@@ -30,6 +30,8 @@ pub enum State {
         ip: Ipv4Addr,
         prefix: u8,
         answers: [String; 4],
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        second: Option<String>,
     },
     Vlsm {
         base: Ipv4Addr,
@@ -178,6 +180,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                 ip,
                 prefix,
                 answers,
+                second,
             },
             Goal::Subnet,
         ) => {
@@ -191,7 +194,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                 return vec![c(false, "Invalid prefix")];
             };
             let want = [n, b, n + 1, b - 1];
-            [
+            let mut results: Vec<_> = [
                 "Network address",
                 "Broadcast address",
                 "First usable host",
@@ -208,7 +211,15 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                     t,
                 )
             })
-            .collect()
+            .collect();
+            if let Some(second) = second {
+                results.push(c(
+                    crate::ipv4::second_result(*ip, *prefix, second)
+                        == crate::ipv4::SecondResult::Valid,
+                    "Second workstation uses a different usable address",
+                ));
+            }
+            results
         }
         (
             State::Vlsm {
@@ -223,14 +234,15 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                 .iter()
                 .enumerate()
                 .map(|(i, a)| {
-                    let ok = cidr(&a.cidr).is_some_and(|(n, b, p)| {
+                    let ok = cidr(a.cidr.trim()).is_some_and(|(n, b, p)| {
                         p <= 30
                             && n >= start
                             && b <= end
                             && (b as u64 - n as u64 + 1) >= a.hosts as u64 + 2
                             && allocations.iter().enumerate().all(|(j, other)| {
                                 i == j
-                                    || cidr(&other.cidr).is_none_or(|(on, ob, _)| b < on || n > ob)
+                                    || cidr(other.cidr.trim())
+                                        .is_none_or(|(on, ob, _)| b < on || n > ob)
                             })
                     });
                     c(
@@ -370,7 +382,9 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
-        State::Subnet { .. } => "Use the four native address fields and Check work.",
+        State::Subnet { .. } => {
+            "Use the native address fields and Check configuration. This activity has no terminal."
+        }
         State::Vlsm { .. } => {
             "Use the native allocation table and Check work. Networks must be aligned."
         }
@@ -412,8 +426,17 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Subnet { answers, .. } => match v.as_slice() {
+        State::Subnet {
+            answers, second, ..
+        } => match v.as_slice() {
             ["answer", field, value] => {
+                if *field == "second" {
+                    value
+                        .parse::<Ipv4Addr>()
+                        .map_err(|_| "Invalid IPv4 address")?;
+                    *second = Some(value.to_string());
+                    return Ok("Second workstation address saved".into());
+                }
                 let i = match *field {
                     "network" => 0,
                     "broadcast" => 1,
@@ -834,6 +857,7 @@ pub fn describe(s: &State) -> String {
             ip,
             prefix,
             answers,
+            ..
         } => format!(
             "Address card\n{ip}/{prefix}\n\nNetwork: {}\nBroadcast: {}\nFirst host: {}\nLast host: {}",
             answers[0], answers[1], answers[2], answers[3]
@@ -867,7 +891,7 @@ pub fn describe(s: &State) -> String {
             lan_prefix,
             target,
         } => format!(
-            "CLIENT {address}/{prefix}\n  |\nLAN — ROUTER {router}/{lan_prefix}\n  |       default gateway: {gateway}\n  +—— REMOTE SERVER {target}"
+            "CLIENT {address}/{prefix} · default gateway: {gateway}\n  |\nLAN ROUTER {router}/{lan_prefix} → REMOTE SERVER {target}"
         ),
         State::Unix { nodes, .. } => nodes
             .iter()

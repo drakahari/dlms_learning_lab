@@ -1,0 +1,226 @@
+//! Optional saved workspace drafts and state-based diagnostics. No host command execution.
+use crate::{
+    engine::{self, State},
+    ipv4,
+    progress::Attempt,
+};
+use serde::{Deserialize, Serialize};
+#[derive(Clone, Debug, Default, Serialize, Deserialize)]
+#[serde(default, deny_unknown_fields)]
+pub struct WorkspaceData {
+    pub version: u32,
+    pub command: String,
+    pub service_port: Option<String>,
+    pub dns_address: Option<String>,
+    pub dns_serial: Option<String>,
+    pub mount_device: Option<String>,
+    pub checked: bool,
+    pub ipv4_check: Option<[String; 5]>,
+    pub practice_check: Option<[String; 5]>,
+    pub migrated_host: bool,
+    pub migrated_practice_host: bool,
+}
+impl WorkspaceData {
+    pub fn new() -> Self {
+        Self {
+            version: 1,
+            ..Default::default()
+        }
+    }
+    pub fn valid(&self) -> bool {
+        self.version == 1
+            && self.command.len() <= 4096
+            && [
+                &self.service_port,
+                &self.dns_address,
+                &self.dns_serial,
+                &self.mount_device,
+            ]
+            .iter()
+            .all(|s| s.as_ref().is_none_or(|s| s.len() <= 256))
+            && [&self.ipv4_check, &self.practice_check]
+                .iter()
+                .all(|s| s.as_ref().is_none_or(|s| s.iter().all(|a| a.len() <= 64)))
+    }
+}
+pub fn prepare(a: &mut Attempt) {
+    let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let Some(mut e) = ipv4::Exercise::from_state(&a.state) {
+        w.migrated_host |= ipv4::upgrade_exercise(&mut e);
+        ipv4::write_exercise(&mut a.state, &e);
+        if w.migrated_host && w.ipv4_check.is_none() {
+            w.ipv4_check = Some(snapshot(&e));
+        }
+        if let Some(e) = a.ipv4.as_mut().and_then(|l| l.variant.as_mut()) {
+            w.migrated_practice_host |= ipv4::upgrade_exercise(e);
+            if w.migrated_practice_host && w.practice_check.is_none() {
+                w.practice_check = Some(snapshot(e));
+            }
+        }
+    }
+}
+pub fn snapshot(e: &ipv4::Exercise) -> [String; 5] {
+    [
+        e.answers[0].clone(),
+        e.answers[1].clone(),
+        e.answers[2].clone(),
+        e.answers[3].clone(),
+        e.second.clone().unwrap_or_default(),
+    ]
+}
+pub fn start_practice(a: &mut Attempt) {
+    prepare(a);
+    let original = ipv4::Exercise::from_state(&a.state).expect("IPv4 practice state");
+    let l = a
+        .ipv4
+        .get_or_insert_with(|| ipv4::Lesson::from_legacy(original.ip, original.prefix, a.step));
+    if !l.use_variant {
+        l.original_section = l.section;
+    }
+    l.sequence = l.sequence.saturating_add(1);
+    let e = ipv4::generated(l.sequence);
+    l.sandbox_host = u32::from(e.ip) & !ipv4::mask(e.prefix).unwrap();
+    l.variant = Some(e);
+    l.use_variant = true;
+    l.section = ipv4::Section::Original;
+    l.variant_section = ipv4::Section::Original;
+    l.variant_submitted = [false; 3];
+    l.variant_revealed = [false; 3];
+    let w = a.workspace.as_mut().unwrap();
+    w.practice_check = None;
+    w.migrated_practice_host = false;
+}
+pub fn select_original(a: &mut Attempt) {
+    let original = ipv4::Exercise::from_state(&a.state).expect("IPv4 original state");
+    if let Some(l) = &mut a.ipv4 {
+        l.use_variant = false;
+        l.section = l.original_section;
+        // A wider practice subnet can have more host bits than the authored /27.
+        l.sandbox_host &= !ipv4::mask(original.prefix).unwrap();
+    }
+}
+pub fn vlsm_issue(s: &State, index: usize) -> Option<String> {
+    let State::Vlsm {
+        base,
+        prefix,
+        allocations,
+    } = s
+    else {
+        return None;
+    };
+    let a = allocations.get(index)?;
+    if a.cidr.trim().is_empty() {
+        return Some("Enter a network/prefix for this team.".into());
+    }
+    let Some((address, p)) = a.cidr.trim().split_once('/') else {
+        return Some("Use an IPv4 network followed by /prefix.".into());
+    };
+    let (Ok(address), Ok(p)) = (address.parse::<std::net::Ipv4Addr>(), p.parse::<u8>()) else {
+        return Some("Use four IPv4 numbers and a prefix from 0 to 30.".into());
+    };
+    if p > 30 {
+        return Some(
+            "Use a conventional subnet through /30; reserve network and broadcast.".into(),
+        );
+    }
+    let (n, b) = engine::bounds(address, p)?;
+    if u32::from(address) != n {
+        return Some("This is a host address. Use the aligned first address of this block.".into());
+    }
+    let (pool_start, pool_end) = engine::bounds(*base, *prefix)?;
+    if n < pool_start || b > pool_end {
+        return Some("This allocation extends outside the supplied address pool.".into());
+    }
+    if (b as u64 - n as u64 + 1) < a.hosts as u64 + 2 {
+        return Some(format!(
+            "Too small for {} hosts plus the two reserved addresses.",
+            a.hosts
+        ));
+    }
+    for (other_index, other) in allocations.iter().enumerate() {
+        if other_index != index
+            && let Some((on, ob, _)) = engine::cidr(other.cidr.trim())
+            && n <= ob
+            && on <= b
+        {
+            return Some(format!(
+                "This block overlaps {}. Give each team its own addresses.",
+                other.name
+            ));
+        }
+    }
+    None
+}
+/// Save both DNS editor fields atomically; changing disk does not reload the authoritative zone.
+pub fn edit_dns(s: &mut State, address: &str, serial: &str) -> Result<(), String> {
+    address
+        .trim()
+        .parse::<std::net::Ipv4Addr>()
+        .map_err(|_| "A record: enter a full IPv4 address.")?;
+    let serial = serial
+        .trim()
+        .parse::<u32>()
+        .map_err(|_| "Serial: enter a whole number from 0 to 4294967295.")?;
+    let State::Dns {
+        records,
+        serial: current,
+        ..
+    } = s
+    else {
+        return Err("No DNS configuration in this activity".into());
+    };
+    let record = records.values_mut().next().ok_or("No modeled A record")?;
+    *record = address.trim().into();
+    *current = serial;
+    Ok(())
+}
+pub fn edit_mount(s: &mut State, device: &str) -> Result<(), String> {
+    let device = device.trim();
+    if !device.starts_with("/dev/")
+        || device.len() > 256
+        || device.contains(char::is_whitespace)
+        || device.contains("..")
+    {
+        return Err(
+            "Enter a device path such as /dev/vdb1; this edits only the simulated fstab entry."
+                .into(),
+        );
+    }
+    let State::Mount {
+        configured_device, ..
+    } = s
+    else {
+        return Err("No mount configuration in this activity".into());
+    };
+    *configured_device = device.into();
+    Ok(())
+}
+/// Explain failed checks using the current model, rather than prescribing one command sequence.
+pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
+    let checks = engine::checks(s, g);
+    checks.iter().enumerate().filter(|(_,c)|!c.0).map(|(i,(_,label))| match s {
+        State::Service{port,running,loaded_port,..} => match i {
+            0=>if port.parse::<u16>().ok().filter(|p|*p>0).is_none(){"The saved port is not a number from 1 to 65535. Inspect the configuration and service journal.".into()}else{"The saved port differs from the requested port. Repair the configuration file.".into()},
+            1=>if !*running {"Atlas is stopped. Inspect status/journal, repair any configuration error, then start it.".into()}else{format!("Atlas is running with port {}. Saving does not apply changes; restart it to use the repaired configuration.",loaded_port.unwrap_or(0))},
+            _=>"Atlas is not enabled for boot. Running now and starting at boot are separate settings.".into(),
+        },
+        State::Dns{serial,loaded_serial,..}=>if i==0{"The saved A record differs from the requested answer. Edit the record before reloading.".into()}else if serial<=loaded_serial{"The new zone has not been activated. Use a serial greater than the loaded serial, validate and reload.".into()}else{"The saved zone is not the loaded answer yet. Validate, reload named, then query resolution.".into()},
+        State::Mount{mounted,writable,..}=>match i {0=>"Usage is above 80%. Inspect the disposable cache; cleanup requires a writable mounted volume.".into(),1=>"The persistent entry points to the wrong device. Correct the /data configuration and verify mounting.".into(),_=>if !*mounted{"/data is unmounted. Check its saved device entry before mounting.".into()}else if !*writable{"/data is read-only. Repair the mount state before deleting the disposable cache.".into()}else{label.clone()}},
+        State::Unix{nodes,users}=>if i==0 {
+            if let engine::Goal::Access{path,user,read,write,..}=g {
+                let mut directories=vec!["/".to_string()];let mut current=String::new();
+                let parts:Vec<_>=path.trim_start_matches('/').split('/').collect();
+                for part in parts.iter().take(parts.len().saturating_sub(1)){current.push('/');current.push_str(part);directories.push(current.clone());}
+                if let Some(blocked)=directories.iter().find(|p|!engine::access(nodes,users,p,user,1)) {
+                    format!("{user} cannot traverse {blocked}. Directory search/execute permission is needed before the file’s own permissions can help.")
+                } else if let Some(file)=nodes.get(path) {
+                    let class=if file.owner==*user{"owner"}else if users.get(user).is_some_and(|groups|groups.contains(&file.group)){"group"}else{"other"};
+                    format!("{user} reaches the file, but its {class} permissions do not allow {}. The matching owner/group/other class determines access.",if *read&&*write{"reading and writing"}else if *write{"writing"}else{"reading"})
+                } else {"The required simulated file is missing.".into()}
+            } else {label.clone()}
+        }else{"The file still grants permissions to the other class. Remove those permissions while retaining the required user’s access.".into()},
+        State::Logs{result,..}=>if result.is_empty(){"No matching text is selected yet. Locate and inspect the log, then filter its ERROR lines.".into()}else{"The last query does not contain exactly the ERROR lines. Check the file, case-sensitive pattern and any unfiltered extra lines.".into()},
+        State::Network{..}=>match i {0=>"The client address changed. Keep the workstation’s assigned address.".into(),1=>"The client mask differs from the router’s LAN mask. Inspect the interface configuration.".into(),_=>"The default route does not use the reachable LAN router. Inspect both the prefix and next hop, then test the remote path.".into()},
+        _=>label.clone(),
+    }).collect()
+}

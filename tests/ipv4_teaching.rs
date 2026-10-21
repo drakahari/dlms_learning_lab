@@ -9,6 +9,7 @@ fn exercise(ip: &str, prefix: u8) -> Exercise {
         ip: ip.parse().unwrap(),
         prefix,
         answers: std::array::from_fn(|_| String::new()),
+        second: None,
     }
 }
 #[test]
@@ -173,11 +174,19 @@ fn generated_variants_are_mathematical_hosts_and_not_catalog_entries() {
         assert!(seen.insert((e.ip, e.prefix)));
         prefixes.insert(e.prefix);
         e.answers = want.map(|a| a.to_string());
+        if e.second.is_some() {
+            let mut free = u32::from(want[2]);
+            if std::net::Ipv4Addr::from(free) == e.ip {
+                free += 1;
+            }
+            e.second = Some(std::net::Ipv4Addr::from(free).to_string());
+        }
         assert!(e.solved());
         let st = State::Subnet {
             ip: e.ip,
             prefix: e.prefix,
             answers: e.answers.clone(),
+            second: e.second.clone(),
         };
         assert!(engine::solved(&st, &engine::Goal::Subnet));
         e.answers[1] = want[0].to_string();
@@ -197,9 +206,11 @@ fn optional_metadata_and_variant_resume_preserve_the_original_and_other_labs() {
     let mut a = Attempt::new(&labs[0], 1);
     let mut e = Exercise::from_state(&a.state).unwrap();
     e.answers = e.expected().unwrap().map(|a| a.to_string());
+    e.second = Some("192.168.10.80".into());
     if let State::Subnet { answers, .. } = &mut a.state {
         *answers = e.answers.clone();
     }
+    ipv4::write_exercise(&mut a.state, &e);
     let mut l = Lesson::from_legacy(e.ip, e.prefix, 2);
     for section in [Section::Network, Section::Broadcast, Section::Usable] {
         assert!(l.reveal(section, &e));

@@ -51,6 +51,8 @@ pub struct Exercise {
     pub ip: Ipv4Addr,
     pub prefix: u8,
     pub answers: [String; 4],
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub second: Option<String>,
 }
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -160,12 +162,14 @@ impl Exercise {
             ip,
             prefix,
             answers,
+            second,
         } = state
         {
             Some(Self {
                 ip: *ip,
                 prefix: *prefix,
                 answers: answers.clone(),
+                second: second.clone(),
             })
         } else {
             None
@@ -184,6 +188,10 @@ impl Exercise {
                 .iter()
                 .zip(want)
                 .all(|(a, w)| a.trim().parse::<Ipv4Addr>() == Ok(w))
+                && self
+                    .second
+                    .as_ref()
+                    .is_none_or(|a| second_result(self.ip, self.prefix, a) == SecondResult::Valid)
         })
     }
     pub fn capacity(&self) -> Option<u64> {
@@ -313,6 +321,7 @@ pub fn generated(sequence: u64) -> Exercise {
         ip: Ipv4Addr::from((raw & m) + offset),
         prefix,
         answers: std::array::from_fn(|_| String::new()),
+        second: Some(String::new()),
     }
 }
 pub fn validate_lesson(l: &Lesson, original: &Exercise) -> bool {
@@ -333,6 +342,73 @@ pub fn validate_lesson(l: &Lesson, original: &Exercise) -> bool {
             .zip(l.variant_submitted)
             .all(|(r, s)| !*r || s)
         && l.variant.as_ref().is_none_or(|v| {
-            l.worked_example_reviewed() && v.prefix <= 30 && v.answers.iter().all(|a| a.len() <= 64)
+            v.prefix <= 30
+                && v.answers.iter().all(|a| a.len() <= 64)
+                && v.second.as_ref().is_none_or(|a| a.len() <= 64)
         })
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SecondResult {
+    Blank,
+    Malformed,
+    Network,
+    Broadcast,
+    Occupied,
+    Outside,
+    Valid,
+}
+pub fn second_result(ip: Ipv4Addr, prefix: u8, draft: &str) -> SecondResult {
+    if draft.trim().is_empty() {
+        return SecondResult::Blank;
+    }
+    let Ok(address) = draft.trim().parse::<Ipv4Addr>() else {
+        return SecondResult::Malformed;
+    };
+    if prefix > 30 {
+        return SecondResult::Outside;
+    }
+    let Some((n, b)) = engine::bounds(ip, prefix) else {
+        return SecondResult::Outside;
+    };
+    let address_value = u32::from(address);
+    if address_value == n {
+        SecondResult::Network
+    } else if address_value == b {
+        SecondResult::Broadcast
+    } else if address == ip {
+        SecondResult::Occupied
+    } else if address_value < n || address_value > b {
+        SecondResult::Outside
+    } else {
+        SecondResult::Valid
+    }
+}
+/// Extend a legacy four-answer exercise without clearing its work or completion.
+/// Completed analyses receive the first free usable host; incomplete drafts keep a blank fifth field.
+pub fn upgrade_exercise(e: &mut Exercise) -> bool {
+    if e.second.is_some() {
+        return false;
+    }
+    let completed = e.solved();
+    e.second = Some(if completed {
+        let w = e.expected().expect("completed conventional subnet");
+        let mut free = u32::from(w[2]);
+        if Ipv4Addr::from(free) == e.ip {
+            free += 1;
+        }
+        Ipv4Addr::from(free).to_string()
+    } else {
+        String::new()
+    });
+    completed
+}
+pub fn write_exercise(state: &mut State, exercise: &Exercise) {
+    if let State::Subnet {
+        answers, second, ..
+    } = state
+    {
+        *answers = exercise.answers.clone();
+        *second = exercise.second.clone();
+    }
 }

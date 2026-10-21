@@ -1,45 +1,47 @@
-# IPv4 teaching pilot: verification
+# Integrated workspace verification
 
-Checked 2026-10-21 on Fedora 44 / COSMIC Wayland, x86_64, Rust 1.99.1, egui/eframe 0.33.3 with native Glow/OpenGL. No new dependency or system package. Nine authored labs remain; numerical practice is not counted as new curriculum. No release or installer publication.
+Fedora desktop, 2026-10-21: native Rust/egui/eframe Glow renderer on COSMIC Wayland. Rust 1.99.1, pinned egui/eframe 0.33.3. No added dependencies or system packages. Nine authored labs; no installer or release publication.
 
-## Results
+## Checks
 
-- `cargo build --locked --offline`: passed; runnable `target/debug/dlms-learning-lab`.
-- `cargo test --locked --offline`: **44 passed**, zero failures (14 egui UI tests, eight focused IPv4 model tests, 22 engine/content/progress/catalog regression tests).
-- `cargo clippy --locked --offline --all-targets -- -D warnings`: passed.
-- `cargo fmt --all -- --check`: passed.
-- `--validate-pack scenarios/starter-v1.json`: passed; all nine reference solutions still reach their goals.
+- Offline development build, `cargo fmt --all -- --check` and Clippy with warnings denied.
+- **46 tests**: nine normal-UI checks, eight IPv4 math/legacy-metadata checks, 22 existing engine/content/catalog/progress checks, and seven workspace/migration/editor checks.
+- Bundled declarative pack validation: all nine initial states unsolved and reference solutions reachable.
 
-The tests verify known network/broadcast/host results at /0, /8, /20, /23, /25, /27 and /30, including carries between octets and upper IPv4 boundaries. Every supported prefix /0…/30 exercises every network/host bit position: network bits cannot toggle, host-bit toggles change the expected binary weight, and all-zero/all-one host patterns match both boundaries. /31, /32 and invalid larger prefixes are explicitly rejected by the lesson math.
+The checks cover all nine success paths and state breakage after success, wrong and partial native answers, malformed drafts, service saved/runtime/boot distinctions, DNS staged/loaded data, mount persistence and capacity, alternate Unix ownership/permission repairs, alternate VLSM layouts and larger valid allocations, log pipelines, unsupported commands and no shell escape. New row diagnostics distinguish format, alignment, capacity, containment and overlap. Unix feedback names a blocked traversal component or the applicable permission class.
 
-Five hundred deterministic generated cases produce valid private host addresses across multiple prefixes, have unique tested address/prefix pairs, and agree with the simulation grader when solved. Numerical variants do not enter the catalog. Tests distinguish blank, malformed, host-as-network, wrong block boundary, reserved host endpoint, outside-subnet and wrong usable-end cases. Feedback is checked not to dump the expected address.
+IPv4 tests cover all conventional prefixes /0…/30, known octet-crossing results, all 256 last-octet host candidates in the supplied /27 (29 unused usable choices), duplicate/reserved/outside/malformed hosts, second hosts at /23 and /30, and 500 deterministic numerical cases. /31 and /32 remain excluded. Original and numerical-practice state are independent. Legacy prediction/review metadata remains loadable; it is no longer a walkthrough gate.
 
-Prediction/reveal gates are tested separately: typing without checking reveals nothing; a wrong prediction can unlock requested help; blank predictions cannot; broadcast cannot inherit network review permission; usable-range review requires both endpoint predictions. Clearing an answer preserves requested review history but removes current success. Original and practice answers, walkthrough positions and grading are independent. Resume preserves malformed practice drafts, original completion and other labs. A legacy fixture still loads all nine version-1 attempts without a read-time rewrite.
+UI checks cover both Learn and Challenge at 1200×850 and 720×560 with 100%/150% text, aligned IPv4 fields, visible desktop Check actions, keyboard focus/Tab/Shift+Tab/Enter, optional assistance, scroll access to Insert command without execution, native editor Save, reset confirmation/isolation, resume of unfinished commands and drafts, and library topic/search/favorites/filter/pagination behavior with 900 synthetic entries. These tests verify mechanics/geometry rather than beginner usability acceptance.
 
-UI tests cover native Check/Reveal state, Challenge hiding prior Learn review, a separate initially collapsed Challenge sandbox, bit focus/click/Space behavior, fixed-bit protection, unchanged answer fields during sandbox use, completion/invalidation, reset isolation, and old save compatibility. Octet and answer-field bounds are checked at 480–1400 logical/physical test widths with 100%/150% scaling and prefixes /8, /16, /20, /23, /27 and /30. Existing library alignment/filter/scale, VLSM, service editor, insertion and large-catalog checks remain passing.
+## What ran and was visually inspected
 
-## What ran on the Fedora desktop
+The normal native application’s `--ui-smoke` capture harness used fresh synthetic data under `/tmp/dlms-workspaces-smoke`. It captured **every lab in Learn and Challenge**, the library, topic filtering, extra filters, service save/restart/enable/status, filtered logs and subsequent invalidation, the checked second-host topology and a later conflicting host, the requested binary explanation, 150% text and real tiled/full-screen transitions. The renderer/input path uses injected egui text, keyboard and pointer events. Service restart/enable commands are submitted through the same in-memory parser; this is not a physical mouse/keyboard study or manual execution of every alternate sequence.
 
-`--ipv4-smoke` opens the real native window and renderer, uses fresh isolated data under `/tmp/dlms-ipv4-smoke`, and injects egui input events. It verifies a typed host-address prediction, native Check and Reveal button clicks, no unrequested worked result, a sandbox host-bit click with the resulting decimal update, independent Challenge practice, and native bit bounds at 150% text size. The window moves between a tiled 1268×632 framebuffer and 2560×1440 full-screen. Some broadcast/range review states are seeded through the tested lesson model to make captures deterministic; this is not a claim of physical mouse/keyboard or complete human end-to-end acceptance.
+Screenshots were inspected for task visibility, field/button alignment, readable state, optional-help defaults and resizing. Relevant local ignored captures:
 
-Screenshots are application-only, local and ignored by Git:
-
-| View | Capture |
+| View | File under `screenshots/workspaces/` |
 | --- | --- |
-| Four original octets, separate mask, persistent explanation | `screenshots/ipv4/01-original-and-mask.png` |
-| Specific host-versus-network misconception | `screenshots/ipv4/02-host-versus-network-feedback.png` |
-| Explicitly requested network result | `screenshots/ipv4/03-requested-network-result.png` |
-| Explicitly requested broadcast result | `screenshots/ipv4/04-requested-broadcast-result.png` |
-| Requested usable endpoints | `screenshots/ipv4/05-requested-usable-range.png` |
-| Host-bit sandbox and updated decimal value | `screenshots/ipv4/06-host-bit-sandbox.png` |
-| Fresh generated Challenge case | `screenshots/ipv4/07-fresh-challenge-variant.png` |
-| Stacked view at 150% | `screenshots/ipv4/08-stacked-150-percent.png` |
-| Alex-specific permissions library description | `screenshots/ipv4/09-permissions-description.png` |
+| Library | `00-library.png` |
+| All nine initial workspaces | `<scenario-id>-learn.png` and `<scenario-id>-challenge.png` |
+| Valid entered second workstation | `ipv4-verified-topology.png` |
+| Editing clears previous success/status | `ipv4-edit-invalidates-success.png` |
+| Checked conflicting host | `ipv4-checked-invalid-host.png` |
+| Explicit network/host split and zero/one rules | `ipv4-binary-explanation.png` |
+| Working service and boot configuration | `service-configured-and-verified.png` |
+| Terminal practice and invalidation | `terminal-filtered-log.png`, `terminal-state-invalidates-success.png` |
+| Larger text | `library-150-percent.png`, `ipv4-150-percent.png`, `service-150-percent.png` |
+| Large navigation fixture | `developer-large-catalog.png` |
 
-## Limits and compatibility
+## Progress and private-data checks
 
-- Original scenario IDs, versions, goals and answer fields are unchanged. Optional lesson metadata adds predictions/reviews, host sandbox state and the active numerical variant; legacy step indexes map conservatively to the four views. Original/practice positions are stored independently. Reset explicitly clears the selected lab’s generated practice too. The original completion flag is still derived from original state, never from review or generated success.
-- New optional metadata is written only on later saves. Earlier binaries do not support these added fields; downgrade compatibility is not claimed. Normal progress was not used by native test harnesses. Corrupt/incompatible originals remain preserved with a read-only explanation; safe atomic replacement is unchanged. Concurrent writers remain unsupported.
-- Prefixes /31 and /32 remain excluded from this conventional broadcast-subnet exercise. The generator uses a selection of prefixes between /8 and /30; the underlying lesson math also handles /0…/7. No IPv6, routing, packets, real shell or host networking is performed.
-- Tooltips, meaningful accessible bit labels, textual N/H/H* markers and persistent focus explanations are implemented. Keyboard behavior and geometry were tested, but screen-reader, IME, physical-device, high-contrast-theme and multi-monitor DPI acceptance were not performed. Small windows need vertical scrolling.
-- Windows/macOS were not built or run in this pass. No broader curriculum conversion or full exam coverage is claimed. License selection remains the owner’s pending decision.
+A synthetic all-nine-lab legacy fixture still loads without rewriting the original. Tests verify exact legacy answers, transcript, hints, mode and completion, partial malformed drafts, original/practice isolation (including return from wider host-bit subnets), all-nine workspace-draft round trips, future-version rejection and selected-attempt reset. Completed legacy IPv4 analyses receive an explicitly disclosed compatible second-host migration; incomplete analyses receive a blank fifth field. A byte-for-byte pre-workspace backup is verified, including non-overwrite on later saves. Normal learner files were not used by the native harness.
+
+The public diff excludes actual learner progress/backups, generated screenshots, recordings, local configuration and credentials. Screenshot artifacts remain local and ignored. Repository license selection remains the owner’s pending decision.
+
+## Not verified / limitations
+
+- Windows/macOS builds and runtime acceptance, installers and distribution packages.
+- Physical-device, screen-reader/AccessKit, IME, high-contrast-theme and multi-monitor DPI acceptance, or a beginner usability study.
+- Concurrent application writers and downgrade to older binaries after a new-format save. Small windows and expanded optional explanations may require vertical scrolling; long terminal lines scroll horizontally.
+- Full Linux/Cisco command behavior, real networking, processes, sockets, filesystems, ACLs/SELinux or complete certification coverage. Configuration files are deliberately limited field editors, not full text editors. Sources and simplifications remain in the pack and secondary UI references.

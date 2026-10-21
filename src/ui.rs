@@ -1,13 +1,13 @@
 use dlms_learning_lab::{
     catalog::{self, Filter},
-    engine,
+    engine, ipv4,
     pack::{self, Scenario},
     progress::{self, Attempt, Progress},
+    workspace as model,
 };
 use eframe::egui::{self, Color32, RichText};
 use std::{path::PathBuf, time::Instant};
-mod ipv4_lesson;
-mod ipv4_smoke;
+mod ipv4_workspace;
 mod smoke;
 #[cfg(test)]
 mod tests;
@@ -24,7 +24,6 @@ struct Metrics {
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
-    split: bool,
     inputs: Vec<egui::Rect>,
     terminal: Option<egui::Rect>,
     output: Option<egui::Rect>,
@@ -34,10 +33,15 @@ struct Metrics {
     completion: bool,
     guide: bool,
     editor_save: Option<egui::Rect>,
-    ipv4_bits: Vec<(egui::Rect, u8, bool)>,
-    ipv4_reveal: Option<egui::Rect>,
-    ipv4_worked: bool,
-    ipv4_explain: bool,
+    hint: Option<egui::Rect>,
+    why: Option<egui::Rect>,
+    help_visible: bool,
+    help: Option<egui::Rect>,
+    reset: Option<egui::Rect>,
+    back: Option<egui::Rect>,
+    extras: Option<egui::Rect>,
+    walkthrough: Option<egui::Rect>,
+    confirm_reset: Option<egui::Rect>,
 }
 pub struct LabApp {
     scenarios: Vec<Scenario>,
@@ -47,8 +51,6 @@ pub struct LabApp {
     selected: Option<usize>,
     input: String,
     checked: bool,
-    last_solved: bool,
-    invalidated: bool,
     reset_pending: bool,
     dirty: bool,
     storage_error: Option<String>,
@@ -59,30 +61,22 @@ pub struct LabApp {
     page: usize,
     scale: f32,
     focus_input: bool,
-    service_draft: Option<String>,
+    scroll_command: bool,
     notice: Option<String>,
     metrics: Metrics,
+    help_open: bool,
+    extra_filters: bool,
+    host_activity: bool,
+    ipv4_view: Option<ipv4_workspace::Assignment>,
     smoke: bool,
     started: Instant,
     smoke_stage: usize,
     pending_events: Vec<egui::Event>,
-    smoke_focus: Option<egui::Id>,
-    smoke_width: f32,
     capture_pending: bool,
-    ipv4_focus: Option<(u8, u8, u8)>,
-    ipv4_challenge_revealed: [bool; 3],
-    ipv4_smoke: bool,
 }
 impl LabApp {
     pub fn new(cc: &eframe::CreationContext<'_>, smoke: bool, developer: bool) -> Self {
         Self::from_context(&cc.egui_ctx, smoke, developer)
-    }
-    pub fn with_ipv4_smoke(mut self, enabled: bool) -> Self {
-        self.ipv4_smoke = enabled;
-        if enabled {
-            self.path = PathBuf::from("/tmp/dlms-ipv4-smoke/progress-v1.json");
-        }
-        self
     }
     fn from_context(ctx: &egui::Context, smoke: bool, developer: bool) -> Self {
         let mut style = (*ctx.style()).clone();
@@ -95,10 +89,11 @@ impl LabApp {
         style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(65, 54, 101);
         style.visuals.selection.bg_fill = Color32::from_rgb(80, 60, 135);
         style.visuals.override_text_color = Some(Color32::from_rgb(235, 239, 250));
-        style.spacing.item_spacing = egui::vec2(12., 10.);
+        style.spacing.item_spacing = egui::vec2(12., 8.);
         style.spacing.button_padding = egui::vec2(14., 8.);
         style.spacing.interact_size.y = CONTROL;
         style.spacing.combo_width = 160.;
+        style.spacing.scroll.floating = false;
         for (kind, size) in [
             (egui::TextStyle::Body, 16.),
             (egui::TextStyle::Button, 16.),
@@ -112,9 +107,9 @@ impl LabApp {
             .text_styles
             .insert(egui::TextStyle::Monospace, egui::FontId::monospace(15.));
         ctx.set_style(style);
-        let scenarios = pack::bundled().expect("Bundled scenarios pass validation");
+        let scenarios = pack::bundled().expect("Bundled pack validates");
         let path = if smoke {
-            PathBuf::from("/tmp/dlms-ui-v2-smoke/progress-v1.json")
+            PathBuf::from("/tmp/dlms-workspaces-smoke/progress-v1.json")
         } else {
             progress::default_path()
                 .unwrap_or_else(|_| PathBuf::from("local-data/progress-v1.json"))
@@ -140,8 +135,6 @@ impl LabApp {
             selected: None,
             input: String::new(),
             checked: false,
-            last_solved: false,
-            invalidated: false,
             reset_pending: false,
             dirty: false,
             storage_error,
@@ -152,19 +145,18 @@ impl LabApp {
             page: 0,
             scale: 1.,
             focus_input: false,
-            service_draft: None,
+            scroll_command: false,
             notice: None,
             metrics: Metrics::default(),
+            help_open: false,
+            extra_filters: false,
+            host_activity: false,
+            ipv4_view: None,
             smoke,
             started: Instant::now(),
             smoke_stage: 0,
             pending_events: Vec::new(),
-            smoke_focus: None,
-            smoke_width: 0.,
             capture_pending: false,
-            ipv4_focus: None,
-            ipv4_challenge_revealed: [false; 3],
-            ipv4_smoke: false,
         }
     }
     fn launch(&mut self, i: usize) {
@@ -176,50 +168,61 @@ impl LabApp {
             .attempts
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
+        model::prepare(a);
         a.visited = clock;
-        self.last_solved = if let Some(v) = a
-            .ipv4
-            .as_ref()
-            .filter(|l| l.use_variant)
-            .and_then(|l| l.variant.as_ref())
-        {
-            v.solved()
-        } else {
-            engine::solved(&a.state, &s.goal)
-        };
-        self.service_draft = if let engine::State::Service { port, .. } = &a.state {
-            Some(port.clone())
+        let data = a.workspace.as_ref().unwrap();
+        self.input = data.command.clone();
+        self.checked = data.checked;
+        self.selected = Some(i);
+        self.reset_pending = false;
+        self.focus_input = true;
+        self.scroll_command = false;
+        self.notice = None;
+        self.help_open = false;
+        self.host_activity = false;
+        self.load_ipv4_view(i);
+        self.dirty = true;
+    }
+    fn load_ipv4_view(&mut self, i: usize) {
+        let a = &self.progress.attempts[&self.scenarios[i].id];
+        self.ipv4_view = if let Some(original) = ipv4::Exercise::from_state(&a.state) {
+            let practice = a.ipv4.as_ref().is_some_and(|l| l.use_variant);
+            let e = if practice {
+                a.ipv4
+                    .as_ref()
+                    .and_then(|l| l.variant.clone())
+                    .unwrap_or(original)
+            } else {
+                original
+            };
+            let w = a.workspace.as_ref().unwrap();
+            Some(ipv4_workspace::Assignment::from_saved(
+                e,
+                if practice {
+                    w.practice_check.clone()
+                } else {
+                    w.ipv4_check.clone()
+                },
+                a.hints,
+            ))
         } else {
             None
         };
-        self.ipv4_challenge_revealed = [false; 3];
-        self.selected = Some(i);
-        self.input.clear();
-        self.checked = false;
-        self.invalidated = false;
-        self.reset_pending = false;
-        self.focus_input = true;
-        self.notice = None;
-        self.dirty = true;
     }
     fn reset_attempt(&mut self, i: usize) {
         let s = &self.scenarios[i];
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
-        self.service_draft = if let engine::State::Service { port, .. } = &a.state {
-            Some(port.clone())
-        } else {
-            None
-        };
-        self.ipv4_focus = None;
-        self.ipv4_challenge_revealed = [false; 3];
+        model::prepare(a);
         self.input.clear();
         self.checked = false;
-        self.last_solved = false;
-        self.invalidated = false;
         self.reset_pending = false;
-        self.focus_input = true;
         self.notice = None;
+        self.focus_input = true;
+        self.scroll_command = false;
+        self.help_open = false;
+        self.host_activity = false;
+        self.load_ipv4_view(i);
         self.dirty = true;
     }
     fn save(&mut self) {
@@ -242,43 +245,39 @@ impl LabApp {
             )
             .show(ctx, |ui| {
                 ui.horizontal_wrapped(|ui| {
-                    let r = ui.label(RichText::new("DLMS").strong().color(ACCENT).size(23.));
-                    self.metrics.header.push(r.rect);
-                    let r = ui.label(RichText::new("Learning Lab").size(20.));
-                    self.metrics.header.push(r.rect);
-                    let r = ui.label(RichText::new("OFFLINE / NATIVE").small().color(MUTED));
-                    self.metrics.header.push(r.rect);
-                    let r = ui.allocate_ui_with_layout(
-                        egui::vec2(164., CONTROL),
-                        egui::Layout::left_to_right(egui::Align::Center),
-                        |ui| {
-                            ui.label(RichText::new("Text size").small().color(MUTED));
-                            egui::ComboBox::from_id_salt("text-size")
-                                .width(92.)
-                                .selected_text(format!("{:.0}%", self.scale * 100.))
-                                .show_ui(ui, |ui| {
-                                    for scale in [0.85, 1., 1.15, 1.25, 1.5] {
-                                        ui.selectable_value(
-                                            &mut self.scale,
-                                            scale,
-                                            format!("{:.0}%", scale * 100.),
-                                        );
-                                    }
-                                });
-                        },
+                    self.metrics.header.push(
+                        ui.label(
+                            RichText::new("DLMS Learning Lab")
+                                .strong()
+                                .size(20.)
+                                .color(ACCENT),
+                        )
+                        .rect,
                     );
+                    self.metrics.header.push(
+                        ui.label(RichText::new("Offline simulation").small().color(MUTED))
+                            .rect,
+                    );
+                    ui.label(RichText::new("Text size").small().color(MUTED));
+                    let r = egui::ComboBox::from_id_salt("text-size")
+                        .width(84.)
+                        .selected_text(format!("{:.0}%", self.scale * 100.))
+                        .show_ui(ui, |ui| {
+                            for scale in [1., 1.15, 1.25, 1.5] {
+                                ui.selectable_value(
+                                    &mut self.scale,
+                                    scale,
+                                    format!("{:.0}%", scale * 100.),
+                                );
+                            }
+                        });
                     self.metrics.header.push(r.response.rect);
                 });
             });
     }
     fn library(&mut self, ui: &mut egui::Ui) {
-        ui.label(RichText::new("YOUR PRACTICE LIBRARY").small().color(ACCENT));
-        ui.heading(RichText::new("Small labs. Real understanding.").size(29.));
-        ui.label(
-            RichText::new("Nine focused scenarios. Choose a skill and pick up where you left off.")
-                .color(MUTED),
-        );
-        ui.add_space(4.);
+        ui.heading("Practice library");
+        ui.add_space(2.);
         ui.horizontal_wrapped(|ui| {
             for (label, value) in [
                 ("All tracks", ""),
@@ -318,7 +317,64 @@ impl LabApp {
         {
             self.page = 0;
         }
-        self.filters(ui);
+        ui.horizontal_wrapped(|ui| {
+            let topics: std::collections::BTreeSet<_> =
+                self.scenarios.iter().map(|s| s.topic.clone()).collect();
+            let before = self.filter.topic.clone();
+            let r = combo(
+                ui,
+                "topic",
+                "Any topic",
+                &mut self.filter.topic,
+                topics.iter().map(String::as_str),
+                220_f32.min(ui.available_width()),
+            );
+            self.metrics.filters.push(r.rect);
+            if before != self.filter.topic {
+                self.page = 0;
+            }
+            let count = usize::from(!self.filter.difficulty.is_empty())
+                + usize::from(!self.filter.status.is_empty())
+                + usize::from(self.filter.max_minutes > 0);
+            let r = ui.add(button(&if count > 0 {
+                format!("More filters ({count})")
+            } else {
+                "More filters".into()
+            }));
+            self.metrics.extras = Some(r.rect);
+            if r.clicked() {
+                self.extra_filters = !self.extra_filters;
+            }
+            if !self.extra_filters
+                && (!self.filter.search.is_empty()
+                    || !self.filter.track.is_empty()
+                    || !self.filter.topic.is_empty()
+                    || count > 0
+                    || self.filter.favorites
+                    || self.filter.recent)
+                && ui.add(button("Clear filters")).clicked()
+            {
+                self.filter = Filter::default();
+                self.page = 0;
+            }
+        });
+        if self.extra_filters {
+            self.filters(ui);
+        } else {
+            let mut active = Vec::new();
+            if !self.filter.difficulty.is_empty() {
+                active.push(self.filter.difficulty.clone());
+            }
+            if !self.filter.status.is_empty() {
+                active.push(self.filter.status.clone());
+            }
+            if self.filter.max_minutes > 0 {
+                active.push(format!("Up to {} min", self.filter.max_minutes));
+            }
+            if !active.is_empty() {
+                ui.label(RichText::new(active.join(" · ")).small().color(MUTED));
+            }
+        }
         ui.add_space(4.);
         ui.separator();
         if self.developer && self.synthetic && self.synthetic_catalog.is_empty() {
@@ -412,11 +468,19 @@ impl LabApp {
                                     .color(MUTED),
                             );
                         });
-                        ui.label(RichText::new(&s.title).strong().size(21.));
+                        ui.allocate_ui_with_layout(
+                            egui::vec2(ui.available_width(), 28.),
+                            egui::Layout::top_down(egui::Align::Min),
+                            |ui| {
+                                ui.set_min_height(28.);
+                                ui.label(RichText::new(&s.title).strong().size(21.));
+                            },
+                        );
                         ui.allocate_ui_with_layout(
                             egui::vec2(ui.available_width(), 42.),
                             egui::Layout::top_down(egui::Align::Min),
                             |ui| {
+                                ui.set_min_height(42.);
                                 ui.label(&s.summary);
                             },
                         );
@@ -441,15 +505,15 @@ impl LabApp {
                                 } else {
                                     "Continue"
                                 })
-                                .min_size(egui::vec2(118., CONTROL)),
+                                .min_size(egui::vec2(108., CONTROL)),
                             );
                             if start.clicked() {
                                 launch = Some(*i);
                             }
                             let fav = ui.add_enabled(
                                 !self.synthetic,
-                                button(if favorite { "Unfavorite" } else { "Favorite" })
-                                    .min_size(egui::vec2(118., CONTROL)),
+                                button(if favorite { "Favorited" } else { "Favorite" })
+                                    .min_size(egui::vec2(108., CONTROL)),
                             );
                             if fav.clicked() {
                                 if favorite {
@@ -503,16 +567,14 @@ impl LabApp {
             self.filter.status.clone(),
             self.filter.max_minutes,
         );
-        let topics: std::collections::BTreeSet<_> =
-            self.scenarios.iter().map(|s| s.topic.clone()).collect();
-        let columns = (((ui.available_width() + 10.) / 174.).floor() as usize).clamp(1, 5);
+        let columns = (((ui.available_width() + 10.) / 174.).floor() as usize).clamp(1, 4);
         let width =
             ((ui.available_width() - 10. * (columns - 1) as f32) / columns as f32).min(240.);
         egui::Grid::new("library-filters")
             .num_columns(columns)
             .spacing([10., 10.])
             .show(ui, |ui| {
-                for index in 0..5 {
+                for index in 0..4 {
                     ui.allocate_ui_with_layout(
                         egui::vec2(width, CONTROL),
                         egui::Layout::left_to_right(egui::Align::Center),
@@ -520,21 +582,13 @@ impl LabApp {
                             let response = match index {
                                 0 => combo(
                                     ui,
-                                    "topic",
-                                    "Any topic",
-                                    &mut self.filter.topic,
-                                    topics.iter().map(String::as_str),
-                                    width,
-                                ),
-                                1 => combo(
-                                    ui,
                                     "difficulty",
                                     "Any difficulty",
                                     &mut self.filter.difficulty,
                                     ["Beginner", "Intermediate"].into_iter(),
                                     width,
                                 ),
-                                2 => combo(
+                                1 => combo(
                                     ui,
                                     "status",
                                     "Any status",
@@ -542,7 +596,7 @@ impl LabApp {
                                     ["Not started", "In progress", "Complete"].into_iter(),
                                     width,
                                 ),
-                                3 => {
+                                2 => {
                                     egui::ComboBox::from_id_salt("duration")
                                         .width(width)
                                         .selected_text(if self.filter.max_minutes == 0 {
@@ -602,7 +656,7 @@ impl LabApp {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(RED, error);
                 ui.label(if self.read_only {
-                    "Original progress retained; this session is read-only."
+                    "Original progress retained; this session cannot overwrite it."
                 } else {
                     "Changes remain in memory until saved."
                 });
@@ -620,15 +674,34 @@ impl LabApp {
             .show(ctx, |ui| {
                 egui::ScrollArea::vertical()
                     .id_salt(("main", self.selected))
+                    .auto_shrink([false, false])
                     .show(ui, |ui| {
-                        ui.set_max_width(ui.available_width().min(1320.));
-                        if let Some(i) = self.selected {
-                            self.workspace(ui, i)
+                        let width = ui.available_width().min(if self.selected.is_some() {
+                            1060.
                         } else {
-                            self.library(ui)
-                        }
+                            1280.
+                        });
+                        ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                            ui.allocate_ui_with_layout(
+                                egui::vec2(width, 0.),
+                                egui::Layout::top_down(egui::Align::Min),
+                                |ui| {
+                                    ui.set_width(width);
+                                    if let Some(i) = self.selected {
+                                        self.workspace(ui, i)
+                                    } else {
+                                        self.library(ui)
+                                    }
+                                },
+                            );
+                        });
                     });
             });
+        if self.host_activity
+            && let Some(i) = self.selected
+        {
+            self.host_bits(ctx, i);
+        }
     }
 }
 fn card() -> egui::Frame {
@@ -691,11 +764,7 @@ impl eframe::App for LabApp {
         self.render(ctx);
         self.save();
         if self.smoke {
-            if self.ipv4_smoke {
-                self.ipv4_smoke_tick(ctx);
-            } else {
-                self.smoke_tick(ctx);
-            }
+            self.smoke_tick(ctx);
             ctx.request_repaint_after(std::time::Duration::from_millis(50));
         }
     }

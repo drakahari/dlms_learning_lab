@@ -7,8 +7,8 @@
       "track": "CCNA",
       "topic": "IPv4 addressing",
       "title": "Read an IPv4 address",
-      "summary": "Predict subnet boundaries, explore host bits, then try a fresh address.",
-      "objective": "For 192.168.10.77/27, identify the network, broadcast, first usable host and last usable host.",
+      "summary": "Find the subnet boundaries and choose an unused address for a second workstation.",
+      "objective": "A workstation is configured as 192.168.10.77/27. Determine its network address, broadcast address, and usable host range, then assign a valid, different address to a second workstation.",
       "difficulty": "Beginner",
       "minutes": 6,
       "initial": {
@@ -20,25 +20,28 @@
           "",
           "",
           ""
-        ]
+        ],
+        "second": ""
       },
       "goal": {
         "kind": "Subnet"
       },
       "steps": [
-        "Use the bit diagram to separate the network and host portions of 192.168.10.77/27. Find the 32-address block containing .77.",
-        "Enter the network and broadcast in their labeled fields. Fields save as you type; Check work tests the values.",
-        "Fill the remaining two fields and Check work. You may pass at any walkthrough position."
+        "Complete the subnet assignment in the native address fields. Optional hints explain the block size and the network/host boundary.",
+        "Enter the network and broadcast addresses. Keep the same network bits when finding both boundaries.",
+        "Enter both usable endpoints and a different usable address for workstation 2. Check configuration grades all five fields."
       ],
       "hints": [
-        "The prefix counts fixed network bits, not host bits. Keep those bits from the original IP.",
-        "For network use all-zero host bits; for broadcast use all-one host bits. Reserve both before choosing the usable endpoints."
+        "/27 leaves five host bits, so each block holds 32 addresses.",
+        "In this example the first three octets stay fixed; last-octet blocks start at multiples of 32.",
+        "Reserve the first and last addresses for network and broadcast. The second workstation must also avoid the address already in use."
       ],
       "solution": [
         "answer network 192.168.10.64",
         "answer broadcast 192.168.10.95",
         "answer first 192.168.10.65",
-        "answer last 192.168.10.94"
+        "answer last 192.168.10.94",
+        "answer second 192.168.10.80"
       ],
       "sources": [
         "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
@@ -49,19 +52,19 @@
         {
           "title": "Read the prefix",
           "why": "A /27 fixes 27 network bits and leaves five host bits. Each block contains 2⁵ = 32 addresses.",
-          "action": "Use the bit diagram to separate the network and host portions of 192.168.10.77/27. Find the 32-address block containing .77.",
+          "action": "Complete the subnet assignment in the native address fields. Optional hints explain the block size and the network/host boundary.",
           "commands": []
         },
         {
           "title": "Mark both boundaries",
           "why": "The network has all host bits zero; the broadcast has all host bits one. Neither is assigned to a conventional host.",
-          "action": "Enter the network and broadcast in their labeled fields. Fields save as you type; Check work tests the values.",
+          "action": "Enter the network and broadcast addresses. Keep the same network bits when finding both boundaries.",
           "commands": []
         },
         {
           "title": "Identify usable hosts",
           "why": "The first usable host follows the network, and the last precedes the broadcast.",
-          "action": "Fill the remaining two fields and Check work. You may pass at any walkthrough position.",
+          "action": "Enter both usable endpoints and a different usable address for workstation 2. Check configuration grades all five fields.",
           "commands": []
         }
       ],
@@ -328,8 +331,8 @@
           ]
         },
         {
-          "title": "Allow the editors to collaborate",
-          "why": "Read is 4 and write is 2. Group read/write is 6; other permissions must stay zero.",
+          "title": "Give Alex the required access",
+          "why": "Alex belongs to editors. Group read/write with no other-class bits meets this modeled goal; changing ownership to Alex is another valid solution.",
           "action": "Change the file mode. An ownership-based solution can also work.",
           "commands": [
             {
@@ -706,12 +709,12 @@
       },
       "steps": [
         "Read the zone and query the current answer.",
-        "Use the simulator’s zone-editing helpers. These are teaching controls, not BIND commands.",
+        "In the simulated zone editor, repair the A record and enter a serial greater than the loaded serial. Save configuration; the running zone changes only after validation and reload.",
         "Check the modeled zone, reload it and query again."
       ],
       "hints": [
         "A saved edit is not yet active. This model requires a larger serial before reload.",
-        "Use dns serial 2026102102 after editing, then reload named."
+        "Use the zone editor to save the repaired record with serial 2026102102, then validate and reload named."
       ],
       "solution": [
         "dns set portal.lab.test 192.0.2.80",
@@ -746,19 +749,8 @@
         {
           "title": "Edit the record and serial",
           "why": "The A record needs the requested address. This model requires a larger serial before a reload.",
-          "action": "Use the simulator’s zone-editing helpers. These are teaching controls, not BIND commands.",
-          "commands": [
-            {
-              "command": "dns set portal.lab.test 192.0.2.80",
-              "explanation": "Simulator-only A-record editor.",
-              "simulator_only": true
-            },
-            {
-              "command": "dns serial 2026102102",
-              "explanation": "Simulator-only serial editor; use a value above the loaded serial.",
-              "simulator_only": true
-            }
-          ]
+          "action": "In the simulated zone editor, repair the A record and enter a serial greater than the loaded serial. Save configuration; the running zone changes only after validation and reload.",
+          "commands": []
         },
         {
           "title": "Validate and reload",
@@ -810,7 +802,7 @@
       },
       "steps": [
         "Inspect usage, disposable cache and the persistent mount entry.",
-        "Use the simulator’s single-field fstab editor, then remount read-write.",
+        "Use the simulated /etc/fstab editor to correct the /data device. Save configuration, then remount the current volume read-write.",
         "Remove only the marked cache and exercise the persistent mount."
       ],
       "hints": [
@@ -856,13 +848,8 @@
         {
           "title": "Repair the mount configuration",
           "why": "A correct persistent entry survives an unmount/mount cycle. Cleanup also requires a writable current mount.",
-          "action": "Use the simulator’s single-field fstab editor, then remount read-write.",
+          "action": "Use the simulated /etc/fstab editor to correct the /data device. Save configuration, then remount the current volume read-write.",
           "commands": [
-            {
-              "command": "config set device /dev/vdb1",
-              "explanation": "Simulator-only fstab editor; not a Linux command.",
-              "simulator_only": true
-            },
             {
               "command": "mount -o remount,rw /data",
               "explanation": "Makes the currently mounted data volume writable.",

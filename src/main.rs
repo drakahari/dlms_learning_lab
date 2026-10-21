@@ -17,6 +17,16 @@ fn main() -> eframe::Result<()> {
         }
         return Ok(());
     }
+    if args
+        .iter()
+        .skip(1)
+        .any(|a| !matches!(a.as_str(), "--ui-smoke" | "--developer"))
+    {
+        eprintln!(
+            "Unsupported launch option. Open without flags for the normal app; --ui-smoke uses isolated test data."
+        );
+        std::process::exit(2);
+    }
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
             .with_inner_size([1200., 850.])
@@ -27,14 +37,11 @@ fn main() -> eframe::Result<()> {
         "DLMS Learning Lab",
         options,
         Box::new(move |cc| {
-            Ok(Box::new(
-                ui::LabApp::new(
-                    cc,
-                    args.contains(&"--ui-smoke".into()) || args.contains(&"--ipv4-smoke".into()),
-                    args.contains(&"--developer".into()),
-                )
-                .with_ipv4_smoke(args.contains(&"--ipv4-smoke".into())),
-            ))
+            Ok(Box::new(ui::LabApp::new(
+                cc,
+                args.contains(&"--ui-smoke".into()),
+                args.contains(&"--developer".into()),
+            )))
         }),
     )
 }

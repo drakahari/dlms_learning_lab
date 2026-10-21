@@ -17,6 +17,8 @@ pub struct Attempt {
     pub visited: u64,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv4: Option<crate::ipv4::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub workspace: Option<crate::workspace::WorkspaceData>,
 }
 impl Attempt {
     pub fn new(s: &Scenario, visited: u64) -> Self {
@@ -26,9 +28,10 @@ impl Attempt {
             step: 0,
             challenge: false,
             hints: 0,
-            transcript: vec!["Simulation ready. Type help to see the command subset.".into()],
+            transcript: Vec::new(),
             visited,
             ipv4: None,
+            workspace: None,
         }
     }
 }
@@ -74,6 +77,9 @@ pub fn load(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
             return Err("Incompatible saved attempt; original retained".into());
         }
         crate::pack::validate_state(&a.state)?;
+        if a.workspace.as_ref().is_some_and(|w| !w.valid()) {
+            return Err("Invalid workspace data; original retained".into());
+        }
         if let Some(l) = &a.ipv4 {
             let original = crate::ipv4::Exercise::from_state(&a.state)
                 .ok_or("IPv4 lesson metadata on a different state")?;
@@ -87,6 +93,28 @@ pub fn load(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
 pub fn save(path: &Path, p: &Progress) -> Result<(), String> {
     let parent = path.parent().ok_or("Missing storage directory")?;
     std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
+    // Preserve a byte-for-byte pre-workspace save before the first upgraded write.
+    // Reading an old save never migrates or rewrites it.
+    if p.attempts.values().any(|a| a.workspace.is_some()) && path.exists() {
+        let backup = path.with_extension("before-workspace.json");
+        if !backup.exists() {
+            let original = std::fs::read(path).map_err(|e| e.to_string())?;
+            let old: Progress = serde_json::from_slice(&original)
+                .map_err(|e| format!("Original retained; cannot back up: {e}"))?;
+            if old.attempts.values().all(|a| a.workspace.is_none()) {
+                let mut copy =
+                    tempfile::NamedTempFile::new_in(parent).map_err(|e| e.to_string())?;
+                copy.write_all(&original)
+                    .and_then(|_| copy.as_file().sync_all())
+                    .map_err(|e| e.to_string())?;
+                if let Err(e) = copy.persist_noclobber(&backup)
+                    && e.error.kind() != std::io::ErrorKind::AlreadyExists
+                {
+                    return Err(format!("Original retained; backup failed: {e}"));
+                }
+            }
+        }
+    }
     let mut file = tempfile::NamedTempFile::new_in(parent).map_err(|e| e.to_string())?;
     serde_json::to_writer(&mut file, p).map_err(|e| e.to_string())?;
     file.flush()

@@ -1,0 +1,276 @@
+use dlms_learning_lab::{
+    engine::{self, State},
+    ipv4, pack,
+    progress::{self, Attempt, Progress},
+    workspace::{self, WorkspaceData},
+};
+#[test]
+fn legacy_completed_subnet_is_upgraded_without_losing_credit_and_backup_is_exact() {
+    let labs = pack::bundled().unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("progress-v1.json");
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    let mut a = Attempt::new(&labs[0], 7);
+    if let State::Subnet {
+        answers, second, ..
+    } = &mut a.state
+    {
+        *answers = [
+            "192.168.10.64",
+            "192.168.10.95",
+            "192.168.10.65",
+            "192.168.10.94",
+        ]
+        .map(String::from);
+        *second = None;
+    }
+    a.step = 2;
+    a.challenge = true;
+    a.hints = 2;
+    a.transcript = vec!["synthetic legacy transcript".into()];
+    p.favorites.insert(labs[0].id.clone());
+    p.attempts.insert(labs[0].id.clone(), a);
+    progress::save(&path, &p).unwrap();
+    let original = std::fs::read(&path).unwrap();
+    let mut q = progress::load(&path, &labs).unwrap();
+    assert_eq!(
+        std::fs::read(&path).unwrap(),
+        original,
+        "load must not rewrite legacy data"
+    );
+    let a = q.attempts.get_mut(&labs[0].id).unwrap();
+    let before = ipv4::Exercise::from_state(&a.state).unwrap();
+    workspace::prepare(a);
+    let after = ipv4::Exercise::from_state(&a.state).unwrap();
+    assert_eq!(before.answers, after.answers);
+    assert!(after.solved());
+    assert_eq!(a.step, 2);
+    assert_eq!(a.hints, 2);
+    assert!(a.challenge);
+    assert_eq!(a.transcript, ["synthetic legacy transcript"]);
+    assert!(a.workspace.as_ref().unwrap().migrated_host);
+    progress::save(&path, &q).unwrap();
+    let backup = path.with_extension("before-workspace.json");
+    assert_eq!(std::fs::read(&backup).unwrap(), original);
+    let q = progress::load(&path, &labs).unwrap();
+    assert!(engine::solved(
+        &q.attempts[&labs[0].id].state,
+        &labs[0].goal
+    ));
+    assert!(q.favorites.contains(&labs[0].id));
+    progress::save(&path, &q).unwrap();
+    assert_eq!(
+        std::fs::read(backup).unwrap(),
+        original,
+        "later writes cannot replace the compatibility backup"
+    );
+}
+#[test]
+fn partial_legacy_answers_and_practice_are_retained_without_fabricating_success() {
+    let labs = pack::bundled().unwrap();
+    let mut a = Attempt::new(&labs[0], 1);
+    if let State::Subnet {
+        second, answers, ..
+    } = &mut a.state
+    {
+        *second = None;
+        answers[0] = "192.168.10.".into();
+    }
+    let mut e = ipv4::Exercise::from_state(&a.state).unwrap();
+    let mut l = ipv4::Lesson::from_legacy(e.ip, e.prefix, 1);
+    e.ip = "10.8.7.77".parse().unwrap();
+    e.prefix = 23;
+    e.answers = e.expected().unwrap().map(|a| a.to_string());
+    l.variant = Some(e);
+    l.use_variant = true;
+    l.sandbox_host = 1;
+    a.ipv4 = Some(l);
+    workspace::prepare(&mut a);
+    assert!(
+        matches!(&a.state,State::Subnet{answers,second:Some(second),..}if answers[0]=="192.168.10."&&second.is_empty())
+    );
+    assert!(!engine::solved(&a.state, &labs[0].goal));
+    let v = a.ipv4.as_ref().unwrap().variant.as_ref().unwrap();
+    assert!(v.solved());
+    assert!(a.workspace.as_ref().unwrap().migrated_practice_host);
+}
+#[test]
+fn every_free_host_is_accepted_and_reserved_duplicate_outside_or_malformed_hosts_fail() {
+    let labs = pack::bundled().unwrap();
+    let mut state = labs[0].initial.clone();
+    for c in &labs[0].solution {
+        engine::execute(&mut state, c).unwrap();
+    }
+    for last in 0..=255 {
+        if let State::Subnet { second, .. } = &mut state {
+            *second = Some(format!("192.168.10.{last}"));
+        }
+        assert_eq!(
+            engine::solved(&state, &labs[0].goal),
+            (65..=94).contains(&last) && last != 77,
+            "last octet {last}"
+        );
+    }
+    for second in ["", "bad", "192.168.10.999", "192.168.11.80"] {
+        if let State::Subnet { second: value, .. } = &mut state {
+            *value = Some(second.into());
+        }
+        assert!(!engine::solved(&state, &labs[0].goal));
+    }
+    assert_eq!(
+        ipv4::second_result("192.0.2.1".parse().unwrap(), 30, "192.0.2.2"),
+        ipv4::SecondResult::Valid
+    );
+    assert_eq!(
+        ipv4::second_result("10.5.7.77".parse().unwrap(), 23, "10.5.6.1"),
+        ipv4::SecondResult::Valid
+    );
+    for prefix in [31, 32] {
+        assert_ne!(
+            ipv4::second_result("192.0.2.1".parse().unwrap(), prefix, "192.0.2.2"),
+            ipv4::SecondResult::Valid
+        );
+    }
+}
+#[test]
+fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original() {
+    let labs = pack::bundled().unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("progress.json");
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    for (n, s) in labs.iter().enumerate() {
+        let mut a = Attempt::new(s, n as u64);
+        workspace::prepare(&mut a);
+        let w = a.workspace.as_mut().unwrap();
+        w.command = "unfinished |".into();
+        w.service_port = Some("unfinished".into());
+        w.dns_address = Some("192.0.".into());
+        w.dns_serial = Some("draft".into());
+        w.mount_device = Some("/dev/vd".into());
+        p.attempts.insert(s.id.clone(), a);
+    }
+    progress::save(&path, &p).unwrap();
+    let q = progress::load(&path, &labs).unwrap();
+    assert_eq!(
+        serde_json::to_value(&p).unwrap(),
+        serde_json::to_value(&q).unwrap()
+    );
+    p.attempts
+        .get_mut(&labs[0].id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .version = 99;
+    progress::save(&path, &p).unwrap();
+    let original = std::fs::read(&path).unwrap();
+    assert!(progress::load(&path, &labs).is_err());
+    assert_eq!(std::fs::read(&path).unwrap(), original);
+    assert!(
+        !WorkspaceData {
+            version: 1,
+            command: "x".repeat(4097),
+            ..Default::default()
+        }
+        .valid()
+    );
+}
+#[test]
+fn dns_edits_are_atomic_and_mount_editor_changes_only_persistent_configuration() {
+    let labs = pack::bundled().unwrap();
+    let mut dns = labs[7].initial.clone();
+    let before = dns.clone();
+    assert!(workspace::edit_dns(&mut dns, "192.0.2.80", "word").is_err());
+    assert_eq!(dns, before);
+    assert!(workspace::edit_dns(&mut dns, "bad", "2026102102").is_err());
+    assert_eq!(dns, before);
+    workspace::edit_dns(&mut dns, "192.0.2.80", "2026102102").unwrap();
+    assert!(!engine::solved(&dns, &labs[7].goal));
+    assert!(
+        workspace::issues(&dns, &labs[7].goal)
+            .iter()
+            .any(|s| s.contains("not the loaded"))
+    );
+    engine::execute(&mut dns, "systemctl reload named").unwrap();
+    assert!(engine::solved(&dns, &labs[7].goal));
+    let mut mount = labs[8].initial.clone();
+    let original = mount.clone();
+    assert!(workspace::edit_mount(&mut mount, "/tmp/host").is_err());
+    assert_eq!(mount, original);
+    workspace::edit_mount(&mut mount, "/dev/vdb1").unwrap();
+    assert!(matches!(
+        mount,
+        State::Mount {
+            used: 950,
+            writable: false,
+            ..
+        }
+    ));
+    assert!(!engine::solved(&mount, &labs[8].goal));
+}
+#[test]
+fn vlsm_feedback_distinguishes_blank_host_boundary_capacity_overlap_and_accepts_alternates() {
+    let labs = pack::bundled().unwrap();
+    let mut s = labs[1].initial.clone();
+    assert!(workspace::vlsm_issue(&s, 0).unwrap().contains("Enter"));
+    let set = |s: &mut State, index: usize, value: &str| {
+        if let State::Vlsm { allocations, .. } = s {
+            allocations[index].cidr = value.into();
+        }
+    };
+    for (value, word) in [
+        ("bad", "IPv4 network"),
+        ("10.20.0.1/26", "host address"),
+        ("10.20.0.0/28", "Too small"),
+        ("10.20.1.0/26", "outside"),
+    ] {
+        set(&mut s, 0, value);
+        assert!(workspace::vlsm_issue(&s, 0).unwrap().contains(word));
+    }
+    set(&mut s, 0, "10.20.0.128/26");
+    set(&mut s, 1, "10.20.0.128/27");
+    assert!(workspace::vlsm_issue(&s, 0).unwrap().contains("overlaps"));
+    set(&mut s, 1, "10.20.0.0/27");
+    set(&mut s, 2, "10.20.0.32/28");
+    assert!(engine::solved(&s, &labs[1].goal));
+    for i in 0..3 {
+        assert!(workspace::vlsm_issue(&s, i).is_none());
+    }
+}
+
+#[test]
+fn switching_from_wider_practice_subnets_keeps_the_original_and_save_valid() {
+    let labs = pack::bundled().unwrap();
+    let mut a = Attempt::new(&labs[0], 1);
+    for c in &labs[0].solution {
+        engine::execute(&mut a.state, c).unwrap();
+    }
+    workspace::prepare(&mut a);
+    let original = a.state.clone();
+    for _ in 0..12 {
+        workspace::start_practice(&mut a);
+        let l = a.ipv4.as_mut().unwrap();
+        l.sandbox_host = !ipv4::mask(l.variant.as_ref().unwrap().prefix).unwrap();
+        workspace::select_original(&mut a);
+        assert_eq!(a.state, original);
+        assert!(ipv4::validate_lesson(
+            a.ipv4.as_ref().unwrap(),
+            &ipv4::Exercise::from_state(&a.state).unwrap()
+        ));
+    }
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("progress.json");
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    p.attempts.insert(labs[0].id.clone(), a);
+    progress::save(&path, &p).unwrap();
+    assert!(progress::load(&path, &labs).is_ok());
+}

@@ -135,7 +135,16 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
-        State::Subnet { prefix, .. } => *prefix <= 30,
+        State::Subnet {
+            prefix,
+            answers,
+            second,
+            ..
+        } => {
+            *prefix <= 30
+                && answers.iter().all(|a| a.len() <= 64)
+                && second.as_ref().is_none_or(|a| a.len() <= 64)
+        }
         State::Vlsm {
             base,
             prefix,
