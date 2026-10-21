@@ -1,0 +1,31 @@
+# Content scope and references
+
+Authored and checked 2026-10-21. These are nine short illustrative exercises, not a course, exam blueprint, exam simulator, or claim of complete coverage. Original fictional systems and reserved documentation addresses are used. All paths, users, devices and logs inside labs are simulated.
+
+Objective alignment was checked against [Cisco CCNA 200-301 v1.1](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPI LPIC-1 v5.0](https://wiki.lpi.org/wiki/LPIC-1_Objectives_V5.0), and [LPI LPIC-2 v4.5](https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5). LPIC-2 v5.0 was labeled draft on the LPI wiki when checked. Cisco's v2.0 page gives a first-test date in 2027; this prototype uses the v1.1 IPv4 objectives. Alignment means a small example of a topic, not complete preparation for that objective.
+
+| Authored lab | Alignment | Modeled learning outcome |
+| --- | --- | --- |
+| Read an IPv4 address | CCNA 1.6 | Calculate a conventional /27 network, broadcast and usable range |
+| Give each team a subnet | CCNA 1.6 | Allocate VLSM networks with adequate usable capacity and no overlap |
+| Reconnect the office client | CCNA 1.6, 1.10 | Correct a LAN prefix and reachable default gateway |
+| Share a report safely | LPIC-1 104.5 | Repair effective file access while restricting other-class permissions |
+| Unlock the project directory | LPIC-1 104.5, 107.1 | Diagnose membership and parent-directory search permissions |
+| Find the failing requests | LPIC-1 103.2, 103.3 | Locate a simulated log and filter literal error lines |
+| Bring the service back | LPIC-2 202.1 | Repair a configuration and distinguish running from enabled |
+| Repair the internal DNS answer | LPIC-2 207.1, 207.2 | Edit an A record, update serial, reload and verify the loaded answer |
+| Recover the data volume | LPIC-2 203.1; introductory capacity practice | Repair fstab, remount, free disposable capacity and exercise mounting |
+
+Technical references consulted include [RFC 1878 subnet tables](https://www.rfc-editor.org/rfc/rfc1878), [Linux path resolution](https://man7.org/linux/man-pages/man7/path_resolution.7.html), [systemctl's upstream manual](https://www.freedesktop.org/software/systemd/man/latest/systemctl.html), [BIND's configuration and zone guide](https://bind9.readthedocs.io/en/latest/chapter3.html), [the upstream mount manual](https://github.com/util-linux/util-linux/blob/master/sys-utils/mount.8.adoc), and [ext4's kernel documentation](https://www.kernel.org/doc/html/latest/filesystems/ext4/index.html). GNU coreutils/grep manuals are also linked in relevant pack entries, but the web fetch timed out during authoring; they are supplementary references. Scenario entries record sources and known simplifications alongside the content.
+
+## Intentional simplifications
+
+- IPv4 uses conventional broadcast subnets through /30. No /31 point-to-point semantics or IPv6. VLSM permits larger-than-minimal valid subnets when all allocations fit.
+- Connectivity models one client, one LAN router and one remote server. No real packets, ARP, switches, routing protocol, latency or firewall. `ip addr set` is a teaching shortcut for replacing the single client interface, not a complete iproute2 command grammar.
+- Unix mutations run with simulated administrator capability; `test-access` evaluates the named ordinary user's access. Owner precedence and directory execute/search are enforced. No ACLs, sticky/setgid/setuid bits, SELinux, capabilities or root bypass. Group changes apply immediately without a new login.
+- Log commands support one-word, case-sensitive literals and a small pipeline subset. No regex, shell quoting, expansion, redirection or executable commands. `find` examines only the in-memory log map. Success grades the last successful text query, not terminal history.
+- Service configuration is one key and one fictional service. Start/restart requires port 1–65535. Configuration edits do not change an existing runtime; enabling is separate from starting. No dependency graph, processes or actual listening sockets.
+- DNS has one authoritative A-record map and staged edits. Reload requires a strictly increased serial. No cache, TTL expiry, recursion, secondary transfer, DNSSEC or serial wrap. `dns set`, `dns serial` and `config set` are explicit teaching editors, not real host commands. `named-checkzone lab.test` checks this model directly rather than opening a real zone file.
+- Storage uses integer MiB and one modeled mount. Only `rm -r /data/cache` can delete content; it is explicitly disposable. No inode pressure, sparse files, deleted-but-open files, ext4 reserved space or real block devices. The fstab editor changes one device field; no UUID resolution or real boot.
+
+The supported subset is shown per scenario through `help` and the workspace disclosure. Unknown commands/arguments report the limitation. The simulation does not pretend to offer a full Linux or Cisco shell.

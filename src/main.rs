@@ -1,0 +1,36 @@
+#![forbid(unsafe_code)]
+mod ui;
+fn main() -> eframe::Result<()> {
+    let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("--validate-pack") {
+        let result = args
+            .get(2)
+            .ok_or("Expected JSON path".to_string())
+            .and_then(|p| std::fs::read_to_string(p).map_err(|e| e.to_string()))
+            .and_then(|s| dlms_learning_lab::pack::load(&s));
+        match result {
+            Ok(s) => println!("Validated {} scenarios", s.len()),
+            Err(e) => {
+                eprintln!("{e}");
+                std::process::exit(1);
+            }
+        }
+        return Ok(());
+    }
+    let options = eframe::NativeOptions {
+        viewport: eframe::egui::ViewportBuilder::default()
+            .with_inner_size([1200., 850.])
+            .with_min_inner_size([720., 560.]),
+        ..Default::default()
+    };
+    eframe::run_native(
+        "DLMS Learning Lab",
+        options,
+        Box::new(move |cc| {
+            Ok(Box::new(ui::LabApp::new(
+                cc,
+                args.contains(&"--ui-smoke".into()),
+            )))
+        }),
+    )
+}

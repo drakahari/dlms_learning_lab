@@ -1,0 +1,483 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-ipv4",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 addressing",
+      "title": "Read an IPv4 address",
+      "summary": "Find the boundaries of a small office subnet.",
+      "objective": "For 192.168.10.77/27, identify the network, broadcast, first usable host and last usable host.",
+      "difficulty": "Beginner",
+      "minutes": 6,
+      "initial": {
+        "kind": "Subnet",
+        "ip": "192.168.10.77",
+        "prefix": 27,
+        "answers": [
+          "",
+          "",
+          "",
+          ""
+        ]
+      },
+      "goal": {
+        "kind": "Subnet"
+      },
+      "steps": [
+        "A /27 leaves five host bits. That gives 32 addresses per block. Find the block containing .77. Use show to inspect the address card.",
+        "The network is the first address in the block; the broadcast is the last. Record them with answer network IPv4 and answer broadcast IPv4.",
+        "Reserve the network and broadcast. Record the remaining boundaries with answer first IPv4 and answer last IPv4, then Check work."
+      ],
+      "hints": [
+        "The last octet blocks begin at 0, 32, 64, 96\u2026",
+        "The block runs from .64 through .95. Hosts run from .65 through .94."
+      ],
+      "solution": [
+        "answer network 192.168.10.64",
+        "answer broadcast 192.168.10.95",
+        "answer first 192.168.10.65",
+        "answer last 192.168.10.94"
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc1878"
+      ],
+      "simplifications": "Conventional broadcast subnets only; /31 point-to-point and /32 host routes are excluded."
+    },
+    {
+      "id": "ccna-vlsm",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Subnet planning",
+      "title": "Give each team a subnet",
+      "summary": "Divide one address pool without overlapping networks.",
+      "objective": "Allocate aligned subnets within 10.20.0.0/24 for design (60 hosts), support (28) and lab (12). Larger valid allocations are accepted if all fit without overlap.",
+      "difficulty": "Intermediate",
+      "minutes": 10,
+      "initial": {
+        "kind": "Vlsm",
+        "base": "10.20.0.0",
+        "prefix": 24,
+        "allocations": [
+          {
+            "name": "design",
+            "hosts": 60,
+            "cidr": ""
+          },
+          {
+            "name": "support",
+            "hosts": 28,
+            "cidr": ""
+          },
+          {
+            "name": "lab",
+            "hosts": 12,
+            "cidr": ""
+          }
+        ]
+      },
+      "goal": {
+        "kind": "Vlsm"
+      },
+      "steps": [
+        "Start with the largest requirement. Include two reserved addresses when sizing a conventional subnet.",
+        "60 hosts need a /26; 28 need /27; 12 need /28. Use allocate NAME NETWORK/PREFIX to place each one.",
+        "Inspect show. Every subnet must be aligned, inside the pool and disjoint from the others. Then Check work."
+      ],
+      "hints": [
+        "A /26 holds 62 usable hosts, /27 holds 30, and /28 holds 14.",
+        "One layout is design at .0/26, support at .64/27, lab at .96/28. Other valid layouts work."
+      ],
+      "solution": [
+        "allocate design 10.20.0.0/26",
+        "allocate support 10.20.0.64/27",
+        "allocate lab 10.20.0.96/28"
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc1878"
+      ],
+      "simplifications": "No routing or DHCP modeling. Conventional subnets reserve two addresses."
+    },
+    {
+      "id": "ccna-gateway",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Connectivity",
+      "title": "Reconnect the office client",
+      "summary": "Repair a client mask and default route.",
+      "objective": "Keep client address 192.168.40.70. Match the router LAN /26, use gateway 192.168.40.65, and reach remote server 203.0.113.10.",
+      "difficulty": "Beginner",
+      "minutes": 8,
+      "initial": {
+        "kind": "Network",
+        "address": "192.168.40.70",
+        "prefix": 24,
+        "gateway": "192.168.40.1",
+        "router": "192.168.40.65",
+        "lan_prefix": 26,
+        "target": "203.0.113.10"
+      },
+      "goal": {
+        "kind": "Network",
+        "address": "192.168.40.70"
+      },
+      "steps": [
+        "Inspect ip addr and ip route. The client, LAN router, and remote server appear in the topology above.",
+        "Use ip addr set IPv4/PREFIX to correct the client mask. Keep its assigned .70 address.",
+        "Use ip route replace default via IPv4 to select the LAN router. Verify with ping 203.0.113.10 and Check work."
+      ],
+      "hints": [
+        "A /26 here places the client and router in 192.168.40.64/26.",
+        "Use ip addr set 192.168.40.70/26 and ip route replace default via 192.168.40.65."
+      ],
+      "solution": [
+        "ip addr set 192.168.40.70/26",
+        "ip route replace default via 192.168.40.65",
+        "ping 203.0.113.10"
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Abstract topology; no ARP, packet forwarding, latency, switches or ICMP filtering. Commands are a documented teaching subset."
+    },
+    {
+      "id": "lpic1-permissions",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Permissions",
+      "title": "Share a report safely",
+      "summary": "Give the editing team access without exposing the report.",
+      "objective": "Let alex read and write /srv/report.txt; give other users no permissions on that file.",
+      "difficulty": "Beginner",
+      "minutes": 6,
+      "initial": {
+        "kind": "Unix",
+        "nodes": {
+          "/": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv/report.txt": {
+            "mode": 384,
+            "owner": "root",
+            "group": "editors",
+            "directory": false
+          }
+        },
+        "users": {
+          "root": [
+            "root"
+          ],
+          "alex": [
+            "alex",
+            "editors"
+          ],
+          "blair": [
+            "blair"
+          ],
+          "nobody": [
+            "nobody"
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Access",
+        "path": "/srv/report.txt",
+        "user": "alex",
+        "read": true,
+        "write": true,
+        "private": true
+      },
+      "steps": [
+        "Inspect ls -l /srv/report.txt and id alex. Owner, group and other permissions are separate classes.",
+        "As the simulated administrator, use chmod OCTAL PATH or explicit u=,g=,o= clauses to provide the editors group read/write and no access for others.",
+        "Run test-access alex /srv/report.txt rw, then Check work. A valid ownership-based repair is also accepted."
+      ],
+      "hints": [
+        "alex belongs to editors. Group bits need read (4) plus write (2).",
+        "chmod 660 /srv/report.txt gives owner/group read-write and no other permissions."
+      ],
+      "solution": [
+        "chmod 660 /srv/report.txt",
+        "test-access alex /srv/report.txt rw"
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-1_Objectives_V5.0",
+        "https://www.gnu.org/software/coreutils/manual/html_node/File-permissions.html",
+        "https://man7.org/linux/man-pages/man7/path_resolution.7.html"
+      ],
+      "simplifications": "Administrator mutations; test-access uses ordinary POSIX owner/group/other precedence. No ACLs, root override, special mode bits or SELinux."
+    },
+    {
+      "id": "lpic1-traversal",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Permissions",
+      "title": "Unlock the project directory",
+      "summary": "Trace group access through a directory tree.",
+      "objective": "Let blair read /srv/project/notes.txt, keeping other users off that file. Repair group membership and traversal as needed.",
+      "difficulty": "Intermediate",
+      "minutes": 9,
+      "initial": {
+        "kind": "Unix",
+        "nodes": {
+          "/": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv/project": {
+            "mode": 480,
+            "owner": "root",
+            "group": "editors",
+            "directory": true
+          },
+          "/srv/project/notes.txt": {
+            "mode": 416,
+            "owner": "root",
+            "group": "editors",
+            "directory": false
+          }
+        },
+        "users": {
+          "root": [
+            "root"
+          ],
+          "alex": [
+            "alex",
+            "editors"
+          ],
+          "blair": [
+            "blair"
+          ],
+          "nobody": [
+            "nobody"
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Access",
+        "path": "/srv/project/notes.txt",
+        "user": "blair",
+        "read": true,
+        "write": false,
+        "private": true
+      },
+      "steps": [
+        "Use id blair and namei /srv/project/notes.txt. Reading a file requires execute/search permission on each parent directory.",
+        "Add blair to editors with usermod -aG editors blair. In this simulation membership updates immediately.",
+        "Give editors traversal on /srv/project using chmod. Verify test-access blair /srv/project/notes.txt r and Check work."
+      ],
+      "hints": [
+        "Directory read lists names; execute allows traversal. Both can be useful, but traversal is necessary here.",
+        "usermod -aG editors blair followed by chmod 750 /srv/project repairs this path."
+      ],
+      "solution": [
+        "usermod -aG editors blair",
+        "chmod 750 /srv/project",
+        "test-access blair /srv/project/notes.txt r"
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-1_Objectives_V5.0",
+        "https://www.gnu.org/software/coreutils/manual/html_node/Mode-Structure.html",
+        "https://man7.org/linux/man-pages/man7/path_resolution.7.html"
+      ],
+      "simplifications": "No supplementary-group session refresh, ACLs or SELinux. Alternative ownership/permission repairs are accepted if effective access and privacy hold."
+    },
+    {
+      "id": "lpic1-logs",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Text processing",
+      "title": "Find the failing requests",
+      "summary": "Locate a log and extract the relevant lines.",
+      "objective": "Find app.log under /var/log, then produce exactly its ERROR lines as the last text query.",
+      "difficulty": "Beginner",
+      "minutes": 6,
+      "initial": {
+        "kind": "Logs",
+        "files": {
+          "/var/log/app.log": "09:00 INFO startup ready\n09:02 ERROR database unavailable\n09:03 INFO retry scheduled\n09:04 ERROR request timeout\n09:05 WARN queue growing\n",
+          "/var/log/auth.log": "09:00 INFO session opened\n"
+        },
+        "result": ""
+      },
+      "goal": {
+        "kind": "Logs",
+        "path": "/var/log/app.log",
+        "needle": "ERROR"
+      },
+      "steps": [
+        "Find the file with find /var/log -name app.log. All files are simulated.",
+        "Inspect it with cat /var/log/app.log. Then filter the case-sensitive literal ERROR using grep.",
+        "Use grep ERROR /var/log/app.log or cat /var/log/app.log | grep ERROR. Check work grades the most recent text query; a later unfiltered query changes the result."
+      ],
+      "hints": [
+        "grep takes a one-word literal and a path; pipelines can also filter cat output.",
+        "grep ERROR /var/log/app.log produces both requested lines."
+      ],
+      "solution": [
+        "find /var/log -name app.log",
+        "cat /var/log/app.log | grep ERROR"
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-1_Objectives_V5.0",
+        "https://www.gnu.org/software/grep/manual/grep.html"
+      ],
+      "simplifications": "Literal case-sensitive matching only; no regex, globbing, quoting, redirection or general shell. find only searches the simulated log map."
+    },
+    {
+      "id": "lpic2-service",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Services",
+      "title": "Bring the service back",
+      "summary": "Repair a bad configuration and restore startup behavior.",
+      "objective": "Repair atlas to listen on port 8080, start it with that configuration, and enable it for boot.",
+      "difficulty": "Beginner",
+      "minutes": 8,
+      "initial": {
+        "kind": "Service",
+        "port": "eighty",
+        "running": false,
+        "enabled": false,
+        "loaded_port": null
+      },
+      "goal": {
+        "kind": "Service",
+        "port": 8080
+      },
+      "steps": [
+        "Use systemctl status atlas and journalctl -u atlas to diagnose. Read cat /etc/atlas.conf.",
+        "The service needs a numeric port. Save the repair with config set port 8080. Changes do not affect an already running service until restart.",
+        "Use systemctl restart atlas and systemctl enable atlas. Verify is-active and is-enabled separately, then Check work."
+      ],
+      "hints": [
+        "Running and enabled are independent states. Enabling does not start a service.",
+        "config set port 8080; then run systemctl restart atlas and systemctl enable atlas as separate commands."
+      ],
+      "solution": [
+        "config set port 8080",
+        "systemctl restart atlas",
+        "systemctl enable atlas"
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
+        "https://www.freedesktop.org/software/systemd/man/latest/systemctl.html"
+      ],
+      "simplifications": "Single modeled service, one configuration key. No unit dependency graph, privileges, socket binding, processes or actual boot."
+    },
+    {
+      "id": "lpic2-dns",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "DNS",
+      "title": "Repair the internal DNS answer",
+      "summary": "Correct a record and reload the authoritative zone.",
+      "objective": "Make portal.lab.test resolve to 192.0.2.80 in the loaded authoritative zone.",
+      "difficulty": "Intermediate",
+      "minutes": 8,
+      "initial": {
+        "kind": "Dns",
+        "records": {
+          "portal.lab.test": "192.0.2.8"
+        },
+        "loaded": {
+          "portal.lab.test": "192.0.2.8"
+        },
+        "serial": 2026102101,
+        "loaded_serial": 2026102101
+      },
+      "goal": {
+        "kind": "Dns",
+        "name": "portal.lab.test",
+        "address": "192.0.2.80"
+      },
+      "steps": [
+        "Compare dig portal.lab.test with cat /etc/named/lab.zone. dig queries the loaded zone, not pending edits.",
+        "Use dns set portal.lab.test 192.0.2.80. Increase the zone serial with dns serial NUMBER.",
+        "Check named-checkzone lab.test, then systemctl reload named. Verify dig portal.lab.test and Check work."
+      ],
+      "hints": [
+        "A saved edit is not yet active. This model requires a larger serial before reload.",
+        "Use dns serial 2026102102 after editing, then reload named."
+      ],
+      "solution": [
+        "dns set portal.lab.test 192.0.2.80",
+        "dns serial 2026102102",
+        "named-checkzone lab.test",
+        "systemctl reload named",
+        "dig portal.lab.test"
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
+        "https://bind9.readthedocs.io/en/latest/chapter3.html"
+      ],
+      "simplifications": "One authoritative A-record map, no recursion, TTL cache, DNSSEC, secondary servers or serial wrap arithmetic. dns set is a teaching editor, not a BIND CLI."
+    },
+    {
+      "id": "lpic2-storage",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Filesystems",
+      "title": "Recover the data volume",
+      "summary": "Fix a mount entry and free disposable capacity.",
+      "objective": "Make /data persistently reference /dev/vdb1, mount it read-write, and reduce usage to at most 80%. Only /data/cache is disposable.",
+      "difficulty": "Intermediate",
+      "minutes": 10,
+      "initial": {
+        "kind": "Mount",
+        "capacity": 1000,
+        "used": 950,
+        "cache": 300,
+        "mounted": true,
+        "device": "/dev/vdb1",
+        "configured_device": "/dev/vdc1",
+        "writable": false
+      },
+      "goal": {
+        "kind": "Mount"
+      },
+      "steps": [
+        "Inspect df -h, du -sh /data/cache and cat /etc/fstab. Capacity and mount configuration are separate problems.",
+        "Use config set device /dev/vdb1 to repair fstab, and mount -o remount,rw /data to make the current mount writable.",
+        "Remove only the disposable cache with rm -r /data/cache. Verify df -h, then umount /data and mount /data to exercise the persistent entry. Check work."
+      ],
+      "hints": [
+        "Cache cleanup requires a mounted writable filesystem. Removing it frees 300 MiB.",
+        "After the fstab repair and remount, rm -r /data/cache reduces usage to 650/1000 MiB."
+      ],
+      "solution": [
+        "config set device /dev/vdb1",
+        "mount -o remount,rw /data",
+        "rm -r /data/cache",
+        "umount /data",
+        "mount /data"
+      ],
+      "sources": [
+        "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
+        "https://www.kernel.org/doc/html/latest/filesystems/ext4/index.html",
+        "https://github.com/util-linux/util-linux/blob/master/sys-utils/mount.8.adoc"
+      ],
+      "simplifications": "Integer MiB capacity model, one filesystem, no inodes, UUID resolution, reserved blocks, open files or real devices. rm accepts only the explicitly disposable cache."
+    }
+  ]
+}

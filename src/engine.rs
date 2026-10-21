@@ -1,0 +1,864 @@
+use serde::{Deserialize, Serialize};
+use std::{collections::BTreeMap, net::Ipv4Addr};
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct Node {
+    pub mode: u16,
+    pub owner: String,
+    pub group: String,
+    pub directory: bool,
+}
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(deny_unknown_fields)]
+pub struct Allocation {
+    pub name: String,
+    pub hosts: u32,
+    pub cidr: String,
+}
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "kind", deny_unknown_fields)]
+pub enum State {
+    Subnet {
+        ip: Ipv4Addr,
+        prefix: u8,
+        answers: [String; 4],
+    },
+    Vlsm {
+        base: Ipv4Addr,
+        prefix: u8,
+        allocations: Vec<Allocation>,
+    },
+    Network {
+        address: Ipv4Addr,
+        prefix: u8,
+        gateway: Ipv4Addr,
+        router: Ipv4Addr,
+        lan_prefix: u8,
+        target: Ipv4Addr,
+    },
+    Unix {
+        nodes: BTreeMap<String, Node>,
+        users: BTreeMap<String, Vec<String>>,
+    },
+    Logs {
+        files: BTreeMap<String, String>,
+        result: String,
+    },
+    Service {
+        port: String,
+        running: bool,
+        enabled: bool,
+        loaded_port: Option<u16>,
+    },
+    Dns {
+        records: BTreeMap<String, String>,
+        loaded: BTreeMap<String, String>,
+        serial: u32,
+        loaded_serial: u32,
+    },
+    Mount {
+        capacity: u64,
+        used: u64,
+        cache: u64,
+        mounted: bool,
+        device: String,
+        configured_device: String,
+        writable: bool,
+    },
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", deny_unknown_fields)]
+pub enum Goal {
+    Subnet,
+    Vlsm,
+    Network {
+        address: Ipv4Addr,
+    },
+    Access {
+        path: String,
+        user: String,
+        read: bool,
+        write: bool,
+        private: bool,
+    },
+    Logs {
+        path: String,
+        needle: String,
+    },
+    Service {
+        port: u16,
+    },
+    Dns {
+        name: String,
+        address: Ipv4Addr,
+    },
+    Mount,
+}
+pub fn bounds(ip: Ipv4Addr, prefix: u8) -> Option<(u32, u32)> {
+    if prefix > 32 {
+        return None;
+    }
+    let mask = if prefix == 0 {
+        0
+    } else {
+        u32::MAX << (32 - prefix)
+    };
+    let net = u32::from(ip) & mask;
+    Some((net, net | !mask))
+}
+pub fn cidr(s: &str) -> Option<(u32, u32, u8)> {
+    let (a, p) = s.split_once('/')?;
+    let ip = a.parse().ok()?;
+    let p = p.parse().ok()?;
+    let (n, b) = bounds(ip, p)?;
+    if u32::from(ip) != n {
+        return None;
+    }
+    Some((n, b, p))
+}
+fn bits(n: &Node, user: &str, groups: &[String]) -> u16 {
+    if user == n.owner {
+        (n.mode >> 6) & 7
+    } else if groups.contains(&n.group) {
+        (n.mode >> 3) & 7
+    } else {
+        n.mode & 7
+    }
+}
+pub fn access(
+    nodes: &BTreeMap<String, Node>,
+    users: &BTreeMap<String, Vec<String>>,
+    path: &str,
+    user: &str,
+    mask: u16,
+) -> bool {
+    let Some(groups) = users.get(user) else {
+        return false;
+    };
+    let mut parent = String::new();
+    let parts: Vec<_> = path.trim_start_matches('/').split('/').collect();
+    if let Some(root) = nodes.get("/") {
+        if !root.directory || bits(root, user, groups) & 1 == 0 {
+            return false;
+        }
+    } else {
+        return false;
+    }
+    for part in parts.iter().take(parts.len().saturating_sub(1)) {
+        parent.push('/');
+        parent.push_str(part);
+        let Some(n) = nodes.get(&parent) else {
+            return false;
+        };
+        if !n.directory || bits(n, user, groups) & 1 == 0 {
+            return false;
+        }
+    }
+    nodes
+        .get(path)
+        .is_some_and(|n| bits(n, user, groups) & mask == mask)
+}
+pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
+    let c = |b, t: &str| (b, t.to_owned());
+    match (s, g) {
+        (
+            State::Subnet {
+                ip,
+                prefix,
+                answers,
+            },
+            Goal::Subnet,
+        ) => {
+            if *prefix > 30 {
+                return vec![c(
+                    false,
+                    "Only conventional subnets through /30 are supported",
+                )];
+            }
+            let Some((n, b)) = bounds(*ip, *prefix) else {
+                return vec![c(false, "Invalid prefix")];
+            };
+            let want = [n, b, n + 1, b - 1];
+            [
+                "Network address",
+                "Broadcast address",
+                "First usable host",
+                "Last usable host",
+            ]
+            .iter()
+            .enumerate()
+            .map(|(i, t)| {
+                c(
+                    answers[i]
+                        .parse::<Ipv4Addr>()
+                        .is_ok_and(|v| u32::from(v) == want[i]),
+                    t,
+                )
+            })
+            .collect()
+        }
+        (
+            State::Vlsm {
+                base,
+                prefix,
+                allocations,
+            },
+            Goal::Vlsm,
+        ) => {
+            let (start, end) = bounds(*base, *prefix).unwrap_or((1, 0));
+            allocations
+                .iter()
+                .enumerate()
+                .map(|(i, a)| {
+                    let ok = cidr(&a.cidr).is_some_and(|(n, b, p)| {
+                        p <= 30
+                            && n >= start
+                            && b <= end
+                            && (b as u64 - n as u64 + 1) >= a.hosts as u64 + 2
+                            && allocations.iter().enumerate().all(|(j, other)| {
+                                i == j
+                                    || cidr(&other.cidr).is_some_and(|(on, ob, _)| b < on || n > ob)
+                            })
+                    });
+                    c(
+                        ok,
+                        &format!("{}: {} hosts, aligned and non-overlapping", a.name, a.hosts),
+                    )
+                })
+                .collect()
+        }
+        (
+            State::Network {
+                address,
+                prefix,
+                gateway,
+                router,
+                lan_prefix,
+                target: _,
+            },
+            Goal::Network { address: required },
+        ) => vec![
+            c(address == required, "Client retains its assigned address"),
+            c(prefix == lan_prefix, "Client mask matches the LAN"),
+            c(
+                gateway == router
+                    && bounds(*address, *prefix)
+                        .zip(bounds(*router, *prefix))
+                        .is_some_and(|(a, b)| a == b),
+                "Default route uses the reachable router",
+            ),
+        ],
+        (
+            State::Unix { nodes, users },
+            Goal::Access {
+                path,
+                user,
+                read,
+                write,
+                private,
+            },
+        ) => vec![
+            c(
+                access(
+                    nodes,
+                    users,
+                    path,
+                    user,
+                    if *read { 4 } else { 0 } | if *write { 2 } else { 0 },
+                ),
+                "Required user has access through every directory",
+            ),
+            c(
+                !private || nodes.get(path).is_some_and(|n| n.mode & 7 == 0),
+                "Other users have no file permissions",
+            ),
+        ],
+        (State::Logs { files, result }, Goal::Logs { path, needle }) => vec![c(
+            files.get(path).is_some_and(|text| {
+                *result
+                    == text
+                        .lines()
+                        .filter(|l| l.contains(needle))
+                        .collect::<Vec<_>>()
+                        .join("\n")
+            }),
+            "Last text query contains exactly the requested log lines",
+        )],
+        (
+            State::Service {
+                port,
+                running,
+                enabled,
+                loaded_port,
+            },
+            Goal::Service { port: expected },
+        ) => vec![
+            c(
+                port.parse::<u16>() == Ok(*expected),
+                "Configuration has the required valid port",
+            ),
+            c(
+                *running && *loaded_port == Some(*expected),
+                "Service is running with the repaired configuration",
+            ),
+            c(*enabled, "Service is enabled for boot"),
+        ],
+        (
+            State::Dns {
+                records,
+                loaded,
+                serial,
+                loaded_serial,
+            },
+            Goal::Dns { name, address },
+        ) => vec![
+            c(
+                records.get(name).and_then(|v| v.parse::<Ipv4Addr>().ok()) == Some(*address),
+                "A record has the required address",
+            ),
+            c(
+                loaded.get(name).and_then(|v| v.parse::<Ipv4Addr>().ok()) == Some(*address)
+                    && serial == loaded_serial,
+                "Authoritative zone is reloaded",
+            ),
+        ],
+        (
+            State::Mount {
+                capacity,
+                used,
+                mounted,
+                device,
+                configured_device,
+                writable,
+                ..
+            },
+            Goal::Mount,
+        ) => vec![
+            c(
+                *capacity > 0 && (*used as u128) * 100 <= (*capacity as u128) * 80,
+                "Filesystem usage is at most 80%",
+            ),
+            c(
+                device == configured_device,
+                "Persistent mount references the correct device",
+            ),
+            c(
+                *mounted && *writable,
+                "Data filesystem is mounted read-write",
+            ),
+        ],
+        _ => vec![c(false, "State and objective do not match")],
+    }
+}
+pub fn solved(s: &State, g: &Goal) -> bool {
+    let c = checks(s, g);
+    !c.is_empty() && c.iter().all(|c| c.0)
+}
+pub fn help(s: &State) -> &'static str {
+    match s {
+        State::Subnet { .. } => "show • answer network|broadcast|first|last IPv4",
+        State::Vlsm { .. } => "show • allocate NAME NETWORK/PREFIX (network must be aligned)",
+        State::Network { .. } => {
+            "show • ip addr • ip route • ip addr set IPv4/PREFIX • ip route replace default via IPv4 • ping IPv4"
+        }
+        State::Unix { .. } => {
+            "ls -l PATH • namei PATH • id USER • chmod OCTAL|u=rw,g=r,o= PATH • chown USER:GROUP PATH • usermod -aG GROUP USER • test-access USER PATH r|w|rw"
+        }
+        State::Logs { .. } => {
+            "find /var/log -name NAME • cat PATH • grep LITERAL PATH • cat PATH | grep LITERAL [| tail -n N] • tail -n N PATH. Literals are one word, case-sensitive; no regex, shell quoting or redirection."
+        }
+        State::Service { .. } => {
+            "cat /etc/atlas.conf • config set port VALUE • systemctl status|start|stop|restart|enable|disable|is-active|is-enabled atlas • journalctl -u atlas"
+        }
+        State::Dns { .. } => {
+            "cat /etc/named/lab.zone • dns set NAME IPv4 • dns serial NUMBER • named-checkzone lab.test • systemctl reload named • dig NAME"
+        }
+        State::Mount { .. } => {
+            "df -h • du -sh /data/cache • cat /etc/fstab • config set device DEVICE • rm -r /data/cache • mount /data • mount -o remount,rw /data • umount /data"
+        }
+    }
+}
+/// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
+pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if input.len() > 4096 {
+        return Err("Command exceeds 4096 characters".into());
+    }
+    let v: Vec<&str> = input.split_whitespace().collect();
+    let limitation = format!(
+        "Unsupported command or arguments. This is a simulation. Supported subset: {}",
+        help(s)
+    );
+    let bad = || limitation.clone();
+    if v == ["help"] {
+        return Ok(help(s).into());
+    }
+    if v == ["show"] {
+        return Ok(describe(s));
+    }
+    match s {
+        State::Subnet { answers, .. } => match v.as_slice() {
+            ["answer", field, value] => {
+                let i = match *field {
+                    "network" => 0,
+                    "broadcast" => 1,
+                    "first" => 2,
+                    "last" => 3,
+                    _ => return Err("Use network, broadcast, first or last".into()),
+                };
+                value
+                    .parse::<Ipv4Addr>()
+                    .map_err(|_| "Invalid IPv4 address")?;
+                answers[i] = value.to_string();
+                Ok("Answer saved. Check work when ready.".into())
+            }
+            _ => Err(bad()),
+        },
+        State::Vlsm { allocations, .. } => match v.as_slice() {
+            ["allocate", name, value] => {
+                cidr(value).ok_or("Use an aligned IPv4 network/prefix")?;
+                let a = allocations
+                    .iter_mut()
+                    .find(|a| a.name == *name)
+                    .ok_or("Unknown allocation name")?;
+                a.cidr = value.to_string();
+                Ok("Allocation saved".into())
+            }
+            _ => Err(bad()),
+        },
+        State::Network {
+            address,
+            prefix,
+            gateway,
+            router,
+            lan_prefix,
+            target,
+        } => match v.as_slice() {
+            ["ip", "addr"] => Ok(format!(
+                "client {address}/{prefix}; LAN router {router}/{lan_prefix}"
+            )),
+            ["ip", "route"] => Ok(format!("default via {gateway}")),
+            ["ip", "addr", "set", value] => {
+                let (a, p) = value.split_once('/').ok_or("Use IPv4/prefix")?;
+                let a = a.parse::<Ipv4Addr>().map_err(|_| "Invalid address")?;
+                let p = p.parse::<u8>().map_err(|_| "Invalid prefix")?;
+                if p > 30 {
+                    return Err("LAN prefix must be 0..30".into());
+                }
+                *address = a;
+                *prefix = p;
+                Ok("Client address updated".into())
+            }
+            ["ip", "route", "replace", "default", "via", a] => {
+                *gateway = a.parse().map_err(|_| "Invalid gateway")?;
+                Ok("Default route updated".into())
+            }
+            ["ping", a] => {
+                let a = a.parse::<Ipv4Addr>().map_err(|_| "Use an IPv4 address")?;
+                let lan = bounds(*address, *prefix) == bounds(*router, *prefix);
+                let ok = lan
+                    && ((a == *router)
+                        || (a == *target && gateway == router && prefix == lan_prefix));
+                Ok(if ok {
+                    format!("Reply from {a} (simulated)")
+                } else {
+                    "Destination unreachable (simulated)".into()
+                })
+            }
+            _ => Err(bad()),
+        },
+        State::Unix { nodes, users } => match v.as_slice() {
+            ["ls", "-l", path] => {
+                let n = nodes.get(*path).ok_or("No simulated path")?;
+                Ok(format!(
+                    "{} {:03o} {}:{} {path}",
+                    if n.directory { "d" } else { "-" },
+                    n.mode,
+                    n.owner,
+                    n.group
+                ))
+            }
+            ["namei", path] => {
+                if !nodes.contains_key(*path) {
+                    return Err("No simulated path".into());
+                }
+                Ok(nodes
+                    .iter()
+                    .filter(|(p, _)| {
+                        *p == "/" || path.starts_with(&format!("{p}/")) || p.as_str() == *path
+                    })
+                    .map(|(p, n)| format!("{:03o} {}:{} {p}", n.mode, n.owner, n.group))
+                    .collect::<Vec<_>>()
+                    .join("\n"))
+            }
+            ["id", user] => Ok(format!(
+                "{user}: {:?}",
+                users.get(*user).ok_or("Unknown user")?
+            )),
+            ["chmod", mode, path] => {
+                let n = nodes.get_mut(*path).ok_or("No simulated path")?;
+                let parsed = u16::from_str_radix(mode, 8).ok().filter(|m| *m <= 0o777);
+                let mode = if let Some(m) = parsed {
+                    m
+                } else {
+                    let mut m = n.mode;
+                    for clause in mode.split(',') {
+                        let (who, perms) = clause
+                            .split_once('=')
+                            .ok_or("Use octal or explicit u=,g=,o= clauses")?;
+                        let shift = match who {
+                            "u" => 6,
+                            "g" => 3,
+                            "o" => 0,
+                            _ => return Err("Only u, g, o are supported".into()),
+                        };
+                        let mut b = 0;
+                        for ch in perms.chars() {
+                            b |= match ch {
+                                'r' => 4,
+                                'w' => 2,
+                                'x' => 1,
+                                _ => return Err("Use r,w,x".into()),
+                            };
+                        }
+                        m = (m & !(7 << shift)) | (b << shift);
+                    }
+                    m
+                };
+                n.mode = mode;
+                Ok("Permissions updated".into())
+            }
+            ["chown", owner, path] => {
+                let (u, g) = owner.split_once(':').ok_or("Use USER:GROUP")?;
+                if !users.contains_key(u) || !users.values().any(|gs| gs.iter().any(|v| v == g)) {
+                    return Err("Unknown user or group".into());
+                }
+                let n = nodes.get_mut(*path).ok_or("No simulated path")?;
+                n.owner = u.into();
+                n.group = g.into();
+                Ok("Ownership updated".into())
+            }
+            ["usermod", "-aG", group, user] => {
+                if !users.values().any(|gs| gs.iter().any(|g| g == group)) {
+                    return Err("Unknown group".into());
+                }
+                let groups = users.get_mut(*user).ok_or("Unknown user")?;
+                if !groups.iter().any(|g| g == group) {
+                    groups.push(group.to_string());
+                }
+                Ok("Group added; simulated sessions update immediately".into())
+            }
+            ["test-access", user, path, mode] => {
+                let mask = match *mode {
+                    "r" => 4,
+                    "w" => 2,
+                    "rw" => 6,
+                    _ => return Err("Use r, w or rw".into()),
+                };
+                Ok(if access(nodes, users, path, user, mask) {
+                    "Access allowed"
+                } else {
+                    "Permission denied"
+                }
+                .into())
+            }
+            _ => Err(bad()),
+        },
+        State::Logs { files, result } => {
+            if let ["find", "/var/log", "-name", name] = v.as_slice() {
+                return Ok(files
+                    .keys()
+                    .filter(|p| p.rsplit('/').next() == Some(*name))
+                    .cloned()
+                    .collect::<Vec<_>>()
+                    .join("\n"));
+            }
+            let chunks: Vec<_> = v.split(|t| *t == "|").collect();
+            let mut text = match chunks[0] {
+                ["cat", path] => files.get(*path).ok_or("No simulated file")?.clone(),
+                ["grep", needle, path] => files
+                    .get(*path)
+                    .ok_or("No simulated file")?
+                    .lines()
+                    .filter(|l| l.contains(needle))
+                    .collect::<Vec<_>>()
+                    .join("\n"),
+                ["tail", "-n", count, path] => {
+                    tail(files.get(*path).ok_or("No simulated file")?, count)?
+                }
+                _ => return Err(bad()),
+            };
+            for chunk in chunks.iter().skip(1) {
+                text = match *chunk {
+                    ["grep", needle] => text
+                        .lines()
+                        .filter(|l| l.contains(needle))
+                        .collect::<Vec<_>>()
+                        .join("\n"),
+                    ["tail", "-n", count] => tail(&text, count)?,
+                    _ => return Err(bad()),
+                };
+            }
+            *result = text.clone();
+            Ok(if text.is_empty() {
+                "(no matching lines)".into()
+            } else {
+                text
+            })
+        }
+        State::Service {
+            port,
+            running,
+            enabled,
+            loaded_port,
+        } => match v.as_slice() {
+            ["cat", "/etc/atlas.conf"] => Ok(format!("port={port}")),
+            ["config", "set", "port", value] => {
+                *port = value.to_string();
+                Ok("Config saved; restart to apply".into())
+            }
+            ["journalctl", "-u", "atlas"] => {
+                Ok(if port.parse::<u16>().ok().filter(|p| *p > 0).is_some() {
+                    "Configuration parses; inspect systemctl status"
+                } else {
+                    "atlas: invalid port: expected integer 1..65535"
+                }
+                .into())
+            }
+            ["systemctl", action, "atlas"] => match *action {
+                "status" => Ok(format!(
+                    "atlas: {}; {}; loaded port {:?}",
+                    if *running {
+                        "active (running)"
+                    } else {
+                        "inactive/failed"
+                    },
+                    if *enabled { "enabled" } else { "disabled" },
+                    loaded_port
+                )),
+                "is-active" => Ok(if *running { "active" } else { "inactive" }.into()),
+                "is-enabled" => Ok(if *enabled { "enabled" } else { "disabled" }.into()),
+                "start" | "restart" => {
+                    if *action == "start" && *running {
+                        return Ok("Already running; restart to apply config".into());
+                    }
+                    *running = false;
+                    *loaded_port = None;
+                    let p = port
+                        .parse::<u16>()
+                        .ok()
+                        .filter(|p| *p > 0)
+                        .ok_or("Start failed: invalid port; inspect journalctl -u atlas")?;
+                    *running = true;
+                    *loaded_port = Some(p);
+                    Ok("atlas started".into())
+                }
+                "stop" => {
+                    *running = false;
+                    *loaded_port = None;
+                    Ok("atlas stopped".into())
+                }
+                "enable" | "disable" => {
+                    *enabled = *action == "enable";
+                    Ok(if *enabled { "Enabled" } else { "Disabled" }.into())
+                }
+                _ => Err(bad()),
+            },
+            _ => Err(bad()),
+        },
+        State::Dns {
+            records,
+            loaded,
+            serial,
+            loaded_serial,
+        } => match v.as_slice() {
+            ["cat", "/etc/named/lab.zone"] => Ok(format!(
+                "serial {serial}\n{}",
+                records
+                    .iter()
+                    .map(|(n, a)| format!("{n} IN A {a}"))
+                    .collect::<Vec<_>>()
+                    .join("\n")
+            )),
+            ["dns", "set", name, addr] => {
+                if !records.contains_key(*name) {
+                    return Err("Use an existing zone name".into());
+                }
+                addr.parse::<Ipv4Addr>()
+                    .map_err(|_| "Invalid IPv4 A record")?;
+                records.insert(name.to_string(), addr.to_string());
+                Ok("Record saved; increase serial and reload".into())
+            }
+            ["dns", "serial", value] => {
+                *serial = value.parse().map_err(|_| "Serial must be a u32 integer")?;
+                Ok("Serial saved".into())
+            }
+            ["named-checkzone", "lab.test"] => {
+                if records.values().all(|a| a.parse::<Ipv4Addr>().is_ok()) {
+                    Ok(format!("zone lab.test serial {serial}: OK"))
+                } else {
+                    Err("Invalid A record".into())
+                }
+            }
+            ["systemctl", "reload", "named"] => {
+                if *serial <= *loaded_serial {
+                    return Err("Increase serial above the loaded serial before reload".into());
+                }
+                if !records.values().all(|a| a.parse::<Ipv4Addr>().is_ok()) {
+                    return Err("Invalid A record".into());
+                }
+                *loaded = records.clone();
+                *loaded_serial = *serial;
+                Ok("Zone loaded (authoritative simulation; no cache)".into())
+            }
+            ["dig", name] => Ok(loaded
+                .get(*name)
+                .map(|a| format!("{name} IN A {a}"))
+                .unwrap_or("NXDOMAIN".into())),
+            _ => Err(bad()),
+        },
+        State::Mount {
+            capacity,
+            used,
+            cache,
+            mounted,
+            device,
+            configured_device,
+            writable,
+        } => match v.as_slice() {
+            ["df", "-h"] => Ok(format!(
+                "{device} /data: {used}/{capacity} MiB used; mounted={mounted}, rw={writable}"
+            )),
+            ["du", "-sh", "/data/cache"] => {
+                Ok(format!("{cache} MiB /data/cache (disposable cache)"))
+            }
+            ["cat", "/etc/fstab"] => Ok(format!(
+                "{configured_device} /data ext4 defaults 0 2\nActual data device: {device}"
+            )),
+            ["config", "set", "device", value] => {
+                if value.len() > 256 {
+                    return Err("Device field exceeds 256 characters".into());
+                }
+                *configured_device = value.to_string();
+                Ok("fstab device updated".into())
+            }
+            ["rm", "-r", "/data/cache"] => {
+                if !*mounted || !*writable {
+                    return Err("/data must be mounted read-write".into());
+                }
+                *used = used.saturating_sub(*cache);
+                *cache = 0;
+                Ok("Disposable cache removed".into())
+            }
+            ["mount", "/data"] => {
+                if device != configured_device {
+                    return Err("fstab references an unknown device".into());
+                }
+                *mounted = true;
+                *writable = true;
+                Ok("/data mounted read-write".into())
+            }
+            ["mount", "-o", "remount,rw", "/data"] => {
+                if !*mounted {
+                    return Err("Not mounted".into());
+                }
+                *writable = true;
+                Ok("/data remounted read-write".into())
+            }
+            ["umount", "/data"] => {
+                *mounted = false;
+                *writable = false;
+                Ok("/data unmounted".into())
+            }
+            _ => Err(bad()),
+        },
+    }
+}
+fn tail(text: &str, count: &str) -> Result<String, String> {
+    let n = count
+        .parse::<usize>()
+        .map_err(|_| "Count must be a positive integer")?;
+    if n > 10000 {
+        return Err("Count limit is 10000".into());
+    }
+    let l: Vec<_> = text.lines().collect();
+    Ok(l[l.len().saturating_sub(n)..].join("\n"))
+}
+pub fn describe(s: &State) -> String {
+    match s {
+        State::Subnet {
+            ip,
+            prefix,
+            answers,
+        } => format!(
+            "Address card\n{ip}/{prefix}\n\nNetwork: {}\nBroadcast: {}\nFirst host: {}\nLast host: {}",
+            answers[0], answers[1], answers[2], answers[3]
+        ),
+        State::Vlsm {
+            base,
+            prefix,
+            allocations,
+        } => format!(
+            "Address pool: {base}/{prefix}\n{}",
+            allocations
+                .iter()
+                .map(|a| format!(
+                    "{} • {} hosts • {}",
+                    a.name,
+                    a.hosts,
+                    if a.cidr.is_empty() {
+                        "unassigned"
+                    } else {
+                        &a.cidr
+                    }
+                ))
+                .collect::<Vec<_>>()
+                .join("\n")
+        ),
+        State::Network {
+            address,
+            prefix,
+            gateway,
+            router,
+            lan_prefix,
+            target,
+        } => format!(
+            "CLIENT {address}/{prefix}\n  |\nLAN — ROUTER {router}/{lan_prefix}\n  |       default gateway: {gateway}\n  +—— REMOTE SERVER {target}"
+        ),
+        State::Unix { nodes, .. } => nodes
+            .iter()
+            .map(|(p, n)| format!("{:03o} {}:{} {p}", n.mode, n.owner, n.group))
+            .collect::<Vec<_>>()
+            .join("\n"),
+        State::Logs { files, .. } => format!(
+            "Log files\n{}",
+            files.keys().cloned().collect::<Vec<_>>().join("\n")
+        ),
+        State::Service {
+            running, enabled, ..
+        } => format!(
+            "atlas service\nRunning: {running}    Enabled at boot: {enabled}\nInspect journal and /etc/atlas.conf to diagnose."
+        ),
+        State::Dns {
+            loaded,
+            loaded_serial,
+            ..
+        } => format!(
+            "Authoritative DNS • lab.test\nLoaded serial: {loaded_serial}\n{}",
+            loaded
+                .iter()
+                .map(|(n, a)| format!("{n} → {a}"))
+                .collect::<Vec<_>>()
+                .join("\n")
+        ),
+        State::Mount {
+            capacity,
+            used,
+            mounted,
+            writable,
+            ..
+        } => format!(
+            "Data volume /data\n{used} / {capacity} MiB used\nMounted: {mounted}    Read-write: {writable}"
+        ),
+    }
+}
