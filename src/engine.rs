@@ -18,6 +18,13 @@ pub struct Allocation {
 }
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
+pub enum ServiceEvent {
+    Rejected { port: String },
+    Started { port: u16 },
+    Stopped,
+}
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+#[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
     Subnet {
         ip: Ipv4Addr,
@@ -50,6 +57,10 @@ pub enum State {
         running: bool,
         enabled: bool,
         loaded_port: Option<u16>,
+        #[serde(default)]
+        failed: bool,
+        #[serde(default)]
+        journal: Vec<ServiceEvent>,
     },
     Dns {
         records: BTreeMap<String, String>,
@@ -218,7 +229,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                             && (b as u64 - n as u64 + 1) >= a.hosts as u64 + 2
                             && allocations.iter().enumerate().all(|(j, other)| {
                                 i == j
-                                    || cidr(&other.cidr).is_some_and(|(on, ob, _)| b < on || n > ob)
+                                    || cidr(&other.cidr).is_none_or(|(on, ob, _)| b < on || n > ob)
                             })
                     });
                     c(
@@ -291,6 +302,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                 running,
                 enabled,
                 loaded_port,
+                ..
             },
             Goal::Service { port: expected },
         ) => vec![
@@ -357,25 +369,27 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
-        State::Subnet { .. } => "show • answer network|broadcast|first|last IPv4",
-        State::Vlsm { .. } => "show • allocate NAME NETWORK/PREFIX (network must be aligned)",
+        State::Subnet { .. } => "Use the four native address fields and Check work.",
+        State::Vlsm { .. } => {
+            "Use the native allocation table and Check work. Networks must be aligned."
+        }
         State::Network { .. } => {
             "show • ip addr • ip route • ip addr set IPv4/PREFIX • ip route replace default via IPv4 • ping IPv4"
         }
         State::Unix { .. } => {
-            "ls -l PATH • namei PATH • id USER • chmod OCTAL|u=rw,g=r,o= PATH • chown USER:GROUP PATH • usermod -aG GROUP USER • test-access USER PATH r|w|rw"
+            "ls -l|-ld PATH • namei PATH • id USER • chmod OCTAL|u=rw,g=r,o= PATH • chown USER:GROUP PATH • usermod -aG GROUP USER • Simulator-only helper: test-access USER PATH r|w|rw"
         }
         State::Logs { .. } => {
             "find /var/log -name NAME • cat PATH • grep LITERAL PATH • cat PATH | grep LITERAL [| tail -n N] • tail -n N PATH. Literals are one word, case-sensitive; no regex, shell quoting or redirection."
         }
         State::Service { .. } => {
-            "cat /etc/atlas.conf • config set port VALUE • systemctl status|start|stop|restart|enable|disable|is-active|is-enabled atlas • journalctl -u atlas"
+            "cat /etc/atlas.conf • Use the simulated config editor to save the port. Legacy simulator-only helper: config set port VALUE • systemctl status|start|stop|restart|enable|disable|is-active|is-enabled atlas • journalctl -u atlas"
         }
         State::Dns { .. } => {
-            "cat /etc/named/lab.zone • dns set NAME IPv4 • dns serial NUMBER • named-checkzone lab.test • systemctl reload named • dig NAME"
+            "cat /etc/named/lab.zone • Simulator-only editors: dns set NAME IPv4; dns serial NUMBER • named-checkzone lab.test • systemctl reload named • dig NAME"
         }
         State::Mount { .. } => {
-            "df -h • du -sh /data/cache • cat /etc/fstab • config set device DEVICE • rm -r /data/cache • mount /data • mount -o remount,rw /data • umount /data"
+            "df -h • du -sh /data/cache • cat /etc/fstab • Simulator-only editor: config set device DEVICE • rm -r /data/cache • mount /data • mount -o remount,rw /data • umount /data"
         }
     }
 }
@@ -468,15 +482,27 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
             _ => Err(bad()),
         },
         State::Unix { nodes, users } => match v.as_slice() {
-            ["ls", "-l", path] => {
+            ["ls", option, path] if ["-l", "-ld"].contains(option) => {
                 let n = nodes.get(*path).ok_or("No simulated path")?;
-                Ok(format!(
-                    "{} {:03o} {}:{} {path}",
-                    if n.directory { "d" } else { "-" },
-                    n.mode,
-                    n.owner,
-                    n.group
-                ))
+                if n.directory && *option == "-l" {
+                    let children = nodes
+                        .iter()
+                        .filter(|(p, _)| {
+                            p.as_str() != *path
+                                && p.rsplit_once('/').is_some_and(|(parent, _)| {
+                                    if parent.is_empty() {
+                                        *path == "/"
+                                    } else {
+                                        parent == *path
+                                    }
+                                })
+                        })
+                        .map(|(p, n)| long_listing(p.rsplit('/').next().unwrap_or(p), n))
+                        .collect::<Vec<_>>();
+                    Ok(format!("total 0\n{}", children.join("\n")))
+                } else {
+                    Ok(long_listing(path, n))
+                }
             }
             ["namei", path] => {
                 if !nodes.contains_key(*path) {
@@ -491,10 +517,20 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
                     .collect::<Vec<_>>()
                     .join("\n"))
             }
-            ["id", user] => Ok(format!(
-                "{user}: {:?}",
-                users.get(*user).ok_or("Unknown user")?
-            )),
+            ["id", user] => {
+                let groups = users.get(*user).ok_or("Unknown user")?;
+                let uid = user_id(users, user);
+                let primary = groups.first().ok_or("User has no primary group")?;
+                Ok(format!(
+                    "uid={uid}({user}) gid={}({primary}) groups={}",
+                    group_id(users, primary),
+                    groups
+                        .iter()
+                        .map(|g| format!("{}({g})", group_id(users, g)))
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            }
             ["chmod", mode, path] => {
                 let n = nodes.get_mut(*path).ok_or("No simulated path")?;
                 let parsed = u16::from_str_radix(mode, 8).ok().filter(|m| *m <= 0o777);
@@ -611,56 +647,63 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
             running,
             enabled,
             loaded_port,
+            failed,
+            journal,
         } => match v.as_slice() {
             ["cat", "/etc/atlas.conf"] => Ok(format!("port={port}")),
             ["config", "set", "port", value] => {
-                *port = value.to_string();
-                Ok("Config saved; restart to apply".into())
-            }
-            ["journalctl", "-u", "atlas"] => {
-                Ok(if port.parse::<u16>().ok().filter(|p| *p > 0).is_some() {
-                    "Configuration parses; inspect systemctl status"
-                } else {
-                    "atlas: invalid port: expected integer 1..65535"
+                if value.len() > 256 {
+                    return Err("Port field exceeds 256 characters".into());
                 }
-                .into())
+                *port = value.to_string();
+                Ok("Simulator-only editor: configuration saved; restart to apply".into())
             }
+            ["journalctl", "-u", "atlas"] => Ok(journal_output(journal)),
             ["systemctl", action, "atlas"] => match *action {
-                "status" => Ok(format!(
-                    "atlas: {}; {}; loaded port {:?}",
-                    if *running {
-                        "active (running)"
-                    } else {
-                        "inactive/failed"
-                    },
-                    if *enabled { "enabled" } else { "disabled" },
-                    loaded_port
-                )),
-                "is-active" => Ok(if *running { "active" } else { "inactive" }.into()),
+                "status" => Ok(service_status(*running, *enabled, *failed, *loaded_port)),
+                "is-active" => Ok(if *running {
+                    "active"
+                } else if *failed {
+                    "failed"
+                } else {
+                    "inactive"
+                }
+                .into()),
                 "is-enabled" => Ok(if *enabled { "enabled" } else { "disabled" }.into()),
                 "start" | "restart" => {
                     if *action == "start" && *running {
-                        return Ok("Already running; restart to apply config".into());
+                        return Ok(
+                            "Unit is already active; restart to apply saved configuration.".into(),
+                        );
                     }
                     *running = false;
                     *loaded_port = None;
-                    let p = port
-                        .parse::<u16>()
-                        .ok()
-                        .filter(|p| *p > 0)
-                        .ok_or("Start failed: invalid port; inspect journalctl -u atlas")?;
-                    *running = true;
-                    *loaded_port = Some(p);
-                    Ok("atlas started".into())
+                    if let Some(p) = port.parse::<u16>().ok().filter(|p| *p > 0) {
+                        *running = true;
+                        *failed = false;
+                        *loaded_port = Some(p);
+                        push_event(journal, ServiceEvent::Started { port: p });
+                        Ok(String::new())
+                    } else {
+                        *failed = true;
+                        push_event(journal, ServiceEvent::Rejected { port: port.clone() });
+                        Err("Job for atlas.service failed because the control process exited with error code. See systemctl status atlas and journalctl -u atlas for details.".into())
+                    }
                 }
                 "stop" => {
                     *running = false;
                     *loaded_port = None;
-                    Ok("atlas stopped".into())
+                    *failed = false;
+                    push_event(journal, ServiceEvent::Stopped);
+                    Ok(String::new())
                 }
                 "enable" | "disable" => {
                     *enabled = *action == "enable";
-                    Ok(if *enabled { "Enabled" } else { "Disabled" }.into())
+                    Ok(if *enabled {
+                        "Created symlink /etc/systemd/system/multi-user.target.wants/atlas.service -> /etc/systemd/system/atlas.service."
+                    } else {
+                        "Removed /etc/systemd/system/multi-user.target.wants/atlas.service."
+                    }.into())
                 }
                 _ => Err(bad()),
             },
@@ -835,9 +878,26 @@ pub fn describe(s: &State) -> String {
             files.keys().cloned().collect::<Vec<_>>().join("\n")
         ),
         State::Service {
-            running, enabled, ..
+            running,
+            enabled,
+            failed,
+            loaded_port,
+            ..
         } => format!(
-            "atlas service\nRunning: {running}    Enabled at boot: {enabled}\nInspect journal and /etc/atlas.conf to diagnose."
+            "atlas.service  |  {}  |  {}\nLoaded port: {}",
+            if *running {
+                "Running"
+            } else if *failed {
+                "Stopped (last start failed)"
+            } else {
+                "Stopped"
+            },
+            if *enabled {
+                "Enabled at boot"
+            } else {
+                "Disabled at boot"
+            },
+            loaded_port.map(|p| p.to_string()).unwrap_or("None".into())
         ),
         State::Dns {
             loaded,
@@ -858,7 +918,106 @@ pub fn describe(s: &State) -> String {
             writable,
             ..
         } => format!(
-            "Data volume /data\n{used} / {capacity} MiB used\nMounted: {mounted}    Read-write: {writable}"
+            "Data volume /data\n{used} / {capacity} MiB used\n{} | {}",
+            if *mounted { "Mounted" } else { "Not mounted" },
+            if *writable { "Read-write" } else { "Read-only" }
         ),
     }
+}
+
+/// Native service-file editor; saving does not mutate the running configuration or journal.
+pub fn edit_service_port(state: &mut State, value: &str) -> Result<(), String> {
+    if value.len() > 256 {
+        return Err("Port field exceeds 256 characters".into());
+    }
+    if let State::Service { port, .. } = state {
+        *port = value.into();
+        Ok(())
+    } else {
+        Err("This state has no service configuration".into())
+    }
+}
+fn push_event(journal: &mut Vec<ServiceEvent>, event: ServiceEvent) {
+    journal.push(event);
+    if journal.len() > 60 {
+        journal.remove(0);
+    }
+}
+pub fn mode_string(n: &Node) -> String {
+    let mut s = String::from(if n.directory { "d" } else { "-" });
+    for shift in [6, 3, 0] {
+        for (bit, ch) in [(4, 'r'), (2, 'w'), (1, 'x')] {
+            s.push(if (n.mode >> shift) & bit != 0 {
+                ch
+            } else {
+                '-'
+            });
+        }
+    }
+    s
+}
+fn user_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
+    match name {
+        "root" => 0,
+        "nobody" => 65534,
+        _ => {
+            1000 + users
+                .keys()
+                .filter(|u| u.as_str() != "root" && u.as_str() != "nobody")
+                .position(|u| u == name)
+                .unwrap_or(999) as u32
+        }
+    }
+}
+fn group_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
+    if users.contains_key(name) {
+        return user_id(users, name);
+    }
+    let groups: std::collections::BTreeSet<_> = users
+        .values()
+        .flatten()
+        .filter(|g| !users.contains_key(*g))
+        .collect();
+    2000 + groups
+        .iter()
+        .position(|g| g.as_str() == name)
+        .unwrap_or(999) as u32
+}
+
+fn long_listing(path: &str, n: &Node) -> String {
+    format!(
+        "{} {} {} {} 0 Oct 21 09:00 {path}",
+        mode_string(n),
+        if n.directory { 2 } else { 1 },
+        n.owner,
+        n.group
+    )
+}
+fn service_status(running: bool, enabled: bool, failed: bool, loaded_port: Option<u16>) -> String {
+    let mark = if failed { "x" } else { "*" };
+    let boot = if enabled { "enabled" } else { "disabled" };
+    let active = if running {
+        "active (running)"
+    } else if failed {
+        "failed (Result: exit-code)"
+    } else {
+        "inactive (dead)"
+    };
+    let runtime=loaded_port.filter(|_|running).map(|p|format!("\n   Main PID: 100 (atlas)\n      Tasks: 1\n     CGroup: /system.slice/atlas.service\n             100 atlas --port {p}")).unwrap_or_default();
+    format!(
+        "{mark} atlas.service - Atlas application service\n     Loaded: loaded (/etc/systemd/system/atlas.service; {boot}; preset: disabled)\n     Active: {active}{runtime}"
+    )
+}
+fn journal_output(journal: &[ServiceEvent]) -> String {
+    if journal.is_empty() {
+        return "-- No entries --\nLegacy attempts may not contain journal history; a start/restart records modeled events.".into();
+    }
+    journal.iter().enumerate().map(|(i,event)|{
+        let stamp=format!("Oct 21 09:{:02}:00 lab",i.min(59));
+        match event{
+            ServiceEvent::Rejected{port}=>format!("{stamp} atlas[100]: Invalid port '{port}': expected integer 1..65535\n{stamp} systemd[1]: atlas.service: Main process exited, code=exited, status=1/FAILURE\n{stamp} systemd[1]: atlas.service: Failed with result 'exit-code'."),
+            ServiceEvent::Started{port}=>format!("{stamp} atlas[100]: Listening on port {port}\n{stamp} systemd[1]: Started atlas.service - Atlas application service."),
+            ServiceEvent::Stopped=>format!("{stamp} systemd[1]: Stopped atlas.service - Atlas application service."),
+        }
+    }).collect::<Vec<_>>().join("\n")
 }

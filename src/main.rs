@@ -30,6 +30,7 @@ fn main() -> eframe::Result<()> {
             Ok(Box::new(ui::LabApp::new(
                 cc,
                 args.contains(&"--ui-smoke".into()),
+                args.contains(&"--developer".into()),
             )))
         }),
     )

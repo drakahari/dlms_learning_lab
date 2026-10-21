@@ -346,3 +346,145 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
         assert!(!engine::solved(&q.attempts[&s.id].state, &s.goal));
     }
 }
+
+#[test]
+fn legacy_v1_fixture_preserves_all_nine_attempts_without_rewriting_the_original() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("p.json");
+    let original = include_bytes!("fixtures/progress-v1.json");
+    std::fs::write(&path, original).unwrap();
+    let labs = pack::bundled().unwrap();
+    let p = progress::load(&path, &labs).unwrap();
+    assert_eq!(p.attempts.len(), 9);
+    assert_eq!(p.clock, 9);
+    assert!(p.favorites.contains("ccna-ipv4"));
+    for a in p.attempts.values() {
+        assert_eq!(a.scenario_version, 1);
+        assert_eq!(a.step, 1);
+        assert_eq!(a.hints, 1);
+        assert_eq!(
+            a.transcript,
+            vec!["Synthetic legacy fixture: no learner recording."]
+        );
+    }
+    assert!(p.attempts["ccna-ipv4"].challenge);
+    assert!(
+        matches!(&p.attempts["lpic2-service"].state,State::Service{port,running:true,loaded_port:Some(80),journal,failed:false,..}if port=="80"&&journal.is_empty())
+    );
+    assert_eq!(std::fs::read(&path).unwrap(), original);
+    progress::save(&path, &p).unwrap();
+    let q = progress::load(&path, &labs).unwrap();
+    for (id, a) in &p.attempts {
+        assert_eq!(q.attempts[id].state, a.state);
+        assert_eq!(q.attempts[id].challenge, a.challenge);
+        assert_eq!(q.attempts[id].visited, a.visited);
+    }
+}
+#[test]
+fn malformed_native_answer_drafts_survive_resume_and_do_not_pass() {
+    let labs = pack::bundled().unwrap();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("p.json");
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    for s in labs.iter().take(2) {
+        let mut a = Attempt::new(s, 1);
+        match &mut a.state {
+            State::Subnet { answers, .. } => answers[0] = "999.1.1.1".into(),
+            State::Vlsm { allocations, .. } => allocations[0].cidr = "10.20.".into(),
+            _ => unreachable!(),
+        }
+        p.attempts.insert(s.id.clone(), a);
+    }
+    progress::save(&path, &p).unwrap();
+    let q = progress::load(&path, &labs).unwrap();
+    for s in labs.iter().take(2) {
+        assert_eq!(q.attempts[&s.id].state, p.attempts[&s.id].state);
+        assert!(!engine::solved(&q.attempts[&s.id].state, &s.goal));
+    }
+}
+#[test]
+fn vlsm_partial_feedback_accepts_a_valid_row_before_the_whole_plan_is_complete() {
+    let s = scenario("ccna-vlsm");
+    let mut st = s.initial.clone();
+    engine::execute(&mut st, "allocate design 10.20.0.0/26").unwrap();
+    let c = engine::checks(&st, &s.goal);
+    assert_eq!(c.iter().filter(|x| x.0).count(), 1);
+    assert!(!engine::solved(&st, &s.goal));
+}
+#[test]
+fn linux_outputs_use_familiar_columns_ids_and_unit_status() {
+    let s = scenario("lpic1-permissions");
+    let mut st = s.initial.clone();
+    let ls = engine::execute(&mut st, "ls -l /srv/report.txt").unwrap();
+    assert!(ls.starts_with("-rw------- 1 root editors "));
+    assert!(ls.ends_with("/srv/report.txt"));
+    let id = engine::execute(&mut st, "id alex").unwrap();
+    assert_eq!(
+        id,
+        "uid=1000(alex) gid=1000(alex) groups=1000(alex),2000(editors)"
+    );
+    let s = scenario("lpic2-service");
+    let mut st = s.initial.clone();
+    let status = engine::execute(&mut st, "systemctl status atlas").unwrap();
+    assert!(status.contains("Loaded: loaded"));
+    assert!(status.contains("Active: failed (Result: exit-code)"));
+    let history = engine::execute(&mut st, "journalctl -u atlas").unwrap();
+    assert!(history.contains("systemd[1]: atlas.service:"));
+    assert!(history.contains("Invalid port 'eighty'"));
+    engine::edit_service_port(&mut st, "8080").unwrap();
+    assert_eq!(
+        engine::execute(&mut st, "journalctl -u atlas").unwrap(),
+        history,
+        "editing does not rewrite history"
+    );
+    engine::execute(&mut st, "systemctl restart atlas").unwrap();
+    assert!(
+        engine::execute(&mut st, "systemctl status atlas")
+            .unwrap()
+            .contains("Active: active (running)")
+    );
+    let started = engine::execute(&mut st, "journalctl -u atlas").unwrap();
+    assert!(started.contains("Invalid port 'eighty'"));
+    assert!(started.contains("Listening on port 8080"));
+    engine::execute(&mut st, "systemctl stop atlas").unwrap();
+    assert!(
+        engine::execute(&mut st, "systemctl status atlas")
+            .unwrap()
+            .contains("Active: inactive (dead)")
+    );
+}
+#[test]
+fn pack_rejects_bad_guidance_and_malformed_authored_allocations() {
+    let source = include_str!("../scenarios/starter-v1.json");
+    let base: serde_json::Value = serde_json::from_str(source).unwrap();
+    for (pointer, value) in [
+        ("/scenarios/0/guide/0/why", serde_json::json!("")),
+        (
+            "/scenarios/1/initial/allocations/0/cidr",
+            serde_json::json!("10.20."),
+        ),
+        (
+            "/scenarios/2/guide/0/commands/0/explanation",
+            serde_json::json!(""),
+        ),
+    ] {
+        let mut v = base.clone();
+        *v.pointer_mut(pointer).unwrap() = value;
+        assert!(pack::load(&v.to_string()).is_err(), "{pointer}");
+    }
+}
+
+#[test]
+fn ls_lists_directory_children_while_ld_inspects_the_directory() {
+    let s = scenario("lpic1-traversal");
+    let mut st = s.initial.clone();
+    let listing = engine::execute(&mut st, "ls -l /srv/project").unwrap();
+    assert!(listing.starts_with("total 0\n-rw-r-----"));
+    assert!(listing.ends_with("notes.txt"));
+    let directory = engine::execute(&mut st, "ls -ld /srv/project").unwrap();
+    assert!(directory.starts_with("drwxr----- 2 root editors "));
+    assert!(directory.ends_with("/srv/project"));
+}

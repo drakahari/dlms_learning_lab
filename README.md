@@ -40,15 +40,21 @@ The checked-in Cargo.lock pins dependencies. First-time builds need crates.io ac
 
 ## Use
 
-Choose a track, search or filter by topic, difficulty, completion, and duration. Favorites and recent/continue provide focused shortcuts. The library paginates at 12 entries. The opt-in developer checkbox generates 900 **synthetic metadata entries** for navigation testing; they cannot launch and are not finished labs.
+Choose a track, search or filter by topic, difficulty, completion, and duration. Favorites and recent/continue provide focused shortcuts. The library shows aligned filters and consistent card actions, uses two card columns when space allows, and paginates only when more than 12 results match. Start with `--developer` to expose the secondary developer option for 900 **synthetic metadata entries**; these previews cannot launch and are not finished labs.
 
-Learn mode shows one step at a time. Challenge hides the steps. Type `help` or expand **Supported commands and simulation limits** before using the simulated terminal. Submit with Enter or Run. **Check work** reads current state; later damage removes completion. Tab/Shift+Tab move focus, Enter/Space activate controls, and the text scale slider adjusts readability. The command bar and Check work stay visible while lesson content scrolls.
+IPv4 uses four labeled native answer fields and a subnet bit diagram. VLSM uses an allocation table. Linux skills use a simulated terminal with scrollable output; the service lab also has a simulated `/etc/atlas.conf` editor. Save that editor explicitly before leaving, then restart the service to apply the saved port.
 
-State, current step, mode, hints, transcript and favorites save locally after actions. Back to library preserves the attempt. Reset requires an inline confirmation and resets only that lab’s attempt. Reset keeps favorites and other labs.
+Learn mode shows one section at a time with the reason for the action, separate command examples, and **Insert command** buttons that populate input without executing it. Challenge hides the walkthrough and examples; hints remain opt-in. `test-access`, `config set`, DNS editing helpers and the client address shortcut are labeled simulator-only controls. Command references, limitations and sources are secondary disclosures.
+
+**Check work** tests current values. All objectives passing immediately shows one completion panel with results, a worked explanation and Back to library / Next lab actions, even at walkthrough section one. Later damage removes current completion. Walkthrough position is optional guidance, not a completion requirement. Wide workspaces place instruction beside practice; narrow windows stack them with scrolling. Terminal input sits directly below its output instead of being pinned to the window bottom. Tab/Shift+Tab move focus, Enter submits terminal commands, and the header’s percentage selector controls text size.
+
+State, current section, mode, hints, transcript and favorites save locally after actions. IPv4/VLSM fields save as typed, including unfinished or malformed drafts. Back to library preserves the attempt. Reset requires an inline confirmation and resets only that lab’s attempt. Reset keeps favorites and other labs.
 
 Storage uses the OS local application-data directory, normally `$XDG_DATA_HOME/dlmslearninglab/progress-v1.json` or `~/.local/share/dlmslearninglab/progress-v1.json` on Linux (the exact directory follows the `directories` crate). Saves replace the file through a synced temporary file in the same directory. Unsupported/corrupt saves are preserved and the session becomes read-only with a visible explanation. Concurrent application instances are not supported; last writer wins.
 
-The public tree excludes progress, recordings, screenshots, credentials, environment files and local tool configuration. The simulator never passes learner commands to OS APIs. Storage paths come from application configuration, not the simulated terminal.
+Existing version-1 progress loads without a reset or file rewrite. Scenario IDs, versions and three-section positions are unchanged. Optional service failure/journal fields default safely for old saves; old attempts have no fabricated journal history. Downgrading to the earlier binary after new service fields are saved is not supported.
+
+The public tree excludes learner progress, recordings, screenshots, credentials, environment files and local tool configuration. The compatibility fixture in `tests/fixtures/` is synthetic test data. The simulator never passes learner commands to OS APIs. Storage paths come from application configuration, not the simulated terminal.
 
 See [architecture and authoring](docs/ARCHITECTURE.md), [sources and simplifications](docs/CONTENT.md), and [verification and limits](docs/VERIFICATION.md).
 

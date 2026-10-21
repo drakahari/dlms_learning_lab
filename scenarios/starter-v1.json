@@ -26,13 +26,13 @@
         "kind": "Subnet"
       },
       "steps": [
-        "A /27 leaves five host bits. That gives 32 addresses per block. Find the block containing .77. Use show to inspect the address card.",
-        "The network is the first address in the block; the broadcast is the last. Record them with answer network IPv4 and answer broadcast IPv4.",
-        "Reserve the network and broadcast. Record the remaining boundaries with answer first IPv4 and answer last IPv4, then Check work."
+        "Use the bit diagram to separate the network and host portions of 192.168.10.77/27. Find the 32-address block containing .77.",
+        "Enter the network and broadcast in their labeled fields. Fields save as you type; Check work tests the values.",
+        "Fill the remaining two fields and Check work. You may pass at any walkthrough position."
       ],
       "hints": [
-        "The last octet blocks begin at 0, 32, 64, 96\u2026",
-        "The block runs from .64 through .95. Hosts run from .65 through .94."
+        "With 32-address blocks, the last-octet boundaries are 0, 32, 64, 96…",
+        "The block runs from .64 through .95. The first usable address follows the network and the last precedes the broadcast."
       ],
       "solution": [
         "answer network 192.168.10.64",
@@ -44,7 +44,28 @@
         "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
         "https://www.rfc-editor.org/rfc/rfc1878"
       ],
-      "simplifications": "Conventional broadcast subnets only; /31 point-to-point and /32 host routes are excluded."
+      "simplifications": "Conventional broadcast subnets only; /31 point-to-point and /32 host routes are excluded.",
+      "guide": [
+        {
+          "title": "Read the prefix",
+          "why": "A /27 fixes 27 network bits and leaves five host bits. Each block contains 2⁵ = 32 addresses.",
+          "action": "Use the bit diagram to separate the network and host portions of 192.168.10.77/27. Find the 32-address block containing .77.",
+          "commands": []
+        },
+        {
+          "title": "Mark both boundaries",
+          "why": "The network has all host bits zero; the broadcast has all host bits one. Neither is assigned to a conventional host.",
+          "action": "Enter the network and broadcast in their labeled fields. Fields save as you type; Check work tests the values.",
+          "commands": []
+        },
+        {
+          "title": "Identify usable hosts",
+          "why": "The first usable host follows the network, and the last precedes the broadcast.",
+          "action": "Fill the remaining two fields and Check work. You may pass at any walkthrough position.",
+          "commands": []
+        }
+      ],
+      "explanation": "A /27 leaves five host bits: 32 addresses per block. The block containing .77 starts at .64 and ends at .95. The network is 192.168.10.64, broadcast is 192.168.10.95, and usable hosts run from .65 through .94 (30 hosts)."
     },
     {
       "id": "ccna-vlsm",
@@ -82,9 +103,9 @@
         "kind": "Vlsm"
       },
       "steps": [
-        "Start with the largest requirement. Include two reserved addresses when sizing a conventional subnet.",
-        "60 hosts need a /26; 28 need /27; 12 need /28. Use allocate NAME NETWORK/PREFIX to place each one.",
-        "Inspect show. Every subnet must be aligned, inside the pool and disjoint from the others. Then Check work."
+        "In the allocation table, give design enough addresses for 60 hosts plus network and broadcast.",
+        "Enter aligned network/prefix values for support and lab. The Hosts column lists each team’s minimum requirement.",
+        "Check work evaluates capacity, alignment, containment and overlap. Review the row results and adjust your plan."
       ],
       "hints": [
         "A /26 holds 62 usable hosts, /27 holds 30, and /28 holds 14.",
@@ -99,7 +120,28 @@
         "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
         "https://www.rfc-editor.org/rfc/rfc1878"
       ],
-      "simplifications": "No routing or DHCP modeling. Conventional subnets reserve two addresses."
+      "simplifications": "No routing or DHCP modeling. Conventional subnets reserve two addresses.",
+      "guide": [
+        {
+          "title": "Size the largest team first",
+          "why": "Include two reserved addresses in every conventional subnet. Starting with the largest avoids leaving unusable fragments.",
+          "action": "In the allocation table, give design enough addresses for 60 hosts plus network and broadcast.",
+          "commands": []
+        },
+        {
+          "title": "Place the remaining teams",
+          "why": "Subnet boundaries must align to their block sizes. Each allocation must be inside the pool without sharing addresses.",
+          "action": "Enter aligned network/prefix values for support and lab. The Hosts column lists each team’s minimum requirement.",
+          "commands": []
+        },
+        {
+          "title": "Check the whole plan",
+          "why": "A plan can have sufficient capacity and still fail because two allocations overlap. More than one layout is valid.",
+          "action": "Check work evaluates capacity, alignment, containment and overlap. Review the row results and adjust your plan.",
+          "commands": []
+        }
+      ],
+      "explanation": "60 hosts require at least /26 (62 usable), 28 require /27 (30 usable), and 12 require /28 (14 usable). One plan is 10.20.0.0/26, 10.20.0.64/27 and 10.20.0.96/28. Other aligned, disjoint plans within the /24 are equally valid."
     },
     {
       "id": "ccna-gateway",
@@ -125,9 +167,9 @@
         "address": "192.168.40.70"
       },
       "steps": [
-        "Inspect ip addr and ip route. The client, LAN router, and remote server appear in the topology above.",
-        "Use ip addr set IPv4/PREFIX to correct the client mask. Keep its assigned .70 address.",
-        "Use ip route replace default via IPv4 to select the LAN router. Verify with ping 203.0.113.10 and Check work."
+        "Inspect the client’s current mask and default route.",
+        "Replace the single simulated interface address.",
+        "Update the default route, then test the remote server."
       ],
       "hints": [
         "A /26 here places the client and router in 192.168.40.64/26.",
@@ -141,7 +183,56 @@
       "sources": [
         "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
       ],
-      "simplifications": "Abstract topology; no ARP, packet forwarding, latency, switches or ICMP filtering. Commands are a documented teaching subset."
+      "simplifications": "Abstract topology; no ARP, packet forwarding, latency, switches or ICMP filtering. Commands are a documented teaching subset.",
+      "guide": [
+        {
+          "title": "Compare the client with its router",
+          "why": "The LAN prefix determines which addresses are on-link. A default route must point to a router on that LAN.",
+          "action": "Inspect the client’s current mask and default route.",
+          "commands": [
+            {
+              "command": "ip addr",
+              "explanation": "Shows the client prefix and the router’s LAN prefix.",
+              "simulator_only": false
+            },
+            {
+              "command": "ip route",
+              "explanation": "Shows the client’s default gateway.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Correct the client prefix",
+          "why": "The router uses /26. The client must keep its assigned .70 address and use the same LAN prefix.",
+          "action": "Replace the single simulated interface address.",
+          "commands": [
+            {
+              "command": "ip addr set 192.168.40.70/26",
+              "explanation": "Teaching shortcut: replaces the modeled client interface; this is not full iproute2 syntax.",
+              "simulator_only": true
+            }
+          ]
+        },
+        {
+          "title": "Choose the router and verify",
+          "why": "Remote traffic needs the reachable LAN router as its next hop. A successful ping tests this modeled path.",
+          "action": "Update the default route, then test the remote server.",
+          "commands": [
+            {
+              "command": "ip route replace default via 192.168.40.65",
+              "explanation": "Uses the LAN router as the default next hop.",
+              "simulator_only": false
+            },
+            {
+              "command": "ping 203.0.113.10",
+              "explanation": "Tests reachability to the simulated remote server.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The client .70 and router .65 share 192.168.40.64/26. Keeping .70/26 and routing remote traffic via .65 restores this modeled path. A /24 mask would incorrectly treat additional addresses as on-link."
     },
     {
       "id": "lpic1-permissions",
@@ -200,9 +291,9 @@
         "private": true
       },
       "steps": [
-        "Inspect ls -l /srv/report.txt and id alex. Owner, group and other permissions are separate classes.",
-        "As the simulated administrator, use chmod OCTAL PATH or explicit u=,g=,o= clauses to provide the editors group read/write and no access for others.",
-        "Run test-access alex /srv/report.txt rw, then Check work. A valid ownership-based repair is also accepted."
+        "Compare the file’s ownership and permissions with alex’s groups.",
+        "Change the file mode. An ownership-based solution can also work.",
+        "Inspect the repaired mode, then optionally use the simulator’s access probe."
       ],
       "hints": [
         "alex belongs to editors. Group bits need read (4) plus write (2).",
@@ -217,7 +308,56 @@
         "https://www.gnu.org/software/coreutils/manual/html_node/File-permissions.html",
         "https://man7.org/linux/man-pages/man7/path_resolution.7.html"
       ],
-      "simplifications": "Administrator mutations; test-access uses ordinary POSIX owner/group/other precedence. No ACLs, root override, special mode bits or SELinux."
+      "simplifications": "Administrator mutations; test-access uses ordinary POSIX owner/group/other precedence. No ACLs, root override, special mode bits or SELinux.",
+      "guide": [
+        {
+          "title": "Read owner and group access",
+          "why": "POSIX chooses one permission class: owner first, then a matching group, otherwise other.",
+          "action": "Compare the file’s ownership and permissions with alex’s groups.",
+          "commands": [
+            {
+              "command": "ls -l /srv/report.txt",
+              "explanation": "Reads the symbolic mode, owner and group columns.",
+              "simulator_only": false
+            },
+            {
+              "command": "id alex",
+              "explanation": "Shows primary and supplementary group memberships.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Allow the editors to collaborate",
+          "why": "Read is 4 and write is 2. Group read/write is 6; other permissions must stay zero.",
+          "action": "Change the file mode. An ownership-based solution can also work.",
+          "commands": [
+            {
+              "command": "chmod 660 /srv/report.txt",
+              "explanation": "Gives owner and group read/write; leaves other users no file permissions.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify effective access",
+          "why": "Correct file bits alone are insufficient if a parent directory cannot be traversed.",
+          "action": "Inspect the repaired mode, then optionally use the simulator’s access probe.",
+          "commands": [
+            {
+              "command": "ls -l /srv/report.txt",
+              "explanation": "Confirms the resulting permission bits.",
+              "simulator_only": false
+            },
+            {
+              "command": "test-access alex /srv/report.txt rw",
+              "explanation": "Simulator-only probe of alex’s effective access through the full path.",
+              "simulator_only": true
+            }
+          ]
+        }
+      ],
+      "explanation": "With root as owner and editors as group, mode 660 gives alex group read/write and removes all other-class permissions. Changing ownership to alex while retaining restrictive bits is another valid solution. Owner permissions take precedence over group permissions."
     },
     {
       "id": "lpic1-traversal",
@@ -282,9 +422,9 @@
         "private": true
       },
       "steps": [
-        "Use id blair and namei /srv/project/notes.txt. Reading a file requires execute/search permission on each parent directory.",
-        "Add blair to editors with usermod -aG editors blair. In this simulation membership updates immediately.",
-        "Give editors traversal on /srv/project using chmod. Verify test-access blair /srv/project/notes.txt r and Check work."
+        "Inspect both blair’s groups and each component of the file path.",
+        "Add editors without replacing existing groups. This model refreshes sessions immediately.",
+        "Give editors directory traversal, then verify access to the file."
       ],
       "hints": [
         "Directory read lists names; execute allows traversal. Both can be useful, but traversal is necessary here.",
@@ -300,7 +440,56 @@
         "https://www.gnu.org/software/coreutils/manual/html_node/Mode-Structure.html",
         "https://man7.org/linux/man-pages/man7/path_resolution.7.html"
       ],
-      "simplifications": "No supplementary-group session refresh, ACLs or SELinux. Alternative ownership/permission repairs are accepted if effective access and privacy hold."
+      "simplifications": "No supplementary-group session refresh, ACLs or SELinux. Alternative ownership/permission repairs are accepted if effective access and privacy hold.",
+      "guide": [
+        {
+          "title": "Trace the entire path",
+          "why": "Reading a file requires search/execute on every parent directory, plus read on the file.",
+          "action": "Inspect both blair’s groups and each component of the file path.",
+          "commands": [
+            {
+              "command": "id blair",
+              "explanation": "Checks whether blair belongs to the file’s group.",
+              "simulator_only": false
+            },
+            {
+              "command": "namei /srv/project/notes.txt",
+              "explanation": "Shows the modeled owner, group and mode at every path component.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Add the missing group",
+          "why": "Supplementary group membership allows the group permission class to apply.",
+          "action": "Add editors without replacing existing groups. This model refreshes sessions immediately.",
+          "commands": [
+            {
+              "command": "usermod -aG editors blair",
+              "explanation": "Appends editors to blair’s supplementary groups.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Restore directory traversal",
+          "why": "Directory read lists names; directory execute permits access through the directory.",
+          "action": "Give editors directory traversal, then verify access to the file.",
+          "commands": [
+            {
+              "command": "chmod 750 /srv/project",
+              "explanation": "Gives the editors group read and search on the project directory.",
+              "simulator_only": false
+            },
+            {
+              "command": "test-access blair /srv/project/notes.txt r",
+              "explanation": "Simulator-only effective read-access probe.",
+              "simulator_only": true
+            }
+          ]
+        }
+      ],
+      "explanation": "Adding blair to editors permits the group class to apply. Mode 750 on /srv/project adds the execute/search bit missing from 740. The file’s existing group-read bit then becomes reachable through all parent directories. Effective-access alternatives are accepted."
     },
     {
       "id": "lpic1-logs",
@@ -326,9 +515,9 @@
         "needle": "ERROR"
       },
       "steps": [
-        "Find the file with find /var/log -name app.log. All files are simulated.",
-        "Inspect it with cat /var/log/app.log. Then filter the case-sensitive literal ERROR using grep.",
-        "Use grep ERROR /var/log/app.log or cat /var/log/app.log | grep ERROR. Check work grades the most recent text query; a later unfiltered query changes the result."
+        "Locate app.log under /var/log.",
+        "Read the application log.",
+        "Produce both ERROR lines as the last text query. A later unfiltered query will change the graded result."
       ],
       "hints": [
         "grep takes a one-word literal and a path; pipelines can also filter cat output.",
@@ -342,7 +531,51 @@
         "https://wiki.lpi.org/wiki/LPIC-1_Objectives_V5.0",
         "https://www.gnu.org/software/grep/manual/grep.html"
       ],
-      "simplifications": "Literal case-sensitive matching only; no regex, globbing, quoting, redirection or general shell. find only searches the simulated log map."
+      "simplifications": "Literal case-sensitive matching only; no regex, globbing, quoting, redirection or general shell. find only searches the simulated log map.",
+      "guide": [
+        {
+          "title": "Locate the log",
+          "why": "Finding the correct file prevents filtering unrelated messages. All paths here belong to the simulated filesystem.",
+          "action": "Locate app.log under /var/log.",
+          "commands": [
+            {
+              "command": "find /var/log -name app.log",
+              "explanation": "Searches the simulated log catalog for that file name.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Read before filtering",
+          "why": "Inspect the message format to choose a literal that isolates the requested severity.",
+          "action": "Read the application log.",
+          "commands": [
+            {
+              "command": "cat /var/log/app.log",
+              "explanation": "Prints the modeled log, including INFO, WARN and ERROR lines.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Extract just the errors",
+          "why": "grep retains matching lines. This documented subset matches a case-sensitive one-word literal.",
+          "action": "Produce both ERROR lines as the last text query. A later unfiltered query will change the graded result.",
+          "commands": [
+            {
+              "command": "grep ERROR /var/log/app.log",
+              "explanation": "Prints only the lines containing ERROR.",
+              "simulator_only": false
+            },
+            {
+              "command": "cat /var/log/app.log | grep ERROR",
+              "explanation": "An alternate pipeline that produces the same result.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "Both ERROR lines must be retained and the INFO/WARN lines excluded. Direct grep or cat piped into grep produces the same resulting text. The most recent successful text query is graded, so printing the unfiltered log afterward removes current completion."
     },
     {
       "id": "lpic2-service",
@@ -359,20 +592,27 @@
         "port": "eighty",
         "running": false,
         "enabled": false,
-        "loaded_port": null
+        "loaded_port": null,
+        "failed": true,
+        "journal": [
+          {
+            "kind": "Rejected",
+            "port": "eighty"
+          }
+        ]
       },
       "goal": {
         "kind": "Service",
         "port": 8080
       },
       "steps": [
-        "Use systemctl status atlas and journalctl -u atlas to diagnose. Read cat /etc/atlas.conf.",
-        "The service needs a numeric port. Save the repair with config set port 8080. Changes do not affect an already running service until restart.",
-        "Use systemctl restart atlas and systemctl enable atlas. Verify is-active and is-enabled separately, then Check work."
+        "Inspect the unit and its journal. A legacy saved attempt may have no journal history; try starting it to record a diagnostic.",
+        "In the simulated /etc/atlas.conf editor, replace eighty with 8080 and choose Save configuration. The editor changes only this attempt.",
+        "Run each command separately and compare active with enabled."
       ],
       "hints": [
-        "Running and enabled are independent states. Enabling does not start a service.",
-        "config set port 8080; then run systemctl restart atlas and systemctl enable atlas as separate commands."
+        "The saved port is a word. Use the simulated config editor to save a numeric port; running and enabled are separate.",
+        "Save 8080 in the editor, then restart atlas and enable it for boot."
       ],
       "solution": [
         "config set port 8080",
@@ -383,7 +623,60 @@
         "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
         "https://www.freedesktop.org/software/systemd/man/latest/systemctl.html"
       ],
-      "simplifications": "Single modeled service, one configuration key. No unit dependency graph, privileges, socket binding, processes or actual boot."
+      "simplifications": "Single modeled service, one configuration key. No unit dependency graph, privileges, socket binding, processes or actual boot.",
+      "guide": [
+        {
+          "title": "Inspect the failed start",
+          "why": "Status describes the unit; the journal explains recorded start failures. Enabling at boot and running now are independent.",
+          "action": "Inspect the unit and its journal. A legacy saved attempt may have no journal history; try starting it to record a diagnostic.",
+          "commands": [
+            {
+              "command": "systemctl status atlas",
+              "explanation": "Shows Loaded, Active and runtime information for the modeled unit.",
+              "simulator_only": false
+            },
+            {
+              "command": "journalctl -u atlas",
+              "explanation": "Reads modeled unit events using journal-style output.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair the saved configuration",
+          "why": "The port must be an integer from 1 through 65535. Saving a file does not reload a running service.",
+          "action": "In the simulated /etc/atlas.conf editor, replace eighty with 8080 and choose Save configuration. The editor changes only this attempt.",
+          "commands": []
+        },
+        {
+          "title": "Restart, enable, then verify",
+          "why": "Restart applies the saved port. Enable configures future boot startup but does not start the service.",
+          "action": "Run each command separately and compare active with enabled.",
+          "commands": [
+            {
+              "command": "systemctl restart atlas",
+              "explanation": "Starts the service using the saved configuration.",
+              "simulator_only": false
+            },
+            {
+              "command": "systemctl enable atlas",
+              "explanation": "Enables the unit for boot.",
+              "simulator_only": false
+            },
+            {
+              "command": "systemctl is-active atlas",
+              "explanation": "Checks whether it is running now.",
+              "simulator_only": false
+            },
+            {
+              "command": "systemctl is-enabled atlas",
+              "explanation": "Checks whether it is enabled for boot.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The original word eighty is not a valid numeric port. Saving port=8080 repairs the file; restart loads that value into the running service. Enable is independent and makes the unit start at boot. A saved config edit alone does not change the currently loaded port."
     },
     {
       "id": "lpic2-dns",
@@ -412,9 +705,9 @@
         "address": "192.0.2.80"
       },
       "steps": [
-        "Compare dig portal.lab.test with cat /etc/named/lab.zone. dig queries the loaded zone, not pending edits.",
-        "Use dns set portal.lab.test 192.0.2.80. Increase the zone serial with dns serial NUMBER.",
-        "Check named-checkzone lab.test, then systemctl reload named. Verify dig portal.lab.test and Check work."
+        "Read the zone and query the current answer.",
+        "Use the simulator’s zone-editing helpers. These are teaching controls, not BIND commands.",
+        "Check the modeled zone, reload it and query again."
       ],
       "hints": [
         "A saved edit is not yet active. This model requires a larger serial before reload.",
@@ -431,7 +724,66 @@
         "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
         "https://bind9.readthedocs.io/en/latest/chapter3.html"
       ],
-      "simplifications": "One authoritative A-record map, no recursion, TTL cache, DNSSEC, secondary servers or serial wrap arithmetic. dns set is a teaching editor, not a BIND CLI."
+      "simplifications": "One authoritative A-record map, no recursion, TTL cache, DNSSEC, secondary servers or serial wrap arithmetic. dns set is a teaching editor, not a BIND CLI.",
+      "guide": [
+        {
+          "title": "Compare disk and loaded answers",
+          "why": "DNS queries use the loaded authoritative zone, so a pending edit does not change resolution.",
+          "action": "Read the zone and query the current answer.",
+          "commands": [
+            {
+              "command": "cat /etc/named/lab.zone",
+              "explanation": "Shows the saved serial and A record.",
+              "simulator_only": false
+            },
+            {
+              "command": "dig portal.lab.test",
+              "explanation": "Queries the modeled authoritative zone.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Edit the record and serial",
+          "why": "The A record needs the requested address. This model requires a larger serial before a reload.",
+          "action": "Use the simulator’s zone-editing helpers. These are teaching controls, not BIND commands.",
+          "commands": [
+            {
+              "command": "dns set portal.lab.test 192.0.2.80",
+              "explanation": "Simulator-only A-record editor.",
+              "simulator_only": true
+            },
+            {
+              "command": "dns serial 2026102102",
+              "explanation": "Simulator-only serial editor; use a value above the loaded serial.",
+              "simulator_only": true
+            }
+          ]
+        },
+        {
+          "title": "Validate and reload",
+          "why": "Syntax validation and activation are separate. Re-query after loading to verify the active answer.",
+          "action": "Check the modeled zone, reload it and query again.",
+          "commands": [
+            {
+              "command": "named-checkzone lab.test",
+              "explanation": "Teaching form that checks the in-memory zone rather than a real zone-file path.",
+              "simulator_only": true
+            },
+            {
+              "command": "systemctl reload named",
+              "explanation": "Applies the staged authoritative zone.",
+              "simulator_only": false
+            },
+            {
+              "command": "dig portal.lab.test",
+              "explanation": "Verifies that the new address is actually loaded.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The saved A record must be 192.0.2.80. Increasing the serial and reloading named moves it into the loaded authoritative zone. dig queries that loaded state; merely editing the record does not change its answer. Serial values above the loaded one are accepted."
     },
     {
       "id": "lpic2-storage",
@@ -457,9 +809,9 @@
         "kind": "Mount"
       },
       "steps": [
-        "Inspect df -h, du -sh /data/cache and cat /etc/fstab. Capacity and mount configuration are separate problems.",
-        "Use config set device /dev/vdb1 to repair fstab, and mount -o remount,rw /data to make the current mount writable.",
-        "Remove only the disposable cache with rm -r /data/cache. Verify df -h, then umount /data and mount /data to exercise the persistent entry. Check work."
+        "Inspect usage, disposable cache and the persistent mount entry.",
+        "Use the simulator’s single-field fstab editor, then remount read-write.",
+        "Remove only the marked cache and exercise the persistent mount."
       ],
       "hints": [
         "Cache cleanup requires a mounted writable filesystem. Removing it frees 300 MiB.",
@@ -477,7 +829,76 @@
         "https://www.kernel.org/doc/html/latest/filesystems/ext4/index.html",
         "https://github.com/util-linux/util-linux/blob/master/sys-utils/mount.8.adoc"
       ],
-      "simplifications": "Integer MiB capacity model, one filesystem, no inodes, UUID resolution, reserved blocks, open files or real devices. rm accepts only the explicitly disposable cache."
+      "simplifications": "Integer MiB capacity model, one filesystem, no inodes, UUID resolution, reserved blocks, open files or real devices. rm accepts only the explicitly disposable cache.",
+      "guide": [
+        {
+          "title": "Separate space from mounting",
+          "why": "The volume is nearly full and read-only; its persistent device entry also points to the wrong device.",
+          "action": "Inspect usage, disposable cache and the persistent mount entry.",
+          "commands": [
+            {
+              "command": "df -h",
+              "explanation": "Shows modeled volume capacity and mount state.",
+              "simulator_only": false
+            },
+            {
+              "command": "du -sh /data/cache",
+              "explanation": "Measures the explicitly disposable cache.",
+              "simulator_only": false
+            },
+            {
+              "command": "cat /etc/fstab",
+              "explanation": "Shows the modeled persistent entry and actual data device.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Repair the mount configuration",
+          "why": "A correct persistent entry survives an unmount/mount cycle. Cleanup also requires a writable current mount.",
+          "action": "Use the simulator’s single-field fstab editor, then remount read-write.",
+          "commands": [
+            {
+              "command": "config set device /dev/vdb1",
+              "explanation": "Simulator-only fstab editor; not a Linux command.",
+              "simulator_only": true
+            },
+            {
+              "command": "mount -o remount,rw /data",
+              "explanation": "Makes the currently mounted data volume writable.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Reclaim space and test persistence",
+          "why": "Removing 300 MiB of disposable cache reduces usage from 95% to 65%. Remounting tests the repaired entry.",
+          "action": "Remove only the marked cache and exercise the persistent mount.",
+          "commands": [
+            {
+              "command": "rm -r /data/cache",
+              "explanation": "Deletes only the explicitly disposable simulated cache.",
+              "simulator_only": false
+            },
+            {
+              "command": "umount /data",
+              "explanation": "Unmounts the modeled data volume.",
+              "simulator_only": false
+            },
+            {
+              "command": "mount /data",
+              "explanation": "Mounts using the saved fstab device.",
+              "simulator_only": false
+            },
+            {
+              "command": "df -h",
+              "explanation": "Verifies the final capacity and mount state.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The correct persistent data device is /dev/vdb1. A read-write mount permits removal of the 300 MiB disposable cache, leaving 650/1000 MiB used (65%). A successful unmount/mount cycle exercises the repaired fstab entry. Unmounting again makes the current objective incomplete."
     }
   ]
 }

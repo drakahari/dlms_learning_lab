@@ -14,12 +14,31 @@ pub struct Scenario {
     pub difficulty: String,
     pub minutes: u16,
     pub steps: Vec<String>,
+    #[serde(default)]
+    pub guide: Vec<LessonStep>,
+    #[serde(default)]
+    pub explanation: String,
     pub hints: Vec<String>,
     pub sources: Vec<String>,
     pub simplifications: String,
     pub initial: State,
     pub goal: Goal,
     pub solution: Vec<String>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct LessonStep {
+    pub title: String,
+    pub why: String,
+    pub action: String,
+    pub commands: Vec<CommandExample>,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct CommandExample {
+    pub command: String,
+    pub explanation: String,
+    pub simulator_only: bool,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -75,6 +94,30 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
         {
             return Err(format!("{}: missing or oversized authoring fields", s.id));
         }
+        let invalid_guide = s.guide.iter().any(|g| {
+            [&g.title, &g.why, &g.action]
+                .iter()
+                .any(|t| t.trim().is_empty() || t.len() > 4000)
+                || g.commands.len() > 10
+                || g.commands.iter().any(|c| {
+                    c.command.trim().is_empty()
+                        || c.command.len() > 4096
+                        || c.explanation.trim().is_empty()
+                        || c.explanation.len() > 4000
+                })
+        });
+        if (!s.guide.is_empty() && (s.guide.len() != s.steps.len() || invalid_guide))
+            || s.explanation.len() > 8000
+        {
+            return Err(format!("{}: invalid learning guidance", s.id));
+        }
+        if let State::Vlsm { allocations, .. } = &s.initial
+            && allocations
+                .iter()
+                .any(|a| !a.cidr.is_empty() && engine::cidr(&a.cidr).is_none())
+        {
+            return Err("Invalid initial subnet allocation".into());
+        }
         validate_state(&s.initial).map_err(|e| format!("{}: {e}", s.id))?;
         if engine::solved(&s.initial, &s.goal) {
             return Err(format!("{}: starts solved", s.id));
@@ -112,7 +155,7 @@ pub fn validate_state(s: &State) -> Result<(), String> {
                                 .bytes()
                                 .all(|c| c.is_ascii_alphanumeric() || c == b'-')
                             && names.insert(&a.name)
-                            && (a.cidr.is_empty() || engine::cidr(&a.cidr).is_some())
+                            && a.cidr.len() <= 64
                     })
                 }
         }
@@ -147,8 +190,11 @@ pub fn validate_state(s: &State) -> Result<(), String> {
         State::Service {
             running,
             loaded_port,
+            failed,
+            journal,
             ..
-        } => !*running || loaded_port.is_some_and(|p| p > 0),
+        } => (!*running || (loaded_port.is_some_and(|p| p > 0) && !*failed)) && journal.len() <= 60,
+
         State::Dns {
             records, loaded, ..
         } => {
