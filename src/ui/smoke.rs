@@ -12,7 +12,11 @@ impl LabApp {
                     .and_then(|d| d.downcast_ref::<String>())
                     .cloned()
                     .unwrap_or("capture".into());
-                let dir = std::path::Path::new("screenshots/after");
+                let dir = std::path::Path::new(if self.ipv4_smoke {
+                    "screenshots/ipv4"
+                } else {
+                    "screenshots/after"
+                });
                 std::fs::create_dir_all(dir).unwrap();
                 let mut encoder = png::Encoder::new(
                     std::fs::File::create(dir.join(format!("{name}.png"))).unwrap(),

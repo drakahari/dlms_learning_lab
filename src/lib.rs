@@ -4,3 +4,5 @@ pub mod catalog;
 pub mod engine;
 pub mod pack;
 pub mod progress;
+
+pub mod ipv4;

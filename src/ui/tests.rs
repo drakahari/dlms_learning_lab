@@ -324,3 +324,246 @@ fn existing_library_reflows_after_resizing_and_zoom_changes() {
         }
     }
 }
+
+#[test]
+fn ipv4_worked_results_require_predictions_and_challenge_hides_prior_review() {
+    use dlms_learning_lab::ipv4::{Exercise, Section};
+    let (ctx, mut a) = app();
+    a.launch(0);
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    a.progress
+        .attempts
+        .get_mut("ccna-ipv4")
+        .unwrap()
+        .ipv4
+        .as_mut()
+        .unwrap()
+        .section = Section::Network;
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    assert!(a.metrics.ipv4_explain);
+    assert!(!a.metrics.ipv4_worked);
+    let lesson = a.progress.attempts["ccna-ipv4"].ipv4.as_ref().unwrap();
+    let e = Exercise::from_state(&a.progress.attempts["ccna-ipv4"].state).unwrap();
+    assert!(!lesson.can_reveal(Section::Network, &e));
+    if let engine::State::Subnet { answers, .. } =
+        &mut a.progress.attempts.get_mut("ccna-ipv4").unwrap().state
+    {
+        answers[0] = "192.168.10.77".into();
+    }
+    let e = Exercise::from_state(&a.progress.attempts["ccna-ipv4"].state).unwrap();
+    a.progress
+        .attempts
+        .get_mut("ccna-ipv4")
+        .unwrap()
+        .ipv4
+        .as_mut()
+        .unwrap()
+        .submit(&e);
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    assert!(!a.metrics.ipv4_worked);
+    // Model the same explicit review action as the native Reveal button; requests remain per-result.
+    assert!(
+        a.progress
+            .attempts
+            .get_mut("ccna-ipv4")
+            .unwrap()
+            .ipv4
+            .as_mut()
+            .unwrap()
+            .reveal(Section::Network, &e)
+    );
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    assert!(a.metrics.ipv4_worked);
+    assert_eq!(
+        a.progress.attempts["ccna-ipv4"]
+            .ipv4
+            .as_ref()
+            .unwrap()
+            .revealed,
+        [true, false, false]
+    );
+    a.progress.attempts.get_mut("ccna-ipv4").unwrap().challenge = true;
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    assert!(!a.metrics.ipv4_worked);
+    assert!(!a.metrics.guide);
+    assert!(!a.metrics.ipv4_bits.iter().any(|(_, _, sandbox)| *sandbox));
+}
+#[test]
+fn ipv4_octets_and_native_fields_fit_prefixes_at_narrow_widths_and_scales() {
+    for prefix in [8, 16, 20, 23, 27, 30] {
+        for (width, scale) in [(480., 1.), (720., 1.5), (1400., 1.), (1400., 1.5)] {
+            let (ctx, mut a) = app();
+            a.scale = scale;
+            a.launch(0);
+            if let engine::State::Subnet { ip, prefix: p, .. } =
+                &mut a.progress.attempts.get_mut("ccna-ipv4").unwrap().state
+            {
+                *ip = "10.12.255.254".parse().unwrap();
+                *p = prefix;
+            }
+            for _ in 0..3 {
+                frame(&ctx, &mut a, width, 2400., vec![]);
+            }
+            let bounds = ctx.input(|i| i.content_rect());
+            assert!(a.metrics.ipv4_explain);
+            assert_eq!(a.metrics.inputs.len(), 4);
+            assert!(a.metrics.ipv4_bits.len() >= 32);
+            for (r, _, _) in &a.metrics.ipv4_bits {
+                assert!(
+                    r.right() <= bounds.right() + 1.,
+                    "octet clip at /{prefix}, {width}/{scale}: {r:?} vs {bounds:?}"
+                );
+            }
+            for r in &a.metrics.inputs {
+                assert!(r.right() <= bounds.right() + 1.);
+            }
+        }
+    }
+}
+#[test]
+fn sandbox_native_click_and_space_change_only_host_bits_and_not_predictions() {
+    let (ctx, mut a) = app();
+    a.launch(0);
+    for _ in 0..3 {
+        frame(&ctx, &mut a, 1400., 2400., vec![]);
+    }
+    let initial = a.progress.attempts["ccna-ipv4"]
+        .ipv4
+        .as_ref()
+        .unwrap()
+        .sandbox_host;
+    let original = a.progress.attempts["ccna-ipv4"].state.clone();
+    // Use a tall test viewport so these real widgets are visible during pointer injection.
+    let press = |ctx: &egui::Context, a: &mut LabApp, r: egui::Rect| {
+        for pressed in [true, false] {
+            frame(
+                ctx,
+                a,
+                1400.,
+                2400.,
+                vec![
+                    egui::Event::PointerMoved(r.center()),
+                    egui::Event::PointerButton {
+                        pos: r.center(),
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: Default::default(),
+                    },
+                ],
+            );
+        }
+    };
+    let fixed = a
+        .metrics
+        .ipv4_bits
+        .iter()
+        .find(|(_, p, s)| *s && *p == 0)
+        .unwrap()
+        .0;
+    press(&ctx, &mut a, fixed);
+    assert_eq!(
+        a.progress.attempts["ccna-ipv4"]
+            .ipv4
+            .as_ref()
+            .unwrap()
+            .sandbox_host,
+        initial
+    );
+    let host = a
+        .metrics
+        .ipv4_bits
+        .iter()
+        .find(|(_, p, s)| *s && *p == 31)
+        .unwrap()
+        .0;
+    press(&ctx, &mut a, host);
+    assert_eq!(
+        a.progress.attempts["ccna-ipv4"]
+            .ipv4
+            .as_ref()
+            .unwrap()
+            .sandbox_host,
+        initial ^ 1
+    );
+    frame(
+        &ctx,
+        &mut a,
+        1400.,
+        2400.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::Space,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: Default::default(),
+            },
+            egui::Event::Key {
+                key: egui::Key::Space,
+                physical_key: None,
+                pressed: false,
+                repeat: false,
+                modifiers: Default::default(),
+            },
+        ],
+    );
+    assert_eq!(
+        a.progress.attempts["ccna-ipv4"]
+            .ipv4
+            .as_ref()
+            .unwrap()
+            .sandbox_host,
+        initial
+    );
+    assert_eq!(a.progress.attempts["ccna-ipv4"].state, original);
+    assert!(!a.metrics.ipv4_worked);
+}
+
+#[test]
+fn resuming_unsolved_variant_does_not_invalidate_completed_original_or_reset_its_position() {
+    use dlms_learning_lab::ipv4::{Exercise, Section};
+    let (ctx, mut a) = app();
+    a.launch(0);
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    {
+        let attempt = a.progress.attempts.get_mut("ccna-ipv4").unwrap();
+        if let engine::State::Subnet { answers, .. } = &mut attempt.state {
+            *answers = [
+                "192.168.10.64".into(),
+                "192.168.10.95".into(),
+                "192.168.10.65".into(),
+                "192.168.10.94".into(),
+            ];
+        }
+        attempt.ipv4.as_mut().unwrap().section = Section::Usable;
+    }
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    assert!(a.metrics.completion);
+    assert_eq!(a.progress.attempts["ccna-ipv4"].step, 2);
+    {
+        let attempt = a.progress.attempts.get_mut("ccna-ipv4").unwrap();
+        let e = Exercise::from_state(&attempt.state).unwrap();
+        let lesson = attempt.ipv4.as_mut().unwrap();
+        for section in [Section::Network, Section::Broadcast, Section::Usable] {
+            lesson.reveal(section, &e);
+        }
+        assert!(lesson.fresh());
+    }
+    a.launch(0);
+    frame(&ctx, &mut a, 1400., 2400., vec![]);
+    assert!(!a.invalidated);
+    assert!(!a.metrics.completion);
+    assert_eq!(a.progress.attempts["ccna-ipv4"].step, 2);
+    assert_eq!(
+        a.progress.attempts["ccna-ipv4"]
+            .ipv4
+            .as_ref()
+            .unwrap()
+            .original_section,
+        Section::Usable
+    );
+    assert!(engine::solved(
+        &a.progress.attempts["ccna-ipv4"].state,
+        &a.scenarios[0].goal
+    ));
+}

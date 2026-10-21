@@ -27,11 +27,14 @@ fn main() -> eframe::Result<()> {
         "DLMS Learning Lab",
         options,
         Box::new(move |cc| {
-            Ok(Box::new(ui::LabApp::new(
-                cc,
-                args.contains(&"--ui-smoke".into()),
-                args.contains(&"--developer".into()),
-            )))
+            Ok(Box::new(
+                ui::LabApp::new(
+                    cc,
+                    args.contains(&"--ui-smoke".into()) || args.contains(&"--ipv4-smoke".into()),
+                    args.contains(&"--developer".into()),
+                )
+                .with_ipv4_smoke(args.contains(&"--ipv4-smoke".into())),
+            ))
         }),
     )
 }

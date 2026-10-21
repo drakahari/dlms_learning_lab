@@ -15,6 +15,8 @@ pub struct Attempt {
     pub hints: usize,
     pub transcript: Vec<String>,
     pub visited: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ipv4: Option<crate::ipv4::Lesson>,
 }
 impl Attempt {
     pub fn new(s: &Scenario, visited: u64) -> Self {
@@ -26,6 +28,7 @@ impl Attempt {
             hints: 0,
             transcript: vec!["Simulation ready. Type help to see the command subset.".into()],
             visited,
+            ipv4: None,
         }
     }
 }
@@ -71,6 +74,13 @@ pub fn load(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
             return Err("Incompatible saved attempt; original retained".into());
         }
         crate::pack::validate_state(&a.state)?;
+        if let Some(l) = &a.ipv4 {
+            let original = crate::ipv4::Exercise::from_state(&a.state)
+                .ok_or("IPv4 lesson metadata on a different state")?;
+            if !crate::ipv4::validate_lesson(l, &original) {
+                return Err("Invalid saved IPv4 lesson; original retained".into());
+            }
+        }
     }
     Ok(p)
 }

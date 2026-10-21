@@ -14,7 +14,16 @@ impl LabApp {
             );
         });
         ui.heading(RichText::new(&s.title).size(27.));
-        ui.label(&s.objective);
+        let variant = self.progress.attempts[&s.id]
+            .ipv4
+            .as_ref()
+            .filter(|l| l.use_variant)
+            .and_then(|l| l.variant.as_ref());
+        if let Some(v) = variant {
+            ui.label(format!("Numerical practice: for {}/{}, predict the network, broadcast and usable endpoints. Original lesson answers stay saved.",v.ip,v.prefix));
+        } else {
+            ui.label(&s.objective);
+        }
         ui.label(RichText::new("Simulation only. Leaving keeps your state, walkthrough position and hints saved locally.").small().color(MUTED));
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         ui.horizontal_wrapped(|ui| {
@@ -24,6 +33,7 @@ impl LabApp {
             }
             if ui.selectable_label(a.challenge, "Challenge").clicked() {
                 a.challenge = true;
+                self.ipv4_challenge_revealed = [false; 3];
                 self.dirty = true;
             }
             if ui.add(button("Reset attempt")).clicked() {
@@ -31,8 +41,12 @@ impl LabApp {
             }
         });
         if self.reset_pending {
-            card().show(ui,|ui|{ui.label("Reset only this lab’s state, walkthrough, hints and transcript? Favorites and other attempts stay saved.");ui.horizontal_wrapped(|ui|{if ui.add(button("Confirm reset")).clicked(){self.reset_attempt(i);}
+            card().show(ui,|ui|{ui.label(if matches!(s.initial,State::Subnet{..}){"Reset this lab’s original answers, worked reviews, sandbox and numerical practice? Favorites and other labs stay saved."}else{"Reset only this lab’s state, walkthrough, hints and transcript? Favorites and other attempts stay saved."});ui.horizontal_wrapped(|ui|{if ui.add(button("Confirm reset")).clicked(){self.reset_attempt(i);}
  if ui.add(button("Cancel")).clicked(){self.reset_pending=false;}});});
+        }
+        if matches!(self.progress.attempts[&s.id].state, State::Subnet { .. }) {
+            self.ipv4_lesson(ui, i);
+            return;
         }
         let width = ui.available_width();
         let split = width >= 960.;
@@ -177,180 +191,66 @@ impl LabApp {
         let s = &self.scenarios[i];
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         let checks = engine::checks(&a.state, &s.goal);
-        match &mut a.state {
-            State::Subnet {
-                ip,
-                prefix,
-                answers,
-            } => {
-                ui.label(
-                    RichText::new(format!("Address card: {ip}/{prefix}"))
-                        .strong()
-                        .size(20.),
-                );
-                ui.label(
-                    RichText::new(format!(
-                        "32 bits · {prefix} network bits · {} host bits",
-                        32 - *prefix
-                    ))
+        if let State::Vlsm {
+            base,
+            prefix,
+            allocations,
+        } = &mut a.state
+        {
+            ui.label(
+                RichText::new(format!("Address pool: {base}/{prefix}"))
+                    .strong()
+                    .size(20.),
+            );
+            ui.label(
+                RichText::new("Assign an aligned network/prefix to every team.")
                     .small()
                     .color(MUTED),
-                );
-                let (rect, _) = ui.allocate_exact_size(
-                    egui::vec2(ui.available_width(), 45.),
-                    egui::Sense::hover(),
-                );
-                let gap = 2.;
-                let w = (rect.width() - 31. * gap) / 32.;
-                for bit in 0..32 {
-                    let x = rect.left() + bit as f32 * (w + gap);
-                    let cell =
-                        egui::Rect::from_min_size(egui::pos2(x, rect.top()), egui::vec2(w, 24.));
-                    ui.painter().rect_filled(
-                        cell,
-                        2.,
-                        if bit < *prefix as usize {
-                            Color32::from_rgb(57, 106, 142)
-                        } else {
-                            Color32::from_rgb(120, 83, 174)
-                        },
-                    );
-                    if w >= 9. {
-                        ui.painter().text(
-                            cell.center(),
-                            egui::Align2::CENTER_CENTER,
-                            format!("{}", (u32::from(*ip) >> (31 - bit)) & 1),
-                            egui::FontId::monospace(11.),
-                            Color32::WHITE,
-                        );
+            );
+            let field_width = (ui.available_width() - 230.).clamp(110., 220.);
+            egui::Grid::new("allocation-table")
+                .num_columns(4)
+                .striped(true)
+                .spacing([10., 12.])
+                .show(ui, |ui| {
+                    for heading in ["Team", "Hosts", "Network/prefix", "Result"] {
+                        ui.label(RichText::new(heading).strong().size(14.));
                     }
-                }
-                ui.painter().text(
-                    egui::pos2(rect.left(), rect.top() + 32.),
-                    egui::Align2::LEFT_CENTER,
-                    "Network portion",
-                    egui::FontId::proportional(12.),
-                    MUTED,
-                );
-                ui.painter().text(
-                    egui::pos2(rect.right(), rect.top() + 32.),
-                    egui::Align2::RIGHT_CENTER,
-                    "Host portion",
-                    egui::FontId::proportional(12.),
-                    ACCENT,
-                );
-                egui::Grid::new("subnet-answers")
-                    .num_columns(2)
-                    .spacing([12., 10.])
-                    .show(ui, |ui| {
-                        for (index, label) in [
-                            "Network address",
-                            "Broadcast address",
-                            "First usable host",
-                            "Last usable host",
-                        ]
-                        .iter()
-                        .enumerate()
-                        {
-                            ui.label(*label);
-                            let width = (ui.available_width() - 8.).clamp(120., 230.);
-                            let r = ui.add_sized(
-                                [width, CONTROL],
-                                egui::TextEdit::singleline(&mut answers[index])
-                                    .id_salt(("answer", index))
-                                    .hint_text("IPv4 address")
-                                    .char_limit(64),
-                            );
-                            self.metrics.inputs.push(r.rect);
-                            if index == 0 {
-                                self.metrics.focus = Some(r.id);
-                                if self.focus_input {
-                                    r.request_focus();
-                                    self.focus_input = false;
-                                }
-                            }
-                            if r.changed() {
-                                self.dirty = true;
-                            }
-                            ui.end_row();
-                            if !answers[index].is_empty()
-                                && answers[index].parse::<std::net::Ipv4Addr>().is_err()
-                            {
-                                ui.label("");
-                                ui.colored_label(RED, "Enter a valid IPv4 address");
-                                ui.end_row();
+                    ui.end_row();
+                    for (index, allocation) in allocations.iter_mut().enumerate() {
+                        ui.label(&allocation.name);
+                        ui.label(allocation.hosts.to_string());
+                        let r = ui.add_sized(
+                            [field_width, CONTROL],
+                            egui::TextEdit::singleline(&mut allocation.cidr)
+                                .id_salt(("allocation", index))
+                                .hint_text("e.g. 10.20.0.0/26")
+                                .char_limit(64),
+                        );
+                        self.metrics.inputs.push(r.rect);
+                        if index == 0 {
+                            self.metrics.focus = Some(r.id);
+                            if self.focus_input {
+                                r.request_focus();
+                                self.focus_input = false;
                             }
                         }
-                    });
-                ui.label(
-                    RichText::new(
-                        "Values save as you type. Check work validates the current answers.",
-                    )
-                    .small()
-                    .color(MUTED),
-                );
-            }
-            State::Vlsm {
-                base,
-                prefix,
-                allocations,
-            } => {
-                ui.label(
-                    RichText::new(format!("Address pool: {base}/{prefix}"))
-                        .strong()
-                        .size(20.),
-                );
-                ui.label(
-                    RichText::new("Assign an aligned network/prefix to every team.")
-                        .small()
-                        .color(MUTED),
-                );
-                let field_width = (ui.available_width() - 230.).clamp(110., 220.);
-                egui::Grid::new("allocation-table")
-                    .num_columns(4)
-                    .striped(true)
-                    .spacing([10., 12.])
-                    .show(ui, |ui| {
-                        for heading in ["Team", "Hosts", "Network/prefix", "Result"] {
-                            ui.label(RichText::new(heading).strong().size(14.));
+                        if r.changed() {
+                            self.dirty = true;
                         }
+                        ui.label(
+                            RichText::new(if self.checked {
+                                if checks[index].0 { "Valid" } else { "Review" }
+                            } else if allocation.cidr.is_empty() {
+                                "Empty"
+                            } else {
+                                "Draft"
+                            })
+                            .small(),
+                        );
                         ui.end_row();
-                        for (index, allocation) in allocations.iter_mut().enumerate() {
-                            ui.label(&allocation.name);
-                            ui.label(allocation.hosts.to_string());
-                            let r = ui.add_sized(
-                                [field_width, CONTROL],
-                                egui::TextEdit::singleline(&mut allocation.cidr)
-                                    .id_salt(("allocation", index))
-                                    .hint_text("e.g. 10.20.0.0/26")
-                                    .char_limit(64),
-                            );
-                            self.metrics.inputs.push(r.rect);
-                            if index == 0 {
-                                self.metrics.focus = Some(r.id);
-                                if self.focus_input {
-                                    r.request_focus();
-                                    self.focus_input = false;
-                                }
-                            }
-                            if r.changed() {
-                                self.dirty = true;
-                            }
-                            ui.label(
-                                RichText::new(if self.checked {
-                                    if checks[index].0 { "Valid" } else { "Review" }
-                                } else if allocation.cidr.is_empty() {
-                                    "Empty"
-                                } else {
-                                    "Draft"
-                                })
-                                .small(),
-                            );
-                            ui.end_row();
-                        }
-                    });
-            }
-            _ => {}
+                    }
+                });
         }
     }
     fn service_editor(&mut self, ui: &mut egui::Ui, i: usize) {

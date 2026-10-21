@@ -6,6 +6,8 @@ use dlms_learning_lab::{
 };
 use eframe::egui::{self, Color32, RichText};
 use std::{path::PathBuf, time::Instant};
+mod ipv4_lesson;
+mod ipv4_smoke;
 mod smoke;
 #[cfg(test)]
 mod tests;
@@ -32,6 +34,10 @@ struct Metrics {
     completion: bool,
     guide: bool,
     editor_save: Option<egui::Rect>,
+    ipv4_bits: Vec<(egui::Rect, u8, bool)>,
+    ipv4_reveal: Option<egui::Rect>,
+    ipv4_worked: bool,
+    ipv4_explain: bool,
 }
 pub struct LabApp {
     scenarios: Vec<Scenario>,
@@ -63,10 +69,20 @@ pub struct LabApp {
     smoke_focus: Option<egui::Id>,
     smoke_width: f32,
     capture_pending: bool,
+    ipv4_focus: Option<(u8, u8, u8)>,
+    ipv4_challenge_revealed: [bool; 3],
+    ipv4_smoke: bool,
 }
 impl LabApp {
     pub fn new(cc: &eframe::CreationContext<'_>, smoke: bool, developer: bool) -> Self {
         Self::from_context(&cc.egui_ctx, smoke, developer)
+    }
+    pub fn with_ipv4_smoke(mut self, enabled: bool) -> Self {
+        self.ipv4_smoke = enabled;
+        if enabled {
+            self.path = PathBuf::from("/tmp/dlms-ipv4-smoke/progress-v1.json");
+        }
+        self
     }
     fn from_context(ctx: &egui::Context, smoke: bool, developer: bool) -> Self {
         let mut style = (*ctx.style()).clone();
@@ -146,6 +162,9 @@ impl LabApp {
             smoke_focus: None,
             smoke_width: 0.,
             capture_pending: false,
+            ipv4_focus: None,
+            ipv4_challenge_revealed: [false; 3],
+            ipv4_smoke: false,
         }
     }
     fn launch(&mut self, i: usize) {
@@ -158,12 +177,22 @@ impl LabApp {
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         a.visited = clock;
-        self.last_solved = engine::solved(&a.state, &s.goal);
+        self.last_solved = if let Some(v) = a
+            .ipv4
+            .as_ref()
+            .filter(|l| l.use_variant)
+            .and_then(|l| l.variant.as_ref())
+        {
+            v.solved()
+        } else {
+            engine::solved(&a.state, &s.goal)
+        };
         self.service_draft = if let engine::State::Service { port, .. } = &a.state {
             Some(port.clone())
         } else {
             None
         };
+        self.ipv4_challenge_revealed = [false; 3];
         self.selected = Some(i);
         self.input.clear();
         self.checked = false;
@@ -182,6 +211,8 @@ impl LabApp {
         } else {
             None
         };
+        self.ipv4_focus = None;
+        self.ipv4_challenge_revealed = [false; 3];
         self.input.clear();
         self.checked = false;
         self.last_solved = false;
@@ -327,7 +358,7 @@ impl LabApp {
                     if self.synthetic {
                         "synthetic previews"
                     } else {
-                        "labs"
+                        if items.len() == 1 { "lab" } else { "labs" }
                     }
                 ))
                 .color(MUTED),
@@ -660,7 +691,11 @@ impl eframe::App for LabApp {
         self.render(ctx);
         self.save();
         if self.smoke {
-            self.smoke_tick(ctx);
+            if self.ipv4_smoke {
+                self.ipv4_smoke_tick(ctx);
+            } else {
+                self.smoke_tick(ctx);
+            }
             ctx.request_repaint_after(std::time::Duration::from_millis(50));
         }
     }

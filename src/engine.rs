@@ -202,6 +202,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
             .map(|(i, t)| {
                 c(
                     answers[i]
+                        .trim()
                         .parse::<Ipv4Addr>()
                         .is_ok_and(|v| u32::from(v) == want[i]),
                     t,
