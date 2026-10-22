@@ -50,7 +50,7 @@ The new **Bash/Shell** track teaches reliable output, quoted arguments, input, g
 
 The in-process interpreter implements a documented [shell subset](docs/SHELL_SUBSET.md), with a real lexer/parser/VM, virtual files and bounded cooperative execution. It never passes learner input to Bash, a subprocess, the host filesystem or network. Real Bash appears **only** in the disposable development-oracle fixtures. No new dependencies were added.
 
-The [curriculum plan](docs/CURRICULUM.md) and [165-row coverage map](docs/CURRICULUM.csv) record current official versions, sources/check dates, implemented slices, distinct planned assignments, prerequisites, capabilities and fidelity gaps. Upcoming CCNA v2.0 is tracked separately from currently offered v1.1. Planned scenarios are not catalog placeholders or full-exam preparation claims.
+The [curriculum plan](docs/CURRICULUM.md) and [165-row coverage map](docs/CURRICULUM.csv) record current official versions, sources/check dates, implemented slices, distinct planned assignments, prerequisites, capabilities and fidelity gaps. Upcoming CCNA v2.0 is tracked separately from currently offered v1.1. The [granular evidence/gap ledger](docs/OBJECTIVE_MAPPING.md) pins1240 current objective/knowledge/tool references with explicit partial evidence and missing capabilities. Planned scenarios are not catalog placeholders or full-exam preparation claims.
 
 ## Use
 

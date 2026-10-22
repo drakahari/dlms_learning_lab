@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus fifteen scripting assignments in three units and six Linux file-management foundations. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus fifteen scripting assignments in three units and six Linux file-management foundations, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -18,7 +18,7 @@ Recheck evidence (2026-10-22): both official PDFs identify their blueprint versi
 
 ## Complete planning crosswalk
 
-[CURRICULUM.csv](CURRICULUM.csv) has **165 rows**: each active top-level objective in CCNA v1.1, LPIC-1 5.0 and LPIC-2 4.5, plus every upcoming CCNA v2.0 top-level objective. LPI's removed 104.4 is deliberately absent. Cisco lettered subobjectives are scoped under their parent; they are not individually marked covered. This is a complete planning index at that granularity, not complete implemented coverage.
+[CURRICULUM.csv](CURRICULUM.csv) has **165 rows**: each active top-level objective in CCNA v1.1, LPIC-1 5.0 and LPIC-2 4.5, plus every upcoming CCNA v2.0 top-level objective. LPI's removed 104.4 is deliberately absent. Cisco lettered subobjectives are scoped under their parent; they are not individually marked covered. This is a complete planning index at that granularity, not complete implemented coverage. The [granular evidence/gap ledger](OBJECTIVE_MAPPING.md) separately indexes all current lettered subobjectives, LPI knowledge areas and named tools/terms, with explicit evidence per item and source-change guards.
 
 Each row records implemented scenario IDs (or None), a distinct proposed assignment, prerequisites, difficulty, the missing simulation model and its fidelity limit. **Partial** means only a narrow slice is implemented; even the existing labs do not cover the full named objective. Difficulty/prerequisite values are initial authoring estimates. Each proposed assignment may need several carefully authored scenarios after review, rather than one giant task per objective. No placeholder has been promoted into curriculum.
 
