@@ -15,7 +15,7 @@ spec.loader.exec_module(candidate)
 class CandidateResources(unittest.TestCase):
     def test_only_tracked_documentation_is_bundled(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             (root / 'docs').mkdir()
             (root / 'docs/guide.md').write_text('public instructions')
             (root / 'docs/private.log').write_text('must never be bundled')
@@ -27,7 +27,7 @@ class CandidateResources(unittest.TestCase):
     @unittest.skipIf(sys.platform == 'win32', 'link creation requires separate Windows privilege acceptance')
     def test_intermediate_source_link_is_rejected_even_when_target_is_inside_repository(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             (root / 'local-data').mkdir()
             (root / 'local-data/guide.md').write_text('private progress')
             (root / 'docs').symlink_to(root / 'local-data', target_is_directory=True)
@@ -43,7 +43,7 @@ if __name__ == '__main__':
 class NativeProvenance(unittest.TestCase):
     def test_target_overrides_cannot_package_a_stale_host_binary(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             stale = root / 'target/release/dlms-learning-lab'
             stale.parent.mkdir(parents=True)
             stale.write_text('stale executable')
@@ -64,7 +64,7 @@ class NativeProvenance(unittest.TestCase):
 
     def test_content_identity_excludes_uncompiled_private_json(self):
         with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
+            root = Path(temporary).resolve()
             (root / 'src').mkdir()
             (root / 'scenarios').mkdir()
             (root / 'src/pack.rs').write_text('include_str!("../scenarios/public.json")')
