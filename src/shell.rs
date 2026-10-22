@@ -1463,3 +1463,17 @@ pub fn run(source: &str, case: &Case) -> Outcome {
 pub fn checks(source: &str, record: &Option<Record>, cases: &[Case]) -> Vec<(bool, String)> {
     cases.iter().enumerate().map(|(i,c)|{let r=record.as_ref().filter(|r|r.source==source).and_then(|r|r.results.get(i));let pass=r.is_some_and(|r|c.accepts(r));let message=if pass{format!("Pass · {}",c.name)}else{format!("{} · {}",c.name,match r{None=>"Run the current script against this case".into(),Some(r)=>if let Some(e)=&r.error{e.clone()}else if r.status!=c.status{format!("Exit status {}; expected {}. Inspect the last command or an early exit.",r.status,c.status)}else if r.stdout!=c.stdout{"Standard output differs. Check spacing, quoting and line breaks.".into()}else if r.stderr!=c.stderr{"Error output differs. Send the requested diagnostic to standard error.".into()}else{"Virtual files differ. Check the destination, append/truncate behavior and untouched input files.".into()}})};(pass,message)}).collect()
 }
+
+/// Literal argv for the separate virtual terminal; no expansion or evaluation.
+pub fn literal_command(source: &str) -> Result<Vec<String>, String> {
+    if source.len() > 4096 {
+        return Err("Command exceeds 4,096 bytes".into());
+    }
+    lex(source)?.into_iter().map(|token| match token {
+        Token::Word(w) => {
+            if w.0.iter().any(|p| p.quote != Quote::Single && p.text.contains('$')) { return Err("Variable expansion is unsupported in this terminal; use a literal quoted path.".into()); }
+            Ok(w.0.into_iter().map(|p| p.text).collect())
+        },
+        Token::Op(_) => Err("Shell operators are unsupported in this terminal. Enter one supported command at a time.".into()),
+    }).collect()
+}

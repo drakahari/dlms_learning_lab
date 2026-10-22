@@ -261,6 +261,9 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
+            State::Filesystem { .. } => {
+                unreachable!("This regression targets the original nine workspaces")
+            }
         }
         if i == 0 {
             a.load_ipv4_view(i);

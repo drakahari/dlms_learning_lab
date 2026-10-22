@@ -142,6 +142,13 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
+        if let Goal::Filesystem { requirements } = &s.goal
+            && (requirements.is_empty()
+                || requirements.len() > 20
+                || requirements.iter().any(|r| !r.valid()))
+        {
+            return Err(format!("{}: invalid filesystem objectives", s.id));
+        }
         validate_state(&s.initial).map_err(|e| format!("{}: {e}", s.id))?;
         if engine::solved(&s.initial, &s.goal) {
             return Err(format!("{}: starts solved", s.id));
@@ -197,6 +204,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Filesystem { tree } => tree.valid(),
         State::Script { source, run } => {
             source.len() <= crate::shell::MAX_SOURCE && run.as_ref().is_none_or(|r| r.valid())
         }

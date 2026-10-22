@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 pub mod catalog;
 pub mod engine;
+pub mod filesystem;
 pub mod pack;
 pub mod progress;
 
