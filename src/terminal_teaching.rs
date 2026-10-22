@@ -42,7 +42,7 @@ impl Lesson {
         }
         if self.outcomes.is_empty()
             || self.outcomes.len() > 20
-            || self.outcomes.iter().any(|r| !r.valid())
+            || self.outcomes.iter().any(|r| !r.valid_for(&self.fixture))
         {
             return Err("Invalid terminal example outcomes".into());
         }

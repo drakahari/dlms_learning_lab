@@ -6,6 +6,7 @@ Bash is a reference for fixed wrapper/cd/umask commands, never the learner engin
 import json
 import os
 import pathlib
+import re
 import shlex
 import shutil
 import subprocess
@@ -15,7 +16,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 PROBE = ROOT / 'target/debug/examples/filesystem_probe'
 FIXTURES = ROOT / 'tests/fixtures/filesystem-reference.json'
 BASH = shutil.which('bash')
-COMMANDS = {'pwd', 'cd', 'umask', 'ls', 'cat', 'touch', 'mkdir', 'cp', 'mv', 'rm', 'rmdir'}
+COMMANDS = {'pwd', 'cd', 'umask', 'ls', 'cat', 'touch', 'mkdir', 'cp', 'mv', 'rm', 'rmdir', 'chmod'}
 
 
 def tree(entries):
@@ -58,7 +59,20 @@ def validate_argv(argv, cwd, work):
     if cwd != work and work not in cwd.resolve().parents:
         raise ValueError('Reference cwd escapes disposable fixture')
     operands, options = [], True
-    for arg in argv[1:]:
+    arguments = argv[1:]
+    if argv[0] == 'chmod':
+        if arguments and arguments[0] == '--':
+            arguments = arguments[1:]
+            options = False
+        if len(arguments) != 2:
+            raise ValueError('Reference chmod requires one mode and one path')
+        mode, operand = arguments
+        numeric = 1 <= len(mode) <= 4 and all(c in '01234567' for c in mode) and int(mode, 8) <= 0o777
+        symbolic = len(mode) <= 512 and len(mode.split(',')) <= 32 and re.fullmatch(r'[ugoa]+[-+=][rwx]*(?:,[ugoa]+[-+=][rwx]*)*', mode) is not None
+        if not (numeric or symbolic):
+            raise ValueError('Reference chmod mode outside the declared subset')
+        arguments = [operand]
+    for arg in arguments:
         if options and arg == '--':
             options = False
             continue

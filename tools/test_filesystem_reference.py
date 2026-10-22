@@ -17,6 +17,12 @@ class ReferenceBoundary(unittest.TestCase):
                 ['cd', '../../outside'],
                 ['ls', '/etc'],
                 ['umask', '888'],
+                ['chmod', '--reference=/outside', 'source'],
+                ['chmod', '600', '../outside'],
+                ['chmod', '--', '600', '../outside'],
+                ['chmod', '+x', 'source'],
+                ['chmod', '4755', 'source'],
+                ['chmod', 'u+r', 'one', 'two'],
                 ['bash', '-c', 'anything'],
             ]:
                 with self.subTest(argv=argv), patch.object(oracle.subprocess, 'run') as run:
@@ -32,7 +38,8 @@ class ReferenceBoundary(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temporary:
             work = pathlib.Path(temporary).resolve()
             for argv in [['ls', '-ald', '.'], ['rm', '-f', '--', '-f'],
-                         ['touch', '--', '-n'], ['cp', '--', '-', 'copy'], ['cd', '--', '-P']]:
+                         ['touch', '--', '-n'], ['cp', '--', '-', 'copy'], ['cd', '--', '-P'],
+                         ['chmod', 'u=rw,g=r,o=', 'source'], ['chmod', '--', '600', '-n']]:
                 oracle.validate_argv(argv, work, work)
 
 

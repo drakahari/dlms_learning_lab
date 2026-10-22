@@ -175,12 +175,16 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 ));
             }
         }
-        if let Goal::Filesystem { requirements } = &s.goal
-            && (requirements.is_empty()
+        if let Goal::Filesystem { requirements } = &s.goal {
+            let State::Filesystem { tree } = &s.initial else {
+                return Err("Filesystem objectives require a filesystem state".into());
+            };
+            if requirements.is_empty()
                 || requirements.len() > 20
-                || requirements.iter().any(|r| !r.valid()))
-        {
-            return Err(format!("{}: invalid filesystem objectives", s.id));
+                || requirements.iter().any(|r| !r.valid_for(tree))
+            {
+                return Err(format!("{}: invalid filesystem objectives", s.id));
+            }
         }
         validate_state(&s.initial).map_err(|e| format!("{}: {e}", s.id))?;
         if engine::solved(&s.initial, &s.goal) {

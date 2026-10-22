@@ -1,4 +1,5 @@
 //! Bounded Unix file model. All paths name in-memory entries, never host files.
+mod permissions;
 use crate::engine::{self, Node};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -25,12 +26,64 @@ pub struct Tree {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
-    Entry { path: String, directory: bool },
-    Contents { path: String, text: String },
-    Absent { path: String },
-    Directory { path: String },
-    Mode { path: String, mode: u16 },
-    Mask { mask: u16 },
+    Entry {
+        path: String,
+        directory: bool,
+    },
+    Contents {
+        path: String,
+        text: String,
+    },
+    Absent {
+        path: String,
+    },
+    Directory {
+        path: String,
+    },
+    Mode {
+        path: String,
+        mode: u16,
+    },
+    Mask {
+        mask: u16,
+    },
+    Access {
+        path: String,
+        user: String,
+        operation: Access,
+        allowed: bool,
+    },
+}
+#[derive(Clone, Copy, Debug, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum Access {
+    ReadFile,
+    WriteFile,
+    ListNames,
+    SearchDirectory,
+    CreateEntry,
+}
+impl Access {
+    pub(crate) fn directory(self) -> bool {
+        !matches!(self, Self::ReadFile | Self::WriteFile)
+    }
+    fn mask(self) -> u16 {
+        match self {
+            Self::ReadFile | Self::ListNames => 4,
+            Self::WriteFile => 2,
+            Self::SearchDirectory => 1,
+            Self::CreateEntry => 3,
+        }
+    }
+    pub fn description(self) -> &'static str {
+        match self {
+            Self::ReadFile => "read the file",
+            Self::WriteFile => "write the file",
+            Self::ListNames => "list names in the directory",
+            Self::SearchDirectory => "search the directory",
+            Self::CreateEntry => "create entries in the directory",
+        }
+    }
 }
 fn canonical(path: &str) -> bool {
     path.starts_with('/')
@@ -84,18 +137,55 @@ impl Requirement {
             | Self::Contents { path, .. }
             | Self::Absent { path }
             | Self::Directory { path }
-            | Self::Mode { path, .. } => path,
+            | Self::Mode { path, .. }
+            | Self::Access { path, .. } => path,
             Self::Mask { .. } => unreachable!(),
         };
         canonical(path)
             && match self {
                 Self::Contents { text, .. } => text.len() <= 131_072 && !text.contains('\0'),
                 Self::Mode { mode, .. } => *mode <= 0o777,
+                Self::Access { user, .. } => {
+                    !user.is_empty()
+                        && user.len() <= 32
+                        && user != "root"
+                        && user
+                            .bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+                }
+                _ => true,
+            }
+    }
+    pub fn valid_for(&self, tree: &Tree) -> bool {
+        self.valid()
+            && match self {
+                Self::Access { user, .. } => tree.users.contains_key(user),
                 _ => true,
             }
     }
     pub fn check(&self, tree: &Tree) -> (bool, String) {
         match self {
+            Self::Access {
+                path,
+                user,
+                operation,
+                allowed,
+            } => {
+                let applicable = self.valid_for(tree)
+                    && tree
+                        .nodes
+                        .get(path)
+                        .is_some_and(|n| n.directory == operation.directory());
+                let actual = tree.access(user, path, *operation);
+                (
+                    applicable && actual == *allowed,
+                    format!(
+                        "{user} {} {}: {path}",
+                        if *allowed { "can" } else { "cannot" },
+                        operation.description()
+                    ),
+                )
+            }
             Self::Mask { mask } => (tree.umask == *mask, format!("Creation mask is {mask:03o}")),
             Self::Entry { path, directory } => (
                 tree.nodes
@@ -168,18 +258,50 @@ impl Tree {
                 .iter()
                 .all(|(p, t)| self.nodes.contains_key(p) && *t <= self.clock)
     }
-    fn permitted(&self, path: &str, mask: u16) -> Result<(), String> {
-        let allowed = self.nodes.get(path).is_some_and(|node| {
-            let shift = if node.owner == self.user {
+    fn allows(&self, user: &str, path: &str, mask: u16) -> bool {
+        let Some(groups) = self.users.get(user) else {
+            return false;
+        };
+        self.nodes.get(path).is_some_and(|node| {
+            let shift = if node.owner == user {
                 6
-            } else if self.users[&self.user].contains(&node.group) {
+            } else if groups.contains(&node.group) {
                 3
             } else {
                 0
             };
             ((node.mode >> shift) & mask) == mask
-        });
-        if allowed {
+        })
+    }
+    pub fn access(&self, user: &str, path: &str, operation: Access) -> bool {
+        if user == "root"
+            || !canonical(path)
+            || !self.users.contains_key(user)
+            || !self
+                .nodes
+                .get(path)
+                .is_some_and(|n| n.directory == operation.directory())
+        {
+            return false;
+        }
+        let mut ancestor = parent(path);
+        if path != "/" {
+            loop {
+                if !self.nodes.get(ancestor).is_some_and(|n| n.directory)
+                    || !self.allows(user, ancestor, 1)
+                {
+                    return false;
+                }
+                if ancestor == "/" {
+                    break;
+                }
+                ancestor = parent(ancestor);
+            }
+        }
+        self.allows(user, path, operation.mask())
+    }
+    fn permitted(&self, path: &str, mask: u16) -> Result<(), String> {
+        if self.allows(&self.user, path, mask) {
             Ok(())
         } else {
             Err(format!(
@@ -341,6 +463,77 @@ impl Tree {
                 })
             }
             "ls" => self.list(&words[1..]),
+            "id" => {
+                let names = !ended_options
+                    && matches!(args.first().map(String::as_str), Some("-Gn" | "-nG"));
+                let operands = if names { &args[1..] } else { args };
+                if operands.len() > 1
+                    || operands
+                        .first()
+                        .is_some_and(|s| s.starts_with('-') && !ended_options)
+                {
+                    return Err(unsupported());
+                }
+                let user = operands.first().unwrap_or(&self.user);
+                let groups = self
+                    .users
+                    .get(user)
+                    .ok_or_else(|| format!("Unknown simulated user: {user}"))?;
+                let mut seen = std::collections::BTreeSet::new();
+                let groups: Vec<_> = groups.iter().filter(|g| seen.insert(*g)).collect();
+                if names {
+                    return Ok(format!(
+                        "{}\n",
+                        groups
+                            .iter()
+                            .map(|g| g.as_str())
+                            .collect::<Vec<_>>()
+                            .join(" ")
+                    ));
+                }
+                let primary = groups[0];
+                Ok(format!(
+                    "uid={}({user}) gid={}({primary}) groups={}\n",
+                    engine::user_id(&self.users, user),
+                    engine::group_id(&self.users, primary),
+                    groups
+                        .iter()
+                        .map(|g| format!("{}({g})", engine::group_id(&self.users, g)))
+                        .collect::<Vec<_>>()
+                        .join(",")
+                ))
+            }
+            "chmod" | "chgrp" if args.len() == 2 => {
+                if (!ended_options && (args[0].starts_with('-') || args[1].starts_with('-')))
+                    || args[0].is_empty()
+                {
+                    return Err(unsupported());
+                }
+                let path = self.resolve(&args[1], false)?;
+                if self.nodes[&path].owner != self.user {
+                    return Err(format!(
+                        "Permission denied: only the owner can change {path} in this ordinary-user simulation."
+                    ));
+                }
+                if cmd == "chmod" {
+                    let new = permissions::mode(&args[0], self.nodes[&path].mode)?;
+                    self.nodes.get_mut(&path).unwrap().mode = new;
+                } else {
+                    if !self.users.values().any(|gs| gs.contains(&args[0])) {
+                        return Err(format!("Unknown simulated group: {}", args[0]));
+                    }
+                    if !self.users[&self.user].contains(&args[0]) {
+                        return Err(format!(
+                            "Permission denied: {} is not a member of group {}.",
+                            self.user, args[0]
+                        ));
+                    }
+                    self.nodes.get_mut(&path).unwrap().group = args[0].clone();
+                }
+                self.changed(&path);
+                Ok(String::new())
+            }
+
             "umask" if args.len() <= 1 => {
                 if let Some(mask) = args.first() {
                     if mask.is_empty()
@@ -594,4 +787,4 @@ impl Tree {
         })
     }
 }
-pub const HELP: &str = "pwd [-L|-P] • cd [PATH|-] • ls [-a|-l|-d] [PATH] • cat PATH • mkdir PATH • touch PATH • cp FILE DEST • mv FILE DEST • rm [-f] FILE • rmdir EMPTY_DIR • umask [OCTAL]. -- ends options; quote spaces. No expansion, pipelines, redirection, recursion or host access. show is a simulator helper.";
+pub const HELP: &str = "pwd [-L|-P] • cd [PATH|-] • ls [-a|-l|-d] [PATH] • cat PATH • mkdir PATH • touch PATH • cp FILE DEST • mv FILE DEST • rm [-f] FILE • rmdir EMPTY_DIR • umask [OCTAL] • chmod MODE PATH • chgrp GROUP PATH • id [-Gn|-nG] [USER]. chmod: 000–777 or explicit u/g/o/a +-= r/w/x clauses. Owner-only changes; chgrp requires membership; synthetic account IDs. -- ends options; quote spaces. No expansion, pipelines, redirection, recursion or host access. show is a simulator helper.";

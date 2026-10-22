@@ -1068,7 +1068,7 @@ pub fn mode_string(n: &Node) -> String {
     }
     s
 }
-fn user_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
+pub(crate) fn user_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
     match name {
         "root" => 0,
         "nobody" => 65534,
@@ -1081,7 +1081,7 @@ fn user_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
         }
     }
 }
-fn group_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
+pub(crate) fn group_id(users: &BTreeMap<String, Vec<String>>, name: &str) -> u32 {
     if users.contains_key(name) {
         return user_id(users, name);
     }

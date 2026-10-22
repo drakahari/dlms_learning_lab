@@ -137,6 +137,10 @@ fn each_objective_is_current_state_not_historical_credit() {
                     tree.nodes.get_mut(path).unwrap().mode = mode ^ 0o004
                 }
                 Requirement::Mask { mask } => tree.umask = mask ^ 0o004,
+                Requirement::Access { path, .. } => {
+                    tree.nodes.remove(path);
+                    tree.files.remove(path);
+                }
             }
             assert!(
                 !engine::solved(&broken, &lab.goal),
