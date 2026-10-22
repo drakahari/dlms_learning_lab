@@ -6,7 +6,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | --- | --- |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
-| `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; authored unit pending |
+| `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; six authored route/recovery tasks |
 | `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
 | `ipv4.rs` | Boundary math, host validation, numerical variants and retained legacy lesson/sandbox metadata |
@@ -117,3 +117,6 @@ Filename matching lives in shell/globbing.rs: iterative C-byte matching over the
 The normal native renderer uses device/address/route editors with one Check configuration action. It parses a clone, commits all valid settings together and reports current outcomes. Unfinished text remains saved and cannot borrow success from earlier applied state. Detailed results, forwarding paths, walkthrough and references are optional. One-interface router forwarding remains available through optional controls; native tools must be able to express every supported authored reference action.
 
 `routing_v4_draft` and `routing_v4_learning` are optional omitted/defaulted fields in the existing version1 workspace. The latter owns a separate topology, raw draft, selected view and check result. Import pins each topology's device/interface/cable shape to its assignment or practice fixture and rejects foreign routing metadata. The clearly named `tests/fixtures/ipv4-routing-preview.json` is only a development fixture, never bundled authored curriculum or objective evidence. See IPV4_ROUTING_SUBSET.md for exact scope, tests and future content requirements.
+
+
+Six reviewed IPv4 static-routing assignments now use this integration; see [IPV4_LESSONS.md](IPV4_LESSONS.md). Conditional StaticRouteFor outcomes require actual selected network prefixes under the same bounded cloned states as reachability. A broader backup default cannot masquerade as a requested /24. Native route forms use aligned table rows when wide, labeled stacked fields when narrow, selected-device adjacency as the main context and optional whole-topology inspection. The interface picker initializes focus only after enabled popup contents and pointer release; both keyboard-only and pointer opening permit Tab/Enter selection without stealing subsequent navigation. Current applied-only results are suppressed while a divergent raw draft is pending, including on resume.

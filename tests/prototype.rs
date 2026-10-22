@@ -359,6 +359,12 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                     p.up = false;
                 }
             }
+        } else if let State::Ipv4Routing { topology } = &mut a.state {
+            for device in topology.devices.values_mut() {
+                for interface in device.interfaces.values_mut() {
+                    interface.up = false;
+                }
+            }
         } else if let State::Filesystem { tree } = &mut a.state {
             for text in tree.files.values_mut() {
                 text.push_str("changed");

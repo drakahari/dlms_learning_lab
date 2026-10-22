@@ -2516,3 +2516,193 @@ fn routing_v4_single_interface_router_is_editable_and_guideless_help_is_safe() {
     check(&ctx, &mut a);
     assert!(a.metrics.completion);
 }
+
+#[test]
+fn ipv4_authored_route_entry_supports_keyboard_tab_and_default_distance_without_reference_fill() {
+    for keyboard_open in [true, false] {
+        let (ctx, mut a) = app();
+        let i = a
+            .scenarios
+            .iter()
+            .position(|s| s.id == "ccna-ipv4-network-route")
+            .unwrap();
+        a.launch(i);
+        draw(&ctx, &mut a);
+        let r = a.metrics.assignment_action.unwrap();
+        click(&ctx, &mut a, r);
+        assert!(a.metrics.inputs.is_empty());
+        let r = a.metrics.routing_add.unwrap();
+        click(&ctx, &mut a, r);
+        let focus = a.metrics.focus.unwrap();
+        assert!(ctx.memory(|m| m.has_focus(focus)));
+        let select = egui::Event::Key {
+            key: egui::Key::A,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers {
+                command: true,
+                ..egui::Modifiers::CTRL
+            },
+        };
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![select, egui::Event::Text("10.40.1.0/24".into())],
+        );
+        frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![egui::Event::Text("10.0.0.2".into())],
+        );
+        draw(&ctx, &mut a);
+        if keyboard_open {
+            frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+            assert!(ctx.memory(|m| m.has_focus(a.metrics.routing_picker_id.unwrap())));
+            frame(
+                &ctx,
+                &mut a,
+                1200.,
+                850.,
+                vec![key(egui::Key::Enter, false)],
+            );
+            draw(&ctx, &mut a);
+        } else {
+            let r = a.metrics.routing_route_interface.unwrap();
+            click(&ctx, &mut a, r);
+        }
+        let target = a
+            .metrics
+            .routing_port_options
+            .iter()
+            .find(|(port, _)| port == "transit")
+            .unwrap()
+            .1;
+        let mut tabs = 0;
+        while !ctx.memory(|m| m.has_focus(target)) && tabs < 8 {
+            frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+            tabs += 1;
+            let mut release = key(egui::Key::Tab, false);
+            if let egui::Event::Key { pressed, .. } = &mut release {
+                *pressed = false;
+            }
+            frame(&ctx, &mut a, 1200., 850., vec![release]);
+        }
+        assert!(
+            ctx.memory(|m| m.has_focus(target)),
+            "Outgoing interface option reachable by Tab"
+        );
+        assert_eq!(tabs, 1, "Selected menu option receives focus when opened");
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![key(egui::Key::Enter, false)],
+        );
+        draw(&ctx, &mut a);
+        check(&ctx, &mut a);
+        assert!(
+            a.metrics.completion,
+            "notice {:?} draft {:?}",
+            a.notice,
+            a.progress.attempts[&a.scenarios[i].id]
+                .workspace
+                .as_ref()
+                .unwrap()
+                .routing_v4_draft
+        );
+        let id = a.scenarios[i].id.clone();
+        let draft = a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .routing_v4_draft
+            .as_ref()
+            .unwrap();
+        assert_eq!(draft.devices["R1"].routes[0].distance, "1");
+        let r = a.metrics.inputs[1];
+        click(&ctx, &mut a, r);
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![egui::Event::Text("x".into())],
+        );
+        draw(&ctx, &mut a);
+        assert!(!a.metrics.completion);
+        assert!(!progress::current_solved(
+            &a.progress.attempts[&id],
+            &a.scenarios[i]
+        ));
+    }
+}
+#[test]
+fn six_authored_ipv4_workspaces_keep_full_tasks_tools_and_guidance_separate_at_each_size() {
+    for id in [
+        "ccna-ipv4-network-route",
+        "ccna-ipv4-return-route",
+        "ccna-ipv4-specific-route",
+        "ccna-ipv4-host-exception",
+        "ccna-ipv4-floating-route",
+        "ccna-ipv4-branch-handover",
+    ] {
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            for (w, h, scale) in [
+                (1200., 850., 1.),
+                (1200., 850., 1.5),
+                (1000., 800., 1.),
+                (940., 700., 1.),
+                (960., 700., 1.5),
+                (720., 560., 1.),
+                (720., 560., 1.5),
+            ] {
+                let (ctx, mut a) = app();
+                let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
+                a.launch(i);
+                a.set_routing_v4_view(i, view);
+                a.scale = scale;
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                assert!(!a.metrics.help_visible);
+                assert!(!a.metrics.guide);
+                for r in a
+                    .metrics
+                    .inputs
+                    .iter()
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.lesson_tabs.iter())
+                    .chain(a.metrics.routing_add.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{id} {view:?} {w}/{scale}: {r:?}"
+                    );
+                }
+                if w == 1200. && scale == 1. && view == teaching::View::Assignment {
+                    assert!(
+                        a.metrics.check.unwrap().bottom() < 850.,
+                        "Desktop Check below workspace {id}: {:?}",
+                        a.metrics.check
+                    );
+                }
+                a.progress.attempts.get_mut(id).unwrap().challenge = true;
+                draw(&ctx, &mut a);
+                assert_eq!(a.routing_v4_view(i), teaching::View::Assignment);
+                assert!(a.metrics.lesson_tabs.is_empty());
+                assert!(!a.metrics.help_visible);
+            }
+        }
+    }
+}

@@ -583,6 +583,8 @@ pub enum Requirement {
         network: Prefix,
         target_device: String,
         target_interface: String,
+        #[serde(default)]
+        when: Vec<InterfaceCondition>,
     },
     Reachable {
         label: String,
@@ -631,11 +633,20 @@ impl Requirement {
                 network,
                 target_device,
                 target_interface,
+                when,
             } => {
                 t.devices.contains_key(device)
                     && device != target_device
                     && network.valid()
                     && port(target_device, target_interface).is_some()
+                    && when.len() <= 4
+                    && when.iter().all(|c| port(&c.device, &c.interface).is_some())
+                    && when
+                        .iter()
+                        .map(|c| (&c.device, &c.interface))
+                        .collect::<BTreeSet<_>>()
+                        .len()
+                        == when.len()
             }
             Self::Reachable {
                 label,
@@ -713,9 +724,38 @@ impl Requirement {
                 network,
                 target_device,
                 target_interface,
+                when,
             } => {
+                let mut candidate = t.clone();
+                for c in when {
+                    candidate
+                        .devices
+                        .get_mut(&c.device)
+                        .unwrap()
+                        .interfaces
+                        .get_mut(&c.interface)
+                        .unwrap()
+                        .up = c.up;
+                }
+                let t = &candidate;
+                let context = if when.is_empty() {
+                    String::new()
+                } else {
+                    format!(
+                        " · with {}",
+                        when.iter()
+                            .map(|c| format!(
+                                "{}/{} {}",
+                                c.device,
+                                c.interface,
+                                if c.up { "up" } else { "down" }
+                            ))
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    )
+                };
                 let label = format!(
-                    "{device}: static {} for {target_device}/{target_interface}",
+                    "{device}: static {} for {target_device}/{target_interface}{context}",
                     network.text()
                 );
                 let result = (|| -> Result<(), String> {

@@ -50,6 +50,11 @@ struct Metrics {
     editor_viewport: Option<egui::Rect>,
     probe: Option<egui::Rect>,
     routing_forward: Option<egui::Rect>,
+    routing_add: Option<egui::Rect>,
+    routing_route_interface: Option<egui::Rect>,
+    routing_picker_id: Option<egui::Id>,
+    routing_port_options: Vec<(String, egui::Id)>,
+    routing_load_example: Option<egui::Rect>,
     routing_router_options: Option<egui::Rect>,
     script_history: Option<egui::Rect>,
     stop: Option<egui::Rect>,
@@ -213,6 +218,12 @@ impl LabApp {
                 2500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("routing-v4") {
                 2600
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv4-unit") {
+                2700
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv4-unit-layout")
+            {
+                2808
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("expansion") {
                 2400
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("vlan-resume") {

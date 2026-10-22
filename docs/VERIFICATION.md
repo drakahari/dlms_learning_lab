@@ -1,6 +1,6 @@
 # Current completion work
 
-The sections below retain historical scoped verification. Current milestone evidence is maintained in [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). As of M30:281 Rust tests;58 authored labs/fourteen units; new IPv4 routing integration uses an explicitly uncounted development fixture with native Fedora keyboard/retry/resize review. Full curriculum, fine-grained objective mapping, assistive-technology review and actual Windows/macOS desktop acceptance remain open. Current notice/platform candidate gates are in [INSTALLATION.md](INSTALLATION.md). No release-readiness claim follows from these counts.
+The sections below retain historical scoped verification. Current milestone evidence is maintained in [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). As of M31:289 Rust tests;64 authored labs/fifteen units; six authored IPv4 static-routing lessons have native Fedora keyboard/retry/resize review. Full curriculum, fine-grained objective mapping, assistive-technology review and actual Windows/macOS desktop acceptance remain open. Current notice/platform candidate gates are in [INSTALLATION.md](INSTALLATION.md). No release-readiness claim follows from these counts.
 
 # Teaching improvement verification
 

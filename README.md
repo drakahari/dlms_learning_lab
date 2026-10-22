@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. Fifty-eight authored assignments: the original nine, twenty-nine scripting tasks, ten Linux file/access activities, six IPv6 static-network activities and four VLAN data-plane activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. Sixty-four authored assignments: the original nine, twenty-nine scripting tasks, ten Linux file/access activities, six IPv6 static-network activities, six IPv4 static-routing activities and four VLAN data-plane activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 

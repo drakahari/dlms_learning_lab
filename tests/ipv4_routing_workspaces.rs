@@ -196,6 +196,7 @@ fn required_static_prefix_must_actually_serve_the_named_endpoint_and_valid_paths
         network,
         target_device: "Server".into(),
         target_interface: "lan".into(),
+        when: vec![],
     };
     assert!(!r.check(&t).0); // Default reaches server, but this specific assignment asks for a /24 static entry.
     editor::adapter(&mut t, "route Client 198.51.100.0/24 lan 192.0.2.1 70").unwrap();

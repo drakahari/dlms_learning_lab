@@ -83,6 +83,292 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 2700..=2807 => {
+                let i = 58 + (n - 2700) / 18;
+                let id = self.scenarios[i].id.clone();
+                match (n - 2700) % 18 {
+                    0 => {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        self.launch(i);
+                    }
+                    1 => {
+                        assert_eq!(self.routing_v4_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => self
+                        .pending_events
+                        .extend(click(self.metrics.example_action.unwrap())),
+                    3 => self
+                        .pending_events
+                        .extend(click(self.metrics.routing_load_example.unwrap())),
+                    4 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    5 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .routing_v4_learning
+                            .as_ref()
+                            .unwrap();
+                        assert!(
+                            l.checks(self.scenarios[i].ipv4_routing_teaching.as_ref().unwrap())
+                                .iter()
+                                .all(|r| r.0)
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!progress::current_solved(a, &self.scenarios[i]));
+                        shot = Some(format!("{id}-example"));
+                    }
+                    6 => self
+                        .pending_events
+                        .extend(click(self.metrics.assignment_action.unwrap())),
+                    7 => {
+                        assert_eq!(self.routing_v4_view(i), teaching::View::Assignment);
+                        shot = Some(format!("{id}-assignment"));
+                    }
+                    8 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    9 => {
+                        assert!(self.checked);
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-retry"));
+                    }
+                    10 => {
+                        let mut state = self.scenarios[i].initial.clone();
+                        for action in &self.scenarios[i].solution {
+                            engine::execute(&mut state, action).unwrap();
+                        }
+                        let engine::State::Ipv4Routing { topology } = state else {
+                            panic!()
+                        };
+                        let draft = self
+                            .progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .routing_v4_draft
+                            .as_mut()
+                            .unwrap();
+                        let selected = draft.selected_device.clone();
+                        let show = draft.show_routes;
+                        *draft = dlms_learning_lab::ipv4_routing_workspace::Draft::new(&topology);
+                        draft.selected_device = selected;
+                        draft.show_routes = show;
+                    }
+                    11 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    12 => {
+                        assert!(self.metrics.completion, "{id} native Check");
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    13 => {
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .routing_v4_draft
+                            .as_mut()
+                            .unwrap()
+                            .devices
+                            .get_mut("R1")
+                            .unwrap()
+                            .routes[0]
+                            .next_hop = "unfinished".into();
+                        self.dirty = true;
+                    }
+                    14 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        self.launch(9);
+                        self.launch(i);
+                    }
+                    15 => {
+                        let a = &self.progress.attempts[&id];
+                        assert!(!progress::current_solved(a, &self.scenarios[i]));
+                        assert!(!self.metrics.completion);
+                        assert_eq!(
+                            a.workspace
+                                .as_ref()
+                                .unwrap()
+                                .routing_v4_draft
+                                .as_ref()
+                                .unwrap()
+                                .devices["R1"]
+                                .routes[0]
+                                .next_hop,
+                            "unfinished"
+                        );
+                    }
+                    16 => self.reset_attempt(i),
+                    _ => {
+                        assert_eq!(self.progress.attempts[&id].state, self.scenarios[i].initial);
+                        self.selected = None;
+                    }
+                }
+            }
+            2808 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(63);
+                self.set_routing_v4_view(63, teaching::View::Introduction);
+            }
+            2809 => shot = Some("ipv4-unit-introduction-light-150".into()),
+            2810 => self.set_routing_v4_view(63, teaching::View::Assignment),
+            2811 => shot = Some("ipv4-unit-handover-light-150".into()),
+            2812 | 2817 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(ctx.content_rect().center()));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -1000.),
+                    modifiers: Default::default(),
+                });
+            }
+            2813 | 2818 => {}
+            2814 => {
+                let r = self.metrics.check.unwrap();
+                assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
+                shot = Some("ipv4-unit-handover-scrolled-light-150".into());
+            }
+            2815 => {
+                let d = self
+                    .progress
+                    .attempts
+                    .get_mut("ccna-ipv4-branch-handover")
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .routing_v4_draft
+                    .as_mut()
+                    .unwrap();
+                d.selected_device = "R1".into();
+                d.show_routes = true;
+                self.lesson_scroll_reset = true;
+            }
+            2816 => shot = Some("ipv4-unit-routes-light-150".into()),
+            2819 => {
+                let r = self.metrics.check.unwrap();
+                if r.top() < 0. || r.bottom() >= ctx.content_rect().bottom() {
+                    let tries = ctx.data_mut(|d| {
+                        let key = egui::Id::new("ipv4-native-route-scroll-tries");
+                        let n = d.get_temp::<usize>(key).unwrap_or(0) + 1;
+                        d.insert_temp(key, n);
+                        n
+                    });
+                    assert!(
+                        tries <= 4,
+                        "Could not scroll to route Check: {r:?} in {:?}",
+                        ctx.content_rect()
+                    );
+                    self.pending_events
+                        .push(egui::Event::PointerMoved(ctx.content_rect().center()));
+                    self.pending_events.push(egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -800.),
+                        modifiers: Default::default(),
+                    });
+                    self.smoke_stage = 2817;
+                } else {
+                    shot = Some("ipv4-unit-routes-scrolled-light-150".into());
+                }
+            }
+            2820 => {
+                self.theme_id = "lab-navy".into();
+                theme::apply(ctx, &self.theme_id);
+                self.progress
+                    .attempts
+                    .get_mut("ccna-ipv4-branch-handover")
+                    .unwrap()
+                    .challenge = true;
+            }
+            2821 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                assert!(!self.metrics.help_visible);
+                shot = Some("ipv4-unit-challenge-dark-150".into());
+            }
+            2822 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.scale = 1.;
+                self.launch(58);
+                self.set_routing_v4_view(58, teaching::View::Assignment);
+            }
+            2823 => self
+                .pending_events
+                .extend(click(self.metrics.routing_add.unwrap())),
+            2824 => {
+                self.pending_events.push(key(egui::Key::A, true));
+                self.pending_events
+                    .push(egui::Event::Text("10.40.1.0/24".into()));
+            }
+            2825 => self.pending_events.push(key(egui::Key::Tab, false)),
+            2826 => self
+                .pending_events
+                .push(egui::Event::Text("10.0.0.2".into())),
+            2827 => self.pending_events.push(key(egui::Key::Tab, false)),
+            2828 => self.pending_events.push(key(egui::Key::Enter, false)),
+            2829 => {}
+            2830 => self.pending_events.push(key(egui::Key::Tab, false)),
+            2831 => self.pending_events.push(key(egui::Key::Enter, false)),
+            2832 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            2833 => {
+                assert!(self.metrics.completion);
+                shot = Some("ipv4-unit-keyboard-route-complete".into());
+            }
+            2834 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "CCNA".into(),
+                    unit: "ipv4-static-foundations".into(),
+                    ..Default::default()
+                };
+            }
+            2835 => {
+                assert!(!self.metrics.pagination);
+                shot = Some("ipv4-unit-library".into());
+            }
+            2836 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2837 => shot = Some("ipv4-unit-library-light-150".into()),
+            2838 => {
+                if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv4-unit-layout") {
+                    println!(
+                        "PASS native IPv4 focused layout: explicit Learn introduction, resized150% light/dark address/stacked-route scrolling, Check reached, independent Challenge, keyboard-only route/menu entry and unit-library wrapping. Synthetic profile only."
+                    );
+                } else {
+                    println!(
+                        "PASS native IPv4 unit: six introductions, real example-load/apply actions with isolation, full assignments, wrong retry, reference drafts through native Check, completion/invalidation/save/reload/reset; manual keyboard route fields and menu focus; resized150% light/dark scrolling/Challenge and unit library. Most alternate repairs are backend-tested, not individually typed. No novice, physical-network or Windows/macOS desktop acceptance."
+                    );
+                }
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+
             2600 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 let i = self.add_routing_fixture();

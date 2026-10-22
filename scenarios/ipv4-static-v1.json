@@ -1,0 +1,4016 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-ipv4-network-route",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "unit": "ipv4-static-foundations",
+      "title": "Connect the branch with a network route",
+      "summary": "Build the missing router entry, choose its neighboring next hop, and verify traffic and replies.",
+      "objective": "Client must reach Server at 10.40.1.20 through R1 and R2. Add a static network route on R1 for 10.40.1.0/24 using its directly connected R2 neighbor. Keep the supplied addresses and forwarding on R1/R2. Verify the complete trip and reply; a default or single-host workaround does not meet this network-route task.",
+      "retry_guidance": "Compare the first failed outcome with the current addresses and selected route. Fix that cause, then check again; a successful forward trip still needs a working reply.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect attached networks",
+        "Build and verify the route"
+      ],
+      "guide": [
+        {
+          "title": "Inspect attached networks",
+          "why": "R1 already reaches the office and the transit link, but not the remote branch.",
+          "action": "Choose R1. Compare Addresses & interfaces with Connected networks and route rules.",
+          "commands": []
+        },
+        {
+          "title": "Build and verify the route",
+          "why": "A network entry must direct branch traffic to a reachable router neighbor.",
+          "action": "Choose Static routes, add the requested /24 row, then Check configuration. Open applied paths if either direction fails.",
+          "commands": []
+        }
+      ],
+      "explanation": "R1 knows its connected office and transit networks. A static 10.40.1.0/24 entry via R2\u2019s 10.0.0.2 on transit supplies the missing direction. R2 already has the reverse office route, and Server has a default to R2. The route\u2019s exact distance can vary when no equally specific candidate competes; the prefix, usable immediate next hop and resulting endpoint behavior matter.",
+      "hints": [
+        "Follow the cable from R1\u2019s transit interface to R2. Which neighboring address is on that same /30?",
+        "On R1, add destination 10.40.1.0/24. The outgoing interface is transit; the next hop belongs to R2, not Server."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Native configuration fields model bounded IPv4 static forwarding; they are not Cisco IOS or Linux command syntax. Only private/documentation endpoints, conventional /1\u2013/30 interfaces, /0\u2013/32 route prefixes and immediate on-link next hops. No real packets, ARP cache, dynamic routing, ECMP, recursive next hops, ACL/NAT or timing. Supplied interface up/down is operational state; a two-ended failure sets both ends. A missing neighbor alone does not withdraw an eligible static route. Return paths must work. Official sources checked 2026-10-22; this is partial current CCNA v1.1 practice, not full exam/equipment preparation.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.1",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": []
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "192.168.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.168.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "route R1 10.40.1.0/24 transit 10.0.0.2 1"
+      ],
+      "prerequisites": [
+        "ccna-gateway"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": true,
+        "prerequisite_note": "Use the address/subnet ideas from IPv4 addressing and diagnosis. Configure device selects equipment; Addresses & interfaces edits its address/prefix and forwarding, while Static routes edits destination, next hop, outgoing interface and distance. Nothing runs on your computer\u2019s network.",
+        "concepts": [
+          {
+            "title": "Routes are directions",
+            "text": "A device first checks its attached networks. For a different network, a static route supplies directions you configure: the destination network, outgoing interface and next-hop neighbor. A /24 network route serves that whole address block, not just one computer."
+          },
+          {
+            "title": "Choose the neighbor, not the final server",
+            "text": "The next hop must be the neighboring router\u2019s address on your outgoing cable. R1 cannot directly use a distant server as its next hop. In the editor, Add static route creates a draft row; replace its default /0 if the task asks for a specific network."
+          },
+          {
+            "title": "Verify both journeys",
+            "text": "Check configuration applies all valid drafts together, then checks the requested endpoints and their replies. Inspect applied forwarding paths shows where a trip stops. Connected networks are derived from up interfaces; route distance defaults to 1 for static entries."
+          }
+        ],
+        "example_description": "A separate topology uses Client 172.20.10.10 and Server 172.22.1.20. R1 has no route to the branch. Load example settings to inspect a working 172.22.1.0/24 route via neighboring R2, then Apply and test example.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.1",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": []
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "route R1 172.22.1.0/24 transit 172.21.0.2 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.20.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "172.20.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "Change only the example route distance from 1 to 25, then test. With no competing route for that prefix it still works. Change its next hop to the distant server and test the specific diagnostic."
+      }
+    },
+    {
+      "id": "ccna-ipv4-return-route",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "unit": "ipv4-static-foundations",
+      "title": "Repair the journey back",
+      "summary": "Diagnose a delivered request whose reply cannot find the office.",
+      "objective": "Client requests reach Server, but no reply returns. Diagnose the applied path and restore a static network route on R2 for the office 192.168.10.0/24 through its R1 neighbor. Keep all supplied addresses, forwarding and the working forward path. Verify that Client receives a reply; a route only to one office host is insufficient.",
+      "retry_guidance": "Compare the first failed outcome with the current addresses and selected route. Fix that cause, then check again; a successful forward trip still needs a working reply.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Find where the reply stops",
+        "Restore office-wide replies"
+      ],
+      "guide": [
+        {
+          "title": "Find where the reply stops",
+          "why": "The applied trace identifies the failing direction instead of assuming every failure starts at the client.",
+          "action": "Open Inspect applied forwarding paths; read the reply failure. Inspect the named router\u2019s static entries.",
+          "commands": []
+        },
+        {
+          "title": "Restore office-wide replies",
+          "why": "A route to the network supports the stated office, unlike a one-host patch.",
+          "action": "On R2 add the office /24 through its directly connected R1 neighbor, then check the complete configuration.",
+          "commands": []
+        }
+      ],
+      "explanation": "Server already sends replies to R2. R2 has only its branch and transit connected networks, so it needs 192.168.10.0/24 via 10.0.0.1 on transit. That restores the return trip without changing the working forward route. A /32 patch can reach this one client but does not satisfy the explicitly requested network entry.",
+      "hints": [
+        "The forward trip already reaches Server. Read the reply failure before editing Client.",
+        "R2 needs the office network as its destination; its immediate neighbor toward that network is R1 on transit."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Native configuration fields model bounded IPv4 static forwarding; they are not Cisco IOS or Linux command syntax. Only private/documentation endpoints, conventional /1\u2013/30 interfaces, /0\u2013/32 route prefixes and immediate on-link next hops. No real packets, ARP cache, dynamic routing, ECMP, recursive next hops, ACL/NAT or timing. Supplied interface up/down is operational state; a two-ended failure sets both ends. A missing neighbor alone does not withdraw an eligible static route. Return paths must work. Official sources checked 2026-10-22; this is partial current CCNA v1.1 practice, not full exam/equipment preparation.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.1",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.2",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R2",
+            "network": {
+              "address": "192.168.10.0",
+              "length": 24
+            },
+            "target_device": "Client",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "192.168.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.168.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "route R2 192.168.10.0/24 transit 10.0.0.1 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-network-route"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": true,
+        "prerequisite_note": "Use the address/subnet ideas from IPv4 addressing and diagnosis. Configure device selects equipment; Addresses & interfaces edits its address/prefix and forwarding, while Static routes edits destination, next hop, outgoing interface and distance. Nothing runs on your computer\u2019s network.",
+        "concepts": [
+          {
+            "title": "Reachable is a round trip",
+            "text": "Getting to a server is only half the task. The server sends a reply toward the original source, and every router on that return trip needs suitable directions too."
+          },
+          {
+            "title": "Read the first failure",
+            "text": "Inspect applied forwarding paths distinguishes forward delivery from a failed reply. Follow the reply toward the office and find the first device missing that network route; changing a working client default cannot supply a missing entry on a different router."
+          }
+        ],
+        "example_description": "The separate practice uses office 172.20.10.0/24. Requests arrive at Server 172.22.1.20; R2 lacks directions back. Load the example route on R2, apply, and compare the forward and reply paths.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.1",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.2",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "route R2 172.20.10.0/24 transit 172.21.0.1 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R2",
+            "network": {
+              "address": "172.20.10.0",
+              "length": 24
+            },
+            "target_device": "Client",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.20.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "172.20.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "Replace the example /24 return route with 172.20.10.10/32. The single client may receive replies, but the requested office-network requirement fails. Restore the /24."
+      }
+    },
+    {
+      "id": "ccna-ipv4-specific-route",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "unit": "ipv4-static-foundations",
+      "title": "Repair the more-specific detour",
+      "summary": "Keep a working default while repairing the network entry that overrides it.",
+      "objective": "Client reaches Sibling at 10.40.2.20, but Server at 10.40.1.20 takes a dead end through Spare. Repair R1\u2019s static 10.40.1.0/24 entry so it serves Server through R2. Keep a default entry serving Sibling, keep all addresses and R1/R2 forwarding, and verify both endpoints. Do not replace the assignment with individual host routes.",
+      "retry_guidance": "Compare the first failed outcome with the current addresses and selected route. Fix that cause, then check again; a successful forward trip still needs a working reply.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Compare destination matches",
+        "Repair one direction without losing the other"
+      ],
+      "guide": [
+        {
+          "title": "Compare destination matches",
+          "why": "Both default and /24 match Server, but their prefix lengths differ.",
+          "action": "On R1 inspect both route rows and identify the more-specific one. Inspect the path stopping at Spare.",
+          "commands": []
+        },
+        {
+          "title": "Repair one direction without losing the other",
+          "why": "Changing distance alone cannot make a matching /24 defer to /0.",
+          "action": "Edit the /24\u2019s next hop and outgoing interface toward R2, keep the default serving Sibling, then check both endpoints.",
+          "commands": []
+        }
+      ],
+      "explanation": "The 10.40.1.0/24 entry matches Server more specifically than 0.0.0.0/0, even at distance80 or150. Its old direction led to Spare, which had no onward route. Pointing that network entry to 10.0.0.2 on transit restores Server. Sibling continues using the default. Distance becomes decisive only among equally specific eligible choices.",
+      "hints": [
+        "Compare which row matches Server most specifically. Its distance need not be smaller than the default\u2019s.",
+        "The /24 row must use R2\u2019s transit next hop; leave the working default for Sibling."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Native configuration fields model bounded IPv4 static forwarding; they are not Cisco IOS or Linux command syntax. Only private/documentation endpoints, conventional /1\u2013/30 interfaces, /0\u2013/32 route prefixes and immediate on-link next hops. No real packets, ARP cache, dynamic routing, ECMP, recursive next hops, ACL/NAT or timing. Supplied interface up/down is operational state; a two-ended failure sets both ends. A missing neighbor alone does not withdraw an eligible static route. Return paths must work. Official sources checked 2026-10-22; this is partial current CCNA v1.1 practice, not full exam/equipment preparation.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.2",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "10.0.0.6",
+                  "distance": 80
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.1",
+                    "prefix": 24
+                  }
+                },
+                "sibling": {
+                  "link": "sibling",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.2.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Spare": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.6",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Sibling": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "sibling",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.2.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.2.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "0.0.0.0",
+              "length": 0
+            },
+            "target_device": "Sibling",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "192.168.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.168.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "10.0.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "sibling",
+            "assignment": {
+              "address": "10.40.2.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Spare",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Sibling",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.2.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Sibling and receives a reply",
+            "from": "Client",
+            "target_device": "Sibling",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "remove-route R1 1",
+        "route R1 10.40.1.0/24 transit 10.0.0.2 80"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-return-route"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": true,
+        "prerequisite_note": "Use the address/subnet ideas from IPv4 addressing and diagnosis. Configure device selects equipment; Addresses & interfaces edits its address/prefix and forwarding, while Static routes edits destination, next hop, outgoing interface and distance. Nothing runs on your computer\u2019s network.",
+        "concepts": [
+          {
+            "title": "More detail wins first",
+            "text": "A route for a smaller address block is more specific: /24 names 256 addresses, while /0 is the default for anything else. For a matching destination, /24 wins before distance is considered."
+          },
+          {
+            "title": "Distance compares equally specific choices",
+            "text": "A higher distance on a /24 does not make a matching /0 take over. Repair the network entry\u2019s direction rather than trying to make its distance larger. Here Spare is a real neighbor but has no onward branch path."
+          },
+          {
+            "title": "Keep an unaffected service working",
+            "text": "Troubleshooting must restore the broken path without losing a working one. This task checks the repaired network entry and the default entry actually serving the sibling network."
+          }
+        ],
+        "example_description": "In the separate practice, the default via R2 reaches 172.22.2.20, but a 172.22.1.0/24 row sends 172.22.1.20 to Spare. Load and apply the repaired network direction, then inspect both paths.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.2",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "172.21.0.6",
+                  "distance": 80
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.1",
+                    "prefix": 24
+                  }
+                },
+                "sibling": {
+                  "link": "sibling",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.2.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Spare": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.6",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Sibling": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "sibling",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.2.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.2.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "remove-route R1 1",
+          "route R1 172.22.1.0/24 transit 172.21.0.2 80"
+        ],
+        "outcomes": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "0.0.0.0",
+              "length": 0
+            },
+            "target_device": "Sibling",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.20.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "172.20.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "172.21.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "sibling",
+            "assignment": {
+              "address": "172.22.2.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Spare",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Sibling",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.2.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Sibling and receives a reply",
+            "from": "Client",
+            "target_device": "Sibling",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "Keep the working /24 direction but change its distance to 150. It still beats the default for that subnet. Then point the /24 back at Spare with distance 1; only that subnet fails."
+      }
+    },
+    {
+      "id": "ccna-ipv4-host-exception",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "unit": "ipv4-static-foundations",
+      "title": "Send one host through a different router",
+      "summary": "Use a host route for a special endpoint without redirecting its neighbors.",
+      "objective": "Server at 10.40.1.20 needs an intentional exception through Spare: R1 must use backup for that one address. Peer at 10.40.1.30 must keep using R1\u2019s network route through transit and R2. Add a static /32 host route on R1 for Server, preserve the /24 serving Peer, all supplied addresses and router forwarding, and verify Client\u2019s full Server trip and reply.",
+      "retry_guidance": "Compare the first failed outcome with the current addresses and selected route. Fix that cause, then check again; a successful forward trip still needs a working reply.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Identify the exception\u2019s scope",
+        "Verify both hosts"
+      ],
+      "guide": [
+        {
+          "title": "Identify the exception\u2019s scope",
+          "why": "A broad direction would change neighbors that must keep their existing path.",
+          "action": "Compare Server and Peer. Choose a route prefix that matches only Server.",
+          "commands": []
+        },
+        {
+          "title": "Verify both hosts",
+          "why": "The special path and unchanged normal path are separate outcomes.",
+          "action": "Add the /32 via Spare on R1, then check. Inspect Server and Peer forward paths and Client\u2019s reply.",
+          "commands": []
+        }
+      ],
+      "explanation": "R1\u2019s 10.40.1.20/32 via 10.0.0.6 on backup matches only Server and wins over its /24, regardless of the /32\u2019s higher distance. Peer keeps the /24 via R2. Server may reply through R2; both journeys work without requiring symmetric paths. /32 host routes are supported here while /31-/32 interface assignments remain excluded.",
+      "hints": [
+        "A whole /24 includes Peer as well as Server. Which routing prefix matches exactly one address?",
+        "On R1 add 10.40.1.20/32 via Spare\u2019s neighbor address on backup. Preserve the existing /24 via R2."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Native configuration fields model bounded IPv4 static forwarding; they are not Cisco IOS or Linux command syntax. Only private/documentation endpoints, conventional /1\u2013/30 interfaces, /0\u2013/32 route prefixes and immediate on-link next hops. No real packets, ARP cache, dynamic routing, ECMP, recursive next hops, ACL/NAT or timing. Supplied interface up/down is operational state; a two-ended failure sets both ends. A missing neighbor alone does not withdraw an eligible static route. Return paths must work. Official sources checked 2026-10-22; this is partial current CCNA v1.1 practice, not full exam/equipment preparation. Router-origin probes use the chosen outgoing interface address as source; this is not a complete source-address policy model.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.2",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "10.0.0.4",
+                    "length": 30
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Spare": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.6",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.2",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.5",
+                  "distance": 1
+                }
+              ]
+            },
+            "Peer": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.30",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.20",
+              "length": 32
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Peer",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "192.168.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.168.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "10.0.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Spare",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Spare",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.2",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Peer",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.30",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "Spare",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "backup",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Peer and receives a reply",
+            "from": "R1",
+            "target_device": "Peer",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "route R1 10.40.1.20/32 backup 10.0.0.6 40"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-specific-route"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": true,
+        "prerequisite_note": "Use the address/subnet ideas from IPv4 addressing and diagnosis. Configure device selects equipment; Addresses & interfaces edits its address/prefix and forwarding, while Static routes edits destination, next hop, outgoing interface and distance. Nothing runs on your computer\u2019s network.",
+        "concepts": [
+          {
+            "title": "One address can have its own direction",
+            "text": "A /32 route matches exactly one IPv4 address. It can override a broader network entry for that host while leaving its neighbors on the normal path. This is a routing prefix, not a /32 interface assignment."
+          },
+          {
+            "title": "A deliberate exception is different from a broken detour",
+            "text": "Both branch routers can reach the server network here. The task intentionally sends one host through Spare. Its return trip may use a different valid router. A successful reply does not need to follow exactly the same path back. A check sent by R1 uses its chosen outgoing interface\u2019s address as the source, unlike a Client check. The supplied R2 route back to R1\u2019s reserve subnet lets that router-origin reply return too."
+          }
+        ],
+        "example_description": "The practice sends only 172.22.1.20 through Spare, while 172.22.1.30 stays on the normal network route. Load the /32 example and compare the two applied forward paths.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.2",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "172.21.0.4",
+                    "length": 30
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Spare": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.6",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.2",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.5",
+                  "distance": 1
+                }
+              ]
+            },
+            "Peer": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.30",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "route R1 172.22.1.20/32 backup 172.21.0.6 40"
+        ],
+        "outcomes": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.20",
+              "length": 32
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Peer",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.20.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "172.20.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "172.21.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Spare",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Spare",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.2",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Peer",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.30",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "Spare",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "backup",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Peer and receives a reply",
+            "from": "R1",
+            "target_device": "Peer",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "Change the example exception destination from 172.22.1.20/32 to 172.22.1.0/24. Both rows then have the same specificity; distance can redirect the peer or hide the intended exception, and the explicit host-route task no longer passes."
+      }
+    },
+    {
+      "id": "ccna-ipv4-floating-route",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "unit": "ipv4-static-foundations",
+      "title": "Restore the primary and floating backup",
+      "summary": "Choose between equal prefixes and prove the backup after an operational withdrawal.",
+      "objective": "R1 should normally reach Server through transit, using backup only when both primary transit interfaces on R1 and R2 are down. Repair the two static routes for 10.40.1.0/24 so the primary is preferred and the floating backup remains usable. Keep all addresses and router forwarding. Check configuration tests normal operation and a separate copy with both primary transit interfaces down, including Client\u2019s reply path.",
+      "retry_guidance": "Compare the first failed outcome with the current addresses and selected route. Fix that cause, then check again; a successful forward trip still needs a working reply.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Restore normal preference",
+        "Prove the failure path"
+      ],
+      "guide": [
+        {
+          "title": "Restore normal preference",
+          "why": "The backup is taking normal traffic because its equally specific candidate has lower distance.",
+          "action": "On R1 compare the two /24 entries. Give transit the preferred distance without disabling backup.",
+          "commands": []
+        },
+        {
+          "title": "Prove the failure path",
+          "why": "A backup that never carries a tested trip is only a saved row, not a verified repair.",
+          "action": "Check configuration. Inspect both the normal and primary-down outcomes, including the reply path through R2.",
+          "commands": []
+        }
+      ],
+      "explanation": "Both R1 entries name 10.40.1.0/24, so their distances decide preference: a lower eligible transit distance wins normally. When the controlled case brings both transit ends down, those connected and static candidates are unavailable; the backup direction and R2\u2019s backup return route carry traffic. A missing neighbor alone does not withdraw an otherwise eligible route. Many unequal distance pairs from1\u2013254 are valid.",
+      "hints": [
+        "Compare distances only after confirming both rows have exactly the same destination prefix.",
+        "Choose a smaller distance for transit than backup, keep both entries eligible, then read the controlled failure outcomes."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Native configuration fields model bounded IPv4 static forwarding; they are not Cisco IOS or Linux command syntax. Only private/documentation endpoints, conventional /1\u2013/30 interfaces, /0\u2013/32 route prefixes and immediate on-link next hops. No real packets, ARP cache, dynamic routing, ECMP, recursive next hops, ACL/NAT or timing. Supplied interface up/down is operational state; a two-ended failure sets both ends. A missing neighbor alone does not withdraw an eligible static route. Return paths must work. Official sources checked 2026-10-22; this is partial current CCNA v1.1 practice, not full exam/equipment preparation.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.2",
+                  "distance": 90
+                },
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "10.0.0.6",
+                  "distance": 5
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.1",
+                    "prefix": 24
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.6",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "10.0.0.5",
+                  "distance": 20
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "192.168.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.168.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "10.0.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "backup",
+            "assignment": {
+              "address": "10.0.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply with the primary link down",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "backup",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply with the primary link down",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "remove-route R1 0",
+        "remove-route R1 0",
+        "route R1 10.40.1.0/24 transit 10.0.0.2 1",
+        "route R1 10.40.1.0/24 backup 10.0.0.6 20"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-host-exception"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": true,
+        "prerequisite_note": "Use the address/subnet ideas from IPv4 addressing and diagnosis. Configure device selects equipment; Addresses & interfaces edits its address/prefix and forwarding, while Static routes edits destination, next hop, outgoing interface and distance. Nothing runs on your computer\u2019s network.",
+        "concepts": [
+          {
+            "title": "Choose between equal destination blocks",
+            "text": "When two eligible entries name the same prefix, lower administrative distance is preferred. It is a preference value, not latency or hop count. Equal distinct paths are outside this model; distance255 is ineligible."
+          },
+          {
+            "title": "A floating route waits for withdrawal",
+            "text": "A less-preferred static entry can become usable when the preferred outgoing interface is down. The checked failure sets both primary ends down in a copy, so your saved configuration stays unchanged. Keep a working return path during that failure too."
+          },
+          {
+            "title": "A silent neighbor is not route withdrawal",
+            "text": "An otherwise eligible static entry does not disappear just because its next-hop neighbor is absent. The backup is not a health monitor. This unit does not model tracking, dynamic protocols or automatic carrier detection."
+          }
+        ],
+        "example_description": "The practice has two routes for 172.22.1.0/24, but the reserve currently has lower distance. Load the corrected preference and test both normal and controlled primary-down cases.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.2",
+                  "distance": 90
+                },
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "172.21.0.6",
+                  "distance": 5
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.1",
+                    "prefix": 24
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.6",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "172.21.0.5",
+                  "distance": 20
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "remove-route R1 0",
+          "remove-route R1 0",
+          "route R1 172.22.1.0/24 transit 172.21.0.2 1",
+          "route R1 172.22.1.0/24 backup 172.21.0.6 20"
+        ],
+        "outcomes": [
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.20.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "172.20.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "172.21.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "backup",
+            "assignment": {
+              "address": "172.21.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply with the primary link down",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "backup",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply with the primary link down",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          }
+        ],
+        "try_change": "Set the practice backup distance to 255 and test. Normal operation can still pass while the primary-down cases fail. Restore a greater-than-primary distance from 1 to 254."
+      }
+    },
+    {
+      "id": "ccna-ipv4-branch-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "unit": "ipv4-static-foundations",
+      "title": "Complete the resilient branch handover",
+      "summary": "Bring a new desk online, diagnose route and forwarding faults, and prove normal and backup service.",
+      "objective": "Bring Client2 onto office 192.168.10.0/24 with a different usable address from Client (192.168.10.10) and R1 (192.168.10.1). Keep every supplied address elsewhere.\n\nBoth office clients must reach Server and receive replies. R1 must normally use transit for the branch 10.40.1.0/24 and use backup when both primary transit ends are down. R2 must normally return to the office through transit, with backup available for failure. Diagnose forwarding, next-hop and return-route faults; keep R1/R2 able to forward.\n\nUse the address and static-route editors, then Check configuration. It verifies both clients in normal and tests with both primary transit interfaces down. Do not disable the reserve or patch only one client\u2019s return route.",
+      "retry_guidance": "Compare the first failed outcome with the current addresses and selected route. Fix that cause, then check again; a successful forward trip still needs a working reply.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Prepare the new desk",
+        "Repair routers and verify the handover"
+      ],
+      "guide": [
+        {
+          "title": "Prepare the new desk",
+          "why": "A blank, occupied or reserved address cannot support an ordinary workstation.",
+          "action": "Assign Client2 a free office host address with /24; keep every supplied address elsewhere.",
+          "commands": []
+        },
+        {
+          "title": "Repair routers and verify the handover",
+          "why": "Normal traffic, both clients\u2019 replies and a tested reserve path are all required.",
+          "action": "Inspect R1 forwarding and next-hop/distance choices, then R2 return paths. Check all normal and primary-down cases and retry the first remaining failure.",
+          "commands": []
+        }
+      ],
+      "explanation": "A valid handover gives Client2 any unoccupied usable 192.168.10.x/24 address, enables R1/R2 forwarding, sends the branch /24 through the actual R2 neighbor on transit with a lower distance than backup, and restores office-wide return directions. The controlled two-ended transit failure then uses backup in both directions. All specified endpoint assignments remain fixed; one successful client or one normal-state probe is insufficient.",
+      "hints": [
+        "Inspect Client2 first, then R1 forwarding and route eligibility. A route pointing at R1\u2019s own address is not a path to R2.",
+        "After normal transit works, inspect R2\u2019s office return routes and the controlled primary-down outcomes. Keep an eligible backup and an office /24 return route; a single-host patch does not cover the office network."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/support/docs/ip/enhanced-interior-gateway-routing-protocol-eigrp/8651-21.html",
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Native configuration fields model bounded IPv4 static forwarding; they are not Cisco IOS or Linux command syntax. Only private/documentation endpoints, conventional /1\u2013/30 interfaces, /0\u2013/32 route prefixes and immediate on-link next hops. No real packets, ARP cache, dynamic routing, ECMP, recursive next hops, ACL/NAT or timing. Supplied interface up/down is operational state; a two-ended failure sets both ends. A missing neighbor alone does not withdraw an eligible static route. Return paths must work. Official sources checked 2026-10-22; this is partial current CCNA v1.1 practice, not full exam/equipment preparation.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": false,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.168.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.1",
+                  "distance": 100
+                },
+                {
+                  "destination": {
+                    "address": "10.40.1.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "10.0.0.6",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.1",
+                    "prefix": 24
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "10.0.0.6",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "10.0.0.2",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "192.168.10.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "10.0.0.5",
+                  "distance": 20
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.40.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.40.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Client2": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.168.10.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "AddressIn",
+            "device": "Client2",
+            "interface": "lan",
+            "network": {
+              "address": "192.168.10.0",
+              "length": 24
+            },
+            "exclude": [
+              "192.168.10.10",
+              "192.168.10.1"
+            ]
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "192.168.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.168.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "10.0.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "10.0.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.40.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "backup",
+            "assignment": {
+              "address": "10.0.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.40.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply with the primary link down",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "backup",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply with the primary link down",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client2 reaches Server and receives a reply",
+            "from": "Client2",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client2 reaches Server and receives a reply with the primary link down",
+            "from": "Client2",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "10.40.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R2",
+            "network": {
+              "address": "192.168.10.0",
+              "length": 24
+            },
+            "target_device": "Client",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "Reachable",
+            "label": "R2 normally returns toward the office through transit",
+            "from": "R2",
+            "target_device": "Client",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "address Client2 lan 192.168.10.22/24",
+        "forward R1 on",
+        "remove-route R1 0",
+        "remove-route R1 0",
+        "route R1 10.40.1.0/24 transit 10.0.0.2 1",
+        "route R1 10.40.1.0/24 backup 10.0.0.6 20",
+        "remove-route R2 0",
+        "route R2 192.168.10.0/24 transit 10.0.0.1 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv4-floating-route",
+        "ccna-vlsm"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": false,
+        "prerequisite_note": "Use the address/subnet ideas from IPv4 addressing and diagnosis. Configure device selects equipment; Addresses & interfaces edits its address/prefix and forwarding, while Static routes edits destination, next hop, outgoing interface and distance. Nothing runs on your computer\u2019s network.",
+        "concepts": [
+          {
+            "title": "Work from a handover checklist",
+            "text": "This assignment combines earlier skills: choose a free host address, preserve working addresses, enable router forwarding, use neighboring next hops and verify both return paths. Fix one cause at a time; partial results help you keep what already works."
+          },
+          {
+            "title": "Inspect saved rows and selected behavior",
+            "text": "A saved route can be ineligible, or eligible without being chosen. A next hop assigned to the same router is not a neighboring router. After edits, Check configuration applies valid drafts and tests the full handover in normal and primary-down states."
+          }
+        ],
+        "example_description": "In the practice office 172.20.10.0/24, a second client has no address and multiple router settings are broken. Load the handover example, apply it, and compare which outcomes each repair enables.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": false,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "172.20.10.1",
+                    "prefix": 24
+                  }
+                },
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.1",
+                    "prefix": 30
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.5",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.1",
+                  "distance": 100
+                },
+                {
+                  "destination": {
+                    "address": "172.22.1.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "172.21.0.6",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "backbone",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.2",
+                    "prefix": 30
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.1",
+                    "prefix": 24
+                  }
+                },
+                "backup": {
+                  "link": "reserve",
+                  "up": true,
+                  "address": {
+                    "address": "172.21.0.6",
+                    "prefix": 30
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "transit",
+                  "via": "172.21.0.2",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "172.20.10.0",
+                    "length": 24
+                  },
+                  "interface": "backup",
+                  "via": "172.21.0.5",
+                  "distance": 20
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "172.22.1.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.22.1.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Client2": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "172.20.10.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "address Client2 lan 172.20.10.22/24",
+          "forward R1 on",
+          "remove-route R1 0",
+          "remove-route R1 0",
+          "route R1 172.22.1.0/24 transit 172.21.0.2 1",
+          "route R1 172.22.1.0/24 backup 172.21.0.6 20",
+          "remove-route R2 0",
+          "route R2 172.20.10.0/24 transit 172.21.0.1 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "AddressIn",
+            "device": "Client2",
+            "interface": "lan",
+            "network": {
+              "address": "172.20.10.0",
+              "length": 24
+            },
+            "exclude": [
+              "172.20.10.10",
+              "172.20.10.1"
+            ]
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.20.10.10",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "172.20.10.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.1",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "172.21.0.5",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": {
+              "address": "172.21.0.2",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "172.22.1.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "backup",
+            "assignment": {
+              "address": "172.21.0.6",
+              "prefix": 30
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "172.22.1.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R2",
+            "enabled": true
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "R1 reaches Server and receives a reply with the primary link down",
+            "from": "R1",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": "backup",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply with the primary link down",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client2 reaches Server and receives a reply",
+            "from": "Client2",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client2 reaches Server and receives a reply with the primary link down",
+            "from": "Client2",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R1",
+            "network": {
+              "address": "172.22.1.0",
+              "length": 24
+            },
+            "target_device": "Server",
+            "target_interface": "lan",
+            "when": [
+              {
+                "device": "R1",
+                "interface": "transit",
+                "up": false
+              },
+              {
+                "device": "R2",
+                "interface": "transit",
+                "up": false
+              }
+            ]
+          },
+          {
+            "kind": "StaticRouteFor",
+            "device": "R2",
+            "network": {
+              "address": "172.20.10.0",
+              "length": 24
+            },
+            "target_device": "Client",
+            "target_interface": "lan"
+          },
+          {
+            "kind": "Reachable",
+            "label": "R2 normally returns toward the office through transit",
+            "from": "R2",
+            "target_device": "Client",
+            "target_interface": "lan",
+            "first_hop": "transit",
+            "when": []
+          }
+        ],
+        "try_change": "Choose another free address for the practice Client2 and test. Then disable R1 forwarding: addresses and saved rows remain, but the end-to-end client cases fail. Restore forwarding before returning to the assignment."
+      }
+    }
+  ]
+}

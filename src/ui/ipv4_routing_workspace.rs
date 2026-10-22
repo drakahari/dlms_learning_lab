@@ -89,7 +89,9 @@ impl LabApp {
                     .clone()
                     .unwrap();
                 ui.horizontal_wrapped(|ui| {
-                    if ui.add(button("Load example settings")).clicked() {
+                    let r = ui.add(button("Load example settings"));
+                    self.metrics.routing_load_example = Some(r.rect);
+                    if r.clicked() {
                         learning.fill_example(lesson).expect("validated example");
                         self.dirty = true;
                     }
@@ -261,6 +263,14 @@ impl LabApp {
         }
         let s = &self.scenarios[i];
         let a = &self.progress.attempts[&s.id];
+        if let State::Ipv4Routing { topology } = &a.state
+            && a.workspace
+                .as_ref()
+                .and_then(|w| w.routing_v4_draft.as_ref())
+                .is_some_and(|d| !d.matches(topology))
+        {
+            return;
+        }
         let results = engine::checks(&a.state, &s.goal);
         let pass = progress::current_solved(a, s);
         self.metrics.completion = pass;
@@ -336,7 +346,7 @@ fn configuration_editor(
                 egui::Layout::top_down(egui::Align::Min),
                 |ui| {
                     ui.set_width(250.);
-                    device_cards(ui, topology, draft, true);
+                    neighbors(ui, topology, draft);
                 },
             );
             ui.allocate_ui_with_layout(
@@ -349,9 +359,68 @@ fn configuration_editor(
             );
         });
     } else {
-        device_cards(ui, topology, draft, false);
+        neighbors(ui, topology, draft);
         device_controls(ui, index, practice, topology, draft, metrics, focus);
     }
+}
+fn neighbors(ui: &mut egui::Ui, topology: &Topology, draft: &Draft) {
+    let selected = &draft.selected_device;
+    ui.label(RichText::new(format!("{selected} · connected neighbors")).strong());
+    for (port, iface) in &draft.devices[selected].interfaces {
+        let link = &topology.devices[selected].interfaces[port].link;
+        egui::Frame::new()
+            .fill(palette(ui).input)
+            .inner_margin(7.)
+            .corner_radius(6.)
+            .show(ui, |ui| {
+                ui.set_min_width(ui.available_width());
+                ui.label(RichText::new(format!("{port} · {link}")).strong());
+                ui.add(
+                    egui::Label::new(format!(
+                        "{selected}: {} · {}",
+                        if iface.address.is_empty() {
+                            "Unassigned"
+                        } else {
+                            &iface.address
+                        },
+                        if iface.up { "Up" } else { "Down" }
+                    ))
+                    .wrap(),
+                );
+                let mut found = false;
+                for (peer, device) in &draft.devices {
+                    if peer == selected {
+                        continue;
+                    }
+                    for (peer_port, neighbor) in &device.interfaces {
+                        if topology.devices[peer].interfaces[peer_port].link == *link {
+                            found = true;
+                            ui.add(
+                                egui::Label::new(format!(
+                                    "to {peer}/{peer_port}: {} · {}",
+                                    if neighbor.address.is_empty() {
+                                        "Unassigned"
+                                    } else {
+                                        &neighbor.address
+                                    },
+                                    if neighbor.up { "Up" } else { "Down" }
+                                ))
+                                .wrap(),
+                            );
+                        }
+                    }
+                }
+                if !found {
+                    ui.label("No other interface on this link");
+                }
+            });
+    }
+    egui::CollapsingHeader::new("All devices and cables")
+        .id_salt(("routing-v4-all-devices", selected))
+        .show(ui, |ui| {
+            device_cards(ui, topology, draft, true);
+        });
+    ui.add_space(4.);
 }
 fn device_cards(ui: &mut egui::Ui, topology: &Topology, draft: &Draft, vertical: bool) {
     let count = if vertical {
@@ -509,6 +578,7 @@ pub(super) fn field(
                 .id_salt(id)
                 .char_limit(limit),
         );
+        r.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::TextEdit, true, label));
         metrics.inputs.push(r.rect);
         metrics.focus.get_or_insert(r.id);
         if *focus && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released()) {
@@ -532,68 +602,71 @@ fn routes(
     let (index, practice) = key;
     ui.label("Static routes · Destination network, neighboring next hop and outgoing interface");
     let mut remove = None;
-    for (n, route) in device.routes.iter_mut().enumerate() {
-        ui.horizontal_wrapped(|ui| {
-            ui.label(RichText::new(format!("Route {}", n + 1)).strong());
-            if ui.add(button("Remove route")).clicked() {
-                remove = Some(n);
+    if ui.available_width() >= 650. {
+        remove = route_table(ui, key, name, device, metrics, focus);
+    } else {
+        for (n, route) in device.routes.iter_mut().enumerate() {
+            ui.horizontal_wrapped(|ui| {
+                ui.label(RichText::new(format!("Route {}", n + 1)).strong());
+                if ui.add(button("Remove route")).clicked() {
+                    remove = Some(n);
+                }
+            });
+            field(
+                ui,
+                "Destination/prefix",
+                &mut route.destination,
+                32,
+                (index, practice, name, n, "prefix"),
+                metrics,
+                focus,
+            );
+            field(
+                ui,
+                "Next-hop address",
+                &mut route.next_hop,
+                32,
+                (index, practice, name, n, "via"),
+                metrics,
+                focus,
+            );
+            ui.horizontal_wrapped(|ui| {
+                ui.label("Outgoing interface");
+                let ports: Vec<_> = device.interfaces.keys().cloned().collect();
+                interface_picker(
+                    ui,
+                    (index, practice, name, n),
+                    &mut route.interface,
+                    &ports,
+                    140.,
+                    metrics,
+                );
+                ui.label("Distance");
+                let r = ui.add_sized(
+                    [60., CONTROL],
+                    egui::TextEdit::singleline(&mut route.distance)
+                        .id_salt(("routing-v4-distance", index, practice, name, n))
+                        .char_limit(3),
+                );
+                metrics.inputs.push(r.rect);
+            });
+            if Draft::new(topology).devices[name].routes.get(n) == Some(route)
+                && let Some(status) = topology.route_status(name, n).ok()
+            {
+                ui.label(
+                    RichText::new(format!("Applied row: {}", status.explanation()))
+                        .small()
+                        .color(palette(ui).muted),
+                );
             }
-        });
-        field(
-            ui,
-            "Destination/prefix",
-            &mut route.destination,
-            32,
-            (index, practice, name, n, "prefix"),
-            metrics,
-            focus,
-        );
-        field(
-            ui,
-            "Next-hop address",
-            &mut route.next_hop,
-            32,
-            (index, practice, name, n, "via"),
-            metrics,
-            focus,
-        );
-        ui.horizontal_wrapped(|ui| {
-            ui.label("Outgoing interface");
-            egui::ComboBox::from_id_salt(("routing-v4-route-interface", index, practice, name, n))
-                .width(140.)
-                .truncate()
-                .selected_text(&route.interface)
-                .show_ui(ui, |ui| {
-                    for port in device.interfaces.keys() {
-                        ui.selectable_value(&mut route.interface, port.clone(), port);
-                    }
-                });
-            ui.label("Distance");
-            let r = ui.add_sized(
-                [60., CONTROL],
-                egui::TextEdit::singleline(&mut route.distance)
-                    .id_salt(("routing-v4-distance", index, practice, name, n))
-                    .char_limit(3),
-            );
-            metrics.inputs.push(r.rect);
-        });
-        if Draft::new(topology).devices[name].routes.get(n) == Some(route)
-            && let Some(status) = topology.route_status(name, n).ok()
-        {
-            ui.label(
-                RichText::new(format!("Applied row: {}", status.explanation()))
-                    .small()
-                    .color(palette(ui).muted),
-            );
         }
     }
     if let Some(n) = remove {
         device.routes.remove(n);
     }
-    if ui
-        .add_enabled(device.routes.len() < 32, button("Add static route"))
-        .clicked()
-    {
+    let r = ui.add_enabled(device.routes.len() < 32, button("Add static route"));
+    metrics.routing_add = Some(r.rect);
+    if r.clicked() {
         device.routes.push(RouteDraft {
             destination: "0.0.0.0/0".into(),
             interface: device.interfaces.keys().next().unwrap().clone(),
@@ -607,8 +680,156 @@ fn routes(
                 ui.label(format!("{} on {port} · {}",ipv4_routing::Prefix::new(address.address,address.prefix).unwrap().text(),if iface.up && address.usable(){"Available"}else{"Unavailable: interface down or reserved address"}));
             }
         }
+        for (n,_) in topology.devices[name].routes.iter().enumerate() {
+            if let Ok(status)=topology.route_status(name,n) {ui.label(format!("Applied route {}: {}",n+1,status.explanation()));}
+        }
         ui.label("A more-specific destination prefix wins first. Lower distance chooses between equally specific eligible routes. Supply the immediate neighboring next hop; recursive and interface-only routes are outside this model. An absent neighbor alone does not activate a backup route.");
     });
+}
+fn route_table(
+    ui: &mut egui::Ui,
+    key: (usize, bool),
+    name: &str,
+    device: &mut dlms_learning_lab::ipv4_routing_workspace::DeviceDraft,
+    metrics: &mut Metrics,
+    focus: &mut bool,
+) -> Option<usize> {
+    let (index, practice) = key;
+    let mut remove = None;
+    egui::Grid::new(("routing-v4-table", index, practice, name))
+        .spacing(egui::vec2(8., 6.))
+        .show(ui, |ui| {
+            for title in [
+                "Destination/prefix",
+                "Next hop",
+                "Interface",
+                "Distance",
+                "",
+            ] {
+                ui.label(title);
+            }
+            ui.end_row();
+            for (n, route) in device.routes.iter_mut().enumerate() {
+                for (value, width, salt) in [
+                    (&mut route.destination, 180., "prefix"),
+                    (&mut route.next_hop, 160., "via"),
+                ] {
+                    let r = ui.add_sized(
+                        [width, CONTROL],
+                        egui::TextEdit::singleline(value)
+                            .id_salt((index, practice, name, n, salt))
+                            .char_limit(32),
+                    );
+                    r.widget_info(|| {
+                        egui::WidgetInfo::labeled(
+                            egui::WidgetType::TextEdit,
+                            true,
+                            format!(
+                                "{name} route {} {}",
+                                n + 1,
+                                if salt == "prefix" {
+                                    "destination/prefix"
+                                } else {
+                                    "next hop"
+                                }
+                            ),
+                        )
+                    });
+                    metrics.inputs.push(r.rect);
+                    metrics.focus.get_or_insert(r.id);
+                    if *focus && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released())
+                    {
+                        r.request_focus();
+                        *focus = false;
+                    }
+                    if r.changed() {
+                        workspace::bound(value, 32);
+                    }
+                }
+                let ports: Vec<_> = device.interfaces.keys().cloned().collect();
+                interface_picker(
+                    ui,
+                    (index, practice, name, n),
+                    &mut route.interface,
+                    &ports,
+                    110.,
+                    metrics,
+                );
+                let r = ui.add_sized(
+                    [64., CONTROL],
+                    egui::TextEdit::singleline(&mut route.distance)
+                        .id_salt(("routing-v4-distance", index, practice, name, n))
+                        .char_limit(3),
+                );
+                metrics.inputs.push(r.rect);
+                if ui.add_sized([80., CONTROL], button("Remove")).clicked() {
+                    remove = Some(n);
+                }
+                ui.end_row();
+            }
+        });
+    remove
+}
+fn interface_picker(
+    ui: &mut egui::Ui,
+    key: (usize, bool, &str, usize),
+    selected: &mut String,
+    ports: &[String],
+    width: f32,
+    metrics: &mut Metrics,
+) {
+    let before = selected.clone();
+    let open_key = ui.make_persistent_id(("routing-v4-interface-menu-open", key));
+    let phase = ui.data(|d| d.get_temp::<u8>(open_key).unwrap_or(0));
+    let r = egui::ComboBox::from_id_salt(("routing-v4-route-interface", key))
+        .width(width)
+        .truncate()
+        .selected_text(&*selected)
+        .show_ui(ui, |ui| {
+            let mut current = None;
+            for port in ports {
+                let active = *selected == *port;
+                let r = ui.selectable_value(selected, port.clone(), port);
+                if active {
+                    current = Some((r.id, r.enabled()));
+                }
+                metrics.routing_port_options.push((port.clone(), r.id));
+            }
+            current
+        });
+    let open = r.inner.is_some();
+    // A new popup first measures disabled contents. Pointer release can also clear
+    // focus. Wait for enabled options and a quiet pointer frame, then focus once.
+    // 0=closed, 1=pending, 2=initialized; keyboard navigation must not be stolen.
+    let phase: u8 = if !open {
+        0
+    } else if phase < 2 {
+        if !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released()) {
+            if let Some(Some((option, true))) = r.inner {
+                ui.memory_mut(|m| m.request_focus(option));
+                2
+            } else {
+                1
+            }
+        } else {
+            1
+        }
+    } else {
+        2
+    };
+    ui.data_mut(|d| d.insert_temp(open_key, phase));
+    if *selected != before && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released()) {
+        r.response.request_focus();
+    }
+    r.response.widget_info(|| {
+        egui::WidgetInfo::labeled(
+            egui::WidgetType::ComboBox,
+            true,
+            format!("{} route {} outgoing interface", key.2, key.3 + 1),
+        )
+    });
+    metrics.routing_route_interface = Some(r.response.rect);
+    metrics.routing_picker_id = Some(r.response.id);
 }
 fn inspect_paths(
     ui: &mut egui::Ui,
@@ -618,7 +839,7 @@ fn inspect_paths(
     requirements: &[Requirement],
 ) {
     egui::CollapsingHeader::new("Inspect applied forwarding paths").id_salt(("routing-v4-inspect",index,practice)).show(ui,|ui|{
-        ui.label("These checks inspect the applied simulation. Check configuration applies pending edits. Controlled failure cases clone the configuration; they do not change your saved interface states.");
+        ui.label("These checks inspect the applied simulation. Check configuration applies pending edits. Failure checks use a separate copy of your configuration; your saved interface settings stay unchanged.");
         for requirement in requirements {
             if !requirement.valid_for(topology){ui.label("Required device or interface is missing.");continue;}
             if let Requirement::Reachable{label,from,target_device,target_interface,when,..}=requirement {
