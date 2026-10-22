@@ -767,5 +767,857 @@
       "status": 0,
       "after": {}
     }
+  },
+  {
+    "name": "shell-streams reference 0",
+    "source": "printf 'Destination: %s\\n' \"$1\" > \"$2\"\nprintf 'Queued: %s\\n' \"$1\" >&2\nprintf 'Done\\n'\n",
+    "case": {
+      "name": "Ordinary destination",
+      "args": [
+        "North desk",
+        "slip.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/slip.txt": "old slip\n",
+        "/work/keep": "leave this alone\n"
+      },
+      "stdout": "Done\n",
+      "stderr": "Queued: North desk\n",
+      "status": 0,
+      "after": {
+        "/work/slip.txt": "Destination: North desk\n",
+        "/work/keep": "leave this alone\n"
+      }
+    }
+  },
+  {
+    "name": "shell-streams alternate 0",
+    "source": "printf '%s%s\\n' 'Destination: ' \"$1\" > \"$2\"\nprintf '%s%s\\n' 'Queued: ' \"$1\" >&2\nprintf '%s\\n' Done\n",
+    "case": {
+      "name": "Ordinary destination",
+      "args": [
+        "North desk",
+        "slip.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/slip.txt": "old slip\n",
+        "/work/keep": "leave this alone\n"
+      },
+      "stdout": "Done\n",
+      "stderr": "Queued: North desk\n",
+      "status": 0,
+      "after": {
+        "/work/slip.txt": "Destination: North desk\n",
+        "/work/keep": "leave this alone\n"
+      }
+    }
+  },
+  {
+    "name": "shell-streams reference 1",
+    "source": "printf 'Destination: %s\\n' \"$1\" > \"$2\"\nprintf 'Queued: %s\\n' \"$1\" >&2\nprintf 'Done\\n'\n",
+    "case": {
+      "name": "Spaces and percent",
+      "args": [
+        "Annex  100%",
+        "destination slip.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/destination slip.txt": "old slip\n",
+        "/work/keep": "leave this alone\n"
+      },
+      "stdout": "Done\n",
+      "stderr": "Queued: Annex  100%\n",
+      "status": 0,
+      "after": {
+        "/work/destination slip.txt": "Destination: Annex  100%\n",
+        "/work/keep": "leave this alone\n"
+      }
+    }
+  },
+  {
+    "name": "shell-streams alternate 1",
+    "source": "printf '%s%s\\n' 'Destination: ' \"$1\" > \"$2\"\nprintf '%s%s\\n' 'Queued: ' \"$1\" >&2\nprintf '%s\\n' Done\n",
+    "case": {
+      "name": "Spaces and percent",
+      "args": [
+        "Annex  100%",
+        "destination slip.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/destination slip.txt": "old slip\n",
+        "/work/keep": "leave this alone\n"
+      },
+      "stdout": "Done\n",
+      "stderr": "Queued: Annex  100%\n",
+      "status": 0,
+      "after": {
+        "/work/destination slip.txt": "Destination: Annex  100%\n",
+        "/work/keep": "leave this alone\n"
+      }
+    }
+  },
+  {
+    "name": "shell-streams reference 2",
+    "source": "printf 'Destination: %s\\n' \"$1\" > \"$2\"\nprintf 'Queued: %s\\n' \"$1\" >&2\nprintf 'Done\\n'\n",
+    "case": {
+      "name": "Empty label",
+      "args": [
+        "",
+        "empty.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.txt": "old slip\n",
+        "/work/keep": "leave this alone\n"
+      },
+      "stdout": "Done\n",
+      "stderr": "Queued: \n",
+      "status": 0,
+      "after": {
+        "/work/empty.txt": "Destination: \n",
+        "/work/keep": "leave this alone\n"
+      }
+    }
+  },
+  {
+    "name": "shell-streams alternate 2",
+    "source": "printf '%s%s\\n' 'Destination: ' \"$1\" > \"$2\"\nprintf '%s%s\\n' 'Queued: ' \"$1\" >&2\nprintf '%s\\n' Done\n",
+    "case": {
+      "name": "Empty label",
+      "args": [
+        "",
+        "empty.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.txt": "old slip\n",
+        "/work/keep": "leave this alone\n"
+      },
+      "stdout": "Done\n",
+      "stderr": "Queued: \n",
+      "status": 0,
+      "after": {
+        "/work/empty.txt": "Destination: \n",
+        "/work/keep": "leave this alone\n"
+      }
+    }
+  },
+  {
+    "name": "shell-streams teaching example",
+    "source": "cat \"$1\" 2> \"$2\"\n",
+    "case": {
+      "name": "Capture a read problem",
+      "args": [
+        "unavailable.txt",
+        "notes.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 1,
+      "after": {
+        "/work/keep": "unchanged\n",
+        "/work/notes.txt": "cat: unavailable.txt: No such file or directory\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines reference 0",
+    "source": "grep -F ERROR \"$1\" | grep -F \"$2\"\n",
+    "case": {
+      "name": "Intersect severity and component",
+      "args": [
+        "events.log",
+        "payments"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+      },
+      "stdout": "ERROR payments timeout\nERROR payments retry\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines alternate 0",
+    "source": "grep -F \"$2\" \"$1\" | grep -F ERROR\n",
+    "case": {
+      "name": "Intersect severity and component",
+      "args": [
+        "events.log",
+        "payments"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+      },
+      "stdout": "ERROR payments timeout\nERROR payments retry\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines reference 1",
+    "source": "grep -F ERROR \"$1\" | grep -F \"$2\"\n",
+    "case": {
+      "name": "Component with spaces",
+      "args": [
+        "branch log",
+        "api west"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+      },
+      "stdout": "ERROR api west timeout\nERROR api west recovered\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines alternate 1",
+    "source": "grep -F \"$2\" \"$1\" | grep -F ERROR\n",
+    "case": {
+      "name": "Component with spaces",
+      "args": [
+        "branch log",
+        "api west"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+      },
+      "stdout": "ERROR api west timeout\nERROR api west recovered\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines reference 2",
+    "source": "grep -F ERROR \"$1\" | grep -F \"$2\"\n",
+    "case": {
+      "name": "No matching errors",
+      "args": [
+        "quiet.log",
+        "orders"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 1,
+      "after": {
+        "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines alternate 2",
+    "source": "grep -F \"$2\" \"$1\" | grep -F ERROR\n",
+    "case": {
+      "name": "No matching errors",
+      "args": [
+        "quiet.log",
+        "orders"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 1,
+      "after": {
+        "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines reference 3",
+    "source": "grep -F ERROR \"$1\" | grep -F \"$2\"\n",
+    "case": {
+      "name": "Final line has no newline",
+      "args": [
+        "tail.log",
+        "worker"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+      },
+      "stdout": "ERROR worker stopped\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines alternate 3",
+    "source": "grep -F \"$2\" \"$1\" | grep -F ERROR\n",
+    "case": {
+      "name": "Final line has no newline",
+      "args": [
+        "tail.log",
+        "worker"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+      },
+      "stdout": "ERROR worker stopped\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines teaching example",
+    "source": "grep -F OPEN \"$1\" | grep -F \"$2\"\n",
+    "case": {
+      "name": "Two filters",
+      "args": [
+        "visitors.txt",
+        "Mina"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/visitors.txt": "OPEN Rowan\nCLOSED Mina\nOPEN Mina\n"
+      },
+      "stdout": "OPEN Mina\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/visitors.txt": "OPEN Rowan\nCLOSED Mina\nOPEN Mina\n"
+      }
+    }
+  },
+  {
+    "name": "shell-eof reference 0",
+    "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+    "case": {
+      "name": "Several complete lines",
+      "args": [],
+      "stdin": "alpha\nbeta\n",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: alpha\nTicket: beta\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof alternate 0",
+    "source": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "case": {
+      "name": "Several complete lines",
+      "args": [],
+      "stdin": "alpha\nbeta\n",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: alpha\nTicket: beta\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof reference 1",
+    "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+    "case": {
+      "name": "Last line has no newline",
+      "args": [],
+      "stdin": "first\nlast",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: first\nTicket: last\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof alternate 1",
+    "source": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "case": {
+      "name": "Last line has no newline",
+      "args": [],
+      "stdin": "first\nlast",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: first\nTicket: last\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof reference 2",
+    "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+    "case": {
+      "name": "Blank lines are records",
+      "args": [],
+      "stdin": "one\n\ntwo\n",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: one\nTicket: \nTicket: two\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof alternate 2",
+    "source": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "case": {
+      "name": "Blank lines are records",
+      "args": [],
+      "stdin": "one\n\ntwo\n",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: one\nTicket: \nTicket: two\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof reference 3",
+    "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+    "case": {
+      "name": "Backslashes and spaces",
+      "args": [],
+      "stdin": "  C:\\jobs  waiting  \n final  tail  ",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: C:\\jobs  waiting\nTicket: final  tail\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof alternate 3",
+    "source": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "case": {
+      "name": "Backslashes and spaces",
+      "args": [],
+      "stdin": "  C:\\jobs  waiting  \n final  tail  ",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: C:\\jobs  waiting\nTicket: final  tail\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof reference 4",
+    "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+    "case": {
+      "name": "Empty input",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof alternate 4",
+    "source": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "case": {
+      "name": "Empty input",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof teaching example",
+    "source": "while read -r name || [ -n \"$name\" ]; do\n    printf 'Visitor: %s\\n' \"$name\"\ndone\n",
+    "case": {
+      "name": "Incomplete final record",
+      "args": [],
+      "stdin": "Mina\nRowan",
+      "env": {},
+      "files": {},
+      "stdout": "Visitor: Mina\nVisitor: Rowan\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-batch-audit reference 0",
+    "source": "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n",
+    "case": {
+      "name": "Multiple readable logs",
+      "args": [
+        "north.log",
+        "south.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/north.log": "INFO start\nERROR north timeout\n",
+        "/work/south.log": "ERROR south retry\n"
+      },
+      "stdout": "File: north.log\nERROR north timeout\nFile: south.log\nERROR south retry\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/north.log": "INFO start\nERROR north timeout\n",
+        "/work/south.log": "ERROR south retry\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit alternate 0",
+    "source": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Multiple readable logs",
+      "args": [
+        "north.log",
+        "south.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/north.log": "INFO start\nERROR north timeout\n",
+        "/work/south.log": "ERROR south retry\n"
+      },
+      "stdout": "File: north.log\nERROR north timeout\nFile: south.log\nERROR south retry\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/north.log": "INFO start\nERROR north timeout\n",
+        "/work/south.log": "ERROR south retry\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit reference 1",
+    "source": "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n",
+    "case": {
+      "name": "Missing first file but later file still handled",
+      "args": [
+        "absent.log",
+        "available log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/available log": "ERROR recovered\n"
+      },
+      "stdout": "File: available log\nERROR recovered\n",
+      "stderr": "Missing: absent.log\n",
+      "status": 2,
+      "after": {
+        "/work/available log": "ERROR recovered\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit alternate 1",
+    "source": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Missing first file but later file still handled",
+      "args": [
+        "absent.log",
+        "available log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/available log": "ERROR recovered\n"
+      },
+      "stdout": "File: available log\nERROR recovered\n",
+      "stderr": "Missing: absent.log\n",
+      "status": 2,
+      "after": {
+        "/work/available log": "ERROR recovered\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit reference 2",
+    "source": "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n",
+    "case": {
+      "name": "Quiet file and later missing file",
+      "args": [
+        "quiet.log",
+        "lost.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/quiet.log": "INFO all clear\n",
+        "/work/keep": "untouched\n"
+      },
+      "stdout": "File: quiet.log\n",
+      "stderr": "Missing: lost.log\n",
+      "status": 2,
+      "after": {
+        "/work/quiet.log": "INFO all clear\n",
+        "/work/keep": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit alternate 2",
+    "source": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Quiet file and later missing file",
+      "args": [
+        "quiet.log",
+        "lost.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/quiet.log": "INFO all clear\n",
+        "/work/keep": "untouched\n"
+      },
+      "stdout": "File: quiet.log\n",
+      "stderr": "Missing: lost.log\n",
+      "status": 2,
+      "after": {
+        "/work/quiet.log": "INFO all clear\n",
+        "/work/keep": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit reference 3",
+    "source": "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n",
+    "case": {
+      "name": "Empty batch",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep": "untouched\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit alternate 3",
+    "source": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Empty batch",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep": "untouched\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit teaching example",
+    "source": "found_problem=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'Found: %s\\n' \"$path\"\n    else\n        printf 'Skipped: %s\\n' \"$path\" >&2\n        found_problem=yes\n    fi\ndone\nif [ -n \"$found_problem\" ]; then\n    exit 2\nfi\n",
+    "case": {
+      "name": "Remember a missing file",
+      "args": [
+        "menu.txt",
+        "missing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/menu.txt": "tea\n"
+      },
+      "stdout": "Found: menu.txt\n",
+      "stderr": "Skipped: missing.txt\n",
+      "status": 2,
+      "after": {
+        "/work/menu.txt": "tea\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit readable quiet reference",
+    "source": "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n",
+    "case": {
+      "name": "Readable quiet log after an incident",
+      "args": [
+        "incident.log",
+        "quiet.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/incident.log": "ERROR retry\n",
+        "/work/quiet.log": "INFO healthy\n"
+      },
+      "stdout": "File: incident.log\nERROR retry\nFile: quiet.log\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/incident.log": "ERROR retry\n",
+        "/work/quiet.log": "INFO healthy\n"
+      }
+    }
+  },
+  {
+    "name": "shell-batch-audit readable quiet alternate",
+    "source": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Readable quiet log after an incident",
+      "args": [
+        "incident.log",
+        "quiet.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/incident.log": "ERROR retry\n",
+        "/work/quiet.log": "INFO healthy\n"
+      },
+      "stdout": "File: incident.log\nERROR retry\nFile: quiet.log\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/incident.log": "ERROR retry\n",
+        "/work/quiet.log": "INFO healthy\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines boundary reference",
+    "source": "grep -F ERROR \"$1\" | grep -F \"$2\"\n",
+    "case": {
+      "name": "Literal substring is not limited to a space-delimited word",
+      "args": [
+        "audit.log",
+        "worker"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+      },
+      "stdout": "12:01 ERROR:worker retry\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pipelines boundary alternate",
+    "source": "grep -F \"$2\" \"$1\" | grep -F ERROR\n",
+    "case": {
+      "name": "Literal substring is not limited to a space-delimited word",
+      "args": [
+        "audit.log",
+        "worker"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+      },
+      "stdout": "12:01 ERROR:worker retry\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+      }
+    }
+  },
+  {
+    "name": "shell-eof boundary reference",
+    "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+    "case": {
+      "name": "Unterminated whitespace is empty after trimming",
+      "args": [],
+      "stdin": "done\n \t ",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: done\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-eof boundary alternate",
+    "source": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "case": {
+      "name": "Unterminated whitespace is empty after trimming",
+      "args": [],
+      "stdin": "done\n \t ",
+      "env": {},
+      "files": {},
+      "stdout": "Ticket: done\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
   }
 ]

@@ -162,7 +162,7 @@ fn prediction_gates_are_per_result_and_explicit() {
 #[test]
 fn generated_variants_are_mathematical_hosts_and_not_catalog_entries() {
     let catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 16);
+    let authored_count = catalog.len();
     assert_eq!(catalog.iter().filter(|s| s.track == "CCNA").count(), 3);
     let mut prefixes = std::collections::BTreeSet::new();
     let mut seen = std::collections::BTreeSet::new();
@@ -194,6 +194,7 @@ fn generated_variants_are_mathematical_hosts_and_not_catalog_entries() {
         assert!(!e.solved());
     }
     assert!(prefixes.contains(&23) && prefixes.contains(&20) && prefixes.contains(&30));
+    assert_eq!(pack::bundled().unwrap().len(), authored_count);
 }
 #[test]
 fn optional_metadata_and_variant_resume_preserve_the_original_and_other_labs() {

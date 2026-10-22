@@ -16,6 +16,10 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("OPEN", "CLOSED"),
         ("Reading", "Menu:"),
         ("-f", "-z"),
+        ("2>", ">"),
+        ("OPEN", "CLOSED"),
+        (r#" || [ -n "$name" ]"#, ""),
+        ("found_problem=yes", "found_problem=''"),
     ];
     for (s, (from, to)) in labs.iter().skip(9).zip(edits) {
         let l = s.teaching.as_ref().unwrap();

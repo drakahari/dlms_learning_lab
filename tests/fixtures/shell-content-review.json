@@ -1,0 +1,68 @@
+[
+  {
+    "id": "shell-handover",
+    "alternate": "printf '%s%s\\n' 'Site: ' \"$SITE\"\nprintf '%s%s\\n' 'Task: ' \"$TASK\"\n",
+    "incorrect": "printf 'Site: %s\\nTask: %s\\n' $SITE $TASK",
+    "misconception": "Unquoted supplied values split spaces into extra arguments."
+  },
+  {
+    "id": "shell-arguments",
+    "alternate": "printf 'Label: %s\\nFile: %s\\n' \"$1\" \"$2\"\n",
+    "incorrect": "printf 'Label: %s\\nFile: %s\\n' \"$2\" \"$1\"",
+    "misconception": "Swapped positional arguments."
+  },
+  {
+    "id": "shell-input",
+    "alternate": "read -r value\nprintf '%s%s\\n' 'Request: ' \"$value\"\n",
+    "incorrect": "read -r value\nprintf 'Request: %s' \"$value\"",
+    "misconception": "Missing required final line break."
+  },
+  {
+    "id": "shell-validation",
+    "alternate": "if test -n \"$1\"; then\nprintf '%s%s\\n' 'Destination: ' \"$1\"\nelse\nprintf '%s\\n' 'Destination required' >&2\nexit 2\nfi\n",
+    "incorrect": "printf 'Destination: %s\\n' \"$1\"",
+    "misconception": "Missing empty-input validation."
+  },
+  {
+    "id": "shell-report",
+    "alternate": "cat \"$1\" | grep -F ERROR > \"$2\"\n",
+    "incorrect": "grep -F ERROR \"$1\" >> \"$2\"",
+    "misconception": "Append retains old report content."
+  },
+  {
+    "id": "shell-loop",
+    "alternate": "for item in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$item\"\ncat \"$item\"\ndone\n",
+    "incorrect": "for item in $@; do printf 'File: %s\\n' \"$item\"; cat \"$item\"; done",
+    "misconception": "Unquoted argument vector loses filename boundaries."
+  },
+  {
+    "id": "shell-capstone",
+    "alternate": "if [ -n \"$2\" ] && [ -f \"$1\" ]; then\ngrep -F ERROR \"$1\" > \"$2\"\nprintf 'Saved: %s\\n' \"$2\"\nelse\nprintf '%s\\n' 'Cannot build report' >&2\nexit 2\nfi\n",
+    "incorrect": "grep -F ERROR \"$1\" > \"$2\"\nprintf 'Saved: %s\\n' \"$2\"",
+    "misconception": "Missing validation before redirection."
+  },
+  {
+    "id": "shell-streams",
+    "alternate": "printf '%s%s\\n' 'Destination: ' \"$1\" > \"$2\"\nprintf '%s%s\\n' 'Queued: ' \"$1\" >&2\nprintf '%s\\n' Done\n",
+    "incorrect": "printf 'Destination: %s\\n' \"$1\" >> \"$2\"\nprintf 'Queued: %s\\n' \"$1\" >&2\nprintf 'Done\\n'",
+    "misconception": "Append instead of replace."
+  },
+  {
+    "id": "shell-pipelines",
+    "alternate": "grep -F \"$2\" \"$1\" | grep -F ERROR\n",
+    "incorrect": "grep -F \"$2\" \"$1\"",
+    "misconception": "Component-only selection also retains non-error entries."
+  },
+  {
+    "id": "shell-eof",
+    "alternate": "while read -r ticket || test -n \"$ticket\"; do\nprintf '%s%s\\n' 'Ticket: ' \"$ticket\"\ndone\n",
+    "incorrect": "while read -r line; do printf 'Ticket: %s\\n' \"$line\"; done",
+    "misconception": "Drops a nonempty last line without a final line break."
+  },
+  {
+    "id": "shell-batch-audit",
+    "alternate": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
+    "incorrect": "for path in \"$@\"; do\nif [ -f \"$path\" ]; then\nprintf 'File: %s\\n' \"$path\"\ngrep -F ERROR \"$path\"\nelse\nprintf 'Missing: %s\\n' \"$path\" >&2\nexit 2\nfi\ndone\nexit 0",
+    "misconception": "Stops on first missing file and skips later valid work."
+  }
+]

@@ -1,0 +1,726 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-streams",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-composition",
+      "topic": "Output channels",
+      "title": "Route output without mixing messages",
+      "summary": "Repair a script that mixes a saved report, useful output and a problem channel.",
+      "objective": "A dispatch tool receives a destination label in $1 and a slip filename in $2. Replace the slip with exactly Destination: LABEL and a newline. Print Queued: LABEL and a newline to standard error, and exactly Done plus a newline to standard output. Return 0 and leave every other file unchanged. The label may contain spaces, percent signs, or be empty.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "A dispatch tool receives a destination label in $1 and a slip filename in $2. Replace the slip with exactly Destination: LABEL and a newline. Print Queued: LABEL and a newline to standard error, and exactly Done plus a newline to standard output. Return 0 and leave every other file unchanged. The label may contain spaces, percent signs, or be empty.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Think about the destination of each message separately; do not combine all three into one report.",
+        "A redirection at the end of one printf affects only that printf.",
+        "Use a fixed printf format and pass the label as a separate quoted value."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Looping-Constructs.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax in the documented bounded subset. Only the declared flat /work text files exist. No external command or host file is used. Input paths are ordinary filenames and never start with a hyphen. This unit does not claim a complete Bash implementation.",
+      "initial": {
+        "kind": "Script",
+        "source": "# This script puts everything in the normal output channel. Repair the destinations.\nprintf 'Destination: %s\\n' \"$1\"\nprintf 'Queued: %s\\n' \"$1\"\nprintf 'Done\\n'\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary destination",
+            "args": [
+              "North desk",
+              "slip.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/slip.txt": "old slip\n",
+              "/work/keep": "leave this alone\n"
+            },
+            "stdout": "Done\n",
+            "stderr": "Queued: North desk\n",
+            "status": 0,
+            "after": {
+              "/work/slip.txt": "Destination: North desk\n",
+              "/work/keep": "leave this alone\n"
+            }
+          },
+          {
+            "name": "Spaces and percent",
+            "args": [
+              "Annex  100%",
+              "destination slip.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/destination slip.txt": "old slip\n",
+              "/work/keep": "leave this alone\n"
+            },
+            "stdout": "Done\n",
+            "stderr": "Queued: Annex  100%\n",
+            "status": 0,
+            "after": {
+              "/work/destination slip.txt": "Destination: Annex  100%\n",
+              "/work/keep": "leave this alone\n"
+            }
+          },
+          {
+            "name": "Empty label",
+            "args": [
+              "",
+              "empty.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/empty.txt": "old slip\n",
+              "/work/keep": "leave this alone\n"
+            },
+            "stdout": "Done\n",
+            "stderr": "Queued: \n",
+            "status": 0,
+            "after": {
+              "/work/empty.txt": "Destination: \n",
+              "/work/keep": "leave this alone\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "printf 'Destination: %s\\n' \"$1\" > \"$2\"\nprintf 'Queued: %s\\n' \"$1\" >&2\nprintf 'Done\\n'\n"
+      ],
+      "prerequisites": [
+        "shell-capstone"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on quoted arguments, printf, file replacement and error output from the foundations unit.",
+        "concepts": [
+          {
+            "title": "Choose where text goes",
+            "text": "Normal output is the result a caller may use. Standard error is a separate channel for notices and problems. A message can be useful without belonging in a saved report."
+          },
+          {
+            "title": "Redirection changes a destination",
+            "text": "> sends normal output to a file and replaces its contents. >&2 sends normal output to the problem channel. 2> captures text a command already writes to that problem channel. Each redirection applies to its own command."
+          },
+          {
+            "title": "A command error is not broken syntax",
+            "text": "In this example cat cannot find a sample file. Its exit status 1 is expected; its problem message is saved to notes.txt. The script itself is readable. Compare the output display with the resulting simulated file."
+          }
+        ],
+        "example": "cat \"$1\" 2> \"$2\"\n",
+        "inputs": "Argument 1 is unavailable.txt, which does not exist; argument 2 is notes.txt. The keep file must stay unchanged.",
+        "try_change": "Change 2> to >, then run again. Which destination now receives the problem message?",
+        "fixture": {
+          "name": "Capture a read problem",
+          "args": [
+            "unavailable.txt",
+            "notes.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/keep": "unchanged\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 1,
+          "after": {
+            "/work/keep": "unchanged\n",
+            "/work/notes.txt": "cat: unavailable.txt: No such file or directory\n"
+          }
+        }
+      },
+      "retry_guidance": "Compare the report file, normal output and problem output separately. A correct message in the wrong destination still changes how another program would use the script.",
+      "explanation": "The report is a file result, Done is normal output, and Queued is a separate notice. Redirect each printf independently. Replacing the slip prevents old content from leaking into the result; other files are part of the checks too."
+    },
+    {
+      "id": "shell-pipelines",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-composition",
+      "topic": "Pipelines and status",
+      "title": "Select the intersection of two log filters",
+      "summary": "Build a pipeline that keeps the right severity and component, with an honest exit status.",
+      "objective": "Argument 1 names an existing log file; argument 2 is literal component text. Print only lines containing both ERROR and the component text, in their original order, each ending in a newline. Print no headings or problem messages and change no files. Return 0 when any line matches and 1 when none match. Matching is case-sensitive substring matching, not a regular expression.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Argument 1 names an existing log file; argument 2 is literal component text. Print only lines containing both ERROR and the component text, in their original order, each ending in a newline. Print no headings or problem messages and change no files. Return 0 when any line matches and 1 when none match. Matching is case-sensitive substring matching, not a regular expression.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Ask which unwanted lines still survive your current filter.",
+        "A pipe carries only normal output; a second grep can further narrow those lines.",
+        "Keep the component argument quoted so spaces stay part of one pattern."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Looping-Constructs.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax in the documented bounded subset. Only the declared flat /work text files exist. No external command or host file is used. Input paths are ordinary filenames and never start with a hyphen. This unit does not claim a complete Bash implementation.",
+      "initial": {
+        "kind": "Script",
+        "source": "# This selects the component but forgets the severity. Add the missing condition.\ngrep -F \"$2\" \"$1\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Intersect severity and component",
+            "args": [
+              "events.log",
+              "payments"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+            },
+            "stdout": "ERROR payments timeout\nERROR payments retry\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+            }
+          },
+          {
+            "name": "Component with spaces",
+            "args": [
+              "branch log",
+              "api west"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+            },
+            "stdout": "ERROR api west timeout\nERROR api west recovered\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+            }
+          },
+          {
+            "name": "No matching errors",
+            "args": [
+              "quiet.log",
+              "orders"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+            }
+          },
+          {
+            "name": "Final line has no newline",
+            "args": [
+              "tail.log",
+              "worker"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+            },
+            "stdout": "ERROR worker stopped\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+            }
+          },
+          {
+            "name": "Literal substring is not limited to a space-delimited word",
+            "args": [
+              "audit.log",
+              "worker"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+            },
+            "stdout": "12:01 ERROR:worker retry\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "grep -F ERROR \"$1\" | grep -F \"$2\"\n"
+      ],
+      "prerequisites": [
+        "shell-streams"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on literal grep, quoted arguments, output channels and status.",
+        "concepts": [
+          {
+            "title": "A pipe connects two commands",
+            "text": "The | symbol sends the normal output of the command on its left into the input of the command on its right. Only the lines surviving the first filter can reach the second filter."
+          },
+          {
+            "title": "Two filters form an intersection",
+            "text": "A line must satisfy both filters to survive. The example first selects OPEN lines, then selects a visitor name. With -F, matching means literal text anywhere in the line; letter case matters."
+          },
+          {
+            "title": "The last stage reports the pipeline status",
+            "text": "In this portable subset, a pipeline returns its last command\u2019s exit status. grep returns 0 for matches and 1 for no matches. That says nothing by itself about whether an earlier command could read a file; this assignment supplies existing files."
+          }
+        ],
+        "example": "grep -F OPEN \"$1\" | grep -F \"$2\"\n",
+        "inputs": "Arguments are visitors.txt and Mina. The file contains OPEN Rowan, CLOSED Mina and OPEN Mina on separate lines.",
+        "try_change": "Change OPEN to CLOSED and run again; the second filter should still require Mina.",
+        "fixture": {
+          "name": "Two filters",
+          "args": [
+            "visitors.txt",
+            "Mina"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/visitors.txt": "OPEN Rowan\nCLOSED Mina\nOPEN Mina\n"
+          },
+          "stdout": "OPEN Mina\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/visitors.txt": "OPEN Rowan\nCLOSED Mina\nOPEN Mina\n"
+          }
+        }
+      },
+      "retry_guidance": "Check both required conditions: a line from another component or a non-ERROR line must not pass. Compare the selected input set before changing the filter.",
+      "explanation": "The two literal conditions form an intersection. Reversing their order is an equally valid solution here because both are pure filters. The final grep provides the requested match/no-match status. A missing input would need a separate guard in a different assignment."
+    },
+    {
+      "id": "shell-eof",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-composition",
+      "topic": "Input loops",
+      "title": "Keep the final record when input ends",
+      "summary": "Repair a line-processing loop that silently loses an unfinished last line.",
+      "objective": "Read all supplied input lines and print Ticket: VALUE plus a newline for each one, including a final line with no terminating newline when its value is non-empty after that trimming. Use read -r with its normal trimming of outer spaces/tabs; preserve internal spaces and backslashes. Blank complete lines produce Ticket: followed by one space and a newline. Empty input prints nothing. Return 0 and change no files.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Read all supplied input lines and print Ticket: VALUE plus a newline for each one, including a final line with no terminating newline when its value is non-empty after that trimming. Use read -r with its normal trimming of outer spaces/tabs; preserve internal spaces and backslashes. Blank complete lines produce Ticket: followed by one space and a newline. Empty input prints nothing. Return 0 and change no files.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "The last read can provide text while reporting that no newline was found.",
+        "Keep normal complete blank lines distinct from no input at all.",
+        "The loop can continue when either read succeeds or the last value is non-empty."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Looping-Constructs.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax in the documented bounded subset. Only the declared flat /work text files exist. No external command or host file is used. Input paths are ordinary filenames and never start with a hyphen. This unit does not claim a complete Bash implementation.",
+      "initial": {
+        "kind": "Script",
+        "source": "# A final line without a newline is currently lost. Repair the loop condition.\nwhile read -r line; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Several complete lines",
+            "args": [],
+            "stdin": "alpha\nbeta\n",
+            "env": {},
+            "files": {},
+            "stdout": "Ticket: alpha\nTicket: beta\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Last line has no newline",
+            "args": [],
+            "stdin": "first\nlast",
+            "env": {},
+            "files": {},
+            "stdout": "Ticket: first\nTicket: last\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Blank lines are records",
+            "args": [],
+            "stdin": "one\n\ntwo\n",
+            "env": {},
+            "files": {},
+            "stdout": "Ticket: one\nTicket: \nTicket: two\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Backslashes and spaces",
+            "args": [],
+            "stdin": "  C:\\jobs  waiting  \n final  tail  ",
+            "env": {},
+            "files": {},
+            "stdout": "Ticket: C:\\jobs  waiting\nTicket: final  tail\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty input",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Unterminated whitespace is empty after trimming",
+            "args": [],
+            "stdin": "done\n \t ",
+            "env": {},
+            "files": {},
+            "stdout": "Ticket: done\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-pipelines"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on read -r, tests, printf and exit status. This lesson introduces while and ||.",
+        "concepts": [
+          {
+            "title": "Repeat while an action succeeds",
+            "text": "while runs its do \u2026 done body whenever the condition reports status 0. read -r takes the next line each time, so this loop makes progress toward the end of a finite input."
+          },
+          {
+            "title": "End-of-input is a status, not always an empty value",
+            "text": "read reports a nonzero status when it reaches the end before a newline. It can still have stored useful final text in the variable. A complete blank line is different: read succeeds and stores an empty value."
+          },
+          {
+            "title": "Try another condition after failure",
+            "text": "A || B runs B only if A fails. The example accepts either a complete read or a non-empty final value. Once both fail, the loop ends; with no input it does no work."
+          }
+        ],
+        "example": "while read -r name || [ -n \"$name\" ]; do\n    printf 'Visitor: %s\\n' \"$name\"\ndone\n",
+        "inputs": "Input is Mina followed by a newline, then Rowan without a final newline. No arguments or files are needed.",
+        "try_change": "Remove || [ -n \"$name\" ] and run again. Notice which visitor disappears, then restore the condition.",
+        "fixture": {
+          "name": "Incomplete final record",
+          "args": [],
+          "stdin": "Mina\nRowan",
+          "env": {},
+          "files": {},
+          "stdout": "Visitor: Mina\nVisitor: Rowan\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "Inspect whether a missing final line break, a blank complete line, or empty input caused the difference. These are three different input conditions.",
+      "explanation": "read communicates both a value and a status. The extra non-empty test preserves the last partial record, but an empty value with failed read ends the loop. The model uses default read whitespace trimming; preserving outer whitespace with IFS is a later capability."
+    },
+    {
+      "id": "shell-batch-audit",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-composition",
+      "topic": "Batch processing",
+      "title": "Audit a batch without hiding failures",
+      "summary": "Combine iteration, filtering, error reporting and a final batch status.",
+      "objective": "For every logfile argument, in order: if the file exists, print File: PATH and a newline, followed by its literal ERROR lines. For a missing file print Missing: PATH and a newline to standard error, then keep processing later arguments. Return 2 if any file was missing, otherwise 0 even when files contain no ERROR lines. With no arguments print nothing and return 0. Leave every file unchanged.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "For every logfile argument, in order: if the file exists, print File: PATH and a newline, followed by its literal ERROR lines. For a missing file print Missing: PATH and a newline to standard error, then keep processing later arguments. Return 2 if any file was missing, otherwise 0 even when files contain no ERROR lines. With no arguments print nothing and return 0. Leave every file unchanged.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Keep processing after recording a missing-file message.",
+        "Remember whether any missing file occurred, then decide the final status after the loop.",
+        "A no-match grep status is normal here. It must not masquerade as a missing-file error."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Redirections.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/s/bash/manual/html_node/Looping-Constructs.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax in the documented bounded subset. Only the declared flat /work text files exist. No external command or host file is used. Input paths are ordinary filenames and never start with a hyphen. This unit does not claim a complete Bash implementation.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Repair this batch: it stops at the first missing path and hides later work.\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        exit 2\n    fi\ndone\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Multiple readable logs",
+            "args": [
+              "north.log",
+              "south.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/north.log": "INFO start\nERROR north timeout\n",
+              "/work/south.log": "ERROR south retry\n"
+            },
+            "stdout": "File: north.log\nERROR north timeout\nFile: south.log\nERROR south retry\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/north.log": "INFO start\nERROR north timeout\n",
+              "/work/south.log": "ERROR south retry\n"
+            }
+          },
+          {
+            "name": "Missing first file but later file still handled",
+            "args": [
+              "absent.log",
+              "available log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/available log": "ERROR recovered\n"
+            },
+            "stdout": "File: available log\nERROR recovered\n",
+            "stderr": "Missing: absent.log\n",
+            "status": 2,
+            "after": {
+              "/work/available log": "ERROR recovered\n"
+            }
+          },
+          {
+            "name": "Quiet file and later missing file",
+            "args": [
+              "quiet.log",
+              "lost.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/quiet.log": "INFO all clear\n",
+              "/work/keep": "untouched\n"
+            },
+            "stdout": "File: quiet.log\n",
+            "stderr": "Missing: lost.log\n",
+            "status": 2,
+            "after": {
+              "/work/quiet.log": "INFO all clear\n",
+              "/work/keep": "untouched\n"
+            }
+          },
+          {
+            "name": "Empty batch",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep": "untouched\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep": "untouched\n"
+            }
+          },
+          {
+            "name": "Readable quiet log after an incident",
+            "args": [
+              "incident.log",
+              "quiet.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incident.log": "ERROR retry\n",
+              "/work/quiet.log": "INFO healthy\n"
+            },
+            "stdout": "File: incident.log\nERROR retry\nFile: quiet.log\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incident.log": "ERROR retry\n",
+              "/work/quiet.log": "INFO healthy\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-eof",
+        "shell-validation",
+        "shell-loop"
+      ],
+      "teaching": {
+        "prerequisite_note": "Capstone: combines the previous unit and this unit. There is no new shell syntax to memorize.",
+        "concepts": [
+          {
+            "title": "Keep working, but remember a problem",
+            "text": "Exiting inside a loop stops the whole script, so later files never get inspected. A named variable can remember a problem while the for loop continues; the variable keeps its value after that loop."
+          },
+          {
+            "title": "Report the batch outcome deliberately",
+            "text": "A missing file and a readable file with no ERROR lines are different outcomes. The final exit status should summarize the whole batch, rather than accidentally reuse the last filter\u2019s no-match status. The example below only checks file availability; your assignment adds log filtering."
+          }
+        ],
+        "example": "found_problem=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'Found: %s\\n' \"$path\"\n    else\n        printf 'Skipped: %s\\n' \"$path\" >&2\n        found_problem=yes\n    fi\ndone\nif [ -n \"$found_problem\" ]; then\n    exit 2\nfi\n",
+        "inputs": "Arguments are menu.txt and missing.txt. Only menu.txt exists and contains tea.",
+        "try_change": "Change found_problem=yes to found_problem='' and run again. The warning still prints, but what happens to the exit status?",
+        "fixture": {
+          "name": "Remember a missing file",
+          "args": [
+            "menu.txt",
+            "missing.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/menu.txt": "tea\n"
+          },
+          "stdout": "Found: menu.txt\n",
+          "stderr": "Skipped: missing.txt\n",
+          "status": 2,
+          "after": {
+            "/work/menu.txt": "tea\n"
+          }
+        }
+      },
+      "retry_guidance": "Check whether later arguments were skipped, a normal no-match result became a failure, or an earlier missing file was forgotten by the final exit status.",
+      "explanation": "An accumulated problem flag separates per-file work from the final batch outcome. Each readable file is independently useful even when another is missing. A quiet file has no ERROR lines, which is acceptable; the requested final status is driven only by missing files."
+    }
+  ]
+}

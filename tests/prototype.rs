@@ -30,7 +30,7 @@ fn solution(s: &pack::Scenario) -> State {
 #[test]
 fn all_nine_start_unsolved_and_reach_success() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 16);
+    assert_eq!(labs.len(), 20);
     for s in labs.into_iter().take(9) {
         assert!(!engine::solved(&s.initial, &s.goal), "{}", s.id);
         assert!(engine::solved(&solution(&s), &s.goal), "{}", s.id);
@@ -212,7 +212,7 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
     p.favorites.insert(labs[0].id.clone());
     progress::save(&path, &p).unwrap();
     let mut q = progress::load(&path, &labs).unwrap();
-    assert_eq!(q.attempts.len(), 16);
+    assert_eq!(q.attempts.len(), labs.len());
     for s in &labs {
         let a = &q.attempts[&s.id];
         assert!(engine::solved(&a.state, &s.goal));

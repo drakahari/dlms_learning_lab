@@ -380,12 +380,13 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            n @ 250..=375 => {
-                let i = 9 + (n - 250) / 18;
+            n @ (250..=375 | 700..=771) => {
+                let (start, first) = if n >= 700 { (700, 16) } else { (250, 9) };
+                let i = first + (n - start) / 18;
                 let id = self.scenarios[i].id.clone();
-                match (n - 250) % 18 {
+                match (n - start) % 18 {
                     0 => {
-                        if i == 9 {
+                        if i == first {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                         }
                         self.launch(i);
@@ -436,6 +437,10 @@ impl LabApp {
                             ("OPEN", "CLOSED"),
                             ("Reading", "Menu:"),
                             ("-f", "-z"),
+                            ("2>", ">"),
+                            ("OPEN", "CLOSED"),
+                            (r#" || [ -n "$name" ]"#, ""),
+                            ("found_problem=yes", "found_problem=''"),
                         ][i - 9];
                         self.pending_events.extend([
                             key(egui::Key::A, true),
@@ -484,8 +489,8 @@ impl LabApp {
                         .extend(click(self.metrics.check.unwrap())),
                     13 => {
                         assert!(!self.metrics.completion);
-                        if i == 9 {
-                            shot = Some("shell-handover-retry-feedback".into());
+                        if i == 9 || i >= 16 {
+                            shot = Some(format!("{id}-retry-feedback"));
                         }
                         self.focus_input = true;
                     }
@@ -499,8 +504,8 @@ impl LabApp {
                     16 => {}
                     _ => {
                         assert!(self.metrics.completion, "{id} retry");
-                        if i == 9 {
-                            shot = Some("shell-handover-teaching-complete".into());
+                        if i == 9 || i >= 16 {
+                            shot = Some(format!("{id}-teaching-complete"));
                         }
                     }
                 }
@@ -751,6 +756,47 @@ impl LabApp {
             519 => {
                 println!(
                     "PASS native recovery: export picker, backup, reset, import typed filename, verified preview, confirmed restore, saved draft/favorite recovery, legacy new-requirement disclosure and light 150% Settings."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            772 => {
+                self.launch(18);
+                self.set_script_view(18, teaching::View::Assignment);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+            }
+            773 => shot = Some("shell-composition-light-150".into()),
+            774 => {
+                self.progress
+                    .attempts
+                    .get_mut("shell-eof")
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            775 => {
+                assert_eq!(self.script_view(18), teaching::View::Assignment);
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("shell-composition-challenge-dark-150".into());
+            }
+            776 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -450.),
+                    modifiers: egui::Modifiers::default(),
+                });
+            }
+            777 => {}
+            778 => shot = Some("shell-composition-challenge-scrolled-150".into()),
+            779 => {
+                println!(
+                    "PASS native composition: four introductions, editable ungraded examples and suggested changes, assignment drafts, incorrect retry feedback, typed reference solutions and grading, light/dark 150% responsive rendering and independent Challenge. Synthetic profile only."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

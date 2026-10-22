@@ -199,7 +199,13 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("courses") {
+            smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("composition-layout")
+            {
+                772
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("composition") {
+                700
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("courses") {
                 600
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("recovery") {
                 500

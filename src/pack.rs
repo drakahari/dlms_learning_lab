@@ -13,6 +13,8 @@ pub struct Scenario {
     pub title: String,
     pub summary: String,
     pub objective: String,
+    #[serde(default)]
+    pub retry_guidance: String,
     pub difficulty: String,
     pub minutes: u16,
     pub steps: Vec<String>,
@@ -79,6 +81,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || !["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].contains(&s.track.as_str())
             || !["Beginner", "Intermediate"].contains(&s.difficulty.as_str())
             || s.minutes == 0
+            || s.retry_guidance.len() > 1000
             || s.minutes > 180
             || s.unit.len() > 80
             || (!s.unit.is_empty()
@@ -331,5 +334,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
     load_catalog(&[
         include_str!("../scenarios/starter-v1.json"),
         include_str!("../scenarios/shell-unit-v1.json"),
+        include_str!("../scenarios/shell-composition-v1.json"),
     ])
 }

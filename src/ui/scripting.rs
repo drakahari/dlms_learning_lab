@@ -104,14 +104,18 @@ impl LabApp {
         let mut selected = self.script_case.min(cases.len() - 1);
         ui.horizontal_wrapped(|ui| {
             ui.label("Inspect inputs");
-            egui::ComboBox::from_id_salt("script-case")
-                .width(230.)
-                .selected_text(&cases[selected].name)
-                .show_ui(ui, |ui| {
-                    for (n, c) in cases.iter().enumerate() {
-                        ui.selectable_value(&mut selected, n, &c.name);
-                    }
-                });
+            let picker_width = 230_f32.min(ui.available_width());
+            ui.allocate_ui_with_layout(egui::vec2(picker_width, CONTROL), egui::Layout::left_to_right(egui::Align::Center), |ui| {
+                egui::ComboBox::from_id_salt("script-case")
+                    .width(picker_width)
+                    .truncate()
+                    .selected_text(&cases[selected].name)
+                    .show_ui(ui, |ui| {
+                        for (n, c) in cases.iter().enumerate() {
+                            ui.selectable_value(&mut selected, n, &c.name);
+                        }
+                    });
+            });
             ui.label(
                 RichText::new(format!(
                     "Run script checks {} sets of sample inputs; simulated files reset for each test",
@@ -340,7 +344,8 @@ impl LabApp {
                     let c = &cases[case];
                     if r.error.is_none() && !c.accepts(r) {
                         ui.label(RichText::new("Behavior differs · Edit your script and Run again.").color(palette(ui).error));
-                        if c.stdout != r.stdout { ui.label(teaching::output_advice(&c.stdout, &r.stdout)); output_diff(ui,"Standard output", &c.stdout, &r.stdout); }
+                        if !self.scenarios[i].retry_guidance.is_empty() { ui.label(&self.scenarios[i].retry_guidance); }
+                        if c.stdout != r.stdout { if self.scenarios[i].retry_guidance.is_empty() { ui.label(teaching::output_advice(&c.stdout,&r.stdout)); } output_diff(ui,"Standard output", &c.stdout, &r.stdout); }
                         if c.stderr != r.stderr { ui.label("Standard error is the separate channel for problem messages; >&2 sends text there."); output_diff(ui,"Standard error", &c.stderr, &r.stderr); }
                         if c.status != r.status { ui.label(format!("Expected exit status: {} · Actual: {}. A successful task uses 0; an input problem uses the assignment’s stated nonzero status.", c.status, r.status)); }
                         if c.after != r.files { ui.label("The virtual files differ. Check the destination path, filter and whether > replaced or >> appended text. Inspect the files below."); }

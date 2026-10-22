@@ -575,7 +575,7 @@ fn assistance_is_optional_and_inserting_a_command_never_executes_it() {
 
 #[test]
 fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
-    for i in 9..16 {
+    for i in 9..pack::bundled().unwrap().len() {
         for width in [720., 1200.] {
             for scale in [1., 1.5] {
                 for challenge in [false, true] {
@@ -856,7 +856,7 @@ fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_r
 
 #[test]
 fn all_introductions_and_examples_wrap_at_large_text_and_challenge_stays_independent() {
-    for i in 9..16 {
+    for i in 9..pack::bundled().unwrap().len() {
         for view in [teaching::View::Introduction, teaching::View::Example] {
             for scale in [1., 1.5] {
                 for width in [720., 1200.] {

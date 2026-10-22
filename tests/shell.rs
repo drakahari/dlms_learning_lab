@@ -20,11 +20,11 @@ fn fixture() -> Case {
     }
 }
 #[test]
-fn seven_authored_scripts_grade_behavior_and_break_after_edit() {
+fn all_authored_scripts_grade_behavior_and_break_after_edit() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 16);
+    assert_eq!(labs.len(), 20);
     let scripts: Vec<_> = labs.iter().filter(|s| s.track == "Bash/Shell").collect();
-    assert_eq!(scripts.len(), 7);
+    assert_eq!(scripts.len(), 11);
     for s in scripts {
         let Goal::Script { cases } = &s.goal else {
             panic!()
