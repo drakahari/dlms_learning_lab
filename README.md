@@ -16,7 +16,7 @@ Try these first:
 
 1. **Read an IPv4 address** — start with Introduction, try a separate example, then solve the complete workstation assignment.
 2. **Share a report safely** — permission repair with multiple valid solutions.
-3. **Bring the service back** — diagnose configuration, restart, and enable separately.
+3. **Bring the service back** — learn service basics, try a separate editor/terminal example, then diagnose, repair, restart and enable.
 
 ## Build and verify
 
@@ -41,6 +41,8 @@ The checked-in Cargo.lock pins dependencies. First-time builds need crates.io ac
 ## This milestone
 
 The accepted native workspace design remains the basis of all labs. The header adds a native theme picker with samples under **Settings → Appearance → Theme samples**: all five stock DLMS palettes and all 22 official Omarchy v4.0.4 palettes, plus the existing Navy default (**28 choices**). Selection and text size persist independently of progress. No desktop settings are changed. Exact inventory, source revision, contrast adaptation and MIT notices: [themes](docs/THEMES.md).
+
+The original **Bring the service back** task now explains background services, saved configuration versus the current run, and startup at boot before independent diagnosis. A separate editor/terminal example keeps its own state and history; inserting a command never executes it. [Service teaching](docs/SERVICE_TEACHING.md).
 
 The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
 

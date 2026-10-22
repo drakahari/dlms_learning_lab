@@ -28,6 +28,8 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub address_learning: Option<crate::address_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub service_learning: Option<crate::service_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_draft: Option<crate::switching_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_learning: Option<crate::switching_teaching::Learning>,
@@ -71,6 +73,7 @@ impl WorkspaceData {
             && self.routing_v4_draft.as_ref().is_none_or(|d| d.valid())
             && self.routing_v4_learning.as_ref().is_none_or(|l| l.valid())
             && self.address_learning.as_ref().is_none_or(|l| l.valid())
+            && self.service_learning.as_ref().is_none_or(|l| l.valid())
             && self.command.len() <= 4096
             && [
                 &self.service_port,
@@ -313,11 +316,11 @@ pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
                 Requirement::Mask{mask}=>format!("The current creation mask is {:03o}; the task requires {mask:03o}. Run umask alone to inspect it.",tree.umask),
             }
         }else{label.clone()},
-        State::Service{port,running,loaded_port,..} => match i {
-            0=>if port.parse::<u16>().ok().filter(|p|*p>0).is_none(){"The saved port is not a number from 1 to 65535. Inspect the configuration and service journal.".into()}else{"The saved port differs from the requested port. Repair the configuration file.".into()},
-            1=>if !*running {"Atlas is stopped. Inspect status/journal, repair any configuration error, then start it.".into()}else{format!("Atlas is running with port {}. Saving does not apply changes; restart it to use the repaired configuration.",loaded_port.unwrap_or(0))},
-            _=>"Atlas is not enabled for boot. Running now and starting at boot are separate settings.".into(),
-        },
+        State::Service{port,running,loaded_port,failed,..} => if let engine::Goal::Service{port:expected}=g {match i {
+            0=>if port.parse::<u16>().ok().filter(|p|*p>0).is_none(){format!("Saved port {port:?} is not a number from 1 to 65535. This task requires port {expected}; inspect the configuration and journal.")}else{format!("Saved port is {port}; this task requires {expected}. Repair the saved configuration.")},
+            1=>if !*running {if *failed{"Atlas failed to start. Its journal explains the recorded error; repair the configuration before starting it again.".into()}else{"Atlas is stopped. Start it after checking the saved configuration.".into()}}else{format!("Atlas is running on port {}, but this task requires {expected}. Saving a file does not apply changes; restart it to load the saved configuration.",loaded_port.unwrap_or(0))},
+            _=>"Atlas is disabled at boot. Running now and starting at boot are separate settings.".into(),
+        }}else{label.clone()},
         State::Dns{serial,loaded_serial,..}=>if i==0{"The saved A record differs from the requested answer. Edit the record before reloading.".into()}else if serial<=loaded_serial{"The new zone has not been activated. Use a serial greater than the loaded serial, validate and reload.".into()}else{"The saved zone is not the loaded answer yet. Validate, reload named, then query resolution.".into()},
         State::Mount{mounted,writable,..}=>match i {0=>"Usage is above 80%. Inspect the disposable cache; cleanup requires a writable mounted volume.".into(),1=>"The persistent entry points to the wrong device. Correct the /data configuration and verify mounting.".into(),_=>if !*mounted{"/data is unmounted. Check its saved device entry before mounting.".into()}else if !*writable{"/data is read-only. Repair the mount state before deleting the disposable cache.".into()}else{label.clone()}},
         State::Unix{nodes,users}=>if i==0 {
@@ -339,4 +342,9 @@ pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
         State::Network{..}=>match i {0=>"The client address changed. Keep the workstation’s assigned address.".into(),1=>"The client mask differs from the router’s LAN mask. Inspect the interface configuration.".into(),_=>"The default route does not use the reachable LAN router. Inspect both the prefix and next hop, then test the remote path.".into()},
         _=>label.clone(),
     }).collect()
+}
+
+/// Pending file edits must not borrow current assignment success from an older saved value.
+pub fn pending_service_draft(a: &Attempt) -> bool {
+    matches!(&a.state,State::Service{port,..}if a.workspace.as_ref().and_then(|w|w.service_port.as_ref()).is_some_and(|d|d!=port))
 }

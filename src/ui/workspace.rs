@@ -50,7 +50,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if s.address_teaching.is_some() {
+            if s.service_teaching.is_some() {
+                self.service_learning_workspace(ui, i);
+            } else if s.address_teaching.is_some() {
                 self.address_learning_workspace(ui, i);
             } else if matches!(self.progress.attempts[&s.id].state, State::Subnet { .. }) {
                 self.ipv4_assignment(ui, i);
@@ -109,7 +111,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if s.address_teaching.is_some() {
+            let show_help = if s.service_teaching.is_some() {
+                self.service_view(i) == teaching::View::Assignment
+            } else if s.address_teaching.is_some() {
                 self.address_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Switching { .. }) {
                 self.switching_view(i) == teaching::View::Assignment
@@ -237,7 +241,7 @@ impl LabApp {
             &mut self.focus_input,
         );
     }
-    fn configuration(&mut self, ui: &mut egui::Ui, i: usize) {
+    pub(super) fn configuration(&mut self, ui: &mut egui::Ui, i: usize) {
         let a = self
             .progress
             .attempts
@@ -514,7 +518,11 @@ impl LabApp {
         }
         let s = &self.scenarios[i];
         let a = &self.progress.attempts[&s.id];
-        let now = engine::solved(&a.state, &s.goal);
+        if model::pending_service_draft(a) {
+            ui.label("Unsaved configuration · Save your draft, then verify the service again.");
+            return;
+        }
+        let now = progress::current_solved(a, s);
         self.metrics.completion = now;
         if now {
             ui.label(
@@ -733,7 +741,7 @@ fn row_label(ui: &mut egui::Ui, label: &str, width: f32) {
         },
     );
 }
-fn editor_row(
+pub(super) fn editor_row(
     ui: &mut egui::Ui,
     label: &str,
     draft: &mut String,

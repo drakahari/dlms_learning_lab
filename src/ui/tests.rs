@@ -11,6 +11,9 @@ fn open_assignment(a: &mut LabApp, i: usize) {
     if a.scenarios[i].address_teaching.is_some() {
         a.set_address_view(i, teaching::View::Assignment);
     }
+    if a.scenarios[i].service_teaching.is_some() {
+        a.set_service_view(i, teaching::View::Assignment);
+    }
 }
 fn frame(ctx: &egui::Context, a: &mut LabApp, w: f32, h: f32, events: Vec<egui::Event>) {
     let modifiers = events
@@ -2966,5 +2969,355 @@ fn addressing_views_wrap_and_challenge_keeps_complete_independent_assignments() 
                 assert!(!a.metrics.help.is_none());
             }
         }
+    }
+}
+
+#[test]
+fn service_fresh_learning_teaches_runs_and_preserves_both_editor_terminal_drafts() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.launch(6);
+    draw(&ctx, &mut a);
+    assert_eq!(a.service_view(6), teaching::View::Introduction);
+    assert!(a.metrics.check.is_none());
+    let original = a.progress.attempts["lpic2-service"].state.clone();
+    let r = a.metrics.example_action.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.service_view(6), teaching::View::Example);
+    let example_focus = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(example_focus)));
+    let r = a.metrics.command_insert.unwrap();
+    click(&ctx, &mut a, r);
+    let l = a.progress.attempts["lpic2-service"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .service_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.command, "systemctl status atlas");
+    assert!(l.transcript.is_empty());
+    assert_eq!(
+        l.state,
+        a.scenarios[6].service_teaching.as_ref().unwrap().fixture
+    );
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![key(egui::Key::Enter, false)],
+    );
+    draw(&ctx, &mut a);
+    assert!(
+        !a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_learning
+            .as_ref()
+            .unwrap()
+            .transcript
+            .is_empty()
+    );
+    let r = a.metrics.insert.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(
+        a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_learning
+            .as_ref()
+            .unwrap()
+            .state,
+        a.scenarios[6].service_teaching.as_ref().unwrap().fixture
+    );
+    let r = a.metrics.editor_save.unwrap();
+    click(&ctx, &mut a, r);
+    check(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    for command in ["systemctl restart atlas", "systemctl enable atlas"] {
+        a.focus_input = true;
+        draw(&ctx, &mut a);
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![egui::Event::Text(command.into())],
+        );
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![key(egui::Key::Enter, false)],
+        );
+        draw(&ctx, &mut a);
+    }
+    check(&ctx, &mut a);
+    assert!(
+        a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_learning
+            .as_ref()
+            .unwrap()
+            .solved(a.scenarios[6].service_teaching.as_ref().unwrap())
+    );
+    assert!(!a.metrics.completion);
+    assert_eq!(a.progress.attempts["lpic2-service"].state, original);
+    a.set_service_view(6, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert_ne!(example_focus, a.metrics.focus.unwrap());
+    a.input = "original terminal draft".into();
+    a.progress
+        .attempts
+        .get_mut("lpic2-service")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .command = a.input.clone();
+    a.progress
+        .attempts
+        .get_mut("lpic2-service")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .service_port = Some("original file draft".into());
+    a.set_service_view(6, teaching::View::Example);
+    draw(&ctx, &mut a);
+    a.progress
+        .attempts
+        .get_mut("lpic2-service")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .service_learning
+        .as_mut()
+        .unwrap()
+        .port_draft = "9091".into();
+    draw(&ctx, &mut a);
+    assert!(
+        !a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_learning
+            .as_ref()
+            .unwrap()
+            .solved(a.scenarios[6].service_teaching.as_ref().unwrap())
+    );
+    a.save();
+    a.progress = progress::load(&a.path, &a.scenarios).unwrap();
+    a.launch(6);
+    assert_eq!(a.service_view(6), teaching::View::Example);
+    assert_eq!(a.input, "original terminal draft");
+    assert_eq!(
+        a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_port
+            .as_deref(),
+        Some("original file draft")
+    );
+    assert_eq!(
+        a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_learning
+            .as_ref()
+            .unwrap()
+            .port_draft,
+        "9091"
+    );
+    a.reset_attempt(6);
+    assert_eq!(a.service_view(6), teaching::View::Introduction);
+    assert_eq!(a.progress.attempts["lpic2-service"].state, original);
+    a.progress
+        .attempts
+        .get_mut("lpic2-service")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .service_learning = None;
+    a.launch(6);
+    assert_eq!(a.service_view(6), teaching::View::Assignment);
+}
+#[test]
+fn service_views_wrap_and_challenge_keeps_the_full_editor_and_terminal() {
+    for view in [
+        teaching::View::Introduction,
+        teaching::View::Example,
+        teaching::View::Assignment,
+    ] {
+        for (w, h, scale) in [
+            (1200., 850., 1.),
+            (960., 740., 1.5),
+            (720., 560., 1.),
+            (720., 560., 1.5),
+        ] {
+            let (ctx, mut a) = app();
+            a.launch(6);
+            a.scale = scale;
+            a.set_service_view(6, view);
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            for r in a
+                .metrics
+                .inputs
+                .iter()
+                .chain(a.metrics.check.iter())
+                .chain(a.metrics.terminal.iter())
+                .chain(a.metrics.lesson_tabs.iter())
+                .chain(a.metrics.example_action.iter())
+                .chain(a.metrics.assignment_action.iter())
+                .chain(a.metrics.command_insert.iter())
+            {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "{view:?} {w}/{scale} {r:?}"
+                );
+            }
+            if w == 1200. {
+                if view == teaching::View::Introduction {
+                    assert!(a.metrics.example_action.unwrap().bottom() < 850.);
+                } else {
+                    assert!(a.metrics.check.unwrap().bottom() < 850.);
+                }
+            }
+            a.progress
+                .attempts
+                .get_mut("lpic2-service")
+                .unwrap()
+                .challenge = true;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            assert_eq!(a.service_view(6), teaching::View::Assignment);
+            assert!(a.metrics.lesson_tabs.is_empty());
+            assert!(a.metrics.command_insert.is_none());
+            assert!(a.metrics.terminal.is_some());
+            assert!(a.metrics.editor_save.is_some());
+            assert!(!a.metrics.help_visible);
+        }
+    }
+}
+#[test]
+fn service_example_and_assignment_editor_terminal_undo_histories_are_isolated() {
+    for terminal in [false, true] {
+        let (ctx, mut a) = app();
+        a.launch(6);
+        a.set_service_view(6, teaching::View::Example);
+        draw(&ctx, &mut a);
+        let r = if terminal {
+            a.metrics.terminal.unwrap()
+        } else {
+            a.metrics.inputs[0]
+        };
+        click(&ctx, &mut a, r);
+        let command = |key| egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers {
+                command: true,
+                ..egui::Modifiers::CTRL
+            },
+        };
+        for text in ["example-draft", "example-edit"] {
+            frame(
+                &ctx,
+                &mut a,
+                1200.,
+                850.,
+                vec![command(egui::Key::A), egui::Event::Text(text.into())],
+            );
+            draw(&ctx, &mut a);
+        }
+        let example = a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .service_learning
+            .clone()
+            .unwrap();
+        assert_eq!(
+            if terminal {
+                &example.command
+            } else {
+                &example.port_draft
+            },
+            "example-edit"
+        );
+        a.set_service_view(6, teaching::View::Assignment);
+        draw(&ctx, &mut a);
+        let r = if terminal {
+            a.metrics.terminal.unwrap()
+        } else {
+            a.metrics.inputs[0]
+        };
+        click(&ctx, &mut a, r);
+        let before = serde_json::to_value(&a.progress.attempts["lpic2-service"]).unwrap();
+        frame(&ctx, &mut a, 1200., 850., vec![command(egui::Key::Z)]);
+        draw(&ctx, &mut a);
+        assert_eq!(
+            serde_json::to_value(&a.progress.attempts["lpic2-service"]).unwrap(),
+            before
+        );
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![
+                command(egui::Key::A),
+                egui::Event::Text("assignment-draft".into()),
+            ],
+        );
+        draw(&ctx, &mut a);
+        let draft = a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap();
+        let draft = if terminal {
+            draft.command.clone()
+        } else {
+            draft.service_port.clone().unwrap()
+        };
+        assert_eq!(draft, "assignment-draft");
+        a.set_service_view(6, teaching::View::Example);
+        draw(&ctx, &mut a);
+        let r = if terminal {
+            a.metrics.terminal.unwrap()
+        } else {
+            a.metrics.inputs[0]
+        };
+        click(&ctx, &mut a, r);
+        frame(&ctx, &mut a, 1200., 850., vec![command(egui::Key::Z)]);
+        draw(&ctx, &mut a);
+        let w = a.progress.attempts["lpic2-service"]
+            .workspace
+            .as_ref()
+            .unwrap();
+        assert_eq!(
+            if terminal {
+                &w.command
+            } else {
+                w.service_port.as_ref().unwrap()
+            },
+            "assignment-draft"
+        );
     }
 }

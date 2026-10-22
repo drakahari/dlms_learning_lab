@@ -210,3 +210,16 @@ Source `b778fb567f8cacb500b62c3d627cafd1ec849626`,64 authored assignments/fiftee
 | Windows | dlms-learning-lab-0.1.0-gb778fb567f8c-x86_64-pc-windows-msvc-windows-candidate.zip | 0c9fe4df55c3166d50e44c89faa74c472156e2d93ded5517270177eae3f4a2f9 |
 
 Fedora binary SHA-256 `565b485d8db497e9d393df0f9ac03f5595ef77b749995a0325b596e4ee6ae50e`. Extracted and upgraded the prior isolated `/tmp` install; validated its desktop file and bundled64/15 content outside the checkout, retained the exact synthetic progress sentinel and passed the full installed all-six routing native flow. Sentinel retention proves file preservation, not parsed legacy-progress acceptance (covered separately by model/UI tests). This candidate predates M32 teaching improvements. No public release. macOS notice gate, Windows/macOS actual runtime acceptance and default-Wayland startup investigation remain open.
+
+
+### M32 installed addressing-teaching candidate
+
+Source `0959e9a037b5742104e040fce24a9eba8d479d5a`, unchanged64/fifteen. [Native CI39862188551](https://github.com/drakahari/dlms_learning_lab/actions/runs/39862188551) passed on all three native runners; downloaded Ubuntu/Windows checksum manifests match their archives.
+
+| Platform | Candidate | SHA-256 |
+| --- | --- | --- |
+| Fedora44 | dlms-learning-lab-0.1.0-g0959e9a037b5-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | 84c117a92302469069c5e1c0936a8d45c1c815931ac6043b17b562d2976a725c |
+| Ubuntu24.04 | dlms-learning-lab-0.1.0-g0959e9a037b5-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz | 277888ec663b9c5b368d3a34a26a368454e99958aa122f4f4273658f76004197 |
+| Windows | dlms-learning-lab-0.1.0-g0959e9a037b5-x86_64-pc-windows-msvc-windows-candidate.zip | 806638597538dd0b13d4d998248baba2a0d6a2e90c9b1d05a5642a3781b5ca3b |
+
+Fedora binary SHA-256 `3864fddf50e1bf61ae789bf652f57313b89c9b8db985f8e223edfe7ac82123b1`. Safely extracted and upgraded the same isolated installation; validated desktop entry and bundled content outside the checkout, retained the exact synthetic progress sentinel, then passed both installed native subnet/VLSM teaching flows with light/dark150% and allocation feedback review. Parsed legacy progress is separately covered by backend/UI regressions. This candidate predates M33 service teaching. macOS archive notices, actual Windows/macOS desktop acceptance and default-Wayland startup remain open. No public release.

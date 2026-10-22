@@ -41,6 +41,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub address_teaching: Option<crate::address_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub service_teaching: Option<crate::service_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -162,6 +164,16 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                     s.id
                 ));
             }
+        }
+        if let Some(lesson) = &s.service_teaching {
+            if !matches!(s.initial, State::Service { .. })
+                || !matches!(s.goal,Goal::Service{port}if port!=lesson.required_port)
+            {
+                return Err(
+                    "Service teaching requires a distinct example port and service task".into(),
+                );
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
         if let Some(lesson) = &s.address_teaching {
             if crate::address_teaching::goal(&s.initial).is_none()
@@ -364,12 +376,20 @@ pub fn validate_state(s: &State) -> Result<(), String> {
                 })
         }
         State::Service {
+            port,
             running,
             loaded_port,
             failed,
             journal,
             ..
-        } => (!*running || (loaded_port.is_some_and(|p| p > 0) && !*failed)) && journal.len() <= 60,
+        } => {
+            port.len() <= 256
+                && (!*running || (loaded_port.is_some_and(|p| p > 0) && !*failed))
+                && journal.len() <= 60
+                && journal
+                    .iter()
+                    .all(|e| !matches!(e,engine::ServiceEvent::Rejected{port}if port.len()>256))
+        }
 
         State::Dns {
             records, loaded, ..

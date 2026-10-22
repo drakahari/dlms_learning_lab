@@ -11,6 +11,7 @@ mod address_learning;
 mod data;
 mod script_learning;
 mod scripting;
+mod service_learning;
 mod terminal_learning;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_routing_workspace;
@@ -28,6 +29,7 @@ struct Metrics {
     lesson_tabs: Vec<egui::Rect>,
     example_action: Option<egui::Rect>,
     example_reset: Option<egui::Rect>,
+    command_insert: Option<egui::Rect>,
     address_diagram: Option<egui::Rect>,
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
@@ -218,8 +220,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("addressing")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("service-teaching")
             {
+                3000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("addressing") {
                 2900
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("file-batches") {
                 2500
@@ -306,6 +310,9 @@ impl LabApp {
         model::prepare(a);
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, new_attempt);
+        }
+        if let Some(lesson) = &s.service_teaching {
+            dlms_learning_lab::service_teaching::prepare(a, lesson, new_attempt);
         }
         if let Some(lesson) = &s.address_teaching {
             dlms_learning_lab::address_teaching::prepare(a, lesson, new_attempt);
@@ -395,6 +402,9 @@ impl LabApp {
         model::prepare(a);
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.service_teaching {
+            dlms_learning_lab::service_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.address_teaching {
             dlms_learning_lab::address_teaching::prepare(a, lesson, true);

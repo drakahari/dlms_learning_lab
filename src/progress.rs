@@ -76,6 +76,9 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if crate::workspace::pending_service_draft(a) {
+        return false;
+    }
     if crate::address_teaching::goal(&s.initial).is_some()
         && !crate::address_teaching::same_assignment(&a.state, &s.initial)
     {
@@ -227,6 +230,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
                 "Saved addressing assignment inputs differ from this lab; original retained".into(),
             );
         }
+        validate_service_workspace(a)?;
         validate_address_workspace(a)?;
         if let Some(l) = a
             .workspace
@@ -239,6 +243,25 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved addressing example differs from this lesson; original retained".into(),
             );
+        }
+        if a.workspace
+            .as_ref()
+            .is_some_and(|w| w.service_learning.is_some())
+            && s.service_teaching.is_none()
+        {
+            return Err(
+                "Service practice metadata without authored teaching; original retained".into(),
+            );
+        }
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.service_learning.as_ref())
+            && s.service_teaching
+                .as_ref()
+                .is_none_or(|lesson| l.command_index >= lesson.commands.len())
+        {
+            return Err("Saved service example selection is incompatible with this lesson; original retained".into());
         }
         validate_routing_workspace(a)?;
         if let Some(l) = a
@@ -279,6 +302,16 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_service_workspace(a: &Attempt) -> Result<(), String> {
+    if a.workspace
+        .as_ref()
+        .is_some_and(|w| w.service_learning.is_some())
+        && !matches!(a.state, State::Service { .. })
+    {
+        return Err("Service practice metadata on another activity; original retained".into());
+    }
+    Ok(())
+}
 fn validate_address_workspace(a: &Attempt) -> Result<(), String> {
     if let Some(l) = a
         .workspace
@@ -318,6 +351,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_service_workspace(a)?;
         validate_address_workspace(a)?;
         validate_routing_workspace(a)?;
         if let State::Switching { fabric } = &a.state

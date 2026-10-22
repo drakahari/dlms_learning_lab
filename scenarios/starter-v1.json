@@ -713,7 +713,8 @@
       ],
       "sources": [
         "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
-        "https://www.freedesktop.org/software/systemd/man/latest/systemctl.html"
+        "https://www.freedesktop.org/software/systemd/man/latest/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/latest/journalctl.html"
       ],
       "simplifications": "Single modeled service, one configuration key. No unit dependency graph, privileges, socket binding, processes or actual boot.",
       "guide": [
@@ -769,7 +770,82 @@
         }
       ],
       "explanation": "The original word eighty is not a valid numeric port. Saving port=8080 repairs the file; restart loads that value into the running service. Enable is independent and makes the unit start at boot. A saved config edit alone does not change the currently loaded port.",
-      "unit": "linux-service-recovery"
+      "unit": "linux-service-recovery",
+      "service_teaching": {
+        "prerequisite_note": "No service-management experience is needed. Read this introduction or open the full assignment. The example keeps its own saved configuration, running service and command history.",
+        "concepts": [
+          {
+            "title": "A service works in the background",
+            "text": "A service is a program that can keep working without an open terminal. This lab models a fictional service called atlas. Its configuration file holds a port number: a numbered entry point for an application. Here it is only a simulated value; no real program or socket is started."
+          },
+          {
+            "title": "Look for evidence before changing anything",
+            "text": "systemctl status atlas reports whether atlas is running now and enabled for future boot. journalctl -u atlas reads recorded events for that service. A failed start can leave an explanation in the journal. Type one command in the terminal and press Enter or Run; its output appears above the input."
+          },
+          {
+            "title": "A saved file and a running program are different",
+            "text": "Use the Port field in the simulated /etc/atlas.conf editor and choose Save configuration. The port must be a number from 1 to 65535 for atlas to start. Saving alone does not change a running service. Restart stops and starts atlas with the saved value; start does not reload a service that is already running."
+          },
+          {
+            "title": "Running now or starting with the computer",
+            "text": "Enable records that a service should start when the computer starts (at boot); it does not start the service now. Restart or start controls whether it runs now. Verify both: is-active reports active when running, while is-enabled reports enabled for boot. In this lab, check both after repairing the configuration."
+          }
+        ],
+        "example_description": "Try repairing a separate practice copy of atlas to use port 9090. Inspect its failed status and journal, put 9090 in the example editor, save, restart and enable it. Then verify both states. Use example port fills only the editor draft; it does not save or run anything.",
+        "required_port": 9090,
+        "fixture": {
+          "kind": "Service",
+          "port": "ninety",
+          "running": false,
+          "enabled": false,
+          "loaded_port": null,
+          "failed": true,
+          "journal": [
+            {
+              "kind": "Rejected",
+              "port": "ninety"
+            }
+          ]
+        },
+        "commands": [
+          {
+            "command": "systemctl status atlas",
+            "explanation": "Inspect current activity and boot enablement before editing.",
+            "simulator_only": false
+          },
+          {
+            "command": "journalctl -u atlas",
+            "explanation": "Read the saved diagnostic from the failed start.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /etc/atlas.conf",
+            "explanation": "Read the saved configuration; an unsaved editor draft is not this file.",
+            "simulator_only": false
+          },
+          {
+            "command": "systemctl restart atlas",
+            "explanation": "Stop and start atlas using its saved configuration.",
+            "simulator_only": false
+          },
+          {
+            "command": "systemctl enable atlas",
+            "explanation": "Enable future boot startup; this does not start atlas.",
+            "simulator_only": false
+          },
+          {
+            "command": "systemctl is-active atlas",
+            "explanation": "See whether atlas is running now.",
+            "simulator_only": false
+          },
+          {
+            "command": "systemctl is-enabled atlas",
+            "explanation": "See whether atlas is set to start when the computer starts.",
+            "simulator_only": false
+          }
+        ],
+        "try_change": "After verifying the example, save port 9091 without restarting and inspect status: the running instance still uses 9090. Restart to load 9091, then check why it fails this example’s required port. Restore 9090 and restart. Finally try systemctl disable atlas: it can keep running while disabled for boot."
+      }
     },
     {
       "id": "lpic2-dns",

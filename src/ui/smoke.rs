@@ -7,6 +7,9 @@ impl LabApp {
         if self.scenarios[i].address_teaching.is_some() {
             self.set_address_view(i, teaching::View::Assignment);
         }
+        if self.scenarios[i].service_teaching.is_some() {
+            self.set_service_view(i, teaching::View::Assignment);
+        }
     }
     pub(super) fn add_routing_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
@@ -90,6 +93,213 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            3000 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.launch(6);
+                assert_eq!(self.service_view(6), teaching::View::Introduction);
+            }
+            3001 => shot = Some("service-foundation-introduction".into()),
+            3002 => self
+                .pending_events
+                .extend(click(self.metrics.example_action.unwrap())),
+            3003 => self
+                .pending_events
+                .extend(click(self.metrics.command_insert.unwrap())),
+            3004 => self.pending_events.push(key(egui::Key::Enter, false)),
+            3005 => {
+                assert!(
+                    !self.progress.attempts["lpic2-service"]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .service_learning
+                        .as_ref()
+                        .unwrap()
+                        .transcript
+                        .is_empty()
+                );
+                shot = Some("service-foundation-example-diagnosis".into());
+            }
+            3006 => self
+                .pending_events
+                .extend(click(self.metrics.terminal.unwrap())),
+            3007 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("journalctl -u atlas".into()),
+                key(egui::Key::Enter, false),
+            ]),
+            3008 => self
+                .pending_events
+                .extend(click(self.metrics.insert.unwrap())),
+            3009 => {
+                assert_eq!(
+                    self.progress.attempts["lpic2-service"].state,
+                    self.scenarios[6].initial
+                );
+                self.pending_events
+                    .extend(click(self.metrics.editor_save.unwrap()));
+            }
+            3010 | 3016 | 3026 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            3011 => {
+                assert!(!self.metrics.completion);
+                shot = Some("service-foundation-example-partial".into());
+            }
+            3012 | 3014 | 3022 | 3024 => self
+                .pending_events
+                .extend(click(self.metrics.terminal.unwrap())),
+            3013 | 3023 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("systemctl restart atlas".into()),
+                key(egui::Key::Enter, false),
+            ]),
+            3015 | 3025 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("systemctl enable atlas".into()),
+                key(egui::Key::Enter, false),
+            ]),
+            3017 => {
+                assert!(
+                    self.progress.attempts["lpic2-service"]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .service_learning
+                        .as_ref()
+                        .unwrap()
+                        .solved(self.scenarios[6].service_teaching.as_ref().unwrap())
+                );
+                assert_eq!(
+                    self.progress.attempts["lpic2-service"].state,
+                    self.scenarios[6].initial
+                );
+                assert!(!self.metrics.completion);
+                shot = Some("service-foundation-example-complete".into());
+            }
+            3018 => self
+                .pending_events
+                .extend(click(self.metrics.lesson_tabs[2])),
+            3019 => {
+                assert_eq!(self.service_view(6), teaching::View::Assignment);
+                assert_eq!(
+                    self.progress.attempts["lpic2-service"].state,
+                    self.scenarios[6].initial
+                );
+                self.pending_events.extend(click(self.metrics.inputs[0]));
+            }
+            3020 => self
+                .pending_events
+                .extend([key(egui::Key::A, true), egui::Event::Text("8080".into())]),
+            3021 => self
+                .pending_events
+                .extend(click(self.metrics.editor_save.unwrap())),
+            3027 => {
+                assert!(self.metrics.completion);
+                shot = Some("service-foundation-assignment-complete".into());
+            }
+            3028 | 3030 => self
+                .pending_events
+                .extend(click(self.metrics.terminal.unwrap())),
+            3029 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("systemctl is-active atlas".into()),
+                key(egui::Key::Enter, false),
+            ]),
+            3031 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("systemctl is-enabled atlas".into()),
+                key(egui::Key::Enter, false),
+            ]),
+            3032 => {
+                let a = &self.progress.attempts["lpic2-service"];
+                assert!(a.transcript.iter().any(|l| l.ends_with("\nactive")));
+                assert!(a.transcript.last().unwrap().ends_with("\nenabled"));
+                shot = Some("service-foundation-assignment-verified".into());
+            }
+            3033 => self.pending_events.extend(click(self.metrics.inputs[0])),
+            3034 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("unfinished port".into()),
+            ]),
+            3035 => {
+                assert!(!self.metrics.completion);
+                assert!(!progress::current_solved(
+                    &self.progress.attempts["lpic2-service"],
+                    &self.scenarios[6]
+                ));
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                self.launch(6);
+                assert_eq!(self.service_view(6), teaching::View::Assignment);
+                assert_eq!(
+                    self.progress.attempts["lpic2-service"]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .service_port
+                        .as_deref(),
+                    Some("unfinished port")
+                );
+            }
+            3036 => shot = Some("service-foundation-resumed-unsaved".into()),
+            3037 => self
+                .pending_events
+                .extend(click(self.metrics.reset.unwrap())),
+            3038 => self
+                .pending_events
+                .extend(click(self.metrics.confirm_reset.unwrap())),
+            3039 => {
+                assert_eq!(self.service_view(6), teaching::View::Introduction);
+                assert_eq!(
+                    self.progress.attempts["lpic2-service"].state,
+                    self.scenarios[6].initial
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 740.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.set_service_view(6, teaching::View::Example);
+            }
+            3040 => shot = Some("service-foundation-example-light-150".into()),
+            3041 | 3045 => {
+                let p = ctx.content_rect().center();
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(p),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1200.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            3042 => {
+                let r = self.metrics.check.unwrap();
+                assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
+                shot = Some("service-foundation-example-scrolled-light-150".into());
+            }
+            3043 => {
+                self.set_service_view(6, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut("lpic2-service")
+                    .unwrap()
+                    .challenge = true;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            3044 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("service-foundation-challenge-dark-150".into());
+            }
+            3046 => shot = Some("service-foundation-challenge-scrolled-dark-150".into()),
+            3047 => {
+                println!(
+                    "PASS native service teaching: fresh introduction; isolated example diagnosis/editor/save/restart/enable/Check; fully typed assignment repair and completion; unsaved-draft invalidation, exact resume and selected reset; resized150% light/dark example/Challenge with reachable scrolling. Agent event/render review, not novice or actual-systemd acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             n @ 2900..=2939 => {
                 let i = (n - 2900) / 20;
                 let id = self.scenarios[i].id.clone();

@@ -1039,7 +1039,7 @@ pub fn describe(s: &State) -> String {
             loaded_port,
             ..
         } => format!(
-            "atlas.service  |  {}  |  {}\nLoaded port: {}",
+            "atlas.service  |  {}  |  {}{}",
             if *running {
                 "Running"
             } else if *failed {
@@ -1052,7 +1052,10 @@ pub fn describe(s: &State) -> String {
             } else {
                 "Disabled at boot"
             },
-            loaded_port.map(|p| p.to_string()).unwrap_or("None".into())
+            loaded_port
+                .filter(|_| *running)
+                .map(|p| format!("\nRunning port: {p}"))
+                .unwrap_or_default()
         ),
         State::Dns {
             loaded,
