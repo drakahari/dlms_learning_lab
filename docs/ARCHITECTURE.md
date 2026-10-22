@@ -6,7 +6,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | --- | --- |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
-| `ipv6.rs` | Bounded prefix math and static forwarding/return-path capability; no authored IPv6 coverage yet |
+| `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
 | `ipv4.rs` | Boundary math, host validation, numerical variants and retained legacy lesson/sandbox metadata |
 | `workspace.rs` | Versioned draft/check metadata, compatibility preparation, pure editor operations and state-specific diagnostic feedback |
 | `pack.rs` | Versioned declarative JSON validation and reference-solution reachability |
@@ -71,4 +71,4 @@ Scenario `unit` metadata does not change saved attempt IDs or versions. The libr
 
 `pack::load_catalog` bounds each declarative pack to 2 MB, a bundle to 100 packs/32 MB and 1,000 scenarios, then validates global identifiers and prerequisite graphs without serializing a giant synthetic pack. This supports distinct versioned units without executable loaders or a plugin platform. Single-pack validation remains strict. `--validate-content` checks the actual complete bundled catalog and unit index; alternate/negative solution checks remain separate content tests.
 
-File-management lessons use the same approved Introduction → Try example → Assignment pattern with a separately persisted virtual tree; see [LINUX_FILES.md](LINUX_FILES.md). IPv6 capability limitations and reference tests are documented in [IPV6_SUBSET.md](IPV6_SUBSET.md). The capability-only IPv6 module is not an executable lesson or current exam coverage.
+File-management lessons use the same approved Introduction → Try example → Assignment pattern with a separately persisted virtual tree; see [LINUX_FILES.md](LINUX_FILES.md). IPv6 capability limitations and reference tests are documented in [IPV6_SUBSET.md](IPV6_SUBSET.md). Six authored IPv6 lessons use native device/interface/route editors with atomic drafts and isolated practice; see [IPV6_LESSONS.md](IPV6_LESSONS.md). This is partial static-network coverage, with dynamic protocols explicitly excluded.

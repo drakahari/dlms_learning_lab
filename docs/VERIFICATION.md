@@ -1,3 +1,7 @@
+# Current completion work
+
+The sections below retain historical scoped verification. Current milestone evidence is maintained in [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). As of M13:147 Rust tests;36 authored labs/eight units; native Fedora IPv6 unit and light150 scroll/retry review. Full curriculum, fine-grained objective mapping, assistive-technology review and actual Windows/macOS desktop acceptance remain open. Current notice/platform candidate gates are in [INSTALLATION.md](INSTALLATION.md). No release-readiness claim follows from these counts.
+
 # Teaching improvement verification
 
 Fedora 44 / COSMIC Wayland, 2026-10-21. This pass changes beginner teaching in the **existing seven scripting labs** and relocates theme samples. All sixteen assignments, scenario versions and behavior cases remain; no dependencies or interpreter features were added.

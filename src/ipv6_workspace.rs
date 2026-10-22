@@ -4,21 +4,20 @@ use serde::{Deserialize, Serialize};
 use std::{collections::BTreeMap, net::Ipv6Addr};
 fn number(text: &str, max: u8) -> Result<u8, String> {
     if text.is_empty() || !text.bytes().all(|b| b.is_ascii_digit()) {
-        return Err(format!("Enter a whole number from 0 to{max}"));
+        return Err(format!("Enter a whole number from 0 to {max}"));
     }
     text.parse::<u8>()
         .ok()
         .filter(|n| *n <= max)
-        .ok_or_else(|| format!("Enter a whole number from 0 to{max}"))
+        .ok_or_else(|| format!("Enter a whole number from 0 to {max}"))
 }
 fn assignment(text: &str, on_link: bool) -> Result<Option<Assignment>, String> {
     if text.trim().is_empty() {
         return Ok(None);
     }
-    let (address, prefix) = text
-        .trim()
-        .split_once('/')
-        .ok_or("Use an IPv6 address/prefix, such as 2001:db8:10::10/64")?;
+    let (address, prefix) = text.trim().split_once('/').ok_or(
+        "Malformed address/prefix: use an IPv6 address/prefix, such as 2001:db8:10::10/64",
+    )?;
     Ok(Some(Assignment {
         address: address
             .parse()
@@ -54,6 +53,8 @@ pub struct DeviceDraft {
 #[serde(deny_unknown_fields)]
 pub struct Draft {
     pub version: u32,
+    #[serde(default)]
+    pub show_routes: bool,
     pub selected_device: String,
     pub devices: BTreeMap<String, DeviceDraft>,
 }
@@ -61,6 +62,7 @@ impl Draft {
     pub fn new(t: &Topology) -> Self {
         Self {
             version: 1,
+            show_routes: false,
             selected_device: t.devices.keys().next().cloned().unwrap_or_default(),
             devices: t
                 .devices
@@ -85,7 +87,7 @@ impl Draft {
                                                 }),
                                             link_local: i.link_local.to_string(),
                                             up: i.up,
-                                            on_link: i.address.as_ref().is_some_and(|a| a.on_link),
+                                            on_link: i.address.as_ref().is_none_or(|a| a.on_link),
                                         },
                                     )
                                 })

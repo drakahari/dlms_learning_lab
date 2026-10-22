@@ -40,6 +40,7 @@ fn scenario() -> pack::Scenario {
                 from: "workstation".into(),
                 target: ip("2001:db8:20::20"),
                 scope: None,
+                first_hop: None,
                 when: vec![],
             },
         ],
@@ -165,6 +166,7 @@ fn conditional_connectivity_checks_test_backup_routes_without_changing_current_s
         from: "workstation".into(),
         target: ip("2001:db8:20::20"),
         scope: None,
+        first_hop: None,
         when: vec![InterfaceCondition {
             device: "workstation".into(),
             interface: "lan".into(),
@@ -227,6 +229,7 @@ fn malformed_packs_adapters_and_changed_shapes_fail_honestly() {
         from: "server".into(),
         target: ip("fe80::1"),
         scope: None,
+        first_hop: None,
         when: vec![],
     };
     assert!(!invalid.valid_for(&t));
@@ -360,7 +363,7 @@ fn teaching_lesson() -> dlms_learning_lab::ipv6_teaching::Lesson {
         .as_mut()
         .unwrap()
         .prefix = 32;
-    Lesson{prerequisite_note:"Use the native address and route fields. No terminal setup is needed.".into(),concepts:vec![Concept{title:"Keep the prefix correct".into(),text:"The manually connected prefix determines which destinations are treated as on the local link.".into()}],example_description:"Repair the practice workstation prefix, then test its path and reply.".into(),fixture,example_solution:vec!["address workstation lan fd77:55:10::10/64".into()],outcomes:vec![Requirement::Reachable{label:"Practice path".into(),from:"workstation".into(),target:ip("fd77:55:20::20"),scope:None,when:vec![]}],try_change:"Choose another free address in the same client /64, then check again.".into()}
+    Lesson{start_with_routes:false,prerequisite_note:"Use the native address and route fields. No terminal setup is needed.".into(),concepts:vec![Concept{title:"Keep the prefix correct".into(),text:"The manually connected prefix determines which destinations are treated as on the local link.".into()}],example_description:"Repair the practice workstation prefix, then test its path and reply.".into(),fixture,example_solution:vec!["address workstation lan fd77:55:10::10/64".into()],outcomes:vec![Requirement::Reachable{label:"Practice path".into(),from:"workstation".into(),target:ip("fd77:55:20::20"),scope:None,first_hop:None,when:vec![]}],try_change:"Choose another free address in the same client /64, then check again.".into()}
 }
 #[test]
 fn native_example_fill_and_apply_never_touch_the_assignment_or_award_credit() {
@@ -473,4 +476,25 @@ fn wrong_shape_draft_cannot_replace_a_known_good_progress_file() {
             .contains("draft structure")
     );
     assert_eq!(std::fs::read(&path).unwrap(), before);
+}
+
+#[test]
+fn ordinary_workstation_choices_exclude_reserved_anycast_but_keep_all_one_host_bits() {
+    let lab = scenario();
+    let mut state = lab.initial.clone();
+    for address in [
+        "2001:db8:10::/64",
+        "2001:db8:10:0:fdff:ffff:ffff:ff80/64",
+        "2001:db8:10:0:fdff:ffff:ffff:ffff/64",
+    ] {
+        engine::execute(&mut state, &format!("address workstation lan {address}")).unwrap();
+        assert!(!engine::solved(&state, &lab.goal));
+        assert!(engine::checks(&state, &lab.goal)[0].1.contains("reserved"));
+    }
+    engine::execute(
+        &mut state,
+        "address workstation lan 2001:db8:10:0:ffff:ffff:ffff:ffff/64",
+    )
+    .unwrap();
+    assert!(engine::solved(&state, &lab.goal));
 }

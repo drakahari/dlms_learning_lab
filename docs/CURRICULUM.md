@@ -26,6 +26,7 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 | --- | --- | --- |
 | `ccna-ipv4` | Conventional IPv4 boundaries and second host | No IPv6 or device CLI; /31 and /32 excluded |
 | `ccna-vlsm` | Host-capacity allocation, alignment, containment, overlap | No routed topology configuration |
+| `ccna-ipv6-neighbor` … `ccna-ipv6-handover` | Six native IPv6 addressing/static-route tasks with return paths and deterministic failover | No dynamic ND/RA/SLAAC, full address-type course, IOS, IPv4 routing or dynamic routing; objectives1.8/1.9/3.3 stay partial |
 | `ccna-gateway` | Client mask/next-hop diagnosis | One topology; no IOS, ARP, multi-hop protocols or cross-OS command coverage |
 | `lpic1-file-navigation` … `lpic1-file-handover` | Six file-management tasks: paths, quoted names, copy/move, cleanup, creation mask and capstone | No globs, recursive operations, links, ownership changes or full GNU option surface |
 | `lpic1-permissions` | Alex-only file access and privacy; alternate repairs | No ACL, SELinux or full Unix filesystem |
@@ -42,7 +43,7 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 
 ## Learning order and capability gates
 
-CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Add IPv6 and packet/routing models before authoring dual-stack or protocol diagnosis. OSPF, STP, LACP, DHCP and FHRP need explicit state transitions and negative tests before content is accepted. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
+CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. A bounded IPv6 static-forwarding model now supports six reviewed assignments. IPv4 multihop and protocol models are still required before dual-stack or dynamic-protocol diagnosis. OSPF, STP, LACP, DHCP and FHRP need explicit state transitions and negative tests before content is accepted. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
 
 LPIC-1 progresses through terminal/files → permissions/accounts → packages/processes → storage/boot → shell/scheduling → networking/services/security. Hardware probing, bootloaders, real package transactions, locale behavior, accessibility and cryptography require new evidence/state models; existing tests do not establish those capabilities. A visual configuration exercise must identify what it models and what it cannot execute.
 
@@ -65,6 +66,6 @@ Each planned stage includes a guided repair, independent construction and capsto
 
 ## Next capability batch
 
-The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Next extend Bash scope, structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 addressing/neighbor state is the next networking capability; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
+The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Next extend Bash scope, structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
 
 Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](LINUX_FILES.md). This delivers narrow practical slices of LPIC-1 103.1, 103.3 and 104.5; the full objectives remain partial.

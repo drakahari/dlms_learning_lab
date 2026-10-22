@@ -851,6 +851,220 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            n @ 1300..=1407 => {
+                let i = 30 + (n - 1300) / 18;
+                let id = self.scenarios[i].id.clone();
+                match (n - 1300) % 18 {
+                    0 => {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        self.launch(i);
+                    }
+                    1 => {
+                        assert_eq!(self.ipv6_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => self.set_ipv6_view(i, teaching::View::Example),
+                    3 => {
+                        let lesson = self.scenarios[i].ipv6_teaching.clone().unwrap();
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .ipv6_learning
+                            .as_mut()
+                            .unwrap()
+                            .fill_example(&lesson)
+                            .unwrap();
+                    }
+                    4 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    5 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .ipv6_learning
+                            .as_ref()
+                            .unwrap();
+                        assert!(
+                            l.checks(self.scenarios[i].ipv6_teaching.as_ref().unwrap())
+                                .iter()
+                                .all(|(p, _)| *p)
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        shot = Some(format!("{id}-practice"));
+                    }
+                    6 => self
+                        .pending_events
+                        .extend(click(self.metrics.assignment_action.unwrap())),
+                    7 => {
+                        assert_eq!(self.ipv6_view(i), teaching::View::Assignment);
+                        shot = Some(format!("{id}-assignment"));
+                    }
+                    8 => {
+                        if i == 30 {
+                            self.pending_events
+                                .push(egui::Event::Text("2001:db8:44::23/64".into()));
+                        } else {
+                            self.pending_events
+                                .extend(click(self.metrics.check.unwrap()));
+                        }
+                    }
+                    9 => {
+                        if i != 30 {
+                            assert!(!self.metrics.completion);
+                            shot = Some(format!("{id}-retry"));
+                        }
+                    }
+                    10 => {
+                        if i != 30 {
+                            let engine::State::Ipv6 { mut topology } =
+                                self.scenarios[i].initial.clone()
+                            else {
+                                panic!()
+                            };
+                            for action in &self.scenarios[i].solution {
+                                dlms_learning_lab::ipv6_workspace::adapter(&mut topology, action)
+                                    .unwrap();
+                            }
+                            let draft = self
+                                .progress
+                                .attempts
+                                .get_mut(&id)
+                                .unwrap()
+                                .workspace
+                                .as_mut()
+                                .unwrap()
+                                .ipv6_draft
+                                .as_mut()
+                                .unwrap();
+                            let selected = draft.selected_device.clone();
+                            *draft = dlms_learning_lab::ipv6_workspace::Draft::new(&topology);
+                            draft.selected_device = selected;
+                        }
+                    }
+                    11 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    12 => {
+                        assert!(self.metrics.completion, "native {id} completion");
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    13 => {
+                        let draft = self
+                            .progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .ipv6_draft
+                            .as_mut()
+                            .unwrap();
+                        for device in draft.devices.values_mut() {
+                            for iface in device.interfaces.values_mut() {
+                                iface.up = false;
+                            }
+                        }
+                    }
+                    14 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                        self.save();
+                    }
+                    15 => {
+                        self.launch(9);
+                        self.launch(i);
+                    }
+                    16 => {
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                    }
+                    _ => self.selected = None,
+                }
+            }
+            1408 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(31);
+                self.reset_attempt(31);
+                self.set_ipv6_view(31, teaching::View::Introduction);
+            }
+            1409 => shot = Some("ipv6-introduction-light-150".into()),
+            1410 => self.set_ipv6_view(31, teaching::View::Assignment),
+            1411 => shot = Some("ipv6-address-light-150".into()),
+            1412 => {
+                self.progress
+                    .attempts
+                    .get_mut("ccna-ipv6-workstation")
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .ipv6_draft
+                    .as_mut()
+                    .unwrap()
+                    .show_routes = true;
+            }
+            1413 => shot = Some("ipv6-routes-light-150".into()),
+            1414 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(400., 400.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -900.),
+                    modifiers: Default::default(),
+                });
+            }
+            1415 => {}
+            1416 => shot = Some("ipv6-routes-scrolled-light-150".into()),
+            1417 => {
+                let r = self.metrics.check.unwrap();
+                assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
+                self.pending_events.extend(click(r));
+            }
+            1418 => {
+                assert!(self.checked);
+                assert!(!self.metrics.completion);
+                shot = Some("ipv6-retry-scrolled-light-150".into());
+            }
+            1419 => {
+                self.progress
+                    .attempts
+                    .get_mut("ccna-ipv6-workstation")
+                    .unwrap()
+                    .challenge = true;
+            }
+            1420 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("ipv6-challenge-light-150".into());
+            }
+            1421 => {
+                if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6-layout") {
+                    println!(
+                        "PASS native IPv6 layout: resized light150 address/route views, scrolled Check action and retry feedback, independent Challenge. Synthetic profile only."
+                    );
+                } else {
+                    println!(
+                        "PASS native IPv6: six introductions, separate example draft/apply checks, assignment error/retry and reference-draft checks, manual keyboard address in first lab, invalidation and resume. Resized light150 address/route scrolling and Challenge. Synthetic profile only; not novice-user or physical networking acceptance."
+                    );
+                }
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             n @ 1100..=1207 => {
                 let ordinal = (n - 1100) / 18;
                 let i = self

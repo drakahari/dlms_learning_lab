@@ -161,6 +161,12 @@ fn supported_unicast(address: Ipv6Addr) -> bool {
 fn supported_local(address: Ipv6Addr) -> bool {
     u128::from(address) >> 64 == 0xfe80000000000000 && u128::from(address) as u64 != 0
 }
+/// Known subnet-router and RFC2526 reservations for this unit's conventional /64s.
+/// This does not identify arbitrary configured anycast from address bits.
+pub fn reserved_workstation_id(address: Ipv6Addr) -> bool {
+    let id = u128::from(address) as u64;
+    id == 0 || id & !0x7f == 0xfdff_ffff_ffff_ff80
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum RouteStatus {
     Active,
@@ -533,6 +539,8 @@ pub enum Requirement {
         from: String,
         target: Ipv6Addr,
         scope: Option<String>,
+        #[serde(default)]
+        first_hop: Option<String>,
         when: Vec<InterfaceCondition>,
     },
 }
@@ -546,7 +554,13 @@ impl Requirement {
                 network,
                 exclude,
                 ..
-            } => port(device, interface).is_some() && network.valid() && exclude.len() <= 16,
+            } => {
+                port(device, interface).is_some()
+                    && network.valid()
+                    && network.length == 64
+                    && supported_unicast(network.address)
+                    && exclude.len() <= 16
+            }
             Self::KeepAddress {
                 device,
                 interface,
@@ -563,6 +577,7 @@ impl Requirement {
                 from,
                 target,
                 scope,
+                first_hop,
                 when,
             } => {
                 !label.trim().is_empty()
@@ -571,6 +586,7 @@ impl Requirement {
                     && (supported_unicast(*target) || supported_local(*target))
                     && (category(*target) != Category::LinkLocal || scope.is_some())
                     && scope.as_ref().is_none_or(|s| port(from, s).is_some())
+                    && first_hop.as_ref().is_none_or(|s| port(from, s).is_some())
                     && when.len() <= 4
                     && when.iter().all(|c| port(&c.device, &c.interface).is_some())
                     && when
@@ -598,18 +614,16 @@ impl Requirement {
                 on_link,
             } => {
                 let address = &t.devices[device].interfaces[interface].address;
-                (
-                    address.as_ref().is_some_and(|a| {
-                        a.prefix == network.length
-                            && network.contains(a.address)
-                            && !exclude.contains(&a.address)
-                            && a.on_link == *on_link
-                    }),
-                    format!(
-                        "{device}/{interface}: use an allowed address in {} with the required manual on-link setting.",
-                        network.text()
-                    ),
-                )
+                let issue = match address {
+                    None => Some("No address is assigned yet. Enter the workstation address and /64.".to_owned()),
+                    Some(a) if a.prefix != 64 => Some(format!("The assigned prefix is /{}. This task uses /64; the prefix determines which addresses are treated as local.",a.prefix)),
+                    Some(a) if !network.contains(a.address) => Some(format!("This address is outside {}. Keep the supplied subnet prefix and choose the workstation part within it.",network.text())),
+                    Some(a) if reserved_workstation_id(a.address) => Some("This interface identifier is reserved for subnet anycast. Choose an ordinary workstation address; IPv6 does not have an IPv4-style broadcast address.".into()),
+                    Some(a) if exclude.contains(&a.address) => Some("This address is already assigned or explicitly excluded by the task. Choose a different address in the same subnet.".into()),
+                    Some(a) if a.on_link != *on_link => Some("The manual on-link setting differs from the task. An assigned address alone is not an on-link declaration.".into()),
+                    _ => None,
+                };
+                (issue.is_none(),format!("{device}/{interface}: {}",issue.unwrap_or_else(||"Address and connected prefix meet the task.".into())))
             }
             Self::KeepAddress {
                 device,
@@ -631,6 +645,7 @@ impl Requirement {
                 from,
                 target,
                 scope,
+                first_hop,
                 when,
             } => {
                 let mut candidate = t.clone();
@@ -645,6 +660,26 @@ impl Requirement {
                         .up = c.up;
                 }
                 match candidate.ping(from, *target, scope.as_deref()) {
+                    Ok(ping)
+                        if first_hop.as_ref().is_some_and(|required| {
+                            ping.forward
+                                .hops
+                                .first()
+                                .is_none_or(|hop| &hop.interface != required)
+                        }) =>
+                    {
+                        (
+                            false,
+                            format!(
+                                "{label}: traffic uses {} as its first interface; the task requires {}. Inspect equally specific routes and their distances.",
+                                ping.forward
+                                    .hops
+                                    .first()
+                                    .map_or("local delivery", |hop| hop.interface.as_str()),
+                                first_hop.as_deref().unwrap()
+                            ),
+                        )
+                    }
                     Ok(_) => (true, format!("{label}: forward delivery and reply work.")),
                     Err(e) => (false, format!("{label}: {e}")),
                 }

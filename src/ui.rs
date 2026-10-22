@@ -13,6 +13,7 @@ mod scripting;
 mod terminal_learning;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_workspace;
+mod ipv6_workspace;
 mod smoke;
 #[cfg(test)]
 mod tests;
@@ -204,6 +205,10 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout")
             {
                 1209
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6-layout") {
+                1408
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6") {
+                1300
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files") {
                 1100
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("reusable") {
@@ -253,6 +258,18 @@ impl LabApp {
         }
         if let Some(lesson) = &s.ipv6_teaching {
             dlms_learning_lab::ipv6_teaching::prepare(a, lesson, new_attempt);
+        }
+        if new_attempt
+            && let engine::Goal::Ipv6 { requirements } = &s.goal
+            && let Some(device) = dlms_learning_lab::ipv6_teaching::preferred_device(requirements)
+        {
+            a.workspace
+                .as_mut()
+                .unwrap()
+                .ipv6_draft
+                .as_mut()
+                .unwrap()
+                .selected_device = device;
         }
         a.visited = clock;
         let data = a.workspace.as_ref().unwrap();
@@ -307,6 +324,17 @@ impl LabApp {
         }
         if let Some(lesson) = &s.ipv6_teaching {
             dlms_learning_lab::ipv6_teaching::prepare(a, lesson, true);
+        }
+        if let engine::Goal::Ipv6 { requirements } = &s.goal
+            && let Some(device) = dlms_learning_lab::ipv6_teaching::preferred_device(requirements)
+        {
+            a.workspace
+                .as_mut()
+                .unwrap()
+                .ipv6_draft
+                .as_mut()
+                .unwrap()
+                .selected_device = device;
         }
         self.script_job = None;
         self.input.clear();

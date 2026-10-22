@@ -1612,3 +1612,200 @@ fn terminal_example_insert_only_populates_input_and_tab_releases_the_field() {
         "Tab leaves the one-line terminal input"
     );
 }
+
+#[test]
+fn ipv6_native_typing_check_retry_focus_and_selected_reset() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    let earlier = a.progress.attempts["shell-handover"].clone();
+    a.launch(30);
+    assert_eq!(a.ipv6_view(30), teaching::View::Introduction);
+    draw(&ctx, &mut a);
+    let r = a.metrics.assignment_action.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let id = a.scenarios[30].id.clone();
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .ipv6_draft
+            .as_ref()
+            .unwrap()
+            .selected_device,
+        "NewPC"
+    );
+    let field = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("2001:db8:44::23/64".into())],
+    );
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    assert!(
+        a.metrics.completion,
+        "Manual entry should work without advanced settings"
+    );
+    let r = a.metrics.inputs[0];
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::CTRL,
+            },
+            egui::Event::Text("malformed".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[30]
+    ));
+    check(&ctx, &mut a);
+    assert!(a.notice.as_ref().unwrap().contains("Malformed"));
+    a.launch(31);
+    a.launch(30);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .ipv6_draft
+            .as_ref()
+            .unwrap()
+            .devices["NewPC"]
+            .interfaces["lan"]
+            .address,
+        "malformed"
+    );
+    let field = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    draw(&ctx, &mut a);
+    assert!(!ctx.memory(|m| m.has_focus(field)));
+    a.reset_attempt(30);
+    assert_eq!(a.progress.attempts[&id].state, a.scenarios[30].initial);
+    assert_eq!(a.progress.attempts["shell-handover"].state, earlier.state);
+}
+
+#[test]
+fn ipv6_examples_apply_without_credit_and_open_assignment_without_overwriting_draft() {
+    let (ctx, mut a) = app();
+    for i in 30..36 {
+        a.launch(i);
+        let id = a.scenarios[i].id.clone();
+        let assignment = a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .ipv6_draft
+            .clone();
+        a.set_ipv6_view(i, teaching::View::Example);
+        let lesson = a.scenarios[i].ipv6_teaching.clone().unwrap();
+        a.progress
+            .attempts
+            .get_mut(&id)
+            .unwrap()
+            .workspace
+            .as_mut()
+            .unwrap()
+            .ipv6_learning
+            .as_mut()
+            .unwrap()
+            .fill_example(&lesson)
+            .unwrap();
+        draw(&ctx, &mut a);
+        check(&ctx, &mut a);
+        let attempt = &a.progress.attempts[&id];
+        let learning = attempt
+            .workspace
+            .as_ref()
+            .unwrap()
+            .ipv6_learning
+            .as_ref()
+            .unwrap();
+        assert!(learning.checks(&lesson).iter().all(|(pass, _)| *pass));
+        assert_eq!(attempt.state, a.scenarios[i].initial);
+        assert_eq!(attempt.workspace.as_ref().unwrap().ipv6_draft, assignment);
+        assert!(!progress::current_solved(attempt, &a.scenarios[i]));
+        let r = a.metrics.lesson_tabs[2];
+        click(&ctx, &mut a, r);
+        assert_eq!(a.ipv6_view(i), teaching::View::Assignment);
+    }
+}
+
+#[test]
+fn ipv6_native_views_keep_controls_in_width_with_large_text_and_challenge_is_independent() {
+    for i in 30..36 {
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            for routes in [false, true] {
+                for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
+                    let (ctx, mut a) = app();
+                    a.launch(i);
+                    a.scale = scale;
+                    a.set_ipv6_view(i, view);
+                    let workspace = a
+                        .progress
+                        .attempts
+                        .get_mut(&a.scenarios[i].id)
+                        .unwrap()
+                        .workspace
+                        .as_mut()
+                        .unwrap();
+                    workspace.ipv6_draft.as_mut().unwrap().show_routes = routes;
+                    workspace.ipv6_learning.as_mut().unwrap().draft.show_routes = routes;
+                    for _ in 0..4 {
+                        frame(&ctx, &mut a, w, h, vec![]);
+                    }
+                    for r in a
+                        .metrics
+                        .inputs
+                        .iter()
+                        .chain(a.metrics.check.iter())
+                        .chain(a.metrics.lesson_tabs.iter())
+                    {
+                        assert!(
+                            r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                            "lab{i} {view:?} {w}/{scale} {r:?}"
+                        );
+                    }
+                    assert!(!a.metrics.help_visible);
+                    assert!(!a.metrics.guide);
+                    if w == 1200. && view == teaching::View::Assignment && !routes {
+                        assert!(
+                            a.metrics.check.unwrap().bottom() < 850.,
+                            "check below desktop lab{i}"
+                        );
+                    }
+                    a.progress
+                        .attempts
+                        .get_mut(&a.scenarios[i].id)
+                        .unwrap()
+                        .challenge = true;
+                    draw(&ctx, &mut a);
+                    assert_eq!(a.ipv6_view(i), teaching::View::Assignment);
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+            }
+        }
+    }
+}

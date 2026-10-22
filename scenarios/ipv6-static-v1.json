@@ -1,0 +1,2561 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-ipv6-neighbor",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-static-foundations",
+      "topic": "IPv6 addressing",
+      "title": "Add an IPv6 workstation to a team link",
+      "summary": "Choose a unique workstation address and verify direct communication.",
+      "objective": "ExistingPC is 2001:db8:44::10/64 on the team link. Configure NewPC with a different ordinary unicast address in the same /64 and keep its interface up. Preserve ExistingPC\u2019s supplied address/prefix. Check that NewPC can reach ExistingPC and receive its reply. No default route is needed.",
+      "difficulty": "Beginner",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Choose a unique workstation address and verify direct communication.",
+          "action": "Read the full assignment, inspect the device cards, then select the named device. Addresses & interfaces and Static routes are two views of the same saved configuration.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Keep the subnet\u2019s first four full groups and /64. NewPC needs its own interface identifier.",
+          "action": "Select NewPC \u2192 Addresses & interfaces. Do not copy the existing workstation\u2019s whole address.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete path",
+          "why": "A forward path alone is not enough. The simulated reply needs a working return route.",
+          "action": "Choose Check configuration. Open Inspect applied forwarding paths for the source, selected hops and reply; retry any failed requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "For this /64, the fixed subnet portion is 2001:0db8:0044:0000. A unique ordinary workstation part such as ::20 keeps both peers on the same link and subnet. The connected route resolves the actual neighbor and the peer uses its connected route for the reply. Equivalent expanded text and other allowed unique addresses pass.",
+      "hints": [
+        "Keep the subnet\u2019s first four full groups and /64. NewPC needs its own interface identifier.",
+        "Select NewPC \u2192 Addresses & interfaces. Do not copy the existing workstation\u2019s whole address.",
+        "A blank, malformed, wrong-prefix, duplicate or reserved choice has a different cause. Read the feedback and retry; many different valid addresses pass."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291",
+        "https://www.rfc-editor.org/rfc/rfc4861",
+        "https://www.rfc-editor.org/rfc/rfc5942.html",
+        "https://www.rfc-editor.org/rfc/rfc2526.html",
+        "https://www.cisco.com/en/US/docs/ios-xml/ios/ipv6/configuration/15-0sy/ip6-stat-routes.html"
+      ],
+      "simplifications": "Small static IPv6 model with documentation/locally assigned ULA addresses and conventional link-local addresses. Manual on-link prefixes are explicit. No ND/DAD/RA packets, SLAAC, DHCPv6, multicast forwarding, ECMP, recursive next hops, full RFC6724 source selection, IOS/Linux command emulation or real network access. Interface choices and routes are edited natively. Ordinary workstation choices in this unit use /64 and exclude known subnet anycast reservations.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "ExistingPC": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "team",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:44::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "NewPC": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "team",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": null
+                }
+              },
+              "routes": []
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "AddressIn",
+            "device": "NewPC",
+            "interface": "lan",
+            "network": {
+              "address": "2001:db8:44::",
+              "length": 64
+            },
+            "exclude": [
+              "2001:db8:44::10"
+            ],
+            "on_link": true
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "ExistingPC",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:44::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Neighbor request and reply",
+            "from": "NewPC",
+            "target": "2001:db8:44::10",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ]
+      },
+      "solution": [
+        "address NewPC lan 2001:db8:44::20/64"
+      ],
+      "prerequisites": [
+        "ccna-gateway"
+      ],
+      "ipv6_teaching": {
+        "prerequisite_note": "IPv4 foundations are useful preparation, but this introduction explains the IPv6 notation needed here. No binary calculation or router command setup is required.",
+        "concepts": [
+          {
+            "title": "Read an IPv6 address",
+            "text": "IPv6 addresses contain 128 bits, written as eight groups separated by colons. Each group has up to four hexadecimal digits: 0\u20139, then a\u2013f for values ten\u2013fifteen. Leading zeros in a group may be omitted. One :: can stand for enough all-zero groups to make eight groups; it may appear only once."
+          },
+          {
+            "title": "Keep the subnet part",
+            "text": "In these /64 examples, the first four full groups identify the subnet and the final four identify the interface. fd71:55:44::20 expands to fd71:0055:0044:0000:0000:0000:0000:0020. Keep the first half and choose a different ordinary workstation part."
+          },
+          {
+            "title": "Use the workspace",
+            "text": "Select NewPC, keep Addresses & interfaces selected, and type the full address/prefix in its field. Check applies all edited fields and tests the current result. Devices on the same link can talk directly; no default route is needed for this assignment. This manual editor includes a connected/on-link prefix by default; router advertisements are not being simulated."
+          },
+          {
+            "title": "Choose an ordinary unique address",
+            "text": "Each interface on this link needs a different address. IPv6 has no broadcast address: do not subtract an IPv4-style broadcast from its range. The all-zero interface identifier and a small reserved subnet-anycast range are not ordinary workstation choices here; the checker explains these cases."
+          }
+        ],
+        "example_description": "ExistingPC uses fd71:55:44::10/64. Give NewPC fd71:55:44::20/64. Load example settings fills the practice fields only; Apply and test example uses them. You can also type the address yourself.",
+        "fixture": {
+          "devices": {
+            "ExistingPC": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "team",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:44::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "NewPC": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "team",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": null
+                }
+              },
+              "routes": []
+            }
+          }
+        },
+        "example_solution": [
+          "address NewPC lan fd71:55:44::20/64"
+        ],
+        "outcomes": [
+          {
+            "kind": "AddressIn",
+            "device": "NewPC",
+            "interface": "lan",
+            "network": {
+              "address": "fd71:55:44::",
+              "length": 64
+            },
+            "exclude": [
+              "fd71:55:44::10"
+            ],
+            "on_link": true
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "ExistingPC",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:44::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Neighbor request and reply",
+            "from": "NewPC",
+            "target": "fd71:55:44::10",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ],
+        "try_change": "Change NewPC to fd71:55:44::37/64, then apply and test again. ExistingPC must keep its original address.",
+        "start_with_routes": false
+      }
+    },
+    {
+      "id": "ccna-ipv6-workstation",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-static-foundations",
+      "topic": "IPv6 addressing",
+      "title": "Repair an IPv6 workstation\u2019s path",
+      "summary": "Distinguish a wrong local prefix from an unreachable default next hop.",
+      "objective": "Client must remain 2001:db8:10::10/64. Restore its path to Server at 2001:db8:20::20 and to R1\u2019s office address 2001:db8:10::1. Repair Client\u2019s prefix/default route, keep all supplied interface addresses/prefixes on other devices, and verify replies as well as requests.",
+      "difficulty": "Beginner",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Distinguish a wrong local prefix from an unreachable default next hop.",
+          "action": "Read the full assignment, inspect the device cards, then select the named device. Addresses & interfaces and Static routes are two views of the same saved configuration.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Check whether Client\u2019s connected prefix wrongly includes the server\u2019s network. Then inspect its default next hop.",
+          "action": "Use Addresses & interfaces for Client\u2019s /64, then Static routes for ::/0 through the actual office router on lan.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete path",
+          "why": "A forward path alone is not enough. The simulated reply needs a working return route.",
+          "action": "Choose Check configuration. Open Inspect applied forwarding paths for the source, selected hops and reply; retry any failed requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "The /64 keeps only the office subnet local. The server therefore uses the default route. Its next hop must be R1 on the office link; an unassigned fe80::99 cannot resolve. R1 forwards to the server network, and the server\u2019s default route provides the reply. Repairing only one fault is partial work.",
+      "hints": [
+        "Check whether Client\u2019s connected prefix wrongly includes the server\u2019s network. Then inspect its default next hop.",
+        "Use Addresses & interfaces for Client\u2019s /64, then Static routes for ::/0 through the actual office router on lan.",
+        "A valid global on-link address for the same router can also work. What matters is a reachable neighboring router and correct current paths."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291",
+        "https://www.rfc-editor.org/rfc/rfc4861",
+        "https://www.rfc-editor.org/rfc/rfc5942.html",
+        "https://www.rfc-editor.org/rfc/rfc2526.html",
+        "https://www.cisco.com/en/US/docs/ios-xml/ios/ipv6/configuration/15-0sy/ip6-stat-routes.html"
+      ],
+      "simplifications": "Small static IPv6 model with documentation/locally assigned ULA addresses and conventional link-local addresses. Manual on-link prefixes are explicit. No ND/DAD/RA packets, SLAAC, DHCPv6, multicast forwarding, ECMP, recursive next hops, full RFC6724 source selection, IOS/Linux command emulation or real network access. Interface choices and routes are edited natively. Ordinary workstation choices in this unit use /64 and exclude known subnet anycast reservations.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:10::10",
+                    "prefix": 32,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::99",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "2001:db8:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "2001:db8:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "2001:db8:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Remote server and reply",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Router on the office link",
+            "from": "Client",
+            "target": "2001:db8:10::1",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ]
+      },
+      "solution": [
+        "address Client lan 2001:db8:10::10/64",
+        "remove-route Client 0",
+        "route Client ::/0 lan fe80::1 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv6-neighbor"
+      ],
+      "ipv6_teaching": {
+        "prerequisite_note": "Builds on the first IPv6 assignment and the earlier idea of a default gateway. Link-local addresses are introduced here; they do not need a global subnet match.",
+        "concepts": [
+          {
+            "title": "Decide local or remote",
+            "text": "The manually connected prefix tells this model which addresses are local. A mistaken /32 can make a remote destination look local, so the workstation searches the wrong link instead of using its router. Keep the supplied address and repair its /64."
+          },
+          {
+            "title": "Choose a default router",
+            "text": "The route ::/0 is the least-specific default: it catches destinations that do not match a more-specific route. Its next hop is the neighboring router, not the remote server. Here fe80::1 is the router\u2019s link-local address on Client\u2019s lan; the outgoing interface scopes that address to this link."
+          },
+          {
+            "title": "Edit routes natively",
+            "text": "Select Client, then Static routes to edit its default row. Keep destination ::/0, set next hop fe80::1, outgoing interface lan and a usable distance such as 1. Check configuration applies address and route edits together. Inspect applied forwarding paths shows why a request or reply failed. Distance is a preference number used between equally specific active routes; lower is preferred. Leave 1 here."
+          }
+        ],
+        "example_description": "Repair Client\u2019s prefix to /64 without changing its fd71:55:10::10 address, then use the office router fe80::1 as its default next hop on lan. The remote server is fd71:55:20::20.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:10::10",
+                    "prefix": 32,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::99",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "fd71:55:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "address Client lan fd71:55:10::10/64",
+          "remove-route Client 0",
+          "route Client ::/0 lan fe80::1 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "fd71:55:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "fd71:55:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Remote server and reply",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Router on the office link",
+            "from": "Client",
+            "target": "fd71:55:10::1",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ],
+        "try_change": "After the example works, change only the default next hop to fe80::88 and test. Restore fe80::1 and retry.",
+        "start_with_routes": false
+      }
+    },
+    {
+      "id": "ccna-ipv6-scope",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-static-foundations",
+      "topic": "IPv6 routing",
+      "title": "Put a link-local next hop on the right link",
+      "summary": "Repair a route\u2019s outgoing interface across a router transit link.",
+      "objective": "R1\u2019s route toward 2001:db8:20::/64 uses R2\u2019s link-local next hop fe80::2, but it points at the wrong outgoing interface. Restore Client\u2019s access to R2\u2019s branch address 2001:db8:20::1 and Server at 2001:db8:20::20, including replies. Keep supplied address/prefix settings, including unnumbered transit interfaces; keep R1 forwarding enabled.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Repair a route\u2019s outgoing interface across a router transit link.",
+          "action": "Read the full assignment, inspect the device cards, then select the named device. Addresses & interfaces and Static routes are two views of the same saved configuration.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Look at the link labels in the topology. R2\u2019s fe80::2 is on transit, not on the office link.",
+          "action": "Select R1 \u2192 Static routes. Pair the neighboring next hop with the interface that actually reaches that neighbor.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete path",
+          "why": "A forward path alone is not enough. The simulated reply needs a working return route.",
+          "action": "Choose Check configuration. Open Inspect applied forwarding paths for the source, selected hops and reply; retry any failed requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "A link-local next hop has meaning only on its chosen outgoing link. Moving the route to transit makes R2 the resolved neighbor. R2\u2019s connected branch prefix and office return route complete both directions. A full route or supported equivalent host routes for both required destinations can meet the outcome.",
+      "hints": [
+        "Look at the link labels in the topology. R2\u2019s fe80::2 is on transit, not on the office link.",
+        "Select R1 \u2192 Static routes. Pair the neighboring next hop with the interface that actually reaches that neighbor.",
+        "The server itself is not directly on the transit link. R2 must receive and forward the traffic, with a return path through R1."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291",
+        "https://www.rfc-editor.org/rfc/rfc4861",
+        "https://www.rfc-editor.org/rfc/rfc5942.html",
+        "https://www.rfc-editor.org/rfc/rfc2526.html",
+        "https://www.cisco.com/en/US/docs/ios-xml/ios/ipv6/configuration/15-0sy/ip6-stat-routes.html"
+      ],
+      "simplifications": "Small static IPv6 model with documentation/locally assigned ULA addresses and conventional link-local addresses. Manual on-link prefixes are explicit. No ND/DAD/RA packets, SLAAC, DHCPv6, multicast forwarding, ECMP, recursive next hops, full RFC6724 source selection, IOS/Linux command emulation or real network access. Interface choices and routes are edited natively. Ordinary workstation choices in this unit use /64 and exclude known subnet anycast reservations.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:10::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "2001:db8:20::",
+                    "length": 64
+                  },
+                  "interface": "office",
+                  "via": "fe80::2",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::2",
+                  "address": null
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "2001:db8:10::",
+                    "length": 64
+                  },
+                  "interface": "transit",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "2001:db8:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "2001:db8:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "2001:db8:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office to branch server",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office to branch router",
+            "from": "Client",
+            "target": "2001:db8:20::1",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ]
+      },
+      "solution": [
+        "remove-route R1 0",
+        "route R1 2001:db8:20::/64 transit fe80::2 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv6-workstation"
+      ],
+      "ipv6_teaching": {
+        "prerequisite_note": "Builds on local versus remote destinations and a default next hop. This assignment adds a router-to-router transit link and explicit scope.",
+        "concepts": [
+          {
+            "title": "Link-local means this link",
+            "text": "A fe80:: address identifies an interface on one link. It is not forwarded to another link, and the same text may be used on different links. A static route with a link-local next hop therefore needs the correct outgoing interface as well as the address."
+          },
+          {
+            "title": "Forward to a neighbor, not straight to the remote host",
+            "text": "The transit link has link-local addresses only in this model. R1 sends the packet to R2\u2019s transit interface; R2 then forwards it onto the branch network. A directly-on-link route would wrongly search the transit link for the remote server."
+          },
+          {
+            "title": "Keep both directions",
+            "text": "R2 already has the office return route. Keep the supplied address settings and forwarding state; repair R1\u2019s route interface and verify both the branch router and server. This models forwarding decisions, not Neighbor Discovery packet exchange."
+          }
+        ],
+        "example_description": "On R1, the route to fd71:55:20::/64 uses neighboring R2 at fe80::2. Select Static routes and choose the transit outgoing interface; the office interface is the wrong link.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:10::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "fd71:55:20::",
+                    "length": 64
+                  },
+                  "interface": "office",
+                  "via": "fe80::2",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::2",
+                  "address": null
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "fd71:55:10::",
+                    "length": 64
+                  },
+                  "interface": "transit",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "fd71:55:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "remove-route R1 0",
+          "route R1 fd71:55:20::/64 transit fe80::2 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "fd71:55:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "fd71:55:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office to branch server",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office to branch router",
+            "from": "Client",
+            "target": "fd71:55:20::1",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ],
+        "try_change": "Change R1\u2019s outgoing interface back to office and test the failure, then restore transit. Inspect the selected first hop.",
+        "start_with_routes": true
+      }
+    },
+    {
+      "id": "ccna-ipv6-specific-route",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-static-foundations",
+      "topic": "IPv6 routing",
+      "title": "Find the route that overrides a working default",
+      "summary": "Diagnose why one destination fails while another still works.",
+      "objective": "Client can reach Monitor at 2001:db8:30::30 but cannot reach Server at 2001:db8:20::20. Investigate Client\u2019s static routes and restore both request/reply paths without changing supplied interface addresses/prefixes. Remove an unnecessary faulty route or repair it; valid alternate routing outcomes are accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Diagnose why one destination fails while another still works.",
+          "action": "Read the full assignment, inspect the device cards, then select the named device. Addresses & interfaces and Static routes are two views of the same saved configuration.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Compare both destinations with the route prefixes. A working default does not guarantee it is selected for every destination.",
+          "action": "The /64 row wins over ::/0 regardless of their distances. Inspect the next hop of the more-specific route.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete path",
+          "why": "A forward path alone is not enough. The simulated reply needs a working return route.",
+          "action": "Choose Check configuration. Open Inspect applied forwarding paths for the source, selected hops and reply; retry any failed requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "The server matches the narrow /64, so its higher distance does not make the default win. The unassigned next hop fails neighbor resolution. Removing the unnecessary narrow route lets the default handle both destinations; repairing it also works. Merely changing its distance to another installed value leaves the same mistake.",
+      "hints": [
+        "Compare both destinations with the route prefixes. A working default does not guarantee it is selected for every destination.",
+        "The /64 row wins over ::/0 regardless of their distances. Inspect the next hop of the more-specific route.",
+        "Repairing the /64 next hop or removing that row can both work. Keep monitoring access as part of your verification."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291",
+        "https://www.rfc-editor.org/rfc/rfc4861",
+        "https://www.rfc-editor.org/rfc/rfc5942.html",
+        "https://www.rfc-editor.org/rfc/rfc2526.html",
+        "https://www.cisco.com/en/US/docs/ios-xml/ios/ipv6/configuration/15-0sy/ip6-stat-routes.html"
+      ],
+      "simplifications": "Small static IPv6 model with documentation/locally assigned ULA addresses and conventional link-local addresses. Manual on-link prefixes are explicit. No ND/DAD/RA packets, SLAAC, DHCPv6, multicast forwarding, ECMP, recursive next hops, full RFC6724 source selection, IOS/Linux command emulation or real network access. Interface choices and routes are edited natively. Ordinary workstation choices in this unit use /64 and exclude known subnet anycast reservations.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:10::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "2001:db8:20::",
+                    "length": 64
+                  },
+                  "interface": "lan",
+                  "via": "fe80::99",
+                  "distance": 200
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "monitor": {
+                  "link": "monitor",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:30::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "2001:db8:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Monitor": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "monitor",
+                  "up": true,
+                  "link_local": "fe80::30",
+                  "address": {
+                    "address": "2001:db8:30::30",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "2001:db8:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "2001:db8:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "monitor",
+            "assignment": {
+              "address": "2001:db8:30::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Monitor",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:30::30",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Server access",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Monitoring access retained",
+            "from": "Client",
+            "target": "2001:db8:30::30",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ]
+      },
+      "solution": [
+        "remove-route Client 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv6-scope"
+      ],
+      "ipv6_teaching": {
+        "prerequisite_note": "Builds on static route fields and next-hop reachability. This lesson introduces longest-prefix selection before distance.",
+        "concepts": [
+          {
+            "title": "Specific destinations win first",
+            "text": "A router or workstation chooses the matching route with the longest prefix. Only equally specific active routes compare distance. A /64 route therefore beats ::/0 even when its distance is 200 and the default\u2019s is 1."
+          },
+          {
+            "title": "Fix the misleading row",
+            "text": "A route can be installed yet fail to reach its next hop. Increasing its distance does not make a shorter prefix win. Remove an unnecessary bad row, or repair its next hop/interface. Confirm the other service still works afterward."
+          }
+        ],
+        "example_description": "Client\u2019s ::/0 route through fe80::1 works for the monitor, but a fd71:55:20::/64 row through fe80::99 breaks the server path. Remove that bad row, or repair its next hop.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:10::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "fd71:55:20::",
+                    "length": 64
+                  },
+                  "interface": "lan",
+                  "via": "fe80::99",
+                  "distance": 200
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "monitor": {
+                  "link": "monitor",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:30::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "fd71:55:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Monitor": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "monitor",
+                  "up": true,
+                  "link_local": "fe80::30",
+                  "address": {
+                    "address": "fd71:55:30::30",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "remove-route Client 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "fd71:55:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "fd71:55:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "monitor",
+            "assignment": {
+              "address": "fd71:55:30::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Monitor",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:30::30",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Server access",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Monitoring access retained",
+            "from": "Client",
+            "target": "fd71:55:30::30",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ],
+        "try_change": "Instead of removing the narrow row, keep its /64 and distance 200 but set its next hop to fe80::1. Both required paths should still work.",
+        "start_with_routes": true
+      }
+    },
+    {
+      "id": "ccna-ipv6-backup",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-static-foundations",
+      "topic": "IPv6 routing",
+      "title": "Make the backup route work before the outage",
+      "summary": "Repair a floating default and verify normal and failed-link behavior.",
+      "objective": "Client must prefer its primary interface to reach Server at 2001:db8:20::20, switch to backup when primary is unavailable, and retain primary when backup is unavailable. Repair its default routes and preserve all supplied interface addresses/prefixes. Keep the saved base interfaces up. Check runs three separate simulated conditions and verifies replies and the first outgoing interface; equivalent usable distance pairs are accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Repair a floating default and verify normal and failed-link behavior.",
+          "action": "Read the full assignment, inspect the device cards, then select the named device. Addresses & interfaces and Static routes are two views of the same saved configuration.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Normal reachability alone does not exercise the backup next hop. Read all three condition results.",
+          "action": "Select Client \u2192 Static routes. The backup next hop must resolve on backup, and its route must remain less preferred than primary.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete path",
+          "why": "A forward path alone is not enough. The simulated reply needs a working return route.",
+          "action": "Choose Check configuration. Open Inspect applied forwarding paths for the source, selected hops and reply; retry any failed requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "With equally specific defaults, primary wins by lower distance. When primary is down its row is inactive; backup must resolve its own neighboring router and carry both directions. The checker uses clones for failures and checks the actual first hop, so one happy-path ping, reversed preference or a single permanent route does not pass.",
+      "hints": [
+        "Normal reachability alone does not exercise the backup next hop. Read all three condition results.",
+        "Select Client \u2192 Static routes. The backup next hop must resolve on backup, and its route must remain less preferred than primary.",
+        "Different unequal distances can be valid. Reversing preference or disabling a base interface cannot substitute for a working normal-and-failure configuration."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291",
+        "https://www.rfc-editor.org/rfc/rfc4861",
+        "https://www.rfc-editor.org/rfc/rfc5942.html",
+        "https://www.rfc-editor.org/rfc/rfc2526.html",
+        "https://www.cisco.com/en/US/docs/ios-xml/ios/ipv6/configuration/15-0sy/ip6-stat-routes.html"
+      ],
+      "simplifications": "Small static IPv6 model with documentation/locally assigned ULA addresses and conventional link-local addresses. Manual on-link prefixes are explicit. No ND/DAD/RA packets, SLAAC, DHCPv6, multicast forwarding, ECMP, recursive next hops, full RFC6724 source selection, IOS/Linux command emulation or real network access. Interface choices and routes are edited natively. Ordinary workstation choices in this unit use /64 and exclude known subnet anycast reservations.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "primary": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:10::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "backup": {
+                  "link": "backup",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:30::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "primary",
+                  "via": "fe80::1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "backup",
+                  "via": "fe80::99",
+                  "distance": 10
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "backup": {
+                  "link": "backup",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:30::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "2001:db8:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "primary",
+            "assignment": {
+              "address": "2001:db8:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "backup",
+            "assignment": {
+              "address": "2001:db8:30::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "2001:db8:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "2001:db8:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "2001:db8:30::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Normal operation prefers primary",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": "primary"
+          },
+          {
+            "kind": "Reachable",
+            "label": "Primary unavailable uses backup",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [
+              {
+                "device": "Client",
+                "interface": "primary",
+                "up": false
+              }
+            ],
+            "first_hop": "backup"
+          },
+          {
+            "kind": "Reachable",
+            "label": "Backup unavailable retains primary",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [
+              {
+                "device": "Client",
+                "interface": "backup",
+                "up": false
+              }
+            ],
+            "first_hop": "primary"
+          }
+        ]
+      },
+      "solution": [
+        "remove-route Client 1",
+        "route Client ::/0 backup fe80::1 10"
+      ],
+      "prerequisites": [
+        "ccna-ipv6-specific-route"
+      ],
+      "ipv6_teaching": {
+        "prerequisite_note": "Builds on longest-prefix and route distance. This lesson adds deterministic failure cases and preference verification.",
+        "concepts": [
+          {
+            "title": "Prefer one route, retain another",
+            "text": "Two equally specific routes can use different distances. The lower distance is preferred while its interface is up. A higher-distance route is a floating backup; it becomes useful when the preferred route is no longer active. This model does not infer link failure from a silent neighbor timeout."
+          },
+          {
+            "title": "Test the backup before relying on it",
+            "text": "Normal success can hide a broken backup. The checker tests the current configuration, then a copy with primary down and another with backup down. The saved base state is not changed. The first interface must match the requested preference in each case."
+          },
+          {
+            "title": "Keep a usable pair",
+            "text": "Use distinct distances, usable next-hop neighbors and the correct outgoing interfaces. Equal-cost choices are explicitly unsupported in this first static model. No particular pair of numeric distances is required if preference and failure behavior are correct."
+          }
+        ],
+        "example_description": "Client has two office links. Keep the primary default preferred and repair the backup default\u2019s next hop to fe80::1 on backup. Apply tests normal operation and each single-interface failure using separate simulated copies.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "primary": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:10::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "backup": {
+                  "link": "backup",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:30::10",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "primary",
+                  "via": "fe80::1",
+                  "distance": 1
+                },
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "backup",
+                  "via": "fe80::99",
+                  "distance": 10
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "server": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "backup": {
+                  "link": "backup",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:30::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "servers",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "fd71:55:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "remove-route Client 1",
+          "route Client ::/0 backup fe80::1 10"
+        ],
+        "outcomes": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "primary",
+            "assignment": {
+              "address": "fd71:55:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "backup",
+            "assignment": {
+              "address": "fd71:55:30::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "fd71:55:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "server",
+            "assignment": {
+              "address": "fd71:55:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "backup",
+            "assignment": {
+              "address": "fd71:55:30::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Normal operation prefers primary",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": "primary"
+          },
+          {
+            "kind": "Reachable",
+            "label": "Primary unavailable uses backup",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [
+              {
+                "device": "Client",
+                "interface": "primary",
+                "up": false
+              }
+            ],
+            "first_hop": "backup"
+          },
+          {
+            "kind": "Reachable",
+            "label": "Backup unavailable retains primary",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [
+              {
+                "device": "Client",
+                "interface": "backup",
+                "up": false
+              }
+            ],
+            "first_hop": "primary"
+          }
+        ],
+        "try_change": "Use distances 5 for primary and 50 for backup. The same preference and failure checks should pass. Reverse them to see the normal-preference feedback.",
+        "start_with_routes": true
+      }
+    },
+    {
+      "id": "ccna-ipv6-handover",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "ipv6-static-foundations",
+      "topic": "IPv6 routing",
+      "title": "Recover an IPv6 branch handover",
+      "summary": "Combine prefix repair, scoped routing, forwarding and return-path diagnosis.",
+      "objective": "Restore Client\u2019s access to R2\u2019s branch address 2001:db8:20::1 and Server at 2001:db8:20::20, including replies. Client must keep address 2001:db8:10::10 with the correct /64. Keep all other supplied address/prefix settings, including link-local-only transit interfaces. Investigate Client, R1 and Server; repair the source prefix, transit forwarding/next hop and server return route. R1 must forward between its networks.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Configure and investigate",
+        "Verify the complete path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Combine prefix repair, scoped routing, forwarding and return-path diagnosis.",
+          "action": "Read the full assignment, inspect the device cards, then select the named device. Addresses & interfaces and Static routes are two views of the same saved configuration.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Work from Client toward R1, R2 and the server, then trace the reply. More than one configuration fault is present.",
+          "action": "A correct Client /64, enabled R1 forwarding and a reachable R2 transit next hop solve different parts of the path.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete path",
+          "why": "A forward path alone is not enough. The simulated reply needs a working return route.",
+          "action": "Choose Check configuration. Open Inspect applied forwarding paths for the source, selected hops and reply; retry any failed requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "The wrong Client prefix first sends remote traffic onto the local link. After correcting /64, R1 must forward to R2 through the transit-scoped neighbor. R2 can deliver to its branch interface and server, but the server still needs a route back through R2. Each repair has a distinct state effect; the final two-destination verification catches partial recovery.",
+      "hints": [
+        "Work from Client toward R1, R2 and the server, then trace the reply. More than one configuration fault is present.",
+        "A correct Client /64, enabled R1 forwarding and a reachable R2 transit next hop solve different parts of the path.",
+        "If the branch router responds but the server fails, inspect the server\u2019s return route. Forward delivery and a reply are separate results in the inspector."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc4291",
+        "https://www.rfc-editor.org/rfc/rfc4861",
+        "https://www.rfc-editor.org/rfc/rfc5942.html",
+        "https://www.rfc-editor.org/rfc/rfc2526.html",
+        "https://www.cisco.com/en/US/docs/ios-xml/ios/ipv6/configuration/15-0sy/ip6-stat-routes.html"
+      ],
+      "simplifications": "Small static IPv6 model with documentation/locally assigned ULA addresses and conventional link-local addresses. Manual on-link prefixes are explicit. No ND/DAD/RA packets, SLAAC, DHCPv6, multicast forwarding, ECMP, recursive next hops, full RFC6724 source selection, IOS/Linux command emulation or real network access. Interface choices and routes are edited natively. Ordinary workstation choices in this unit use /64 and exclude known subnet anycast reservations.",
+      "initial": {
+        "kind": "Ipv6",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "2001:db8:10::10",
+                    "prefix": 32,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": false,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "2001:db8:20::",
+                    "length": 64
+                  },
+                  "interface": "transit",
+                  "via": "fe80::99",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::2",
+                  "address": null
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "2001:db8:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "2001:db8:10::",
+                    "length": 64
+                  },
+                  "interface": "transit",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "2001:db8:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv6",
+        "requirements": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "2001:db8:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "2001:db8:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "2001:db8:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office reaches branch router",
+            "from": "Client",
+            "target": "2001:db8:20::1",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office reaches branch service and receives reply",
+            "from": "Client",
+            "target": "2001:db8:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ]
+      },
+      "solution": [
+        "address Client lan 2001:db8:10::10/64",
+        "forward R1 on",
+        "remove-route R1 0",
+        "route R1 2001:db8:20::/64 transit fe80::2 1",
+        "route Server ::/0 lan fe80::1 1"
+      ],
+      "prerequisites": [
+        "ccna-ipv6-backup"
+      ],
+      "ipv6_teaching": {
+        "prerequisite_note": "Capstone: combines the five preceding IPv6 lessons. Reopen their introductions if prefix, scope, route preference or forwarding is unfamiliar.",
+        "concepts": [
+          {
+            "title": "Investigate one failed segment at a time",
+            "text": "Use the full task as a checklist: source prefix, selected next hop, transit forwarding and return route. Inspect applied paths after a check; a later failure can become visible only after an earlier fault is repaired."
+          },
+          {
+            "title": "Verify more than the gateway",
+            "text": "Reaching a router\u2019s own branch address does not prove the server has a reply route. Test both required destinations and keep the supplied address values. This capstone combines earlier concepts and native fields; no new command syntax is required."
+          }
+        ],
+        "example_description": "The practice branch has a wrong Client prefix, disabled R1 forwarding, a bad R1 transit next hop and no Server return route. Restore Client\u2019s /64, enable R1 forwarding, route the branch through R2 at fe80::2 on transit, and give Server a default through fe80::1 on lan.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::10",
+                  "address": {
+                    "address": "fd71:55:10::10",
+                    "prefix": 32,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "::",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": false,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:10::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                },
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": null
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "fd71:55:20::",
+                    "length": 64
+                  },
+                  "interface": "transit",
+                  "via": "fe80::99",
+                  "distance": 1
+                }
+              ]
+            },
+            "R2": {
+              "forwarding": true,
+              "interfaces": {
+                "transit": {
+                  "link": "transit",
+                  "up": true,
+                  "link_local": "fe80::2",
+                  "address": null
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::1",
+                  "address": {
+                    "address": "fd71:55:20::1",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "fd71:55:10::",
+                    "length": 64
+                  },
+                  "interface": "transit",
+                  "via": "fe80::1",
+                  "distance": 1
+                }
+              ]
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "link_local": "fe80::20",
+                  "address": {
+                    "address": "fd71:55:20::20",
+                    "prefix": 64,
+                    "on_link": true
+                  }
+                }
+              },
+              "routes": []
+            }
+          }
+        },
+        "example_solution": [
+          "address Client lan fd71:55:10::10/64",
+          "forward R1 on",
+          "remove-route R1 0",
+          "route R1 fd71:55:20::/64 transit fe80::2 1",
+          "route Server ::/0 lan fe80::1 1"
+        ],
+        "outcomes": [
+          {
+            "kind": "KeepAddress",
+            "device": "Client",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:10::10",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "fd71:55:10::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "transit",
+            "assignment": null
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R2",
+            "interface": "branch",
+            "assignment": {
+              "address": "fd71:55:20::1",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "fd71:55:20::20",
+              "prefix": 64,
+              "on_link": true
+            }
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office reaches branch router",
+            "from": "Client",
+            "target": "fd71:55:20::1",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          },
+          {
+            "kind": "Reachable",
+            "label": "Office reaches branch service and receives reply",
+            "from": "Client",
+            "target": "fd71:55:20::20",
+            "scope": null,
+            "when": [],
+            "first_hop": null
+          }
+        ],
+        "try_change": "Remove only the Server default after the example passes. The branch router should still respond, while the server request arrives but its reply fails.",
+        "start_with_routes": false
+      }
+    }
+  ]
+}

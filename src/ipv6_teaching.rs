@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Lesson {
+    #[serde(default)]
+    pub start_with_routes: bool,
     pub prerequisite_note: String,
     pub concepts: Vec<Concept>,
     pub example_description: String,
@@ -73,7 +75,14 @@ impl Learning {
             version: 1,
             view: View::Introduction,
             topology: lesson.fixture.clone(),
-            draft: Draft::new(&lesson.fixture),
+            draft: {
+                let mut draft = Draft::new(&lesson.fixture);
+                draft.show_routes = lesson.start_with_routes;
+                if let Some(device) = preferred_device(&lesson.outcomes) {
+                    draft.selected_device = device;
+                }
+                draft
+            },
             checked: false,
             notice: None,
         }
@@ -90,7 +99,13 @@ impl Learning {
         for action in &lesson.example_solution {
             ipv6_workspace::adapter(&mut candidate, action)?;
         }
+        let selected = self.draft.selected_device.clone();
+        let show_routes = self.draft.show_routes;
         self.draft = Draft::new(&candidate);
+        if self.draft.devices.contains_key(&selected) {
+            self.draft.selected_device = selected;
+        }
+        self.draft.show_routes = show_routes;
         self.checked = false;
         self.notice = None;
         Ok(())
@@ -114,6 +129,9 @@ impl Learning {
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
     let workspace = attempt.workspace.as_mut().expect("workspace prepared");
+    if new_attempt && let Some(draft) = &mut workspace.ipv6_draft {
+        draft.show_routes = lesson.start_with_routes;
+    }
     if workspace.ipv6_learning.is_none() {
         let mut learning = Learning::new(lesson);
         if !new_attempt {
@@ -121,4 +139,14 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
         }
         workspace.ipv6_learning = Some(learning);
     }
+}
+
+/// Select the first device named by the meaningful outcomes, without a correctness hint.
+pub fn preferred_device(requirements: &[Requirement]) -> Option<String> {
+    requirements.first().map(|r| match r {
+        Requirement::AddressIn { device, .. }
+        | Requirement::KeepAddress { device, .. }
+        | Requirement::Forwarding { device, .. } => device.clone(),
+        Requirement::Reachable { from, .. } => from.clone(),
+    })
 }
