@@ -1,0 +1,805 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-handover",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Print a reliable handover",
+      "summary": "Use variables and quoted output to create a dependable handover.",
+      "objective": "Print exactly two lines: Site: followed by SITE, then Task: followed by TASK, with one space after each colon. Keep spaces and literal percent signs in the values.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "Quoted expansions preserve spaces and empty data. printf treats percent signs in a %s argument as ordinary data, not a new format.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "Quoted expansions preserve spaces and empty data. printf treats percent signs in a %s argument as ordinary data, not a new format.\n\nOne supported solution:\nsite=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n",
+      "hints": [
+        "Use $SITE and $TASK to read the supplied values. Assign a local scalar with name=value.",
+        "Double quotes keep each expanded value together. printf separates the fixed format from the data.",
+        "A format such as printf 'Site: %s\\n' \"$SITE\" prints one complete line."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# SITE and TASK are supplied by each test case.\n# Print the two labeled lines.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary shift",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "SITE": "North",
+              "TASK": "Audit"
+            },
+            "files": {},
+            "stdout": "Site: North\nTask: Audit\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Spaces and percent",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "SITE": "West office",
+              "TASK": "Check 95% usage"
+            },
+            "files": {},
+            "stdout": "Site: West office\nTask: Check 95% usage\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty task",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "SITE": "South",
+              "TASK": ""
+            },
+            "files": {},
+            "stdout": "Site: South\nTask: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "site=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n"
+      ],
+      "prerequisites": []
+    },
+    {
+      "id": "shell-arguments",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Label the supplied file",
+      "summary": "Turn positional arguments into a clear, reusable report.",
+      "objective": "Read label from argument 1 and a file path from argument 2. Print Label: LABEL and File: PATH on separate lines. Preserve both arguments exactly, including spaces and an empty label.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "Arguments are data. Saving them in named variables makes intent readable, and quoting their later expansion keeps file names with spaces intact.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "Arguments are data. Saving them in named variables makes intent readable, and quoting their later expansion keeps file names with spaces intact.\n\nOne supported solution:\nlabel=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n",
+      "hints": [
+        "$1 and $2 refer to the arguments, not file contents.",
+        "Assignment-only commands do not split their values; quote values when passing them to printf.",
+        "Use one %s placeholder for each value rather than using the value as the format."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Arguments: label, file path\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Simple arguments",
+            "args": [
+              "daily",
+              "/work/report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Label: daily\nFile: /work/report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Names with spaces",
+            "args": [
+              "night shift",
+              "/work/shift notes"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Label: night shift\nFile: /work/shift notes\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty label",
+            "args": [
+              "",
+              "/work/input"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Label: \nFile: /work/input\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "label=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n"
+      ],
+      "prerequisites": [
+        "shell-handover"
+      ]
+    },
+    {
+      "id": "shell-input",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Read a request without losing backslashes",
+      "summary": "Read finite input and distinguish data from escape characters.",
+      "objective": "Read one line from standard input into request with read -r. Print Request: VALUE and a newline. Use normal default whitespace trimming; keep internal spaces and literal backslashes.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "read -r disables backslash interpretation. With one variable and the default whitespace separators, outer spaces/tabs are trimmed while internal spacing remains.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "read -r disables backslash interpretation. With one variable and the default whitespace separators, outer spaces/tabs are trimmed while internal spacing remains.\n\nOne supported solution:\nread -r request\nprintf 'Request: %s\\n' \"$request\"\n",
+      "hints": [
+        "read consumes standard input; it does not read the argument list.",
+        "Use read -r request so backslashes stay literal.",
+        "Quote \"$request\" when printing, so its internal spaces survive."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Standard input contains one request line.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Plain request",
+            "args": [],
+            "stdin": "check disk\n",
+            "env": {},
+            "files": {},
+            "stdout": "Request: check disk\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Literal backslashes",
+            "args": [],
+            "stdin": "copy C:\\notes\\today\n",
+            "env": {},
+            "files": {},
+            "stdout": "Request: copy C:\\notes\\today\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Outer whitespace",
+            "args": [],
+            "stdin": "  keep  internal spaces \t\n",
+            "env": {},
+            "files": {},
+            "stdout": "Request: keep  internal spaces\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "read -r request\nprintf 'Request: %s\\n' \"$request\"\n"
+      ],
+      "prerequisites": [
+        "shell-arguments"
+      ]
+    },
+    {
+      "id": "shell-validation",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Reject a missing destination",
+      "summary": "Use a condition and exit status to make failure visible.",
+      "objective": "If argument 1 is empty or missing, print Destination required to standard error and exit 2. Otherwise print Destination: VALUE to standard output and exit 0. Do not change files.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "Shell conditions inspect exit status: zero means true/success. A guard gives a useful diagnostic on standard error and stops before normal output. Keeping errors separate helps callers.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "Shell conditions inspect exit status: zero means true/success. A guard gives a useful diagnostic on standard error and stops before normal output. Keeping errors separate helps callers.\n\nOne supported solution:\nif [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n",
+      "hints": [
+        "[ -z \"$1\" ] succeeds when the first argument is empty. Spaces around [ and ] matter.",
+        "An if runs its then block when the condition returns status 0.",
+        ">&2 sends the message to standard error. exit 2 ends the script with a deliberate failure status."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Argument 1 is the requested destination.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Given destination",
+            "args": [
+              "/work/archive"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Destination: /work/archive\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Missing destination",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Destination required\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Empty argument",
+            "args": [
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Destination required\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Space in destination",
+            "args": [
+              "/work/night archive"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Destination: /work/night archive\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "if [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n"
+      ],
+      "prerequisites": [
+        "shell-input"
+      ]
+    },
+    {
+      "id": "shell-report",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Write an incident report",
+      "summary": "Filter virtual data and direct output into a report file.",
+      "objective": "Argument 1 names an input log; argument 2 names the report. Write exactly the lines containing the literal ERROR to the report, replacing any old report. Leave input and other files unchanged. Print nothing. Return grep’s status: 0 for matches, 1 for none. Inputs always exist.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "Redirection opens or truncates the destination before grep runs. grep returns 1 when no lines match; that is a meaningful outcome rather than a syntax error. The final command supplies the script’s status.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "Redirection opens or truncates the destination before grep runs. grep returns 1 when no lines match; that is a meaningful outcome rather than a syntax error. The final command supplies the script’s status.\n\nOne supported solution:\ngrep -F ERROR \"$1\" > \"$2\"\n",
+      "hints": [
+        "grep -F matches literal text, one line at a time.",
+        "> redirects standard output and replaces a previous report; >> would append.",
+        "Quote both paths. A no-match status of 1 is expected for the quiet fixture."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Arguments: input log, report path\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Two incidents",
+            "args": [
+              "/work/app.log",
+              "/work/errors"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n",
+              "/work/errors": "ERROR disk\nERROR timeout\n"
+            }
+          },
+          {
+            "name": "Replace stale report",
+            "args": [
+              "/work/app log",
+              "/work/report file"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/app log": "ERROR one\nINFO ok\n",
+              "/work/report file": "old data\n",
+              "/work/keep": "private fixture\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/app log": "ERROR one\nINFO ok\n",
+              "/work/report file": "ERROR one\n",
+              "/work/keep": "private fixture\n"
+            }
+          },
+          {
+            "name": "No matches",
+            "args": [
+              "/work/quiet",
+              "/work/errors"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/quiet": "INFO normal\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/quiet": "INFO normal\n",
+              "/work/errors": ""
+            }
+          }
+        ]
+      },
+      "solution": [
+        "grep -F ERROR \"$1\" > \"$2\"\n"
+      ],
+      "prerequisites": [
+        "shell-validation"
+      ]
+    },
+    {
+      "id": "shell-loop",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Assemble a file handover",
+      "summary": "Loop over a variable number of files without splitting their names.",
+      "objective": "For each path argument, in order, print File: PATH and then its contents. All supplied files exist and end in a newline. Preserve spaces and argument order; with no arguments print nothing. Do not change files.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "Sole quoted \"$@\" expands to one word per positional argument. With no arguments it supplies zero words, so the loop runs zero times. This prevents spaces in names becoming extra iterations.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "Sole quoted \"$@\" expands to one word per positional argument. With no arguments it supplies zero words, so the loop runs zero times. This prevents spaces in names becoming extra iterations.\n\nOne supported solution:\nfor file in \"$@\"; do\n    printf 'File: %s\\n' \"$file\"\n    cat \"$file\"\ndone\n",
+      "hints": [
+        "for file in \"$@\" iterates over the original argument boundaries.",
+        "Inside the loop, quote \"$file\" for both the heading and cat.",
+        "Keep the print and cat inside do … done so each heading stays next to its contents."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Each argument is a separate virtual file.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Two files",
+            "args": [
+              "/work/a",
+              "/work/b"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a": "alpha\n",
+              "/work/b": "beta\n"
+            },
+            "stdout": "File: /work/a\nalpha\nFile: /work/b\nbeta\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/a": "alpha\n",
+              "/work/b": "beta\n"
+            }
+          },
+          {
+            "name": "One spaced path",
+            "args": [
+              "/work/shift notes"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/shift notes": "done\n"
+            },
+            "stdout": "File: /work/shift notes\ndone\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/shift notes": "done\n"
+            }
+          },
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "for file in \"$@\"; do\n    printf 'File: %s\\n' \"$file\"\n    cat \"$file\"\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-report"
+      ]
+    },
+    {
+      "id": "shell-capstone",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Scripting foundations",
+      "title": "Publish a safe incident report",
+      "summary": "Combine guards, quoting, filtering and safe output into a reusable script.",
+      "objective": "Create a report from input log $1 at destination $2. If $2 is empty or $1 is not an existing virtual file, print Cannot build report to standard error, exit 2, and leave every file unchanged. Otherwise replace the report with its ERROR lines, print Saved: PATH, and exit 0 even when there are no matches. Valid input and output paths differ.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Investigate the fixtures",
+        "Write and test the script",
+        "Review edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Read the contract",
+          "why": "Each case is a separate fresh virtual workspace. Inspect the inputs and expected behavior.",
+          "action": "Use the case selector to inspect inputs, then edit the script.",
+          "commands": []
+        },
+        {
+          "title": "Make the behavior reliable",
+          "why": "Validation must happen before output redirection: otherwise a failed read can still destroy an old report. No matching incidents is a valid empty report here, so the successful Saved message becomes the final status. Equivalent supported guard structures are accepted.",
+          "action": "Run script executes every case. Inspect the output and specific failing check, edit, and retry.",
+          "commands": []
+        },
+        {
+          "title": "Explain the edge cases",
+          "why": "A script that works once can still fail on spaces, missing files or empty data.",
+          "action": "Compare the cases. Why does the same script handle every input?",
+          "commands": []
+        }
+      ],
+      "explanation": "Validation must happen before output redirection: otherwise a failed read can still destroy an old report. No matching incidents is a valid empty report here, so the successful Saved message becomes the final status. Equivalent supported guard structures are accepted.\n\nOne supported solution:\nif [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+      "hints": [
+        "Check the destination before using >, which can truncate a file.",
+        "Use [ -f \"$1\" ] to guard the input. An empty destination or missing source must exit before any redirection.",
+        "After grep, a successful printf gives status 0 even when grep found no incidents. Consider why that matches this assignment but differs from the previous report task."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Quoting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Shell subset v1, documented in Help. UTF-8 virtual /work files; no host processes or files. Each Run starts fresh declared fixtures. All syntax in this introductory unit is portable shell; Bash-specific features are planned separately.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Capstone: validate before creating the report.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Incidents",
+            "args": [
+              "/work/app",
+              "/work/report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/app": "INFO ok\nERROR disk\n"
+            },
+            "stdout": "Saved: /work/report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/app": "INFO ok\nERROR disk\n",
+              "/work/report": "ERROR disk\n"
+            }
+          },
+          {
+            "name": "Quiet log",
+            "args": [
+              "/work/quiet",
+              "/work/report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/quiet": "INFO ok\n",
+              "/work/report": "stale\n"
+            },
+            "stdout": "Saved: /work/report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/quiet": "INFO ok\n",
+              "/work/report": ""
+            }
+          },
+          {
+            "name": "Missing source",
+            "args": [
+              "/work/missing",
+              "/work/report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/report": "keep me\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot build report\n",
+            "status": 2,
+            "after": {
+              "/work/report": "keep me\n"
+            }
+          },
+          {
+            "name": "Spaces",
+            "args": [
+              "/work/app log",
+              "/work/incident report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/app log": "ERROR one\nERROR two\n"
+            },
+            "stdout": "Saved: /work/incident report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/app log": "ERROR one\nERROR two\n",
+              "/work/incident report": "ERROR one\nERROR two\n"
+            }
+          },
+          {
+            "name": "Missing destination",
+            "args": [
+              "/work/app"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/app": "ERROR disk\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot build report\n",
+            "status": 2,
+            "after": {
+              "/work/app": "ERROR disk\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-loop"
+      ]
+    }
+  ]
+}

@@ -24,6 +24,8 @@ pub struct Scenario {
     pub initial: State,
     pub goal: Goal,
     pub solution: Vec<String>,
+    #[serde(default)]
+    pub prerequisites: Vec<String>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -40,7 +42,7 @@ pub struct CommandExample {
     pub explanation: String,
     pub simulator_only: bool,
 }
-#[derive(Deserialize)]
+#[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Pack {
     pub schema_version: u32,
@@ -67,7 +69,7 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
             return Err("Invalid or duplicate scenario identifier".into());
         }
         if s.version == 0
-            || !["CCNA", "LPIC-1", "LPIC-2"].contains(&s.track.as_str())
+            || !["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].contains(&s.track.as_str())
             || !["Beginner", "Intermediate"].contains(&s.difficulty.as_str())
             || s.minutes == 0
             || s.minutes > 180
@@ -127,14 +129,55 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
             engine::execute(&mut state, cmd)
                 .map_err(|e| format!("{}: unreachable solution: {e}", s.id))?;
         }
+        if let (State::Script { source, run }, Goal::Script { cases }) = (&mut state, &s.goal) {
+            if cases.len() < 3 || cases.len() > 8 || cases.iter().any(|c| !c.valid()) {
+                return Err(format!("{}: invalid script cases", s.id));
+            }
+            *run = Some(crate::shell::Record {
+                source: source.clone(),
+                results: cases.iter().map(|c| crate::shell::run(source, c)).collect(),
+            });
+        }
         if !engine::solved(&state, &s.goal) {
             return Err(format!("{}: solution does not reach objective", s.id));
+        }
+    }
+    for s in &p.scenarios {
+        if s.prerequisites.len() > 8
+            || s.prerequisites
+                .iter()
+                .any(|id| id == &s.id || !ids.contains(id))
+        {
+            return Err(format!("{}: invalid prerequisites", s.id));
+        }
+    }
+    // Any cycle would make a prerequisite learning path impossible.
+    for start in &p.scenarios {
+        let mut pending = start.prerequisites.clone();
+        let mut seen = BTreeSet::new();
+        while let Some(id) = pending.pop() {
+            if id == start.id {
+                return Err(format!("{}: cyclic prerequisites", start.id));
+            }
+            if seen.insert(id.clone()) {
+                pending.extend(
+                    p.scenarios
+                        .iter()
+                        .find(|s| s.id == id)
+                        .unwrap()
+                        .prerequisites
+                        .clone(),
+                );
+            }
         }
     }
     Ok(p.scenarios)
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Script { source, run } => {
+            source.len() <= crate::shell::MAX_SOURCE && run.as_ref().is_none_or(|r| r.valid())
+        }
         State::Subnet {
             prefix,
             answers,
@@ -239,5 +282,10 @@ pub fn validate_state(s: &State) -> Result<(), String> {
     }
 }
 pub fn bundled() -> Result<Vec<Scenario>, String> {
-    load(include_str!("../scenarios/starter-v1.json"))
+    let mut all: Pack = serde_json::from_str(include_str!("../scenarios/starter-v1.json"))
+        .map_err(|e| e.to_string())?;
+    let unit: Pack = serde_json::from_str(include_str!("../scenarios/shell-unit-v1.json"))
+        .map_err(|e| e.to_string())?;
+    all.scenarios.extend(unit.scenarios);
+    load(&serde_json::to_string(&all).map_err(|e| e.to_string())?)
 }

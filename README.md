@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking and Linux practice. Nine authored scenarios across CCNA, LPIC-1 and LPIC-2. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking and Linux practice. Sixteen authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus a seven-lab introductory Bash/Shell unit. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -38,6 +38,16 @@ CARGO_HOME=/tmp/dlms-cargo RUSTUP_HOME=/tmp/dlms-rustup /tmp/dlms-cargo/bin/carg
 
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 
+## This milestone
+
+The accepted native workspace design remains the basis of all labs. The header adds a native theme picker and optional preview: all five stock DLMS palettes and all 22 official Omarchy v4.0.4 palettes, plus the existing Navy default (**28 choices**). Selection and text size persist independently of progress. No desktop settings are changed. Exact inventory, source revision, contrast adaptation and MIT notices: [themes](docs/THEMES.md).
+
+The new **Bash/Shell** track teaches reliable output, quoted arguments, input, guards/status, report redirection, multi-file loops and a safe-report capstone. Scripts are written in a native editor and run against 3–5 fresh deterministic cases with output/file-state grading. Run/Stop, case inspection and specific retry feedback stay together. Learn/Challenge retain the same assignments; walkthroughs, progressive hints and worked solutions are optional. Drafts survive resume; edits invalidate old results. Tab indents the code editor, Escape releases its focus, and Ctrl+Enter runs.
+
+The in-process interpreter implements a documented [shell subset](docs/SHELL_SUBSET.md), with a real lexer/parser/VM, virtual files and bounded cooperative execution. It never passes learner input to Bash, a subprocess, the host filesystem or network. Real Bash appears **only** in the disposable development-oracle fixtures. No new dependencies were added.
+
+The [curriculum plan](docs/CURRICULUM.md) and [165-row coverage map](docs/CURRICULUM.csv) record current official versions, sources/check dates, implemented slices, distinct planned assignments, prerequisites, capabilities and fidelity gaps. Upcoming CCNA v2.0 is tracked separately from currently offered v1.1. Planned scenarios are not catalog placeholders or full-exam preparation claims.
+
 ## Use
 
 Choose a certification and topic, or search titles/goals. Favorites and Recent / continue keep navigation focused. Difficulty, completion and duration live under **More filters**, with an active-filter summary when collapsed. Cards have aligned actions; pagination appears only above 12 results. `--developer` exposes a clearly marked 900-item synthetic catalog for navigation testing; those entries are not playable curriculum.
@@ -59,6 +69,8 @@ Existing version-1 saves load without a reset or read-time rewrite. All nine IDs
 Optional versioned `workspace` data stores unfinished commands, editor drafts and check snapshots. Before the first upgraded write, an existing pre-workspace save is copied byte-for-byte to `progress-v1.before-workspace.json` beside the progress file. The backup is not replaced by later saves. Storage uses the OS local application-data directory (normally `$XDG_DATA_HOME/dlmslearninglab` or `~/.local/share/dlmslearninglab` on Linux). New metadata requires this newer binary; downgrade compatibility is not claimed.
 
 Progress, backups, screenshots and recordings remain local and excluded from the public tree. No learner input is passed to an OS shell, process, host filesystem command or network operation. The compatibility fixtures and native captures use synthetic data.
+
+Development checks also include `python3 tools/verify_palettes.py` and, after `cargo build --locked --example shell_probe`, `python3 tools/bash_reference.py`. The latter executes only checked-in controlled fixtures in temporary directories.
 
 See [architecture and authoring](docs/ARCHITECTURE.md), [content sources and simplifications](docs/CONTENT.md), and [verification and limits](docs/VERIFICATION.md).
 

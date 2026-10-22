@@ -8,3 +8,7 @@ pub mod progress;
 pub mod ipv4;
 
 pub mod workspace;
+
+pub mod shell;
+
+pub mod theme;

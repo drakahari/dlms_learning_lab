@@ -1,0 +1,771 @@
+[
+  {
+    "name": "quoted and split",
+    "source": "x='a  b'\nprintf '<%s>\\n' \"$x\" $x \"$1\" \"$2\" \"$missing\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "literal escaping",
+    "source": "printf '%s\\n' 'literal $x `ok`' \"literal \\$x\" a\\ b\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "concatenated expansions",
+    "source": "x=' a b '\nprintf '<%s>\\n' pre${x}post \"$x\"tail $x'END'\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "empty argument vector",
+    "source": "for x in \"$@\"; do printf '<%s>\\n' \"$x\"; done\nprintf 'count=%s\\n' \"$#\"\n",
+    "case": {
+      "name": "reference",
+      "args": [],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "loop preserves arguments",
+    "source": "for x in \"$@\"; do printf '<%s>\\n' \"$x\"; done\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "read eof and backslashes",
+    "source": "read -r line\nprintf '<%s> status=%s\\n' \"$line\" \"$?\"\nread -r line\nprintf '<%s> status=%s\\n' \"$line\" \"$?\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  \\slashes \t\nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "status and conditional lists",
+    "source": "false\nprintf '%s\\n' \"$?\"\nfalse && echo no || echo fallback\ntrue || echo no && echo yes\nif false; then echo no; fi\nprintf 'if=%s\\n' \"$?\"\nwhile false; do echo no; done\nprintf 'while=%s\\n' \"$?\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "loop status",
+    "source": "x=yes\nwhile test \"$x\" = yes; do x=no; false; done\nprintf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "pipeline variable isolation",
+    "source": "x=parent\nprintf 'child\\n' | read -r x\nprintf '%s\\n' \"$x\"\nprintf 'INFO ok\\nERROR one\\n' | grep -F ERROR\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "pipeline previous status",
+    "source": "false\nprintf 'a' | printf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "truncate append and input",
+    "source": "printf 'first\\n' > report\nprintf 'second\\n' >> report\ncat report\ngrep -F second < report\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "descriptor copies",
+    "source": "printf 'err\\n' >&2\nprintf 'out\\n' 2>&1 > report\nprintf 'last\\n' > report 2>&1\ncat report\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "error leaves truncated file",
+    "source": "cat missing > report\nprintf 'status=%s\\n' \"$?\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "quoted file names",
+    "source": "for f in \"$@\"; do cat \"$f\"; done\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "one file",
+        "two"
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {
+        "/work/one file": "first\n",
+        "/work/two": "second\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "numeric and string tests",
+    "source": "if [ 10 -gt 2 ]; then echo greater; else echo no; fi\nif test -n \"$1\"; then echo supplied; fi\n[ '' != x ] && printf 'different\\n'\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "  keep  internal spaces  \nlast",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "read redirect restores stdin",
+    "source": "read -r first < request\nread -r second\nprintf '%s|%s\\n' \"$first\" \"$second\"\n",
+    "case": {
+      "name": "reference",
+      "args": [
+        "two words",
+        ""
+      ],
+      "stdin": "same\n",
+      "env": {},
+      "files": {
+        "/work/request": "same\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-handover: Ordinary shift",
+    "source": "site=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n",
+    "case": {
+      "name": "Ordinary shift",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "SITE": "North",
+        "TASK": "Audit"
+      },
+      "files": {},
+      "stdout": "Site: North\nTask: Audit\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-handover: Spaces and percent",
+    "source": "site=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n",
+    "case": {
+      "name": "Spaces and percent",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "SITE": "West office",
+        "TASK": "Check 95% usage"
+      },
+      "files": {},
+      "stdout": "Site: West office\nTask: Check 95% usage\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-handover: Empty task",
+    "source": "site=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n",
+    "case": {
+      "name": "Empty task",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "SITE": "South",
+        "TASK": ""
+      },
+      "files": {},
+      "stdout": "Site: South\nTask: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-arguments: Simple arguments",
+    "source": "label=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n",
+    "case": {
+      "name": "Simple arguments",
+      "args": [
+        "daily",
+        "report"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: daily\nFile: /work/report\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-arguments: Names with spaces",
+    "source": "label=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n",
+    "case": {
+      "name": "Names with spaces",
+      "args": [
+        "night shift",
+        "shift notes"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: night shift\nFile: /work/shift notes\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-arguments: Empty label",
+    "source": "label=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n",
+    "case": {
+      "name": "Empty label",
+      "args": [
+        "",
+        "input"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: \nFile: /work/input\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-input: Plain request",
+    "source": "read -r request\nprintf 'Request: %s\\n' \"$request\"\n",
+    "case": {
+      "name": "Plain request",
+      "args": [],
+      "stdin": "check disk\n",
+      "env": {},
+      "files": {},
+      "stdout": "Request: check disk\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-input: Literal backslashes",
+    "source": "read -r request\nprintf 'Request: %s\\n' \"$request\"\n",
+    "case": {
+      "name": "Literal backslashes",
+      "args": [],
+      "stdin": "copy C:\\notes\\today\n",
+      "env": {},
+      "files": {},
+      "stdout": "Request: copy C:\\notes\\today\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-input: Outer whitespace",
+    "source": "read -r request\nprintf 'Request: %s\\n' \"$request\"\n",
+    "case": {
+      "name": "Outer whitespace",
+      "args": [],
+      "stdin": "  keep  internal spaces \t\n",
+      "env": {},
+      "files": {},
+      "stdout": "Request: keep  internal spaces\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-validation: Given destination",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n",
+    "case": {
+      "name": "Given destination",
+      "args": [
+        "archive"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Destination: /work/archive\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-validation: Missing destination",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n",
+    "case": {
+      "name": "Missing destination",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Destination required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-validation: Empty argument",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n",
+    "case": {
+      "name": "Empty argument",
+      "args": [
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Destination required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-validation: Space in destination",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n",
+    "case": {
+      "name": "Space in destination",
+      "args": [
+        "night archive"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Destination: /work/night archive\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-report: Two incidents",
+    "source": "grep -F ERROR \"$1\" > \"$2\"\n",
+    "case": {
+      "name": "Two incidents",
+      "args": [
+        "app.log",
+        "errors"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n",
+        "/work/errors": "ERROR disk\nERROR timeout\n"
+      }
+    }
+  },
+  {
+    "name": "shell-report: Replace stale report",
+    "source": "grep -F ERROR \"$1\" > \"$2\"\n",
+    "case": {
+      "name": "Replace stale report",
+      "args": [
+        "app log",
+        "report file"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/app log": "ERROR one\nINFO ok\n",
+        "/work/report file": "old data\n",
+        "/work/keep": "private fixture\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/app log": "ERROR one\nINFO ok\n",
+        "/work/report file": "ERROR one\n",
+        "/work/keep": "private fixture\n"
+      }
+    }
+  },
+  {
+    "name": "shell-report: No matches",
+    "source": "grep -F ERROR \"$1\" > \"$2\"\n",
+    "case": {
+      "name": "No matches",
+      "args": [
+        "quiet",
+        "errors"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/quiet": "INFO normal\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 1,
+      "after": {
+        "/work/quiet": "INFO normal\n",
+        "/work/errors": ""
+      }
+    }
+  },
+  {
+    "name": "shell-loop: Two files",
+    "source": "for file in \"$@\"; do\n    printf 'File: %s\\n' \"$file\"\n    cat \"$file\"\ndone\n",
+    "case": {
+      "name": "Two files",
+      "args": [
+        "a",
+        "b"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a": "alpha\n",
+        "/work/b": "beta\n"
+      },
+      "stdout": "File: /work/a\nalpha\nFile: /work/b\nbeta\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a": "alpha\n",
+        "/work/b": "beta\n"
+      }
+    }
+  },
+  {
+    "name": "shell-loop: One spaced path",
+    "source": "for file in \"$@\"; do\n    printf 'File: %s\\n' \"$file\"\n    cat \"$file\"\ndone\n",
+    "case": {
+      "name": "One spaced path",
+      "args": [
+        "shift notes"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/shift notes": "done\n"
+      },
+      "stdout": "File: /work/shift notes\ndone\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/shift notes": "done\n"
+      }
+    }
+  },
+  {
+    "name": "shell-loop: No arguments",
+    "source": "for file in \"$@\"; do\n    printf 'File: %s\\n' \"$file\"\n    cat \"$file\"\ndone\n",
+    "case": {
+      "name": "No arguments",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-capstone: Incidents",
+    "source": "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Incidents",
+      "args": [
+        "app",
+        "report"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/app": "INFO ok\nERROR disk\n"
+      },
+      "stdout": "Saved: /work/report\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/app": "INFO ok\nERROR disk\n",
+        "/work/report": "ERROR disk\n"
+      }
+    }
+  },
+  {
+    "name": "shell-capstone: Quiet log",
+    "source": "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Quiet log",
+      "args": [
+        "quiet",
+        "report"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/quiet": "INFO ok\n",
+        "/work/report": "stale\n"
+      },
+      "stdout": "Saved: /work/report\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/quiet": "INFO ok\n",
+        "/work/report": ""
+      }
+    }
+  },
+  {
+    "name": "shell-capstone: Missing source",
+    "source": "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Missing source",
+      "args": [
+        "missing",
+        "report"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/report": "keep me\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot build report\n",
+      "status": 2,
+      "after": {
+        "/work/report": "keep me\n"
+      }
+    }
+  },
+  {
+    "name": "shell-capstone: Spaces",
+    "source": "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Spaces",
+      "args": [
+        "app log",
+        "incident report"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/app log": "ERROR one\nERROR two\n"
+      },
+      "stdout": "Saved: /work/incident report\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/app log": "ERROR one\nERROR two\n",
+        "/work/incident report": "ERROR one\nERROR two\n"
+      }
+    }
+  },
+  {
+    "name": "shell-capstone: Missing destination",
+    "source": "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Missing destination",
+      "args": [
+        "app"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/app": "ERROR disk\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot build report\n",
+      "status": 2,
+      "after": {
+        "/work/app": "ERROR disk\n"
+      }
+    }
+  },
+  {
+    "name": "CRLF data and unterminated final line",
+    "source": "grep -F ERROR\n",
+    "case": {
+      "name": "reference",
+      "args": [],
+      "stdin": "INFO ok\r\nERROR first\r\nERROR final",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  }
+]

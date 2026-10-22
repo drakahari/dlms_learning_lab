@@ -8,12 +8,13 @@ impl LabApp {
             let r = ui.add(button("Back to library"));
             self.metrics.back = Some(r.rect);
             if r.clicked() {
+                self.script_job = None;
                 self.selected = None;
             }
             ui.label(
                 RichText::new(format!("{} / {}", s.track, s.topic))
                     .small()
-                    .color(ACCENT),
+                    .color(palette(ui).accent),
             );
             let before = challenge;
             ui.selectable_value(&mut challenge, false, "Learn");
@@ -46,7 +47,7 @@ impl LabApp {
             });
         }
         ui.add_space(8.);
-        card().show(ui, |ui| {
+        card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
             if matches!(self.progress.attempts[&s.id].state, State::Subnet { .. }) {
                 self.ipv4_assignment(ui, i);
@@ -54,46 +55,50 @@ impl LabApp {
                 ui.label(RichText::new(&s.title).strong().size(23.));
                 ui.label(&s.objective);
                 if !challenge {
-                    ui.label(RichText::new(starting_point(&s.id)).color(MUTED));
+                    ui.label(RichText::new(starting_point(&s.id)).color(palette(ui).muted));
                 }
-                match &self.progress.attempts[&s.id].state {
-                    State::Vlsm { .. } => self.allocations(ui, i),
-                    State::Service { .. } | State::Dns { .. } | State::Mount { .. } => {
-                        self.configuration(ui, i);
-                        self.terminal(ui, i);
+                if matches!(s.initial, State::Script { .. }) {
+                    self.scripting(ui, i);
+                } else {
+                    match &self.progress.attempts[&s.id].state {
+                        State::Vlsm { .. } => self.allocations(ui, i),
+                        State::Service { .. } | State::Dns { .. } | State::Mount { .. } => {
+                            self.configuration(ui, i);
+                            self.terminal(ui, i);
+                        }
+                        State::Network { .. } => {
+                            ui.add(
+                                egui::Label::new(
+                                    RichText::new(engine::describe(
+                                        &self.progress.attempts[&s.id].state,
+                                    ))
+                                    .monospace(),
+                                )
+                                .wrap(),
+                            );
+                            self.terminal(ui, i);
+                        }
+                        _ => self.terminal(ui, i),
                     }
-                    State::Network { .. } => {
-                        ui.add(
-                            egui::Label::new(
-                                RichText::new(engine::describe(
-                                    &self.progress.attempts[&s.id].state,
-                                ))
-                                .monospace(),
-                            )
-                            .wrap(),
-                        );
-                        self.terminal(ui, i);
+                    let r = ui.add_sized(
+                        [220_f32.min(ui.available_width()), CONTROL],
+                        primary(ui, "Check work"),
+                    );
+                    self.metrics.check = Some(r.rect);
+                    if r.clicked() {
+                        self.checked = true;
+                        self.progress
+                            .attempts
+                            .get_mut(&s.id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .checked = true;
+                        self.dirty = true;
                     }
-                    _ => self.terminal(ui, i),
+                    self.report(ui, i);
                 }
-                let r = ui.add_sized(
-                    [220_f32.min(ui.available_width()), CONTROL],
-                    primary("Check work"),
-                );
-                self.metrics.check = Some(r.rect);
-                if r.clicked() {
-                    self.checked = true;
-                    self.progress
-                        .attempts
-                        .get_mut(&s.id)
-                        .unwrap()
-                        .workspace
-                        .as_mut()
-                        .unwrap()
-                        .checked = true;
-                    self.dirty = true;
-                }
-                self.report(ui, i);
             }
             ui.add_space(2.);
             let r = ui.link(if self.help_open {
@@ -118,7 +123,7 @@ impl LabApp {
                 "Simulation only · Leaving keeps your work and editor drafts saved locally.",
             )
             .small()
-            .color(MUTED),
+            .color(palette(ui).muted),
         );
     }
     fn ipv4_assignment(&mut self, ui: &mut egui::Ui, i: usize) {
@@ -129,7 +134,7 @@ impl LabApp {
             ui.label(
                 RichText::new("Numerical practice · Original assignment stays saved")
                     .small()
-                    .color(ACCENT),
+                    .color(palette(ui).accent),
             );
         }
         let view = self.ipv4_view.as_mut().unwrap();
@@ -154,7 +159,7 @@ impl LabApp {
         } else {
             w.migrated_host
         } {
-            ui.label(RichText::new("Your completed subnet analysis was retained. A free second-host address was supplied for compatibility; you can change it.").small().color(MUTED));
+            ui.label(RichText::new("Your completed subnet analysis was retained. A free second-host address was supplied for compatibility; you can change it.").small().color(palette(ui).muted));
         }
         self.metrics.completion = view.verified();
         if self.metrics.completion
@@ -177,7 +182,7 @@ impl LabApp {
         else {
             return;
         };
-        ui.label(RichText::new(format!("Address pool: {base}/{prefix}")).color(ACCENT));
+        ui.label(RichText::new(format!("Address pool: {base}/{prefix}")).color(palette(ui).accent));
         let wide = ui.available_width() >= 640.;
         let label_width = (ui.available_width() * 0.4).clamp(100., 154.);
         let width = (ui.available_width() - label_width - 12.).clamp(70., 220.);
@@ -240,7 +245,10 @@ impl LabApp {
                                     && let Some(issue) = &issues[index]
                                 {
                                     ui.add(
-                                        egui::Label::new(RichText::new(issue).color(RED)).wrap(),
+                                        egui::Label::new(
+                                            RichText::new(issue).color(palette(ui).error),
+                                        )
+                                        .wrap(),
                                     );
                                 }
                             },
@@ -264,12 +272,12 @@ impl LabApp {
                 ui.label(
                     RichText::new(engine::describe(&a.state))
                         .small()
-                        .color(MUTED),
+                        .color(palette(ui).muted),
                 );
                 ui.label(
                     RichText::new("/etc/atlas.conf · simulated file")
                         .small()
-                        .color(ACCENT),
+                        .color(palette(ui).accent),
                 );
                 let draft = w.service_port.get_or_insert_with(|| port.clone());
                 if editor_row(ui, "Port", draft, "service-port", &mut self.metrics, false) {
@@ -289,7 +297,7 @@ impl LabApp {
                         "/etc/named/lab.zone · loaded serial {loaded_serial}"
                     ))
                     .small()
-                    .color(ACCENT),
+                    .color(palette(ui).accent),
                 );
                 let (name, address) = records.iter().next().unwrap();
                 ui.label(format!("A record: {name}"));
@@ -326,7 +334,7 @@ impl LabApp {
                 ui.label(
                     RichText::new("/etc/fstab · /data device (simulated file)")
                         .small()
-                        .color(ACCENT),
+                        .color(palette(ui).accent),
                 );
                 let draft = w
                     .mount_device
@@ -354,7 +362,7 @@ impl LabApp {
                 ui.label(
                     RichText::new("Unsaved draft · retained when leaving")
                         .small()
-                        .color(ACCENT),
+                        .color(palette(ui).accent),
                 );
             }
         });
@@ -397,7 +405,7 @@ impl LabApp {
             });
         }
         if let Some(notice) = &self.notice {
-            ui.label(RichText::new(notice).small().color(ACCENT));
+            ui.label(RichText::new(notice).small().color(palette(ui).accent));
         }
     }
     fn terminal(&mut self, ui: &mut egui::Ui, i: usize) {
@@ -406,14 +414,14 @@ impl LabApp {
             (ui.ctx().input(|input| input.content_rect().bottom()) - ui.cursor().top() - 190.)
                 .clamp(140., 260.);
         let output = egui::Frame::new()
-            .fill(Color32::from_rgb(7, 13, 24))
+            .fill(palette(ui).input)
             .inner_margin(10.)
             .corner_radius(6.)
             .show(ui, |ui| {
                 ui.label(
                     RichText::new("Simulated terminal · administrator")
                         .small()
-                        .color(MUTED),
+                        .color(palette(ui).muted),
                 );
                 egui::ScrollArea::both()
                     .id_salt(("terminal", i))
@@ -426,7 +434,7 @@ impl LabApp {
                             ui.label(
                                 RichText::new("Ready for your command.")
                                     .monospace()
-                                    .color(MUTED),
+                                    .color(palette(ui).muted),
                             );
                         }
                         for line in &a.transcript {
@@ -441,7 +449,7 @@ impl LabApp {
         self.metrics.output = Some(output.response.rect);
         let mut run = false;
         ui.horizontal(|ui| {
-            ui.label(RichText::new("lab #").monospace().color(ACCENT));
+            ui.label(RichText::new("lab #").monospace().color(palette(ui).accent));
             let width = (ui.available_width() - 90.).max(40.);
             let r = ui.add_sized(
                 [width, CONTROL],
@@ -518,7 +526,7 @@ impl LabApp {
             ui.label(
                 RichText::new("Objective complete · All current checks pass.")
                     .strong()
-                    .color(GREEN),
+                    .color(palette(ui).success),
             );
             if i + 1 < self.scenarios.len()
                 && ui
@@ -534,17 +542,22 @@ impl LabApp {
             // Native row feedback is primary; the summary also works in stacked layouts.
             for (index, allocation) in allocations.iter().enumerate() {
                 if let Some(issue) = model::vlsm_issue(&a.state, index) {
-                    ui.colored_label(RED, format!("{}: {issue}", allocation.name));
+                    ui.colored_label(palette(ui).error, format!("{}: {issue}", allocation.name));
                 }
             }
         } else if !matches!(a.state, State::Vlsm { .. }) {
             for issue in model::issues(&a.state, &s.goal) {
-                ui.add(egui::Label::new(RichText::new(issue).color(RED)).wrap());
+                ui.add(egui::Label::new(RichText::new(issue).color(palette(ui).error)).wrap());
             }
         }
     }
     fn help(&mut self, ui: &mut egui::Ui, i: usize) {
         self.metrics.help_visible = true;
+        if matches!(self.scenarios[i].initial, State::Script { .. }) {
+            egui::CollapsingHeader::new("Supported shell subset & limits").show(ui, |ui| {
+                ui.label(include_str!("../../docs/SHELL_SUBSET.md"));
+            });
+        }
         let s = &self.scenarios[i];
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         if !matches!(a.state, State::Subnet { .. }) {
@@ -584,7 +597,7 @@ impl LabApp {
                             ui.label(
                                 RichText::new("Simulator-only helper · not a Linux command")
                                     .small()
-                                    .color(ACCENT),
+                                    .color(palette(ui).accent),
                             );
                         }
                         ui.label(&c.explanation);

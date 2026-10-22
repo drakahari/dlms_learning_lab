@@ -5,18 +5,15 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace as model,
 };
-use eframe::egui::{self, Color32, RichText};
+use dlms_learning_lab::{shell, theme};
+use eframe::egui::{self, RichText};
+mod scripting;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_workspace;
 mod smoke;
 #[cfg(test)]
 mod tests;
 mod workspace;
-const ACCENT: Color32 = Color32::from_rgb(184, 165, 255);
-const MUTED: Color32 = Color32::from_rgb(165, 180, 205);
-const PANEL: Color32 = Color32::from_rgb(25, 34, 55);
-const GREEN: Color32 = Color32::from_rgb(142, 225, 183);
-const RED: Color32 = Color32::from_rgb(255, 164, 166);
 const CONTROL: f32 = 36.;
 #[derive(Default)]
 struct Metrics {
@@ -33,6 +30,8 @@ struct Metrics {
     completion: bool,
     guide: bool,
     editor_save: Option<egui::Rect>,
+    editor_viewport: Option<egui::Rect>,
+    stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
     why: Option<egui::Rect>,
     help_visible: bool,
@@ -60,6 +59,12 @@ pub struct LabApp {
     developer: bool,
     page: usize,
     scale: f32,
+    theme_id: String,
+    theme_preview: bool,
+    preferences_error: Option<String>,
+    preferences_read_only: bool,
+    script_job: Option<scripting::Job>,
+    script_case: usize,
     focus_input: bool,
     scroll_command: bool,
     notice: Option<String>,
@@ -80,15 +85,6 @@ impl LabApp {
     }
     fn from_context(ctx: &egui::Context, smoke: bool, developer: bool) -> Self {
         let mut style = (*ctx.style()).clone();
-        style.visuals = egui::Visuals::dark();
-        style.visuals.panel_fill = Color32::from_rgb(14, 21, 38);
-        style.visuals.window_fill = PANEL;
-        style.visuals.extreme_bg_color = Color32::from_rgb(9, 15, 28);
-        style.visuals.faint_bg_color = PANEL;
-        style.visuals.widgets.inactive.bg_fill = Color32::from_rgb(38, 48, 73);
-        style.visuals.widgets.hovered.bg_fill = Color32::from_rgb(65, 54, 101);
-        style.visuals.selection.bg_fill = Color32::from_rgb(80, 60, 135);
-        style.visuals.override_text_color = Some(Color32::from_rgb(235, 239, 250));
         style.spacing.item_spacing = egui::vec2(12., 8.);
         style.spacing.button_padding = egui::vec2(14., 8.);
         style.spacing.interact_size.y = CONTROL;
@@ -127,6 +123,15 @@ impl LabApp {
             }
         };
         let read_only = storage_error.is_some();
+        let preferences = if smoke {
+            Ok(theme::Preferences::default())
+        } else {
+            theme::Preferences::load(&path.with_file_name("preferences-v1.json"))
+        };
+        let preferences_error = preferences.as_ref().err().cloned();
+        let preferences_read_only = preferences_error.is_some();
+        let preferences = preferences.unwrap_or_default();
+        theme::apply(ctx, &preferences.theme);
         Self {
             scenarios,
             progress,
@@ -143,7 +148,13 @@ impl LabApp {
             synthetic_catalog: Vec::new(),
             developer,
             page: 0,
-            scale: 1.,
+            scale: preferences.text_scale,
+            theme_id: preferences.theme,
+            theme_preview: false,
+            preferences_error,
+            preferences_read_only,
+            script_job: None,
+            script_case: 0,
             focus_input: false,
             scroll_command: false,
             notice: None,
@@ -154,12 +165,18 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: 0,
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scripts") {
+                176
+            } else {
+                0
+            },
             pending_events: Vec::new(),
             capture_pending: false,
         }
     }
     fn launch(&mut self, i: usize) {
+        self.script_job = None;
+        self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
         let clock = self.progress.clock;
         let s = &self.scenarios[i];
@@ -214,6 +231,7 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        self.script_job = None;
         self.input.clear();
         self.checked = false;
         self.reset_pending = false;
@@ -236,44 +254,93 @@ impl LabApp {
             }
         }
     }
+    fn text_size_picker(&mut self, ui: &mut egui::Ui) {
+        ui.label(RichText::new("Text size").small().color(palette(ui).muted));
+        let r = egui::ComboBox::from_id_salt("text-size")
+            .width(84.)
+            .selected_text(format!("{:.0}%", self.scale * 100.))
+            .show_ui(ui, |ui| {
+                for scale in [1., 1.15, 1.25, 1.5] {
+                    ui.selectable_value(&mut self.scale, scale, format!("{:.0}%", scale * 100.));
+                }
+            });
+        self.metrics.header.push(r.response.rect);
+    }
+    fn theme_picker(&mut self, ui: &mut egui::Ui) {
+        let r = egui::ComboBox::from_id_salt("native-theme-picker")
+            .width(195.)
+            .truncate()
+            .selected_text(format!(
+                "{} · {}",
+                theme::find(&self.theme_id).group,
+                theme::find(&self.theme_id).name
+            ))
+            .show_ui(ui, |ui| {
+                for t in theme::inventory() {
+                    ui.selectable_value(
+                        &mut self.theme_id,
+                        t.id.clone(),
+                        format!("{} · {}", t.group, t.name),
+                    );
+                }
+            });
+        self.metrics.header.push(r.response.rect);
+        if ui.button("Preview theme").clicked() {
+            self.theme_preview = !self.theme_preview;
+        }
+    }
     fn header(&mut self, ctx: &egui::Context) {
+        let previous = (self.theme_id.clone(), self.scale);
         egui::TopBottomPanel::top("brand")
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(18, 26, 44))
+                    .fill(theme::roles(ctx).panel)
                     .inner_margin(egui::Margin::symmetric(20, 10)),
             )
             .show(ctx, |ui| {
+                let narrow = ui.available_width() < 1050.;
                 ui.horizontal_wrapped(|ui| {
                     self.metrics.header.push(
                         ui.label(
                             RichText::new("DLMS Learning Lab")
                                 .strong()
                                 .size(20.)
-                                .color(ACCENT),
+                                .color(palette(ui).accent),
                         )
                         .rect,
                     );
                     self.metrics.header.push(
-                        ui.label(RichText::new("Offline simulation").small().color(MUTED))
-                            .rect,
+                        ui.label(
+                            RichText::new("Offline simulation")
+                                .small()
+                                .color(palette(ui).muted),
+                        )
+                        .rect,
                     );
-                    ui.label(RichText::new("Text size").small().color(MUTED));
-                    let r = egui::ComboBox::from_id_salt("text-size")
-                        .width(84.)
-                        .selected_text(format!("{:.0}%", self.scale * 100.))
-                        .show_ui(ui, |ui| {
-                            for scale in [1., 1.15, 1.25, 1.5] {
-                                ui.selectable_value(
-                                    &mut self.scale,
-                                    scale,
-                                    format!("{:.0}%", scale * 100.),
-                                );
-                            }
-                        });
-                    self.metrics.header.push(r.response.rect);
+                    if !narrow {
+                        self.text_size_picker(ui);
+                        self.theme_picker(ui);
+                    }
                 });
+                if narrow {
+                    ui.horizontal_wrapped(|ui| {
+                        self.text_size_picker(ui);
+                        self.theme_picker(ui);
+                    });
+                }
             });
+        if previous != (self.theme_id.clone(), self.scale) {
+            theme::apply(ctx, &self.theme_id);
+            if !self.preferences_read_only {
+                self.preferences_error = theme::Preferences {
+                    version: 1,
+                    theme: self.theme_id.clone(),
+                    text_scale: self.scale,
+                }
+                .save(&self.path.with_file_name("preferences-v1.json"))
+                .err();
+            }
+        }
     }
     fn library(&mut self, ui: &mut egui::Ui) {
         ui.heading("Practice library");
@@ -284,6 +351,7 @@ impl LabApp {
                 ("CCNA", "CCNA"),
                 ("LPIC-1", "LPIC-1"),
                 ("LPIC-2", "LPIC-2"),
+                ("Bash/Shell", "Bash/Shell"),
             ] {
                 if ui
                     .selectable_label(self.filter.track == value, label)
@@ -372,7 +440,11 @@ impl LabApp {
                 active.push(format!("Up to {} min", self.filter.max_minutes));
             }
             if !active.is_empty() {
-                ui.label(RichText::new(active.join(" · ")).small().color(MUTED));
+                ui.label(
+                    RichText::new(active.join(" · "))
+                        .small()
+                        .color(palette(ui).muted),
+                );
             }
         }
         ui.add_space(4.);
@@ -417,7 +489,7 @@ impl LabApp {
                         if items.len() == 1 { "lab" } else { "labs" }
                     }
                 ))
-                .color(MUTED),
+                .color(palette(ui).muted),
             );
             if self.metrics.pagination {
                 if ui
@@ -454,18 +526,18 @@ impl LabApp {
             ui.columns(columns, |uis| {
                 for (col, (i, s)) in row.iter().enumerate() {
                     let ui = &mut uis[col];
-                    card().show(ui, |ui| {
+                    card(ui).show(ui, |ui| {
                         ui.set_min_width((ui.available_width() - 1.).max(0.));
                         ui.horizontal_wrapped(|ui| {
                             ui.label(
                                 RichText::new(format!("{} / {}", s.track, s.topic))
                                     .small()
-                                    .color(ACCENT),
+                                    .color(palette(ui).accent),
                             );
                             ui.label(
                                 RichText::new(format!("{} · {} min", s.difficulty, s.minutes))
                                     .small()
-                                    .color(MUTED),
+                                    .color(palette(ui).muted),
                             );
                         });
                         ui.allocate_ui_with_layout(
@@ -498,13 +570,16 @@ impl LabApp {
                         ui.horizontal_wrapped(|ui| {
                             let start = ui.add_enabled(
                                 !self.synthetic,
-                                primary(if self.synthetic {
-                                    "Preview only"
-                                } else if a.is_none() {
-                                    "Start lab"
-                                } else {
-                                    "Continue"
-                                })
+                                primary(
+                                    ui,
+                                    if self.synthetic {
+                                        "Preview only"
+                                    } else if a.is_none() {
+                                        "Start lab"
+                                    } else {
+                                        "Continue"
+                                    },
+                                )
                                 .min_size(egui::vec2(108., CONTROL)),
                             );
                             if start.clicked() {
@@ -525,9 +600,9 @@ impl LabApp {
                             }
                             rects = Some((start.rect, fav.rect));
                             ui.label(RichText::new(status).small().color(if complete {
-                                GREEN
+                                palette(ui).success
                             } else {
-                                MUTED
+                                palette(ui).muted
                             }));
                         });
                         if let Some(rects) = rects {
@@ -544,7 +619,7 @@ impl LabApp {
         ui.label(
             RichText::new("Illustrative practice • not full exam coverage")
                 .small()
-                .color(MUTED),
+                .color(palette(ui).muted),
         );
         if self.developer {
             egui::CollapsingHeader::new("Developer options").show(ui, |ui| {
@@ -651,10 +726,12 @@ impl LabApp {
     fn render(&mut self, ctx: &egui::Context) {
         self.metrics = Metrics::default();
         ctx.set_zoom_factor(self.scale);
+        self.advance_scripts(ctx);
         self.header(ctx);
+        self.appearance_preview(ctx);
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
-                ui.colored_label(RED, error);
+                ui.colored_label(palette(ui).error, error);
                 ui.label(if self.read_only {
                     "Original progress retained; this session cannot overwrite it."
                 } else {
@@ -668,7 +745,7 @@ impl LabApp {
         egui::CentralPanel::default()
             .frame(
                 egui::Frame::new()
-                    .fill(Color32::from_rgb(14, 21, 38))
+                    .fill(theme::roles(ctx).background)
                     .inner_margin(18.),
             )
             .show(ctx, |ui| {
@@ -702,12 +779,24 @@ impl LabApp {
         {
             self.host_bits(ctx, i);
         }
+        // egui shares selection foreground with TextEdit's built-in focus border.
+        // Paint a separate contrasting native focus ring so both remain readable.
+        if let Some(id) = ctx.memory(|m| m.focused())
+            && let Some(response) = ctx.read_response(id)
+        {
+            ctx.layer_painter(response.layer_id).rect_stroke(
+                response.interact_rect,
+                4_u8,
+                egui::Stroke::new(2_f32, theme::roles(ctx).accent),
+                egui::StrokeKind::Inside,
+            );
+        }
     }
 }
-fn card() -> egui::Frame {
+fn card(ui: &egui::Ui) -> egui::Frame {
     egui::Frame::new()
-        .fill(PANEL)
-        .stroke(egui::Stroke::new(1_f32, Color32::from_rgb(52, 63, 86)))
+        .fill(palette(ui).panel)
+        .stroke(egui::Stroke::new(1_f32, palette(ui).border))
         .inner_margin(16.)
         .corner_radius(10.)
 }
@@ -716,8 +805,12 @@ fn button(text: &str) -> egui::Button<'_> {
         .min_size(egui::vec2(0., CONTROL))
         .corner_radius(6.)
 }
-fn primary(text: &str) -> egui::Button<'_> {
-    button(text).fill(Color32::from_rgb(83, 62, 140))
+fn primary<'a>(ui: &egui::Ui, text: &'a str) -> egui::Button<'a> {
+    egui::Button::new(RichText::new(text).color(palette(ui).on_accent))
+        .min_size(egui::vec2(0., CONTROL))
+        .corner_radius(6.)
+        .fill(palette(ui).accent)
+        .stroke(egui::Stroke::new(1_f32, palette(ui).border))
 }
 fn combo<'a>(
     ui: &mut egui::Ui,
@@ -768,4 +861,8 @@ impl eframe::App for LabApp {
             ctx.request_repaint_after(std::time::Duration::from_millis(50));
         }
     }
+}
+
+fn palette(ui: &egui::Ui) -> theme::Roles {
+    theme::roles(ui.ctx())
 }

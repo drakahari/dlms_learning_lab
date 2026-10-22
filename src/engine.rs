@@ -26,6 +26,11 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Script {
+        source: String,
+        #[serde(default)]
+        run: Option<crate::shell::Record>,
+    },
     Subnet {
         ip: Ipv4Addr,
         prefix: u8,
@@ -83,6 +88,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Script {
+        cases: Vec<crate::shell::Case>,
+    },
     Subnet,
     Vlsm,
     Network {
@@ -175,6 +183,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Script { source, run }, Goal::Script { cases }) => {
+            crate::shell::checks(source, run, cases)
+        }
         (
             State::Subnet {
                 ip,
@@ -382,6 +393,9 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Script { .. } => {
+            "Use the script editor and Run script. Only the documented in-process shell subset is supported."
+        }
         State::Subnet { .. } => {
             "Use the native address fields and Check configuration. This activity has no terminal."
         }
@@ -410,6 +424,14 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::Script { source, run } = s {
+        if input.len() > crate::shell::MAX_SOURCE {
+            return Err("Script exceeds 16 KiB".into());
+        }
+        *source = input.into();
+        *run = None;
+        return Ok("Script saved; use Run script to execute the test cases".into());
+    }
     if input.len() > 4096 {
         return Err("Command exceeds 4096 characters".into());
     }
@@ -426,6 +448,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
+        State::Script { .. } => unreachable!(),
         State::Subnet {
             answers, second, ..
         } => match v.as_slice() {
@@ -853,6 +876,7 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Script { .. } => "Script editor · virtual files only".into(),
         State::Subnet {
             ip,
             prefix,

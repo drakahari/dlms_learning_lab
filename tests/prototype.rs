@@ -16,13 +16,22 @@ fn solution(s: &pack::Scenario) -> State {
     for cmd in &s.solution {
         engine::execute(&mut state, cmd).unwrap();
     }
+    if let (State::Script { source, run }, engine::Goal::Script { cases }) = (&mut state, &s.goal) {
+        *run = Some(dlms_learning_lab::shell::Record {
+            source: source.clone(),
+            results: cases
+                .iter()
+                .map(|c| dlms_learning_lab::shell::run(source, c))
+                .collect(),
+        });
+    }
     state
 }
 #[test]
 fn all_nine_start_unsolved_and_reach_success() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 9);
-    for s in labs {
+    assert_eq!(labs.len(), 16);
+    for s in labs.into_iter().take(9) {
         assert!(!engine::solved(&s.initial, &s.goal), "{}", s.id);
         assert!(engine::solved(&solution(&s), &s.goal), "{}", s.id);
     }
@@ -168,7 +177,7 @@ fn log_alternates_pipeline_and_limits() {
 }
 #[test]
 fn no_shell_escape_or_unsupported_command_succeeds() {
-    for s in pack::bundled().unwrap() {
+    for s in pack::bundled().unwrap().into_iter().take(9) {
         for c in [
             "sudo whoami",
             "sh -c id",
@@ -203,7 +212,7 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
     p.favorites.insert(labs[0].id.clone());
     progress::save(&path, &p).unwrap();
     let mut q = progress::load(&path, &labs).unwrap();
-    assert_eq!(q.attempts.len(), 9);
+    assert_eq!(q.attempts.len(), 16);
     for s in &labs {
         let a = &q.attempts[&s.id];
         assert!(engine::solved(&a.state, &s.goal));
@@ -267,7 +276,7 @@ fn packs_reject_bad_schema_ids_metadata_state_and_unreachable_solutions() {
 #[test]
 fn catalog_900_filters_and_synthetic_boundary() {
     let labs = pack::bundled().unwrap();
-    let large = catalog::synthetic_catalog(&labs, 900);
+    let large = catalog::synthetic_catalog(&labs[..9], 900);
     assert_eq!(large.len(), 900);
     assert!(
         large
@@ -334,7 +343,8 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic1-logs" => "grep INFO /var/log/app.log",
             "lpic2-service" => "config set port broken",
             "lpic2-dns" => "dns serial 1",
-            _ => "config set device invalid-device",
+            "lpic2-storage" => "config set device invalid-device",
+            _ => "# unfinished script",
         };
         engine::execute(&mut a.state, cmd).unwrap();
         assert!(!engine::solved(&a.state, &s.goal));

@@ -55,8 +55,8 @@ pub fn load(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
             ..Default::default()
         });
     }
-    if std::fs::metadata(path).map_err(|e| e.to_string())?.len() > 5_000_000 {
-        return Err("Progress exceeds 5 MB; original retained".into());
+    if std::fs::metadata(path).map_err(|e| e.to_string())?.len() > 16_000_000 {
+        return Err("Progress exceeds 16 MB; original retained".into());
     }
     let p: Progress = serde_json::from_slice(&std::fs::read(path).map_err(|e| e.to_string())?)
         .map_err(|e| format!("Progress unreadable; original retained: {e}"))?;
@@ -115,8 +115,12 @@ pub fn save(path: &Path, p: &Progress) -> Result<(), String> {
             }
         }
     }
+    let encoded = serde_json::to_vec(p).map_err(|e| e.to_string())?;
+    if encoded.len() > 16_000_000 {
+        return Err("Progress exceeds 16 MB; original retained".into());
+    }
     let mut file = tempfile::NamedTempFile::new_in(parent).map_err(|e| e.to_string())?;
-    serde_json::to_writer(&mut file, p).map_err(|e| e.to_string())?;
+    file.write_all(&encoded).map_err(|e| e.to_string())?;
     file.flush()
         .and_then(|_| file.as_file().sync_all())
         .map_err(|e| e.to_string())?;

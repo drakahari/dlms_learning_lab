@@ -132,6 +132,9 @@ fn library_topic_is_visible_extra_filters_are_optional_and_catalog_navigation_su
     let (ctx, mut a) = app();
     draw(&ctx, &mut a);
     assert_eq!(a.metrics.filters.len(), 1);
+    assert!(a.metrics.pagination);
+    a.filter.track = "CCNA".into();
+    draw(&ctx, &mut a);
     assert!(!a.metrics.pagination);
     let r = a.metrics.extras.unwrap();
     click(&ctx, &mut a, r);
@@ -257,6 +260,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 loaded.insert("portal.lab.test".into(), "192.0.2.8".into());
             }
             State::Mount { writable, .. } => *writable = false,
+            State::Script { run, .. } => *run = None,
         }
         if i == 0 {
             a.load_ipv4_view(i);
@@ -566,5 +570,161 @@ fn assistance_is_optional_and_inserting_a_command_never_executes_it() {
         draw(&ctx, &mut a);
         assert!(!a.metrics.guide);
         assert!(a.metrics.insert.is_none());
+    }
+}
+
+#[test]
+fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
+    for i in 9..16 {
+        for width in [720., 1200.] {
+            for scale in [1., 1.5] {
+                for challenge in [false, true] {
+                    let (ctx, mut a) = app();
+                    a.launch(i);
+                    a.scale = scale;
+                    a.progress
+                        .attempts
+                        .get_mut(&a.scenarios[i].id)
+                        .unwrap()
+                        .challenge = challenge;
+                    for _ in 0..3 {
+                        frame(&ctx, &mut a, width, 850., vec![]);
+                    }
+                    if width == 1200. && scale == 1. {
+                        assert!(
+                            a.metrics.editor_viewport.unwrap().height() >= 175.,
+                            "usable script editor collapsed"
+                        );
+                    }
+                    assert!(!a.metrics.help_visible);
+                    assert!(!a.metrics.guide);
+                    for r in a
+                        .metrics
+                        .header
+                        .iter()
+                        .chain(a.metrics.inputs.iter())
+                        .chain(a.metrics.check.iter())
+                        .chain(a.metrics.stop.iter())
+                    {
+                        assert!(
+                            r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                            "script{i} {width}/{scale} {r:?}"
+                        );
+                    }
+                    assert!(a.metrics.stop.is_some());
+                    assert!(a.metrics.check.is_some());
+                }
+            }
+        }
+    }
+}
+#[test]
+fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    draw(&ctx, &mut a);
+    let editor = a.metrics.focus.unwrap();
+    let solution = a.scenarios[9].solution[0].clone();
+    assert!(ctx.memory(|m| m.has_focus(editor)));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::CTRL,
+            },
+            egui::Event::Text(solution),
+        ],
+    );
+    draw(&ctx, &mut a);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Key {
+            key: egui::Key::Enter,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::CTRL,
+        }],
+    );
+    for _ in 0..20 {
+        draw(&ctx, &mut a);
+    }
+    assert!(a.metrics.completion);
+    a.launch(10);
+    a.launch(9);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![key(egui::Key::Escape, false)],
+    );
+    draw(&ctx, &mut a);
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    draw(&ctx, &mut a);
+    assert!(!ctx.memory(|m| m.has_focus(editor)));
+    a.focus_input = true;
+    draw(&ctx, &mut a);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::CTRL,
+            },
+            egui::Event::Text("while true; do :; done".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    check(&ctx, &mut a);
+    assert!(a.script_job.is_some());
+    let stop = a.metrics.stop.unwrap();
+    click(&ctx, &mut a, stop);
+    assert!(a.script_job.is_none());
+    assert!(!a.metrics.completion);
+    let draft = a.progress.attempts["shell-handover"].state.clone();
+    a.launch(0);
+    a.launch(9);
+    assert_eq!(a.progress.attempts["shell-handover"].state, draft);
+    a.reset_attempt(9);
+    assert_eq!(
+        a.progress.attempts["shell-handover"].state,
+        a.scenarios[9].initial
+    );
+}
+#[test]
+fn every_theme_renders_focus_selection_and_disabled_samples() {
+    for t in theme::inventory() {
+        let (ctx, mut a) = app();
+        a.theme_id = t.id.clone();
+        theme::apply(&ctx, &t.id);
+        a.theme_preview = true;
+        draw(&ctx, &mut a);
+        assert_eq!(theme::roles(&ctx).text, t.roles.text);
+        assert!(ctx.style().visuals.selection.bg_fill == t.roles.accent);
+        assert_eq!(
+            ctx.style().visuals.selection.stroke.color,
+            t.roles.on_accent
+        );
+        assert_eq!(ctx.style().visuals.disabled_alpha, 1.);
     }
 }

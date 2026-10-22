@@ -152,8 +152,10 @@ impl Assignment {
                                     && let Some(message) = self.message(i)
                                 {
                                     ui.add(
-                                        egui::Label::new(RichText::new(message).small().color(RED))
-                                            .wrap(),
+                                        egui::Label::new(
+                                            RichText::new(message).small().color(palette(ui).error),
+                                        )
+                                        .wrap(),
                                     );
                                 }
                             },
@@ -170,7 +172,10 @@ impl Assignment {
                 if self.checked
                     && let Some(message) = self.message(i)
                 {
-                    ui.add(egui::Label::new(RichText::new(message).small().color(RED)).wrap());
+                    ui.add(
+                        egui::Label::new(RichText::new(message).small().color(palette(ui).error))
+                            .wrap(),
+                    );
                 }
             }
         }
@@ -179,13 +184,13 @@ impl Assignment {
             ui.horizontal(|ui| {
                 let offset = metrics.inputs[0].left() - ui.cursor().left();
                 ui.add_space(offset.max(0.));
-                ui.add_sized([field_width, CONTROL], primary("Check configuration"))
+                ui.add_sized([field_width, CONTROL], primary(ui, "Check configuration"))
             })
             .inner
         } else {
             ui.add_sized(
                 [220_f32.min(ui.available_width()), CONTROL],
-                primary("Check configuration"),
+                primary(ui, "Check configuration"),
             )
         };
         metrics.check = Some(r.rect);
@@ -194,7 +199,7 @@ impl Assignment {
             self.checked_answers = Some(snapshot(&self.exercise));
         }
         if self.verified() {
-            ui.label(RichText::new("Configuration valid. The boundaries and usable range are correct, and workstation 2 has a different usable address.").color(GREEN));
+            ui.label(RichText::new("Configuration valid. The boundaries and usable range are correct, and workstation 2 has a different usable address.").color(palette(ui).success));
         }
         self.guidance(ui, challenge, metrics);
     }
@@ -271,7 +276,7 @@ impl Assignment {
             ui.label(
                 RichText::new(format!("Hint {} of 3", self.hints))
                     .small()
-                    .color(ACCENT),
+                    .color(palette(ui).accent),
             );
             let host_bits = 32 - self.exercise.prefix;
             let hint=match self.hints {
@@ -296,7 +301,7 @@ impl Assignment {
             ui.label(
                 RichText::new("network bits | host bits")
                     .strong()
-                    .color(ACCENT),
+                    .color(palette(ui).accent),
             );
             ui.label(format!(
                 "Octet {} (earlier octets are fixed network bits):",
@@ -366,24 +371,28 @@ fn topology(ui: &mut egui::Ui, e: &Exercise, checked: bool) {
     let painter = ui.painter();
     painter.line_segment(
         [left.right_center(), right.left_center()],
-        egui::Stroke::new(2_f32, ACCENT),
+        egui::Stroke::new(2_f32, palette(ui).accent),
     );
     for (r, text, color) in [
-        (left, format!("Workstation 1\n{}", e.ip), MUTED),
+        (left, format!("Workstation 1\n{}", e.ip), palette(ui).muted),
         (
             right,
             format!("Workstation 2\n{display}\n{status}"),
             if checked {
-                if valid { GREEN } else { RED }
+                if valid {
+                    palette(ui).success
+                } else {
+                    palette(ui).error
+                }
             } else {
-                MUTED
+                palette(ui).muted
             },
         ),
     ] {
         painter.rect(
             r,
             6.,
-            Color32::from_rgb(14, 21, 38),
+            palette(ui).background,
             egui::Stroke::new(1_f32, color),
             egui::StrokeKind::Inside,
         );
@@ -392,7 +401,7 @@ fn topology(ui: &mut egui::Ui, e: &Exercise, checked: bool) {
             egui::Align2::CENTER_CENTER,
             text,
             egui::FontId::proportional(14.),
-            Color32::from_rgb(235, 239, 250),
+            palette(ui).text,
         );
     }
     painter.text(
@@ -400,6 +409,6 @@ fn topology(ui: &mut egui::Ui, e: &Exercise, checked: bool) {
         egui::Align2::CENTER_CENTER,
         format!("Same local network · /{}", e.prefix),
         egui::FontId::proportional(13.),
-        MUTED,
+        palette(ui).muted,
     );
 }

@@ -261,8 +261,120 @@ impl LabApp {
                 shot = Some("developer-large-catalog".into());
             }
             91 => {
+                self.synthetic = false;
+                self.developer = false;
+                self.scale = 1.;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            n @ 92..=175 => {
+                let index = (n - 92) / 3;
+                match (n - 92) % 3 {
+                    0 => {
+                        self.theme_id = theme::inventory()[index].id.clone();
+                        theme::apply(ctx, &self.theme_id);
+                        self.launch(9);
+                        self.theme_preview = true;
+                    }
+                    1 => {}
+                    _ => shot = Some(format!("theme-{}", self.theme_id)),
+                }
+            }
+            n @ 176..=231 => {
+                let i = 9 + (n - 176) / 8;
+                match (n - 176) % 8 {
+                    0 => {
+                        if i == 9 {
+                            ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        }
+                        self.theme_preview = false;
+                        self.theme_id = "lab-navy".into();
+                        theme::apply(ctx, &self.theme_id);
+                        self.launch(i);
+                        self.progress
+                            .attempts
+                            .get_mut(&self.scenarios[i].id)
+                            .unwrap()
+                            .challenge = false;
+                    }
+                    1 => shot = Some(format!("{}-learn", self.scenarios[i].id)),
+                    2 => {
+                        self.pending_events.extend([
+                            key(egui::Key::A, true),
+                            egui::Event::Text(self.scenarios[i].solution[0].clone()),
+                        ]);
+                    }
+                    3 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    4 => {}
+                    5 => {
+                        assert!(
+                            self.metrics.completion,
+                            "{} did not complete",
+                            self.scenarios[i].id
+                        );
+                        shot = Some(format!("{}-complete", self.scenarios[i].id));
+                    }
+                    6 => {
+                        self.progress
+                            .attempts
+                            .get_mut(&self.scenarios[i].id)
+                            .unwrap()
+                            .challenge = true
+                    }
+                    _ => shot = Some(format!("{}-challenge", self.scenarios[i].id)),
+                }
+            }
+            232 => {
+                self.focus_input = true;
+            }
+            233 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("while true; do :; done".into()),
+            ]),
+            234 => {
+                assert!(!self.metrics.completion);
+                self.pending_events
+                    .extend(click(self.metrics.check.unwrap()));
+            }
+            235 => {
+                assert!(self.script_job.is_some());
+                self.pending_events
+                    .extend(click(self.metrics.stop.unwrap()));
+            }
+            236 => {
+                assert!(self.script_job.is_none());
+                assert!(!self.metrics.completion);
+                shot = Some("shell-stopped-and-invalidated".into());
+            }
+            237 => {
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+            }
+            238 => shot = Some("shell-light-150-percent".into()),
+            239 => {
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            240 => shot = Some("shell-dark-150-percent".into()),
+            241 => {
+                self.selected = None;
+                self.filter = Filter::default();
+                self.filter.track = "Bash/Shell".into();
+                self.theme_id = "omarchy-catppuccin-latte".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            242 => shot = Some("shell-library-light-150-percent".into()),
+            243 => {
+                let scope = if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scripts") {
+                    "scripting capture pass"
+                } else {
+                    "full milestone: original nine and all 28 theme previews plus scripting"
+                };
                 println!(
-                    "PASS native normal app: all nine Learn/Challenge workspaces captured; actual IPv4 field editing/check/invalidation; service editor save and modeled restart/enable; terminal Enter/filter/invalidation; real resize, 150% text and synthetic catalog. Injected input, not a physical-device acceptance claim."
+                    "PASS native {scope}: seven scripting workspaces, typed source and Run, complete behavior cases, Challenge, Stop and invalidation, light/dark 150% resize. Synthetic progress only; injected native input, not physical-device acceptance."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

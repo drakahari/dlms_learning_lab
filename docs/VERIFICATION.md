@@ -1,47 +1,50 @@
-# Integrated workspace verification
+# Milestone verification
 
-Fedora desktop, 2026-10-21: native Rust/egui/eframe Glow renderer on COSMIC Wayland. Rust 1.99.1, pinned egui/eframe 0.33.3. No added dependencies or system packages. Nine authored labs; no installer or release publication.
+Fedora 44 / COSMIC Wayland, 2026-10-21; Rust 1.99.1, pinned egui/eframe 0.33.3, native Glow renderer. Baseline: accepted commit `89f2c0a`. No added dependencies, system packages, installers, releases, desktop-theme changes or other-project writes.
 
-## Checks
+## Automated and reference checks
 
-- Offline development build, `cargo fmt --all -- --check` and Clippy with warnings denied.
-- **46 tests**: nine normal-UI checks, eight IPv4 math/legacy-metadata checks, 22 existing engine/content/catalog/progress checks, and seven workspace/migration/editor checks.
-- Bundled declarative pack validation: all nine initial states unsolved and reference solutions reachable.
+- **57 Rust tests passed:** 12 native-UI mechanics/layout tests, eight IPv4 mathematics/compatibility tests, 22 engine/content/catalog/progress tests, eight shell/theme tests, seven workspace/migration/editor tests.
+- Offline build, `cargo fmt --all -- --check`, and Clippy for all targets with warnings denied.
+- Original nine scenarios plus seven authored scripting scenarios validate: initial states unsolved, references reach every objective, identifiers/metadata/state bounded, prerequisites valid and acyclic. Invalid script cases and unreachable reference programs are rejected.
+- `tools/verify_palettes.py`: all five DLMS stock palettes, all 22 exact Omarchy files/fields/SHA-256 values and MIT notices verified. The official immutable source archive's complete color-file inventory was independently compared during import.
+- `tools/bash_reference.py`: **41 controlled development fixtures**, zero stdout/stderr/status/virtual-file differences against **GNU Bash 5.3.9**. Seventeen language edge fixtures plus all 24 authored unit test cases. Cases cover quotes, empty/spaced arguments, concatenated expansions, read/EOF, exit status and conditional lists, loop status, pipeline variable isolation and status, truncation/append/input redirects, descriptor copies and file names with spaces. Real Bash ran only these checked-in fixtures in disposable temporary directories with a controlled environment and two-second timeouts. No learner script or personal file was passed to Bash.
 
-The checks cover all nine success paths and state breakage after success, wrong and partial native answers, malformed drafts, service saved/runtime/boot distinctions, DNS staged/loaded data, mount persistence and capacity, alternate Unix ownership/permission repairs, alternate VLSM layouts and larger valid allocations, log pipelines, unsupported commands and no shell escape. New row diagnostics distinguish format, alignment, capacity, containment and overlap. Unix feedback names a blocked traversal component or the applicable permission class.
+The language oracle compares the declared subset; it does not establish Bash/POSIX conformance. Unsupported syntax and host paths/commands fail honestly. Tests cover finite instruction/output/memory bounds, Stop, resumable limit-failure records, alternatives, wrong/partial scripts, source-edit invalidation, reset isolation, old-nine saved progress and new script-draft round trips. Existing 500 generated IPv4 numerical cases remain mathematical tests, not new curriculum.
 
-IPv4 tests cover all conventional prefixes /0…/30, known octet-crossing results, all 256 last-octet host candidates in the supplied /27 (29 unused usable choices), duplicate/reserved/outside/malformed hosts, second hosts at /23 and /30, and 500 deterministic numerical cases. /31 and /32 remain excluded. Original and numerical-practice state are independent. Legacy prediction/review metadata remains loadable; it is no longer a walkthrough gate.
+Every palette's derived text, input, panel, terminal, control, hover, primary/selected text, error/success and boundary roles have explicit contrast checks. Native UI tests render each theme's focus/selection/disabled samples. A separate native focus outline avoids egui's shared selection-foreground/focus-border role making light-theme editor focus invisible. Disabled controls are labeled unavailable/idle, and feedback uses words as well as color.
 
-UI checks cover both Learn and Challenge at 1200×850 and 720×560 with 100%/150% text, aligned IPv4 fields, visible desktop Check actions, keyboard focus/Tab/Shift+Tab/Enter, optional assistance, scroll access to Insert command without execution, native editor Save, reset confirmation/isolation, resume of unfinished commands and drafts, and library topic/search/favorites/filter/pagination behavior with 900 synthetic entries. These tests verify mechanics/geometry rather than beginner usability acceptance.
+UI tests cover all 16 labs in Learn/Challenge at 1200×850 and 720×850, 100% and 150% text; original nine also retain 720×560 checks. They cover library search/topic/certification/favorites/resume/optional filters/pagination and 900 synthetic catalog entries, aligned fields/buttons, editor input, Ctrl+Enter Run, Escape/Tab focus, terminal Enter/Tab/Shift+Tab, Stop, completion invalidation and selected-attempt reset. These verify mechanics and geometry, not learner comprehension.
 
-## What ran and was visually inspected
+## Native Fedora rendering and input
 
-The normal native application’s `--ui-smoke` capture harness used fresh synthetic data under `/tmp/dlms-workspaces-smoke`. It captured **every lab in Learn and Challenge**, the library, topic filtering, extra filters, service save/restart/enable/status, filtered logs and subsequent invalidation, the checked second-host topology and a later conflicting host, the requested binary explanation, 150% text and real tiled/full-screen transitions. The renderer/input path uses injected egui text, keyboard and pointer events. Service restart/enable commands are submitted through the same in-memory parser; this is not a physical mouse/keyboard study or manual execution of every alternate sequence.
+The normal application's `--ui-smoke` harness used fresh synthetic data under `/tmp/dlms-workspaces-smoke`, never actual learner progress. It captured the original nine labs in Learn/Challenge, all 28 native theme state previews, each of seven scripting workspaces in Learn/Challenge and completed state, source editing through injected keyboard events, actual native Run/Stop button interactions, state invalidation, and light/dark 150% text after a real full-screen/tiled transition. Captures use 1920×1080 and the compositor's 946×929 tiled window on this desktop. Dimensions may differ on another desktop.
 
-Screenshots were inspected for task visibility, field/button alignment, readable state, optional-help defaults and resizing. Relevant local ignored captures:
+Actual captures were inspected for readable text, selected text, focus, disabled controls, errors/success, task prominence, editor space, button alignment and scrolling. Visual review caught the focus-outline and short-editor issues; the final capture pass includes those fixes. Screen captures are local ignored artifacts under `screenshots/workspaces/`, including:
 
-| View | File under `screenshots/workspaces/` |
+| View | Capture |
 | --- | --- |
-| Library | `00-library.png` |
-| All nine initial workspaces | `<scenario-id>-learn.png` and `<scenario-id>-challenge.png` |
-| Valid entered second workstation | `ipv4-verified-topology.png` |
-| Editing clears previous success/status | `ipv4-edit-invalidates-success.png` |
-| Checked conflicting host | `ipv4-checked-invalid-host.png` |
-| Explicit network/host split and zero/one rules | `ipv4-binary-explanation.png` |
-| Working service and boot configuration | `service-configured-and-verified.png` |
-| Terminal practice and invalidation | `terminal-filtered-log.png`, `terminal-state-invalidates-success.png` |
-| Larger text | `library-150-percent.png`, `ipv4-150-percent.png`, `service-150-percent.png` |
-| Large navigation fixture | `developer-large-catalog.png` |
+| Themes, all 28 | `theme-<saved-id>.png` |
+| Script assignments | `shell-<lab>-learn.png`, `shell-<lab>-challenge.png`, `shell-<lab>-complete.png` |
+| Safe-report capstone | `shell-capstone-complete.png` |
+| Stop and invalidation | `shell-stopped-and-invalidated.png` |
+| Resizing / larger text | `shell-light-150-percent.png`, `shell-dark-150-percent.png`, `shell-library-light-150-percent.png` |
+| Existing nine / library | Prior capture names retained and regenerated by the same normal-app harness |
 
-## Progress and private-data checks
+After the full matrix pass, `DLMS_SMOKE_STAGE=scripts ./target/debug/dlms-learning-lab --ui-smoke` regenerated the unit captures with the final readable reference examples. This focused pass skips the original-lab/theme matrix.
 
-A synthetic all-nine-lab legacy fixture still loads without rewriting the original. Tests verify exact legacy answers, transcript, hints, mode and completion, partial malformed drafts, original/practice isolation (including return from wider host-bit subnets), all-nine workspace-draft round trips, future-version rejection and selected-attempt reset. Completed legacy IPv4 analyses receive an explicitly disclosed compatible second-host migration; incomplete analyses receive a blank fifth field. A byte-for-byte pre-workspace backup is verified, including non-overwrite on later saves. Normal learner files were not used by the native harness.
+Input was injected through egui's native event path; this was **not** a physical-device or beginner usability study. Most alternate solutions and error paths are exercised through pure/UI tests rather than manually typed on the desktop.
 
-The public diff excludes actual learner progress/backups, generated screenshots, recordings, local configuration and credentials. Screenshot artifacts remain local and ignored. Repository license selection remains the owner’s pending decision.
+## Persistence and public-tree checks
 
-## Not verified / limitations
+The original nine IDs, scenario versions, state models, optional workspace drafts and progress envelope remain compatible. Scripting adds a typed state variant; source and completed run snapshots save locally, interrupted jobs do not resume executing on launch. A new Run starts fresh fixtures. Editing invalidates the previous result. Reset clears only the selected attempt; theme, favorites and other attempts remain. Earlier pre-workspace backup behavior remains intact. Progress retains its envelope/version with a 16 MB read/write ceiling for bounded run records; oversized writes retain the original. Appearance has its own versioned atomic file; invalid/future files are retained and reported without disabling learner progress.
 
-- Windows/macOS builds and runtime acceptance, installers and distribution packages.
-- Physical-device, screen-reader/AccessKit, IME, high-contrast-theme and multi-monitor DPI acceptance, or a beginner usability study.
-- Concurrent application writers and downgrade to older binaries after a new-format save. Small windows and expanded optional explanations may require vertical scrolling; long terminal lines scroll horizontally.
-- Full Linux/Cisco command behavior, real networking, processes, sockets, filesystems, ACLs/SELinux or complete certification coverage. Configuration files are deliberately limited field editors, not full text editors. Sources and simplifications remain in the pack and secondary UI references.
+Generated screenshots, local preferences, learner progress/backups, toolchains, native captures and recordings stay excluded. Public diff checked for credentials and private paths/data; third-party copyright attribution is intentionally retained. Root license selection remains the owner's decision.
+
+## Unverified and remaining limits
+
+- **Windows/macOS were not built or runtime tested.** The architecture remains native and portable Rust, but cross-platform acceptance is not implied.
+- No physical keyboard/mouse acceptance, screen-reader/AccessKit study, IME, high-contrast OS theme, multiple-monitor DPI or beginner usability study.
+- Shell v1 is a bounded text interpreter with a flat `/work` file namespace, explicit builtins and no external commands. No functions, arrays, substitution, globbing, jobs, traps, full filesystem or production Bash behavior. Exact supported syntax/limits are in [SHELL_SUBSET.md](SHELL_SUBSET.md).
+- No genuine networking, hardware, kernel, processes, encryption or complete certification coverage. Planned curriculum is explicitly separate from implemented practice.
+- Small windows/larger text and optional help can require vertical scrolling; long code/output lines can scroll horizontally. Concurrent application writers and downgrade to an older binary after saving new scripting attempts remain unsupported.
