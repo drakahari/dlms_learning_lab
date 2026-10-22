@@ -34,6 +34,8 @@ pub struct Scenario {
     pub teaching: Option<crate::script_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub terminal_teaching: Option<crate::terminal_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -138,6 +140,12 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         {
             return Err("Invalid initial subnet allocation".into());
         }
+        if let Some(lesson) = &s.ipv6_teaching {
+            if !matches!(s.initial, State::Ipv6 { .. }) {
+                return Err("IPv6 teaching attached to an incompatible state".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
         if let Some(lesson) = &s.terminal_teaching {
             if !matches!(s.initial, State::Filesystem { .. }) {
                 return Err("Terminal teaching attached to an incompatible lab type".into());
@@ -149,6 +157,23 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("Script teaching attached to a different lab type".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let Goal::Ipv6 { requirements } = &s.goal {
+            let State::Ipv6 { topology } = &s.initial else {
+                return Err("IPv6 objective requires an IPv6 topology".into());
+            };
+            if requirements.is_empty()
+                || requirements.len() > 20
+                || requirements.iter().any(|r| !r.valid_for(topology))
+                || !requirements.iter().any(
+                    |r| matches!(r,crate::ipv6::Requirement::Reachable{when,..} if when.is_empty()),
+                )
+            {
+                return Err(format!(
+                    "{}: invalid IPv6 objectives or missing unconditional positive connectivity case",
+                    s.id
+                ));
+            }
         }
         if let Goal::Filesystem { requirements } = &s.goal
             && (requirements.is_empty()
@@ -212,6 +237,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Ipv6 { topology } => topology.valid(),
         State::Filesystem { tree } => tree.valid(),
         State::Script { source, run } => {
             source.len() <= crate::shell::MAX_SOURCE && run.as_ref().is_none_or(|r| r.valid())

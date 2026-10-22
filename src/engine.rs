@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Ipv6 {
+        topology: crate::ipv6::Topology,
+    },
     Filesystem {
         tree: crate::filesystem::Tree,
     },
@@ -91,6 +94,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Ipv6 {
+        requirements: Vec<crate::ipv6::Requirement>,
+    },
     Filesystem {
         requirements: Vec<crate::filesystem::Requirement>,
     },
@@ -191,6 +197,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Ipv6 { topology }, Goal::Ipv6 { requirements }) => {
+            requirements.iter().map(|r| r.check(topology)).collect()
+        }
         (State::Filesystem { tree }, Goal::Filesystem { requirements }) => {
             requirements.iter().map(|r| r.check(tree)).collect()
         }
@@ -417,6 +426,9 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Ipv6 { .. } => {
+            "Use the native IPv6 configuration editors and path probes. Only the documented bounded static forwarding subset is simulated. Pack reference adapters are not router or Linux commands."
+        }
         State::Filesystem { .. } => crate::filesystem::HELP,
         State::Script { .. } => {
             "Use the script editor and Run script. Only the documented in-process shell subset is supported."
@@ -449,6 +461,10 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::Ipv6 { topology } = s {
+        return crate::ipv6_workspace::adapter(topology, input);
+    }
+
     if let State::Filesystem { tree } = s {
         if input.len() > 4096 {
             return Err("Command exceeds 4,096 bytes".into());
@@ -490,7 +506,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Filesystem { .. } | State::Script { .. } => unreachable!(),
+        State::Ipv6 { .. } | State::Filesystem { .. } | State::Script { .. } => unreachable!(),
         State::Subnet {
             answers, second, ..
         } => match v.as_slice() {
@@ -918,6 +934,10 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Ipv6 { topology } => format!(
+            "IPv6 static topology · {} simulated devices",
+            topology.devices.len()
+        ),
         State::Filesystem { tree } => format!("Virtual filesystem · {} · {}", tree.user, tree.cwd),
         State::Script { .. } => "Script editor · virtual files only".into(),
         State::Subnet {

@@ -50,6 +50,14 @@ pub fn legacy_credit(a: &Attempt) -> bool {
             && crate::ipv4::Exercise::from_state(&a.state).is_some_and(|e| e.solved())
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::Ipv6 { topology } = &a.state
+        && a.workspace
+            .as_ref()
+            .and_then(|w| w.ipv6_draft.as_ref())
+            .is_some_and(|d| !d.matches(topology))
+    {
+        return false;
+    }
     !matches!(&a.state, State::Subnet { second: None, .. })
         && a.workspace
             .as_ref()
@@ -123,9 +131,28 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        if let (State::Ipv6 { topology }, State::Ipv6 { topology: initial }) =
+            (&a.state, &s.initial)
+            && (!topology.same_shape(initial)
+                || a.workspace
+                    .as_ref()
+                    .and_then(|w| w.ipv6_draft.as_ref())
+                    .is_some_and(|d| !d.same_shape(topology)))
+        {
+            return Err("Saved IPv6 device/interface/link structure differs from this scenario; original retained".into());
+        }
         crate::pack::validate_state(&a.state)?;
         if a.workspace.as_ref().is_some_and(|w| !w.valid()) {
             return Err("Invalid workspace data; original retained".into());
+        }
+        if let Some(learning) = a.workspace.as_ref().and_then(|w| w.ipv6_learning.as_ref())
+            && s.ipv6_teaching
+                .as_ref()
+                .is_none_or(|lesson| !learning.topology.same_shape(&lesson.fixture))
+        {
+            return Err(
+                "Saved IPv6 practice structure differs from this lesson; original retained".into(),
+            );
         }
         if let Some(l) = &a.ipv4 {
             let original = crate::ipv4::Exercise::from_state(&a.state)
@@ -144,6 +171,14 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        if let State::Ipv6 { topology } = &a.state
+            && a.workspace
+                .as_ref()
+                .and_then(|w| w.ipv6_draft.as_ref())
+                .is_some_and(|draft| !draft.same_shape(topology))
+        {
+            return Err("Invalid IPv6 draft structure; previous progress retained".into());
+        }
         if a.workspace.as_ref().is_some_and(|w| !w.valid()) {
             return Err("Invalid draft data; previous progress retained".into());
         }

@@ -13,6 +13,10 @@ pub struct WorkspaceData {
     pub script_learning: Option<crate::script_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub terminal_learning: Option<crate::terminal_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ipv6_draft: Option<crate::ipv6_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ipv6_learning: Option<crate::ipv6_teaching::Learning>,
     pub command: String,
     pub service_port: Option<String>,
     pub dns_address: Option<String>,
@@ -37,6 +41,8 @@ impl WorkspaceData {
         self.version == 1
             && self.script_learning.as_ref().is_none_or(|l| l.valid())
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
+            && self.ipv6_draft.as_ref().is_none_or(|d| d.valid())
+            && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
             && self.command.len() <= 4096
             && [
                 &self.service_port,
@@ -53,6 +59,11 @@ impl WorkspaceData {
 }
 pub fn prepare(a: &mut Attempt) {
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::Ipv6 { topology } = &a.state
+        && w.ipv6_draft.is_none()
+    {
+        w.ipv6_draft = Some(crate::ipv6_workspace::Draft::new(topology));
+    }
     if let Some(mut e) = ipv4::Exercise::from_state(&a.state) {
         w.migrated_host |= ipv4::upgrade_exercise(&mut e);
         ipv4::write_exercise(&mut a.state, &e);

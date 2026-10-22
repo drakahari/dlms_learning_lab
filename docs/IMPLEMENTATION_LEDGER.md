@@ -118,3 +118,12 @@ M10 evidence wording follow-up: the shorter `files-layout` native rerun now prin
 ### M11 installation candidate identity
 
 Clean Fedora candidate source `71734c65df33aa2dda88596258a90f2d7c4bce0b`: `dlms-learning-lab-0.1.0-g71734c65df33-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz`, SHA-256 `8067a2191cfa5d1b6a64e44a7686e8dc0c32f1acf5bdcaa2413ac68ace99318e`. Installed under the isolated /tmp acceptance root, validated30 labs/7 units outside the checkout and passed desktop-file-validate plus actual native light150/focus layout. This is a milestone candidate while curriculum completion stays open. Native CI run `39800447563` dispatched for this source; results pending. No release published.
+
+## 2026-10-22 — M12: resumable IPv6 configuration and teaching integration
+
+- Added bounded atomic native configuration drafts, typed address/preservation/forwarding/connectivity outcomes and deterministic failover conditions. Pack adapters remain explicitly internal rather than invented router commands. Old scenarios/progress fields remain unchanged; incomplete new drafts are retained and cannot preserve stale success.
+- Added isolated persisted example topology/drafts and declared example outcomes. Load-example fills only practice drafts; applying/checking examples cannot touch assignments or credit. Native rendering and six authored activities follow separately; current catalog remains30 assignments/seven units.
+- Independent review requested immutable import shape/link validation and an unconditional positive base-state probe alongside failover conditions. Both implemented and tested; flexible-address tasks must keep probe targets consistent with advertised alternatives.
+- Validation:138 Rust tests, Clippy and formatter. Eight new integration tests exercise atomic malformed/unsupported edits, alternate addresses and global/link-local gateways, each conditional probe without mutation, partial/current-state invalidation, old/new progress roundtrips, retained incomplete drafts, forged graph/draft import rejection, wrong-shape save retention and isolated example fill/apply/retry. No new dependency, host learner execution or native IPv6 usability acceptance is claimed.
+
+M11 CI follow-up: run39800447563 passed on all three native runners. Ubuntu/Windows candidate hashes were verified after download and recorded in INSTALLATION.md; macOS remains packaging-gated. This evidence describes source71734c6 (130 tests), separate from later M12 integration tests.

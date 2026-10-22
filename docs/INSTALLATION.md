@@ -65,3 +65,15 @@ For each exact candidate checksum: clean user installation; opening offline; sav
 | `dlms-learning-lab-0.1.0-gdb54a2cd7b82-x86_64-pc-windows-msvc-windows-candidate.zip` | `93f40a7361380c7884b14a499e2410ce8356548884f4e35a7aff591604d8f487` |
 
 Local retained copies: ignored `dist/native-ci-db54a2c/`. CI retention is 14 days. No public release was published; Windows/macOS desktop runtime, upgrades and security prompts remain unverified.
+
+### Refreshed M11 candidates
+
+[Run39800447563](https://github.com/drakahari/dlms_learning_lab/actions/runs/39800447563) at `71734c65df33aa2dda88596258a90f2d7c4bce0b`: all native CI jobs passed; runtime acceptance remains separate. These include30 authored assignments/seven units and the IPv6 capability foundation, with no authored IPv6 lesson counted. Downloaded archives and sidecars were verified and retained under ignored `dist/native-ci-71734c6/`.
+
+| Candidate | SHA-256 |
+| --- | --- |
+| Fedora44 x86_64 `...-g71734c65df33-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` | `8067a2191cfa5d1b6a64e44a7686e8dc0c32f1acf5bdcaa2413ac68ace99318e` |
+| Ubuntu24.04 x86_64 `...-g71734c65df33-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `6d706a134c8fb5d4c415d85f241e65bac0c93830252c283c536adce88175c743` |
+| Windows x86_64 `...-g71734c65df33-x86_64-pc-windows-msvc-windows-candidate.zip` | `c6a97ac99374911d6657c0e955d6262bbd36a71d8e222dd049f9973586de9f52` |
+
+The full filename prefix is `dlms-learning-lab-0.1.0`. No macOS archive is supplied while its notice gate remains unresolved. Fedora candidate was installed/opened outside the checkout under an isolated test root with a synthetic profile, including light150 native layout; no Windows/macOS desktop run is claimed.

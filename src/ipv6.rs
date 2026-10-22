@@ -205,6 +205,18 @@ struct Selected {
     distance: u8,
 }
 impl Topology {
+    /// Configuration can change; authored devices, ports and physical links cannot.
+    pub fn same_shape(&self, original: &Self) -> bool {
+        self.devices.keys().eq(original.devices.keys())
+            && self.devices.iter().all(|(id, device)| {
+                let other = &original.devices[id];
+                device.interfaces.keys().eq(other.interfaces.keys())
+                    && device
+                        .interfaces
+                        .iter()
+                        .all(|(port, iface)| iface.link == other.interfaces[port].link)
+            })
+    }
     pub fn valid(&self) -> bool {
         !self.devices.is_empty()
             && self.devices.len() <= 12
@@ -486,5 +498,157 @@ impl Topology {
             forward,
             reply,
         })
+    }
+}
+
+/// Declarative positive outcome checks. Conditional probes never mutate saved state.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct InterfaceCondition {
+    pub device: String,
+    pub interface: String,
+    pub up: bool,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", deny_unknown_fields)]
+pub enum Requirement {
+    AddressIn {
+        device: String,
+        interface: String,
+        network: Prefix,
+        exclude: Vec<Ipv6Addr>,
+        on_link: bool,
+    },
+    KeepAddress {
+        device: String,
+        interface: String,
+        assignment: Option<Assignment>,
+    },
+    Forwarding {
+        device: String,
+        enabled: bool,
+    },
+    Reachable {
+        label: String,
+        from: String,
+        target: Ipv6Addr,
+        scope: Option<String>,
+        when: Vec<InterfaceCondition>,
+    },
+}
+impl Requirement {
+    pub fn valid_for(&self, t: &Topology) -> bool {
+        let port = |d: &str, p: &str| t.devices.get(d).and_then(|d| d.interfaces.get(p));
+        match self {
+            Self::AddressIn {
+                device,
+                interface,
+                network,
+                exclude,
+                ..
+            } => port(device, interface).is_some() && network.valid() && exclude.len() <= 16,
+            Self::KeepAddress {
+                device,
+                interface,
+                assignment,
+            } => {
+                port(device, interface).is_some()
+                    && assignment
+                        .as_ref()
+                        .is_none_or(|a| a.prefix <= 128 && supported_unicast(a.address))
+            }
+            Self::Forwarding { device, .. } => t.devices.contains_key(device),
+            Self::Reachable {
+                label,
+                from,
+                target,
+                scope,
+                when,
+            } => {
+                !label.trim().is_empty()
+                    && label.len() <= 160
+                    && t.devices.contains_key(from)
+                    && (supported_unicast(*target) || supported_local(*target))
+                    && (category(*target) != Category::LinkLocal || scope.is_some())
+                    && scope.as_ref().is_none_or(|s| port(from, s).is_some())
+                    && when.len() <= 4
+                    && when.iter().all(|c| port(&c.device, &c.interface).is_some())
+                    && when
+                        .iter()
+                        .map(|c| (&c.device, &c.interface))
+                        .collect::<BTreeSet<_>>()
+                        .len()
+                        == when.len()
+            }
+        }
+    }
+    pub fn check(&self, t: &Topology) -> (bool, String) {
+        if !t.valid() || !self.valid_for(t) {
+            return (
+                false,
+                "Required IPv6 device, interface or supported probe is missing/invalid.".into(),
+            );
+        }
+        match self {
+            Self::AddressIn {
+                device,
+                interface,
+                network,
+                exclude,
+                on_link,
+            } => {
+                let address = &t.devices[device].interfaces[interface].address;
+                (
+                    address.as_ref().is_some_and(|a| {
+                        a.prefix == network.length
+                            && network.contains(a.address)
+                            && !exclude.contains(&a.address)
+                            && a.on_link == *on_link
+                    }),
+                    format!(
+                        "{device}/{interface}: use an allowed address in {} with the required manual on-link setting.",
+                        network.text()
+                    ),
+                )
+            }
+            Self::KeepAddress {
+                device,
+                interface,
+                assignment,
+            } => (
+                t.devices[device].interfaces[interface].address == *assignment,
+                format!("Keep the supplied address/prefix on {device}/{interface}."),
+            ),
+            Self::Forwarding { device, enabled } => (
+                t.devices[device].forwarding == *enabled,
+                format!(
+                    "{device}: forwarding must be {}.",
+                    if *enabled { "enabled" } else { "disabled" }
+                ),
+            ),
+            Self::Reachable {
+                label,
+                from,
+                target,
+                scope,
+                when,
+            } => {
+                let mut candidate = t.clone();
+                for c in when {
+                    candidate
+                        .devices
+                        .get_mut(&c.device)
+                        .unwrap()
+                        .interfaces
+                        .get_mut(&c.interface)
+                        .unwrap()
+                        .up = c.up;
+                }
+                match candidate.ping(from, *target, scope.as_deref()) {
+                    Ok(_) => (true, format!("{label}: forward delivery and reply work.")),
+                    Err(e) => (false, format!("{label}: {e}")),
+                }
+            }
+        }
     }
 }

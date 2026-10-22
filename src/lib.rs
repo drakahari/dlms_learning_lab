@@ -8,6 +8,8 @@ pub mod progress;
 
 pub mod ipv4;
 pub mod ipv6;
+pub mod ipv6_teaching;
+pub mod ipv6_workspace;
 
 pub mod workspace;
 

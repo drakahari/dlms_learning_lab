@@ -251,6 +251,9 @@ impl LabApp {
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.ipv6_teaching {
+            dlms_learning_lab::ipv6_teaching::prepare(a, lesson, new_attempt);
+        }
         a.visited = clock;
         let data = a.workspace.as_ref().unwrap();
         self.input = data.command.clone();
@@ -301,6 +304,9 @@ impl LabApp {
         }
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.ipv6_teaching {
+            dlms_learning_lab::ipv6_teaching::prepare(a, lesson, true);
         }
         self.script_job = None;
         self.input.clear();
