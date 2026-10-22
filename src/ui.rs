@@ -208,6 +208,8 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scope-recovery")
             {
                 1500
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scope") {
+                1600
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6-layout") {
                 1408
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6") {

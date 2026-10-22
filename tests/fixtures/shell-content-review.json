@@ -88,5 +88,23 @@
     "alternate": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
     "incorrect": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nprintf '' > \"$destination\"\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
     "misconception": "Truncate the old destination before completing every source check."
+  },
+  {
+    "id": "shell-local-heading",
+    "alternate": "printf 'Report: %s\\n' \"$REPORT_TITLE\"\nfor value in \"$@\"; do printf '%s%s\\n' 'Item: ' \"$value\"; done\nprintf 'End: %s\\n' \"$REPORT_TITLE\"\n",
+    "incorrect": "print_item() {\n    REPORT_TITLE=$1\n    printf 'Item: %s\\n' \"$REPORT_TITLE\"\n}\nprintf 'Report: %s\\n' \"$REPORT_TITLE\"\nfor item in \"$@\"; do\n    print_item \"$item\"\ndone\nprintf 'End: %s\\n' \"$REPORT_TITLE\"\n",
+    "misconception": "A helper uses a shared caller variable as scratch state; ordinary successful output hides the changed caller setting."
+  },
+  {
+    "id": "shell-scope-review",
+    "alternate": "topic() {\n    printf 'Topic: %s\\n' \"$1\"\n    grep -F \"$1\" \"$2\"\n}\ntopic \"$1\" \"$3\"\ntopic \"$2\" \"$3\"\nprintf 'Review: %s\\n' \"$SUMMARY\"\n",
+    "incorrect": "matches() {\n    grep -F \"$needle\" \"$1\"\n}\nreview() {\n    needle=$1\n    printf 'Topic: %s\\n' \"$needle\"\n    matches \"$2\"\n}\nneedle=$SUMMARY\nreview \"$1\" \"$3\"\nreview \"$2\" \"$3\"\nprintf 'Review: %s\\n' \"$needle\"\n",
+    "misconception": "A helper uses a shared caller variable as scratch state; ordinary successful output hides the changed caller setting."
+  },
+  {
+    "id": "shell-scope-capstone",
+    "alternate": "if test \"$#\" -lt 3 || test -z \"$2\"; then printf 'Cannot build review\\n' >&2; exit 2; fi\noutput=$1\nfilter=$2\nshift 2\nfor input in \"$@\"; do\n    if test \"$input\" = \"$output\"; then printf 'Cannot build review\\n' >&2; exit 2; fi\n    if test -f \"$input\"; then :; else printf 'Cannot build review\\n' >&2; exit 2; fi\ndone\nprintf 'Review: %s\\n' \"$filter\" > \"$output\"\nfor input in \"$@\"; do\n    printf 'File: %s\\n' \"$input\" >> \"$output\"\n    grep -F \"$filter\" \"$input\" >> \"$output\"\ndone\nprintf 'Saved: %s\\n' \"$output\"\n",
+    "incorrect": "valid_source() {\n    destination=$1\n    if [ \"$destination\" = \"$2\" ]; then return 1; fi\n    if [ -f \"$destination\" ]; then return 0; fi\n    return 1\n}\nif [ \"$#\" -lt 3 ] || [ -z \"$2\" ]; then\n    printf 'Cannot build review\\n' >&2\n    exit 2\nfi\ndestination=$1\nneedle=$2\nshift 2\nfor path in \"$@\"; do\n    if valid_source \"$path\" \"$destination\"; then\n        :\n    else\n        printf 'Cannot build review\\n' >&2\n        exit 2\n    fi\ndone\nprintf 'Review: %s\\n' \"$needle\" > \"$destination\"\nfor path in \"$@\"; do\n    printf 'File: %s\\n' \"$path\" >> \"$destination\"\n    grep -F \"$needle\" \"$path\" >> \"$destination\"\ndone\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "misconception": "A helper uses a shared caller variable as scratch state; ordinary successful output hides the changed caller setting."
   }
 ]

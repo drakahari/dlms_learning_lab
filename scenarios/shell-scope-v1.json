@@ -1,0 +1,630 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-local-heading",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-scope",
+      "topic": "Bash function scope",
+      "title": "Protect the report heading",
+      "summary": "Debug a helper that overwrites the caller’s report title.",
+      "objective": "Repair the report printer. REPORT_TITLE is supplied by the lab; each script argument is one item. Print Report: TITLE, then Item: VALUE for every argument in order, then End: TITLE, each on its own line. Keep the original title, spaces, percent signs and empty items. With no items still print the opening and ending lines. Return 0, print no errors and change no files. Bash-specific local is available; equivalent supported repairs are accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Repair the report printer. REPORT_TITLE is supplied by the lab; each script argument is one item. Print Report: TITLE, then Item: VALUE for every argument in order, then End: TITLE, each on its own line. Keep the original title, spaces, percent signs and empty items. With no items still print the opening and ending lines. Return 0, print no errors and change no files. Bash-specific local is available; equivalent supported repairs are accepted.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A helper can accidentally change values that its caller still needs.",
+          "action": "Run the starter, trace the changed variable, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Run the starter and compare the first and last lines. Which assignment changes the report title?",
+        "Function arguments are separate, but named variables are shared unless you declare a function-local variable.",
+        "A local declaration inside print_item can protect the caller’s REPORT_TITLE. Use double quotes when printing values."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html"
+      ],
+      "simplifications": "Bash-specific local declarations are available with default Bash scope behavior. They are not portable POSIX sh syntax. No arrays, custom IFS, local options or function-call redirection. Redirect individual commands inside a function. Only declared flat /work text files exist; supplied filenames never begin with a hyphen. Grading accepts any equivalent supported program, including explicit argument passing or different variable names.",
+      "initial": {
+        "kind": "Script",
+        "source": "print_item() {\n    REPORT_TITLE=$1\n    printf 'Item: %s\\n' \"$REPORT_TITLE\"\n}\nprintf 'Report: %s\\n' \"$REPORT_TITLE\"\nfor item in \"$@\"; do\n    print_item \"$item\"\ndone\nprintf 'End: %s\\n' \"$REPORT_TITLE\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Several items",
+            "args": [
+              "Printer",
+              "Router"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Morning handover"
+            },
+            "files": {},
+            "stdout": "Report: Morning handover\nItem: Printer\nItem: Router\nEnd: Morning handover\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty list",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "No changes"
+            },
+            "files": {},
+            "stdout": "Report: No changes\nEnd: No changes\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Spaces and percent",
+            "args": [
+              "West  desk",
+              "100%",
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "100% ready"
+            },
+            "files": {},
+            "stdout": "Report: 100% ready\nItem: West  desk\nItem: 100%\nItem: \nEnd: 100% ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Same-looking item",
+            "args": [
+              "Evening",
+              "Other"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Evening"
+            },
+            "files": {},
+            "stdout": "Report: Evening\nItem: Evening\nItem: Other\nEnd: Evening\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "print_item() {\n    local REPORT_TITLE=\"$1\"\n    printf 'Item: %s\\n' \"$REPORT_TITLE\"\n}\nprintf 'Report: %s\\n' \"$REPORT_TITLE\"\nfor item in \"$@\"; do\n    print_item \"$item\"\ndone\nprintf 'End: %s\\n' \"$REPORT_TITLE\"\n"
+      ],
+      "prerequisites": [
+        "shell-functions",
+        "shell-shift"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use functions, quoted arguments, for loops and printf from Reusable functions. This lesson introduces Bash-specific function-local variables.",
+        "concepts": [
+          {
+            "title": "A helper can change its caller’s variables",
+            "text": "Function arguments such as $1 belong to that call. Named variables such as title are shared by default: assigning title inside a helper can replace the caller’s title. The practical task is to find and repair that collision."
+          },
+          {
+            "title": "Give a helper its own temporary value",
+            "text": "Inside a function, local title=\"$1\" gives that call a separate title value. When the function returns, the earlier value becomes visible again. local belongs to Bash; portable sh scripts can pass arguments directly or use carefully chosen names instead."
+          },
+          {
+            "title": "Read the example, then experiment",
+            "text": "The example creates its own title; the lab does not supply it. Inside prints the item, while Outside still prints Weekend notes. In the assignment, REPORT_TITLE is supplied by the lab and item is created by the script. The same protection is useful even when the item is empty."
+          }
+        ],
+        "example": "title='Weekend notes'\nshow_item() {\n    local title=\"$1\"\n    printf 'Inside: %s\\n' \"$title\"\n}\nshow_item 'Spare cable'\nprintf 'Outside: %s\\n' \"$title\"\n",
+        "inputs": "No arguments, files or supplied variables. The example creates title itself.",
+        "try_change": "Remove local before title in show_item and run again. Compare the Outside line; restore local when finished.",
+        "fixture": {
+          "name": "Temporary item title",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Inside: Spare cable\nOutside: Weekend notes\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "If End names the last item, a helper changed the caller’s title. If only the empty or spaced cases fail, inspect quoting rather than hardcoding the sample title.",
+      "explanation": "The helper’s assignment originally replaced the caller’s report title. A function-local variable temporarily hides that name during the call, then restores the caller’s value on return. Passing the item directly or using a different helper variable also avoids the collision. This is behavior-based grading, not a requirement to type one particular declaration."
+    },
+    {
+      "id": "shell-scope-review",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-scope",
+      "topic": "Bash function scope",
+      "title": "Keep two topic reviews independent",
+      "summary": "Trace a called helper’s setting and repair a leaking log filter.",
+      "objective": "Build a two-topic log review. Arguments are the first literal topic, second literal topic and an existing log file whose supplied name never starts with a hyphen; SUMMARY is supplied by the lab. For each topic, in order, print Topic: VALUE followed by every log line containing that exact text, preserving source order. A topic with no matches still has its heading. Finish with Review: SUMMARY. Supplied topics are nonempty, stay on one line and never start with a hyphen; repeated topics are reviewed twice. Every printed line ends with a newline. Return 0, print no errors and change no files. Repair the starter’s leaking variable; Bash-specific local or an equivalent supported program is accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Build a two-topic log review. Arguments are the first literal topic, second literal topic and an existing log file; SUMMARY is supplied by the lab. For each topic, in order, print Topic: VALUE followed by every log line containing that exact text, preserving source order. A topic with no matches still has its heading. Finish with Review: SUMMARY. Topics are nonempty; repeated topics are reviewed twice. Every printed line ends with a newline. Return 0, print no errors and change no files. Repair the starter’s leaking variable; Bash-specific local or an equivalent supported program is accepted.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A helper can accidentally change values that its caller still needs.",
+          "action": "Run the starter, trace the changed variable, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "The last Review line should use SUMMARY, even after two calls. The starter overwrites needle in review.",
+        "matches reads the needle currently visible to its caller. A local needle in review is visible to functions that review calls.",
+        "Keep the caller’s summary separate from each filter value. grep -F returns 1 for no matches; the final successful printf supplies the required overall status."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html"
+      ],
+      "simplifications": "Bash-specific local declarations are available with default Bash scope behavior. They are not portable POSIX sh syntax. No arrays, custom IFS, local options or function-call redirection. Redirect individual commands inside a function. Only declared flat /work text files exist; supplied filenames never begin with a hyphen. Grading accepts any equivalent supported program, including explicit argument passing or different variable names. Supplied selection strings are single-line, nonempty and do not begin with a hyphen; supplied filenames are canonical single names without slash components or dot/dot-dot aliases.",
+      "initial": {
+        "kind": "Script",
+        "source": "matches() {\n    grep -F \"$needle\" \"$1\"\n}\nreview() {\n    needle=$1\n    printf 'Topic: %s\\n' \"$needle\"\n    matches \"$2\"\n}\nneedle=$SUMMARY\nreview \"$1\" \"$3\"\nreview \"$2\" \"$3\"\nprintf 'Review: %s\\n' \"$needle\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Two topics",
+            "args": [
+              "api",
+              "db",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Morning review"
+            },
+            "files": {
+              "/work/events.log": "api ERROR\ndb OK\napi ready\n"
+            },
+            "stdout": "Topic: api\napi ERROR\napi ready\nTopic: db\ndb OK\nReview: Morning review\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "api ERROR\ndb OK\napi ready\n"
+            }
+          },
+          {
+            "name": "One quiet topic",
+            "args": [
+              "cache",
+              "api",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Evening"
+            },
+            "files": {
+              "/work/events.log": "api ready\nother\n"
+            },
+            "stdout": "Topic: cache\nTopic: api\napi ready\nReview: Evening\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "api ready\nother\n"
+            }
+          },
+          {
+            "name": "Literal spaces and percent",
+            "args": [
+              "100%",
+              "desk  A",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Percent review"
+            },
+            "files": {
+              "/work/events.log": "100% done\ndesk  A online\ndesk A skipped\n"
+            },
+            "stdout": "Topic: 100%\n100% done\nTopic: desk  A\ndesk  A online\nReview: Percent review\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "100% done\ndesk  A online\ndesk A skipped\n"
+            }
+          },
+          {
+            "name": "Same topic twice",
+            "args": [
+              "ready",
+              "ready",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Repeated"
+            },
+            "files": {
+              "/work/events.log": "ready now\nnot selected\n"
+            },
+            "stdout": "Topic: ready\nready now\nTopic: ready\nready now\nReview: Repeated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "ready now\nnot selected\n"
+            }
+          },
+          {
+            "name": "No matches",
+            "args": [
+              "blue",
+              "green",
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Quiet"
+            },
+            "files": {
+              "/work/events.log": "red\n"
+            },
+            "stdout": "Topic: blue\nTopic: green\nReview: Quiet\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "red\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "matches() {\n    grep -F \"$needle\" \"$1\"\n}\nreview() {\n    local needle=\"$1\"\n    printf 'Topic: %s\\n' \"$needle\"\n    matches \"$2\"\n}\nneedle=$SUMMARY\nreview \"$1\" \"$3\"\nreview \"$2\" \"$3\"\nprintf 'Review: %s\\n' \"$needle\"\n"
+      ],
+      "prerequisites": [
+        "shell-local-heading",
+        "shell-pipelines"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use the previous local-variable lesson plus literal grep filtering and status. This lesson adds visibility through nested calls; no new grammar is needed.",
+        "concepts": [
+          {
+            "title": "Follow the active call",
+            "text": "A function-local variable is also visible to helpers it calls. In this example visit gives tone a temporary value, and announce sees that value. After visit returns, the outer tone is visible again. This Bash behavior is called dynamic scope."
+          },
+          {
+            "title": "Local does not make a variable untouchable",
+            "text": "A called helper that assigns tone without its own local declaration can change the caller’s local tone. Prefer explicit arguments for a reusable helper, or clearly document which caller setting it reads. Both styles can solve the assignment."
+          },
+          {
+            "title": "No matching line is a normal result",
+            "text": "grep -F selects lines containing the literal text. It returns 1 when nothing matched. The assignment still prints a topic heading and finishes the full review; a final successful printf can make the overall script return 0. The log always exists in this activity."
+          }
+        ],
+        "example": "tone='quiet'\nannounce() {\n    printf 'Tone: %s\\n' \"$tone\"\n}\nvisit() {\n    local tone='loud'\n    announce\n}\nvisit\nannounce\n",
+        "inputs": "No files, arguments or supplied variables. The example creates tone.",
+        "try_change": "Change loud to busy inside visit and run again. Only the first Tone line should change.",
+        "fixture": {
+          "name": "Nested caller setting",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Tone: loud\nTone: quiet\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "If matching lines are wrong, trace the topic used by grep. If the final Review text names the second topic, the helper leaked its setting into the caller. A quiet topic should not prevent the final summary.",
+      "explanation": "Bash function-local values are visible to functions called from that function. review can temporarily bind needle for matches, then restore the outer value. This is dynamic visibility, not a private variable that no other function can see. Explicitly passing a topic to the filtering helper is often clearer and passes the same tests. A no-match grep is a normal empty selection, not a missing-file failure."
+    },
+    {
+      "id": "shell-scope-capstone",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-scope",
+      "topic": "Bash function scope",
+      "title": "Repair a review that damages its inputs",
+      "summary": "Protect caller settings and original files in a multi-source review builder.",
+      "objective": "Repair the review builder before trusting it with inputs. Arguments are an output filename, a nonempty literal selection text, then one or more source filenames. Supplied filenames are single names without directory parts and never start with a hyphen; the selection text stays on one line and never starts with a hyphen. First verify every source exists and none is the output. On failure print only Cannot build review plus a newline to standard error, return 2, and leave all files unchanged (do not create output). On success replace the output with Review: TEXT, then for each source in argument order append File: NAME and its matching lines. Keep headings even for no matches; repeated sources are included again. Finish by printing Saved: OUTPUT plus a newline; return 0 with no errors. Preserve all source files. Bash-specific local or equivalent supported repairs are accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Repair the review builder before trusting it with inputs. Arguments are an output filename, a nonempty literal selection text, then one or more source filenames. First verify every source exists and none is the output. On failure print only Cannot build review plus a newline to standard error, return 2, and leave all files unchanged (do not create output). On success replace the output with Review: TEXT, then for each source in argument order append File: NAME and its matching lines. Keep headings even for no matches; repeated sources are included again. Finish by printing Saved: OUTPUT plus a newline; return 0 with no errors. Preserve all source files. Bash-specific local or equivalent supported repairs are accepted.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A helper can accidentally change values that its caller still needs.",
+          "action": "Run the starter, trace the changed variable, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Run the starter and inspect files, not just printed text. The checking helper reuses the destination name.",
+        "Checking a source must not change the caller’s output filename. A local destination inside valid_source protects it during each call.",
+        "Finish every validation before the first >. Then replace the output once and append each section; grep returning 1 for no match is not a failed preflight."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html"
+      ],
+      "simplifications": "Bash-specific local declarations are available with default Bash scope behavior. They are not portable POSIX sh syntax. No arrays, custom IFS, local options or function-call redirection. Redirect individual commands inside a function. Only declared flat /work text files exist; supplied filenames never begin with a hyphen. Grading accepts any equivalent supported program, including explicit argument passing or different variable names. Supplied selection strings are single-line, nonempty and do not begin with a hyphen; supplied filenames are canonical single names without slash components or dot/dot-dot aliases.",
+      "initial": {
+        "kind": "Script",
+        "source": "valid_source() {\n    destination=$1\n    if [ \"$destination\" = \"$2\" ]; then return 1; fi\n    if [ -f \"$destination\" ]; then return 0; fi\n    return 1\n}\nif [ \"$#\" -lt 3 ] || [ -z \"$2\" ]; then\n    printf 'Cannot build review\\n' >&2\n    exit 2\nfi\ndestination=$1\nneedle=$2\nshift 2\nfor path in \"$@\"; do\n    if valid_source \"$path\" \"$destination\"; then\n        :\n    else\n        printf 'Cannot build review\\n' >&2\n        exit 2\n    fi\ndone\nprintf 'Review: %s\\n' \"$needle\" > \"$destination\"\nfor path in \"$@\"; do\n    printf 'File: %s\\n' \"$path\" >> \"$destination\"\n    grep -F \"$needle\" \"$path\" >> \"$destination\"\ndone\nprintf 'Saved: %s\\n' \"$destination\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Two sources replace old review",
+            "args": [
+              "review.txt",
+              "ERROR",
+              "api.log",
+              "db.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/review.txt": "Previous\n",
+              "/work/api.log": "ERROR timeout\nOK ready\n",
+              "/work/db.log": "ERROR disk\n"
+            },
+            "stdout": "Saved: review.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/review.txt": "Review: ERROR\nFile: api.log\nERROR timeout\nFile: db.log\nERROR disk\n",
+              "/work/api.log": "ERROR timeout\nOK ready\n",
+              "/work/db.log": "ERROR disk\n"
+            }
+          },
+          {
+            "name": "Repeated quiet source keeps both headings",
+            "args": [
+              "out.txt",
+              "WARN",
+              "quiet.log",
+              "quiet.log",
+              "active.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/quiet.log": "OK ready\n",
+              "/work/active.log": "WARN fan\n"
+            },
+            "stdout": "Saved: out.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/quiet.log": "OK ready\n",
+              "/work/active.log": "WARN fan\n",
+              "/work/out.txt": "Review: WARN\nFile: quiet.log\nFile: quiet.log\nFile: active.log\nWARN fan\n"
+            }
+          },
+          {
+            "name": "Literal values and absent destination",
+            "args": [
+              "shift  A.txt",
+              "100%",
+              "desk  A.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/desk  A.log": "100% ready\n100 percent\n"
+            },
+            "stdout": "Saved: shift  A.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/desk  A.log": "100% ready\n100 percent\n",
+              "/work/shift  A.txt": "Review: 100%\nFile: desk  A.log\n100% ready\n"
+            }
+          },
+          {
+            "name": "Later missing input retains old review",
+            "args": [
+              "review.txt",
+              "ERROR",
+              "api.log",
+              "missing.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/review.txt": "Keep this\n",
+              "/work/api.log": "ERROR one\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot build review\n",
+            "status": 2,
+            "after": {
+              "/work/review.txt": "Keep this\n",
+              "/work/api.log": "ERROR one\n"
+            }
+          },
+          {
+            "name": "Missing input must not create output",
+            "args": [
+              "new.txt",
+              "ERROR",
+              "missing.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Cannot build review\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Output also supplied as an input",
+            "args": [
+              "api.log",
+              "ERROR",
+              "api.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/api.log": "ERROR preserve\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot build review\n",
+            "status": 2,
+            "after": {
+              "/work/api.log": "ERROR preserve\n"
+            }
+          },
+          {
+            "name": "No inputs",
+            "args": [
+              "out.txt",
+              "ERROR"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/out.txt": "Keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot build review\n",
+            "status": 2,
+            "after": {
+              "/work/out.txt": "Keep\n"
+            }
+          },
+          {
+            "name": "Empty selection text",
+            "args": [
+              "out.txt",
+              "",
+              "in.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/out.txt": "Keep\n",
+              "/work/in.log": "Anything\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot build review\n",
+            "status": 2,
+            "after": {
+              "/work/out.txt": "Keep\n",
+              "/work/in.log": "Anything\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "valid_source() {\n    local destination=\"$1\"\n    if [ \"$destination\" = \"$2\" ]; then return 1; fi\n    if [ -f \"$destination\" ]; then return 0; fi\n    return 1\n}\nif [ \"$#\" -lt 3 ] || [ -z \"$2\" ]; then\n    printf 'Cannot build review\\n' >&2\n    exit 2\nfi\ndestination=$1\nneedle=$2\nshift 2\nfor path in \"$@\"; do\n    if valid_source \"$path\" \"$destination\"; then\n        :\n    else\n        printf 'Cannot build review\\n' >&2\n        exit 2\n    fi\ndone\nprintf 'Review: %s\\n' \"$needle\" > \"$destination\"\nfor path in \"$@\"; do\n    printf 'File: %s\\n' \"$path\" >> \"$destination\"\n    grep -F \"$needle\" \"$path\" >> \"$destination\"\ndone\nprintf 'Saved: %s\\n' \"$destination\"\n"
+      ],
+      "prerequisites": [
+        "shell-scope-review",
+        "shell-bundle"
+      ],
+      "teaching": {
+        "prerequisite_note": "Combines local scope, argument counts/shift, file tests, literal grep, redirection and preflight from earlier units. No new syntax is required.",
+        "concepts": [
+          {
+            "title": "Investigate the file that changed",
+            "text": "A successful message is weak evidence. Compare the expected output file and every source after Run. A helper can unintentionally change the output filename even if it only seems to check input files."
+          },
+          {
+            "title": "Protect settings during preflight",
+            "text": "The example checks menu.txt while keeping the caller’s summary.txt destination. Remove local and the helper silently replaces that destination. In the assignment, finish checking every source and reject output/input aliases before opening any file for writing. Supplied names have no directory parts, so this exercise compares names as text. Real files can have different paths to the same file; a text comparison alone is not general alias protection."
+          },
+          {
+            "title": "Build the report in two phases",
+            "text": "After validation, use > once for the report heading, then >> for each source heading and matching lines. Redirect commands inside functions, if used; this simulator does not support redirecting a whole function call. A quiet source still needs its heading."
+          }
+        ],
+        "example": "destination='summary.txt'\nexists() {\n    local destination=\"$1\"\n    if [ -f \"$destination\" ]; then return 0; fi\n    return 1\n}\nif exists menu.txt; then\n    printf 'Checked; destination is %s\\n' \"$destination\"\nfi\n",
+        "inputs": "menu.txt exists with Soup plus a newline. No arguments or supplied variables. No files should change.",
+        "try_change": "Remove local before destination inside exists and run again. Watch the destination printed by the caller; no simulated file is changed by this example.",
+        "fixture": {
+          "name": "Preflight keeps its caller’s destination",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/menu.txt": "Soup\n"
+          },
+          "stdout": "Checked; destination is summary.txt\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/menu.txt": "Soup\n"
+          }
+        }
+      },
+      "retry_guidance": "Compare source files as well as the destination. A changed input suggests the validation helper overwrote a caller setting. If only failing cases change files, a redirection happened before validation finished; if quiet sections fail, separate no matches from missing sources.",
+      "explanation": "The preflight helper’s scratch destination name originally replaced the caller’s output setting. Later writes could then target a source file. Giving the helper its own binding—or using separate names/arguments—keeps the output stable. Complete existence and output-alias checks before any redirection. Behavioral tests verify missing later files, absent outputs, alias rejection, quiet sections and unchanged source contents; merely printing Saved is insufficient. The model uses flat virtual text files and does not claim real filesystem transactions. Output/input comparison here is limited to the supplied canonical single filenames; it does not model real filesystem aliases or links."
+    }
+  ]
+}

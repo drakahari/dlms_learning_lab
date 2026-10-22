@@ -380,8 +380,10 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            n @ (250..=375 | 700..=771 | 900..=971) => {
-                let (start, first) = if n >= 900 {
+            n @ (250..=375 | 700..=771 | 900..=971 | 1600..=1653) => {
+                let (start, first) = if n >= 1600 {
+                    (1600, 36)
+                } else if n >= 900 {
                     (900, 20)
                 } else if n >= 700 {
                     (700, 16)
@@ -435,23 +437,31 @@ impl LabApp {
                     }
                     6 => {
                         let lesson = self.scenarios[i].teaching.as_ref().unwrap();
-                        let (from, to) = [
-                            ("Mina", "Rowan"),
-                            ("For:", "Recipient:"),
-                            ("Note:", "Reminder:"),
-                            ("-z", "-n"),
-                            ("OPEN", "CLOSED"),
-                            ("Reading", "Menu:"),
-                            ("-f", "-z"),
-                            ("2>", ">"),
-                            ("OPEN", "CLOSED"),
-                            (r#" || [ -n "$name" ]"#, ""),
-                            ("found_problem=yes", "found_problem=''"),
-                            ("Rowan Reed", "Tess Ford"),
-                            ("return 1", "exit 1"),
-                            ("shift\n", "shift 0\n"),
-                            (r#"if available "$@""#, "if available menu.txt"),
-                        ][i - 9];
+                        let (from, to) = if i >= 36 {
+                            [
+                                ("local title=", "title="),
+                                ("loud", "busy"),
+                                ("local destination=", "destination="),
+                            ][i - 36]
+                        } else {
+                            [
+                                ("Mina", "Rowan"),
+                                ("For:", "Recipient:"),
+                                ("Note:", "Reminder:"),
+                                ("-z", "-n"),
+                                ("OPEN", "CLOSED"),
+                                ("Reading", "Menu:"),
+                                ("-f", "-z"),
+                                ("2>", ">"),
+                                ("OPEN", "CLOSED"),
+                                (r#" || [ -n "$name" ]"#, ""),
+                                ("found_problem=yes", "found_problem=''"),
+                                ("Rowan Reed", "Tess Ford"),
+                                ("return 1", "exit 1"),
+                                ("shift\n", "shift 0\n"),
+                                (r#"if available "$@""#, "if available menu.txt"),
+                            ][i - 9]
+                        };
                         self.pending_events.extend([
                             key(egui::Key::A, true),
                             egui::Event::Text(lesson.example.replacen(from, to, 1)),
@@ -848,6 +858,68 @@ impl LabApp {
             979 => {
                 println!(
                     "PASS native reusable functions: four introductions, editable ungraded examples and suggested changes, assignment drafts, incorrect retry feedback, typed reference solutions and grading, light/dark 150% responsive rendering and independent Challenge. Synthetic profile only."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            1654 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                for i in 36..39 {
+                    assert!(progress::current_solved(
+                        &self.progress.attempts[&self.scenarios[i].id],
+                        &self.scenarios[i]
+                    ));
+                }
+                self.launch(38);
+                self.set_script_view(38, teaching::View::Assignment);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            1655 => shot = Some("shell-scope-light-150".into()),
+            1656 => {
+                self.progress
+                    .attempts
+                    .get_mut("shell-scope-capstone")
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            1657 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("shell-scope-challenge-dark-150".into());
+            }
+            1658 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -650.),
+                    modifiers: Default::default(),
+                });
+            }
+            1659 => {}
+            1660 => shot = Some("shell-scope-challenge-scrolled-150".into()),
+            1661 => {
+                if let engine::State::Script { source, .. } = &mut self
+                    .progress
+                    .attempts
+                    .get_mut("shell-scope-capstone")
+                    .unwrap()
+                    .state
+                {
+                    source.push_str("\nprintf broken");
+                }
+                assert!(!progress::current_solved(
+                    &self.progress.attempts["shell-scope-capstone"],
+                    &self.scenarios[38]
+                ));
+                println!(
+                    "PASS native Bash scope: three introductions, isolated runnable examples and exact suggested edits, full assignments, incorrect retries, keyboard reference repair/current Run, saved reload, invalidation and light/dark150 scrolling. Synthetic profile only; not novice or Windows/macOS desktop acceptance."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

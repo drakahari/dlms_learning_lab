@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus fifteen scripting assignments in three units and six Linux file-management foundations, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus eighteen scripting assignments in four units and six Linux file-management foundations, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -37,9 +37,9 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 | `lpic2-storage` | Capacity, saved mount device and writable state | No real blocks, quotas, inodes, integrity repair, RAID or LVM |
 | `shell-handover` … `shell-capstone` | Seven portable-shell foundations assignments below | No complete Bash/POSIX implementation; see supported subset |
 
-| `shell-streams`, `shell-pipelines`, `shell-eof`, `shell-batch-audit` | Separate channels, pipeline intersection/status, EOF repair and resilient batches | No functions, shell option parser or broader utility suite |
+| `shell-streams`, `shell-pipelines`, `shell-eof`, `shell-batch-audit` | Separate channels, pipeline intersection/status, EOF repair and resilient batches | No complete shell option parser or broader utility suite; functions are taught in the next unit |
 
-| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | No Bash local/arrays/substitution or complete option parser |
+| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | No arrays/substitution or complete option parser; Bash scope follows in its own unit |
 
 ## Learning order and capability gates
 
@@ -51,13 +51,13 @@ LPIC-2 assumes LPIC-1 foundations. Sequence capacity and boot recovery → advan
 
 ## Bash/Shell progression
 
-All fifteen delivered shell labs use **portable shell syntax**, tested against Bash 5.3.9 on Fedora. Bash is the reference oracle, not the learner engine; this is not a claim of POSIX or Bash conformance.
+The first fifteen shell labs use **portable shell syntax**; the next three explicitly teach **Bash-specific function scope**. All are tested against Bash 5.3.9 on Fedora. Bash is the reference oracle, not the learner engine; this is not a claim of POSIX or Bash conformance.
 
 | Stage | Status / distinct assignments | Prerequisites | Capability and portability boundary |
 | --- | --- | --- | --- |
 | 1. Foundations | **Implemented:** reliable handover; supplied-file labels; input without losing backslashes; missing-destination guard; incident report; multi-file handover; safe-report capstone | Listed preceding lab in the unit, advisory rather than a lock | Scalars, quoting, positional arguments, read, printf, status, test/if, redirects, for, literal grep/cat. Portable subset; 3–5 deterministic cases per assignment |
-| 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x`, Bash `local`, and pipefail must be explicitly modeled before teaching them |
-| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Planned:** option parser and streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. getopts, compound/function-call redirects, command substitution and parameter defaults remain unsupported. Explain subshell scope/status before substitution |
+| 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x` and pipefail remain unsupported; Bash local is taught in the following scope unit |
+| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Planned:** option parser and streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. getopts, compound/function-call redirects, command substitution and parameter defaults remain unsupported. Explain subshell scope/status before substitution |
 | 4. Structured Bash | **Planned:** safe filename queue; associative lookup; array-based command construction; regex validation | Reusable functions and argument boundaries | Bash-specific indexed/associative arrays, `[[ ]]`, `=~`, arithmetic, `${array[@]}`. Explicit Bash track labels; do not suggest portability |
 | 5. Text and data | **Planned:** delimiter-aware inventory transform; regex audit; compare snapshots; recover malformed rows | Streams, conditions and functions | Correct sort/uniq/cut/sed/awk models and regex/locale boundaries needed; none delivered. Distinguish shell language from external utility semantics |
 | 6. Safe automation projects | **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |
@@ -66,6 +66,6 @@ Each planned stage includes a guided repair, independent construction and capsto
 
 ## Next capability batch
 
-The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Next extend Bash scope, structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
+The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Three [Bash scope/debugging assignments](SHELL_SCOPE.md) now follow the reusable unit, using the tested function-local subset. Next extend structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
 
 Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](LINUX_FILES.md). This delivers narrow practical slices of LPIC-1 103.1, 103.3 and 104.5; the full objectives remain partial.

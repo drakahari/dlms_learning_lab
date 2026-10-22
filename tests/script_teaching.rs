@@ -24,6 +24,9 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("return 1", "exit 1"),
         ("shift\n", "shift 0\n"),
         (r#"if available "$@""#, "if available menu.txt"),
+        ("local title=", "title="),
+        ("loud", "busy"),
+        ("local destination=", "destination="),
     ];
     assert_eq!(
         edits.len(),
