@@ -179,3 +179,16 @@ Sourcea3d7a9d212663f91a134b231525971fb0cfeda80,55/thirteen, evaluator5. [Run3984
 | Windows | dlms-learning-lab-0.1.0-ga3d7a9d21266-x86_64-pc-windows-msvc-windows-candidate.zip | 5c2f774a4a87b67dae5f2d00948b6f7557bf220705b2631e8a5c5077e352fd60 |
 
 Fedora binary SHA-256 e638446f14eda469d686eff080e5f72fb97c91fab9d4eb4d55d83dd887a8a23e. No M27 candidate release was published. macOS archive notice gate, actual Windows/macOS desktop acceptance and the default-Wayland startup investigation remain open.
+
+
+### M28 installed candidates (58 authored assignments)
+
+Sourceae484460b456bb43cbb180f6b326775fd6770a68,58/fourteen, evaluator5. [Run39849265414](https://github.com/drakahari/dlms_learning_lab/actions/runs/39849265414) passed260 Rust tests and applicable native checks on all3 runners. Downloaded Ubuntu/Windows sidecars were locally hash-verified under ignored dist/native-ci-ae48446.
+
+| Build | Candidate archive | SHA-256 |
+| --- | --- | --- |
+| Fedora44 | dlms-learning-lab-0.1.0-gae484460b456-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | 2d7d966099a7f5e9e924986a9e87cb60131e67afac07ed6203ba0b2bce51bb42 |
+| Ubuntu24.04 | dlms-learning-lab-0.1.0-gae484460b456-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz | 0a1771743e083f254732c427c811ce5932a1579f833ada0c18d2100375381061 |
+| Windows | dlms-learning-lab-0.1.0-gae484460b456-x86_64-pc-windows-msvc-windows-candidate.zip | 153efc0cc3839ad20a7529450c5eae36df8f339c97efc0f9e09e58eaef498a48 |
+
+Fedora binary SHA-2562523d408a182e9d5747a4740ac1b710acb01b8eb787e8b7408d5e10c42e2561a. Clean archive installed/upgraded in the isolated /tmp acceptance root; bundled validation58/fourteen, desktop entry validation and exact synthetic sentinel retention pass (retained-file check). Installed native all-three file-batch flow passed outside checkout, including examples/experiments, keyboard repairs/current grading, save/reload/edit invalidation, selected reset and light/dark150%/unit library. This is a development milestone, not completed-curriculum or novice/platform acceptance. Default-Wayland investigation, actual Windows/macOS desktop acceptance and macOS archive notices remain open. No release published.
