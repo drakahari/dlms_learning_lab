@@ -645,7 +645,10 @@ fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
                 physical_key: None,
                 pressed: true,
                 repeat: false,
-                modifiers: egui::Modifiers::CTRL,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
             },
             egui::Event::Text(solution),
         ],
@@ -696,7 +699,10 @@ fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
                 physical_key: None,
                 pressed: true,
                 repeat: false,
-                modifiers: egui::Modifiers::CTRL,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
             },
             egui::Event::Text("while true; do :; done".into()),
         ],
@@ -1664,7 +1670,10 @@ fn ipv6_native_typing_check_retry_focus_and_selected_reset() {
                 physical_key: None,
                 pressed: true,
                 repeat: false,
-                modifiers: egui::Modifiers::CTRL,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
             },
             egui::Event::Text("malformed".into()),
         ],
