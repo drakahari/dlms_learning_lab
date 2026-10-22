@@ -6,6 +6,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | --- | --- |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
+| `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
 | `ipv4.rs` | Boundary math, host validation, numerical variants and retained legacy lesson/sandbox metadata |
 | `workspace.rs` | Versioned draft/check metadata, compatibility preparation, pure editor operations and state-specific diagnostic feedback |
@@ -94,3 +95,10 @@ Evaluator revision3 corrects assignment/redirection order: ordinary command and 
 Sequential while-file input uses typed input/cursor frames, restored at loop completion or function return. Saved text/names count toward the same memory limit. Active sources are read-only: writes are rejected before truncation/append rather than approximating changing-open-file behavior. Other compound redirection forms remain unsupported. See SHELL_COUNTS.md for dependent teaching and authoring cases.
 
 Ordinary-user file access uses explicit typed operation requirements with declared simulated subjects. Access checks require an existing correct target kind, select owner/group/other bits in that order and require search through all parent components. The same permission predicate drives current-user file operations. Attribute changes validate ownership/group membership on a cloned candidate; unsupported symbolic modes never partially apply. Deterministic ID labels are derived from bundled account metadata, never discovered from the host.
+
+
+### Switching capability authoring boundary
+
+Use `State::Switching` with a validated fixed physical forest and `Goal::Switching` with typed requirements. Visibility goals check both directions; every isolated endpoint must also occur in a positive service case. Negative outcomes require up, active access attachments and a live physical path. Preserve intended access memberships through explicit AccessVlan outcomes; NativeVlan and ActiveVlan can enforce stated constraints. Internal `access`, `trunk`, `vlan` and `port` actions prove declarative reachability only; they are never taught as IOS commands. Native port tables are the learner tool.
+
+Draft application is atomic, and current success rejects unapplied divergent settings. Optional `switching_draft`/`switching_learning` fields preserve malformed bounded text and separate examples without changing old attempt IDs/versions. Import validates fixed workstation/cable/port structure against the assignment or example, after the existing whole-document byte cap. Practice never gives assignment credit. See SWITCHING_SUBSET.md for platform-policy and STP/native-mismatch limitations. The development-only switching-preview test fixture is not bundled curriculum; no objective evidence is gained from a capability preview.

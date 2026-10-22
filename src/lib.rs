@@ -34,3 +34,6 @@ pub fn build_identity() -> String {
 }
 
 pub mod switching;
+
+pub mod switching_teaching;
+pub mod switching_workspace;

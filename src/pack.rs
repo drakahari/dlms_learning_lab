@@ -36,6 +36,8 @@ pub struct Scenario {
     pub terminal_teaching: Option<crate::terminal_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub switching_teaching: Option<crate::switching_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -140,6 +142,23 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         {
             return Err("Invalid initial subnet allocation".into());
         }
+        if let Some(lesson) = &s.switching_teaching {
+            if !matches!(s.initial, State::Switching { .. }) {
+                return Err("Switching teaching attached to incompatible state".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let Goal::Switching { requirements } = &s.goal {
+            let State::Switching { fabric } = &s.initial else {
+                return Err("Switching goals require a switching fabric".into());
+            };
+            if !crate::switching::valid_requirements(requirements, fabric) {
+                return Err(format!(
+                    "{}: invalid switching goals; every isolation endpoint needs a positive service case",
+                    s.id
+                ));
+            }
+        }
         if let Some(lesson) = &s.ipv6_teaching {
             if !matches!(s.initial, State::Ipv6 { .. }) {
                 return Err("IPv6 teaching attached to an incompatible state".into());
@@ -242,6 +261,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Switching { fabric } => fabric.validate().is_ok(),
         State::Ipv6 { topology } => topology.valid(),
         State::Filesystem { tree } => tree.valid(),
         State::Script { source, run } => {

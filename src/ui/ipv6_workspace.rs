@@ -433,7 +433,7 @@ fn device_controls(
     }
 }
 
-fn field(
+pub(super) fn field(
     ui: &mut egui::Ui,
     label: &str,
     value: &mut String,

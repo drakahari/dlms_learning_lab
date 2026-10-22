@@ -385,14 +385,14 @@ impl Fabric {
                 (Mode::Trunk { .. }, Some(vlan)) => vlan,
             };
             if !s.vlans.contains(&local) {
-                result.drop_reason(format!("VLAN{local} is not active on {switch}"));
+                result.drop_reason(format!("VLAN {local} is not active on {switch}"));
                 continue;
             }
             if let Mode::Trunk { allowed, .. } = &input.mode
                 && !allowed.contains(&local)
             {
                 result.drop_reason(format!(
-                    "VLAN{local} is not allowed into {switch}/{ingress}"
+                    "VLAN {local} is not allowed into {switch}/{ingress}"
                 ));
                 continue;
             }
@@ -415,7 +415,7 @@ impl Fabric {
                     continue;
                 }
                 let Some(out_tag) = output.mode.egress(local) else {
-                    result.drop_reason(format!("{switch}/{egress} does not carry VLAN{local}"));
+                    result.drop_reason(format!("{switch}/{egress} does not carry VLAN {local}"));
                     continue;
                 };
                 let mut next_path = path.clone();
@@ -459,4 +459,200 @@ impl Fabric {
             reverse: reverse.recipients.contains_key(a),
         })
     }
+}
+
+/// State-based outcomes; negative policy checks always require operational attachments.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum Requirement {
+    Visibility {
+        label: String,
+        from: String,
+        to: String,
+        visible: bool,
+    },
+    AccessVlan {
+        switch: String,
+        port: String,
+        vlan: u16,
+    },
+    NativeVlan {
+        switch: String,
+        port: String,
+        vlan: u16,
+    },
+    ActiveVlan {
+        switch: String,
+        vlan: u16,
+    },
+}
+impl Fabric {
+    /// Port configuration may change; the authored equipment/cabling cannot be replaced.
+    pub fn same_shape(&self, initial: &Self) -> bool {
+        self.validate().is_ok()
+            && initial.validate().is_ok()
+            && self.hosts == initial.hosts
+            && self.cables == initial.cables
+            && self.switches.keys().eq(initial.switches.keys())
+            && self.switches.iter().all(|(id, s)| {
+                s.label == initial.switches[id].label
+                    && s.ports.keys().eq(initial.switches[id].ports.keys())
+            })
+    }
+    fn active_attachment(&self, host: &str) -> bool {
+        let jack = Jack::Host { host: host.into() };
+        self.cables
+            .iter()
+            .find_map(|c| {
+                if c.a == jack {
+                    Some(&c.b)
+                } else if c.b == jack {
+                    Some(&c.a)
+                } else {
+                    None
+                }
+            })
+            .is_some_and(|j| match j {
+                Jack::Switch { switch, port } => match self.switches[switch].ports[port].mode {
+                    Mode::Access { vlan } => self.switches[switch].vlans.contains(&vlan),
+                    _ => false,
+                },
+                _ => false,
+            })
+    }
+}
+impl Requirement {
+    pub fn valid_for(&self, f: &Fabric) -> bool {
+        if f.validate().is_err() {
+            return false;
+        }
+        match self {
+            Self::Visibility {
+                label: description,
+                from,
+                to,
+                ..
+            } => {
+                label(description)
+                    && from != to
+                    && f.hosts.contains_key(from)
+                    && f.hosts.contains_key(to)
+            }
+            Self::AccessVlan {
+                switch,
+                port,
+                vlan: n,
+            }
+            | Self::NativeVlan {
+                switch,
+                port,
+                vlan: n,
+            } => {
+                vlan(*n)
+                    && f.switches
+                        .get(switch)
+                        .is_some_and(|s| s.ports.contains_key(port))
+            }
+            Self::ActiveVlan { switch, vlan: n } => vlan(*n) && f.switches.contains_key(switch),
+        }
+    }
+    pub fn check(&self, f: &Fabric) -> (bool, String) {
+        if !self.valid_for(f) {
+            return (false, "Invalid switching objective or topology".into());
+        }
+        match self {
+            Self::Visibility {
+                label,
+                from,
+                to,
+                visible,
+            } => {
+                if !f.live_path(from, to).unwrap_or(false)
+                    || !f.active_attachment(from)
+                    || !f.active_attachment(to)
+                {
+                    return (
+                        false,
+                        format!(
+                            "{label}: keep both workstations attached to up access ports, with their VLANs active and every link in the path up. Disconnection does not prove isolation."
+                        ),
+                    );
+                }
+                match f.visibility(from, to) {
+                    Err(e) => (false, format!("{label}: {e}")),
+                    Ok(v) => {
+                        let okay = if *visible { v.mutual() } else { v.isolated() };
+                        (
+                            okay,
+                            format!(
+                                "{label}: {from} to {to} {}; {to} to {from} {}. {}",
+                                if v.forward { "delivered" } else { "blocked" },
+                                if v.reverse { "delivered" } else { "blocked" },
+                                if *visible {
+                                    "Both directions must deliver."
+                                } else {
+                                    "Neither direction may deliver."
+                                }
+                            ),
+                        )
+                    }
+                }
+            }
+            Self::AccessVlan { switch, port, vlan } => {
+                let p = &f.switches[switch].ports[port];
+                (
+                    p.up && matches!(p.mode,Mode::Access{vlan:n}if n==*vlan),
+                    format!("{switch}/{port}: use an up access port in VLAN {vlan}"),
+                )
+            }
+            Self::NativeVlan { switch, port, vlan } => {
+                let p = &f.switches[switch].ports[port];
+                (
+                    p.up && matches!(p.mode,Mode::Trunk{native,..}if native==*vlan),
+                    format!("{switch}/{port}: use an up trunk with native VLAN {vlan}"),
+                )
+            }
+            Self::ActiveVlan { switch, vlan } => (
+                f.switches[switch].vlans.contains(vlan),
+                format!("{switch}: VLAN {vlan} is active"),
+            ),
+        }
+    }
+}
+
+/// Every negative endpoint needs an authored positive service case, rather than shutdown credit.
+pub fn valid_requirements(requirements: &[Requirement], f: &Fabric) -> bool {
+    if requirements.is_empty()
+        || requirements.len() > 20
+        || requirements.iter().any(|r| !r.valid_for(f))
+    {
+        return false;
+    }
+    let positive: BTreeSet<_> = requirements
+        .iter()
+        .filter_map(|r| {
+            if let Requirement::Visibility {
+                from,
+                to,
+                visible: true,
+                ..
+            } = r
+            {
+                Some([from, to])
+            } else {
+                None
+            }
+        })
+        .flatten()
+        .collect();
+    !positive.is_empty()
+        && requirements.iter().all(|r| match r {
+            Requirement::Visibility {
+                from,
+                to,
+                visible: false,
+                ..
+            } => positive.contains(from) && positive.contains(to),
+            _ => true,
+        })
 }

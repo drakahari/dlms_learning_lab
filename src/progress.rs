@@ -76,6 +76,14 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::Switching { fabric } = &a.state
+        && a.workspace
+            .as_ref()
+            .and_then(|w| w.switching_draft.as_ref())
+            .is_some_and(|d| !d.matches(fabric))
+    {
+        return false;
+    }
     if let State::Ipv6 { topology } = &a.state
         && a.workspace
             .as_ref()
@@ -157,6 +165,29 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        if let (State::Switching { fabric }, State::Switching { fabric: initial }) =
+            (&a.state, &s.initial)
+            && (!fabric.same_shape(initial)
+                || a.workspace
+                    .as_ref()
+                    .and_then(|w| w.switching_draft.as_ref())
+                    .is_some_and(|d| !d.same_shape(fabric)))
+        {
+            return Err("Saved switch/workstation/cable structure differs from this activity; original retained".into());
+        }
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.switching_learning.as_ref())
+            && s.switching_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.fabric.same_shape(&lesson.fixture))
+        {
+            return Err(
+                "Saved switching example structure differs from this lesson; original retained"
+                    .into(),
+            );
+        }
         if let (State::Ipv6 { topology }, State::Ipv6 { topology: initial }) =
             (&a.state, &s.initial)
             && (!topology.same_shape(initial)
@@ -200,6 +231,15 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        if let State::Switching { fabric } = &a.state
+            && a.workspace
+                .as_ref()
+                .and_then(|w| w.switching_draft.as_ref())
+                .is_some_and(|d| !d.same_shape(fabric))
+        {
+            return Err("Invalid switching draft structure; previous progress retained".into());
+        }
+
         if let State::Ipv6 { topology } = &a.state
             && a.workspace
                 .as_ref()

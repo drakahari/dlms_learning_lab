@@ -1,0 +1,476 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-switching-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Switching preview fixture",
+      "unit": "",
+      "title": "Restore two workgroups \u00b7 development fixture",
+      "summary": "Review an access port while retaining two working groups.",
+      "objective": "Staff workstations must exchange broadcasts with each other in VLAN 10. Guests must exchange broadcasts in VLAN 20 and stay separate from staff. Keep the equipment connected. Inspect the port settings, repair the fault and check both service and isolation.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Inspect group membership and repair the access port."
+      ],
+      "guide": [],
+      "explanation": "The workstation sends untagged data. Its access port selects the local VLAN; the trunk carries that VLAN to the far switch. An access port in the wrong VLAN joins the wrong group. Service within both groups matters as well as separation.",
+      "hints": [
+        "Compare the access VLAN at the two staff ports.",
+        "A workstation uses an access port. Trunks carry multiple VLANs between switches."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html"
+      ],
+      "simplifications": "Development fixture, not added curriculum. Broadcast data plane only; no ping, MAC learning, STP/PVST or Cisco command interpreter. Plain workstations send and receive untagged frames.",
+      "initial": {
+        "kind": "Switching",
+        "fabric": {
+          "switches": {
+            "left": {
+              "label": "Left switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            },
+            "right": {
+              "label": "Right switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "staff-left": {
+              "label": "Staff left",
+              "up": true
+            },
+            "guest-left": {
+              "label": "Guest left",
+              "up": true
+            },
+            "staff-right": {
+              "label": "Staff right",
+              "up": true
+            },
+            "guest-right": {
+              "label": "Guest right",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "trunk",
+              "a": {
+                "kind": "switch",
+                "switch": "left",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "right",
+                "port": "uplink"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-left",
+              "a": {
+                "kind": "host",
+                "host": "staff-left"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "left",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-left",
+              "a": {
+                "kind": "host",
+                "host": "guest-left"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "left",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-right",
+              "a": {
+                "kind": "host",
+                "host": "staff-right"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "right",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-right",
+              "a": {
+                "kind": "host",
+                "host": "guest-right"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "right",
+                "port": "guest"
+              },
+              "up": true
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Switching",
+        "requirements": [
+          {
+            "kind": "visibility",
+            "label": "Staff service",
+            "from": "staff-left",
+            "to": "staff-right",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest service",
+            "from": "guest-left",
+            "to": "guest-right",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Group isolation",
+            "from": "staff-left",
+            "to": "guest-right",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "left",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "right",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "left",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "right",
+            "port": "guest",
+            "vlan": 20
+          }
+        ]
+      },
+      "solution": [
+        "access right staff 10"
+      ],
+      "prerequisites": [],
+      "switching_teaching": {
+        "prerequisite_note": "No command-line knowledge is needed. Type into the switch settings; Check configuration applies the draft and tests it.",
+        "concepts": [
+          {
+            "title": "A group on a shared switch",
+            "text": "A VLAN keeps one group\u2019s broadcast messages separate from another group on the same switch. A workstation uses an access port, which puts its untagged messages into one VLAN."
+          },
+          {
+            "title": "Carry the group between switches",
+            "text": "A trunk carries several groups over one cable. A tag identifies the VLAN, except for the configured native VLAN, which travels untagged in this model. Both switches need the group active and allowed on the trunk."
+          }
+        ],
+        "example_description": "Separate practice uses staff VLAN 30 and guest VLAN 40. Inspect the right switch\u2019s staff port. Load example settings if you want to see the repair, then apply and test.",
+        "fixture": {
+          "switches": {
+            "left": {
+              "label": "Left switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            },
+            "right": {
+              "label": "Right switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "staff-left": {
+              "label": "Staff left",
+              "up": true
+            },
+            "guest-left": {
+              "label": "Guest left",
+              "up": true
+            },
+            "staff-right": {
+              "label": "Staff right",
+              "up": true
+            },
+            "guest-right": {
+              "label": "Guest right",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "trunk",
+              "a": {
+                "kind": "switch",
+                "switch": "left",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "right",
+                "port": "uplink"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-left",
+              "a": {
+                "kind": "host",
+                "host": "staff-left"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "left",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-left",
+              "a": {
+                "kind": "host",
+                "host": "guest-left"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "left",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-right",
+              "a": {
+                "kind": "host",
+                "host": "staff-right"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "right",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-right",
+              "a": {
+                "kind": "host",
+                "host": "guest-right"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "right",
+                "port": "guest"
+              },
+              "up": true
+            }
+          ]
+        },
+        "example_solution": [
+          "access right staff 30"
+        ],
+        "outcomes": [
+          {
+            "kind": "visibility",
+            "label": "Staff service",
+            "from": "staff-left",
+            "to": "staff-right",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest service",
+            "from": "guest-left",
+            "to": "guest-right",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Group isolation",
+            "from": "staff-left",
+            "to": "guest-right",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "left",
+            "port": "staff",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "right",
+            "port": "staff",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "left",
+            "port": "guest",
+            "vlan": 40
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "right",
+            "port": "guest",
+            "vlan": 40
+          }
+        ],
+        "try_change": "Change the right staff access VLAN to 40, apply and test, and see why working guest service does not prove staff service. Restore it to 30."
+      }
+    }
+  ]
+}

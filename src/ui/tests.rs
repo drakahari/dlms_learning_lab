@@ -261,7 +261,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
-            State::Ipv6 { .. } | State::Filesystem { .. } => {
+            State::Switching { .. } | State::Ipv6 { .. } | State::Filesystem { .. } => {
                 unreachable!("This regression targets the original nine workspaces")
             }
         }
@@ -1965,4 +1965,86 @@ fn count_assignments_keep_the_editor_and_actions_in_width_and_stop_file_loops() 
     click(&ctx, &mut a, r);
     assert!(a.script_job.is_none());
     assert!(!a.metrics.completion);
+}
+
+#[test]
+fn switching_fixture_keeps_practice_separate_and_wraps_with_visible_keyboard_focus() {
+    for (width, height, scale) in [
+        (1200., 850., 1.),
+        (1120., 850., 1.),
+        (1080., 850., 1.),
+        (720., 560., 1.),
+        (720., 560., 1.5),
+    ] {
+        let (ctx, mut a) = app();
+        a.scenarios.push(
+            pack::load(include_str!("../../tests/fixtures/switching-preview.json"))
+                .unwrap()
+                .remove(0),
+        );
+        let i = a.scenarios.len() - 1;
+        a.launch(i);
+        a.scale = scale;
+        assert_eq!(a.switching_view(i), teaching::View::Introduction);
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            a.set_switching_view(i, view);
+            for _ in 0..3 {
+                frame(&ctx, &mut a, width, height, vec![]);
+            }
+            for r in a
+                .metrics
+                .inputs
+                .iter()
+                .chain(a.metrics.check.iter())
+                .chain(a.metrics.lesson_tabs.iter())
+            {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "{view:?} {width}/{scale}: {r:?}"
+                );
+            }
+            assert!(!a.metrics.help_visible);
+            assert!(!a.metrics.completion);
+        }
+        assert!(a.metrics.inputs.len() >= 5);
+        let input = a.metrics.inputs[0];
+        if ctx.content_rect().contains(input.center()) {
+            for pressed in [true, false] {
+                frame(
+                    &ctx,
+                    &mut a,
+                    width,
+                    height,
+                    vec![
+                        egui::Event::PointerMoved(input.center()),
+                        egui::Event::PointerButton {
+                            pos: input.center(),
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: Default::default(),
+                        },
+                    ],
+                );
+            }
+            assert!(ctx.memory(|m| m.focused()).is_some());
+        }
+        frame(
+            &ctx,
+            &mut a,
+            width,
+            height,
+            vec![key(egui::Key::Tab, false)],
+        );
+        assert!(ctx.memory(|m| m.focused()).is_some());
+        let s = &a.scenarios[i];
+        a.progress.attempts.get_mut(&s.id).unwrap().challenge = true;
+        frame(&ctx, &mut a, width, height, vec![]);
+        assert_eq!(a.switching_view(i), teaching::View::Assignment);
+        assert!(a.metrics.lesson_tabs.is_empty());
+        assert!(!a.metrics.help_visible);
+    }
 }

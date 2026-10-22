@@ -54,18 +54,22 @@ impl LabApp {
                 self.ipv4_assignment(ui, i);
             } else {
                 ui.label(RichText::new(&s.title).strong().size(23.));
-                if !matches!(s.initial, State::Script { .. } | State::Ipv6 { .. })
-                    && s.terminal_teaching.is_none()
+                if !matches!(
+                    s.initial,
+                    State::Script { .. } | State::Ipv6 { .. } | State::Switching { .. }
+                ) && s.terminal_teaching.is_none()
                 {
                     ui.label(&s.objective);
                 }
                 if !challenge
                     && s.terminal_teaching.is_none()
-                    && !matches!(s.initial, State::Ipv6 { .. })
+                    && !matches!(s.initial, State::Ipv6 { .. } | State::Switching { .. })
                 {
                     ui.label(RichText::new(starting_point(&s.id)).color(palette(ui).muted));
                 }
-                if matches!(s.initial, State::Ipv6 { .. }) {
+                if matches!(s.initial, State::Switching { .. }) {
+                    self.switching_learning_workspace(ui, i);
+                } else if matches!(s.initial, State::Ipv6 { .. }) {
                     self.ipv6_learning_workspace(ui, i);
                 } else if matches!(s.initial, State::Script { .. }) {
                     self.script_learning_workspace(ui, i);
@@ -95,7 +99,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::Ipv6 { .. }) {
+            let show_help = if matches!(s.initial, State::Switching { .. }) {
+                self.switching_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::Ipv6 { .. }) {
                 self.ipv6_view(i) == teaching::View::Assignment
             } else if s.terminal_teaching.is_some() {
                 self.terminal_view(i) == teaching::View::Assignment

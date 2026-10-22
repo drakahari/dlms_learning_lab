@@ -72,6 +72,200 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            2100 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                let fixture =
+                    pack::load(include_str!("../../tests/fixtures/switching-preview.json"))
+                        .unwrap()
+                        .remove(0);
+                self.scenarios.push(fixture);
+                self.launch(self.scenarios.len() - 1);
+            }
+            2101 => shot = Some("switching-fixture-introduction".into()),
+            2102 => self.pending_events = click(self.metrics.example_action.unwrap()),
+            2103 => {
+                let i = self.selected.unwrap();
+                assert_eq!(self.switching_view(i), teaching::View::Example);
+                let s = &self.scenarios[i];
+                let l = self
+                    .progress
+                    .attempts
+                    .get_mut(&s.id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .switching_learning
+                    .as_mut()
+                    .unwrap();
+                l.fill_example(s.switching_teaching.as_ref().unwrap())
+                    .unwrap();
+                self.dirty = true;
+            }
+            2104 => self.pending_events = click(self.metrics.check.unwrap()),
+            2105 => {
+                let i = self.selected.unwrap();
+                let s = &self.scenarios[i];
+                let a = &self.progress.attempts[&s.id];
+                assert!(
+                    a.workspace
+                        .as_ref()
+                        .unwrap()
+                        .switching_learning
+                        .as_ref()
+                        .unwrap()
+                        .checks(s.switching_teaching.as_ref().unwrap())
+                        .iter()
+                        .all(|c| c.0)
+                );
+                assert!(!progress::current_solved(a, s));
+                shot = Some("switching-fixture-practice".into());
+            }
+            2106 => {
+                let i = self.selected.unwrap();
+                let l = self
+                    .progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .switching_learning
+                    .as_mut()
+                    .unwrap();
+                l.draft.selected_switch = "right".into();
+                l.draft
+                    .switches
+                    .get_mut("right")
+                    .unwrap()
+                    .ports
+                    .get_mut("staff")
+                    .unwrap()
+                    .access = "40".into();
+                self.dirty = true;
+            }
+            2107 => self.pending_events = click(self.metrics.check.unwrap()),
+            2108 => {
+                let i = self.selected.unwrap();
+                let s = &self.scenarios[i];
+                assert!(
+                    self.progress.attempts[&s.id]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .switching_learning
+                        .as_ref()
+                        .unwrap()
+                        .checks(s.switching_teaching.as_ref().unwrap())
+                        .iter()
+                        .any(|c| !c.0)
+                );
+                shot = Some("switching-fixture-practice-retry".into());
+            }
+            2109 => self.set_switching_view(self.selected.unwrap(), teaching::View::Assignment),
+            2110 => shot = Some("switching-fixture-assignment".into()),
+            2111 => self.pending_events = click(self.metrics.check.unwrap()),
+            2112 => {
+                assert!(!self.metrics.completion);
+                shot = Some("switching-fixture-assignment-retry".into());
+            }
+            2113 => {
+                let i = self.selected.unwrap();
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .switching_draft
+                    .as_mut()
+                    .unwrap()
+                    .selected_switch = "right".into();
+                self.dirty = true;
+            }
+            2114 => self.pending_events = click(self.metrics.inputs[2]),
+            2115 => {
+                self.pending_events = vec![key(egui::Key::A, true), egui::Event::Text("10".into())]
+            }
+            2116 => self.pending_events = click(self.metrics.check.unwrap()),
+            2117 => {
+                assert!(self.metrics.completion);
+                shot = Some("switching-fixture-complete".into());
+                self.pending_events = click(self.metrics.probe.unwrap());
+            }
+            2118 => {
+                self.save();
+                let loaded = progress::load(&self.path, &self.scenarios).unwrap();
+                let i = self.selected.unwrap();
+                assert!(progress::current_solved(
+                    &loaded.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                self.progress = loaded;
+                shot = Some("switching-fixture-broadcast-inspection".into());
+                self.pending_events = click(self.metrics.inputs[2]);
+            }
+            2119 => {
+                self.pending_events = vec![key(egui::Key::A, true), egui::Event::Text("20".into())]
+            }
+            2120 => {
+                assert!(!self.metrics.completion);
+                let i = self.selected.unwrap();
+                assert!(!progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                shot = Some("switching-fixture-edited-invalidation".into());
+            }
+            2121 => {
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(940., 760.)));
+            }
+            2122 => shot = Some("switching-fixture-light-150".into()),
+            2123 => {
+                self.pending_events = vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -620.),
+                        modifiers: Default::default(),
+                    },
+                ]
+            }
+            2124 => shot = Some("switching-fixture-light-150-scrolled".into()),
+            2125 => {
+                let i = self.selected.unwrap();
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.help_open = false;
+                self.lesson_scroll_reset = true;
+            }
+            2126 => shot = Some("switching-fixture-challenge-150".into()),
+            2127 => {
+                let i = self.selected.unwrap();
+                assert_eq!(self.switching_view(i), teaching::View::Assignment);
+                assert!(!self.help_open);
+                self.reset_attempt(i);
+                assert_eq!(
+                    self.progress.attempts[&self.scenarios[i].id].state,
+                    self.scenarios[i].initial
+                );
+                println!(
+                    "PASS native switching fixture: introduction, isolated example/experiment, wrong retry, keyboard repair, Check, save/reload, edit invalidation, reset and light/dark150 resizing. Development fixture only; bundled catalog unchanged."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+
             0 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
             }

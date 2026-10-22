@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Switching {
+        fabric: crate::switching::Fabric,
+    },
     Ipv6 {
         topology: crate::ipv6::Topology,
     },
@@ -94,6 +97,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Switching {
+        requirements: Vec<crate::switching::Requirement>,
+    },
     Ipv6 {
         requirements: Vec<crate::ipv6::Requirement>,
     },
@@ -197,6 +203,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Switching { fabric }, Goal::Switching { requirements }) => {
+            requirements.iter().map(|r| r.check(fabric)).collect()
+        }
         (State::Ipv6 { topology }, Goal::Ipv6 { requirements }) => {
             requirements.iter().map(|r| r.check(topology)).collect()
         }
@@ -426,6 +435,9 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Switching { .. } => {
+            "Use native switch/port tables and broadcast traces. This bounded VLAN data plane is not a Cisco CLI, ping, MAC learning or STP simulator."
+        }
         State::Ipv6 { .. } => {
             "Use the native IPv6 configuration editors and path probes. Only the documented bounded static forwarding subset is simulated. Pack reference adapters are not router or Linux commands."
         }
@@ -461,6 +473,9 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::Switching { fabric } = s {
+        return crate::switching_workspace::adapter(fabric, input);
+    }
     if let State::Ipv6 { topology } = s {
         return crate::ipv6_workspace::adapter(topology, input);
     }
@@ -506,7 +521,10 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Ipv6 { .. } | State::Filesystem { .. } | State::Script { .. } => unreachable!(),
+        State::Switching { .. }
+        | State::Ipv6 { .. }
+        | State::Filesystem { .. }
+        | State::Script { .. } => unreachable!(),
         State::Subnet {
             answers, second, ..
         } => match v.as_slice() {
@@ -934,6 +952,11 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Switching { fabric } => format!(
+            "VLAN data plane · {} switches · {} workstations",
+            fabric.switches.len(),
+            fabric.hosts.len()
+        ),
         State::Ipv6 { topology } => format!(
             "IPv6 static topology · {} simulated devices",
             topology.devices.len()

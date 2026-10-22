@@ -1,6 +1,6 @@
 # VLAN data-plane capability contract
 
-Specified2026-10-22 before implementation/dependent teaching. This capability will be a pure typed in-process model, with no learner host/network/process operations or new dependency. It does not yet add a playable lesson or objective evidence. The current51 authored assignments remain unchanged.
+Specified2026-10-22 before implementation/dependent teaching. This capability is a pure typed in-process model, with no learner host/network/process operations or new dependency. It does not yet add a playable lesson or objective evidence. The current51 authored assignments remain unchanged.
 
 ## Initial model
 
@@ -33,3 +33,10 @@ A native-VLAN mismatch can translate untagged data between different local VLAN 
 No issuer endorsement, hardware/packet-capture comparison, real network experience or full802.1Q conformance is claimed. Model tests must include VLAN database absence, allowed-list asymmetry, native tagging, alternate valid isolation, both directions, down ports/cables, malformed topology, bounded propagation and success invalidation before dependent content.
 
 Additional pinned ingress reference: Cisco Nexus5000 NX-OS Layer2 Switching Guide5.0(3)N1(1), Configuring Access and Trunk Interfaces: https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus5000/sw/layer2/503_n1_1/Cisco_n5k_layer2_config_gd_rel_503_N1_1_chapter6.html . The non-tag-native profile accepts tagged ingress within its allowed set. Tag-native/global/platform-specific native-ingress policies are not selectable in this first educational fabric and are not inferred from its behavior.
+
+
+## Native integration (M24)
+
+The native workspace has a selected-switch port table (aligned desktop rows and stacked narrow controls), active VLAN editing, one Check configuration action and optional applied-state broadcast inspection. Introduction → Try example → Assignment is preserved. Practice is separately persisted, can load example settings only on explicit request, and cannot change assignment drafts or credit. Challenge opens the full assignment without unsolicited help. Feedback names both delivery directions, inactive/unattached endpoints and unsupported behavior.
+
+Declarative requirements and pack validation enforce the integration gates above. Save/import uses the existing byte-capped/versioned safe storage and checks authored shape; malformed bounded draft text remains editable. Native review uses a clearly labeled test-only fixture, not an additional lab or certification coverage claim. A later reviewed curriculum unit must teach every prerequisite and demonstrate positive/negative/alternate outcomes before coverage is recorded.

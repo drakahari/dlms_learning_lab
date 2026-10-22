@@ -15,6 +15,7 @@ use std::{path::PathBuf, time::Instant};
 mod ipv4_workspace;
 mod ipv6_workspace;
 mod smoke;
+mod switching_workspace;
 #[cfg(test)]
 mod tests;
 mod workspace;
@@ -46,6 +47,7 @@ struct Metrics {
     guide: bool,
     editor_save: Option<egui::Rect>,
     editor_viewport: Option<egui::Rect>,
+    probe: Option<egui::Rect>,
     script_history: Option<egui::Rect>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
@@ -202,9 +204,10 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout")
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("switching")
             {
+                2100
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout") {
                 1209
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scope-recovery")
             {
@@ -275,6 +278,9 @@ impl LabApp {
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.switching_teaching {
+            dlms_learning_lab::switching_teaching::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.ipv6_teaching {
             dlms_learning_lab::ipv6_teaching::prepare(a, lesson, new_attempt);
         }
@@ -340,6 +346,9 @@ impl LabApp {
         }
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.switching_teaching {
+            dlms_learning_lab::switching_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.ipv6_teaching {
             dlms_learning_lab::ipv6_teaching::prepare(a, lesson, true);

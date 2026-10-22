@@ -21,6 +21,10 @@ pub struct WorkspaceData {
     pub ipv6_draft: Option<crate::ipv6_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_learning: Option<crate::ipv6_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub switching_draft: Option<crate::switching_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub switching_learning: Option<crate::switching_teaching::Learning>,
     pub command: String,
     pub service_port: Option<String>,
     pub dns_address: Option<String>,
@@ -43,6 +47,8 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.switching_draft.as_ref().is_none_or(|d| d.valid())
+            && self.switching_learning.as_ref().is_none_or(|l| l.valid())
             && self.script_learning.as_ref().is_none_or(|l| l.valid())
             && self
                 .script_history
@@ -116,6 +122,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::Switching { fabric } = &a.state
+        && w.switching_draft.is_none()
+    {
+        w.switching_draft = Some(crate::switching_workspace::Draft::new(fabric));
+    }
     if let State::Ipv6 { topology } = &a.state
         && w.ipv6_draft.is_none()
     {
