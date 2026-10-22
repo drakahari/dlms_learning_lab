@@ -1,0 +1,18 @@
+# Native application identity and Fedora startup investigation (M34)
+
+Specified 2026-10-22 before the scoped identity change. Preserve the native toolkit, window size, fonts/themes, simulation and all custom progress/preference paths. No dependency, compositor setting, desktop-theme change or activation/security workaround.
+
+The prior isolated default-Wayland trace stalled after its first surface frame request and a keyboard-focus departure. That is evidence of an intermittent rendering/startup problem, not an established cause. XWayland walkthroughs have passed. A fresh 15-second default-Wayland baseline at service-teaching source 77e341a now advances through multiple real native screenshots and frame callbacks. The timeout intentionally bounds a startup probe; it is not a full-flow acceptance failure or proof that the old issue disappeared.
+
+Both the historical and current traces omit a Wayland `set_app_id`. The pinned egui-winit 0.33.3 only supplies it when ViewportBuilder.app_id is explicit. Set `org.dlms.LearningLab`, matching the existing packaged `org.dlms.LearningLab.desktop`. This follows the pinned upstream xdg-shell set_app_id protocol recommendation for grouping/desktop integration; it is an application identity fix, not a presumed frame-callback fix. Original source: wayland-protocols 0.32.13/stable/xdg-shell/xdg-shell.xml; pinned API: egui 0.33.3 ViewportBuilder::with_app_id and egui-winit 0.33.3 window-attribute builder.
+
+The application's progress/preferences use their existing explicit directories APIs. eframe’s optional persistence feature is disabled. Setting native window identity must not relocate or invent learner work. Verify emitted protocol identity, real Fedora flows in default Wayland and XWayland, save/resume, visible resizing/scale and actual candidate launch outside the checkout. Keep intermittent startup, real Windows/macOS desktop and assistive-technology acceptance honest; do not infer causation from a single passing run.
+
+
+## Observed results
+
+The corrected application's own protocol trace emits `xdg_toplevel.set_app_id("org.dlms.LearningLab")`. A complete default-Wayland service teaching flow and a subsequent separate default-Wayland subnet/VLSM flow both pass, including current grading, separate drafts, unsaved/stale invalidation, reset/resume and light/dark 150% resizing. Captures were reviewed at 1920×1080 and 946×929. The pre-change 15-second startup probe also rendered normally, so these observations do **not** establish that application identity caused or cured the old intermittent stall. They establish current default-Wayland operation for those flows and correct desktop identity.
+
+Build, formatting and Clippy pass; independent read-only review confirmed the exact packaged ID, Wayland-only native attribute application and absence of eframe persistence. The existing 310-test backend/UI baseline is unchanged; it was not rerun merely to test a window identifier. Actual native flows are the relevant added evidence. Previously verified XWayland remains an application-local fallback. No compositor, activation token, security setting or user theme was altered.
+
+The original default-Wayland anomaly remains monitored until its conditions can be reproduced and distinguished from focus/occlusion behavior. Windows/macOS desktop, screen-reader/physical-input and complete curriculum acceptance remain open. Do not describe this identity correction as a conclusive startup fix.

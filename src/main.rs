@@ -49,6 +49,7 @@ fn main() -> eframe::Result<()> {
     }
     let options = eframe::NativeOptions {
         viewport: eframe::egui::ViewportBuilder::default()
+            .with_app_id("org.dlms.LearningLab")
             .with_inner_size([1200., 850.])
             .with_min_inner_size([720., 560.]),
         ..Default::default()

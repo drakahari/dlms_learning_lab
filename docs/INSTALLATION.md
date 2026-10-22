@@ -223,3 +223,8 @@ Source `0959e9a037b5742104e040fce24a9eba8d479d5a`, unchanged64/fifteen. [Native 
 | Windows | dlms-learning-lab-0.1.0-g0959e9a037b5-x86_64-pc-windows-msvc-windows-candidate.zip | 806638597538dd0b13d4d998248baba2a0d6a2e90c9b1d05a5642a3781b5ca3b |
 
 Fedora binary SHA-256 `3864fddf50e1bf61ae789bf652f57313b89c9b8db985f8e223edfe7ac82123b1`. Safely extracted and upgraded the same isolated installation; validated desktop entry and bundled content outside the checkout, retained the exact synthetic progress sentinel, then passed both installed native subnet/VLSM teaching flows with light/dark150% and allocation feedback review. Parsed legacy progress is separately covered by backend/UI regressions. This candidate predates M33 service teaching. macOS archive notices, actual Windows/macOS desktop acceptance and default-Wayland startup remain open. No public release.
+
+
+### Native identity follow-up (M34)
+
+The native Wayland ID now explicitly matches `org.dlms.LearningLab.desktop`; custom learner-data paths stay unchanged. Fresh full default-Wayland service and addressing walkthroughs pass at desktop/narrow150% sizes. The baseline startup probe passed too, so this does not prove the historical intermittent stall was fixed. See NATIVE_STARTUP.md for the evidence and remaining investigation. Do not change compositor/security settings as a workaround. macOS notice provenance was rechecked at the upstream repository and remains unresolved; no license text was guessed and the packaging gate remains intact.
