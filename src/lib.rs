@@ -32,3 +32,5 @@ pub fn build_identity() -> String {
         option_env!("DLMS_BUILD_REVISION").unwrap_or("development")
     )
 }
+
+pub mod switching;

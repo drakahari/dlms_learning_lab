@@ -122,3 +122,16 @@ Initial native CI run39828321927 at this source passed Ubuntu/macOS but failed a
 | `dlms-learning-lab-0.1.0-gbd14db0dcf1a-x86_64-pc-windows-msvc-windows-candidate.zip` | `fda9ce66dd69e5c74c7d93a63e97adf18b5158d459a01dff7f2cfdcdabdb81dc` |
 
 These CI results do not establish actual Windows/macOS desktop installation/runtime/accessibility acceptance. macOS packaging remains notice-gated. The Fedora94b0dbe candidate above is separately installed/render-tested; no release published.
+
+
+### M22 clean owner-test candidates
+
+Source `19aad147796b289c8aa89d9371dcaea372c9155c` contains51 assignments/twelve units. [Run39833026248](https://github.com/drakahari/dlms_learning_lab/actions/runs/39833026248) passed all three native CI runners (216 Rust tests and applicable build/tooling checks). Ubuntu/Windows archives were downloaded and sidecar hashes verified in ignored `dist/native-ci-19aad14/`.
+
+| Candidate | SHA-256 |
+| --- | --- |
+| Fedora44 `dlms-learning-lab-0.1.0-g19aad147796b-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` | `1dd7badf44ac9d228445c1104652dc9dd59449a92d8dac06dd9569b80b92136d` |
+| `dlms-learning-lab-0.1.0-g19aad147796b-x86_64-pc-windows-msvc-windows-candidate.zip` | `b89c52eba6b670c24703b481d8611b7a0a0355e2b24881726558536ca6071e5a` |
+| `dlms-learning-lab-0.1.0-g19aad147796b-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `9142e7a2edfc12cf428f827d5012b62a746530d6b296fe490f4132ba92c8c90e` |
+
+The clean Fedora archive was extracted and installed/upgraded in the isolated /tmp root. Installed CLI validated51/twelve outside the checkout; desktop-file-validate passed and the exact synthetic progress sentinel remained intact (file retention, not parsed legacy-profile acceptance). Installed native all-four access lesson flows passed, including light/dark150% views. Windows/macOS desktop runtime/install/accessibility and macOS notice/signing gates remain open. No release publication.
