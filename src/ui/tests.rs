@@ -581,6 +581,7 @@ fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
                 for challenge in [false, true] {
                     let (ctx, mut a) = app();
                     a.launch(i);
+                    a.set_script_view(i, teaching::View::Assignment);
                     a.scale = scale;
                     a.progress
                         .attempts
@@ -622,6 +623,7 @@ fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
 fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
     let (ctx, mut a) = app();
     a.launch(9);
+    a.set_script_view(9, teaching::View::Assignment);
     draw(&ctx, &mut a);
     let editor = a.metrics.focus.unwrap();
     let solution = a.scenarios[9].solution[0].clone();
@@ -727,4 +729,331 @@ fn every_theme_renders_focus_selection_and_disabled_samples() {
         );
         assert_eq!(ctx.style().visuals.disabled_alpha, 1.);
     }
+}
+
+#[test]
+fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_retry() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.launch(9);
+    draw(&ctx, &mut a);
+    assert_eq!(a.script_view(9), teaching::View::Introduction);
+    assert!(a.metrics.check.is_none());
+    assert!(!a.metrics.help_visible);
+    let before = a.progress.attempts["shell-handover"].state.clone();
+    let r = a.metrics.example_action.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.script_view(9), teaching::View::Example);
+    let editor = a.metrics.focus.unwrap();
+    assert_eq!(ctx.memory(|m| m.focused()), Some(editor));
+    check(&ctx, &mut a);
+    for _ in 0..10 {
+        draw(&ctx, &mut a);
+    }
+    let l = a.progress.attempts["shell-handover"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .script_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(
+        l.example_result.as_ref().unwrap().stdout,
+        "Welcome\nHello, Mina!\nRoom: Library\n"
+    );
+    assert_eq!(a.progress.attempts["shell-handover"].state, before);
+    assert!(!a.metrics.completion);
+    let edited = l.example_source.replace("Mina", "Rowan");
+    a.focus_input = true;
+    draw(&ctx, &mut a);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers {
+                    ctrl: true,
+                    command: true,
+                    ..Default::default()
+                },
+            },
+            egui::Event::Text(edited.clone()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    for _ in 0..10 {
+        draw(&ctx, &mut a);
+    }
+    assert!(
+        a.progress.attempts["shell-handover"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .script_learning
+            .as_ref()
+            .unwrap()
+            .example_result
+            .as_ref()
+            .unwrap()
+            .stdout
+            .contains("Rowan")
+    );
+    let r = a.metrics.assignment_action.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.script_view(9), teaching::View::Assignment);
+    assert_eq!(a.progress.attempts["shell-handover"].state, before);
+    let solution = a.scenarios[9].solution[0].clone();
+    if let State::Script { source, run } =
+        &mut a.progress.attempts.get_mut("shell-handover").unwrap().state
+    {
+        *source = solution;
+        *run = None;
+    }
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    for _ in 0..10 {
+        draw(&ctx, &mut a);
+    }
+    assert!(a.metrics.completion);
+    let solved = a.progress.attempts["shell-handover"].state.clone();
+    a.set_script_view(9, teaching::View::Example);
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    for _ in 0..10 {
+        draw(&ctx, &mut a);
+    }
+    assert_eq!(a.progress.attempts["shell-handover"].state, solved);
+    a.save();
+    a.progress = progress::load(&a.path, &a.scenarios).unwrap();
+    a.launch(10);
+    a.launch(9);
+    assert_eq!(a.script_view(9), teaching::View::Example);
+    assert_eq!(
+        a.progress.attempts["shell-handover"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .script_learning
+            .as_ref()
+            .unwrap()
+            .example_source,
+        edited
+    );
+    a.set_script_view(9, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    a.reset_attempt(9);
+    draw(&ctx, &mut a);
+    assert_eq!(a.script_view(9), teaching::View::Introduction);
+    assert_eq!(a.progress.attempts["shell-handover"].state, before);
+}
+
+#[test]
+fn all_introductions_and_examples_wrap_at_large_text_and_challenge_stays_independent() {
+    for i in 9..16 {
+        for view in [teaching::View::Introduction, teaching::View::Example] {
+            for scale in [1., 1.5] {
+                for width in [720., 1200.] {
+                    let (ctx, mut a) = app();
+                    a.launch(i);
+                    a.set_script_view(i, view);
+                    a.scale = scale;
+                    if view == teaching::View::Example {
+                        let lesson = a.scenarios[i].teaching.as_ref().unwrap();
+                        let result = shell::run(&lesson.example, &lesson.fixture);
+                        a.progress
+                            .attempts
+                            .get_mut(&a.scenarios[i].id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .script_learning
+                            .as_mut()
+                            .unwrap()
+                            .example_result = Some(result);
+                    }
+                    for _ in 0..4 {
+                        frame(&ctx, &mut a, width, 850., vec![]);
+                    }
+                    for r in a
+                        .metrics
+                        .header
+                        .iter()
+                        .chain(a.metrics.lesson_tabs.iter())
+                        .chain(a.metrics.inputs.iter())
+                        .chain(a.metrics.check.iter())
+                        .chain(a.metrics.assignment_action.iter())
+                    {
+                        assert!(
+                            r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                            "lab {i} {view:?} {width}/{scale} {r:?}"
+                        );
+                    }
+                    if view == teaching::View::Example {
+                        assert!(
+                            a.metrics.editor_viewport.unwrap().height() >= 175.,
+                            "example editor collapsed"
+                        );
+                    }
+                    if view == teaching::View::Example {
+                        assert!(
+                            a.metrics.output.unwrap().height() >= 180.,
+                            "example output collapsed"
+                        );
+                    }
+                    assert!(!a.metrics.help_visible);
+                    assert!(!a.metrics.completion);
+                    a.progress
+                        .attempts
+                        .get_mut(&a.scenarios[i].id)
+                        .unwrap()
+                        .challenge = true;
+                    draw(&ctx, &mut a);
+                    assert_eq!(a.script_view(i), teaching::View::Assignment);
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                    assert!(a.metrics.check.is_some());
+                    assert!(a.metrics.example_action.is_none());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn settings_moves_samples_off_toolbar_and_theme_changes_persist() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    draw(&ctx, &mut a);
+    assert!(!a.settings_open);
+    assert!(!a.theme_preview);
+    let r = a.metrics.settings.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(a.settings_open);
+    a.theme_id = "dlms-light".into();
+    a.sync_appearance(&ctx, ("lab-navy".into(), a.scale));
+    let prefs = theme::Preferences::load(&a.path.with_file_name("preferences-v1.json")).unwrap();
+    assert_eq!(prefs.theme, "dlms-light");
+    assert_eq!(theme::inventory().len(), 28);
+}
+
+#[test]
+fn example_keyboard_run_syntax_retry_and_stop_do_not_grade_the_assignment() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    a.set_script_view(9, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let original = a.progress.attempts["shell-handover"].state.clone();
+    let editor = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(editor)));
+    let replace = |a: &mut LabApp, text: &str| {
+        a.focus_input = true;
+        draw(&ctx, a);
+        frame(
+            &ctx,
+            a,
+            1200.,
+            850.,
+            vec![
+                egui::Event::Key {
+                    key: egui::Key::A,
+                    physical_key: None,
+                    pressed: true,
+                    repeat: false,
+                    modifiers: egui::Modifiers {
+                        ctrl: true,
+                        command: true,
+                        ..Default::default()
+                    },
+                },
+                egui::Event::Text(text.into()),
+            ],
+        );
+        draw(&ctx, a);
+    };
+    let run = |a: &mut LabApp| {
+        frame(
+            &ctx,
+            a,
+            1200.,
+            850.,
+            vec![egui::Event::Key {
+                key: egui::Key::Enter,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::CTRL,
+            }],
+        );
+    };
+    replace(&mut a, "printf 'not closed");
+    run(&mut a);
+    for _ in 0..5 {
+        draw(&ctx, &mut a);
+    }
+    let error = a.progress.attempts["shell-handover"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .script_learning
+        .as_ref()
+        .unwrap()
+        .example_result
+        .as_ref()
+        .unwrap()
+        .error
+        .as_ref()
+        .unwrap();
+    assert_eq!(teaching::diagnostic(error), teaching::Diagnostic::Syntax);
+    let example = a.scenarios[9].teaching.as_ref().unwrap().example.clone();
+    replace(&mut a, &example);
+    run(&mut a);
+    for _ in 0..5 {
+        draw(&ctx, &mut a);
+    }
+    assert!(
+        a.progress.attempts["shell-handover"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .script_learning
+            .as_ref()
+            .unwrap()
+            .example_result
+            .as_ref()
+            .unwrap()
+            .error
+            .is_none()
+    );
+    a.focus_input = true;
+    draw(&ctx, &mut a);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![key(egui::Key::Escape, false)],
+    );
+    draw(&ctx, &mut a);
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    draw(&ctx, &mut a);
+    assert!(!ctx.memory(|m| m.has_focus(editor)));
+    replace(&mut a, "while true; do :; done");
+    run(&mut a);
+    assert!(a.script_job.is_some());
+    draw(&ctx, &mut a);
+    let r = a.metrics.stop.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(a.script_job.is_none());
+    assert!(!a.metrics.completion);
+    assert_eq!(a.progress.attempts["shell-handover"].state, original);
 }

@@ -1,4 +1,28 @@
-# Milestone verification
+# Teaching improvement verification
+
+Fedora 44 / COSMIC Wayland, 2026-10-21. This pass changes beginner teaching in the **existing seven scripting labs** and relocates theme samples. All sixteen assignments, scenario versions and behavior cases remain; no dependencies or interpreter features were added.
+
+- **65 Rust tests passed**: 16 UI mechanics/layout tests, eight IPv4 tests, 22 prototype tests, four new teaching/content/compatibility tests, eight shell/theme tests and seven workspace tests. Offline locked build, formatting and Clippy (all targets, warnings denied) pass. Both declarative packs validate (9 + 7). All 28 palette inventory/hash/notice checks pass.
+- All seven introductory examples and all seven suggested edits execute through the bounded VM. Tests cover separate example/assignment drafts and results, old optional-field omissions, completed work retention, saved selected view, reset, syntax/unsupported/limit diagnostics, output/newline differences, wrong/partial answers, equivalent supported scripts, edit invalidation, keyboard Run/Stop/Escape/Tab, theme persistence and large-text width/editor-space regressions.
+- A **fresh synthetic-profile native walkthrough** opened every Introduction, ran every example, typed each suggested edit, opened each complete Assignment, ran an incorrect program, then retried successfully against all original cases. It asserted no example completion credit or assignment overwrite and reloaded progress successfully. Rendered captures were reviewed, including all seven introductions and the first lesson's practice/assignment/retry views. Review caught and corrected an undersized example editor that behavior tests had not caught.
+- Native captures were 2560×1440 full-screen and 1268×632 tiled on this desktop. DLMS Light and Omarchy catppuccin were inspected at 150% text. A separate native scroll pass reached Introduction actions and example/assignment Run controls in the tiled window and ran the example there. Larger text/smaller windows use outer scrolling rather than shrinking text or clipping the controls. Changing teaching views returns to the top without changing either draft.
+- Theme samples now live in **Settings → Appearance → Theme samples**, collapsed by default and explicitly labeled examples. Toolbar selection still applies immediately and saves independently. All 28 theme roles, selected text/focus/disabled semantics and source notices retain automated checks; every theme was not recaptured natively in this teaching-only pass.
+
+Native input was injected through the application's event path. This is an agent walkthrough/render review, **not beginner usability acceptance from a novice user study**, physical-device testing or assistive-technology acceptance. Windows/macOS runtime status remains untested. The existing real-Bash reference suite was **not rerun in this pass**: no learner or teaching script was executed by a host shell; example execution and grading use only the in-process simulator. Interpreter changes only clarify diagnostic categories.
+
+Local ignored screenshots under `screenshots/workspaces/`:
+
+- `shell-handover-introduction.png`, `shell-handover-example.png`, `shell-handover-assignment.png`
+- `shell-handover-retry-feedback.png`, `shell-handover-teaching-complete.png`
+- `shell-<lab>-introduction.png`, `shell-<lab>-example.png`, `shell-<lab>-assignment.png` for all seven
+- `shell-introduction-light-150-scrolled.png`, `shell-example-light-150-output.png`, `shell-assignment-dark-150-scrolled.png`
+- `settings-appearance-theme-samples.png`
+
+Reproduce the fresh teaching walkthrough with `DLMS_SMOKE_STAGE=teaching ./target/debug/dlms-learning-lab --ui-smoke`; use `DLMS_SMOKE_STAGE=teaching-layout` for the focused tiled/150% scroll check. Both use fresh isolated `/tmp` data, never the normal learner profile. The [teaching audit](SCRIPT_TEACHING.md) documents prerequisites, authoring and compatibility.
+
+The preceding milestone's broader matrix/reference evidence is retained below as historical evidence; it was not all rerun for this scoped change.
+
+# Prior milestone record
 
 Fedora 44 / COSMIC Wayland, 2026-10-21; Rust 1.99.1, pinned egui/eframe 0.33.3, native Glow renderer. Baseline: accepted commit `89f2c0a`. No added dependencies, system packages, installers, releases, desktop-theme changes or other-project writes.
 

@@ -12,3 +12,5 @@ pub mod workspace;
 pub mod shell;
 
 pub mod theme;
+
+pub mod script_teaching;

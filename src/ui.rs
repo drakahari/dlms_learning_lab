@@ -5,8 +5,9 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace as model,
 };
-use dlms_learning_lab::{shell, theme};
+use dlms_learning_lab::{script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
+mod script_learning;
 mod scripting;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_workspace;
@@ -18,6 +19,10 @@ const CONTROL: f32 = 36.;
 #[derive(Default)]
 struct Metrics {
     header: Vec<egui::Rect>,
+    lesson_tabs: Vec<egui::Rect>,
+    example_action: Option<egui::Rect>,
+    assignment_action: Option<egui::Rect>,
+    settings: Option<egui::Rect>,
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
@@ -61,12 +66,14 @@ pub struct LabApp {
     scale: f32,
     theme_id: String,
     theme_preview: bool,
+    settings_open: bool,
     preferences_error: Option<String>,
     preferences_read_only: bool,
     script_job: Option<scripting::Job>,
     script_case: usize,
     focus_input: bool,
     scroll_command: bool,
+    lesson_scroll_reset: bool,
     notice: Option<String>,
     metrics: Metrics,
     help_open: bool,
@@ -151,12 +158,14 @@ impl LabApp {
             scale: preferences.text_scale,
             theme_id: preferences.theme,
             theme_preview: false,
+            settings_open: false,
             preferences_error,
             preferences_read_only,
             script_job: None,
             script_case: 0,
             focus_input: false,
             scroll_command: false,
+            lesson_scroll_reset: false,
             notice: None,
             metrics: Metrics::default(),
             help_open: false,
@@ -165,7 +174,13 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scripts") {
+            smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching-layout")
+            {
+                400
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching") {
+                250
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scripts") {
                 176
             } else {
                 0
@@ -180,12 +195,16 @@ impl LabApp {
         self.progress.clock = self.progress.clock.saturating_add(1);
         let clock = self.progress.clock;
         let s = &self.scenarios[i];
+        let new_attempt = !self.progress.attempts.contains_key(&s.id);
         let a = self
             .progress
             .attempts
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
+        if let Some(lesson) = &s.teaching {
+            teaching::prepare(a, lesson, new_attempt);
+        }
         a.visited = clock;
         let data = a.workspace.as_ref().unwrap();
         self.input = data.command.clone();
@@ -231,6 +250,9 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        if let Some(lesson) = &s.teaching {
+            teaching::prepare(a, lesson, true);
+        }
         self.script_job = None;
         self.input.clear();
         self.checked = false;
@@ -267,6 +289,14 @@ impl LabApp {
         self.metrics.header.push(r.response.rect);
     }
     fn theme_picker(&mut self, ui: &mut egui::Ui) {
+        self.theme_dropdown(ui);
+        let r = ui.button("Settings");
+        self.metrics.settings = Some(r.rect);
+        if r.clicked() {
+            self.settings_open = !self.settings_open;
+        }
+    }
+    fn theme_dropdown(&mut self, ui: &mut egui::Ui) {
         let r = egui::ComboBox::from_id_salt("native-theme-picker")
             .width(195.)
             .truncate()
@@ -285,12 +315,8 @@ impl LabApp {
                 }
             });
         self.metrics.header.push(r.response.rect);
-        if ui.button("Preview theme").clicked() {
-            self.theme_preview = !self.theme_preview;
-        }
     }
     fn header(&mut self, ctx: &egui::Context) {
-        let previous = (self.theme_id.clone(), self.scale);
         egui::TopBottomPanel::top("brand")
             .frame(
                 egui::Frame::new()
@@ -329,6 +355,8 @@ impl LabApp {
                     });
                 }
             });
+    }
+    fn sync_appearance(&mut self, ctx: &egui::Context, previous: (String, f32)) {
         if previous != (self.theme_id.clone(), self.scale) {
             theme::apply(ctx, &self.theme_id);
             if !self.preferences_read_only {
@@ -727,8 +755,10 @@ impl LabApp {
         self.metrics = Metrics::default();
         ctx.set_zoom_factor(self.scale);
         self.advance_scripts(ctx);
+        let previous = (self.theme_id.clone(), self.scale);
         self.header(ctx);
         self.appearance_preview(ctx);
+        self.sync_appearance(ctx, previous);
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(palette(ui).error, error);
@@ -749,30 +779,31 @@ impl LabApp {
                     .inner_margin(18.),
             )
             .show(ctx, |ui| {
-                egui::ScrollArea::vertical()
-                    .id_salt(("main", self.selected))
-                    .auto_shrink([false, false])
-                    .show(ui, |ui| {
-                        let width = ui.available_width().min(if self.selected.is_some() {
-                            1060.
-                        } else {
-                            1280.
-                        });
-                        ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
-                            ui.allocate_ui_with_layout(
-                                egui::vec2(width, 0.),
-                                egui::Layout::top_down(egui::Align::Min),
-                                |ui| {
-                                    ui.set_width(width);
-                                    if let Some(i) = self.selected {
-                                        self.workspace(ui, i)
-                                    } else {
-                                        self.library(ui)
-                                    }
-                                },
-                            );
-                        });
+                let mut area = egui::ScrollArea::vertical().id_salt(("main", self.selected));
+                if std::mem::take(&mut self.lesson_scroll_reset) {
+                    area = area.vertical_scroll_offset(0.);
+                }
+                area.auto_shrink([false, false]).show(ui, |ui| {
+                    let width = ui.available_width().min(if self.selected.is_some() {
+                        1060.
+                    } else {
+                        1280.
                     });
+                    ui.with_layout(egui::Layout::top_down(egui::Align::Center), |ui| {
+                        ui.allocate_ui_with_layout(
+                            egui::vec2(width, 0.),
+                            egui::Layout::top_down(egui::Align::Min),
+                            |ui| {
+                                ui.set_width(width);
+                                if let Some(i) = self.selected {
+                                    self.workspace(ui, i)
+                                } else {
+                                    self.library(ui)
+                                }
+                            },
+                        );
+                    });
+                });
             });
         if self.host_activity
             && let Some(i) = self.selected

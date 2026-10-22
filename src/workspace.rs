@@ -9,6 +9,8 @@ use serde::{Deserialize, Serialize};
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     pub version: u32,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub script_learning: Option<crate::script_teaching::Learning>,
     pub command: String,
     pub service_port: Option<String>,
     pub dns_address: Option<String>,
@@ -29,6 +31,7 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.script_learning.as_ref().is_none_or(|l| l.valid())
             && self.command.len() <= 4096
             && [
                 &self.service_port,

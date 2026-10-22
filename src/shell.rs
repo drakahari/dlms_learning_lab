@@ -498,13 +498,20 @@ impl Parser {
             self.patch(branch);
             return Ok(());
         }
-        if [
-            "then", "else", "fi", "do", "done", "case", "until", "select", "function", "!",
-        ]
-        .iter()
-        .any(|s| self.is(s))
+        if ["then", "else", "fi", "do", "done"]
+            .iter()
+            .any(|s| self.is(s))
         {
-            return Err("Unexpected or unsupported shell keyword".into());
+            return Err(
+                "Syntax error: unexpected then/else/fi/do/done; check the matching if or loop"
+                    .into(),
+            );
+        }
+        if ["case", "until", "select", "function", "!"]
+            .iter()
+            .any(|s| self.is(s))
+        {
+            return Err("Unsupported shell keyword".into());
         }
         let mut pipeline = vec![self.command()?];
         while self.eat("|") {
@@ -553,13 +560,24 @@ impl Parser {
     }
 }
 fn compile(source: &str) -> Result<Vec<Code>, String> {
+    fn classified(message: String) -> String {
+        if message.to_ascii_lowercase().contains("unsupported")
+            || message.contains("exceeds")
+            || message.contains("limit")
+            || message.starts_with("Syntax error:")
+        {
+            message
+        } else {
+            format!("Syntax error: {message}")
+        }
+    }
     let mut p = Parser {
-        tokens: lex(source)?,
+        tokens: lex(source).map_err(classified)?,
         pos: 0,
         code: Vec::new(),
         depth: 0,
     };
-    p.list(&[])?;
+    p.list(&[]).map_err(classified)?;
     Ok(p.code)
 }
 fn path(s: &str) -> Result<String, String> {

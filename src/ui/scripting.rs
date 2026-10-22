@@ -6,8 +6,14 @@ pub(super) struct Job {
     index: usize,
     vm: Option<shell::Vm>,
     results: Vec<shell::Outcome>,
+    example: bool,
 }
 impl Job {
+    pub(super) fn example(id: String, source: String, case: shell::Case) -> Self {
+        let mut job = Self::new(id, source, vec![case]);
+        job.example = true;
+        job
+    }
     fn new(id: String, source: String, cases: Vec<shell::Case>) -> Self {
         Self {
             id,
@@ -16,6 +22,7 @@ impl Job {
             index: 0,
             vm: None,
             results: Vec::new(),
+            example: false,
         }
     }
 }
@@ -42,17 +49,34 @@ impl LabApp {
             }
         }
         if job.index == job.cases.len() {
-            if let Some(a) = self.progress.attempts.get_mut(&job.id)
-                && let engine::State::Script { source, run } = &mut a.state
-                && *source == job.source
-            {
-                *run = Some(shell::Record {
-                    source: job.source.clone(),
-                    results: std::mem::take(&mut job.results),
-                });
-                a.workspace.as_mut().unwrap().checked = true;
-                self.checked = true;
-                self.dirty = true;
+            if let Some(a) = self.progress.attempts.get_mut(&job.id) {
+                if job.example {
+                    if let Some(l) = a
+                        .workspace
+                        .as_mut()
+                        .and_then(|w| w.script_learning.as_mut())
+                        && l.example_source == job.source
+                    {
+                        l.example_result = job.results.pop();
+                        self.dirty = true;
+                    }
+                } else if let engine::State::Script { source, run } = &mut a.state
+                    && *source == job.source
+                {
+                    self.script_case = job
+                        .results
+                        .iter()
+                        .zip(&job.cases)
+                        .position(|(r, c)| !c.accepts(r))
+                        .unwrap_or(0);
+                    *run = Some(shell::Record {
+                        source: job.source.clone(),
+                        results: std::mem::take(&mut job.results),
+                    });
+                    a.workspace.as_mut().unwrap().checked = true;
+                    self.checked = true;
+                    self.dirty = true;
+                }
             }
             self.script_job = None;
         }
@@ -79,7 +103,7 @@ impl LabApp {
         }
         let mut selected = self.script_case.min(cases.len() - 1);
         ui.horizontal_wrapped(|ui| {
-            ui.label("Inspect case");
+            ui.label("Inspect inputs");
             egui::ComboBox::from_id_salt("script-case")
                 .width(230.)
                 .selected_text(&cases[selected].name)
@@ -90,7 +114,7 @@ impl LabApp {
                 });
             ui.label(
                 RichText::new(format!(
-                    "Run tests all {} cases in fresh virtual workspaces",
+                    "Run script checks all {} input sets using fresh virtual files",
                     cases.len()
                 ))
                 .small()
@@ -98,6 +122,21 @@ impl LabApp {
             );
         });
         self.script_case = selected;
+        let c = &cases[selected];
+        if !c.env.is_empty() {
+            ui.add(
+                egui::Label::new(format!(
+                    "Supplied by the lab for these inputs: {}",
+                    c.env
+                        .iter()
+                        .map(|(name, value)| format!("{name} = {value:?}"))
+                        .collect::<Vec<_>>()
+                        .join(" · ")
+                ))
+                .wrap(),
+            );
+        }
+
         let running = self.script_job.is_some();
         let mut run_clicked = false;
         let mut stop_clicked = false;
@@ -171,9 +210,9 @@ impl LabApp {
             self.metrics.completion = complete;
             ui.label(
                 RichText::new(if complete {
-                    "Objective complete · Every behavior case passes."
+                    "Correct solution · All input sets pass."
                 } else {
-                    "Needs another edit · Inspect the failing cases, then retry."
+                    "Needs another edit · Inspect the failing inputs, then retry."
                 })
                 .color(if complete {
                     palette(ui).success
@@ -201,7 +240,7 @@ impl LabApp {
             }
         }
         let c = &cases[selected];
-        egui::CollapsingHeader::new("Case inputs, expected behavior & virtual files").id_salt("script-fixture").show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the declared virtual files exist. Every Run starts fresh; editor work is retained.");});
+        egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the declared virtual files exist. Every Run starts fresh; editor work is retained.");});
     }
     fn script_editor(&mut self, ui: &mut egui::Ui, i: usize) {
         ui.label("Script · portable shell subset");
@@ -284,24 +323,43 @@ impl LabApp {
         });
         (run, stop)
     }
-    fn script_output(&self, ui: &mut egui::Ui, i: usize, case: usize) {
-        ui.label("Run output · selected case");
+    fn script_output(&mut self, ui: &mut egui::Ui, i: usize, case: usize) {
+        ui.label("Run output · selected inputs");
         let engine::State::Script { run, .. } =
             &self.progress.attempts[&self.scenarios[i].id].state
         else {
             return;
         };
         let r = run.as_ref().and_then(|r| r.results.get(case));
-        egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui,|ui|{ui.set_min_width(ui.available_width().min(180.));egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(280.).show(ui,|ui|{if let Some(r)=r{ui.label(format!("Exit status: {}",r.status));ui.label(RichText::new("Standard output").small().color(palette(ui).muted));ui.label(RichText::new(if r.stdout.is_empty(){"(empty)"}else{&r.stdout}).monospace());if !r.stderr.is_empty(){ui.label(RichText::new("Standard error").small().color(palette(ui).error));ui.label(RichText::new(&r.stderr).monospace());}
-if let Some(e)=&r.error{ui.add(egui::Label::new(RichText::new(format!("Simulator diagnostic: {e}")).color(palette(ui).error)).wrap());}}else{ui.label("Run the script to see output and feedback. Editing clears the previous result.");}});});
+        let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
+            egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]).show(ui, |ui| {
+                if let Some(r) = r {
+                    outcome(ui, r);
+                    let engine::Goal::Script { cases } = &self.scenarios[i].goal else { return; };
+                    let c = &cases[case];
+                    if r.error.is_none() && !c.accepts(r) {
+                        ui.label(RichText::new("Behavior differs · Edit your script and Run again.").color(palette(ui).error));
+                        if c.stdout != r.stdout { ui.label(teaching::output_advice(&c.stdout, &r.stdout)); output_diff(ui,"Standard output", &c.stdout, &r.stdout); }
+                        if c.stderr != r.stderr { ui.label("Standard error is the separate channel for problem messages; >&2 sends text there."); output_diff(ui,"Standard error", &c.stderr, &r.stderr); }
+                        if c.status != r.status { ui.label(format!("Expected exit status: {} · Actual: {}. A successful task uses 0; an input problem uses the assignment’s stated nonzero status.", c.status, r.status)); }
+                        if c.after != r.files { ui.label("The virtual files differ. Check the destination path, filter and whether > replaced or >> appended text. Inspect the files below."); }
+                    }
+                } else { ui.label("Type your script in the editor, then choose Run script. Output and feedback appear here."); }
+            });
+        });
+        self.metrics.output = Some(output.response.rect);
     }
     pub(super) fn appearance_preview(&mut self, ctx: &egui::Context) {
-        if self.theme_preview {
+        if self.settings_open || self.theme_preview {
             let mut open = true;
-            egui::Window::new("Native theme preview").open(&mut open).default_width(500.).resizable(true).show(ctx,|ui|{
+            egui::Window::new("Settings").open(&mut open).default_width(500.).resizable(true).show(ctx,|ui|{
+                ui.heading("Appearance");
+                ui.push_id("settings-theme", |ui| { self.theme_dropdown(ui); });
                 ui.label(format!("{} · {}",theme::find(&self.theme_id).group,theme::find(&self.theme_id).name));
                 ui.label("Selection previews immediately and is saved locally. Your desktop theme stays unchanged.");
                 egui::ScrollArea::vertical().max_height(ctx.content_rect().height()*0.65).show(ui,|ui|{
+                    egui::CollapsingHeader::new("Theme samples").default_open(self.theme_preview).show(ui, |ui| {
+                    ui.label("Examples only · These controls demonstrate appearance and perform no lab actions.");
                     card(ui).show(ui,|ui|{
                         ui.label("Readable workspace text");
                         ui.label(RichText::new("Secondary instructions").color(palette(ui).muted));
@@ -318,6 +376,7 @@ if let Some(e)=&r.error{ui.add(egui::Label::new(RichText::new(format!("Simulator
                         egui::Frame::new().fill(palette(ui).input).inner_margin(10.).show(ui,|ui|{ui.label(RichText::new("Simulated terminal\nlab # printf '%s\\n' 'ready'\nready").monospace());});
                         ui.label("Tab moves focus; the focused control has a contrasting outline.");
                     });
+                    });
                     egui::CollapsingHeader::new("Sources & attribution").show(ui,|ui|{
                         ui.label("Five stock DLMS palettes, all 22 official Omarchy v4.0.4 palettes, and the accepted Learning Lab Navy. DLMS and upstream Omarchy Ethereal remain distinct entries.");
                         ui.label("Omarchy revision c668141e9c42b13c80c9ca4ea108e11708c5e8a5 · Native role/contrast adaptations.");
@@ -326,12 +385,58 @@ if let Some(e)=&r.error{ui.add(egui::Label::new(RichText::new(format!("Simulator
                     });
                 });
             });
-            self.theme_preview = open;
+            self.settings_open = open;
+            if !open {
+                self.theme_preview = false;
+            }
         }
         if let Some(e) = &self.preferences_error {
             egui::TopBottomPanel::bottom("appearance-error").show(ctx, |ui| {
                 ui.label(format!("Appearance could not be saved: {e}"));
             });
         }
+    }
+}
+
+fn output_diff(ui: &mut egui::Ui, label: &str, expected: &str, actual: &str) {
+    ui.label(RichText::new(format!("{label} · \\n means a line break below")).small());
+    ui.add(
+        egui::Label::new(
+            RichText::new(format!("Expected: {expected:?}\nActual:   {actual:?}")).monospace(),
+        )
+        .wrap(),
+    );
+}
+pub(super) fn outcome(ui: &mut egui::Ui, r: &shell::Outcome) {
+    ui.label(format!("Exit status: {}", r.status));
+    ui.label(
+        RichText::new("Standard output · printed text")
+            .small()
+            .color(palette(ui).muted),
+    );
+    ui.add(
+        egui::Label::new(
+            RichText::new(if r.stdout.is_empty() {
+                "(empty)"
+            } else {
+                &r.stdout
+            })
+            .monospace(),
+        )
+        .wrap(),
+    );
+    if !r.stderr.is_empty() {
+        ui.label(
+            RichText::new("Standard error · problem messages")
+                .small()
+                .color(palette(ui).error),
+        );
+        ui.add(egui::Label::new(RichText::new(&r.stderr).monospace()).wrap());
+    }
+    if let Some(e) = &r.error {
+        ui.label(RichText::new(teaching::diagnostic_title(e)).color(palette(ui).error));
+        ui.label(teaching::diagnostic_advice(e));
+        ui.add(egui::Label::new(e).wrap());
+        ui.label("Edit the script, then Run again. Your draft stays saved.");
     }
 }

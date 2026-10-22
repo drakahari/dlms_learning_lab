@@ -22,6 +22,7 @@ impl LabApp {
             if before != challenge {
                 self.progress.attempts.get_mut(&s.id).unwrap().challenge = challenge;
                 self.help_open = false;
+                self.script_job = None;
                 if let Some(view) = &mut self.ipv4_view {
                     view.hide_guidance();
                 }
@@ -53,12 +54,14 @@ impl LabApp {
                 self.ipv4_assignment(ui, i);
             } else {
                 ui.label(RichText::new(&s.title).strong().size(23.));
-                ui.label(&s.objective);
+                if !matches!(s.initial, State::Script { .. }) {
+                    ui.label(&s.objective);
+                }
                 if !challenge {
                     ui.label(RichText::new(starting_point(&s.id)).color(palette(ui).muted));
                 }
                 if matches!(s.initial, State::Script { .. }) {
-                    self.scripting(ui, i);
+                    self.script_learning_workspace(ui, i);
                 } else {
                     match &self.progress.attempts[&s.id].state {
                         State::Vlsm { .. } => self.allocations(ui, i),
@@ -100,22 +103,27 @@ impl LabApp {
                     self.report(ui, i);
                 }
             }
-            ui.add_space(2.);
-            let r = ui.link(if self.help_open {
-                "Hide help"
-            } else if matches!(s.initial, State::Subnet { .. }) {
-                "References & more practice"
-            } else if challenge {
-                "Request help & references"
-            } else {
-                "Hints, walkthrough & references"
-            });
-            self.metrics.help = Some(r.rect);
-            if r.clicked() {
-                self.help_open = !self.help_open;
-            }
-            if self.help_open {
-                self.help(ui, i);
+            let show_help = challenge
+                || !matches!(s.initial, State::Script { .. })
+                || self.script_view(i) == teaching::View::Assignment;
+            if show_help {
+                ui.add_space(2.);
+                let r = ui.link(if self.help_open {
+                    "Hide help"
+                } else if matches!(s.initial, State::Subnet { .. }) {
+                    "References & more practice"
+                } else if challenge {
+                    "Request help & references"
+                } else {
+                    "Hints, walkthrough & references"
+                });
+                self.metrics.help = Some(r.rect);
+                if r.clicked() {
+                    self.help_open = !self.help_open;
+                }
+                if self.help_open {
+                    self.help(ui, i);
+                }
             }
         });
         ui.label(

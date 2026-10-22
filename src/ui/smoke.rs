@@ -287,9 +287,11 @@ impl LabApp {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                         }
                         self.theme_preview = false;
+                        self.settings_open = false;
                         self.theme_id = "lab-navy".into();
                         theme::apply(ctx, &self.theme_id);
                         self.launch(i);
+                        self.set_script_view(i, teaching::View::Assignment);
                         self.progress
                             .attempts
                             .get_mut(&self.scenarios[i].id)
@@ -375,6 +377,267 @@ impl LabApp {
                 };
                 println!(
                     "PASS native {scope}: seven scripting workspaces, typed source and Run, complete behavior cases, Challenge, Stop and invalidation, light/dark 150% resize. Synthetic progress only; injected native input, not physical-device acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            n @ 250..=375 => {
+                let i = 9 + (n - 250) / 18;
+                let id = self.scenarios[i].id.clone();
+                match (n - 250) % 18 {
+                    0 => {
+                        if i == 9 {
+                            ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        }
+                        self.launch(i);
+                    }
+                    1 => {
+                        assert_eq!(self.script_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => self
+                        .pending_events
+                        .extend(click(self.metrics.example_action.unwrap())),
+                    3 => {
+                        assert_eq!(self.script_view(i), teaching::View::Example);
+                        self.pending_events
+                            .extend(click(self.metrics.check.unwrap()));
+                    }
+                    4 => {}
+                    5 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .script_learning
+                            .as_ref()
+                            .unwrap();
+                        assert!(
+                            self.scenarios[i]
+                                .teaching
+                                .as_ref()
+                                .unwrap()
+                                .fixture
+                                .accepts(l.example_result.as_ref().unwrap())
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!self.metrics.completion);
+                        assert!(self.metrics.editor_viewport.unwrap().height() >= 175.);
+                        shot = Some(format!("{id}-example"));
+                        self.focus_input = true;
+                    }
+                    6 => {
+                        let lesson = self.scenarios[i].teaching.as_ref().unwrap();
+                        let (from, to) = [
+                            ("Mina", "Rowan"),
+                            ("For:", "Recipient:"),
+                            ("Note:", "Reminder:"),
+                            ("-z", "-n"),
+                            ("OPEN", "CLOSED"),
+                            ("Reading", "Menu:"),
+                            ("-f", "-z"),
+                        ][i - 9];
+                        self.pending_events.extend([
+                            key(egui::Key::A, true),
+                            egui::Event::Text(lesson.example.replacen(from, to, 1)),
+                        ]);
+                    }
+                    7 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    8 => {}
+                    9 => {
+                        let a = &self.progress.attempts[&id];
+                        let result = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .script_learning
+                            .as_ref()
+                            .unwrap()
+                            .example_result
+                            .as_ref()
+                            .unwrap();
+                        assert!(result.error.is_none());
+                        assert!(
+                            !self.scenarios[i]
+                                .teaching
+                                .as_ref()
+                                .unwrap()
+                                .fixture
+                                .accepts(result)
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        self.pending_events
+                            .extend(click(self.metrics.assignment_action.unwrap()));
+                    }
+                    10 => {
+                        assert_eq!(self.script_view(i), teaching::View::Assignment);
+                        shot = Some(format!("{id}-assignment"));
+                    }
+                    11 => self.pending_events.extend([
+                        key(egui::Key::A, true),
+                        egui::Event::Text("printf 'Not the requested output'".into()),
+                    ]),
+                    12 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    13 => {
+                        assert!(!self.metrics.completion);
+                        if i == 9 {
+                            shot = Some("shell-handover-retry-feedback".into());
+                        }
+                        self.focus_input = true;
+                    }
+                    14 => self.pending_events.extend([
+                        key(egui::Key::A, true),
+                        egui::Event::Text(self.scenarios[i].solution[0].clone()),
+                    ]),
+                    15 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    16 => {}
+                    _ => {
+                        assert!(self.metrics.completion, "{id} retry");
+                        if i == 9 {
+                            shot = Some("shell-handover-teaching-complete".into());
+                        }
+                    }
+                }
+            }
+            376 => {
+                self.launch(9);
+                self.set_script_view(9, teaching::View::Introduction);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+            }
+            377 => shot = Some("shell-introduction-light-150".into()),
+            378 => {
+                self.set_script_view(9, teaching::View::Example);
+            }
+            379 => shot = Some("shell-example-light-150".into()),
+            380 => {
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+                self.set_script_view(9, teaching::View::Assignment);
+            }
+            381 => shot = Some("shell-assignment-dark-150".into()),
+            382 => {
+                self.scale = 1.;
+                self.settings_open = true;
+                self.theme_preview = true;
+            }
+            383 => shot = Some("settings-appearance-theme-samples".into()),
+            384 => {
+                self.save();
+                let saved = progress::load(&self.path, &self.scenarios).unwrap();
+                self.progress = saved;
+                self.launch(9);
+                assert_eq!(self.script_view(9), teaching::View::Assignment);
+                assert!(engine::solved(
+                    &self.progress.attempts["shell-handover"].state,
+                    &self.scenarios[9].goal
+                ));
+                println!(
+                    "PASS native teaching walkthrough: fresh profile; seven introductions, example runs and suggested edits, isolated assignment drafts, wrong output and successful retry, save/load resume, light/dark 150% and Settings samples. Injected application events; not a novice user study."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            400 => {
+                self.launch(9);
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.set_script_view(9, teaching::View::Introduction);
+            }
+            401 | 405 => {
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(egui::pos2(30., 300.)),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1500.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            402 => {}
+            403 => {
+                let r = self.metrics.example_action.unwrap();
+                assert!(
+                    ctx.content_rect().contains(r.center()),
+                    "Introduction actions must be reachable by scrolling"
+                );
+                shot = Some("shell-introduction-light-150-scrolled".into());
+                self.pending_events.extend(click(r));
+            }
+            404 => {
+                assert_eq!(self.script_view(9), teaching::View::Example);
+            }
+            406 => {}
+            407 => {
+                let r = self.metrics.check.unwrap();
+                assert!(
+                    ctx.content_rect().contains(r.center()),
+                    "Example Run must be reachable by scrolling"
+                );
+                shot = Some("shell-example-light-150-scrolled".into());
+                self.pending_events.extend(click(r));
+            }
+            408 => {
+                assert!(
+                    self.progress.attempts["shell-handover"]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .script_learning
+                        .as_ref()
+                        .unwrap()
+                        .example_result
+                        .is_some()
+                );
+            }
+            409 => {
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(egui::pos2(30., 300.)),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1500.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            410 => {
+                shot = Some("shell-example-light-150-output".into());
+            }
+            411 => {
+                self.set_script_view(9, teaching::View::Assignment);
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            412 => {
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(egui::pos2(30., 300.)),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1500.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            413 => {}
+            414 => {
+                let r = self.metrics.check.unwrap();
+                assert!(
+                    ctx.content_rect().contains(r.center()),
+                    "Assignment Run must be reachable by scrolling"
+                );
+                shot = Some("shell-assignment-dark-150-scrolled".into());
+            }
+            415 => {
+                println!(
+                    "PASS native teaching layout: light/dark 150% outer scrolling reaches introduction actions and example/assignment Run controls in a tiled Fedora window; completed example output inspected."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

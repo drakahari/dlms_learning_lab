@@ -18,7 +18,7 @@ Checked 2026-10-21. **28 choices:** the accepted Learning Lab Navy default, **al
 | Omarchy light | catppuccin-latte; flexoki-light; lupine; rose-pine; white |
 | Omarchy dark | catppuccin; ethereal; everforest; gruvbox; hackerman; kanagawa; last-horizon; lumon; matte-black; miasma; nord; osaka-jade; retro-82; ristretto; solitude; tokyo-night; vantablack |
 
-Saved IDs are namespaced (`lab-navy`, `dlms-*`, `omarchy-*`). The picker previews immediately; **Preview theme** shows native terminal/editor/action/selection/disabled/error/success samples and full attribution. Selection and text size use independent version-1 atomic local preferences. Existing progress format and attempts are not rewritten to choose a theme. Invalid or future preference files are retained; the UI reports an appearance-only problem and uses the default. Unknown IDs fall back on read without rewriting the file.
+Saved IDs are namespaced (`lab-navy`, `dlms-*`, `omarchy-*`). The picker previews immediately; **Settings → Appearance → Theme samples** shows explicitly labeled example native terminal/editor/action/selection/disabled/error/success samples and full attribution. Selection and text size use independent version-1 atomic local preferences. Existing progress format and attempts are not rewritten to choose a theme. Invalid or future preference files are retained; the UI reports an appearance-only problem and uses the default. Unknown IDs fall back on read without rewriting the file.
 
 ## Native role adaptation and verification targets
 

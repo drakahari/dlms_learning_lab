@@ -38,7 +38,7 @@
       ],
       "explanation": "Quoted expansions preserve spaces and empty data. printf treats percent signs in a %s argument as ordinary data, not a new format.\n\nOne supported solution:\nsite=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n",
       "hints": [
-        "Use $SITE and $TASK to read the supplied values. Assign a local scalar with name=value.",
+        "The lab supplies SITE and TASK. Read their values as \"$SITE\" and \"$TASK\"; create your own named value with name=value if useful.",
         "Double quotes keep each expanded value together. printf separates the fixed format from the data.",
         "A format such as printf 'Site: %s\\n' \"$SITE\" prints one complete line."
       ],
@@ -101,7 +101,44 @@
       "solution": [
         "site=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n"
       ],
-      "prerequisites": []
+      "prerequisites": [],
+      "teaching": {
+        "prerequisite_note": "Start here: no shell knowledge is needed.",
+        "concepts": [
+          {
+            "title": "A script is a saved set of instructions",
+            "text": "Type instructions in the script editor. Run reads them from top to bottom and shows what they print. Here it runs only in the offline simulator; it cannot change your computer."
+          },
+          {
+            "title": "Comments and printed text",
+            "text": "A line starting with # is a comment: a note that is not run. printf prints text. A command name comes first, followed by the information it needs, separated by spaces."
+          },
+          {
+            "title": "Variables are names for values",
+            "text": "visitor='Mina' creates a variable named visitor; use no spaces around =. \"$visitor\" reads its value. The example also has ROOM, supplied by the lab before Run. You create visitor; you do not create ROOM. In the assignment, SITE and TASK are supplied instead."
+          },
+          {
+            "title": "Quotes and printf formatting",
+            "text": "Single quotes keep the format text literal. In double quotes, $visitor is replaced by its value and kept together, even with spaces. In printf, %s means “insert the next text value here”; \\n (backslash then n) means “start a new line.” The format and the values are separate pieces."
+          }
+        ],
+        "example": "# A comment is a note, not an instruction.\nvisitor='Mina'\nprintf 'Welcome\\n'\nprintf 'Hello, %s!\\n' \"$visitor\"\nprintf 'Room: %s\\n' \"$ROOM\"\n",
+        "inputs": "ROOM is supplied as Library. This example has no arguments, input text or files.",
+        "try_change": "Change Mina to Rowan, then Run example again. The greeting should change; the room should stay Library.",
+        "fixture": {
+          "name": "Welcome example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "ROOM": "Library"
+          },
+          "files": {},
+          "stdout": "Welcome\nHello, Mina!\nRoom: Library\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      }
     },
     {
       "id": "shell-arguments",
@@ -141,7 +178,7 @@
       "explanation": "Arguments are data. Saving them in named variables makes intent readable, and quoting their later expansion keeps file names with spaces intact.\n\nOne supported solution:\nlabel=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n",
       "hints": [
         "$1 and $2 refer to the arguments, not file contents.",
-        "Assignment-only commands do not split their values; quote values when passing them to printf.",
+        "A line such as label=$1 saves argument 1 under a name you choose. Later, quote \"$label\" when passing it to printf.",
         "Use one %s placeholder for each value rather than using the value as the format."
       ],
       "sources": [
@@ -205,7 +242,37 @@
       ],
       "prerequisites": [
         "shell-handover"
-      ]
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on lab 1: printing, variables, quotes, %s and \\n.",
+        "concepts": [
+          {
+            "title": "Arguments are values passed to a script",
+            "text": "An argument is a separate piece of information given when Run starts the script. $1 reads the first argument and $2 the second. They are supplied values, like the lab variables you used earlier, but identified by position."
+          },
+          {
+            "title": "Give those values useful names",
+            "text": "person=$1 copies argument 1 into a variable you create. When passing that variable to printf, write \"$person\" so a name such as River Park stays one value. An empty argument is still an argument; it does not move the next one into its place."
+          }
+        ],
+        "example": "person=$1\nitem=$2\nprintf 'For: %s\\nItem: %s\\n' \"$person\" \"$item\"\n",
+        "inputs": "Argument 1: River Park. Argument 2: welcome card. These are text values, not files to open.",
+        "try_change": "Change For: to Recipient: in the format. Run again; the argument values should stay the same.",
+        "fixture": {
+          "name": "Gift example",
+          "args": [
+            "River Park",
+            "welcome card"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "For: River Park\nItem: welcome card\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      }
     },
     {
       "id": "shell-input",
@@ -300,7 +367,38 @@
       ],
       "prerequisites": [
         "shell-arguments"
-      ]
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on labs 1–2: quoted values and the difference between script text and supplied arguments.",
+        "concepts": [
+          {
+            "title": "Input and output are different directions",
+            "text": "Standard input is text supplied for a running script to read. Standard output is the normal text it prints. Arguments are separate starting values; read does not read the argument list. The simulator supplies input text, so it will not wait for your keyboard."
+          },
+          {
+            "title": "Read one line into a variable",
+            "text": "read -r note reads one line and creates or updates note. The -r option keeps backslashes as ordinary characters. With one variable, this form removes spaces and tabs at the ends but keeps spaces inside the line. Print \"$note\" to keep those internal spaces."
+          },
+          {
+            "title": "What is a line break?",
+            "text": "A line break ends a line. printf uses \\n to print one. A backslash in input, such as the one in C:\\plans, is data, not a request to print a line break."
+          }
+        ],
+        "example": "read -r note\nprintf 'Note: %s\\n' \"$note\"\n",
+        "inputs": "Input text: two spaces, Meet  at C:\\plans, two spaces, then a line break. No arguments are supplied.",
+        "try_change": "Change Note: to Reminder: and Run. The two spaces between Meet and at should remain.",
+        "fixture": {
+          "name": "Reminder example",
+          "args": [],
+          "stdin": "  Meet  at C:\\plans  \n",
+          "env": {},
+          "files": {},
+          "stdout": "Note: Meet  at C:\\plans\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      }
     },
     {
       "id": "shell-validation",
@@ -412,7 +510,38 @@
       ],
       "prerequisites": [
         "shell-input"
-      ]
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on labs 1–3: arguments, quotes, printed output and supplied input.",
+        "concepts": [
+          {
+            "title": "Commands report whether they succeeded",
+            "text": "An exit status is a number a command returns: 0 means success; other numbers report another outcome. The script normally returns its last command’s status. exit 2 stops it immediately and returns 2."
+          },
+          {
+            "title": "Choose what runs with a condition",
+            "text": "[ -z \"$1\" ] tests whether argument 1 is empty or missing. -n tests the opposite: whether text is non-empty. Keep spaces after [ and before ]. if runs the then instructions when the test succeeds (status 0); else gives another path. fi ends the choice. A ; can separate instructions where a new line would also work."
+          },
+          {
+            "title": "Keep problems separate from normal output",
+            "text": "Standard error is a second output channel for problem messages. >&2 sends a printf message there instead of to normal output. A guard is an early check that explains a problem and stops before doing other work."
+          }
+        ],
+        "example": "if [ -z \"$1\" ]; then\n    printf 'Name needed\\n' >&2\n    exit 2\nelse\n    printf 'Hello, %s\\n' \"$1\"\nfi\n",
+        "inputs": "No arguments are supplied, so the example takes the missing-name path. The message belongs in Standard error.",
+        "try_change": "Change -z to -n, which tests for a non-empty value. Run again with the same empty input and observe the other path.",
+        "fixture": {
+          "name": "Name guard example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "",
+          "stderr": "Name needed\n",
+          "status": 2,
+          "after": {}
+        }
+      }
     },
     {
       "id": "shell-report",
@@ -534,7 +663,46 @@
       ],
       "prerequisites": [
         "shell-validation"
-      ]
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on lab 4: exit status, arguments, quoting and output channels.",
+        "concepts": [
+          {
+            "title": "A path names a virtual file",
+            "text": "A file contains text; its path is its name in the simulated workspace. /work/visitors names the example input. A path argument is just a name until a command opens that file. These files never refer to your computer’s files."
+          },
+          {
+            "title": "Select lines with grep",
+            "text": "grep -F OPEN \"$1\" reads the file named by argument 1 and prints each line containing the literal text OPEN. -F means ordinary text, not a special search pattern. Letter case matters. grep returns 0 if it finds lines, 1 if it finds none, or 2 for a read problem."
+          },
+          {
+            "title": "Send output to a file",
+            "text": "> \"$2\" sends normal output to the file named by argument 2 instead of the output display. It creates that file or replaces its previous contents, before the command runs. >> would add to the end instead. Run starts with fresh example files each time."
+          }
+        ],
+        "example": "grep -F OPEN \"$1\" > \"$2\"\n",
+        "inputs": "Arguments: /work/visitors and /work/open-list. The input contains OPEN Mina, CLOSED Dev and OPEN Rowan on separate lines.",
+        "try_change": "Change OPEN to CLOSED and Run again. Inspect the example files below the output to see the different report.",
+        "fixture": {
+          "name": "Visitor report example",
+          "args": [
+            "/work/visitors",
+            "/work/open-list"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/visitors": "OPEN Mina\nCLOSED Dev\nOPEN Rowan\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/visitors": "OPEN Mina\nCLOSED Dev\nOPEN Rowan\n",
+            "/work/open-list": "OPEN Mina\nOPEN Rowan\n"
+          }
+        }
+      }
     },
     {
       "id": "shell-loop",
@@ -644,7 +812,43 @@
       ],
       "prerequisites": [
         "shell-report"
-      ]
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on lab 5: file paths, quoted arguments and printed reports.",
+        "concepts": [
+          {
+            "title": "Repeat a group of instructions",
+            "text": "A for loop repeats its do … done instructions once for each supplied value. for path in \"$@\" gives path each original argument in order. \"$@\" means all arguments, keeping spaces and empty arguments intact. With no arguments, there is nothing to repeat."
+          },
+          {
+            "title": "Read the contents of each file",
+            "text": "cat \"$path\" prints the file’s text. It does not print the name, so printf can put a heading before it. The loop variable path is created by for; you read its current value as \"$path\". Put both commands inside do … done to keep each heading beside its text."
+          }
+        ],
+        "example": "for path in \"$@\"; do\n    printf 'Reading %s\\n' \"$path\"\n    cat \"$path\"\ndone\n",
+        "inputs": "Arguments: /work/morning and /work/evening notes. Their contents are Tea and Water, each followed by a line break.",
+        "try_change": "Change Reading to Menu: and Run again. You should get one heading and the corresponding text per file, in order.",
+        "fixture": {
+          "name": "Menu example",
+          "args": [
+            "/work/morning",
+            "/work/evening notes"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/morning": "Tea\n",
+            "/work/evening notes": "Water\n"
+          },
+          "stdout": "Reading /work/morning\nTea\nReading /work/evening notes\nWater\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/morning": "Tea\n",
+            "/work/evening notes": "Water\n"
+          }
+        }
+      }
     },
     {
       "id": "shell-capstone",
@@ -798,8 +1002,47 @@
         "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n"
       ],
       "prerequisites": [
+        "shell-validation",
+        "shell-report",
         "shell-loop"
-      ]
+      ],
+      "teaching": {
+        "prerequisite_note": "Combine labs 1–6: guards, quotes, arguments, output channels, grep and file redirection. The new test here is -f.",
+        "concepts": [
+          {
+            "title": "Check a file before using it",
+            "text": "[ -f \"$1\" ] succeeds only when argument 1 names an existing ordinary virtual file. It complements -z and -n, which check whether text is empty. A non-empty path can still name a missing file."
+          },
+          {
+            "title": "Check before changing anything",
+            "text": "> creates or clears the output file before reading begins. A missing-input guard must therefore run before the command containing >. The example checks a file and reads it without creating a report; the assignment asks you to combine this with the earlier report-writing skill."
+          },
+          {
+            "title": "Decide which outcomes are acceptable",
+            "text": "grep’s status 1 means no matching lines. For the capstone, an empty report is acceptable: a successful final Saved message can give status 0. A missing input is different; explain that problem on standard error and exit before touching any file."
+          }
+        ],
+        "example": "if [ -f \"$1\" ]; then\n    cat \"$1\"\nelse\n    printf 'Input is missing\\n' >&2\n    exit 2\nfi\n",
+        "inputs": "Argument 1: /work/greeting. That virtual file contains Welcome, followed by a line break.",
+        "try_change": "Change -f to -z and Run again. The path is not empty, so the other branch should run; compare that with checking whether the file exists.",
+        "fixture": {
+          "name": "File guard example",
+          "args": [
+            "/work/greeting"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/greeting": "Welcome\n"
+          },
+          "stdout": "Welcome\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/greeting": "Welcome\n"
+          }
+        }
+      }
     }
   ]
 }

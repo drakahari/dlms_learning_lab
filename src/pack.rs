@@ -26,6 +26,8 @@ pub struct Scenario {
     pub solution: Vec<String>,
     #[serde(default)]
     pub prerequisites: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub teaching: Option<crate::script_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -119,6 +121,12 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
                 .any(|a| !a.cidr.is_empty() && engine::cidr(&a.cidr).is_none())
         {
             return Err("Invalid initial subnet allocation".into());
+        }
+        if let Some(lesson) = &s.teaching {
+            if !matches!(s.initial, State::Script { .. }) {
+                return Err("Script teaching attached to a different lab type".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
         validate_state(&s.initial).map_err(|e| format!("{}: {e}", s.id))?;
         if engine::solved(&s.initial, &s.goal) {
