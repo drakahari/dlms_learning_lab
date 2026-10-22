@@ -46,7 +46,10 @@ fn legacy_completed_subnet_is_upgraded_without_losing_credit_and_backup_is_exact
     workspace::prepare(a);
     let after = ipv4::Exercise::from_state(&a.state).unwrap();
     assert_eq!(before.answers, after.answers);
-    assert!(after.solved());
+    assert!(!after.solved());
+    assert_eq!(after.second.as_deref(), Some(""));
+    assert!(progress::legacy_credit(a));
+    assert!(!progress::current_solved(a, &labs[0]));
     assert_eq!(a.step, 2);
     assert_eq!(a.hints, 2);
     assert!(a.challenge);
@@ -56,9 +59,10 @@ fn legacy_completed_subnet_is_upgraded_without_losing_credit_and_backup_is_exact
     let backup = path.with_extension("before-workspace.json");
     assert_eq!(std::fs::read(&backup).unwrap(), original);
     let q = progress::load(&path, &labs).unwrap();
-    assert!(engine::solved(
-        &q.attempts[&labs[0].id].state,
-        &labs[0].goal
+    assert!(progress::legacy_credit(&q.attempts[&labs[0].id]));
+    assert!(!progress::current_solved(
+        &q.attempts[&labs[0].id],
+        &labs[0]
     ));
     assert!(q.favorites.contains(&labs[0].id));
     progress::save(&path, &q).unwrap();
@@ -94,7 +98,8 @@ fn partial_legacy_answers_and_practice_are_retained_without_fabricating_success(
     );
     assert!(!engine::solved(&a.state, &labs[0].goal));
     let v = a.ipv4.as_ref().unwrap().variant.as_ref().unwrap();
-    assert!(v.solved());
+    assert!(!v.solved());
+    assert_eq!(v.second.as_deref(), Some(""));
     assert!(a.workspace.as_ref().unwrap().migrated_practice_host);
 }
 #[test]
@@ -168,7 +173,10 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         .as_mut()
         .unwrap()
         .version = 99;
-    progress::save(&path, &p).unwrap();
+    let retained = std::fs::read(&path).unwrap();
+    assert!(progress::save(&path, &p).is_err());
+    assert_eq!(std::fs::read(&path).unwrap(), retained);
+    std::fs::write(&path, serde_json::to_vec(&p).unwrap()).unwrap();
     let original = std::fs::read(&path).unwrap();
     assert!(progress::load(&path, &labs).is_err());
     assert_eq!(std::fs::read(&path).unwrap(), original);

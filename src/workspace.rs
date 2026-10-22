@@ -20,6 +20,8 @@ pub struct WorkspaceData {
     pub ipv4_check: Option<[String; 5]>,
     pub practice_check: Option<[String; 5]>,
     pub migrated_host: bool,
+    pub legacy_host_reviewed: bool,
+    pub legacy_practice_reviewed: bool,
     pub migrated_practice_host: bool,
 }
 impl WorkspaceData {
@@ -51,13 +53,13 @@ pub fn prepare(a: &mut Attempt) {
     if let Some(mut e) = ipv4::Exercise::from_state(&a.state) {
         w.migrated_host |= ipv4::upgrade_exercise(&mut e);
         ipv4::write_exercise(&mut a.state, &e);
-        if w.migrated_host && w.ipv4_check.is_none() {
-            w.ipv4_check = Some(snapshot(&e));
+        if w.migrated_host && !w.legacy_host_reviewed {
+            w.ipv4_check = None;
         }
         if let Some(e) = a.ipv4.as_mut().and_then(|l| l.variant.as_mut()) {
             w.migrated_practice_host |= ipv4::upgrade_exercise(e);
-            if w.migrated_practice_host && w.practice_check.is_none() {
-                w.practice_check = Some(snapshot(e));
+            if w.migrated_practice_host && !w.legacy_practice_reviewed {
+                w.practice_check = None;
             }
         }
     }
@@ -221,7 +223,9 @@ pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
                     format!("{user} reaches the file, but its {class} permissions do not allow {}. The matching owner/group/other class determines access.",if *read&&*write{"reading and writing"}else if *write{"writing"}else{"reading"})
                 } else {"The required simulated file is missing.".into()}
             } else {label.clone()}
-        }else{"The file still grants permissions to the other class. Remove those permissions while retaining the required user’s access.".into()},
+        }else{
+            if let engine::Goal::Access{path,user,exclusive:true,..}=g && let Some(other)=users.keys().find(|other| other.as_str()!=user && other.as_str()!="root" && [1,2,4].iter().any(|bit|engine::access(nodes,users,path,other,*bit))) { format!("{other} can still access the file. Inspect group membership and the file’s owner/group permissions; keep access for {user} only.") } else { "The file still grants permissions to the other class. Remove those permissions while retaining the required user’s access.".into() }
+        },
         State::Logs{result,..}=>if result.is_empty(){"No matching text is selected yet. Locate and inspect the log, then filter its ERROR lines.".into()}else{"The last query does not contain exactly the ERROR lines. Check the file, case-sensitive pattern and any unfiltered extra lines.".into()},
         State::Network{..}=>match i {0=>"The client address changed. Keep the workstation’s assigned address.".into(),1=>"The client mask differs from the router’s LAN mask. Inspect the interface configuration.".into(),_=>"The default route does not use the reachable LAN router. Inspect both the prefix and next hop, then test the remote path.".into()},
         _=>label.clone(),

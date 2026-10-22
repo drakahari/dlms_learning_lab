@@ -1057,3 +1057,81 @@ fn example_keyboard_run_syntax_retry_and_stop_do_not_grade_the_assignment() {
     assert!(!a.metrics.completion);
     assert_eq!(a.progress.attempts["shell-handover"].state, original);
 }
+
+#[test]
+fn legacy_subnet_credit_does_not_invent_a_host_and_requires_new_check() {
+    let (ctx, mut a) = app();
+    let s = &a.scenarios[0];
+    let mut old = Attempt::new(s, 1);
+    if let State::Subnet {
+        answers, second, ..
+    } = &mut old.state
+    {
+        *answers = [
+            "192.168.10.64",
+            "192.168.10.95",
+            "192.168.10.65",
+            "192.168.10.94",
+        ]
+        .map(String::from);
+        *second = None;
+    }
+    a.progress.attempts.insert(s.id.clone(), old);
+    a.launch(0);
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(progress::legacy_credit(&a.progress.attempts["ccna-ipv4"]));
+    assert!(!progress::current_solved(
+        &a.progress.attempts["ccna-ipv4"],
+        &a.scenarios[0]
+    ));
+    a.ipv4_view.as_mut().unwrap().exercise.second = Some("192.168.10.81".into());
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    assert!(
+        a.progress.attempts["ccna-ipv4"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .legacy_host_reviewed
+    );
+    assert!(progress::current_solved(
+        &a.progress.attempts["ccna-ipv4"],
+        &a.scenarios[0]
+    ));
+}
+
+#[test]
+fn historical_auto_host_snapshot_is_reviewed_resumed_and_invalidated() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.launch(0);
+    solve(&mut a, 0);
+    let attempt = a.progress.attempts.get_mut("ccna-ipv4").unwrap();
+    attempt.workspace.as_mut().unwrap().migrated_host = true;
+    attempt.workspace.as_mut().unwrap().ipv4_check = Some(model::snapshot(
+        &ipv4::Exercise::from_state(&attempt.state).unwrap(),
+    ));
+    let before = attempt.state.clone();
+    a.launch(0);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts["ccna-ipv4"].state, before);
+    assert!(!a.metrics.completion);
+    assert!(a.ipv4_view.as_ref().unwrap().checked_answers.is_none());
+    check(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    a.save();
+    a.progress = progress::load(&a.path, &a.scenarios).unwrap();
+    a.launch(0);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    a.ipv4_view.as_mut().unwrap().exercise.second = Some("192.168.10.77".into());
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts["ccna-ipv4"],
+        &a.scenarios[0]
+    ));
+}

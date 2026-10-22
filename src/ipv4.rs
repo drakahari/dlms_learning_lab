@@ -384,23 +384,13 @@ pub fn second_result(ip: Ipv4Addr, prefix: u8, draft: &str) -> SecondResult {
         SecondResult::Valid
     }
 }
-/// Extend a legacy four-answer exercise without clearing its work or completion.
-/// Completed analyses receive the first free usable host; incomplete drafts keep a blank fifth field.
+/// Retain four-answer credit separately. A newly required host is always a learner answer.
 pub fn upgrade_exercise(e: &mut Exercise) -> bool {
     if e.second.is_some() {
         return false;
     }
     let completed = e.solved();
-    e.second = Some(if completed {
-        let w = e.expected().expect("completed conventional subnet");
-        let mut free = u32::from(w[2]);
-        if Ipv4Addr::from(free) == e.ip {
-            free += 1;
-        }
-        Ipv4Addr::from(free).to_string()
-    } else {
-        String::new()
-    });
+    e.second = Some(String::new());
     completed
 }
 pub fn write_exercise(state: &mut State, exercise: &Exercise) {

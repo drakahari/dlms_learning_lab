@@ -494,7 +494,7 @@ impl LabApp {
                     s,
                     &self.filter,
                     a.is_some(),
-                    a.is_some_and(|a| engine::solved(&a.state, &s.goal)),
+                    a.is_some_and(|a| progress::current_solved(a, s)),
                     self.progress.favorites.contains(&s.id),
                 )
             })
@@ -585,9 +585,11 @@ impl LabApp {
                             },
                         );
                         let a = self.progress.attempts.get(&s.id);
-                        let complete = a.is_some_and(|a| engine::solved(&a.state, &s.goal));
+                        let complete = a.is_some_and(|a| progress::current_solved(a, s));
                         let favorite = self.progress.favorites.contains(&s.id);
-                        let status = if complete {
+                        let status = if a.is_some_and(progress::legacy_credit) && !complete {
+                            "Earlier analysis complete · New requirement remaining"
+                        } else if complete {
                             "Complete"
                         } else if a.is_some() {
                             "In progress"

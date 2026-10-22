@@ -43,6 +43,19 @@ pub struct Progress {
     pub favorites: BTreeSet<String>,
     pub attempts: BTreeMap<String, Attempt>,
 }
+/// Original analysis credit is visible, but never stands in for a new requirement.
+pub fn legacy_credit(a: &Attempt) -> bool {
+    a.workspace.as_ref().is_some_and(|w| w.migrated_host)
+        || matches!(&a.state, State::Subnet { second: None, .. })
+            && crate::ipv4::Exercise::from_state(&a.state).is_some_and(|e| e.solved())
+}
+pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    !matches!(&a.state, State::Subnet { second: None, .. })
+        && a.workspace
+            .as_ref()
+            .is_none_or(|w| !w.migrated_host || w.legacy_host_reviewed)
+        && crate::engine::solved(&a.state, &s.goal)
+}
 pub fn default_path() -> Result<PathBuf, String> {
     directories::ProjectDirs::from("org", "DLMS", "DLMS Learning Lab")
         .map(|d| d.data_local_dir().join("progress-v1.json"))
@@ -91,6 +104,12 @@ pub fn load(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
     Ok(p)
 }
 pub fn save(path: &Path, p: &Progress) -> Result<(), String> {
+    for a in p.attempts.values() {
+        crate::pack::validate_state(&a.state)?;
+        if a.workspace.as_ref().is_some_and(|w| !w.valid()) {
+            return Err("Invalid draft data; previous progress retained".into());
+        }
+    }
     let parent = path.parent().ok_or("Missing storage directory")?;
     std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
     // Preserve a byte-for-byte pre-workspace save before the first upgraded write.

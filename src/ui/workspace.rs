@@ -152,6 +152,13 @@ impl LabApp {
         view.render(ui, a.challenge, &mut self.metrics);
         let w = a.workspace.as_mut().unwrap();
         view.save_ui(w, practice);
+        if checked_before != view.checked_answers && view.checked_answers.is_some() {
+            if practice {
+                w.legacy_practice_reviewed = true;
+            } else {
+                w.legacy_host_reviewed = true;
+            }
+        }
         a.hints = view.hints.min(s.hints.len());
         if before != view.exercise || checked_before != view.checked_answers || hints != view.hints
         {
@@ -167,7 +174,7 @@ impl LabApp {
         } else {
             w.migrated_host
         } {
-            ui.label(RichText::new("Your completed subnet analysis was retained. A free second-host address was supplied for compatibility; you can change it.").small().color(palette(ui).muted));
+            ui.label(RichText::new("Your earlier subnet analysis is retained as legacy credit. Complete and check the second-workstation requirement yourself. Older compatibility-supplied values are retained for review, not counted as new mastery.").small().color(palette(ui).muted));
         }
         self.metrics.completion = view.verified();
         if self.metrics.completion

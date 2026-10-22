@@ -16,3 +16,12 @@ Next: resolve review findings; implement safe progress backup/export/restore and
 ## 2026-10-22 — M1b: owner-approved license
 
 The owner explicitly approved MIT for original code and authored curriculum, using “DLMS Learning Lab contributors.” Added root LICENSE/NOTICE and package metadata; retained palette attribution. This resolves the project-license decision, not the remaining dependency-notice or platform-acceptance gates. No public release.
+
+## 2026-10-22 — M2: reviewed grading and persistence integrity
+
+- Independent read-only review reproduced long-command diagnostics that made saves unreadable, exclusive-file privacy bypass, legacy host invention, concurrent-writer loss and ambiguous utility operands.
+- Diagnostics now truncate on UTF-8 boundaries at creation; invalid in-memory state cannot replace a valid save. Regression covers assignment/example failures from long ASCII and Unicode sources through save/reload.
+- Alex-only privacy now explicitly checks all modeled non-administrator users as well as other-class bits. Team traversal retains its distinct shared-access goal. Feedback identifies an unauthorized modeled user.
+- New host requirements stay blank on migration. Historical analysis credit is displayed separately; values supplied by an older binary remain intact but need an explicit new check. Review/check persists, and broken answers invalidate current success.
+- Ambiguous option-like grep patterns/file operands and cat operands fail honestly. Malformed numeric tests explicitly disclose the current unsupported boundary rather than claim faithful recoverable Bash behavior.
+- Regression: 71 Rust tests, including old/new legacy UI flows, invalid-save retention, alternate privacy solutions and error-record roundtrips. Disposable 41-fixture Bash reference comparison is rerun. Full certification coverage remains open. Concurrent-writer protection follows in M3.

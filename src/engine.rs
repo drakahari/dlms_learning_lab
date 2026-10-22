@@ -102,6 +102,8 @@ pub enum Goal {
         read: bool,
         write: bool,
         private: bool,
+        #[serde(default)]
+        exclusive: bool,
     },
     Logs {
         path: String,
@@ -292,6 +294,7 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                 read,
                 write,
                 private,
+                exclusive,
             },
         ) => vec![
             c(
@@ -305,8 +308,20 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
                 "Required user has access through every directory",
             ),
             c(
-                !private || nodes.get(path).is_some_and(|n| n.mode & 7 == 0),
-                "Other users have no file permissions",
+                (!private || nodes.get(path).is_some_and(|n| n.mode & 7 == 0))
+                    && (!exclusive
+                        || users.keys().all(|other| {
+                            other == user
+                                || other == "root"
+                                || ![1, 2, 4]
+                                    .iter()
+                                    .any(|bit| access(nodes, users, path, other, *bit))
+                        })),
+                if *exclusive {
+                    "Only the required user can access the file (administrator excluded)"
+                } else {
+                    "Other-class file permissions are removed"
+                },
             ),
         ],
         (State::Logs { files, result }, Goal::Logs { path, needle }) => vec![c(

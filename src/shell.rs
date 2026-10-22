@@ -5,6 +5,18 @@ pub const MAX_SOURCE: usize = 16_384;
 const MAX_TEXT: usize = 262_144;
 const MAX_OUTPUT: usize = 32_768;
 const MAX_STEPS: usize = 2000;
+/// Persistable diagnostics are bounded at creation, not only when rendering.
+fn diagnostic(mut text: String) -> String {
+    if text.len() > 1000 {
+        let mut end = 997;
+        while !text.is_char_boundary(end) {
+            end -= 1;
+        }
+        text.truncate(end);
+        text.push_str("...");
+    }
+    text
+}
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct Case {
@@ -77,7 +89,8 @@ impl Record {
         self.source.len() <= MAX_SOURCE
             && self.results.len() <= 8
             && self.results.iter().all(|r| {
-                r.stdout.len() + r.stderr.len() <= MAX_OUTPUT
+                (0..=255).contains(&r.status)
+                    && r.stdout.len() + r.stderr.len() <= MAX_OUTPUT
                     && r.files.len() <= 64
                     && r.files.values().map(String::len).sum::<usize>() <= MAX_TEXT
                     && r.files
@@ -649,7 +662,7 @@ impl Vm {
         self.fail("Stopped: this run was not graded".into())
     }
     fn fail(&mut self, message: String) {
-        self.outcome.error = Some(message);
+        self.outcome.error = Some(diagnostic(message));
         self.outcome.status = 2;
         self.done = true;
     }
@@ -1033,6 +1046,9 @@ impl Vm {
                 Ok(ok(format!("{}\n", args.join(" "))))
             }
             "cat" if args.len() == 1 => {
+                if args[0].starts_with('-') {
+                    return usage();
+                }
                 let p = path(&args[0])?;
                 Ok(match self.outcome.files.get(&p) {
                     Some(s) => ok(s.clone()),
@@ -1044,7 +1060,13 @@ impl Vm {
                 })
             }
             "grep" if (args.len() == 2 || args.len() == 3) && args[0] == "-F" => {
+                if args[1].starts_with('-') {
+                    return Err("Unsupported grep pattern starting with -; option parsing with -e/-- is not yet implemented".into());
+                }
                 let text = if args.len() == 3 {
+                    if args[2].starts_with('-') {
+                        return usage();
+                    }
                     let p = path(&args[2])?;
                     match self.outcome.files.get(&p) {
                         Some(s) => s.clone(),
@@ -1109,14 +1131,10 @@ impl Vm {
                         "=" => l == r,
                         "!=" => l != r,
                         "-eq" | "-ne" | "-lt" | "-le" | "-gt" | "-ge" => {
-                            let l = l
-                                .trim()
-                                .parse::<i64>()
-                                .map_err(|_| "test requires an integer")?;
-                            let r = r
-                                .trim()
-                                .parse::<i64>()
-                                .map_err(|_| "test requires an integer")?;
+                            let (Ok(l), Ok(r)) = (l.trim().parse::<i64>(), r.trim().parse::<i64>())
+                            else {
+                                return Err("Unsupported integer-test operand; this subset accepts signed 64-bit decimal integers only".into());
+                            };
                             match op.as_str() {
                                 "-eq" => l == r,
                                 "-ne" => l != r,
@@ -1200,7 +1218,7 @@ pub fn run(source: &str, case: &Case) -> Outcome {
             stderr: String::new(),
             status: 2,
             files: case.files.clone(),
-            error: Some(e),
+            error: Some(diagnostic(e)),
         },
     }
 }

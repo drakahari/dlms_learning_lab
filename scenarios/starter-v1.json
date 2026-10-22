@@ -291,7 +291,8 @@
         "user": "alex",
         "read": true,
         "write": true,
-        "private": true
+        "private": true,
+        "exclusive": true
       },
       "steps": [
         "Compare the file’s ownership and permissions with alex’s groups.",
@@ -311,7 +312,7 @@
         "https://www.gnu.org/software/coreutils/manual/html_node/File-permissions.html",
         "https://man7.org/linux/man-pages/man7/path_resolution.7.html"
       ],
-      "simplifications": "Administrator mutations; test-access uses ordinary POSIX owner/group/other precedence. No ACLs, root override, special mode bits or SELinux.",
+      "simplifications": "Administrator mutations; test-access uses ordinary POSIX owner/group/other precedence. No ACLs, root override, special mode bits or SELinux. Privacy excludes the root administrator; all other modeled users and the other permission class are checked. Group access is valid only while no other modeled user can use it.",
       "guide": [
         {
           "title": "Read owner and group access",
@@ -332,7 +333,7 @@
         },
         {
           "title": "Give Alex the required access",
-          "why": "Alex belongs to editors. Group read/write with no other-class bits meets this modeled goal; changing ownership to Alex is another valid solution.",
+          "why": "Alex belongs to editors. Group read/write works here only while no other modeled non-administrator user can use that access. Changing ownership to Alex and removing group permissions is another valid solution.",
           "action": "Change the file mode. An ownership-based solution can also work.",
           "commands": [
             {

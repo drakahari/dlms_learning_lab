@@ -23,3 +23,5 @@ Maximum source 16 KiB; 4096 tokens; 24 levels of syntax nesting; 128 words/argum
 ## Fidelity evidence
 
 `tools/bash_reference.py` runs **only checked-in controlled fixtures**, from a fresh temporary directory with an empty controlled environment and a timeout. It does not accept learner scripts or personal paths. It compares stdout, stderr, exit status and resulting text files with the Rust interpreter probe. Real Bash is a development oracle only; it is absent from the runtime interpreter. See the milestone verification report for the fixtures actually run and remaining exclusions.
+
+Integrity clarification (2026-10-22): `grep -F` rejects patterns beginning with `-` until real `-e`/`--` option parsing is implemented. Integer comparisons accept signed 64-bit decimal operands; malformed or out-of-range operands return an explicit unsupported diagnostic instead of pretending to implement Bash’s recoverable test error. Stored diagnostics are bounded to 1,000 UTF-8 bytes so any supported-length script remains resumable after failure.
