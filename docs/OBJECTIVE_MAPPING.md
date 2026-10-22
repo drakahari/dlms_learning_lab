@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are94 narrowly evidenced Partial practice rows and1146 Open rows; no full-objective completion is asserted. The catalog contains55 authored assignments/thirteen units.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are96 narrowly evidenced Partial practice rows and1144 Open rows; no full-objective completion is asserted. The catalog contains58 authored assignments/fourteen units.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -36,3 +36,6 @@ The ordinary-user access unit adds explicit narrow chgrp evidence for104.5.T4 an
 
 
 M25 adds six narrowly partial evidence rows: CCNA v1.1 2.1/2.1.a (ordinary data access only) and2.2/2.2.a/b/c (explicit trunks, restricted802.1Q/native data classification). Default VLAN2.1.b, inter-VLAN2.1.c, switching/MAC learning1.13 and STP2.5 stay Open. A physical forest is a modeling boundary, not STP implementation; data-plane native translation does not predict Catalyst PVST/PVID protection. See VLAN_LESSONS.md and SWITCHING_SUBSET.md. Future v2.0 rows remain separately planned, not silently promoted from current practice.
+
+
+M28 adds narrowly partial103.3.K4/T19 evidence for script-VM simple * selection, quoting/hidden/no-match handling and safe changing-file reports. Advanced/bracket/directory patterns and cp/mv/rm terminal expansion remain absent. A tested ? capability alone is not claimed as authored instruction. All full-objective and future-blueprint requirements stay open.

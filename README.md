@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. Fifty-five authored assignments: the original nine, twenty-six scripting tasks, ten Linux file/access activities six IPv6 static-network activities and four VLAN data-plane activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. Fifty-eight authored assignments: the original nine, twenty-nine scripting tasks, ten Linux file/access activities, six IPv6 static-network activities and four VLAN data-plane activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -45,6 +45,8 @@ The accepted native workspace design remains the basis of all labs. The header a
 The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
 
 The **CCNA** course adds six [IPv6 static-network foundations](docs/IPV6_LESSONS.md): unique workstation addressing, prefix/gateway repair, interface-scoped next hops, route specificity, backup failover and a branch capstone. A small topology and selected-device native address/route editor keep the full assignment visible. Examples have independent saved drafts; Check configuration applies and tests only virtual state. This is narrow partial IPv6/static-routing practice, not complete CCNA coverage.
+
+The **Filename selection and safe batch reports** unit adds three [script assignments](docs/SHELL_FILE_BATCHES.md): a changing-file manifest, cross-file incident collection and a collision-safe handover. Separate examples teach selection before writing; scripted filename matching stays inside the virtual file map.
 
 The **VLAN groups, trunks and handover** unit adds four [native switching assignments](docs/VLAN_LESSONS.md): access membership, trunks versus active/allowed groups, native classification and a multi-fault handover. Edit native port tables and inspect simulated broadcasts; no Cisco terminal, STP or real network is involved. Each lesson has isolated examples and tests both working groups and separation.
 

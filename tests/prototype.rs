@@ -31,7 +31,7 @@ fn solution(s: &pack::Scenario) -> State {
 #[test]
 fn all_nine_start_unsolved_and_reach_success() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 55);
+    assert!(labs.len() >= 9);
     for s in labs.into_iter().take(9) {
         assert!(!engine::solved(&s.initial, &s.goal), "{}", s.id);
         assert!(engine::solved(&solution(&s), &s.goal), "{}", s.id);

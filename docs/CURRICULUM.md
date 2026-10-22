@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-six scripting assignments in six units and ten Linux file/access assignments, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-nine scripting assignments in seven units and ten Linux file/access assignments, plus six IPv6 static-network assignments and four VLAN data-plane assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -66,7 +66,7 @@ Each planned stage includes a guided repair, independent construction and capsto
 
 ## Next capability batch
 
-The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Three [Bash scope/debugging assignments](SHELL_SCOPE.md) now follow the reusable unit, using the tested function-local subset. Next extend structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
+The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Three [Bash scope/debugging assignments](SHELL_SCOPE.md) now follow the reusable unit, using the tested function-local subset. Bounded filename matching and three reviewed batch-selection/publication assignments now follow; see SHELL_FILE_BATCHES.md. Next extend structured data and substitution only after faithful grammar/evaluation and bounded execution tests. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
 
 Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](LINUX_FILES.md). This delivers narrow practical slices of LPIC-1 103.1, 103.3 and 104.5; the full objectives remain partial.
 
@@ -75,3 +75,6 @@ Four [text-record assignments](SHELL_TEXT.md) add narrow LPIC-1 103.2 filter pra
 Four [counters/totals assignments](SHELL_COUNTS.md) teach bounded portable integer calculations and sequential read-only virtual-file loops before a safe counting/publication project. This does not complete structured Bash, numeric-text validation, advanced safe automation or any full issuer objective.
 
 Four [access-policy assignments](LINUX_ACCESS.md) follow the six file foundations and precede the original access seeds. Narrow104.5 ordinary-file/directory/group practice is expanded; special files, special bits, privileged ownership/ACL/SELinux remain absent.
+
+
+Three [filename-selection/batch assignments](SHELL_FILE_BATCHES.md) add simple * pattern practice, incident harvesting, and a captured-source handover that rejects collisions before writing. Flat virtual paths only; advanced/directory/bracket patterns, command substitution and the broader safe-automation path remain open. This strengthens a narrow LPIC-1 103.3 slice; the separate Linux terminal does not gain expansion.

@@ -10785,5 +10785,1105 @@
       "status": 0,
       "after": {}
     }
+  },
+  {
+    "name": "shell-file-manifest authored 1",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "Mixed files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/z.log": "Z\n",
+        "/work/a.log": "A\n",
+        "/work/two words.log": "space\n",
+        "/work/.private.log": "private\n",
+        "/work/notes.txt": "ignore\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/z.log": "Z\n",
+        "/work/a.log": "A\n",
+        "/work/two words.log": "space\n",
+        "/work/.private.log": "private\n",
+        "/work/notes.txt": "ignore\n",
+        "/work/manifest.txt": "a.log\ntwo words.log\nz.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest authored 2",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "No matching files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "keep\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "keep\n",
+        "/work/manifest.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest authored 3",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "Empty file still has a name",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.log": "",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty.log": "",
+        "/work/manifest.txt": "empty.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest authored 4",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "Names are data",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/100% ready.log": "percent\n",
+        "/work/rack\\west.log": "backslash\n",
+        "/work/é.log": "UTF-8\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/100% ready.log": "percent\n",
+        "/work/rack\\west.log": "backslash\n",
+        "/work/é.log": "UTF-8\n",
+        "/work/manifest.txt": "100% ready.log\nrack\\west.log\né.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest authored 5",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "Case matters",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/UPPER.LOG": "not selected\n",
+        "/work/low.log": "selected\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/UPPER.LOG": "not selected\n",
+        "/work/low.log": "selected\n",
+        "/work/manifest.txt": "low.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest authored 6",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "New manifest",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/one.log": "first\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/one.log": "first\n",
+        "/work/manifest.txt": "one.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest authored 7",
+    "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+    "case": {
+      "name": "Only hidden logs",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/.hidden.log": "secret\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/.hidden.log": "secret\n",
+        "/work/manifest.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 1",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "Mixed files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/z.log": "Z\n",
+        "/work/a.log": "A\n",
+        "/work/two words.log": "space\n",
+        "/work/.private.log": "private\n",
+        "/work/notes.txt": "ignore\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/z.log": "Z\n",
+        "/work/a.log": "A\n",
+        "/work/two words.log": "space\n",
+        "/work/.private.log": "private\n",
+        "/work/notes.txt": "ignore\n",
+        "/work/manifest.txt": "a.log\ntwo words.log\nz.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 2",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "No matching files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "keep\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "keep\n",
+        "/work/manifest.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 3",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "Empty file still has a name",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.log": "",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty.log": "",
+        "/work/manifest.txt": "empty.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 4",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "Names are data",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/100% ready.log": "percent\n",
+        "/work/rack\\west.log": "backslash\n",
+        "/work/é.log": "UTF-8\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/100% ready.log": "percent\n",
+        "/work/rack\\west.log": "backslash\n",
+        "/work/é.log": "UTF-8\n",
+        "/work/manifest.txt": "100% ready.log\nrack\\west.log\né.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 5",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "Case matters",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/UPPER.LOG": "not selected\n",
+        "/work/low.log": "selected\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/UPPER.LOG": "not selected\n",
+        "/work/low.log": "selected\n",
+        "/work/manifest.txt": "low.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 6",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "New manifest",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/one.log": "first\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/one.log": "first\n",
+        "/work/manifest.txt": "one.log\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest alternate 7",
+    "source": "write_names() {\n for name in \"$@\"; do\n  if [ -f \"$name\" ]; then printf '%s\\n' \"$name\" >> manifest.txt; fi\n done\n}\nprintf '' > manifest.txt\nwrite_names *.log\n",
+    "case": {
+      "name": "Only hidden logs",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/.hidden.log": "secret\n",
+        "/work/manifest.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/.hidden.log": "secret\n",
+        "/work/manifest.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-file-manifest separate teaching example",
+    "source": "printf '' > list.txt\nfor item in *.note; do\n    if [ -f \"$item\" ]; then\n        printf '%s\\n' \"$item\" >> list.txt\n    fi\ndone\n",
+    "case": {
+      "name": "Separate note example",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/lake.note": "Water\n",
+        "/work/hill.note": "Trail\n",
+        "/work/.private.note": "Keep\n",
+        "/work/list.txt": "Old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/lake.note": "Water\n",
+        "/work/hill.note": "Trail\n",
+        "/work/.private.note": "Keep\n",
+        "/work/list.txt": "hill.note\nlake.note\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 1",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "Several log streams",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+        "/work/a.log": "ready\nERROR link\n",
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.private.log": "ERROR hidden\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+        "/work/a.log": "ready\nERROR link\n",
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.private.log": "ERROR hidden\n",
+        "/work/errors.txt": "ERROR link\nERROR disk\nERROR disk\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 2",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "No ERROR records",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "error lower\nOK\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.log": "error lower\nOK\n",
+        "/work/errors.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 3",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "No source files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "ERROR unrelated\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "ERROR unrelated\n",
+        "/work/errors.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 4",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "Empty source",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.log": "",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty.log": "",
+        "/work/errors.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 5",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "Final matching line lacks newline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/last.log": "OK\nERROR final",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/last.log": "OK\nERROR final",
+        "/work/errors.txt": "ERROR final\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 6",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "Names and record punctuation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/two words.log": "ERROR 100% path\\west\n",
+        "/work/a.log": "NOTERROR still contains the text\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/two words.log": "ERROR 100% path\\west\n",
+        "/work/a.log": "NOTERROR still contains the text\n",
+        "/work/errors.txt": "NOTERROR still contains the text\nERROR 100% path\\west\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors authored 7",
+    "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "Create the report",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/z.log": "ERROR last\n",
+        "/work/a.log": "ERROR first\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/z.log": "ERROR last\n",
+        "/work/a.log": "ERROR first\n",
+        "/work/errors.txt": "ERROR first\nERROR last\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 1",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "Several log streams",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+        "/work/a.log": "ready\nERROR link\n",
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.private.log": "ERROR hidden\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+        "/work/a.log": "ready\nERROR link\n",
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.private.log": "ERROR hidden\n",
+        "/work/errors.txt": "ERROR link\nERROR disk\nERROR disk\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 2",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "No ERROR records",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "error lower\nOK\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.log": "error lower\nOK\n",
+        "/work/errors.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 3",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "No source files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "ERROR unrelated\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "ERROR unrelated\n",
+        "/work/errors.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 4",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "Empty source",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.log": "",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty.log": "",
+        "/work/errors.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 5",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "Final matching line lacks newline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/last.log": "OK\nERROR final",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/last.log": "OK\nERROR final",
+        "/work/errors.txt": "ERROR final\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 6",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "Names and record punctuation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/two words.log": "ERROR 100% path\\west\n",
+        "/work/a.log": "NOTERROR still contains the text\n",
+        "/work/errors.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/two words.log": "ERROR 100% path\\west\n",
+        "/work/a.log": "NOTERROR still contains the text\n",
+        "/work/errors.txt": "NOTERROR still contains the text\nERROR 100% path\\west\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors alternate 7",
+    "source": "printf '' > errors.txt\nfor item in *.log; do\n if [ -f \"$item\" ]; then\n  if grep -F ERROR \"$item\" >> errors.txt; then :; else :; fi\n fi\ndone\n",
+    "case": {
+      "name": "Create the report",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/z.log": "ERROR last\n",
+        "/work/a.log": "ERROR first\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/z.log": "ERROR last\n",
+        "/work/a.log": "ERROR first\n",
+        "/work/errors.txt": "ERROR first\nERROR last\n"
+      }
+    }
+  },
+  {
+    "name": "shell-collect-errors separate teaching example",
+    "source": "printf '' > flags.txt\nfor file in *.note; do\n    if [ -f \"$file\" ]; then\n        grep -F TODO \"$file\" >> flags.txt\n    fi\ndone\nexit 0\n",
+    "case": {
+      "name": "Different TODO example",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/blue.note": "DONE\nTODO visit\n",
+        "/work/red.note": "TODO pack\nTODO pack\n",
+        "/work/other.txt": "TODO ignore\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/blue.note": "DONE\nTODO visit\n",
+        "/work/red.note": "TODO pack\nTODO pack\n",
+        "/work/other.txt": "TODO ignore\n",
+        "/work/flags.txt": "TODO visit\nTODO pack\nTODO pack\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 1",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "Normal handover",
+      "args": [
+        "audit.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/b.log": "OK\n",
+        "/work/a.log": "ERROR link\nERROR link\n",
+        "/work/audit.txt": "old\n",
+        "/work/other.txt": "keep\n",
+        "/work/empty.log": ""
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/b.log": "OK\n",
+        "/work/a.log": "ERROR link\nERROR link\n",
+        "/work/audit.txt": "Error audit\nFile: a.log\nERROR link\nERROR link\nFile: b.log\nFile: empty.log\nFiles: 3\n",
+        "/work/other.txt": "keep\n",
+        "/work/empty.log": ""
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 2",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "New report also ends in .log",
+      "args": [
+        "new.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/b.log": "ERROR b\n",
+        "/work/a.log": "ERROR a\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/b.log": "ERROR b\n",
+        "/work/a.log": "ERROR a\n",
+        "/work/new.log": "Error audit\nFile: a.log\nERROR a\nFile: b.log\nERROR b\nFiles: 2\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 3",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "Later selected source is the destination",
+      "args": [
+        "z.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "ERROR a\n",
+        "/work/z.log": "ERROR original\n",
+        "/work/keep.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "ERROR a\n",
+        "/work/z.log": "ERROR original\n",
+        "/work/keep.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 4",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "No visible logs",
+      "args": [
+        "audit.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.hidden.log": "ERROR private\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.hidden.log": "ERROR private\n",
+        "/work/audit.txt": "Error audit\nFiles: 0\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 5",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "Spaces and literal text",
+      "args": [
+        "daily report.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/day two.log": "ERROR path\\west 100%\n",
+        "/work/a.log": "OK\nERROR start",
+        "/work/daily report.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/day two.log": "ERROR path\\west 100%\n",
+        "/work/a.log": "OK\nERROR start",
+        "/work/daily report.txt": "Error audit\nFile: a.log\nERROR start\nFile: day two.log\nERROR path\\west 100%\nFiles: 2\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 6",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "Missing destination",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 7",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "Extra argument",
+      "args": [
+        "audit.txt",
+        "extra"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone authored 8",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+    "case": {
+      "name": "Empty destination",
+      "args": [
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "",
+        "/work/b.log": "ready\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "",
+        "/work/b.log": "ready\n",
+        "/work/audit.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 1",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "Normal handover",
+      "args": [
+        "audit.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/b.log": "OK\n",
+        "/work/a.log": "ERROR link\nERROR link\n",
+        "/work/audit.txt": "old\n",
+        "/work/other.txt": "keep\n",
+        "/work/empty.log": ""
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/b.log": "OK\n",
+        "/work/a.log": "ERROR link\nERROR link\n",
+        "/work/audit.txt": "Error audit\nFile: a.log\nERROR link\nERROR link\nFile: b.log\nFile: empty.log\nFiles: 3\n",
+        "/work/other.txt": "keep\n",
+        "/work/empty.log": ""
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 2",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "New report also ends in .log",
+      "args": [
+        "new.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/b.log": "ERROR b\n",
+        "/work/a.log": "ERROR a\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/b.log": "ERROR b\n",
+        "/work/a.log": "ERROR a\n",
+        "/work/new.log": "Error audit\nFile: a.log\nERROR a\nFile: b.log\nERROR b\nFiles: 2\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 3",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "Later selected source is the destination",
+      "args": [
+        "z.log"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "ERROR a\n",
+        "/work/z.log": "ERROR original\n",
+        "/work/keep.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "ERROR a\n",
+        "/work/z.log": "ERROR original\n",
+        "/work/keep.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 4",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "No visible logs",
+      "args": [
+        "audit.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.hidden.log": "ERROR private\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "ERROR ignore\n",
+        "/work/.hidden.log": "ERROR private\n",
+        "/work/audit.txt": "Error audit\nFiles: 0\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 5",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "Spaces and literal text",
+      "args": [
+        "daily report.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/day two.log": "ERROR path\\west 100%\n",
+        "/work/a.log": "OK\nERROR start",
+        "/work/daily report.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/day two.log": "ERROR path\\west 100%\n",
+        "/work/a.log": "OK\nERROR start",
+        "/work/daily report.txt": "Error audit\nFile: a.log\nERROR start\nFile: day two.log\nERROR path\\west 100%\nFiles: 2\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 6",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "Missing destination",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 7",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "Extra argument",
+      "args": [
+        "audit.txt",
+        "extra"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "ERROR a\n",
+        "/work/audit.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone alternate 8",
+    "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\npublish() {\n    destination=$1\n    shift\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish \"$1\" *.log\n",
+    "case": {
+      "name": "Empty destination",
+      "args": [
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "",
+        "/work/b.log": "ready\n",
+        "/work/audit.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish audit\n",
+      "status": 2,
+      "after": {
+        "/work/a.log": "",
+        "/work/b.log": "ready\n",
+        "/work/audit.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "shell-file-batch-capstone separate teaching example",
+    "source": "build_list() {\n    for item in \"$@\"; do\n        if [ -f \"$item\" ] && [ \"$item\" = \"$target\" ]; then\n            printf 'Choose a separate list file\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Notes\\n' > \"$target\"\n    for item in \"$@\"; do\n        if [ -f \"$item\" ]; then\n            printf '%s\\n' \"$item\" >> \"$target\"\n        fi\n    done\n}\ntarget=practice.txt\nbuild_list *.note\n",
+    "case": {
+      "name": "Protected note-list example",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/blue.note": "Keep blue\n",
+        "/work/red.note": "Keep red\n",
+        "/work/practice.txt": "Old\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/blue.note": "Keep blue\n",
+        "/work/red.note": "Keep red\n",
+        "/work/practice.txt": "Notes\nblue.note\nred.note\n"
+      }
+    }
   }
 ]

@@ -1,0 +1,767 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-file-manifest",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-file-batches",
+      "topic": "Filename matching and safe batches",
+      "title": "Build a changing file manifest",
+      "summary": "Select visible logs by name while preserving spaces and empty inputs.",
+      "objective": "Replace manifest.txt with one filename per line for every visible file ending in .log, in C-locale filename order. Keep filenames literal, including spaces, backslashes, percent signs and UTF-8. Exclude hidden files and other endings. With no matches create an empty manifest. Print nothing, return 0 and preserve every other file. The lab supplies the files; your script discovers the current selection rather than listing fixed names.",
+      "retry_guidance": "If a name breaks at spaces, inspect quotes around the loop variable. If only the last name survives, check where > is used. A literal *.log line means the no-match case needs attention.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Replace manifest.txt with one filename per line for every visible file ending in .log, in C-locale filename order. Keep filenames literal, including spaces, backslashes, percent signs and UTF-8. Exclude hidden files and other endings. With no matches create an empty manifest. Print nothing, return 0 and preserve every other file. The lab supplies the files; your script discovers the current selection rather than listing fixed names.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The same script must handle a changed set of files, not just the first example.",
+          "action": "Open input details when useful. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Select sources deliberately and keep data separate from shell instructions.",
+          "action": "Run, inspect the first differing input set, edit and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Leave the intended *.log pattern unquoted in the for list; quote the selected filename everywhere it is used.",
+        "Initialize manifest.txt once. Replacing it inside the loop retains only the last entry.",
+        "Guard each selected value with a file test so no-match text does not become a fake filename."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Filename-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/grep/manual/grep.html"
+      ],
+      "simplifications": "Portable shell concepts, compared with Bash 5.3.9 under LC_ALL=C. Only flat virtual /work text files; no host I/O. Unquoted * and ? only: no bracket, recursive or directory patterns. Hidden files require an explicit leading dot. Names in these assignments have no newline or leading hyphen. Fixed virtual input files always remain unchanged; bounded simulation. Text matching is case-sensitive literal substring matching, not regular expressions. This is authored practice, not full shell or certification coverage.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Discover the visible .log files; do not hardcode their names.\n# Replace manifest.txt once, then add each whole filename.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Mixed files",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/z.log": "Z\n",
+              "/work/a.log": "A\n",
+              "/work/two words.log": "space\n",
+              "/work/.private.log": "private\n",
+              "/work/notes.txt": "ignore\n",
+              "/work/manifest.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/z.log": "Z\n",
+              "/work/a.log": "A\n",
+              "/work/two words.log": "space\n",
+              "/work/.private.log": "private\n",
+              "/work/notes.txt": "ignore\n",
+              "/work/manifest.txt": "a.log\ntwo words.log\nz.log\n"
+            }
+          },
+          {
+            "name": "No matching files",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "keep\n",
+              "/work/manifest.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "keep\n",
+              "/work/manifest.txt": ""
+            }
+          },
+          {
+            "name": "Empty file still has a name",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/empty.log": "",
+              "/work/manifest.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/empty.log": "",
+              "/work/manifest.txt": "empty.log\n"
+            }
+          },
+          {
+            "name": "Names are data",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/100% ready.log": "percent\n",
+              "/work/rack\\west.log": "backslash\n",
+              "/work/é.log": "UTF-8\n",
+              "/work/manifest.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/100% ready.log": "percent\n",
+              "/work/rack\\west.log": "backslash\n",
+              "/work/é.log": "UTF-8\n",
+              "/work/manifest.txt": "100% ready.log\nrack\\west.log\né.log\n"
+            }
+          },
+          {
+            "name": "Case matters",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/UPPER.LOG": "not selected\n",
+              "/work/low.log": "selected\n",
+              "/work/manifest.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/UPPER.LOG": "not selected\n",
+              "/work/low.log": "selected\n",
+              "/work/manifest.txt": "low.log\n"
+            }
+          },
+          {
+            "name": "New manifest",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/one.log": "first\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.log": "first\n",
+              "/work/manifest.txt": "one.log\n"
+            }
+          },
+          {
+            "name": "Only hidden logs",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/.hidden.log": "secret\n",
+              "/work/manifest.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/.hidden.log": "secret\n",
+              "/work/manifest.txt": ""
+            }
+          }
+        ]
+      },
+      "solution": [
+        "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-capstone"
+      ],
+      "teaching": {
+        "example": "printf '' > list.txt\nfor item in *.note; do\n    if [ -f \"$item\" ]; then\n        printf '%s\\n' \"$item\" >> list.txt\n    fi\ndone\n",
+        "inputs": "The example supplies two visible .note files, a hidden note and an old list.txt. The script creates item; no variable is supplied by the lab. Inspect the resulting list in virtual files.",
+        "try_change": "Change *.note to *.missing and Run. There are no matches: list.txt becomes empty, and the literal pattern is not listed because the file test fails.",
+        "fixture": {
+          "name": "Separate note example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/lake.note": "Water\n",
+            "/work/hill.note": "Trail\n",
+            "/work/.private.note": "Keep\n",
+            "/work/list.txt": "Old\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/lake.note": "Water\n",
+            "/work/hill.note": "Trail\n",
+            "/work/.private.note": "Keep\n",
+            "/work/list.txt": "hill.note\nlake.note\n"
+          }
+        },
+        "concepts": [
+          {
+            "title": "Let the shell discover names",
+            "text": "A filename pattern selects a changing set of files. In *.note, * means any number of filename bytes and .note is literal. The shell replaces this unquoted pattern with matching names before the command or for loop begins. A loop gets one whole filename per item, even if a matching name contains spaces."
+          },
+          {
+            "title": "Quote the selected name",
+            "text": "After selection, \"$item\" passes the current filename as one argument. Writing $item can split a name at spaces and start another filename search. Quote values; leave only the pattern that you intend to expand unquoted."
+          },
+          {
+            "title": "Handle an empty selection",
+            "text": "By default, a pattern with no matches stays as literal text. Before processing it, [ -f \"$item\" ] checks whether it names a file. A leading dot is not selected by *.note. The simulator sorts names in C-byte order, with uppercase before lowercase and UTF-8 names after ASCII."
+          },
+          {
+            "title": "Replace once, append inside",
+            "text": "printf with an empty format prints nothing. printf '' > list.txt creates or empties the list once, before the loop. >> inside the loop adds each filename without erasing earlier entries. The output file has a different ending from the sources."
+          }
+        ],
+        "prerequisite_note": "Uses the for loop, if file test, quoted printf values and redirection from scripting foundations. Reopen those lessons if these are unfamiliar; filename matching is introduced here."
+      },
+      "explanation": "Filename matching chooses the real input set before the loop; quoting then preserves each chosen name. A file test distinguishes no-match pattern text from an actual file. Replacing the output once and appending each result preserves the full manifest."
+    },
+    {
+      "id": "shell-collect-errors",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-file-batches",
+      "topic": "Filename matching and safe batches",
+      "title": "Collect incidents across a changing log set",
+      "summary": "Combine literal ERROR records without losing duplicates or treating no matches as a broken batch.",
+      "objective": "Replace errors.txt with every line containing the literal text ERROR from visible .log files. Process source filenames in C-locale order and preserve line order and duplicate lines within each source. Include no filenames or headings. A final matching line without a newline gains one in the report. With no files or matches, the report is empty. Return 0, print nothing to either output channel and preserve all input files. Matching is case-sensitive substring matching: NOTERROR contains ERROR too.",
+      "retry_guidance": "If the report repeats filenames, remove unintended labels. If duplicates disappear, sorting or deduplication changed the task. If only the final source remains, check > versus >>. A status 1 with correct empty output may be the last filter result.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Replace errors.txt with every line containing the literal text ERROR from visible .log files. Process source filenames in C-locale order and preserve line order and duplicate lines within each source. Include no filenames or headings. A final matching line without a newline gains one in the report. With no files or matches, the report is empty. Return 0, print nothing to either output channel and preserve all input files. Matching is case-sensitive substring matching: NOTERROR contains ERROR too.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The same script must handle a changed set of files, not just the first example.",
+          "action": "Open input details when useful. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Select sources deliberately and keep data separate from shell instructions.",
+          "action": "Run, inspect the first differing input set, edit and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Keep filename matching and record filtering separate; the same glob loop works with a filter instead of a filename printer.",
+        "Create errors.txt once, then append each file’s matching lines. Keep duplicates and source ordering.",
+        "A no-match grep status is expected here. Make the finished batch return 0 after processing all sources."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Filename-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/grep/manual/grep.html"
+      ],
+      "simplifications": "Portable shell concepts, compared with Bash 5.3.9 under LC_ALL=C. Only flat virtual /work text files; no host I/O. Unquoted * and ? only: no bracket, recursive or directory patterns. Hidden files require an explicit leading dot. Names in these assignments have no newline or leading hyphen. Fixed virtual input files always remain unchanged; bounded simulation. Text matching is case-sensitive literal substring matching, not regular expressions. This is authored practice, not full shell or certification coverage.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Collect ERROR lines from the current visible logs.\n# Leave inputs unchanged and keep duplicate records.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Several log streams",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+              "/work/a.log": "ready\nERROR link\n",
+              "/work/notes.txt": "ERROR ignore\n",
+              "/work/.private.log": "ERROR hidden\n",
+              "/work/errors.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+              "/work/a.log": "ready\nERROR link\n",
+              "/work/notes.txt": "ERROR ignore\n",
+              "/work/.private.log": "ERROR hidden\n",
+              "/work/errors.txt": "ERROR link\nERROR disk\nERROR disk\n"
+            }
+          },
+          {
+            "name": "No ERROR records",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.log": "error lower\nOK\n",
+              "/work/errors.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/a.log": "error lower\nOK\n",
+              "/work/errors.txt": ""
+            }
+          },
+          {
+            "name": "No source files",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "ERROR unrelated\n",
+              "/work/errors.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "ERROR unrelated\n",
+              "/work/errors.txt": ""
+            }
+          },
+          {
+            "name": "Empty source",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/empty.log": "",
+              "/work/errors.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/empty.log": "",
+              "/work/errors.txt": ""
+            }
+          },
+          {
+            "name": "Final matching line lacks newline",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/last.log": "OK\nERROR final",
+              "/work/errors.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/last.log": "OK\nERROR final",
+              "/work/errors.txt": "ERROR final\n"
+            }
+          },
+          {
+            "name": "Names and record punctuation",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/two words.log": "ERROR 100% path\\west\n",
+              "/work/a.log": "NOTERROR still contains the text\n",
+              "/work/errors.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/two words.log": "ERROR 100% path\\west\n",
+              "/work/a.log": "NOTERROR still contains the text\n",
+              "/work/errors.txt": "NOTERROR still contains the text\nERROR 100% path\\west\n"
+            }
+          },
+          {
+            "name": "Create the report",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/z.log": "ERROR last\n",
+              "/work/a.log": "ERROR first\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/z.log": "ERROR last\n",
+              "/work/a.log": "ERROR first\n",
+              "/work/errors.txt": "ERROR first\nERROR last\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-file-manifest",
+        "shell-pipelines"
+      ],
+      "teaching": {
+        "example": "printf '' > flags.txt\nfor file in *.note; do\n    if [ -f \"$file\" ]; then\n        grep -F TODO \"$file\" >> flags.txt\n    fi\ndone\nexit 0\n",
+        "inputs": "The example uses .note sources and TODO text, not the assignment’s .log/ERROR selection. The script creates file; the lab supplies only files. Open the resulting flags.txt.",
+        "try_change": "Change TODO to LATER and Run. flags.txt is empty, and the script still finishes with status 0.",
+        "fixture": {
+          "name": "Different TODO example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/blue.note": "DONE\nTODO visit\n",
+            "/work/red.note": "TODO pack\nTODO pack\n",
+            "/work/other.txt": "TODO ignore\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/blue.note": "DONE\nTODO visit\n",
+            "/work/red.note": "TODO pack\nTODO pack\n",
+            "/work/other.txt": "TODO ignore\n",
+            "/work/flags.txt": "TODO visit\nTODO pack\nTODO pack\n"
+          }
+        },
+        "concepts": [
+          {
+            "title": "Select files, then select records",
+            "text": "The filename pattern chooses source files. grep -F TODO \"$file\" then chooses lines inside one source that contain the exact text TODO. These are two different selections. -F means fixed text, not a regular expression. Matching lines keep their order and duplicates."
+          },
+          {
+            "title": "No matching line is normal",
+            "text": "grep returns 0 when it finds a line and 1 when it does not. A batch can still succeed when some or all files have no matching records. Finish the completed batch with exit 0; do not mistake a normal empty result for a missing command."
+          },
+          {
+            "title": "Send records into one report",
+            "text": "Create or empty the report before the loop. Append each filter result with >>. The example prints no console output because matches go into flags.txt. A final matching record receives a newline; an empty source contributes nothing."
+          }
+        ],
+        "prerequisite_note": "Uses Build a changing file manifest and the literal filter/pipeline lesson. Reopen those prerequisites if grep, redirection or exit status is unfamiliar."
+      },
+      "explanation": "The outer selection chooses visible source files; the inner fixed-text filter chooses records. Appending preserves duplicates and order, while explicit final success describes the completed batch rather than the last file’s match status."
+    },
+    {
+      "id": "shell-file-batch-capstone",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-file-batches",
+      "topic": "Filename matching and safe batches",
+      "title": "Publish a safe incident handover",
+      "summary": "Capture the source set before creating a report, reject collisions, and combine selection, filtering and counts.",
+      "objective": "Publish an incident handover from the visible .log files. Accept exactly one nonempty destination filename. Capture sources before creating or changing it. If the destination is already a selected source, or the argument count/value is invalid, print only Cannot publish audit plus a newline to standard error, return 2, and change no files.\n\nOn success, replace the destination with Error audit plus a newline. For each selected source in C-locale order, add File: NAME and its ERROR lines, keeping duplicates and adding a newline to a final matching line. End with Files: COUNT and a newline, counting empty sources too.\n\nReturn 0 and print nothing to either console channel. Preserve all inputs and unrelated files. A new .log destination must not become its own source. Supplied destinations are canonical relative filenames without wildcard characters or leading hyphens.",
+      "retry_guidance": "If a new .log report appears in its own contents, selection happened after creation. If a collision damages a source, move all validation before the first write. Count files, not matching records; empty sources still get headings.",
+      "difficulty": "Intermediate",
+      "minutes": 40,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Publish an incident handover from the visible .log files. Accept exactly one nonempty destination filename. Capture sources before creating or changing it. If the destination is already a selected source, or the argument count/value is invalid, print only Cannot publish audit plus a newline to standard error, return 2, and change no files.\n\nOn success, replace the destination with Error audit plus a newline. For each selected source in C-locale order, add File: NAME and its ERROR lines, keeping duplicates and adding a newline to a final matching line. End with Files: COUNT and a newline, counting empty sources too.\n\nReturn 0 and print nothing to either console channel. Preserve all inputs and unrelated files. A new .log destination must not become its own source. Supplied destinations are canonical relative filenames without wildcard characters or leading hyphens.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The same script must handle a changed set of files, not just the first example.",
+          "action": "Open input details when useful. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Select sources deliberately and keep data separate from shell instructions.",
+          "action": "Run, inspect the first differing input set, edit and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Capture *.log before the first report write. A function call can receive that snapshot as separate arguments.",
+        "Validate the request and every selected source/destination relationship before creating or truncating the report.",
+        "Publish headings and fixed-text matches in snapshot order, then print a source counter. Treat no-match filter results as normal."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Filename-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/grep/manual/grep.html"
+      ],
+      "simplifications": "Portable shell concepts, compared with Bash 5.3.9 under LC_ALL=C. Only flat virtual /work text files; no host I/O. Unquoted * and ? only: no bracket, recursive or directory patterns. Hidden files require an explicit leading dot. Names in these assignments have no newline or leading hyphen. Fixed virtual input files always remain unchanged; bounded simulation. Text matching is case-sensitive literal substring matching, not regular expressions. This is authored practice, not full shell or certification coverage.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Validate the destination, capture sources, then publish.\n# A new .log report must not join its own input selection.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Normal handover",
+            "args": [
+              "audit.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/b.log": "OK\n",
+              "/work/a.log": "ERROR link\nERROR link\n",
+              "/work/audit.txt": "old\n",
+              "/work/other.txt": "keep\n",
+              "/work/empty.log": ""
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/b.log": "OK\n",
+              "/work/a.log": "ERROR link\nERROR link\n",
+              "/work/audit.txt": "Error audit\nFile: a.log\nERROR link\nERROR link\nFile: b.log\nFile: empty.log\nFiles: 3\n",
+              "/work/other.txt": "keep\n",
+              "/work/empty.log": ""
+            }
+          },
+          {
+            "name": "New report also ends in .log",
+            "args": [
+              "new.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/b.log": "ERROR b\n",
+              "/work/a.log": "ERROR a\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/b.log": "ERROR b\n",
+              "/work/a.log": "ERROR a\n",
+              "/work/new.log": "Error audit\nFile: a.log\nERROR a\nFile: b.log\nERROR b\nFiles: 2\n"
+            }
+          },
+          {
+            "name": "Later selected source is the destination",
+            "args": [
+              "z.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.log": "ERROR a\n",
+              "/work/z.log": "ERROR original\n",
+              "/work/keep.txt": "keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish audit\n",
+            "status": 2,
+            "after": {
+              "/work/a.log": "ERROR a\n",
+              "/work/z.log": "ERROR original\n",
+              "/work/keep.txt": "keep\n"
+            }
+          },
+          {
+            "name": "No visible logs",
+            "args": [
+              "audit.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "ERROR ignore\n",
+              "/work/.hidden.log": "ERROR private\n",
+              "/work/audit.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/notes.txt": "ERROR ignore\n",
+              "/work/.hidden.log": "ERROR private\n",
+              "/work/audit.txt": "Error audit\nFiles: 0\n"
+            }
+          },
+          {
+            "name": "Spaces and literal text",
+            "args": [
+              "daily report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/day two.log": "ERROR path\\west 100%\n",
+              "/work/a.log": "OK\nERROR start",
+              "/work/daily report.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/day two.log": "ERROR path\\west 100%\n",
+              "/work/a.log": "OK\nERROR start",
+              "/work/daily report.txt": "Error audit\nFile: a.log\nERROR start\nFile: day two.log\nERROR path\\west 100%\nFiles: 2\n"
+            }
+          },
+          {
+            "name": "Missing destination",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.log": "ERROR a\n",
+              "/work/audit.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish audit\n",
+            "status": 2,
+            "after": {
+              "/work/a.log": "ERROR a\n",
+              "/work/audit.txt": "old\n"
+            }
+          },
+          {
+            "name": "Extra argument",
+            "args": [
+              "audit.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.log": "ERROR a\n",
+              "/work/audit.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish audit\n",
+            "status": 2,
+            "after": {
+              "/work/a.log": "ERROR a\n",
+              "/work/audit.txt": "old\n"
+            }
+          },
+          {
+            "name": "Empty destination",
+            "args": [
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.log": "",
+              "/work/b.log": "ready\n",
+              "/work/audit.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish audit\n",
+            "status": 2,
+            "after": {
+              "/work/a.log": "",
+              "/work/b.log": "ready\n",
+              "/work/audit.txt": "old\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n"
+      ],
+      "prerequisites": [
+        "shell-collect-errors",
+        "shell-functions",
+        "shell-return",
+        "shell-number-records"
+      ],
+      "teaching": {
+        "example": "build_list() {\n    for item in \"$@\"; do\n        if [ -f \"$item\" ] && [ \"$item\" = \"$target\" ]; then\n            printf 'Choose a separate list file\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Notes\\n' > \"$target\"\n    for item in \"$@\"; do\n        if [ -f \"$item\" ]; then\n            printf '%s\\n' \"$item\" >> \"$target\"\n        fi\n    done\n}\ntarget=practice.txt\nbuild_list *.note\n",
+        "inputs": "blue.note and red.note are inputs; practice.txt is an old separate report. The pattern is expanded before build_list starts. The lab supplies no environment variables.",
+        "try_change": "Change target=practice.txt to target=blue.note and Run. It returns 2 with Choose a separate list file, and every file remains unchanged. The earlier successful example output does not become assignment credit.",
+        "fixture": {
+          "name": "Protected note-list example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/blue.note": "Keep blue\n",
+            "/work/red.note": "Keep red\n",
+            "/work/practice.txt": "Old\n"
+          },
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/blue.note": "Keep blue\n",
+            "/work/red.note": "Keep red\n",
+            "/work/practice.txt": "Notes\nblue.note\nred.note\n"
+          }
+        },
+        "concepts": [
+          {
+            "title": "Choose the input set before writing",
+            "text": "Creating a new report ending in .note changes what a later *.note would match. Expanding the pattern at the function call captures the original selection. Inside the function, \"$@\" keeps those filenames as separate arguments; it does not search again. This is a snapshot of names, not a copy of their contents."
+          },
+          {
+            "title": "Protect a source before the first write",
+            "text": "A matching source might also be the requested destination. Check the entire captured set before > touches anything. Reject a collision rather than replacing input with output. The earlier function/validation lessons supply return, argument counts and if tests."
+          },
+          {
+            "title": "Keep selection, records and totals distinct",
+            "text": "The capstone combines the earlier file selection, ERROR filter and a counter. Count each real source once, even an empty one. Every source needs a heading; a source with no matching record still belongs in the handover. Keep a final success status after ordinary grep no-match results."
+          },
+          {
+            "title": "Use the separate example to investigate",
+            "text": "The example builds a note list, not the assignment’s incident report. target and item are created by the script; the lab supplies the files. Its first loop checks for collisions; the second publishes. Changing the target safely demonstrates why the first loop exists."
+          }
+        ],
+        "prerequisite_note": "Combines the two file-selection lessons with functions, quoted \"$@\", return/exit, argument validation and small counters. Those prerequisites remain available and can be reopened."
+      },
+      "explanation": "Expanding the source pattern at the function call freezes the input-name set before output creation. A full preflight protects existing sources; a new .log output cannot join the captured list. Publication then combines ordered headings, literal error records and a count of real inputs, with explicit validation failures kept separate from normal no-match filtering."
+    }
+  ]
+}

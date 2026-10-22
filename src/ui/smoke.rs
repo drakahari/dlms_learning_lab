@@ -1073,8 +1073,16 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            n @ (250..=375 | 700..=771 | 900..=971 | 1600..=1653 | 1700..=1771 | 1900..=1971) => {
-                let (start, first) = if n >= 1900 {
+            n @ (250..=375
+            | 700..=771
+            | 900..=971
+            | 1600..=1653
+            | 1700..=1771
+            | 1900..=1971
+            | 2500..=2553) => {
+                let (start, first) = if n >= 2500 {
+                    (2500, 55)
+                } else if n >= 1900 {
                     (1900, 43)
                 } else if n >= 1700 {
                     (1700, 39)
@@ -1137,7 +1145,13 @@ impl LabApp {
                     }
                     6 => {
                         let lesson = self.scenarios[i].teaching.as_ref().unwrap();
-                        let (from, to) = if i >= 43 {
+                        let (from, to) = if i >= 55 {
+                            [
+                                ("*.note", "*.missing"),
+                                ("TODO", "LATER"),
+                                ("target=practice.txt", "target=blue.note"),
+                            ][i - 55]
+                        } else if i >= 43 {
                             [
                                 ("visits + 1", "visits + 2"),
                                 ("boxes * price + fee", "boxes * (price + fee)"),
@@ -1776,6 +1790,123 @@ impl LabApp {
             1992 => {
                 println!(
                     "PASS native while-file input: responsive Stop on an infinite file loop, no credit, keyboard repair/Run through all eight inputs, current success and saved reload. Synthetic profile only."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            2554 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                for i in 55..58 {
+                    assert!(progress::current_solved(
+                        &self.progress.attempts[&self.scenarios[i].id],
+                        &self.scenarios[i]
+                    ));
+                }
+                self.launch(55);
+                self.set_script_view(55, teaching::View::Assignment);
+                self.focus_input = true;
+            }
+            2555 => self.pending_events = click(self.metrics.inputs[0]),
+            2556 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("printf wrong".into()),
+                ]
+            }
+            2557 => {
+                assert!(!self.metrics.completion);
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(!progress::current_solved(
+                    &self.progress.attempts["shell-file-manifest"],
+                    &self.scenarios[55]
+                ));
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(940., 760.)));
+            }
+            2558 => shot = Some("file-batches-light-150".into()),
+            2559 | 2563 => {
+                self.pending_events = vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -650.),
+                        modifiers: Default::default(),
+                    },
+                ]
+            }
+            2560 => shot = Some("file-batches-light-150-scrolled".into()),
+            2561 => {
+                self.launch(57);
+                self.progress
+                    .attempts
+                    .get_mut("shell-file-batch-capstone")
+                    .unwrap()
+                    .challenge = true;
+                self.set_script_view(57, teaching::View::Assignment);
+                self.help_open = false;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2562 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("file-batches-challenge-dark-150".into());
+            }
+            2564 => shot = Some("file-batches-challenge-dark-150-scrolled".into()),
+            2565 => {
+                let retained =
+                    serde_json::to_value(&self.progress.attempts["shell-file-batch-capstone"])
+                        .unwrap();
+                self.reset_attempt(55);
+                assert_eq!(
+                    serde_json::to_value(&self.progress.attempts["shell-file-batch-capstone"])
+                        .unwrap(),
+                    retained
+                );
+                assert!(!progress::current_solved(
+                    &self.progress.attempts["shell-file-manifest"],
+                    &self.scenarios[55]
+                ));
+            }
+            2566 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "Bash/Shell".into(),
+                    unit: "shell-file-batches".into(),
+                    ..Default::default()
+                };
+                self.page = 0;
+                self.scale = 1.;
+                self.theme_id = "lab-navy".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            2567 => shot = Some("file-batches-library-desktop".into()),
+            2568 => {
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(940., 760.)));
+            }
+            2569 => shot = Some("file-batches-library-light-150".into()),
+            2570 => {
+                self.pending_events = vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -650.),
+                        modifiers: Default::default(),
+                    },
+                ]
+            }
+            2571 => shot = Some("file-batches-library-light-150-scrolled".into()),
+            2572 => {
+                println!(
+                    "PASS native file batches: three introductions, isolated example Runs/exact experiments, full assignments, wrong retries, keyboard repair/current Run, saved reload, keyboard edit invalidation, selected reset and light/dark150 scrolling/Challenge; unit library at desktop and light150. Synthetic agent checks, not novice or Windows/macOS desktop acceptance."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

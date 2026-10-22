@@ -35,6 +35,9 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("boxes * price + fee", "boxes * (price + fee)"),
         ("tray=5", "tray=0"),
         ("total + count", "total + 1"),
+        ("*.note", "*.missing"),
+        ("TODO", "LATER"),
+        ("target=practice.txt", "target=blue.note"),
     ];
     assert_eq!(
         edits.len(),

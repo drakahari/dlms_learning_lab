@@ -1,6 +1,6 @@
 # Content scope and references
 
-Authored and checked 2026-10-21. These are nine short illustrative exercises, not a course, exam blueprint, exam simulator, or claim of complete coverage. Original fictional systems and reserved documentation addresses are used. All paths, users, devices and logs inside labs are simulated.
+Authored and checked 2026-10-21. This page records the original nine short illustrative exercises. The growing authored course inventory and exact remaining gaps are tracked in CURRICULUM.md, OBJECTIVE_MAPPING.md and the unit guides; none claims complete exam preparation. Original fictional systems and reserved documentation addresses are used. All paths, users, devices and logs inside labs are simulated.
 
 Objective alignment was checked against [Cisco CCNA 200-301 v1.1](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPI LPIC-1 v5.0](https://wiki.lpi.org/wiki/LPIC-1_Objectives_V5.0), and [LPI LPIC-2 v4.5](https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5). LPIC-2 v5.0 was labeled draft on the LPI wiki when checked. Cisco's v2.0 page gives a first-test date in 2027; this prototype uses the v1.1 IPv4 objectives. Alignment means a small example of a topic, not complete preparation for that objective.
 

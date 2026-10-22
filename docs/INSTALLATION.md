@@ -166,3 +166,16 @@ Source44c1f406f15c68c4bab73f9bed3c482271dc4b6b,55/thirteen, evaluator4. [Run3984
 | Windows | dlms-learning-lab-0.1.0-g44c1f406f15c-x86_64-pc-windows-msvc-windows-candidate.zip | 069861a156b3a3675f123f6c283aeb2c745bc98af40f19013780f1bc0035c577 |
 
 Fedora binary SHA-256 c98f4827bbe5bfcd281ea11085ab16beb7b6584e48b81a1d0605652d57dcd87f. Clean archive installed/upgraded in the isolated /tmp test root; bundled validation55/thirteen, desktop entry validation and exact sentinel retention pass (retained-file check). Installed native stress flow outside checkout passed current limit feedback/history, exact backup, keyboard editor/Run/Stop, repair/all3cases, reload/edit invalidation and light/dark150%. These are synthetic development checks, not novice/platform acceptance. Default-Wayland startup investigation and actual Windows/macOS desktop acceptance remain open. macOS archive remains notice-gated. No release published.
+
+
+### M27 prepared candidates (before M28 authored file-batch unit)
+
+Sourcea3d7a9d212663f91a134b231525971fb0cfeda80,55/thirteen, evaluator5. [Run39846874265](https://github.com/drakahari/dlms_learning_lab/actions/runs/39846874265) passed253 Rust tests and applicable native checks on all3 CI runners. Ubuntu/Windows sidecars downloaded and locally hash-verified under ignored dist/native-ci-a3d7a9d. Fedora prepared from clean source; this identity is build/hash evidence, not a new installed-runtime acceptance run.
+
+| Build | Candidate archive | SHA-256 |
+| --- | --- | --- |
+| Fedora44 | dlms-learning-lab-0.1.0-ga3d7a9d21266-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | 16c63c31aebc9917f9ca8a928d1bc5e0735346912e25d087a9b1778e2a1d79fe |
+| Ubuntu24.04 | dlms-learning-lab-0.1.0-ga3d7a9d21266-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz | 8589a6d2969712d5ce8d631f74f782ddae759b8b9c73cad8afedf1e6992dcde5 |
+| Windows | dlms-learning-lab-0.1.0-ga3d7a9d21266-x86_64-pc-windows-msvc-windows-candidate.zip | 5c2f774a4a87b67dae5f2d00948b6f7557bf220705b2631e8a5c5077e352fd60 |
+
+Fedora binary SHA-256 e638446f14eda469d686eff080e5f72fb97c91fab9d4eb4d55d83dd887a8a23e. No M27 candidate release was published. macOS archive notice gate, actual Windows/macOS desktop acceptance and the default-Wayland startup investigation remain open.
