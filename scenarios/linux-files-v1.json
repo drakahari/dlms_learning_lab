@@ -1,0 +1,1645 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-file-navigation",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-foundations",
+      "topic": "Files and directories",
+      "title": "Find a project and prepare its handover",
+      "summary": "Navigate a project tree, inspect its instructions and make a handover copy.",
+      "objective": "You are Alex in /home/alex. Find the Aurora project under projects, read its welcome.txt, and copy that file to ready.txt in the same project. Keep welcome.txt unchanged and finish with Aurora as your working directory.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Navigate a project tree, inspect its instructions and make a handover copy.",
+          "action": "Inspect the starting directory and the supplied text before changing files.",
+          "commands": [
+            {
+              "command": "pwd",
+              "explanation": "Print the current directory; this does not change files.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Use pwd and ls to find projects, then inspect its child directories.",
+          "action": "cd projects/aurora selects the requested project. cp makes the copy; it does not need a new destination file to exist.",
+          "commands": []
+        },
+        {
+          "title": "Verify the result",
+          "why": "A command finishing silently is normal. Check names, contents and permissions rather than relying on the absence of an error.",
+          "action": "Inspect the affected directories and files, then choose Check work.",
+          "commands": [
+            {
+              "command": "ls",
+              "explanation": "List visible names in the current directory; use cat with the requested path to inspect a text file.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The project name selects the correct branch. Reading welcome.txt identifies its contents; copying preserves those contents in a separate ready.txt. Ending in the project directory satisfies the navigation part too. An absolute source/destination path with a later cd is equally valid.",
+      "hints": [
+        "Use pwd and ls to find projects, then inspect its child directories.",
+        "cd projects/aurora selects the requested project. cp makes the copy; it does not need a new destination file to exist.",
+        "Check that ready.txt has the same text as welcome.txt and pwd ends in /projects/aurora."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex; virtual UTF-8 files only. One path per creation/removal command; cp/mv support ordinary files only. No globbing, expansion, recursive flags, links, devices, ACLs or actual computer access. ls uses deterministic simplified metadata. help lists the subset; show is a simulator helper.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/projects": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/projects/aurora": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/projects/aurora/welcome.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/projects/beacon": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/projects/beacon/welcome.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/projects/aurora/welcome.txt": "Aurora handover: review the backup window.\n",
+            "/home/alex/projects/beacon/welcome.txt": "Beacon uses a different schedule.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/projects/aurora/ready.txt",
+            "text": "Aurora handover: review the backup window.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/projects/aurora/welcome.txt",
+            "text": "Aurora handover: review the backup window.\n"
+          },
+          {
+            "kind": "Directory",
+            "path": "/home/alex/projects/aurora"
+          }
+        ]
+      },
+      "solution": [
+        "cd projects/aurora",
+        "cat welcome.txt",
+        "cp welcome.txt ready.txt"
+      ],
+      "prerequisites": [],
+      "terminal_teaching": {
+        "prerequisite_note": "No Linux experience needed. Type one command in the terminal input and press Enter or Run. These commands affect only the lesson\u2019s simulated files.",
+        "concepts": [
+          {
+            "title": "Know where you are",
+            "text": "A directory is a folder. pwd prints your current folder; ls lists its visible names. Commands and names are case-sensitive. A command often finishes without printing anything when it succeeds."
+          },
+          {
+            "title": "Move through folders",
+            "text": "cd NAME enters a folder. A path names a location: /home/alex is absolute, starting at the simulated root /. A relative path starts where you are. A slash joins folder names; .. means the parent folder. cd alone returns home."
+          },
+          {
+            "title": "Read, then copy",
+            "text": "cat FILE prints a text file. cp SOURCE DESTINATION makes a separate copy and leaves the source in place. Use a space between the command and each name. Type in the input below the transcript, not in its printed output."
+          }
+        ],
+        "example": [
+          "pwd",
+          "ls",
+          "cd workshop",
+          "cat welcome.txt",
+          "cp welcome.txt copied.txt"
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/workshop": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/workshop/welcome.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/workshop/welcome.txt": "Workshop meeting at 14:00.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        },
+        "inputs": "This practice home contains a workshop folder and its welcome.txt. Run each example command in order. The assignment uses a different project.",
+        "try_change": "After copying, run ls and cat copied.txt. Then try cd .. followed by pwd.",
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/workshop/copied.txt",
+            "text": "Workshop meeting at 14:00.\n"
+          },
+          {
+            "kind": "Directory",
+            "path": "/home/alex/workshop"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-file-names",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-foundations",
+      "topic": "Files and directories",
+      "title": "Package notes with spaces in their names",
+      "summary": "Create a release folder and copy notes without splitting their names.",
+      "objective": "Create /home/alex/release notes. Copy draft notes.txt into that directory as notes.txt. Leave the draft and unrelated keep.txt unchanged. Finish anywhere you like.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Create a release folder and copy notes without splitting their names.",
+          "action": "Inspect the starting directory and the supplied text before changing files.",
+          "commands": [
+            {
+              "command": "pwd",
+              "explanation": "Print the current directory; this does not change files.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Use ls to read the exact names. Quotes are syntax; they are not part of the file name.",
+          "action": "mkdir creates release notes. Give cp a quoted source and a quoted destination containing the requested new name.",
+          "commands": []
+        },
+        {
+          "title": "Verify the result",
+          "why": "A command finishing silently is normal. Check names, contents and permissions rather than relying on the absence of an error.",
+          "action": "Inspect the affected directories and files, then choose Check work.",
+          "commands": [
+            {
+              "command": "ls",
+              "explanation": "List visible names in the current directory; use cat with the requested path to inspect a text file.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "Quotes group each path into one argument. The destination includes both the directory and new base name, so cp writes notes.txt rather than draft notes.txt inside the new directory. The original and unrelated document remain unchanged.",
+      "hints": [
+        "Use ls to read the exact names. Quotes are syntax; they are not part of the file name.",
+        "mkdir creates release notes. Give cp a quoted source and a quoted destination containing the requested new name.",
+        "A copied draft remains in place. Check the new file using cat and compare it with the original."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex; virtual UTF-8 files only. One path per creation/removal command; cp/mv support ordinary files only. No globbing, expansion, recursive flags, links, devices, ACLs or actual computer access. ls uses deterministic simplified metadata. help lists the subset; show is a simulator helper.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/draft notes.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/keep.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/draft notes.txt": "Release notes: keep the rollback instructions.\n",
+            "/home/alex/keep.txt": "Unrelated document.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Entry",
+            "path": "/home/alex/release notes",
+            "directory": true
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/release notes/notes.txt",
+            "text": "Release notes: keep the rollback instructions.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/draft notes.txt",
+            "text": "Release notes: keep the rollback instructions.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/keep.txt",
+            "text": "Unrelated document.\n"
+          }
+        ]
+      },
+      "solution": [
+        "mkdir 'release notes'",
+        "cp 'draft notes.txt' 'release notes/notes.txt'"
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Builds on finding folders and copying files. This lesson adds creating a folder and protecting spaces in names.",
+        "concepts": [
+          {
+            "title": "Keep a name together",
+            "text": "Spaces normally separate command arguments. Single quotes around a name keep its spaces together: cat 'meeting agenda.txt' reads one file. Double quotes also work for these literal paths; variable expansion is not part of this terminal."
+          },
+          {
+            "title": "Create a folder",
+            "text": "mkdir PATH creates one directory whose parent already exists. cp SOURCE DIRECTORY keeps the source name inside that directory; cp SOURCE DIRECTORY/NEWNAME chooses a new name. Existing destination files can be overwritten, so inspect first."
+          }
+        ],
+        "example": [
+          "mkdir 'event pack'",
+          "cp 'guest list.txt' 'event pack/list.txt'",
+          "cat 'event pack/list.txt'"
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/guest list.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/guest list.txt": "Guests: Lee and Jo.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        },
+        "inputs": "The practice file is guest list.txt; there is no event pack directory yet.",
+        "try_change": "Make a second folder with a space in its name and copy the guest list into it without renaming the file.",
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/event pack/list.txt",
+            "text": "Guests: Lee and Jo.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/guest list.txt",
+            "text": "Guests: Lee and Jo.\n"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-copy-move",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-foundations",
+      "topic": "Files and directories",
+      "title": "Keep a snapshot and process a receipt",
+      "summary": "Choose copying versus moving so the right originals remain.",
+      "objective": "Keep ledger.txt in place and copy it to archive/snapshot.txt. Move inbox/receipt.txt to processed/receipt.txt so the inbox copy no longer exists. Preserve the contents of both documents and archive/keep.txt. The destination directories already exist.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Choose copying versus moving so the right originals remain.",
+          "action": "Inspect the starting directory and the supplied text before changing files.",
+          "commands": [
+            {
+              "command": "pwd",
+              "explanation": "Print the current directory; this does not change files.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Make two separate decisions: the ledger must remain, but the receipt must leave its inbox.",
+          "action": "Use cp for the retained snapshot and mv for the processed receipt. The last operand may be a directory or a full new path.",
+          "commands": []
+        },
+        {
+          "title": "Verify the result",
+          "why": "A command finishing silently is normal. Check names, contents and permissions rather than relying on the absence of an error.",
+          "action": "Inspect the affected directories and files, then choose Check work.",
+          "commands": [
+            {
+              "command": "ls",
+              "explanation": "List visible names in the current directory; use cat with the requested path to inspect a text file.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The ledger has two independent names with identical contents. The receipt has one final name under processed and no inbox name. A valid alternate sequence that reaches these same outcomes passes; the grader does not require a particular command history.",
+      "hints": [
+        "Make two separate decisions: the ledger must remain, but the receipt must leave its inbox.",
+        "Use cp for the retained snapshot and mv for the processed receipt. The last operand may be a directory or a full new path.",
+        "A copy followed by removal can also meet the move outcome here, but verify the destination before removing the original."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex; virtual UTF-8 files only. One path per creation/removal command; cp/mv support ordinary files only. No globbing, expansion, recursive flags, links, devices, ACLs or actual computer access. ls uses deterministic simplified metadata. help lists the subset; show is a simulator helper.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/ledger.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/archive": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/archive/keep.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/inbox": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/inbox/receipt.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/processed": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/ledger.txt": "Ledger total: 42.\n",
+            "/home/alex/archive/keep.txt": "Keep this archive note.\n",
+            "/home/alex/inbox/receipt.txt": "Receipt R-18 approved.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/ledger.txt",
+            "text": "Ledger total: 42.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/archive/snapshot.txt",
+            "text": "Ledger total: 42.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/processed/receipt.txt",
+            "text": "Receipt R-18 approved.\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/inbox/receipt.txt"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/archive/keep.txt",
+            "text": "Keep this archive note.\n"
+          }
+        ]
+      },
+      "solution": [
+        "cp ledger.txt archive/snapshot.txt",
+        "mv inbox/receipt.txt processed"
+      ],
+      "prerequisites": [
+        "lpic1-file-names"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Builds on copying and quoted paths. This lesson distinguishes a retained copy from a moved original.",
+        "concepts": [
+          {
+            "title": "Copy or move?",
+            "text": "cp makes a second file. mv changes a file\u2019s name or location; its old name disappears. Both take a source and destination. A destination folder keeps the source base name. An existing destination file is replaced, so check it before acting."
+          },
+          {
+            "title": "Verify the result",
+            "text": "Use ls on both folders, then cat the destination. A move does not require write permission on the file itself: renaming requires write and search permission on its parent folders. This exercise supplies those permissions."
+          }
+        ],
+        "example": [
+          "cp schedule.txt saved.txt",
+          "mv queue/job.txt done",
+          "ls queue",
+          "cat done/job.txt"
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/schedule.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/queue": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/queue/job.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/done": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/schedule.txt": "Meeting at noon.\n",
+            "/home/alex/queue/job.txt": "Job J-4.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        },
+        "inputs": "Practice retains a schedule and relocates one queued job; the assignment uses financial handover files.",
+        "try_change": "Rename saved.txt to second-copy.txt with mv, then check that schedule.txt still exists.",
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/saved.txt",
+            "text": "Meeting at noon.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/schedule.txt",
+            "text": "Meeting at noon.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/done/job.txt",
+            "text": "Job J-4.\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/queue/job.txt"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-file-cleanup",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-foundations",
+      "topic": "Files and directories",
+      "title": "Clean a staging folder without losing the release",
+      "summary": "Inspect hidden names and remove only explicitly disposable files.",
+      "objective": "In staging, remove draft.tmp and the hidden .scratch file, then remove the now-empty old directory. Keep staging/final.txt and staging/.approved unchanged. Do not remove staging itself.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Inspect hidden names and remove only explicitly disposable files.",
+          "action": "Inspect the starting directory and the supplied text before changing files.",
+          "commands": [
+            {
+              "command": "pwd",
+              "explanation": "Print the current directory; this does not change files.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and act",
+          "why": "List staging with -a so the hidden disposable and hidden approval are both visible.",
+          "action": "Delete only the two named disposable files. Use rmdir, not rm, for the empty old directory.",
+          "commands": []
+        },
+        {
+          "title": "Verify the result",
+          "why": "A command finishing silently is normal. Check names, contents and permissions rather than relying on the absence of an error.",
+          "action": "Inspect the affected directories and files, then choose Check work.",
+          "commands": [
+            {
+              "command": "ls -la",
+              "explanation": "Include hidden names and show permissions for entries in the current directory.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "Hidden names are a display convention, not a deletion policy. Exact paths target the disposable items. rmdir refuses nonempty directories, helping avoid a broad recursive operation. The final and approval documents remain available and unchanged.",
+      "hints": [
+        "List staging with -a so the hidden disposable and hidden approval are both visible.",
+        "Delete only the two named disposable files. Use rmdir, not rm, for the empty old directory.",
+        "Do not treat every dot-name as disposable. The approval is required state and must remain unchanged."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex; virtual UTF-8 files only. One path per creation/removal command; cp/mv support ordinary files only. No globbing, expansion, recursive flags, links, devices, ACLs or actual computer access. ls uses deterministic simplified metadata. help lists the subset; show is a simulator helper.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/staging": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/staging/draft.tmp": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/staging/.scratch": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/staging/final.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/staging/.approved": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/staging/old": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/staging/draft.tmp": "Disposable draft.\n",
+            "/home/alex/staging/.scratch": "Disposable scratch.\n",
+            "/home/alex/staging/final.txt": "Published revision 3.\n",
+            "/home/alex/staging/.approved": "Approved by release review.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Absent",
+            "path": "/home/alex/staging/draft.tmp"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/staging/.scratch"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/staging/old"
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/alex/staging",
+            "directory": true
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/staging/final.txt",
+            "text": "Published revision 3.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/staging/.approved",
+            "text": "Approved by release review.\n"
+          }
+        ]
+      },
+      "solution": [
+        "ls -a staging",
+        "rm staging/draft.tmp",
+        "rm staging/.scratch",
+        "rmdir staging/old"
+      ],
+      "prerequisites": [
+        "lpic1-copy-move"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Builds on paths and moving files. This lesson adds hidden-name inspection and deliberate deletion.",
+        "concepts": [
+          {
+            "title": "Hidden does not mean protected",
+            "text": "A name beginning with . is hidden from ordinary ls output. ls -a includes it along with . (this folder) and .. (its parent). Hidden files still need the same careful review as visible files."
+          },
+          {
+            "title": "Delete precisely",
+            "text": "rm FILE removes one file, with no recycle bin in this simulation. rmdir DIRECTORY removes an empty folder and refuses one containing entries. Recursive deletion is deliberately unsupported here. Read the requirement and inspect before deleting; Reset restores this selected attempt if needed."
+          }
+        ],
+        "example": [
+          "ls -a practice",
+          "cat practice/keep.txt",
+          "rm practice/old.tmp",
+          "rmdir practice/empty"
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/practice": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/practice/keep.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/practice/old.tmp": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/practice/.note": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/practice/empty": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/practice/keep.txt": "Keep this.\n",
+            "/home/alex/practice/old.tmp": "Discard this.\n",
+            "/home/alex/practice/.note": "Hidden reminder.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        },
+        "inputs": "Practice has a disposable old.tmp, an empty folder and two items to retain.",
+        "try_change": "Run ls -a practice afterward. Confirm keep.txt and .note remain; try rmdir practice to see why a nonempty directory is refused.",
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/practice/keep.txt",
+            "text": "Keep this.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/practice/.note",
+            "text": "Hidden reminder.\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/practice/old.tmp"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/practice/empty"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-creation-mask",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-foundations",
+      "topic": "Files and directories",
+      "title": "Create a private working area by default",
+      "summary": "Set creation defaults and verify actual directory and file permissions.",
+      "objective": "Set Alex\u2019s creation mask to 077. Create private as a directory with permission 700 and private/notes.txt as an empty file with permission 600. Keep public.txt unchanged with permission 644. Do not change /home/alex permissions.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Set creation defaults and verify actual directory and file permissions.",
+          "action": "Inspect the starting directory and the supplied text before changing files.",
+          "commands": [
+            {
+              "command": "pwd",
+              "explanation": "Print the current directory; this does not change files.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Set the mask before creating either required entry. umask alone prints the current mask.",
+          "action": "mkdir creates a directory; touch creates an empty ordinary file. Their base permission sets differ.",
+          "commands": []
+        },
+        {
+          "title": "Verify the result",
+          "why": "A command finishing silently is normal. Check names, contents and permissions rather than relying on the absence of an error.",
+          "action": "Inspect the affected directories and files, then choose Check work.",
+          "commands": [
+            {
+              "command": "ls -la",
+              "explanation": "Include hidden names and show permissions for entries in the current directory.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "077 removes all group and other permissions at creation. A directory needs owner search permission, so 777 with those bits blocked becomes 700; an ordinary new file starts with no execute bits, so 666 becomes 600. Existing public.txt keeps its contents and original 644 mode.",
+      "hints": [
+        "Set the mask before creating either required entry. umask alone prints the current mask.",
+        "mkdir creates a directory; touch creates an empty ordinary file. Their base permission sets differ.",
+        "Use ls -ld private and ls -l private to check both levels. Changing the mask afterward does not repair already-created permissions; reset this attempt if you want a clean retry."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex; virtual UTF-8 files only. One path per creation/removal command; cp/mv support ordinary files only. No globbing, expansion, recursive flags, links, devices, ACLs or actual computer access. ls uses deterministic simplified metadata. help lists the subset; show is a simulator helper.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/public.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/public.txt": "Shared announcement.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Entry",
+            "path": "/home/alex/private",
+            "directory": true
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex/private",
+            "mode": 448
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/alex/private/notes.txt",
+            "directory": false
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/private/notes.txt",
+            "text": ""
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex/private/notes.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/public.txt",
+            "text": "Shared announcement.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex/public.txt",
+            "mode": 420
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex",
+            "mode": 448
+          },
+          {
+            "kind": "Mask",
+            "mask": 63
+          }
+        ]
+      },
+      "solution": [
+        "umask 077",
+        "mkdir private",
+        "touch private/notes.txt"
+      ],
+      "prerequisites": [
+        "lpic1-file-cleanup"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Builds on creating folders and inspecting names. This lesson introduces permission defaults; it does not require the earlier repair lab.",
+        "concepts": [
+          {
+            "title": "Read the access groups",
+            "text": "ls -l shows permissions in three groups: owner, group and everyone else. r means read, w means write and x means search/enter for a directory (execute for a file). A dash means that permission is absent. Alex owns these practice files."
+          },
+          {
+            "title": "Understand the numbers",
+            "text": "Octal permissions combine read=4, write=2 and execute/search=1. Thus 700 gives the owner all three permissions and nobody else any; 600 gives only owner read+write. ls -ld PATH inspects the directory itself rather than its contents."
+          },
+          {
+            "title": "Choose safer creation defaults",
+            "text": "umask blocks permissions on NEW entries; it does not edit existing ones. umask 077 blocks group and everyone-else access. Normal new directories start from 777, giving 700; touch creates ordinary files from 666, giving 600. touch also updates an existing entry\u2019s time without emptying it."
+          }
+        ],
+        "example": [
+          "umask 077",
+          "mkdir journal",
+          "touch journal/entry.txt",
+          "ls -ld journal",
+          "ls -l journal"
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {},
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        },
+        "inputs": "The practice home is empty. Create journal and inspect its owner-only permissions.",
+        "try_change": "Run umask 022, create another folder and file, and compare ls -l. Existing journal permissions stay unchanged.",
+        "outcomes": [
+          {
+            "kind": "Mode",
+            "path": "/home/alex/journal",
+            "mode": 448
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex/journal/entry.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Mask",
+            "mask": 63
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-file-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-foundations",
+      "topic": "Files and directories",
+      "title": "Prepare a safe project handover",
+      "summary": "Combine navigation, inspection, copying, moving, private defaults and precise cleanup.",
+      "objective": "Read handover.txt. Prepare private/delivery.txt as an owner-only copy of reports/final.txt, keeping the original unchanged. Move queue/job.txt into done/job.txt, preserving its text and removing the queue copy. Remove scratch.tmp only; keep .approval unchanged. The private directory must be 700 and delivery.txt 600. Finish in done. Set creation mask 077. Retain all supplied directories.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Combine navigation, inspection, copying, moving, private defaults and precise cleanup.",
+          "action": "Inspect the starting directory and the supplied text before changing files.",
+          "commands": [
+            {
+              "command": "pwd",
+              "explanation": "Print the current directory; this does not change files.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Read handover.txt and use ls -a. Decide which operation matches each requested outcome before acting.",
+          "action": "Create the private copy after setting umask 077. Moving the queued job and cleaning the scratch file are separate requirements.",
+          "commands": []
+        },
+        {
+          "title": "Verify the result",
+          "why": "A command finishing silently is normal. Check names, contents and permissions rather than relying on the absence of an error.",
+          "action": "Inspect the affected directories and files, then choose Check work.",
+          "commands": [
+            {
+              "command": "ls -la",
+              "explanation": "Include hidden names and show permissions for entries in the current directory.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "The handover combines independent outcomes: a retained source and private copy, a relocated queued document, precise cleanup, a retained hidden approval and the requested working directory. The grader checks current state, so breaking any requirement after success removes current completion.",
+      "hints": [
+        "Read handover.txt and use ls -a. Decide which operation matches each requested outcome before acting.",
+        "Create the private copy after setting umask 077. Moving the queued job and cleaning the scratch file are separate requirements.",
+        "Check all required state, not just the last command. Finishing in done still allows inspection of sibling folders through .. paths."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/coreutils.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex; virtual UTF-8 files only. One path per creation/removal command; cp/mv support ordinary files only. No globbing, expansion, recursive flags, links, devices, ACLs or actual computer access. ls uses deterministic simplified metadata. help lists the subset; show is a simulator helper.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/handover.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/reports": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/reports/final.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/queue": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/queue/job.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/done": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/scratch.tmp": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/.approval": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/handover.txt": "Deliver the final report privately. Process the queued job. Remove scratch.tmp; retain .approval.\n",
+            "/home/alex/reports/final.txt": "Final handover: recovery checked.\n",
+            "/home/alex/queue/job.txt": "Job Q-7 ready.\n",
+            "/home/alex/scratch.tmp": "Temporary work.\n",
+            "/home/alex/.approval": "Approved handover.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Entry",
+            "path": "/home/alex/private",
+            "directory": true
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex/private",
+            "mode": 448
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/private/delivery.txt",
+            "text": "Final handover: recovery checked.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/home/alex/private/delivery.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/reports/final.txt",
+            "text": "Final handover: recovery checked.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/done/job.txt",
+            "text": "Job Q-7 ready.\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/queue/job.txt"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/scratch.tmp"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/.approval",
+            "text": "Approved handover.\n"
+          },
+          {
+            "kind": "Directory",
+            "path": "/home/alex/done"
+          },
+          {
+            "kind": "Mask",
+            "mask": 63
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/handover.txt",
+            "text": "Deliver the final report privately. Process the queued job. Remove scratch.tmp; retain .approval.\n"
+          },
+          {
+            "kind": "Entry",
+            "path": "/home/alex/queue",
+            "directory": true
+          }
+        ]
+      },
+      "solution": [
+        "cat handover.txt",
+        "umask 077",
+        "mkdir private",
+        "cp reports/final.txt private/delivery.txt",
+        "mv queue/job.txt done",
+        "rm scratch.tmp",
+        "cd done"
+      ],
+      "prerequisites": [
+        "lpic1-creation-mask"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Capstone: uses only the earlier five file-management lessons. Reopen those introductions if a command is unfamiliar.",
+        "concepts": [
+          {
+            "title": "Plan by outcome",
+            "text": "Identify what must remain, what needs a second copy, what changes location and what is explicitly disposable. Read instructions and inspect hidden names before making changes. A successful command alone is not proof the whole handover is correct."
+          },
+          {
+            "title": "Verify both sides",
+            "text": "Set the mask before creation. Check the private folder itself with ls -ld and its file with ls -l. Inspect source and destination contents, confirm the old queue name is absent, and use pwd to check your final location. Absolute and relative paths are both valid."
+          }
+        ],
+        "example": [
+          "ls -a",
+          "umask 077",
+          "mkdir secure",
+          "cp brief.txt secure/copy.txt",
+          "mv waiting/item.txt completed",
+          "rm discarded.tmp",
+          "cd completed"
+        ],
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/home/alex": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/brief.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/waiting": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/waiting/item.txt": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/completed": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/discarded.tmp": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/home/alex/.retain": {
+              "directory": false,
+              "mode": 420,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/home/alex/brief.txt": "Practice delivery.\n",
+            "/home/alex/waiting/item.txt": "Practice item.\n",
+            "/home/alex/discarded.tmp": "Disposable.\n",
+            "/home/alex/.retain": "Retain this note.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff"
+            ]
+          },
+          "user": "alex",
+          "home": "/home/alex",
+          "cwd": "/home/alex",
+          "umask": 18
+        },
+        "inputs": "This ungraded practice combines the same operations with different names and contents.",
+        "try_change": "From completed, use ../secure to inspect the copy, then return and verify pwd. The assignment remains untouched.",
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/home/alex/secure/copy.txt",
+            "text": "Practice delivery.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/brief.txt",
+            "text": "Practice delivery.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/completed/item.txt",
+            "text": "Practice item.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/home/alex/.retain",
+            "text": "Retain this note.\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/waiting/item.txt"
+          },
+          {
+            "kind": "Absent",
+            "path": "/home/alex/discarded.tmp"
+          },
+          {
+            "kind": "Directory",
+            "path": "/home/alex/completed"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking and Linux practice. Twenty-four authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking and Linux practice. Thirty authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments, plus six Linux file-management foundations. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -41,6 +41,8 @@ The checked-in Cargo.lock pins dependencies. First-time builds need crates.io ac
 ## This milestone
 
 The accepted native workspace design remains the basis of all labs. The header adds a native theme picker with samples under **Settings → Appearance → Theme samples**: all five stock DLMS palettes and all 22 official Omarchy v4.0.4 palettes, plus the existing Navy default (**28 choices**). Selection and text size persist independently of progress. No desktop settings are changed. Exact inventory, source revision, contrast adaptation and MIT notices: [themes](docs/THEMES.md).
+
+The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
 
 The new **Bash/Shell** track teaches reliable output, quoted arguments, input, guards/status, report redirection, multi-file loops and a safe-report capstone, followed by separate output channels, intersecting pipeline filters, end-of-input repair resilient batch auditing, reusable functions, per-item return status, argument consumption and a preflight bundle capstone. Scripts are written in a native editor and run against 3–7 deterministic sets of sample inputs with output/file-state grading. Run/Stop, case inspection and specific retry feedback stay together. Learn/Challenge retain the same assignments. Learn adds a skippable, reopenable introduction and a separately saved **Try example** workspace, with different example values and no completion credit. Challenge opens independent assignment work. Walkthroughs, progressive hints and worked solutions remain optional. See the [foundations teaching audit](docs/SCRIPT_TEACHING.md) and [composition content review](docs/SHELL_COMPOSITION.md) and [reusable-interface unit](docs/SHELL_REUSABLE.md). Drafts survive resume; edits invalidate old results. Tab indents the code editor, Escape releases its focus, and Ctrl+Enter runs.
 

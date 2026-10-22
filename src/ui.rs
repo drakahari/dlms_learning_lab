@@ -10,6 +10,7 @@ use eframe::egui::{self, RichText};
 mod data;
 mod script_learning;
 mod scripting;
+mod terminal_learning;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_workspace;
 mod smoke;
@@ -199,8 +200,13 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("reusable")
+            smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout")
             {
+                1209
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files") {
+                1100
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("reusable") {
                 900
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("composition-layout")
@@ -241,6 +247,9 @@ impl LabApp {
         model::prepare(a);
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, new_attempt);
+        }
+        if let Some(lesson) = &s.terminal_teaching {
+            dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
         }
         a.visited = clock;
         let data = a.workspace.as_ref().unwrap();
@@ -289,6 +298,9 @@ impl LabApp {
         model::prepare(a);
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.terminal_teaching {
+            dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
         }
         self.script_job = None;
         self.input.clear();
@@ -452,14 +464,21 @@ impl LabApp {
             && !self.filter.favorites
             && !self.filter.recent
         {
-            let next = self.scenarios.iter().position(|s| {
-                s.track == self.filter.track
-                    && self
-                        .progress
-                        .attempts
-                        .get(&s.id)
-                        .is_none_or(|a| !progress::current_solved(a, s))
-            });
+            let next = self
+                .units
+                .iter()
+                .filter(|u| u.track == self.filter.track)
+                .flat_map(|u| u.labs.iter())
+                .find_map(|id| {
+                    self.scenarios.iter().position(|s| {
+                        &s.id == id
+                            && self
+                                .progress
+                                .attempts
+                                .get(id)
+                                .is_none_or(|a| !progress::current_solved(a, s))
+                    })
+                });
             ui.horizontal_wrapped(|ui| {
                 ui.label("Follow the course order, or choose any lab below.");
                 if let Some(i) = next {

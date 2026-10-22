@@ -32,6 +32,8 @@ pub struct Scenario {
     pub prerequisites: Vec<String>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub teaching: Option<crate::script_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub terminal_teaching: Option<crate::terminal_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -135,6 +137,12 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 .any(|a| !a.cidr.is_empty() && engine::cidr(&a.cidr).is_none())
         {
             return Err("Invalid initial subnet allocation".into());
+        }
+        if let Some(lesson) = &s.terminal_teaching {
+            if !matches!(s.initial, State::Filesystem { .. }) {
+                return Err("Terminal teaching attached to an incompatible lab type".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
         if let Some(lesson) = &s.teaching {
             if !matches!(s.initial, State::Script { .. }) {
@@ -344,5 +352,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/shell-unit-v1.json"),
         include_str!("../scenarios/shell-composition-v1.json"),
         include_str!("../scenarios/shell-reusable-v1.json"),
+        include_str!("../scenarios/linux-files-v1.json"),
     ])
 }

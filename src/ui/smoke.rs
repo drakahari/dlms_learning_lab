@@ -851,6 +851,175 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            n @ 1100..=1207 => {
+                let ordinal = (n - 1100) / 18;
+                let i = self
+                    .scenarios
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, s)| s.terminal_teaching.is_some())
+                    .nth(ordinal)
+                    .unwrap()
+                    .0;
+                let id = self.scenarios[i].id.clone();
+                match (n - 1100) % 18 {
+                    0 => {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        self.launch(i);
+                    }
+                    1 => {
+                        assert_eq!(self.terminal_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => self.set_terminal_view(i, teaching::View::Example),
+                    3 => {
+                        let command = self.scenarios[i]
+                            .terminal_teaching
+                            .as_ref()
+                            .unwrap()
+                            .example[0]
+                            .clone();
+                        self.pending_events.push(egui::Event::Text(command));
+                        self.pending_events.push(key(egui::Key::Enter, false));
+                    }
+                    4 => {}
+                    5 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .terminal_learning
+                            .as_ref()
+                            .unwrap();
+                        assert_eq!(l.transcript.len(), 1);
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!engine::solved(&a.state, &self.scenarios[i].goal));
+                    }
+                    6 => {
+                        let commands = self.scenarios[i]
+                            .terminal_teaching
+                            .as_ref()
+                            .unwrap()
+                            .example
+                            .clone();
+                        let l = self
+                            .progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .terminal_learning
+                            .as_mut()
+                            .unwrap();
+                        for command in commands.into_iter().skip(1) {
+                            l.command = command;
+                            l.execute();
+                        }
+                        for requirement in &self.scenarios[i]
+                            .terminal_teaching
+                            .as_ref()
+                            .unwrap()
+                            .outcomes
+                        {
+                            assert!(requirement.check(&l.tree).0);
+                        }
+                    }
+                    7 => shot = Some(format!("{id}-practice")),
+                    8 => self.set_terminal_view(i, teaching::View::Assignment),
+                    9 => {
+                        self.input = "cat absent-file".into();
+                        self.submit(i);
+                    }
+                    10 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-assignment-retry"));
+                    }
+                    11 => {
+                        for command in self.scenarios[i].solution.clone() {
+                            self.input = command;
+                            self.submit(i);
+                        }
+                    }
+                    12 => {
+                        self.checked = true;
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .checked = true;
+                    }
+                    13 => {
+                        assert!(self.metrics.completion);
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    14 => {
+                        self.input = [
+                            "rm ready.txt",
+                            "rm 'release notes/notes.txt'",
+                            "rm archive/snapshot.txt",
+                            "touch staging/draft.tmp",
+                            "umask 022",
+                            "rm ../private/delivery.txt",
+                        ][ordinal]
+                            .into();
+                        self.submit(i);
+                    }
+                    15 => {
+                        assert!(!self.metrics.completion);
+                    }
+                    16 => {
+                        self.save();
+                    }
+                    _ => self.selected = None,
+                }
+            }
+            1208 => {}
+            1209 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(24);
+                self.set_terminal_view(24, teaching::View::Introduction);
+            }
+            1210 => shot = Some("files-introduction-light-150".into()),
+            1211 => self.set_terminal_view(24, teaching::View::Example),
+            1212 => shot = Some("files-practice-light-150".into()),
+            1213 => {
+                self.progress
+                    .attempts
+                    .get_mut("lpic1-file-navigation")
+                    .unwrap()
+                    .challenge = true;
+            }
+            1214 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("files-challenge-light-150".into());
+            }
+            1215 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -450.),
+                    modifiers: Default::default(),
+                });
+            }
+            1216 => {}
+            1217 => shot = Some("files-challenge-scrolled-light-150".into()),
+            1218 => {
+                println!(
+                    "PASS native file foundations: six introductions, keyboard practice command, isolated example outcomes, assignment error/retry, all state solutions, success invalidation and saved drafts. Light150 resized Challenge with optional help closed. Synthetic profile only; not novice-user acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             600 => {
                 self.filter.track = "Bash/Shell".into();
             }

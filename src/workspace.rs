@@ -11,6 +11,8 @@ pub struct WorkspaceData {
     pub version: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub script_learning: Option<crate::script_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub terminal_learning: Option<crate::terminal_teaching::Learning>,
     pub command: String,
     pub service_port: Option<String>,
     pub dns_address: Option<String>,
@@ -34,6 +36,7 @@ impl WorkspaceData {
     pub fn valid(&self) -> bool {
         self.version == 1
             && self.script_learning.as_ref().is_none_or(|l| l.valid())
+            && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.command.len() <= 4096
             && [
                 &self.service_port,
@@ -204,6 +207,17 @@ pub fn edit_mount(s: &mut State, device: &str) -> Result<(), String> {
 pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
     let checks = engine::checks(s, g);
     checks.iter().enumerate().filter(|(_,c)|!c.0).map(|(i,(_,label))| match s {
+        State::Filesystem{tree}=>if let engine::Goal::Filesystem{requirements}=g {
+            use crate::filesystem::Requirement;
+            match &requirements[i] {
+                Requirement::Contents{path,..}=>if tree.files.contains_key(path) {format!("{path} has different text. Check which source you copied; compare it with cat before retrying.")} else {format!("{path} is missing as a file. Inspect its parent folder and check the destination name.")},
+                Requirement::Entry{path,directory}=>format!("{path} must be a {}. Use ls on its parent to check the name and type.",if *directory {"directory"}else{"file"}),
+                Requirement::Absent{path}=>format!("{path} still exists. Check that its replacement is safe before removing the requested old entry."),
+                Requirement::Directory{path}=>format!("You are in {}. Finish in {path}; pwd shows your current directory.",tree.cwd),
+                Requirement::Mode{path,mode}=>format!("{path} does not have permission {mode:03o}. Inspect with ls -l (or -ld for a directory). umask changes new entries, not existing ones."),
+                Requirement::Mask{mask}=>format!("The current creation mask is {:03o}; the task requires {mask:03o}. Run umask alone to inspect it.",tree.umask),
+            }
+        }else{label.clone()},
         State::Service{port,running,loaded_port,..} => match i {
             0=>if port.parse::<u16>().ok().filter(|p|*p>0).is_none(){"The saved port is not a number from 1 to 65535. Inspect the configuration and service journal.".into()}else{"The saved port differs from the requested port. Repair the configuration file.".into()},
             1=>if !*running {"Atlas is stopped. Inspect status/journal, repair any configuration error, then start it.".into()}else{format!("Atlas is running with port {}. Saving does not apply changes; restart it to use the repaired configuration.",loaded_port.unwrap_or(0))},

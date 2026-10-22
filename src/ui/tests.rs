@@ -578,7 +578,12 @@ fn assistance_is_optional_and_inserting_a_command_never_executes_it() {
 
 #[test]
 fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
-    for i in 9..pack::bundled().unwrap().len() {
+    for (i, _) in pack::bundled()
+        .unwrap()
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.teaching.is_some())
+    {
         for width in [720., 1200.] {
             for scale in [1., 1.5] {
                 for challenge in [false, true] {
@@ -859,7 +864,12 @@ fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_r
 
 #[test]
 fn all_introductions_and_examples_wrap_at_large_text_and_challenge_stays_independent() {
-    for i in 9..pack::bundled().unwrap().len() {
+    for (i, _) in pack::bundled()
+        .unwrap()
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.teaching.is_some())
+    {
         for view in [teaching::View::Introduction, teaching::View::Example] {
             for scale in [1., 1.5] {
                 for width in [720., 1200.] {
@@ -1366,4 +1376,239 @@ fn function_scripts_run_cooperatively_in_the_existing_workspace_and_preserve_dra
     a.launch(9);
     assert_eq!(a.progress.attempts["shell-handover"].state, draft);
     assert!(!a.metrics.completion);
+}
+
+#[test]
+fn terminal_introduction_practice_and_assignment_keep_drafts_focus_and_credit_separate() {
+    let (ctx, mut a) = app();
+    let i = a
+        .scenarios
+        .iter()
+        .position(|s| s.id == "lpic1-file-navigation")
+        .unwrap();
+    a.launch(i);
+    draw(&ctx, &mut a);
+    assert_eq!(a.terminal_view(i), teaching::View::Introduction);
+    assert!(a.metrics.terminal.is_none());
+    let original = a.progress.attempts["lpic1-file-navigation"].state.clone();
+    let r = a.metrics.example_action.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert_eq!(a.terminal_view(i), teaching::View::Example);
+    assert!(ctx.memory(|m| m.has_focus(a.metrics.focus.unwrap())));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Text("pwd".into()),
+            key(egui::Key::Enter, false),
+        ],
+    );
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts["lpic1-file-navigation"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .terminal_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.transcript.len(), 1);
+    assert!(l.transcript[0].contains("/home/alex"));
+    assert_eq!(a.progress.attempts["lpic1-file-navigation"].state, original);
+    assert!(!a.metrics.completion);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("practice draft".into())],
+    );
+    draw(&ctx, &mut a);
+    a.set_terminal_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("assignment draft".into())],
+    );
+    draw(&ctx, &mut a);
+    let assignment = a.input.clone();
+    a.set_terminal_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        a.progress.attempts["lpic1-file-navigation"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .terminal_learning
+            .as_ref()
+            .unwrap()
+            .command,
+        "practice draft"
+    );
+    assert_eq!(a.input, assignment);
+    let directory = tempfile::tempdir().unwrap();
+    a.path = directory.path().join("progress.json");
+    a.save();
+    let p = progress::load(&a.path, &a.scenarios).unwrap();
+    assert_eq!(
+        serde_json::to_value(&p).unwrap(),
+        serde_json::to_value(&a.progress).unwrap()
+    );
+    a.progress
+        .attempts
+        .get_mut("lpic1-file-navigation")
+        .unwrap()
+        .challenge = true;
+    draw(&ctx, &mut a);
+    assert_eq!(a.terminal_view(i), teaching::View::Assignment);
+    assert!(a.metrics.lesson_tabs.is_empty());
+    assert!(!a.metrics.help_visible);
+    a.reset_attempt(i);
+    draw(&ctx, &mut a);
+    assert_eq!(a.terminal_view(i), teaching::View::Introduction);
+    assert_eq!(a.progress.attempts["lpic1-file-navigation"].state, original);
+}
+#[test]
+fn file_lesson_layouts_wrap_and_challenge_keeps_full_assignment_at_large_text() {
+    let labs = pack::bundled().unwrap();
+    for (i, s) in labs
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.terminal_teaching.is_some())
+    {
+        for width in [720., 1200.] {
+            for scale in [1., 1.5] {
+                for view in [
+                    teaching::View::Introduction,
+                    teaching::View::Example,
+                    teaching::View::Assignment,
+                ] {
+                    let (ctx, mut a) = app();
+                    a.launch(i);
+                    a.scale = scale;
+                    a.set_terminal_view(i, view);
+                    for _ in 0..3 {
+                        frame(&ctx, &mut a, width, 850., vec![]);
+                    }
+                    for r in a
+                        .metrics
+                        .header
+                        .iter()
+                        .chain(a.metrics.lesson_tabs.iter())
+                        .chain(a.metrics.terminal.iter())
+                        .chain(a.metrics.check.iter())
+                        .chain(a.metrics.assignment_action.iter())
+                    {
+                        assert!(
+                            r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                            "{} {width}/{scale} {view:?} {r:?}",
+                            s.id
+                        );
+                    }
+                    if view != teaching::View::Introduction {
+                        assert!(a.metrics.output.unwrap().height() >= 140.);
+                        assert!(a.metrics.terminal.is_some());
+                    }
+                    assert!(!a.metrics.help_visible);
+                    assert!(!a.metrics.guide);
+                    a.progress.attempts.get_mut(&s.id).unwrap().challenge = true;
+                    draw(&ctx, &mut a);
+                    assert_eq!(a.terminal_view(i), teaching::View::Assignment);
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+            }
+        }
+    }
+}
+#[test]
+fn file_assignments_grade_then_invalidate_and_selected_reset_preserves_other_labs() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    let old = a.progress.attempts["shell-handover"].state.clone();
+    let indexes: Vec<_> = a
+        .scenarios
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.terminal_teaching.is_some())
+        .map(|(i, _)| i)
+        .collect();
+    for i in indexes {
+        a.launch(i);
+        a.set_terminal_view(i, teaching::View::Assignment);
+        for cmd in a.scenarios[i].solution.clone() {
+            a.input = cmd;
+            a.submit(i);
+        }
+        draw(&ctx, &mut a);
+        check(&ctx, &mut a);
+        draw(&ctx, &mut a);
+        assert!(a.metrics.completion, "{}", a.scenarios[i].id);
+        let id = a.scenarios[i].id.clone();
+        let State::Filesystem { tree } = &mut a.progress.attempts.get_mut(&id).unwrap().state
+        else {
+            panic!()
+        };
+        // Each assignment protects at least one supplied source; change all for this UI regression.
+        for text in tree.files.values_mut() {
+            text.push_str("changed");
+        }
+        draw(&ctx, &mut a);
+        assert!(!a.metrics.completion, "{id}");
+        a.reset_attempt(i);
+        assert_eq!(a.progress.attempts[&id].state, a.scenarios[i].initial);
+        assert_eq!(a.progress.attempts["shell-handover"].state, old);
+    }
+}
+
+#[test]
+fn new_linux_learners_start_with_file_foundations_without_reordering_saved_ids() {
+    let (ctx, mut a) = app();
+    a.filter.track = "LPIC-1".into();
+    draw(&ctx, &mut a);
+    let r = a.metrics.course_start.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert_eq!(a.scenarios[a.selected.unwrap()].id, "lpic1-file-navigation");
+    assert_eq!(
+        a.terminal_view(a.selected.unwrap()),
+        teaching::View::Introduction
+    );
+    assert_eq!(a.scenarios[3].id, "lpic1-permissions");
+}
+
+#[test]
+fn terminal_example_insert_only_populates_input_and_tab_releases_the_field() {
+    let (ctx, mut a) = app();
+    a.launch(24);
+    a.set_terminal_view(24, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let r = a.metrics.insert.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts["lpic1-file-navigation"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .terminal_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.command, "pwd");
+    assert!(l.transcript.is_empty());
+    assert_eq!(
+        l.tree,
+        a.scenarios[24].terminal_teaching.as_ref().unwrap().fixture
+    );
+    let field = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    draw(&ctx, &mut a);
+    assert!(
+        !ctx.memory(|m| m.has_focus(field)),
+        "Tab leaves the one-line terminal input"
+    );
 }

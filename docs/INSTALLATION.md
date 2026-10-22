@@ -54,3 +54,14 @@ The manually dispatched `Native milestone checks and candidates` workflow tests/
 ## Acceptance still required
 
 For each exact candidate checksum: clean user installation; opening offline; saved script and terminal drafts across restart; all current scenario types; restored backup; upgrade with an old profile; uninstall retaining progress; keyboard/focus and assistive technology; smaller/larger windows and text; light/dark states; OS security/signing behavior. Fedora evidence and actual CI results belong in the implementation ledger. Windows/macOS desktop checks cannot be inferred from Fedora, cross-compilation or CI.
+
+## M8 native CI evidence (not final product acceptance)
+
+[Run 39793992548](https://github.com/drakahari/dlms_learning_lab/actions/runs/39793992548), source `db54a2cd7b82d58e3eea811ce48bd4c049a9f684`: all three native jobs passed Rust tests/Clippy and applicable Python checks. macOS compiled but produced no installation candidate because of the notice gate. Ubuntu/Windows candidate archives were downloaded and their sidecar hashes verified locally. They contain the 24-assignment M8 curriculum, not subsequent work.
+
+| Candidate | SHA-256 |
+| --- | --- |
+| `dlms-learning-lab-0.1.0-gdb54a2cd7b82-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `3e4ac6abbfeee4239f3c9a4fa3be8ef69f87b0d3e85456f83777bcb23ec6d154` |
+| `dlms-learning-lab-0.1.0-gdb54a2cd7b82-x86_64-pc-windows-msvc-windows-candidate.zip` | `93f40a7361380c7884b14a499e2410ce8356548884f4e35a7aff591604d8f487` |
+
+Local retained copies: ignored `dist/native-ci-db54a2c/`. CI retention is 14 days. No public release was published; Windows/macOS desktop runtime, upgrades and security prompts remain unverified.

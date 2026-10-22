@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus fifteen scripting assignments in three units. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus fifteen scripting assignments in three units and six Linux file-management foundations. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -27,6 +27,7 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 | `ccna-ipv4` | Conventional IPv4 boundaries and second host | No IPv6 or device CLI; /31 and /32 excluded |
 | `ccna-vlsm` | Host-capacity allocation, alignment, containment, overlap | No routed topology configuration |
 | `ccna-gateway` | Client mask/next-hop diagnosis | One topology; no IOS, ARP, multi-hop protocols or cross-OS command coverage |
+| `lpic1-file-navigation` … `lpic1-file-handover` | Six file-management tasks: paths, quoted names, copy/move, cleanup, creation mask and capstone | No globs, recursive operations, links, ownership changes or full GNU option surface |
 | `lpic1-permissions` | Alex-only file access and privacy; alternate repairs | No ACL, SELinux or full Unix filesystem |
 | `lpic1-traversal` | Group access and ancestor traversal | No account lifecycle, authentication or complete group database |
 | `lpic1-logs` | Locate and filter literal ERROR lines | No regex, complete filter suite or logging service configuration |
@@ -65,3 +66,5 @@ Each planned stage includes a guided repair, independent construction and capsto
 ## Next capability batch
 
 The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Next extend Bash scope, structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 addressing/neighbor state is the next networking capability; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
+
+Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](LINUX_FILES.md). This delivers narrow practical slices of LPIC-1 103.1, 103.3 and 104.5; the full objectives remain partial.

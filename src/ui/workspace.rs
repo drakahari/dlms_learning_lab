@@ -54,14 +54,16 @@ impl LabApp {
                 self.ipv4_assignment(ui, i);
             } else {
                 ui.label(RichText::new(&s.title).strong().size(23.));
-                if !matches!(s.initial, State::Script { .. }) {
+                if !matches!(s.initial, State::Script { .. }) && s.terminal_teaching.is_none() {
                     ui.label(&s.objective);
                 }
-                if !challenge {
+                if !challenge && s.terminal_teaching.is_none() {
                     ui.label(RichText::new(starting_point(&s.id)).color(palette(ui).muted));
                 }
                 if matches!(s.initial, State::Script { .. }) {
                     self.script_learning_workspace(ui, i);
+                } else if s.terminal_teaching.is_some() {
+                    self.terminal_learning_workspace(ui, i);
                 } else {
                     match &self.progress.attempts[&s.id].state {
                         State::Vlsm { .. } => self.allocations(ui, i),
@@ -83,29 +85,16 @@ impl LabApp {
                         }
                         _ => self.terminal(ui, i),
                     }
-                    let r = ui.add_sized(
-                        [220_f32.min(ui.available_width()), CONTROL],
-                        primary(ui, "Check work"),
-                    );
-                    self.metrics.check = Some(r.rect);
-                    if r.clicked() {
-                        self.checked = true;
-                        self.progress
-                            .attempts
-                            .get_mut(&s.id)
-                            .unwrap()
-                            .workspace
-                            .as_mut()
-                            .unwrap()
-                            .checked = true;
-                        self.dirty = true;
-                    }
-                    self.report(ui, i);
+                    self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = challenge
-                || !matches!(s.initial, State::Script { .. })
-                || self.script_view(i) == teaching::View::Assignment;
+            let show_help = if s.terminal_teaching.is_some() {
+                self.terminal_view(i) == teaching::View::Assignment
+            } else {
+                challenge
+                    || !matches!(s.initial, State::Script { .. })
+                    || self.script_view(i) == teaching::View::Assignment
+            };
             if show_help {
                 ui.add_space(2.);
                 let r = ui.link(if self.help_open {
@@ -133,6 +122,27 @@ impl LabApp {
             .small()
             .color(palette(ui).muted),
         );
+    }
+    pub(super) fn check_terminal_work(&mut self, ui: &mut egui::Ui, i: usize) {
+        let s = &self.scenarios[i];
+        let r = ui.add_sized(
+            [220_f32.min(ui.available_width()), CONTROL],
+            primary(ui, "Check work"),
+        );
+        self.metrics.check = Some(r.rect);
+        if r.clicked() {
+            self.checked = true;
+            self.progress
+                .attempts
+                .get_mut(&s.id)
+                .unwrap()
+                .workspace
+                .as_mut()
+                .unwrap()
+                .checked = true;
+            self.dirty = true;
+        }
+        self.report(ui, i);
     }
     fn ipv4_assignment(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = &self.scenarios[i];
@@ -418,7 +428,7 @@ impl LabApp {
             ui.label(RichText::new(notice).small().color(palette(ui).accent));
         }
     }
-    fn terminal(&mut self, ui: &mut egui::Ui, i: usize) {
+    pub(super) fn terminal(&mut self, ui: &mut egui::Ui, i: usize) {
         let a = &self.progress.attempts[&self.scenarios[i].id];
         let height =
             (ui.ctx().input(|input| input.content_rect().bottom()) - ui.cursor().top() - 190.)
@@ -429,9 +439,14 @@ impl LabApp {
             .corner_radius(6.)
             .show(ui, |ui| {
                 ui.label(
-                    RichText::new("Simulated terminal · administrator")
-                        .small()
-                        .color(palette(ui).muted),
+                    RichText::new(match &a.state {
+                        State::Filesystem { tree } => {
+                            format!("Simulated terminal · {} · {}", tree.user, tree.cwd)
+                        }
+                        _ => "Simulated terminal · administrator".into(),
+                    })
+                    .small()
+                    .color(palette(ui).muted),
                 );
                 egui::ScrollArea::both()
                     .id_salt(("terminal", i))
@@ -457,9 +472,14 @@ impl LabApp {
                     });
             });
         self.metrics.output = Some(output.response.rect);
+        let prompt = if matches!(a.state, State::Filesystem { .. }) {
+            "alex $"
+        } else {
+            "lab #"
+        };
         let mut run = false;
         ui.horizontal(|ui| {
-            ui.label(RichText::new("lab #").monospace().color(palette(ui).accent));
+            ui.label(RichText::new(prompt).monospace().color(palette(ui).accent));
             let width = (ui.available_width() - 90.).max(40.);
             let r = ui.add_sized(
                 [width, CONTROL],
@@ -509,10 +529,15 @@ impl LabApp {
             .unwrap();
         let before = a.state.clone();
         let output = engine::execute(&mut a.state, &cmd).unwrap_or_else(|e| e);
-        a.transcript.push(if output.is_empty() {
-            format!("lab # {cmd}")
+        let prompt = if matches!(a.state, State::Filesystem { .. }) {
+            "alex $"
         } else {
-            format!("lab # {cmd}\n{output}")
+            "lab #"
+        };
+        a.transcript.push(if output.is_empty() {
+            format!("{prompt} {cmd}")
+        } else {
+            format!("{prompt} {cmd}\n{output}")
         });
         if a.transcript.len() > 100 {
             a.transcript.drain(..a.transcript.len() - 100);
@@ -641,7 +666,7 @@ impl LabApp {
             });
         egui::CollapsingHeader::new("Supported commands, limits & sources").id_salt(("references",i)).show(ui,|ui|{
             ui.add(egui::Label::new(engine::help(&a.state)).wrap());ui.label(&s.simplifications);
-            ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands.");
+            if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
             for source in &s.sources{ui.add(egui::Label::new(source).wrap());}
         });
         if matches!(a.state, State::Subnet { .. }) {

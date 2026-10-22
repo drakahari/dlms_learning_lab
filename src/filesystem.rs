@@ -30,6 +30,7 @@ pub enum Requirement {
     Absent { path: String },
     Directory { path: String },
     Mode { path: String, mode: u16 },
+    Mask { mask: u16 },
 }
 fn canonical(path: &str) -> bool {
     path.starts_with('/')
@@ -75,12 +76,16 @@ impl From<PathError> for String {
 }
 impl Requirement {
     pub fn valid(&self) -> bool {
+        if let Self::Mask { mask } = self {
+            return *mask <= 0o777;
+        }
         let path = match self {
             Self::Entry { path, .. }
             | Self::Contents { path, .. }
             | Self::Absent { path }
             | Self::Directory { path }
             | Self::Mode { path, .. } => path,
+            Self::Mask { .. } => unreachable!(),
         };
         canonical(path)
             && match self {
@@ -91,6 +96,7 @@ impl Requirement {
     }
     pub fn check(&self, tree: &Tree) -> (bool, String) {
         match self {
+            Self::Mask { mask } => (tree.umask == *mask, format!("Creation mask is {mask:03o}")),
             Self::Entry { path, directory } => (
                 tree.nodes
                     .get(path)

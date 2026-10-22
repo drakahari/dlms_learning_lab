@@ -25,8 +25,11 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("shift\n", "shift 0\n"),
         (r#"if available "$@""#, "if available menu.txt"),
     ];
-    assert_eq!(edits.len(), labs.len() - 9);
-    for (s, (from, to)) in labs.iter().skip(9).zip(edits) {
+    assert_eq!(
+        edits.len(),
+        labs.iter().filter(|s| s.teaching.is_some()).count()
+    );
+    for (s, (from, to)) in labs.iter().filter(|s| s.teaching.is_some()).zip(edits) {
         let l = s.teaching.as_ref().unwrap();
         l.validate().unwrap();
         assert_ne!(l.example, s.solution[0]);

@@ -30,7 +30,7 @@ fn solution(s: &pack::Scenario) -> State {
 #[test]
 fn all_nine_start_unsolved_and_reach_success() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 24);
+    assert_eq!(labs.len(), 30);
     for s in labs.into_iter().take(9) {
         assert!(!engine::solved(&s.initial, &s.goal), "{}", s.id);
         assert!(engine::solved(&solution(&s), &s.goal), "{}", s.id);
@@ -346,7 +346,13 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        engine::execute(&mut a.state, cmd).unwrap();
+        if let State::Filesystem { tree } = &mut a.state {
+            for text in tree.files.values_mut() {
+                text.push_str("changed");
+            }
+        } else {
+            engine::execute(&mut a.state, cmd).unwrap();
+        }
         assert!(!engine::solved(&a.state, &s.goal));
         p.attempts.insert(s.id.clone(), a);
     }
