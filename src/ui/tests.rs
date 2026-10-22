@@ -1818,3 +1818,98 @@ fn ipv6_native_views_keep_controls_in_width_with_large_text_and_challenge_is_ind
         }
     }
 }
+
+#[test]
+fn earlier_script_runs_are_labeled_legacy_until_a_current_native_run_and_remain_saved() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    let lab = a.scenarios[9].clone();
+    let engine::Goal::Script { cases } = &lab.goal else {
+        panic!()
+    };
+    let original = lab.solution[0].clone();
+    let source = format!("IFS=,\n{original}");
+    a.progress.attempts.get_mut(&lab.id).unwrap().state = State::Script {
+        source: source.clone(),
+        run: Some(shell::Record {
+            engine_revision: 0,
+            source,
+            results: cases.iter().map(|c| shell::run(&original, c)).collect(),
+        }),
+    };
+    a.launch(9);
+    a.set_script_view(9, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(progress::legacy_script_credit(
+        &a.progress.attempts[&lab.id],
+        &lab
+    ));
+    check(&ctx, &mut a);
+    for _ in 0..10 {
+        draw(&ctx, &mut a);
+    }
+    assert!(!a.metrics.completion);
+    assert!(progress::legacy_script_credit(
+        &a.progress.attempts[&lab.id],
+        &lab
+    ));
+    let r = a.metrics.inputs[0];
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
+            },
+            egui::Event::Text(original),
+        ],
+    );
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    for _ in 0..15 {
+        draw(&ctx, &mut a);
+    }
+    assert!(a.metrics.completion);
+    assert!(progress::legacy_script_credit(
+        &a.progress.attempts[&lab.id],
+        &lab
+    ));
+    let history = a.progress.attempts[&lab.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .script_history
+        .clone();
+    a.launch(10);
+    a.launch(9);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    assert_eq!(
+        a.progress.attempts[&lab.id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .script_history,
+        history
+    );
+    a.reset_attempt(9);
+    assert!(
+        a.progress.attempts[&lab.id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .script_history
+            .is_none()
+    );
+}

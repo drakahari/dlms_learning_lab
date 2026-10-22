@@ -1,6 +1,11 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
 use serde::{Deserialize, Serialize};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
+// Increment when previously saved outcomes can change under corrected evaluator semantics.
+pub const EVALUATOR_REVISION: u32 = 1;
+pub(crate) fn legacy_revision(revision: &u32) -> bool {
+    *revision == 0
+}
 pub const MAX_SOURCE: usize = 16_384;
 const MAX_TEXT: usize = 262_144;
 const MAX_OUTPUT: usize = 32_768;
@@ -36,7 +41,10 @@ impl Case {
             && self.name.len() < 120
             && self.args.len() <= 64
             && self.env.len() <= 64
-            && self.env.keys().all(|k| name(k))
+            && self
+                .env
+                .keys()
+                .all(|k| name(k) && variable_target(k).is_ok())
             && self.files.len() <= 64
             && self.after.len() <= 64
             && self
@@ -53,12 +61,25 @@ impl Case {
                 .all(|s| !s.contains('\0'))
             && !self.stdin.contains('\0')
             && self.stdin.len()
-                + self.env.values().map(String::len).sum::<usize>()
-                + self.files.values().map(String::len).sum::<usize>()
+                + self
+                    .env
+                    .iter()
+                    .map(|(name, value)| name.len() + value.len())
+                    .sum::<usize>()
+                + self
+                    .files
+                    .iter()
+                    .map(|(name, value)| name.len() + value.len())
+                    .sum::<usize>()
                 + self.args.iter().map(String::len).sum::<usize>()
                 < MAX_TEXT / 2
             && self.stdout.len() + self.stderr.len() <= MAX_OUTPUT
-            && self.after.values().map(String::len).sum::<usize>() < MAX_TEXT / 2
+            && self
+                .after
+                .iter()
+                .map(|(name, value)| name.len() + value.len())
+                .sum::<usize>()
+                < MAX_TEXT / 2
             && (0..=255).contains(&self.status)
     }
     pub fn accepts(&self, r: &Outcome) -> bool {
@@ -81,12 +102,18 @@ pub struct Outcome {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct Record {
+    #[serde(default, skip_serializing_if = "legacy_revision")]
+    pub engine_revision: u32,
     pub source: String,
     pub results: Vec<Outcome>,
 }
 impl Record {
+    pub fn current(&self) -> bool {
+        self.engine_revision == EVALUATOR_REVISION
+    }
     pub fn valid(&self) -> bool {
-        self.source.len() <= MAX_SOURCE
+        self.engine_revision <= EVALUATOR_REVISION
+            && self.source.len() <= MAX_SOURCE
             && self.results.len() <= 8
             && self.results.iter().all(|r| {
                 (0..=255).contains(&r.status)
@@ -132,6 +159,63 @@ fn name(s: &str) -> bool {
     c.next()
         .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
         && c.all(|c| c.is_ascii_alphanumeric() || c == '_')
+}
+// These Bash variables have readonly/dynamic/attribute/option behavior that this subset does not model.
+fn unmodeled_variable(n: &str) -> bool {
+    n.starts_with("BASH")
+        || n.starts_with("COMP_")
+        || n.starts_with("HIST")
+        || [
+            "_",
+            "UID",
+            "EUID",
+            "PPID",
+            "SHELLOPTS",
+            "RANDOM",
+            "SRANDOM",
+            "SECONDS",
+            "EPOCHSECONDS",
+            "EPOCHREALTIME",
+            "LINENO",
+            "FUNCNAME",
+            "DIRSTACK",
+            "GROUPS",
+            "PIPESTATUS",
+            "SHLVL",
+            "OPTARG",
+            "OPTIND",
+            "REPLY",
+            "MAPFILE",
+            "PS0",
+            "PS1",
+            "PS2",
+            "PS3",
+            "PS4",
+            "PROMPT_COMMAND",
+            "IGNOREEOF",
+            "TMOUT",
+            "GLOBIGNORE",
+            "GLOBSORT",
+            "CDPATH",
+            "FIGNORE",
+            "EXECIGNORE",
+            "POSIXLY_CORRECT",
+        ]
+        .contains(&n)
+}
+fn variable_target(n: &str) -> Result<(), String> {
+    if n == "IFS" {
+        return Err(
+            "Unsupported custom IFS; this subset uses default space, tab and newline splitting"
+                .into(),
+        );
+    }
+    if unmodeled_variable(n) {
+        return Err(format!(
+            "Unsupported special-variable name or reserved namespace {n}; use an ordinary variable name within this subset"
+        ));
+    }
+    Ok(())
 }
 fn reserved_function_name(n: &str) -> bool {
     // Keywords cannot become ordinary calls; no Bash builtin replacement is modeled.
@@ -609,6 +693,7 @@ impl Parser {
                 .filter(|s| name(s))
                 .ok_or("Invalid for variable")?
                 .to_string();
+            variable_target(&n)?;
             self.pos += 1;
             self.expect("in")?;
             let mut words = Vec::new();
@@ -741,6 +826,7 @@ struct CallFrame {
     args: Vec<String>,
     loops: usize,
     whiles: usize,
+    locals: BTreeMap<String, Option<String>>,
 }
 pub struct Vm {
     code: Vec<Code>,
@@ -796,8 +882,14 @@ impl Vm {
         self.done = true;
     }
     fn variable(&self, key: &str) -> Result<String, String> {
+        if unmodeled_variable(key) {
+            return Err(format!(
+                "Unsupported special-variable name or reserved namespace {key}; it is not an ordinary simulated variable"
+            ));
+        }
         Ok(match key {
             "?" => self.outcome.status.to_string(),
+            "IFS" => " \t\n".into(),
             "#" => self.args.len().to_string(),
             "@" | "*" | "0" => {
                 return Err("Only sole quoted \"$@\", $1…$9, $# and $? are supported".into());
@@ -993,6 +1085,13 @@ impl Vm {
             .calls
             .pop()
             .ok_or("Unsupported return outside a function")?;
+        for (name, previous) in frame.locals {
+            if let Some(value) = previous {
+                self.env.insert(name, value);
+            } else {
+                self.env.remove(&name);
+            }
+        }
         self.pc = frame.pc;
         self.args = frame.args;
         self.loops.truncate(frame.loops);
@@ -1000,6 +1099,9 @@ impl Vm {
         Ok(())
     }
     fn enter_function(&mut self, cmd: &Command) -> Result<bool, String> {
+        if cmd.words.first().and_then(Word::literal) == Some("local") {
+            return Ok(false);
+        }
         if self.functions.is_empty()
             || cmd
                 .words
@@ -1025,15 +1127,37 @@ impl Vm {
             args: old_args,
             loops: self.loops.len(),
             whiles: self.while_status.len(),
+            locals: BTreeMap::new(),
         });
         self.pc = start;
         Ok(true)
     }
     fn limits(&self) -> Result<(), String> {
-        if self.env.len() > 256
+        let visible: BTreeSet<_> = self
+            .env
+            .keys()
+            .chain(self.calls.iter().flat_map(|f| f.locals.keys()))
+            .collect();
+        if visible.len() > 256
             || self.outcome.files.len() > 64
-            || self.env.values().map(String::len).sum::<usize>()
-                + self.outcome.files.values().map(String::len).sum::<usize>()
+            || self
+                .env
+                .iter()
+                .map(|(name, value)| name.len() + value.len())
+                .sum::<usize>()
+                + self
+                    .outcome
+                    .files
+                    .iter()
+                    .map(|(name, value)| name.len() + value.len())
+                    .sum::<usize>()
+                + self.input.len()
+                + self
+                    .calls
+                    .iter()
+                    .flat_map(|f| &f.locals)
+                    .map(|(name, value)| name.len() + value.as_ref().map_or(0, String::len))
+                    .sum::<usize>()
                 + self.args.iter().map(String::len).sum::<usize>()
                 + self
                     .calls
@@ -1044,8 +1168,9 @@ impl Vm {
                 + self
                     .loops
                     .iter()
-                    .flat_map(|(_, values, _)| values)
-                    .map(String::len)
+                    .map(|(name, values, _)| {
+                        name.len() + values.iter().map(String::len).sum::<usize>()
+                    })
                     .sum::<usize>()
                 > MAX_TEXT
         {
@@ -1093,11 +1218,10 @@ impl Vm {
         if cmds.len() > 1 {
             for cmd in cmds {
                 let args = self.words(&cmd.words)?;
-                if args
-                    .first()
-                    .is_some_and(|s| self.functions.contains_key(s) || s == "return")
-                {
-                    return Err("Unsupported function call or return in a pipeline; call functions as separate commands".into());
+                if args.first().is_some_and(|s| {
+                    self.functions.contains_key(s) || s == "return" || s == "local"
+                }) {
+                    return Err("Unsupported function call, return or local declaration in a pipeline; use separate commands".into());
                 }
             }
         }
@@ -1135,6 +1259,67 @@ impl Vm {
             self.input_pos = saved_pos;
         }
         Ok(())
+    }
+    fn local_declarations(&mut self, cmd: &Command) -> Result<bool, String> {
+        if cmd.words.first().and_then(Word::literal) != Some("local") {
+            return Ok(false);
+        }
+        if self.calls.is_empty() {
+            return Err(
+                "Unsupported local outside a function; local variables belong to a function call"
+                    .into(),
+            );
+        }
+        if cmd.words.len() == 1 {
+            return Err("Unsupported local listing; supply a variable name or NAME=value".into());
+        }
+        // Bash declaration assignments suppress splitting; all arguments expand before mutation.
+        let mut declarations = Vec::new();
+        for word in &cmd.words[1..] {
+            let assignment = word.0.first().is_some_and(|p| {
+                p.quote == Quote::Bare && p.text.split_once('=').is_some_and(|(n, _)| name(n))
+            });
+            let values = if assignment {
+                self.expand(word, false)?
+            } else {
+                self.expand(word, true)?
+            };
+            for value in values {
+                let (key, new_value) = value
+                    .split_once('=')
+                    .map_or((value.as_str(), None), |(key, value)| {
+                        (key, Some(value.to_string()))
+                    });
+                variable_target(key)?;
+                if !name(key) {
+                    return Err("Unsupported local argument; use a valid variable name or NAME=value, without options or attributes".into());
+                }
+                declarations.push((key.to_string(), new_value));
+                if declarations.len() > 128
+                    || declarations
+                        .iter()
+                        .map(|(k, v)| k.len() + v.as_ref().map_or(0, String::len))
+                        .sum::<usize>()
+                        > MAX_TEXT
+                {
+                    return Err("Local declaration argument limit exceeded".into());
+                }
+            }
+        }
+        if declarations.is_empty() {
+            return Err("Unsupported local listing; supply a valid variable argument".into());
+        }
+        for (key, new_value) in declarations {
+            let locals = &mut self.calls.last_mut().unwrap().locals;
+            if !locals.contains_key(&key) {
+                locals.insert(key.clone(), self.env.remove(&key));
+            }
+            if let Some(value) = new_value {
+                self.env.insert(key, value);
+            }
+            self.limits()?;
+        }
+        Ok(true)
     }
     fn command(&mut self, cmd: &Command) -> Result<String, String> {
         let mut stdout = Dest::Out;
@@ -1190,11 +1375,14 @@ impl Vm {
                 p.quote == Quote::Bare && p.text.split_once('=').is_some_and(|(n, _)| name(n))
             })
         });
-        let (out, err, status) = if assignments && !cmd.words.is_empty() {
+        let (out, err, status) = if self.local_declarations(cmd)? {
+            (String::new(), String::new(), 0)
+        } else if assignments && !cmd.words.is_empty() {
             for w in &cmd.words {
                 let mut w = w.clone();
                 let (n, rest) = w.0[0].text.split_once('=').unwrap();
                 let n = n.to_string();
+                variable_target(&n)?;
                 w.0[0].text = rest.to_string();
                 let value = self.expand(&w, false)?.join("");
                 self.env.insert(n, value);
@@ -1238,6 +1426,7 @@ impl Vm {
         let ok = |s: String| (s, String::new(), 0);
         let usage = || Err(format!("Unsupported {cmd} arguments; see the shell subset"));
         match cmd {
+            "local" => Err("Unsupported declaration command name: use literal unquoted local inside a function".into()),
             ":" | "true" | "false" if args.is_empty() => {
                 Ok((empty.clone(), empty, i32::from(cmd == "false")))
             }
@@ -1311,6 +1500,7 @@ impl Vm {
                 Ok((output, empty, status))
             }
             "read" if args.len() == 2 && args[0] == "-r" && name(&args[1]) => {
+                variable_target(&args[1])?;
                 let rest = &self.input[self.input_pos..];
                 let (line, status, used) = if let Some(i) = rest.find('\n') {
                     (&rest[..i], 0, i + 1)
@@ -1461,7 +1651,7 @@ pub fn run(source: &str, case: &Case) -> Outcome {
     }
 }
 pub fn checks(source: &str, record: &Option<Record>, cases: &[Case]) -> Vec<(bool, String)> {
-    cases.iter().enumerate().map(|(i,c)|{let r=record.as_ref().filter(|r|r.source==source).and_then(|r|r.results.get(i));let pass=r.is_some_and(|r|c.accepts(r));let message=if pass{format!("Pass · {}",c.name)}else{format!("{} · {}",c.name,match r{None=>"Run the current script against this case".into(),Some(r)=>if let Some(e)=&r.error{e.clone()}else if r.status!=c.status{format!("Exit status {}; expected {}. Inspect the last command or an early exit.",r.status,c.status)}else if r.stdout!=c.stdout{"Standard output differs. Check spacing, quoting and line breaks.".into()}else if r.stderr!=c.stderr{"Error output differs. Send the requested diagnostic to standard error.".into()}else{"Virtual files differ. Check the destination, append/truncate behavior and untouched input files.".into()}})};(pass,message)}).collect()
+    cases.iter().enumerate().map(|(i,c)|{let r=record.as_ref().filter(|r|r.current() && r.source==source && r.results.len()==cases.len()).and_then(|r|r.results.get(i));let pass=r.is_some_and(|r|c.accepts(r));let message=if pass{format!("Pass · {}",c.name)}else{format!("{} · {}",c.name,match r{None=>"Run the current script against this case".into(),Some(r)=>if let Some(e)=&r.error{e.clone()}else if r.status!=c.status{format!("Exit status {}; expected {}. Inspect the last command or an early exit.",r.status,c.status)}else if r.stdout!=c.stdout{"Standard output differs. Check spacing, quoting and line breaks.".into()}else if r.stderr!=c.stderr{"Error output differs. Send the requested diagnostic to standard error.".into()}else{"Virtual files differ. Check the destination, append/truncate behavior and untouched input files.".into()}})};(pass,message)}).collect()
 }
 
 /// Literal argv for the separate virtual terminal; no expansion or evaluation.

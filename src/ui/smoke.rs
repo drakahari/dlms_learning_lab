@@ -851,6 +851,129 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            1500 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.launch(9);
+                let s = self.scenarios[9].clone();
+                let engine::Goal::Script { cases } = &s.goal else {
+                    panic!()
+                };
+                let original = s.solution[0].clone();
+                let source = format!("IFS=,\n{original}");
+                self.progress.attempts.get_mut(&s.id).unwrap().state = engine::State::Script {
+                    source: source.clone(),
+                    run: Some(shell::Record {
+                        engine_revision: 0,
+                        source,
+                        results: cases.iter().map(|c| shell::run(&original, c)).collect(),
+                    }),
+                };
+                self.launch(9);
+                self.set_script_view(9, teaching::View::Assignment);
+                self.selected = None;
+                self.filter.track = "Bash/Shell".into();
+                self.filter.search = s.title;
+            }
+            1501 => shot = Some("script-earlier-credit-library".into()),
+            1502 => self.launch(9),
+            1503 => {
+                assert!(!self.metrics.completion);
+                assert!(progress::legacy_script_credit(
+                    &self.progress.attempts["shell-handover"],
+                    &self.scenarios[9]
+                ));
+                shot = Some("script-earlier-output-retained".into());
+            }
+            1504 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            1505 | 1506 => {}
+            1507 => {
+                assert!(!self.metrics.completion);
+                assert!(self.script_job.is_none());
+                shot = Some("script-current-simulator-retry".into());
+            }
+            1508 => {
+                let engine::State::Script { source, run } = &mut self
+                    .progress
+                    .attempts
+                    .get_mut("shell-handover")
+                    .unwrap()
+                    .state
+                else {
+                    panic!()
+                };
+                *source =
+                    "scope_test() { local label=inside; while true; do :; done; }\nscope_test"
+                        .into();
+                *run = None;
+            }
+            1509 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            1510 => {
+                assert!(self.script_job.is_some());
+                self.pending_events
+                    .extend(click(self.metrics.stop.unwrap()));
+            }
+            1511 => {
+                assert!(self.script_job.is_none());
+                assert!(!self.metrics.completion);
+                shot = Some("script-scoped-loop-stopped".into());
+            }
+            1512 => self.pending_events.extend(click(self.metrics.inputs[0])),
+            1513 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text(self.scenarios[9].solution[0].clone()),
+            ]),
+            1514 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            1515 | 1516 => {}
+            1517 => {
+                assert!(self.metrics.completion);
+                assert!(progress::legacy_script_credit(
+                    &self.progress.attempts["shell-handover"],
+                    &self.scenarios[9]
+                ));
+                shot = Some("script-current-run-and-earlier-history".into());
+            }
+            1518 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(progress::current_solved(
+                    &self.progress.attempts["shell-handover"],
+                    &self.scenarios[9]
+                ));
+                self.selected = None;
+            }
+            1519 => shot = Some("script-current-completion-library".into()),
+            1520 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(9);
+            }
+            1521 => shot = Some("script-history-light-150".into()),
+            1522 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(400., 400.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -900.),
+                    modifiers: Default::default(),
+                });
+            }
+            1523 => {}
+            1524 => shot = Some("script-history-scrolled-light-150".into()),
+            1525 => {
+                println!(
+                    "PASS native evaluator upgrade: earlier script/output/credit retained separately; current unsupported retry, scoped-loop Stop, keyboard repair/current Run, saved reload and light150 scroll. Synthetic legacy fixture only; no personal progress or novice-user acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             n @ 1300..=1407 => {
                 let i = 30 + (n - 1300) / 18;
                 let id = self.scenarios[i].id.clone();

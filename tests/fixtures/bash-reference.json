@@ -2900,5 +2900,200 @@
         "/work/keep": "untouched\n"
       }
     }
+  },
+  {
+    "name": "local starts unset and restores global",
+    "source": "value=outside\nf() { local value; printf '<%s>\\n' \"$value\"; value=inside; printf '%s\\n' \"$value\"; }\nf\nprintf '%s\\n' \"$value\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local redeclaration preserves call value",
+    "source": "f() { local value=first; local value; printf '%s\\n' \"$value\"; local value=second; printf '%s\\n' \"$value\"; }\nf\nprintf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local declaration arguments expand before assignment",
+    "source": "a=outside\nf() { local a=inside b=\"$a\"; printf '%s:%s\\n' \"$a\" \"$b\"; }\nf\nprintf '%s:<%s>\\n' \"$a\" \"$b\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local assignment keeps whitespace and wildcard value",
+    "source": "f() { local value=$1; printf '<%s>\\n' \"$value\"; }\nf 'a * b' ",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "callee sees and updates caller local",
+    "source": "value=global\nchild() { printf '%s\\n' \"$value\"; value=changed; }\nparent() { local value=parent; child; printf '%s\\n' \"$value\"; }\nparent\nprintf '%s\\n' \"$value\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "nested local and early return restore caller",
+    "source": "value=global\nchild() { local value=child; printf '%s\\n' \"$value\"; return 7; }\nparent() { local value=parent; child; printf '%s:%s\\n' \"$value\" \"$?\"; }\nparent\nprintf '%s\\n' \"$value\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local loop and read updates remain scoped",
+    "source": "row=global\nf() { local row; read -r row; printf '%s\\n' \"$row\"; for row in a b; do printf '%s\\n' \"$row\"; done; }\nf\nprintf '%s\\n' \"$row\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local shadow survives recursive argument restoration",
+    "source": "value=global\nf() { local value=\"$1\"; shift; if [ \"$#\" -gt 0 ]; then f \"$@\"; fi; printf '%s:%s\\n' \"$value\" \"$#\"; }\nf a b c\nprintf '%s\\n' \"$value\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local quoted names and assignment values",
+    "source": "value=global\nf() { name=value; local \"$name\"; local 'other=literal * value'; printf '<%s>:%s\\n' \"$value\" \"$other\"; }\nf\nprintf '%s:<%s>\\n' \"$value\" \"$other\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "local declaration redirection and status",
+    "source": "value=global\nf() { false; local value=inside > output; printf '%s:%s\\n' \"$value\" \"$?\"; }\nf\nprintf '%s\\n' \"$value\"",
+    "case": {
+      "name": "function-local reference",
+      "args": [
+        "two words",
+        "*"
+      ],
+      "stdin": "  keep internal spaces  \n",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "default IFS is visible but not inherited from host",
+    "source": "printf '<%s>' \"$IFS\"",
+    "case": {
+      "name": "IFS reference",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
   }
 ]

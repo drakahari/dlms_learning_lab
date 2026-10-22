@@ -196,6 +196,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err(format!("{}: invalid script cases", s.id));
             }
             *run = Some(crate::shell::Record {
+                engine_revision: crate::shell::EVALUATOR_REVISION,
                 source: source.clone(),
                 results: cases.iter().map(|c| crate::shell::run(source, c)).collect(),
             });

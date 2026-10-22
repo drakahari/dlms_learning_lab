@@ -66,6 +66,8 @@ Completion comes from current state and does not require visiting walkthrough se
 
 Back to library retains the selected track, search and filters. Reset asks for confirmation and clears only that attempt, including drafts, transcript and numerical practice; favorites and other labs remain. Local state saves after edits using a synced temporary file and atomic replacement. Corrupt/future saves are retained and opened read-only. A profile writer lock prevents concurrent app copies from silently replacing each other’s drafts. Settings → Your data provides checked backup export/restore; see [progress recovery](docs/PROGRESS_RECOVERY.md).
 
+Shell evaluator upgrades retain earlier output and credit separately from current success. Run rechecks the saved draft; unsupported behavior cannot reuse earlier completion. The first upgraded write keeps an exact non-overwriting backup. [Recovery details](docs/PROGRESS_RECOVERY.md).
+
 ## Saved-progress compatibility
 
 Existing version-1 saves load without a reset or read-time rewrite. All nine IDs, scenario versions, previous answers, walkthrough positions, hints, transcripts and optional numerical-practice data are retained. The complete IPv4 assignment adds an optional `second` field to the typed state. When reopening a completed legacy four-answer analysis, its earlier credit is retained separately and the second-workstation field is left blank. The library identifies the new requirement as remaining; it never supplies a learner answer. Values supplied by an older compatibility version remain saved but require a new explicit check before counting toward the complete assignment. Incomplete attempts retain every draft.

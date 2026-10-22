@@ -45,11 +45,17 @@ impl Candidate {
         let legacy = self
             .progress
             .attempts
-            .values()
-            .filter(|a| progress::legacy_credit(a))
+            .iter()
+            .filter(|(id, a)| {
+                progress::legacy_credit(a)
+                    || scenarios
+                        .iter()
+                        .find(|s| &s.id == *id)
+                        .is_some_and(|s| progress::legacy_script_credit(a, s))
+            })
             .count();
         format!(
-            "{} saved labs · {complete} currently complete · {legacy} with earlier analysis credit · {} favorites · {} script/example results rechecked",
+            "{} saved labs · {complete} currently complete · {legacy} with earlier completion credit · {} favorites · {} script/example results rechecked",
             self.progress.attempts.len(),
             self.progress.favorites.len(),
             self.rechecked
@@ -141,6 +147,8 @@ pub fn inspect(
             .iter()
             .find(|s| &s.id == id)
             .ok_or("Unknown backup lab")?;
+        let had_saved_run = matches!(&a.state, State::Script { run: Some(_), .. });
+        crate::workspace::preserve_script_history(a);
         if let (
             State::Script {
                 source,
@@ -148,13 +156,14 @@ pub fn inspect(
             },
             Goal::Script { cases },
         ) = (&mut a.state, &s.goal)
-            && record.is_some()
+            && had_saved_run
         {
             let mut results = Vec::new();
             for case in cases {
                 results.push(run(source, case, cancel)?);
             }
             *record = Some(shell::Record {
+                engine_revision: crate::shell::EVALUATOR_REVISION,
                 source: source.clone(),
                 results,
             });
@@ -171,6 +180,7 @@ pub fn inspect(
                 .as_ref()
                 .ok_or("Example data does not belong to this lab")?;
             l.example_result = Some(run(&l.example_source, &lesson.fixture, cancel)?);
+            l.example_revision = shell::EVALUATOR_REVISION;
             count += 1;
         }
         checked.store(count, Ordering::Relaxed);
@@ -266,11 +276,33 @@ pub fn check_destination(target: &Path, profile: &Path) -> Result<(), String> {
             .join(path.file_name().ok_or("Missing filename")?))
     }
     let target = normalized(target)?;
+    let profile = normalized(profile)?;
+    let prefix = profile
+        .with_extension("before-shell-v")
+        .to_string_lossy()
+        .into_owned();
+    let candidate = target.to_string_lossy().into_owned();
+    let (prefix, candidate) = if cfg!(windows) {
+        (prefix.to_ascii_lowercase(), candidate.to_ascii_lowercase())
+    } else {
+        (prefix, candidate)
+    };
+    if candidate
+        .strip_prefix(&prefix)
+        .and_then(|tail| tail.strip_suffix(".json"))
+        .is_some_and(|version| !version.is_empty() && version.bytes().all(|b| b.is_ascii_digit()))
+    {
+        return Err(
+            "Choose a backup filename outside the application's evaluator-migration filenames"
+                .into(),
+        );
+    }
     for reserved in [
         profile.to_path_buf(),
         profile.with_extension("lock"),
         profile.with_file_name("preferences-v1.json"),
         profile.with_extension("before-workspace.json"),
+        profile.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION)),
     ] {
         let reserved = normalized(&reserved)?;
         #[cfg(windows)]

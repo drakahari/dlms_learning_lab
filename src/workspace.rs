@@ -12,6 +12,8 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub script_learning: Option<crate::script_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub script_history: Option<crate::shell::Record>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub terminal_learning: Option<crate::terminal_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_draft: Option<crate::ipv6_workspace::Draft>,
@@ -40,6 +42,10 @@ impl WorkspaceData {
     pub fn valid(&self) -> bool {
         self.version == 1
             && self.script_learning.as_ref().is_none_or(|l| l.valid())
+            && self
+                .script_history
+                .as_ref()
+                .is_none_or(|r| r.valid() && r.engine_revision < crate::shell::EVALUATOR_REVISION)
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.ipv6_draft.as_ref().is_none_or(|d| d.valid())
             && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
@@ -57,7 +63,19 @@ impl WorkspaceData {
                 .all(|s| s.as_ref().is_none_or(|s| s.iter().all(|a| a.len() <= 64)))
     }
 }
+pub fn preserve_script_history(a: &mut Attempt) {
+    if let State::Script { run, .. } = &mut a.state
+        && run.as_ref().is_some_and(|r| !r.current())
+    {
+        let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+        if w.script_history.is_none() {
+            w.script_history = run.take();
+            w.checked = false;
+        }
+    }
+}
 pub fn prepare(a: &mut Attempt) {
+    preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
     if let State::Ipv6 { topology } = &a.state
         && w.ipv6_draft.is_none()

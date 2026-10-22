@@ -44,7 +44,6 @@ fn unsupported_function_contexts_fail_instead_of_approximating() {
         "f() { :; }\nf < source",
         "f() { return | printf wrong; }\nf",
         "return 0",
-        "f() { local x=a; }\nf",
         "f() ( printf wrong )\nf",
         "printf() { :; }",
         "f() { return 256; }\nf",

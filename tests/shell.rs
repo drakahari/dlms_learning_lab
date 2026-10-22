@@ -33,6 +33,7 @@ fn all_authored_scripts_grade_behavior_and_break_after_edit() {
             panic!()
         };
         let mut record = shell::Record {
+            engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
             source: source.clone(),
             results: cases.iter().map(|c| shell::run(&source, c)).collect(),
         };
@@ -43,6 +44,7 @@ fn all_authored_scripts_grade_behavior_and_break_after_edit() {
         );
         source = s.solution[0].clone();
         record = shell::Record {
+            engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
             source: source.clone(),
             results: cases.iter().map(|c| shell::run(&source, c)).collect(),
         };
@@ -262,6 +264,7 @@ fn limits_keep_records_resumable_and_invalid_packs_are_rejected() {
         assert!(result.error.is_some());
         assert!(
             shell::Record {
+                engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
                 source: source.into(),
                 results: vec![result]
             }

@@ -49,6 +49,26 @@ pub fn legacy_credit(a: &Attempt) -> bool {
         || matches!(&a.state, State::Subnet { second: None, .. })
             && crate::ipv4::Exercise::from_state(&a.state).is_some_and(|e| e.solved())
 }
+/// Earlier script completion remains distinguishable from current evaluator acceptance.
+pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
+    let crate::engine::Goal::Script { cases } = &s.goal else {
+        return false;
+    };
+    let State::Script { run, .. } = &a.state else {
+        return false;
+    };
+    run.as_ref()
+        .into_iter()
+        .chain(a.workspace.as_ref().and_then(|w| w.script_history.as_ref()))
+        .any(|r| {
+            r.engine_revision < crate::shell::EVALUATOR_REVISION
+                && r.results.len() == cases.len()
+                && r.results
+                    .iter()
+                    .zip(cases)
+                    .all(|(result, case)| case.accepts(result))
+        })
+}
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
     if let State::Ipv6 { topology } = &a.state
         && a.workspace
@@ -185,33 +205,72 @@ pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     }
     let parent = path.parent().ok_or("Missing storage directory")?;
     std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    // Preserve a byte-for-byte pre-workspace save before the first upgraded write.
-    // Reading an old save never migrates or rewrites it.
-    if p.attempts.values().any(|a| a.workspace.is_some()) && path.exists() {
-        let backup = path.with_extension("before-workspace.json");
-        if !backup.exists() {
-            let original = std::fs::read(path).map_err(|e| e.to_string())?;
-            let old: Progress = serde_json::from_slice(&original)
-                .map_err(|e| format!("Original retained; cannot back up: {e}"))?;
-            if old.attempts.values().all(|a| a.workspace.is_none()) {
-                let mut copy =
-                    tempfile::NamedTempFile::new_in(parent).map_err(|e| e.to_string())?;
-                copy.write_all(&original)
-                    .and_then(|_| copy.as_file().sync_all())
-                    .map_err(|e| e.to_string())?;
-                if let Err(e) = copy.persist_noclobber(&backup)
-                    && e.error.kind() != std::io::ErrorKind::AlreadyExists
-                {
-                    return Err(format!("Original retained; backup failed: {e}"));
-                }
-            }
-        }
-    }
     let encoded = serde_json::to_vec(p).map_err(|e| e.to_string())?;
     if encoded.len() > 16_000_000 {
         return Err("Progress exceeds 16 MB; original retained".into());
     }
+    // Read-time migration never rewrites the original. Preserve exact bytes before an upgraded write.
+    let workspace_backup = path.with_extension("before-workspace.json");
+    let evaluator_backup = path.with_extension(format!(
+        "before-shell-v{}.json",
+        crate::shell::EVALUATOR_REVISION
+    ));
+    // Inspect the on-disk version even when Reset removed the last legacy run from memory.
+    if path.exists() {
+        let original = read_bounded(path, 16_000_000)?;
+        let old: Progress = serde_json::from_slice(&original)
+            .map_err(|e| format!("Original retained; cannot back up: {e}"))?;
+        if p.attempts.values().any(|a| a.workspace.is_some())
+            && old.attempts.values().all(|a| a.workspace.is_none())
+        {
+            preserve_copy(&workspace_backup, &original)?;
+        }
+        if old.attempts.values().any(|a| {
+            matches!(&a.state,State::Script{run:Some(r),..}if !r.current())
+                || a.workspace
+                    .as_ref()
+                    .and_then(|w| w.script_learning.as_ref())
+                    .is_some_and(|l| {
+                        l.example_result.is_some()
+                            && l.example_revision < crate::shell::EVALUATOR_REVISION
+                    })
+        }) {
+            preserve_copy(&evaluator_backup, &original)?;
+        }
+    }
     write_atomic(path, &encoded)
+}
+fn validate_saved_copy(path: &Path) -> Result<(), String> {
+    let bytes = read_bounded(path, 16_000_000)?;
+    let previous:Progress=serde_json::from_slice(&bytes).map_err(|_|"Original retained; existing migration-backup filename is occupied by incompatible data")?;
+    if previous.schema_version != 1 {
+        return Err("Original retained; existing migration backup has an unknown version".into());
+    }
+    Ok(())
+}
+fn preserve_copy(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    if let Ok(metadata) = std::fs::symlink_metadata(path) {
+        if metadata.file_type().is_file() {
+            return validate_saved_copy(path);
+        }
+        return Err("Original retained; migration backup path is not an ordinary file".into());
+    }
+    let mut copy =
+        tempfile::NamedTempFile::new_in(path.parent().ok_or("Missing backup directory")?)
+            .map_err(|e| e.to_string())?;
+    copy.write_all(bytes)
+        .and_then(|_| copy.as_file().sync_all())
+        .map_err(|e| e.to_string())?;
+    match copy.persist_noclobber(path) {
+        Ok(_) => Ok(()),
+        Err(error) if error.error.kind() == std::io::ErrorKind::AlreadyExists => {
+            validate_saved_copy(path)
+        }
+        Err(error) => Err(format!(
+            "Original retained; migration backup failed: {}",
+            error.error
+        )),
+    }
 }
 pub(crate) fn write_atomic(path: &Path, encoded: &[u8]) -> Result<Saved, String> {
     write_atomic_with_sync(path, encoded, |parent| {

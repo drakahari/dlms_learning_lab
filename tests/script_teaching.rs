@@ -70,6 +70,7 @@ fn optional_learning_data_preserves_old_attempts_completed_state_and_separate_dr
     a.state = State::Script {
         source: source.clone(),
         run: Some(shell::Record {
+            engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
             source: source.clone(),
             results: cases.iter().map(|c| shell::run(&source, c)).collect(),
         }),

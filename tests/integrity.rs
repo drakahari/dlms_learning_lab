@@ -17,6 +17,7 @@ fn long_unknown_commands_remain_persistable_in_assignments_and_examples() {
         let r = shell::run(&source, &lesson.fixture);
         assert!(r.error.as_ref().unwrap().len() <= 1000);
         let record = shell::Record {
+            engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
             source: source.clone(),
             results: vec![r.clone()],
         };

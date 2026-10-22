@@ -18,6 +18,7 @@ fn profile(labs: &[dlms_learning_lab::pack::Scenario]) -> Progress {
     if let (State::Script { source, run }, Goal::Script { cases }) = (&mut a.state, &s.goal) {
         *source = s.solution[0].clone();
         *run = Some(shell::Record {
+            engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
             source: source.clone(),
             results: cases.iter().map(|c| shell::run(source, c)).collect(),
         });
@@ -163,6 +164,8 @@ fn export_cannot_occupy_missing_application_files_or_parent_aliases() {
         &profile.with_extension("lock"),
         &profile.with_file_name("preferences-v1.json"),
         &profile.with_extension("before-workspace.json"),
+        &profile.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION)),
+        &profile.with_extension("before-shell-v999.json"),
     ] {
         assert!(!reserved.exists());
         assert!(backup::check_destination(reserved, &profile).is_err());

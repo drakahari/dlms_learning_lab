@@ -58,6 +58,7 @@ impl LabApp {
                         && l.example_source == job.source
                     {
                         l.example_result = job.results.pop();
+                        l.example_revision = shell::EVALUATOR_REVISION;
                         self.dirty = true;
                     }
                 } else if let engine::State::Script { source, run } = &mut a.state
@@ -70,6 +71,7 @@ impl LabApp {
                         .position(|(r, c)| !c.accepts(r))
                         .unwrap_or(0);
                     *run = Some(shell::Record {
+                        engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
                         source: job.source.clone(),
                         results: std::mem::take(&mut job.results),
                     });
@@ -224,15 +226,32 @@ impl LabApp {
                     palette(ui).error
                 }),
             );
-            for (pass, message) in checks {
-                ui.add(
-                    egui::Label::new(RichText::new(message).small().color(if pass {
-                        palette(ui).success
-                    } else {
-                        palette(ui).error
-                    }))
-                    .wrap(),
-                );
+            let same_error = run.as_ref().is_some_and(|r| {
+                r.current()
+                    && r.results.len() == cases.len()
+                    && r.results
+                        .first()
+                        .and_then(|r| r.error.as_ref())
+                        .is_some_and(|first| {
+                            r.results.iter().all(|r| r.error.as_ref() == Some(first))
+                        })
+            });
+            if same_error {
+                ui.label(format!(
+                    "The same diagnostic stopped all {} input sets. Fix it once, then Run again.",
+                    cases.len()
+                ));
+            } else {
+                for (pass, message) in checks {
+                    ui.add(
+                        egui::Label::new(RichText::new(message).small().color(if pass {
+                            palette(ui).success
+                        } else {
+                            palette(ui).error
+                        }))
+                        .wrap(),
+                    );
+                }
             }
             if complete {
                 self.next_unit_lab(ui, i);
@@ -242,7 +261,7 @@ impl LabApp {
         egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the listed simulated files exist. Each test resets these files; your script stays saved.");});
     }
     fn script_editor(&mut self, ui: &mut egui::Ui, i: usize) {
-        ui.label("Script · portable shell subset");
+        ui.label("Script · simulated shell");
         let id = egui::Id::new(("script-editor", i));
         let a = self
             .progress
@@ -335,14 +354,30 @@ impl LabApp {
         else {
             return;
         };
-        let r = run.as_ref().and_then(|r| r.results.get(case));
+        let historical = self.progress.attempts[&self.scenarios[i].id]
+            .workspace
+            .as_ref()
+            .and_then(|w| w.script_history.as_ref());
+        let displayed = run.as_ref().or(historical);
+        let earlier = displayed.is_some_and(|r| !r.current());
+        if earlier {
+            ui.label("Earlier saved output · Your script and results are retained. Run the current draft to verify it with this simulator.");
+        }
+        if let Some(history) = historical {
+            egui::CollapsingHeader::new("Earlier saved script")
+                .id_salt(("script-history", i))
+                .show(ui, |ui| {
+                    ui.add(egui::Label::new(RichText::new(&history.source).monospace()).wrap());
+                });
+        }
+        let r = displayed.and_then(|r| r.results.get(case));
         let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
             egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]).show(ui, |ui| {
                 if let Some(r) = r {
                     outcome(ui, r);
                     let engine::Goal::Script { cases } = &self.scenarios[i].goal else { return; };
                     let c = &cases[case];
-                    if r.error.is_none() && !c.accepts(r) {
+                    if !earlier && r.error.is_none() && !c.accepts(r) {
                         ui.label(RichText::new("Behavior differs · Edit your script and Run again.").color(palette(ui).error));
                         if !self.scenarios[i].retry_guidance.is_empty() { ui.label(&self.scenarios[i].retry_guidance); }
                         if c.stdout != r.stdout { if self.scenarios[i].retry_guidance.is_empty() { ui.label(teaching::output_advice(&c.stdout,&r.stdout)); } output_diff(ui,"Standard output", &c.stdout, &r.stdout); }

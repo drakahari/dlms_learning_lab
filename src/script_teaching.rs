@@ -58,6 +58,8 @@ pub struct Learning {
     pub version: u32,
     pub view: View,
     pub example_source: String,
+    #[serde(default, skip_serializing_if = "crate::shell::legacy_revision")]
+    pub example_revision: u32,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub example_result: Option<shell::Outcome>,
 }
@@ -67,12 +69,14 @@ impl Learning {
             version: 1,
             view: View::Introduction,
             example_source: lesson.example.clone(),
+            example_revision: shell::EVALUATOR_REVISION,
             example_result: None,
         }
     }
     pub fn valid(&self) -> bool {
         self.version == 1
             && shell::Record {
+                engine_revision: self.example_revision,
                 source: self.example_source.clone(),
                 results: self.example_result.clone().into_iter().collect(),
             }

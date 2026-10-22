@@ -18,6 +18,7 @@ fn solution(s: &pack::Scenario) -> State {
     }
     if let (State::Script { source, run }, engine::Goal::Script { cases }) = (&mut state, &s.goal) {
         *run = Some(dlms_learning_lab::shell::Record {
+            engine_revision: dlms_learning_lab::shell::EVALUATOR_REVISION,
             source: source.clone(),
             results: cases
                 .iter()

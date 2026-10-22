@@ -205,6 +205,9 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout")
             {
                 1209
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scope-recovery")
+            {
+                1500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6-layout") {
                 1408
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ipv6") {
@@ -472,11 +475,30 @@ impl LabApp {
                     })
                 })
                 .count();
-            ui.label(format!(
-                "{} · {done}/{} labs complete",
-                unit.title,
-                unit.labs.len()
-            ));
+            let earlier = unit
+                .labs
+                .iter()
+                .filter(|id| {
+                    self.progress.attempts.get(*id).is_some_and(|a| {
+                        self.scenarios
+                            .iter()
+                            .find(|s| &s.id == *id)
+                            .is_some_and(|s| {
+                                !progress::current_solved(a, s)
+                                    && progress::legacy_script_credit(a, s)
+                            })
+                    })
+                })
+                .count();
+            ui.label(if earlier > 0 {
+                format!(
+                    "{} · {done}/{} currently verified · {earlier} earlier completions retained",
+                    unit.title,
+                    unit.labs.len()
+                )
+            } else {
+                format!("{} · {done}/{} labs complete", unit.title, unit.labs.len())
+            });
             ui.label(&unit.summary);
             if !unit.prerequisites.is_empty() {
                 ui.label(
@@ -517,7 +539,14 @@ impl LabApp {
                 ui.label("Follow the course order, or choose any lab below.");
                 if let Some(i) = next {
                     let r = ui.add(button(
-                        if self.progress.attempts.contains_key(&self.scenarios[i].id) {
+                        if self
+                            .progress
+                            .attempts
+                            .get(&self.scenarios[i].id)
+                            .is_some_and(|a| progress::legacy_script_credit(a, &self.scenarios[i]))
+                        {
+                            "Verify earlier run"
+                        } else if self.progress.attempts.contains_key(&self.scenarios[i].id) {
                             "Continue course"
                         } else {
                             "Start course"
@@ -826,7 +855,11 @@ impl LabApp {
                         let a = self.progress.attempts.get(&s.id);
                         let complete = a.is_some_and(|a| progress::current_solved(a, s));
                         let favorite = self.progress.favorites.contains(&s.id);
-                        let status = if a.is_some_and(progress::legacy_credit) && !complete {
+                        let status = if a.is_some_and(|a| progress::legacy_script_credit(a, s))
+                            && !complete
+                        {
+                            "Earlier run complete · Rerun to verify"
+                        } else if a.is_some_and(progress::legacy_credit) && !complete {
                             "Earlier analysis complete · New requirement remaining"
                         } else if complete {
                             "Complete"
