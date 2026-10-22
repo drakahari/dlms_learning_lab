@@ -1015,9 +1015,15 @@ impl LabApp {
             1216 => {}
             1217 => shot = Some("files-challenge-scrolled-light-150".into()),
             1218 => {
-                println!(
-                    "PASS native file foundations: six introductions, keyboard practice command, isolated example outcomes, assignment error/retry, all state solutions, success invalidation and saved drafts. Light150 resized Challenge with optional help closed. Synthetic profile only; not novice-user acceptance."
-                );
+                if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout") {
+                    println!(
+                        "PASS native file layout: focused practice input and resized light150 Challenge with optional help closed. Synthetic profile only."
+                    );
+                } else {
+                    println!(
+                        "PASS native file foundations: six introductions, keyboard practice command, isolated example outcomes, assignment error/retry, all state solutions, success invalidation and saved drafts. Light150 resized Challenge with optional help closed. Synthetic profile only; not novice-user acceptance."
+                    );
+                }
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             600 => {
