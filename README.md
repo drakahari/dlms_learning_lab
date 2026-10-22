@@ -78,4 +78,4 @@ See [architecture and authoring](docs/ARCHITECTURE.md), [content sources and sim
 
 Native Fedora development prototype. Windows and macOS use the same native Rust stack but have **not** been runtime accepted. No releases, installers, or distribution packages have been published.
 
-**License decision pending the repository owner.** No project license has been selected; public visibility does not grant a reuse license. Dependency licenses remain their respective authors’ terms.
+Original code and authored curriculum are licensed under [MIT](LICENSE), approved by the owner on 2026-10-22. Third-party licenses and attribution remain in [NOTICE](NOTICE) and the palette notices. Installer redistribution still requires complete dependency notices and platform acceptance.

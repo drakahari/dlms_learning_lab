@@ -17,6 +17,6 @@ Owner authorization: 2026-10-22. Baseline: `69f695d`. This checklist defines com
 | D1 | Bundled offline versioned content, accurate coverage/inventory/authoring/user/recovery/integration-boundary documentation; no endorsement or certification guarantee | Partial; completion documentation open |
 | R1 | Build-identified Linux/Windows/macOS installation candidates with checksums, dependency/notices inventory, simple install/launch/uninstall that protects progress | Open |
 | R2 | Actual OS clean install/reopen/upgrade/uninstall acceptance, not just CI/cross-build | Fedora development runs only; Windows/macOS environments unavailable here |
-| R3 | Owner project/content license choice, third-party redistribution obligations, signing/notarization decisions and owner installation acceptance resolved | Owner decisions pending; candidates must not be called redistributable yet |
+| R3 | Owner project/content license choice, third-party redistribution obligations, signing/notarization decisions and owner installation acceptance resolved | MIT approved 2026-10-22; dependency notice bundle, signing decisions and platform acceptance remain open |
 
 A model can teach evidence interpretation without performing physical, kernel or cryptographic operations, but its exact limits must accompany coverage. A limitation is not a substitute for implementing a difficult supported configuration task. No incomplete objective becomes “covered” merely because a related command is recognized. No public release or deployment is authorized.

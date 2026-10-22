@@ -12,3 +12,7 @@ Completion authority: [COMPLETION.md](COMPLETION.md). Every milestone records ch
 - Independent baseline review started. A permissions privacy grading defect is queued for immediate repair; broader content and simulator work remains open.
 
 Next: resolve review findings; implement safe progress backup/export/restore and course/unit navigation; extend bounded simulator capabilities and author reviewed curriculum batches. License and actual Windows/macOS acceptance remain owner/environment decisions, not reasons to stop independent implementation.
+
+## 2026-10-22 — M1b: owner-approved license
+
+The owner explicitly approved MIT for original code and authored curriculum, using “DLMS Learning Lab contributors.” Added root LICENSE/NOTICE and package metadata; retained palette attribution. This resolves the project-license decision, not the remaining dependency-notice or platform-acceptance gates. No public release.
