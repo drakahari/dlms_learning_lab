@@ -136,7 +136,11 @@ pub fn diagnostic_title(message: &str) -> &'static str {
 }
 pub fn diagnostic_advice(message: &str) -> &'static str {
     let m = message.to_ascii_lowercase();
-    if m.contains("division by zero") {
+    if m.contains("expansion work limit") {
+        "Replacing variables repeatedly can require much more work than the script’s length suggests, even when nothing is printed. Use smaller values or avoid repeating a large value, then retry."
+    } else if m.contains("expansion memory limit") {
+        "Joining large variable values builds one large piece of text. Process smaller pieces separately instead of joining many copies, then retry."
+    } else if m.contains("division by zero") {
         "A division needs a nonzero divisor. Check or reject zero input before calculating, then retry."
     } else if m.contains("invalid integer") {
         "Use an integer value. A leading 0 means octal (digits 0–7); floating-point values and expressions stored in named variables are outside this subset."

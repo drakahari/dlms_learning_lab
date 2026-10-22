@@ -1,4 +1,17 @@
 use super::*;
+fn input_value_preview(value: &str) -> String {
+    let end = value.char_indices().nth(80).map_or(value.len(), |(n, _)| n);
+    let prefix = format!("{:?}", &value[..end]);
+    if end == value.len() {
+        prefix
+    } else {
+        format!(
+            "{prefix} … ({} bytes; full value in input details)",
+            value.len()
+        )
+    }
+}
+
 pub(super) struct Job {
     id: String,
     source: String,
@@ -135,7 +148,7 @@ impl LabApp {
                     "Supplied by the lab for these inputs: {}",
                     c.env
                         .iter()
-                        .map(|(name, value)| format!("{name} = {value:?}"))
+                        .map(|(name, value)| format!("{name} = {}", input_value_preview(value)))
                         .collect::<Vec<_>>()
                         .join(" · ")
                 ))
@@ -258,7 +271,7 @@ impl LabApp {
             }
         }
         let c = &cases[selected];
-        egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the listed simulated files exist. Each test resets these files; your script stays saved.");});
+        egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{egui::ScrollArea::vertical().id_salt("script-fixture-scroll").max_height(260.).show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the listed simulated files exist. Each test resets these files; your script stays saved.");});});
     }
     fn script_editor(&mut self, ui: &mut egui::Ui, i: usize) {
         ui.label("Script · simulated shell");

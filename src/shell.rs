@@ -2,9 +2,13 @@
 mod arithmetic;
 mod text_tools;
 use serde::{Deserialize, Serialize};
-use std::collections::{BTreeMap, BTreeSet};
+use std::{
+    borrow::Cow,
+    cell::Cell,
+    collections::{BTreeMap, BTreeSet},
+};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
-pub const EVALUATOR_REVISION: u32 = 3;
+pub const EVALUATOR_REVISION: u32 = 4;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -12,6 +16,7 @@ pub const MAX_SOURCE: usize = 16_384;
 const MAX_TEXT: usize = 262_144;
 const MAX_OUTPUT: usize = 32_768;
 const MAX_STEPS: usize = 2000;
+const MAX_EXPANSION_WORK: usize = 1_000_000;
 /// Persistable diagnostics are bounded at creation, not only when rendering.
 fn diagnostic(mut text: String) -> String {
     if text.len() > 1000 {
@@ -856,6 +861,20 @@ enum Dest {
     Err,
     File(String),
 }
+fn bounded_expansion_bytes(current: usize, additional: usize) -> Result<usize, String> {
+    current
+        .checked_add(additional)
+        .filter(|n| *n <= MAX_TEXT)
+        .ok_or_else(|| "Expansion memory limit reached (256 KiB of expanded text)".into())
+}
+fn expansion_fields_size(fields: &[String]) -> Result<usize, String> {
+    if fields.len() > 128 {
+        return Err("Argument limit exceeded (128 expanded fields)".into());
+    }
+    fields
+        .iter()
+        .try_fold(0, |n, s| bounded_expansion_bytes(n, s.len()))
+}
 type LocalDeclaration = (String, Option<String>);
 struct InputFrame {
     input: String,
@@ -874,6 +893,7 @@ pub struct Vm {
     code: Vec<Code>,
     pc: usize,
     steps: usize,
+    expansion_work: Cell<usize>,
     env: BTreeMap<String, String>,
     args: Vec<String>,
     input: String,
@@ -895,6 +915,7 @@ impl Vm {
             code: compile(source)?,
             pc: 0,
             steps: 0,
+            expansion_work: Cell::new(0),
             env: case.env.clone(),
             args: case.args.clone(),
             input: case.stdin.clone(),
@@ -925,35 +946,52 @@ impl Vm {
         self.outcome.status = 2;
         self.done = true;
     }
+    /// Charge all expansion paths, including preflight and arithmetic callbacks, before copying.
+    fn charge_expansion(&self, bytes: usize) -> Result<(), String> {
+        let next = self.expansion_work.get().checked_add(bytes)
+            .filter(|n| *n <= MAX_EXPANSION_WORK)
+            .ok_or("Expansion work limit reached (1,000,000 processed bytes). Reduce repeated large expansions; Stop is also available.")?;
+        self.expansion_work.set(next);
+        Ok(())
+    }
+    fn append_expansion(&self, output: &mut String, text: &str) -> Result<(), String> {
+        bounded_expansion_bytes(output.len(), text.len())?;
+        self.charge_expansion(text.len())?;
+        output.push_str(text);
+        Ok(())
+    }
     fn variable(&self, key: &str) -> Result<String, String> {
         if unmodeled_variable(key) {
-            return Err(format!(
-                "Unsupported special-variable name or reserved namespace {key}; it is not an ordinary simulated variable"
-            ));
+            return Err(format!("Unsupported special variable: {key}"));
         }
-        Ok(match key {
-            "?" => self.outcome.status.to_string(),
-            "IFS" => " \t\n".into(),
-            "#" => self.args.len().to_string(),
+        let value: Cow<'_, str> = match key {
+            "?" => Cow::Owned(self.outcome.status.to_string()),
+            "IFS" => Cow::Borrowed(" \t\n"),
+            "#" => Cow::Owned(self.args.len().to_string()),
             "@" | "*" | "0" => {
                 return Err("Only sole quoted \"$@\", $1…$9, $# and $? are supported".into());
             }
-            s if s.len() == 1 && s.as_bytes()[0].is_ascii_digit() => self
-                .args
-                .get(s.parse::<usize>().unwrap() - 1)
-                .cloned()
-                .unwrap_or_default(),
-            s if name(s) => self.env.get(s).cloned().unwrap_or_default(),
+            key if key.len() == 1 && key.as_bytes()[0].is_ascii_digit() => Cow::Borrowed(
+                self.args
+                    .get(key.parse::<usize>().unwrap() - 1)
+                    .map_or("", String::as_str),
+            ),
+            key if name(key) => Cow::Borrowed(self.env.get(key).map_or("", String::as_str)),
             _ => return Err("Unsupported parameter expansion".into()),
-        })
+        };
+        bounded_expansion_bytes(0, value.len())?;
+        self.charge_expansion(value.len())?;
+        Ok(value.into_owned())
     }
     fn expand_text(&self, s: &str) -> Result<String, String> {
+        self.charge_expansion(s.len())?;
         let cs: Vec<char> = s.chars().collect();
         let mut i = 0;
         let mut result = String::new();
         while i < cs.len() {
             if cs[i] != '$' {
-                result.push(cs[i]);
+                let mut bytes = [0; 4];
+                self.append_expansion(&mut result, cs[i].encode_utf8(&mut bytes))?;
                 i += 1;
                 continue;
             }
@@ -962,13 +1000,13 @@ impl Vm {
                 let expression = cs[i + 3..end - 2].iter().collect::<String>();
                 let expanded = self.expand_text(&expression)?;
                 let number = arithmetic::evaluate(&expanded, |name| self.variable(name))?;
-                result.push_str(&number.to_string());
+                self.append_expansion(&mut result, &number.to_string())?;
                 i = end;
                 continue;
             }
             i += 1;
             if i == cs.len() {
-                result.push('$');
+                self.append_expansion(&mut result, "$")?;
                 break;
             }
             let key = if cs[i] == '{' {
@@ -995,26 +1033,35 @@ impl Vm {
                 i += 1;
                 key
             };
-            result.push_str(&self.variable(&key)?);
-            if result.len() > MAX_TEXT {
-                return Err("Expansion exceeds memory limit".into());
-            }
+            self.append_expansion(&mut result, &self.variable(&key)?)?;
         }
         Ok(result)
     }
     fn expand(&self, w: &Word, split: bool) -> Result<Vec<String>, String> {
         if w.0.len() == 1 && w.0[0].quote == Quote::Double && w.0[0].text == "$@" {
+            let bytes = expansion_fields_size(&self.args)?;
+            self.charge_expansion(bytes)?;
             return Ok(self.args.clone());
         }
         let mut fields = vec![String::new()];
+        let mut retained = 0;
         let mut keep = false;
         let mut pending = false;
+        let next_field = |fields: &mut Vec<String>| -> Result<(), String> {
+            if fields.len() >= 128 {
+                return Err("Argument limit exceeded (128 expanded fields)".into());
+            }
+            fields.push(String::new());
+            Ok(())
+        };
         for p in &w.0 {
             let text = if p.quote == Quote::Single {
+                self.charge_expansion(p.text.len())?;
                 p.text.clone()
             } else {
                 self.expand_text(&p.text)?
             };
+            self.charge_expansion(text.len())?;
             if split && p.quote == Quote::Bare {
                 if text.contains(['*', '?']) {
                     return Err("Globbing is unsupported; quote the expanded value".into());
@@ -1024,17 +1071,19 @@ impl Vm {
                         pending = true;
                     } else {
                         if pending && (!fields.last().unwrap().is_empty() || keep) {
-                            fields.push(String::new());
+                            next_field(&mut fields)?;
                             keep = false;
                         }
+                        retained = bounded_expansion_bytes(retained, c.len_utf8())?;
                         fields.last_mut().unwrap().push(c);
                         pending = false;
                     }
                 }
             } else {
                 if pending && (!fields.last().unwrap().is_empty() || keep) {
-                    fields.push(String::new());
+                    next_field(&mut fields)?;
                 }
+                retained = bounded_expansion_bytes(retained, text.len())?;
                 fields.last_mut().unwrap().push_str(&text);
                 keep = true;
                 pending = false;
@@ -1047,11 +1096,14 @@ impl Vm {
     }
     fn words(&self, words: &[Word]) -> Result<Vec<String>, String> {
         let mut out = Vec::new();
+        let mut retained = 0;
         for w in words {
-            out.extend(self.expand(w, true)?);
-            if out.len() > 128 || out.iter().map(String::len).sum::<usize>() > MAX_TEXT {
-                return Err("Argument limit exceeded".into());
+            let fields = self.expand(w, true)?;
+            if out.len() + fields.len() > 128 {
+                return Err("Argument limit exceeded (128 arguments)".into());
             }
+            retained = bounded_expansion_bytes(retained, expansion_fields_size(&fields)?)?;
+            out.extend(fields);
         }
         Ok(out)
     }

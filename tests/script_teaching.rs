@@ -187,6 +187,13 @@ fn feedback_separates_malformed_unsupported_limits_and_output_mistakes() {
         let e = r.error.expect(source);
         assert_eq!(teaching::diagnostic(&e), kind, "{source}: {e}");
     }
+    for error in [
+        "Expansion work limit reached",
+        "Expansion memory limit reached",
+    ] {
+        assert_eq!(teaching::diagnostic(error), Diagnostic::Limit);
+        assert!(teaching::diagnostic_advice(error).contains("variable"));
+    }
     assert!(teaching::output_advice("hello\n", "hello").contains("final line break"));
     assert!(teaching::output_advice("two  words\n", "two words\n").contains("spacing"));
     let r = shell::run("printf 'wrong\\n'", &l.fixture);

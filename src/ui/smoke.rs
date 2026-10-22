@@ -72,6 +72,216 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            2400 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                let source = format!("printf '%s\\n' {}\n", "$spaces\"\"".repeat(32));
+                let cases: Vec<_> = [32768, 65536, 98304]
+                    .into_iter()
+                    .map(|size| shell::Case {
+                        name: format!("Controlled prior fixture {size}"),
+                        args: vec![],
+                        stdin: String::new(),
+                        env: std::collections::BTreeMap::from([(
+                            "spaces".into(),
+                            " ".repeat(size),
+                        )]),
+                        files: Default::default(),
+                        stdout: "\n".repeat(32),
+                        stderr: String::new(),
+                        status: 0,
+                        after: Default::default(),
+                    })
+                    .collect();
+                let mut lab = self.scenarios[9].clone();
+                lab.id = "test-expansion-resource".into();
+                lab.title = "Expansion bounds · development fixture".into();
+                lab.objective="Controlled simulator resource check. Retain earlier revision 3 credit as history; run the current script to inspect its resource diagnostic. Repair or stop a run using the normal native editor. This fixture is not curriculum.".into();
+                lab.unit.clear();
+                lab.prerequisites.clear();
+                lab.teaching = None;
+                lab.steps = vec![
+                    "Inspect the normal editor, current feedback and retained historical result."
+                        .into(),
+                ];
+                lab.guide.clear();
+                lab.goal = engine::Goal::Script {
+                    cases: cases.clone(),
+                };
+                lab.initial = engine::State::Script {
+                    source: source.clone(),
+                    run: None,
+                };
+                lab.solution = vec![format!("printf '%s\\n' {}", "\"\" ".repeat(32))];
+                let mut a = Attempt::new(&lab, 1);
+                a.state = engine::State::Script {
+                    source: source.clone(),
+                    run: Some(shell::Record {
+                        engine_revision: 3,
+                        source,
+                        results: cases
+                            .iter()
+                            .map(|c| shell::Outcome {
+                                stdout: c.stdout.clone(),
+                                stderr: String::new(),
+                                status: 0,
+                                files: Default::default(),
+                                error: None,
+                            })
+                            .collect(),
+                    }),
+                };
+                self.progress = Progress {
+                    schema_version: 1,
+                    ..Default::default()
+                };
+                self.progress.attempts.insert(lab.id.clone(), a);
+                self.scenarios.push(lab);
+                let i = self.scenarios.len() - 1;
+                let root = tempfile::Builder::new()
+                    .prefix("dlms-expansion-native-")
+                    .tempdir()
+                    .unwrap()
+                    .keep();
+                self.path = root.join("progress-v1.json");
+                let original = serde_json::to_vec_pretty(&self.progress).unwrap();
+                std::fs::write(&self.path, &original).unwrap();
+                std::fs::write(root.join("exact-original.json"), original).unwrap();
+                self.launch(i);
+            }
+            2401 => {
+                let i = self.selected.unwrap();
+                assert!(progress::legacy_script_credit(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                assert!(!self.metrics.completion);
+                shot = Some("expansion-revision3-history".into());
+            }
+            2402 => self.pending_events = click(self.metrics.check.unwrap()),
+            2403 => {}
+            2404 => {
+                if self.script_job.is_some() {
+                    return;
+                }
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                let engine::State::Script { run: Some(r), .. } = &a.state else {
+                    panic!()
+                };
+                assert!(r.results.iter().all(|r| {
+                    r.error
+                        .as_ref()
+                        .is_some_and(|e| e.contains("Expansion work limit"))
+                }));
+                assert!(progress::legacy_script_credit(a, &self.scenarios[i]));
+                assert!(!self.metrics.completion);
+                assert_eq!(
+                    std::fs::read(self.path.with_extension(format!(
+                        "before-shell-v{}.json",
+                        shell::EVALUATOR_REVISION
+                    )))
+                    .unwrap(),
+                    std::fs::read(self.path.parent().unwrap().join("exact-original.json")).unwrap()
+                );
+                shot = Some("expansion-current-limit-feedback".into());
+            }
+            2405 | 2416 => self.pending_events = click(self.metrics.inputs[0]),
+            2406 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("while true; do :; done".into()),
+                ]
+            }
+            2407 | 2412 => self.pending_events = click(self.metrics.check.unwrap()),
+            2408 => {
+                assert!(self.script_job.is_some());
+                let pos = self.metrics.stop.unwrap().center();
+                assert!(ctx.content_rect().contains(pos));
+                // Let the enabled Stop control enter egui's previous-frame hit map
+                // before injecting a click. Run creates its job after drawing actions.
+                shot = Some("expansion-native-running".into());
+            }
+            2409 => self.pending_events = click(self.metrics.stop.unwrap()),
+            2410 => {
+                assert!(self.script_job.is_none());
+                assert!(!self.metrics.completion);
+                shot = Some("expansion-native-stop".into());
+                self.pending_events = click(self.metrics.inputs[0]);
+            }
+            2411 => {
+                let source = self.scenarios[self.selected.unwrap()].solution[0].clone();
+                self.pending_events = vec![key(egui::Key::A, true), egui::Event::Text(source)];
+            }
+            2413 => {}
+            2414 => {
+                if self.script_job.is_some() {
+                    return;
+                }
+                assert!(self.metrics.completion);
+                shot = Some("expansion-current-repair".into());
+            }
+            2415 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                assert!(progress::current_solved(a, &self.scenarios[i]));
+                assert!(progress::legacy_script_credit(a, &self.scenarios[i]));
+            }
+            2417 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("printf wrong".into()),
+                ]
+            }
+            2418 => {
+                assert!(!self.metrics.completion);
+                let i = self.selected.unwrap();
+                assert!(progress::legacy_script_credit(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                shot = Some("expansion-edited-history-retained".into());
+            }
+            2419 => {
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(940., 760.)));
+            }
+            2420 => shot = Some("expansion-history-light-150".into()),
+            2421 => {
+                self.pending_events = vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -680.),
+                        modifiers: Default::default(),
+                    },
+                ]
+            }
+            2422 => shot = Some("expansion-history-light-150-scrolled".into()),
+            2423 => {
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                let i = self.selected.unwrap();
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.lesson_scroll_reset = true;
+            }
+            2424 => shot = Some("expansion-challenge-dark-150".into()),
+            2425 => {
+                println!(
+                    "PASS native expansion boundary: actual prior fixture history, current resource feedback, exact v4 backup, keyboard loop/Stop, repair/all3current cases, reload, edit invalidation and retained history, resized light/dark150. Development fixture only; no new curriculum or novice acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+
             2320 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 let i = self

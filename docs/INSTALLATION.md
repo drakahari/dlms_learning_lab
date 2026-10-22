@@ -140,3 +140,16 @@ The clean Fedora archive was extracted and installed/upgraded in the isolated /t
 ### Native startup evidence to investigate after M25
 
 The full four-lesson M25 Fedora native flow completed, but extra default-Wayland resumed-draft runs stopped before the smoke harness’s first timed action. The same synthetic resume flow passed through existing XWayland. An app-only Wayland trace ends after committing a frame, with a pending callback after keyboard focus left; the session was active and unlocked. This suggests occlusion/repaint scheduling in the timed harness, but does not establish a root cause. Do not treat those stalled runs as startup acceptance. No user desktop/session setting was changed, and no security control was bypassed. Continue independent work and investigate the harness/window startup behavior before final acceptance.
+
+
+### M25 installed candidates (before evaluator4 expansion correction)
+
+Source `85d0274ebbacf9e65376d6b44fc054a83b95b77e`,55 assignments/thirteen units, evaluator3. [Run39841022031](https://github.com/drakahari/dlms_learning_lab/actions/runs/39841022031) passed239 Rust tests and applicable build/tooling checks on all three native CI runners. Downloaded Ubuntu/Windows archives and sidecars were hash-verified under ignored `dist/native-ci-85d0274/`. They precede M26 resource tightening and are development milestone candidates, not final release acceptance.
+
+| Candidate | SHA-256 |
+| --- | --- |
+| Fedora44 `dlms-learning-lab-0.1.0-g85d0274ebbac-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` | `504e6a758d391ff6ddf1fe7344d787c31732f6077a28c58edf3f50183428f927` |
+| `dlms-learning-lab-0.1.0-g85d0274ebbac-x86_64-pc-windows-msvc-windows-candidate.zip` | `35159be57612b225eae9f862b89337a47f68646983f8bb5bcf43ad76cbc71d23` |
+| `dlms-learning-lab-0.1.0-g85d0274ebbac-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `23447655b2f97aaa3cb16a20944b49a360537040771dc123ebb1ae33b675d223` |
+
+Fedora binary SHA-256 `145d2290d8dc7e53cccb5d6a1f23601ca6e5971faafb14c0b2296f398fe7f647`. Archive verified/extracted and installed/upgraded in the isolated /tmp acceptance root. Outside-checkout CLI validated55/thirteen and desktop-file-validate passed; exact synthetic sentinel remained (retained-file check). Installed native all4 VLAN flows passed outside checkout through existing XWayland, including keyboard repairs, checks, reset/resume, invalidation, malformed-entry feedback and150% light/dark views. The default-Wayland extra-start observation above remains unresolved; a smoke-only pre-map fullscreen experiment was ineffective and removed. No system/session/theme setting was changed. Actual Windows/macOS desktop runtime and macOS notice/signing gates remain open. No release publication.
