@@ -388,5 +388,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/shell-scope-v1.json"),
         include_str!("../scenarios/shell-text-v1.json"),
         include_str!("../scenarios/shell-counts-v1.json"),
+        include_str!("../scenarios/linux-access-v1.json"),
     ])
 }

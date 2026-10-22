@@ -280,3 +280,39 @@ fn invalid_goal_subjects_are_rejected_and_old_progress_format_is_unchanged() {
             .contains("filesystem objectives")
     );
 }
+
+#[test]
+fn ownership_requirements_distinguish_in_place_update_move_and_recreation() {
+    let mut t = tree();
+    let requirement = Requirement::Ownership {
+        path: "/work/foreign".into(),
+        owner: "blair".into(),
+        group: "staff".into(),
+    };
+    assert!(requirement.valid_for(&t));
+    assert!(requirement.check(&t).0);
+    t.nodes.get_mut("/work/foreign").unwrap().mode = 0o660;
+    t.execute("cp source foreign").unwrap();
+    assert!(requirement.check(&t).0);
+    assert_eq!(t.files["/work/foreign"], "original\n");
+    t.execute("rm foreign").unwrap();
+    t.execute("cp source foreign").unwrap();
+    assert!(!requirement.check(&t).0);
+    let mut t = tree();
+    t.execute("mv foreign renamed").unwrap();
+    let r = Requirement::Ownership {
+        path: "/work/renamed".into(),
+        owner: "blair".into(),
+        group: "staff".into(),
+    };
+    assert!(r.check(&t).0);
+    for (owner, group) in [("missing", "staff"), ("blair", "missing")] {
+        let r = Requirement::Ownership {
+            path: "/work/renamed".into(),
+            owner: owner.into(),
+            group: group.into(),
+        };
+        assert!(!r.valid_for(&t));
+        assert!(!r.check(&t).0);
+    }
+}

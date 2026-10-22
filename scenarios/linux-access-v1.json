@@ -1,0 +1,1208 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-team-brief",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-access-policy",
+      "topic": "File access",
+      "title": "Share a brief with the review group",
+      "summary": "Repair group ownership and access without exposing private notes.",
+      "objective": "Work as alex. Make /work/brief.txt belong to group review while retaining owner alex and its text. Alex must be able to read/write it; Blair must be able to read but not write it. Casey and Devon must not read or write it. These are read/write requirements for a text file; execute permission is not assessed. Keep /work at 755 and private.txt unchanged at 600 with its original text. Inspect the supplied memberships and current permissions, repair them, then Check work. You cannot use root or change accounts.",
+      "retry_guidance": "If Blair is still blocked, check both the group label and group read bit. If Casey can read, inspect the file's group and other bits. Changing umask will not repair this existing file.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the current permissions",
+        "Make the smallest safe change",
+        "Verify the complete outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the current permissions",
+          "why": "The same permission letter has a different effect on a file and its parent directory.",
+          "action": "Use ls -l for files, ls -ld for directories and id for the supplied memberships. You work as alex; root is not available.",
+          "commands": [
+            {
+              "command": "ls -ld /work",
+              "explanation": "Inspect the directory itself rather than listing its contents.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Make the smallest safe change",
+          "why": "A targeted change avoids opening access for unrelated people or damaging another owner's files.",
+          "action": "Repair the stated policy and preserve the required evidence. Each command acts only on the simulated tree.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete outcome",
+          "why": "A successful command does not prove the whole access requirement is satisfied.",
+          "action": "Inspect again, then Check work. If something fails, use the current feedback to investigate and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Inspect both the file's group and Blair's membership. Group read on a staff-owned file shares with the wrong people.",
+        "Change the group as its owner, then give group read without group write. Keep other read/write closed.",
+        "chmod can describe the whole mode numerically or change selected classes symbolically; the resulting access is what matters."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chgrp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/id-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user alex, canonical virtual tree and traditional owner/group/other permissions only. No root/sudo, account changes, ACL/SELinux, links, special bits, mounts or actual execution of files. chmod supports numeric modes or explicit u/g/o/a r/w/x clauses; chgrp requires ownership and membership. id uses supplied identities with synthetic numbers. Group membership is fixed; no real accounts or files are touched. Only supported literal commands; no shell expansion/redirection/pipelines. See optional command reference.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/brief.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/private.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/brief.txt": "Release review: verify labels before delivery.\n",
+            "/work/private.txt": "Private planning notes.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Contents",
+            "path": "/work/brief.txt",
+            "text": "Release review: verify labels before delivery.\n"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/brief.txt",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "alex",
+            "operation": "read_file",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "alex",
+            "operation": "write_file",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "blair",
+            "operation": "read_file",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "blair",
+            "operation": "write_file",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "casey",
+            "operation": "read_file",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "casey",
+            "operation": "write_file",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "devon",
+            "operation": "read_file",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/brief.txt",
+            "user": "devon",
+            "operation": "write_file",
+            "allowed": false
+          },
+          {
+            "kind": "Mode",
+            "path": "/work",
+            "mode": 493
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/private.txt",
+            "text": "Private planning notes.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/private.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/private.txt",
+            "owner": "alex",
+            "group": "staff"
+          }
+        ]
+      },
+      "solution": [
+        "chgrp review brief.txt",
+        "chmod u=rw,g=r,o= brief.txt"
+      ],
+      "prerequisites": [
+        "lpic1-creation-mask",
+        "lpic1-file-names"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Uses ls, quoted paths and owner/group/other bits from the private-area lesson. Here you learn to inspect membership and change an existing file's group/permissions.",
+        "concepts": [
+          {
+            "title": "Find the people behind the group column",
+            "text": "ls -l shows the owner and group of each file. id blair shows Blair's supplied group memberships; the first is the primary group. The numbers are simulated identifiers, not your computer's accounts. Blair belongs to review; Casey belongs to staff. Alex belongs to both. Being in a similarly named project does not grant permission by itself."
+          },
+          {
+            "title": "Change who shares the file",
+            "text": "chgrp review menu.txt makes review the file's group. An ordinary user must own the file and belong to that group. It does not change the owner or the read/write bits. No account creation or membership editing is needed here."
+          },
+          {
+            "title": "Change an existing file without opening everything",
+            "text": "chmod g+r menu.txt adds group read while preserving other bits. u means owner, g means group, o means everyone else; + adds, - removes and = replaces the selected bits. Separate clauses with commas, for example u=rw,g=r,o=. Numeric 640 describes the same ordinary bits. Owner bits take precedence, even when the owner is also in the group. umask only affects new entries."
+          }
+        ],
+        "example": [
+          "id blair",
+          "ls -l menu.txt",
+          "chgrp review menu.txt",
+          "chmod g+r menu.txt",
+          "ls -l menu.txt"
+        ],
+        "inputs": "The practice menu starts private to Alex with group staff. The commands share it read-only with review. Values and file are separate from the assignment.",
+        "try_change": "Run chmod g-r menu.txt, then inspect with ls -l. Blair loses read permission; changing the group alone did not guarantee access.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/menu.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/menu.txt": "Soup and bread.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        },
+        "outcomes": [
+          {
+            "kind": "Access",
+            "path": "/work/menu.txt",
+            "user": "blair",
+            "operation": "read_file",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/menu.txt",
+            "user": "casey",
+            "operation": "read_file",
+            "allowed": false
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/menu.txt",
+            "owner": "alex",
+            "group": "review"
+          }
+        ]
+      },
+      "explanation": "Sharing depends on both group identity and permission bits. review contains Blair; staff contains Casey. Owner precedence preserves Alex's independent read/write rights. A group change without adding read leaves the original problem; broad world-readable permissions violate the requested policy."
+    },
+    {
+      "id": "lpic1-drop-directory",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-access-policy",
+      "topic": "File access",
+      "title": "Configure a drop folder without browsing",
+      "summary": "Separate directory write, search and name-listing permissions.",
+      "objective": "Configure /work/drop for the supplied review group. Keep Alex able to list names and create entries. Blair must be able to create entries but not list names. Casey must not list, search or create inside it. Retain owner alex/group review, /work mode 755, and the original sealed.txt text/600 permissions. Work as alex; use Check work to test the other supplied users' access. This is a directory-permission exercise, not a secure upload-service design: write/search also permit removal of known entries, and file access still depends on each file's own permissions.",
+      "retry_guidance": "If creation fails with write set, check directory search permission. If Blair can browse, remove group directory read. Broad modes may accidentally admit Casey.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the current permissions",
+        "Make the smallest safe change",
+        "Verify the complete outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the current permissions",
+          "why": "The same permission letter has a different effect on a file and its parent directory.",
+          "action": "Use ls -l for files, ls -ld for directories and id for the supplied memberships. You work as alex; root is not available.",
+          "commands": [
+            {
+              "command": "ls -ld /work",
+              "explanation": "Inspect the directory itself rather than listing its contents.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Make the smallest safe change",
+          "why": "A targeted change avoids opening access for unrelated people or damaging another owner's files.",
+          "action": "Repair the stated policy and preserve the required evidence. Each command acts only on the simulated tree.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete outcome",
+          "why": "A successful command does not prove the whole access requirement is satisfied.",
+          "action": "Inspect again, then Check work. If something fails, use the current feedback to investigate and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Listing names needs r; searching through a directory needs x. Creating entries needs w and x together.",
+        "Blair uses the group class here; Casey uses the other class. Keep Alex's owner permissions intact.",
+        "Do not change the sealed file to make its parent directory usable. The required directory policy can be expressed numerically or with explicit classes."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chgrp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/id-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user alex, canonical virtual tree and traditional owner/group/other permissions only. No root/sudo, account changes, ACL/SELinux, links, special bits, mounts or actual execution of files. chmod supports numeric modes or explicit u/g/o/a r/w/x clauses; chgrp requires ownership and membership. id uses supplied identities with synthetic numbers. Group membership is fixed; no real accounts or files are touched. Only supported literal commands; no shell expansion/redirection/pipelines. See optional command reference.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/drop": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/work/drop/sealed.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "review"
+            }
+          },
+          "files": {
+            "/work/drop/sealed.txt": "Existing sealed evidence.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "alex",
+            "operation": "list_names",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "alex",
+            "operation": "create_entry",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "blair",
+            "operation": "create_entry",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "blair",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "casey",
+            "operation": "create_entry",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "casey",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/drop",
+            "user": "casey",
+            "operation": "search_directory",
+            "allowed": false
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/drop",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/drop/sealed.txt",
+            "text": "Existing sealed evidence.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/drop/sealed.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Mode",
+            "path": "/work",
+            "mode": 493
+          }
+        ]
+      },
+      "solution": [
+        "chmod u=rwx,g=wx,o= drop"
+      ],
+      "prerequisites": [
+        "lpic1-team-brief"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Builds on the review-group brief. File read permission and directory search/listing are different; this activity introduces directory write plus search.",
+        "concepts": [
+          {
+            "title": "A directory is a list of names",
+            "text": "On a directory, r lets a user list names. x lets them search through it to a known name. Neither grants file-content reading by itself. A directory without r can still be searchable; this is useful when a task needs access without browsing."
+          },
+          {
+            "title": "Creating a name needs two permissions",
+            "text": "Creating or removing entries needs directory w and x together. w alone is insufficient. Giving review wx without r permits creation without listing the names. It is not a complete secure upload service: known names, deletion rights and real-system policies need separate controls outside this exercise."
+          },
+          {
+            "title": "Inspect the directory itself",
+            "text": "ls -ld inbox shows the directory's own bits. ls -l inbox inspects its contents instead. chmod g=wx inbox replaces just the group bits. Leave the owner's full control in place and keep unrelated users outside the directory."
+          }
+        ],
+        "example": [
+          "id blair",
+          "ls -ld inbox",
+          "chmod g=wx inbox",
+          "ls -ld inbox"
+        ],
+        "inputs": "Practice inbox belongs to Alex, group review, and contains a retained parcel. No actual second-user command execution or host account change happens.",
+        "try_change": "Run chmod g+r inbox, then inspect again. The group can now list names as well as create; that is a different policy.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/inbox": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/work/inbox/parcel.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "review"
+            }
+          },
+          "files": {
+            "/work/inbox/parcel.txt": "Practice parcel.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        },
+        "outcomes": [
+          {
+            "kind": "Access",
+            "path": "/work/inbox",
+            "user": "blair",
+            "operation": "create_entry",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/inbox",
+            "user": "blair",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/inbox/parcel.txt",
+            "text": "Practice parcel.\n"
+          }
+        ]
+      },
+      "explanation": "For a directory, read lists names, search follows names and write together with search changes the directory's entries. These are independent of reading a file's content. The final policy is deliberately narrower than a general-purpose shared folder."
+    },
+    {
+      "id": "lpic1-update-existing",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-access-policy",
+      "topic": "File access",
+      "title": "Update files inside a read-only directory",
+      "summary": "Investigate group write access and preserve another owner's existing files.",
+      "objective": "Update the two existing files in /work/publish using the current incoming roster and Friday-at-10 notice. Inspect /work/incoming: an obsolete roster is also present. Retain every incoming file and its text. publish must remain 550; both published files must retain owner blair, group staff and mode 660. Do not create publish/new.txt. Work as alex without root. You may update existing writable file contents even though you cannot create names in the directory. Inspect, copy the correct data and Check work.",
+      "retry_guidance": "If the output has the old roster, inspect the source text. If ownership changed, a file was recreated rather than updated in place. Do not widen the directory or try to chmod a file you do not own.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the current permissions",
+        "Make the smallest safe change",
+        "Verify the complete outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the current permissions",
+          "why": "The same permission letter has a different effect on a file and its parent directory.",
+          "action": "Use ls -l for files, ls -ld for directories and id for the supplied memberships. You work as alex; root is not available.",
+          "commands": [
+            {
+              "command": "ls -ld /work",
+              "explanation": "Inspect the directory itself rather than listing its contents.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Make the smallest safe change",
+          "why": "A targeted change avoids opening access for unrelated people or damaging another owner's files.",
+          "action": "Repair the stated policy and preserve the required evidence. Each command acts only on the simulated tree.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete outcome",
+          "why": "A successful command does not prove the whole access requirement is satisfied.",
+          "action": "Inspect again, then Check work. If something fails, use the current feedback to investigate and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Inspect directory and file permissions separately. Alex uses the group bits for Blair's files.",
+        "The destination files already exist and are group-writable. You do not need directory write permission to update their data.",
+        "Keep sources with cp, retain the existing destination entries, and verify that you selected the current roster rather than the obsolete one."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chgrp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/id-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user alex, canonical virtual tree and traditional owner/group/other permissions only. No root/sudo, account changes, ACL/SELinux, links, special bits, mounts or actual execution of files. chmod supports numeric modes or explicit u/g/o/a r/w/x clauses; chgrp requires ownership and membership. id uses supplied identities with synthetic numbers. Group membership is fixed; no real accounts or files are touched. Only supported literal commands; no shell expansion/redirection/pipelines. See optional command reference.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/incoming": {
+              "directory": true,
+              "mode": 488,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/incoming/roster-good.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/incoming/roster-old.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/incoming/notice-good.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/publish": {
+              "directory": true,
+              "mode": 360,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/publish/roster.txt": {
+              "directory": false,
+              "mode": 432,
+              "owner": "blair",
+              "group": "staff"
+            },
+            "/work/publish/notice.txt": {
+              "directory": false,
+              "mode": 432,
+              "owner": "blair",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/incoming/roster-good.txt": "Current roster: Blair and Casey.\n",
+            "/work/incoming/roster-old.txt": "Old roster: Blair only.\n",
+            "/work/incoming/notice-good.txt": "Publication: Friday at 10.\n",
+            "/work/publish/roster.txt": "Old roster: Blair only.\n",
+            "/work/publish/notice.txt": "Publication: not scheduled.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Contents",
+            "path": "/work/publish/roster.txt",
+            "text": "Current roster: Blair and Casey.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/publish/notice.txt",
+            "text": "Publication: Friday at 10.\n"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/publish/roster.txt",
+            "owner": "blair",
+            "group": "staff"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/publish/notice.txt",
+            "owner": "blair",
+            "group": "staff"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/publish/roster.txt",
+            "mode": 432
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/publish/notice.txt",
+            "mode": 432
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/publish",
+            "mode": 360
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/incoming/roster-good.txt",
+            "text": "Current roster: Blair and Casey.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/incoming/notice-good.txt",
+            "text": "Publication: Friday at 10.\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/incoming/roster-old.txt",
+            "text": "Old roster: Blair only.\n"
+          },
+          {
+            "kind": "Absent",
+            "path": "/work/publish/new.txt"
+          }
+        ]
+      },
+      "solution": [
+        "cp incoming/roster-good.txt publish/roster.txt",
+        "cp incoming/notice-good.txt publish/notice.txt"
+      ],
+      "prerequisites": [
+        "lpic1-drop-directory",
+        "lpic1-copy-move"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Uses copy-versus-move and group access. You now distinguish writing an existing file from creating/replacing a directory entry.",
+        "concepts": [
+          {
+            "title": "Writing data is different from changing a name",
+            "text": "An existing file with write permission can be updated without directory write permission. The parent still needs search. Creating a new file, removing one or renaming one requires parent write/search. A directory can therefore prevent new names while allowing selected existing files to change."
+          },
+          {
+            "title": "Use the permission class that actually applies",
+            "text": "The example label belongs to Blair, group staff. Alex is not its owner but belongs to staff and has group write. Alex cannot chmod Blair's file. Ordinary cp to an existing writable file updates its content while retaining its owner/group/mode; removing and recreating it would give the replacement a new owner."
+          },
+          {
+            "title": "Preserve evidence while choosing the correct source",
+            "text": "Inspect the incoming text with cat, then copy rather than move it. Check the result and directory permissions. The assignment includes an obsolete roster as a deliberate investigation choice; successful execution alone does not prove you selected the right input."
+          }
+        ],
+        "example": [
+          "ls -ld cabinet",
+          "ls -l cabinet/label.txt",
+          "cat replacement.txt",
+          "cp replacement.txt cabinet/label.txt",
+          "cat cabinet/label.txt"
+        ],
+        "inputs": "The cabinet is 550 and Alex belongs to its group. The example updates an existing group-writable label owned by Blair, without adding directory write permission.",
+        "try_change": "Try touch cabinet/new.txt. It must fail without creating a file: updating a writable existing file did not grant permission to create a new name.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/cabinet": {
+              "directory": true,
+              "mode": 360,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/cabinet/label.txt": {
+              "directory": false,
+              "mode": 432,
+              "owner": "blair",
+              "group": "staff"
+            },
+            "/work/replacement.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/cabinet/label.txt": "Old label.\n",
+            "/work/replacement.txt": "New example label.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        },
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/work/cabinet/label.txt",
+            "text": "New example label.\n"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/cabinet/label.txt",
+            "owner": "blair",
+            "group": "staff"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/cabinet",
+            "mode": 360
+          }
+        ]
+      },
+      "explanation": "Directory read-only does not make every contained file read-only. Parent search reaches the existing entry; group write permits its data to change. Copying into that existing file retains the other owner, whereas deleting and creating a replacement would not."
+    },
+    {
+      "id": "lpic1-retire-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-access-policy",
+      "topic": "File access",
+      "title": "Retire a read-only handover safely",
+      "summary": "Preserve file identity while restoring a locked-down staging policy.",
+      "objective": "Rename /work/staging/ready.txt to delivered.txt, preserving its approved receipt text, owner blair, group review and mode 444. ready.txt must be gone afterward. Keep proof.txt with its original text and mode 600. Finish with staging owned by alex/group staff at mode 500. Work as alex without root. Investigate why the first move is blocked, make only the temporary permission change needed, and restore the final directory policy before Check work.",
+      "retry_guidance": "If mv is blocked, inspect parent write/search rather than adding file write. If ownership changed, inspect whether you copied and recreated it. If the folder is still writable, finish the temporary-permission cleanup.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Inspect the current permissions",
+        "Make the smallest safe change",
+        "Verify the complete outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the current permissions",
+          "why": "The same permission letter has a different effect on a file and its parent directory.",
+          "action": "Use ls -l for files, ls -ld for directories and id for the supplied memberships. You work as alex; root is not available.",
+          "commands": [
+            {
+              "command": "ls -ld /work",
+              "explanation": "Inspect the directory itself rather than listing its contents.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Make the smallest safe change",
+          "why": "A targeted change avoids opening access for unrelated people or damaging another owner's files.",
+          "action": "Repair the stated policy and preserve the required evidence. Each command acts only on the simulated tree.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete outcome",
+          "why": "A successful command does not prove the whole access requirement is satisfied.",
+          "action": "Inspect again, then Check work. If something fails, use the current feedback to investigate and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Inspect the directory itself as well as the file. File write permission is not the gate for this rename.",
+        "As the directory owner, Alex can temporarily add directory write, then move the existing entry. Keep its identity rather than recreating it.",
+        "Restore the final 500 directory mode after the move. A renamed file alone is only partial completion."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/chgrp-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/id-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/basedefs/V1_chap04.html"
+      ],
+      "simplifications": "Ordinary simulated user alex, canonical virtual tree and traditional owner/group/other permissions only. No root/sudo, account changes, ACL/SELinux, links, special bits, mounts or actual execution of files. chmod supports numeric modes or explicit u/g/o/a r/w/x clauses; chgrp requires ownership and membership. id uses supplied identities with synthetic numbers. Group membership is fixed; no real accounts or files are touched. Only supported literal commands; no shell expansion/redirection/pipelines. See optional command reference.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/staging": {
+              "directory": true,
+              "mode": 320,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/staging/ready.txt": {
+              "directory": false,
+              "mode": 292,
+              "owner": "blair",
+              "group": "review"
+            },
+            "/work/staging/proof.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/staging/ready.txt": "Approved receipt: delivery complete.\n",
+            "/work/staging/proof.txt": "Keep this release proof.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "Absent",
+            "path": "/work/staging/ready.txt"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/staging/delivered.txt",
+            "text": "Approved receipt: delivery complete.\n"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/staging/delivered.txt",
+            "owner": "blair",
+            "group": "review"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/staging/delivered.txt",
+            "mode": 292
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/staging",
+            "mode": 320
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/staging",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/staging/proof.txt",
+            "text": "Keep this release proof.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/staging/proof.txt",
+            "mode": 384
+          }
+        ]
+      },
+      "solution": [
+        "chmod u+w staging",
+        "mv staging/ready.txt staging/delivered.txt",
+        "chmod u-w staging"
+      ],
+      "prerequisites": [
+        "lpic1-update-existing",
+        "lpic1-file-cleanup"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Combines file-versus-directory permissions, safe moves and preservation checks. No new command syntax is required; this is an independent repair/handover capstone.",
+        "concepts": [
+          {
+            "title": "A read-only file can still be renamed",
+            "text": "The name is an entry in its parent directory. Renaming or removing it uses the parent's write/search permissions, not the file's write bit. That is why making a file read-only does not protect it from someone who can change its directory."
+          },
+          {
+            "title": "Keep the other owner's identity",
+            "text": "mv within this modeled filesystem preserves the existing file metadata. A new copy belongs to the copying user, so copy-then-remove would lose Blair's ownership here. Alex cannot restore another owner with chmod or chgrp; ownership transfer/root is outside this ordinary-user activity."
+          },
+          {
+            "title": "Return temporary permission changes to the final policy",
+            "text": "The folder owner can temporarily add their own write permission, perform the move, then remove it. Verify the retained proof and final permissions, not merely the existence of the new name. There are no shell scripts or real filesystem actions involved."
+          }
+        ],
+        "example": [
+          "ls -ld dispatch",
+          "chmod u+w dispatch",
+          "mv dispatch/parcel.txt dispatch/sent.txt",
+          "chmod u-w dispatch",
+          "ls -l dispatch"
+        ],
+        "inputs": "Example dispatch starts at 500; its read-only parcel belongs to Blair. After moving it to sent.txt, the folder is 500 again.",
+        "try_change": "Try mv dispatch/sent.txt dispatch/again.txt after the example. It must fail and retain sent.txt because directory write permission has been removed.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/dispatch": {
+              "directory": true,
+              "mode": 320,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/dispatch/parcel.txt": {
+              "directory": false,
+              "mode": 292,
+              "owner": "blair",
+              "group": "review"
+            }
+          },
+          "files": {
+            "/work/dispatch/parcel.txt": "Example parcel.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "staff"
+            ],
+            "devon": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "umask": 18
+        },
+        "outcomes": [
+          {
+            "kind": "Contents",
+            "path": "/work/dispatch/sent.txt",
+            "text": "Example parcel.\n"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/dispatch/sent.txt",
+            "owner": "blair",
+            "group": "review"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/dispatch",
+            "mode": 320
+          },
+          {
+            "kind": "Absent",
+            "path": "/work/dispatch/parcel.txt"
+          }
+        ]
+      },
+      "explanation": "The parent controls changes to names; the file mode controls access to its content. A temporary owner-write change permits the rename without editing the read-only file or taking it from its owner. Restoring the parent policy completes the handover."
+    }
+  ]
+}

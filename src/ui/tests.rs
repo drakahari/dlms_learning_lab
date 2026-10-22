@@ -1332,21 +1332,26 @@ fn course_start_and_unit_filters_keep_search_favorites_and_resume_navigation() {
 }
 #[test]
 fn unit_filter_controls_wrap_at_narrow_widths_and_large_text() {
-    for width in [720., 1200.] {
-        for scale in [1., 1.5] {
-            let (ctx, mut a) = app();
-            a.filter.track = "LPIC-2".into();
-            a.filter.unit = "linux-service-recovery".into();
-            a.scale = scale;
-            for _ in 0..4 {
-                frame(&ctx, &mut a, width, 850., vec![]);
-            }
-            for r in &a.metrics.filters {
-                assert!(
-                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
-                    "{width}/{scale}: {r:?}, screen {:?}",
-                    ctx.content_rect()
-                );
+    for (track, unit) in [
+        ("LPIC-2", "linux-service-recovery"),
+        ("LPIC-1", "linux-access-policy"),
+    ] {
+        for width in [720., 1200.] {
+            for scale in [1., 1.5] {
+                let (ctx, mut a) = app();
+                a.filter.track = track.into();
+                a.filter.unit = unit.into();
+                a.scale = scale;
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, width, 850., vec![]);
+                }
+                for r in &a.metrics.filters {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{width}/{scale}: {r:?}, screen {:?}",
+                        ctx.content_rect()
+                    );
+                }
             }
         }
     }

@@ -110,3 +110,15 @@ Full prefix: `dlms-learning-lab-0.1.0`. Fedora archive was checksum-verified, ex
 Source `94b0dbe4883a5124033faf8c86e32abf21d74e9a` contains47 authored assignments/eleven units, evaluator3. Fedora44 archive `dlms-learning-lab-0.1.0-g94b0dbe4883a-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` SHA-256 `4453f212087bd8ff99f545ffccc60bbf0a66832a017be94d921112dcdb37064f`; binary `d49476cd39c19a8a567ae82c3174e0bc384eba1908aae5c7abf10d9c72338194`. Checksum-verified, extracted and installed/upgraded the isolated /tmp Fedora test root. Outside-checkout CLI validation and desktop-file-validate passed; the exact synthetic progress sentinel was retained (a file-retention check). Installed native full counter-unit flow passed all4 lessons, wrong retries, keyboard repair/current runs, save/reload/invalidation and light/dark150 rendering. No personal profile or release publication.
 
 Initial native CI run39828321927 at this source passed Ubuntu/macOS but failed a Windows restore-dialog UI assertion. Windows is not marked validated for this source; fixture diagnostics/geometry follow-up is under investigation. Earlier successful candidate identities remain above. macOS notice/signing and actual Windows/macOS desktop acceptance remain open.
+
+
+### M20 CI follow-up acceptance
+
+[Run39829793024](https://github.com/drakahari/dlms_learning_lab/actions/runs/39829793024) at `bd14db0dcf1ab81672e87d5a6885d6b0e7895fe9` passed all three native runners after the async-dialog fixture follow-up. It includes203 Rust tests/47 assignments/eleven units and precedes M21 access capabilities/M22 content. Downloaded archives were sidecar-checksum verified under ignored `dist/native-ci-bd14db0/`.
+
+| Candidate | SHA-256 |
+| --- | --- |
+| `dlms-learning-lab-0.1.0-gbd14db0dcf1a-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `f0d6d5afa16d2c3916114db926b23d26a0907e4c50d47ed376fc275d81641f1a` |
+| `dlms-learning-lab-0.1.0-gbd14db0dcf1a-x86_64-pc-windows-msvc-windows-candidate.zip` | `fda9ce66dd69e5c74c7d93a63e97adf18b5158d459a01dff7f2cfdcdabdb81dc` |
+
+These CI results do not establish actual Windows/macOS desktop installation/runtime/accessibility acceptance. macOS packaging remains notice-gated. The Fedora94b0dbe candidate above is separately installed/render-tested; no release published.

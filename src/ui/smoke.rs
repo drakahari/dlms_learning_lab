@@ -952,6 +952,91 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            2090 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "LPIC-1".into(),
+                    unit: "linux-access-policy".into(),
+                    ..Default::default()
+                };
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            2091 => shot = Some("access-unit-library".into()),
+            2092 => {
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            2093 => shot = Some("access-unit-library-light-150".into()),
+            2094 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -500.),
+                    modifiers: Default::default(),
+                });
+            }
+            2095 => {}
+            2096 => shot = Some("access-unit-library-scrolled-150".into()),
+            2097 => {
+                println!(
+                    "PASS native access-unit library: certification/unit selection, large-text light/dark responsive cards and clean scrolling. Render check; no desktop platform acceptance implied."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            2072 => {
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                for i in 47..51 {
+                    assert!(!progress::current_solved(
+                        &self.progress.attempts[&self.scenarios[i].id],
+                        &self.scenarios[i]
+                    ));
+                }
+                self.launch(47);
+                self.set_terminal_view(47, teaching::View::Introduction);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            2073 => shot = Some("access-introduction-light-150".into()),
+            2074 => self.set_terminal_view(47, teaching::View::Example),
+            2075 => shot = Some("access-practice-light-150".into()),
+            2076 => {
+                self.set_terminal_view(47, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut("lpic1-team-brief")
+                    .unwrap()
+                    .challenge = true;
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2077 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("access-challenge-dark-150".into());
+            }
+            2078 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -650.),
+                    modifiers: Default::default(),
+                });
+            }
+            2079 => {}
+            2080 => shot = Some("access-challenge-scrolled-150".into()),
+            2081 => {
+                println!(
+                    "PASS native Linux access: four introductions, keyboard first-example commands, isolated practice outcomes, partial-policy feedback, normal command repairs/Check, success invalidation, saved reload and light/dark150 scrolling/Challenge. Synthetic agent input; not novice, real multiuser or Windows/macOS desktop acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             1980 => {
                 self.launch(46);
                 self.set_script_view(46, teaching::View::Assignment);
@@ -1577,6 +1662,142 @@ impl LabApp {
                     );
                 }
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            n @ 2000..=2071 => {
+                let ordinal = (n - 2000) / 18;
+                let i = 47 + ordinal;
+                let id = self.scenarios[i].id.clone();
+                match (n - 2000) % 18 {
+                    0 => {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        self.launch(i);
+                    }
+                    1 => {
+                        assert_eq!(self.terminal_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => self.set_terminal_view(i, teaching::View::Example),
+                    3 => {
+                        let command = self.scenarios[i]
+                            .terminal_teaching
+                            .as_ref()
+                            .unwrap()
+                            .example[0]
+                            .clone();
+                        self.pending_events.push(egui::Event::Text(command));
+                        self.pending_events.push(key(egui::Key::Enter, false));
+                    }
+                    4 => {}
+                    5 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .terminal_learning
+                            .as_ref()
+                            .unwrap();
+                        assert_eq!(l.transcript.len(), 1);
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!engine::solved(&a.state, &self.scenarios[i].goal));
+                    }
+                    6 => {
+                        let commands = self.scenarios[i]
+                            .terminal_teaching
+                            .as_ref()
+                            .unwrap()
+                            .example
+                            .clone();
+                        let l = self
+                            .progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .terminal_learning
+                            .as_mut()
+                            .unwrap();
+                        for command in commands.into_iter().skip(1) {
+                            l.command = command;
+                            l.execute();
+                        }
+                        for requirement in &self.scenarios[i]
+                            .terminal_teaching
+                            .as_ref()
+                            .unwrap()
+                            .outcomes
+                        {
+                            assert!(requirement.check(&l.tree).0);
+                        }
+                    }
+                    7 => shot = Some(format!("{id}-practice")),
+                    8 => self.set_terminal_view(i, teaching::View::Assignment),
+                    9 => {
+                        let mistakes: &[&str] = match ordinal {
+                            0 => &["chmod 644 brief.txt"],
+                            1 => &["chmod g=w drop"],
+                            2 => &["cp incoming/roster-old.txt publish/roster.txt"],
+                            _ => &[
+                                "chmod u+w staging",
+                                "mv staging/ready.txt staging/delivered.txt",
+                            ],
+                        };
+                        for command in mistakes {
+                            self.input = (*command).into();
+                            self.submit(i);
+                        }
+                        self.checked = true;
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .checked = true;
+                    }
+                    10 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-assignment-retry"));
+                    }
+                    11 => {
+                        let commands = if ordinal == 3 {
+                            vec!["chmod u-w staging".into()]
+                        } else {
+                            self.scenarios[i].solution.clone()
+                        };
+                        for command in commands {
+                            self.input = command;
+                            self.submit(i);
+                        }
+                    }
+                    12 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    13 => {
+                        assert!(self.metrics.completion);
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    14 => {
+                        self.input = [
+                            "chmod o+r brief.txt",
+                            "chmod g+r drop",
+                            "chmod u+w publish",
+                            "chmod u+w staging",
+                        ][ordinal]
+                            .into();
+                        self.submit(i);
+                    }
+                    15 => {
+                        assert!(!self.metrics.completion);
+                    }
+                    16 => {
+                        self.save();
+                    }
+                    _ => self.selected = None,
+                }
             }
             n @ 1100..=1207 => {
                 let ordinal = (n - 1100) / 18;

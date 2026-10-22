@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking and Linux practice. Forty-seven authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments and three Bash scope/debugging assignments and four text-processing/audit assignments and four counters/totals/publication assignments, plus six Linux file-management foundations and six IPv6 configuration/troubleshooting assignments. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. Fifty-one authored assignments: the original nine, twenty-six scripting tasks, ten Linux file/access activities and six IPv6 static-network activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -91,3 +91,5 @@ Native Fedora development prototype. Windows and macOS use the same native Rust 
 Original code and authored curriculum are licensed under [MIT](LICENSE), approved by the owner on 2026-10-22. Third-party licenses and attribution remain in [NOTICE](NOTICE) and the palette notices. Candidates include target-specific dependency/font/standard-library notices and original source archives. macOS notice provenance and actual cross-platform installation/runtime acceptance remain explicit gates.
 
 Four [counter and totals assignments](docs/SHELL_COUNTS.md) add sequential virtual-file input, stable record numbering, whole-cent costs, guarded division/remainder and a preflight multi-file count capstone. Small valid integer inputs and read-only active-source limitations are explicit; no arbitrary numeric validation or floating-point behavior is claimed.
+
+Four [access-policy assignments](docs/LINUX_ACCESS.md) continue LPIC-1 file foundations: group sharing, directory write/search versus browsing, updating another owner's existing files, and a metadata-preserving handover. The native terminal keeps the complete assignment visible with separate saved examples and optional guidance.

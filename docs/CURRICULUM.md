@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-six scripting assignments in six units and six Linux file-management foundations, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-six scripting assignments in six units and ten Linux file/access assignments, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -73,3 +73,5 @@ Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](
 Four [text-record assignments](SHELL_TEXT.md) add narrow LPIC-1 103.2 filter practice, with separate cut/sort/uniq evidence. Full tool and option coverage remain open.
 
 Four [counters/totals assignments](SHELL_COUNTS.md) teach bounded portable integer calculations and sequential read-only virtual-file loops before a safe counting/publication project. This does not complete structured Bash, numeric-text validation, advanced safe automation or any full issuer objective.
+
+Four [access-policy assignments](LINUX_ACCESS.md) follow the six file foundations and precede the original access seeds. Narrow104.5 ordinary-file/directory/group practice is expanded; special files, special bits, privileged ownership/ACL/SELinux remain absent.

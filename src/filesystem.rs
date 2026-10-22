@@ -47,6 +47,11 @@ pub enum Requirement {
     Mask {
         mask: u16,
     },
+    Ownership {
+        path: String,
+        owner: String,
+        group: String,
+    },
     Access {
         path: String,
         user: String,
@@ -138,13 +143,20 @@ impl Requirement {
             | Self::Absent { path }
             | Self::Directory { path }
             | Self::Mode { path, .. }
-            | Self::Access { path, .. } => path,
+            | Self::Access { path, .. }
+            | Self::Ownership { path, .. } => path,
             Self::Mask { .. } => unreachable!(),
         };
         canonical(path)
             && match self {
                 Self::Contents { text, .. } => text.len() <= 131_072 && !text.contains('\0'),
                 Self::Mode { mode, .. } => *mode <= 0o777,
+                Self::Ownership { owner, group, .. } => [owner, group].iter().all(|s| {
+                    !s.is_empty()
+                        && s.len() <= 32
+                        && s.bytes()
+                            .all(|b| b.is_ascii_alphanumeric() || b == b'_' || b == b'-')
+                }),
                 Self::Access { user, .. } => {
                     !user.is_empty()
                         && user.len() <= 32
@@ -160,11 +172,22 @@ impl Requirement {
         self.valid()
             && match self {
                 Self::Access { user, .. } => tree.users.contains_key(user),
+                Self::Ownership { owner, group, .. } => {
+                    tree.users.contains_key(owner) && tree.users.values().any(|g| g.contains(group))
+                }
                 _ => true,
             }
     }
     pub fn check(&self, tree: &Tree) -> (bool, String) {
         match self {
+            Self::Ownership { path, owner, group } => (
+                self.valid_for(tree)
+                    && tree
+                        .nodes
+                        .get(path)
+                        .is_some_and(|n| n.owner == *owner && n.group == *group),
+                format!("{path} belongs to {owner}, group {group}"),
+            ),
             Self::Access {
                 path,
                 user,
