@@ -551,3 +551,248 @@ impl Topology {
         Ok(result)
     }
 }
+
+/// Authored outcomes bind named equipment, never a current IP's inferred owner.
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct InterfaceCondition {
+    pub device: String,
+    pub interface: String,
+    pub up: bool,
+}
+#[derive(Clone, Debug, Serialize, Deserialize)]
+#[serde(tag = "kind", deny_unknown_fields)]
+pub enum Requirement {
+    AddressIn {
+        device: String,
+        interface: String,
+        network: Prefix,
+        exclude: Vec<Ipv4Addr>,
+    },
+    KeepAddress {
+        device: String,
+        interface: String,
+        assignment: Option<Assignment>,
+    },
+    Forwarding {
+        device: String,
+        enabled: bool,
+    },
+    StaticRouteFor {
+        device: String,
+        network: Prefix,
+        target_device: String,
+        target_interface: String,
+    },
+    Reachable {
+        label: String,
+        from: String,
+        target_device: String,
+        target_interface: String,
+        first_hop: Option<String>,
+        when: Vec<InterfaceCondition>,
+    },
+}
+pub fn valid_requirements(requirements: &[Requirement], t: &Topology) -> bool {
+    t.valid()
+        && !requirements.is_empty()
+        && requirements.len() <= 20
+        && requirements.iter().all(|r| r.valid_for(t))
+        && requirements
+            .iter()
+            .any(|r| matches!(r,Requirement::Reachable{when,..} if when.is_empty()))
+}
+impl Requirement {
+    pub fn valid_for(&self, t: &Topology) -> bool {
+        let port = |d: &str, p: &str| t.devices.get(d).and_then(|d| d.interfaces.get(p));
+        match self {
+            Self::AddressIn {
+                device,
+                interface,
+                network,
+                exclude,
+            } => {
+                port(device, interface).is_some()
+                    && network.valid()
+                    && (1..=30).contains(&network.length)
+                    && exclude.len() <= 16
+            }
+            Self::KeepAddress {
+                device,
+                interface,
+                assignment,
+            } => {
+                port(device, interface).is_some()
+                    && assignment.as_ref().is_none_or(Assignment::valid)
+            }
+            Self::Forwarding { device, .. } => t.devices.contains_key(device),
+            Self::StaticRouteFor {
+                device,
+                network,
+                target_device,
+                target_interface,
+            } => {
+                t.devices.contains_key(device)
+                    && device != target_device
+                    && network.valid()
+                    && port(target_device, target_interface).is_some()
+            }
+            Self::Reachable {
+                label,
+                from,
+                target_device,
+                target_interface,
+                first_hop,
+                when,
+            } => {
+                !label.trim().is_empty()
+                    && label.len() <= 160
+                    && t.devices.contains_key(from)
+                    && from != target_device
+                    && port(target_device, target_interface).is_some()
+                    && first_hop.as_ref().is_none_or(|p| port(from, p).is_some())
+                    && when.len() <= 4
+                    && when.iter().all(|c| port(&c.device, &c.interface).is_some())
+                    && when
+                        .iter()
+                        .map(|c| (&c.device, &c.interface))
+                        .collect::<BTreeSet<_>>()
+                        .len()
+                        == when.len()
+            }
+        }
+    }
+    pub fn check(&self, t: &Topology) -> (bool, String) {
+        if !t.valid() || !self.valid_for(t) {
+            return (
+                false,
+                "Required IPv4 device, interface or outcome is missing/invalid".into(),
+            );
+        }
+        match self {
+            Self::AddressIn {
+                device,
+                interface,
+                network,
+                exclude,
+            } => {
+                let a = t.devices[device].interfaces[interface].address.as_ref();
+                let issue=match a {
+                    None=>Some("No address is assigned; enter the workstation address and prefix".to_owned()),
+                    Some(a) if a.prefix!=network.length=>Some(format!("The assigned prefix is /{}; this task's subnet uses /{}",a.prefix,network.length)),
+                    Some(a) if !network.contains(a.address)=>Some(format!("The address is outside {}; keep the task's subnet",network.text())),
+                    Some(a) if !a.usable()=>Some("The network and broadcast addresses identify the subnet or all hosts; choose an ordinary host address".into()),
+                    Some(a) if exclude.contains(&a.address)=>Some("This address is already assigned or excluded by the task; choose a different host address".into()),
+                    _=>None,
+                };
+                (
+                    issue.is_none(),
+                    format!(
+                        "{device}/{interface}: {}",
+                        issue.unwrap_or_else(|| "Address and prefix meet the task".into())
+                    ),
+                )
+            }
+            Self::KeepAddress {
+                device,
+                interface,
+                assignment,
+            } => (
+                t.devices[device].interfaces[interface].address == *assignment,
+                format!("Keep the supplied address/prefix on {device}/{interface}"),
+            ),
+            Self::Forwarding { device, enabled } => (
+                t.devices[device].forwarding == *enabled,
+                format!(
+                    "{device}: forwarding must be {}",
+                    if *enabled { "enabled" } else { "disabled" }
+                ),
+            ),
+            Self::StaticRouteFor {
+                device,
+                network,
+                target_device,
+                target_interface,
+            } => {
+                let label = format!(
+                    "{device}: static {} for {target_device}/{target_interface}",
+                    network.text()
+                );
+                let result = (|| -> Result<(), String> {
+                    let address = t.devices[target_device].interfaces[target_interface]
+                        .address
+                        .as_ref()
+                        .ok_or("Intended destination has no address")?
+                        .address;
+                    if !network.contains(address) {
+                        return Err(
+                            "The intended destination is outside the required route prefix".into(),
+                        );
+                    }
+                    let selected = t.select(device, address)?;
+                    if selected.destination != *network || selected.via.is_none() {
+                        return Err(format!(
+                            "The selected entry is {} ({}); this task asks for a static {} entry serving this endpoint",
+                            selected.destination.text(),
+                            if selected.via.is_some() {
+                                "static"
+                            } else {
+                                "connected"
+                            },
+                            network.text()
+                        ));
+                    }
+                    t.verify_endpoint(device, target_device, target_interface)?;
+                    Ok(())
+                })();
+                match result {
+                    Ok(()) => (true, format!("{label}: selected and endpoint verified")),
+                    Err(e) => (false, format!("{label}: {e}")),
+                }
+            }
+            Self::Reachable {
+                label,
+                from,
+                target_device,
+                target_interface,
+                first_hop,
+                when,
+            } => {
+                let mut candidate = t.clone();
+                for c in when {
+                    candidate
+                        .devices
+                        .get_mut(&c.device)
+                        .unwrap()
+                        .interfaces
+                        .get_mut(&c.interface)
+                        .unwrap()
+                        .up = c.up;
+                }
+                match candidate.verify_endpoint(from, target_device, target_interface) {
+                    Ok(p)
+                        if first_hop.as_ref().is_some_and(|required| {
+                            p.forward
+                                .hops
+                                .first()
+                                .is_none_or(|hop| &hop.interface != required)
+                        }) =>
+                    {
+                        (
+                            false,
+                            format!(
+                                "{label}: the first outgoing interface differs from the task's required {}; inspect equally specific route distances",
+                                first_hop.as_deref().unwrap()
+                            ),
+                        )
+                    }
+                    Ok(_) => (
+                        true,
+                        format!("{label}: intended endpoint and reply verified"),
+                    ),
+                    Err(e) => (false, format!("{label}: {e}")),
+                }
+            }
+        }
+    }
+}

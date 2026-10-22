@@ -37,6 +37,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ipv4_routing_teaching: Option<crate::ipv4_routing_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -159,6 +161,23 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 ));
             }
         }
+        if let Some(lesson) = &s.ipv4_routing_teaching {
+            if !matches!(s.initial, State::Ipv4Routing { .. }) {
+                return Err("IPv4 routing teaching attached to an incompatible state".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let Goal::Ipv4Routing { requirements } = &s.goal {
+            let State::Ipv4Routing { topology } = &s.initial else {
+                return Err("IPv4 routing objectives require an IPv4 routing topology".into());
+            };
+            if !crate::ipv4_routing::valid_requirements(requirements, topology) {
+                return Err(format!(
+                    "{}: invalid IPv4 routing objectives or missing normal-state positive connectivity",
+                    s.id
+                ));
+            }
+        }
         if let Some(lesson) = &s.ipv6_teaching {
             if !matches!(s.initial, State::Ipv6 { .. }) {
                 return Err("IPv6 teaching attached to an incompatible state".into());
@@ -263,6 +282,7 @@ pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
         State::Switching { fabric } => fabric.validate().is_ok(),
         State::Ipv6 { topology } => topology.valid(),
+        State::Ipv4Routing { topology } => topology.valid(),
         State::Filesystem { tree } => tree.valid(),
         State::Script { source, run } => {
             source.len() <= crate::shell::MAX_SOURCE && run.as_ref().is_none_or(|r| r.valid())

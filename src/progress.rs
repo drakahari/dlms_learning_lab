@@ -92,6 +92,14 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
     {
         return false;
     }
+    if let State::Ipv4Routing { topology } = &a.state
+        && a.workspace
+            .as_ref()
+            .and_then(|w| w.routing_v4_draft.as_ref())
+            .is_some_and(|d| !d.matches(topology))
+    {
+        return false;
+    }
     !matches!(&a.state, State::Subnet { second: None, .. })
         && a.workspace
             .as_ref()
@@ -198,6 +206,27 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Saved IPv6 device/interface/link structure differs from this scenario; original retained".into());
         }
+        if let State::Ipv4Routing { topology } = &a.state {
+            let State::Ipv4Routing { topology: initial } = &s.initial else {
+                unreachable!()
+            };
+            if !topology.same_shape(initial) {
+                return Err("Saved IPv4 device/interface/link structure differs from this activity; original retained".into());
+            }
+        }
+        validate_routing_workspace(a)?;
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.routing_v4_learning.as_ref())
+            && s.ipv4_routing_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.topology.same_shape(&lesson.fixture))
+        {
+            return Err(
+                "Saved IPv4 practice structure differs from this lesson; original retained".into(),
+            );
+        }
         crate::pack::validate_state(&a.state)?;
         if !crate::workspace::can_preserve_script_history(a) {
             return Err("Saved script history is full; original retained. Keep a copy of the progress file; this profile needs a history migration.".into());
@@ -224,6 +253,24 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else {
+        return Ok(());
+    };
+    if w.routing_v4_draft.is_none() && w.routing_v4_learning.is_none() {
+        return Ok(());
+    }
+    let State::Ipv4Routing { topology } = &a.state else {
+        return Err("IPv4 routing metadata on a different activity; original retained".into());
+    };
+    if w.routing_v4_draft
+        .as_ref()
+        .is_some_and(|d| !d.same_shape(topology))
+    {
+        return Err("Invalid IPv4 routing draft structure; original retained".into());
+    }
+    Ok(())
+}
 #[derive(Debug)]
 pub struct Saved {
     pub durability_warning: Option<String>,
@@ -231,6 +278,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_routing_workspace(a)?;
         if let State::Switching { fabric } = &a.state
             && a.workspace
                 .as_ref()

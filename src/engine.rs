@@ -32,6 +32,9 @@ pub enum State {
     Ipv6 {
         topology: crate::ipv6::Topology,
     },
+    Ipv4Routing {
+        topology: crate::ipv4_routing::Topology,
+    },
     Filesystem {
         tree: crate::filesystem::Tree,
     },
@@ -102,6 +105,9 @@ pub enum Goal {
     },
     Ipv6 {
         requirements: Vec<crate::ipv6::Requirement>,
+    },
+    Ipv4Routing {
+        requirements: Vec<crate::ipv4_routing::Requirement>,
     },
     Filesystem {
         requirements: Vec<crate::filesystem::Requirement>,
@@ -207,6 +213,9 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
             requirements.iter().map(|r| r.check(fabric)).collect()
         }
         (State::Ipv6 { topology }, Goal::Ipv6 { requirements }) => {
+            requirements.iter().map(|r| r.check(topology)).collect()
+        }
+        (State::Ipv4Routing { topology }, Goal::Ipv4Routing { requirements }) => {
             requirements.iter().map(|r| r.check(topology)).collect()
         }
         (State::Filesystem { tree }, Goal::Filesystem { requirements }) => {
@@ -441,6 +450,9 @@ pub fn help(s: &State) -> &'static str {
         State::Ipv6 { .. } => {
             "Use the native IPv6 configuration editors and path probes. Only the documented bounded static forwarding subset is simulated. Pack reference adapters are not router or Linux commands."
         }
+        State::Ipv4Routing { .. } => {
+            "Use native IPv4 configuration editors and applied path inspection. Only bounded static forwarding is modeled. Pack reference actions are not router/Linux commands."
+        }
         State::Filesystem { .. } => crate::filesystem::HELP,
         State::Script { .. } => {
             "Use the script editor and Run script. Only the documented in-process shell subset is supported."
@@ -480,6 +492,9 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return crate::ipv6_workspace::adapter(topology, input);
     }
 
+    if let State::Ipv4Routing { topology } = s {
+        return crate::ipv4_routing_workspace::adapter(topology, input);
+    }
     if let State::Filesystem { tree } = s {
         if input.len() > 4096 {
             return Err("Command exceeds 4,096 bytes".into());
@@ -523,6 +538,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     match s {
         State::Switching { .. }
         | State::Ipv6 { .. }
+        | State::Ipv4Routing { .. }
         | State::Filesystem { .. }
         | State::Script { .. } => unreachable!(),
         State::Subnet {
@@ -959,6 +975,10 @@ pub fn describe(s: &State) -> String {
         ),
         State::Ipv6 { topology } => format!(
             "IPv6 static topology · {} simulated devices",
+            topology.devices.len()
+        ),
+        State::Ipv4Routing { topology } => format!(
+            "IPv4 static topology · {} simulated devices",
             topology.devices.len()
         ),
         State::Filesystem { tree } => format!("Virtual filesystem · {} · {}", tree.user, tree.cwd),

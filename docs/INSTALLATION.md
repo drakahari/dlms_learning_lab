@@ -192,3 +192,8 @@ Sourceae484460b456bb43cbb180f6b326775fd6770a68,58/fourteen, evaluator5. [Run3984
 | Windows | dlms-learning-lab-0.1.0-gae484460b456-x86_64-pc-windows-msvc-windows-candidate.zip | 153efc0cc3839ad20a7529450c5eae36df8f339c97efc0f9e09e58eaef498a48 |
 
 Fedora binary SHA-2562523d408a182e9d5747a4740ac1b710acb01b8eb787e8b7408d5e10c42e2561a. Clean archive installed/upgraded in the isolated /tmp acceptance root; bundled validation58/fourteen, desktop entry validation and exact synthetic sentinel retention pass (retained-file check). Installed native all-three file-batch flow passed outside checkout, including examples/experiments, keyboard repairs/current grading, save/reload/edit invalidation, selected reset and light/dark150%/unit library. This is a development milestone, not completed-curriculum or novice/platform acceptance. Default-Wayland investigation, actual Windows/macOS desktop acceptance and macOS archive notices remain open. No release published.
+
+
+### M29 prepared Fedora capability candidate
+
+Sourcea1245b4431786ddccb88dba7480c7d69303465d6,58/fourteen, evaluator5. [Run39852335952](https://github.com/drakahari/dlms_learning_lab/actions/runs/39852335952) passed270 Rust tests and applicable checks on all3 native CI runners. Fedora clean candidate `dlms-learning-lab-0.1.0-ga1245b443178-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` has SHA-256 `6d32fe01d60bb1f67c5a59eb9365b44f3f7ab7acf38e0f16d9474fd66f704770`; binary `e07ef599ca0d244649534a9d176883e7b50caf0d0ef67922691ea036e86957f8`. This is build/hash evidence, not additional installed-runtime acceptance. No release published; macOS archive notice gate, actual Windows/macOS desktop acceptance and default-Wayland startup investigation remain open.

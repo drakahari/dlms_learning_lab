@@ -51,3 +51,6 @@ Evaluator4 tightens shared text-expansion bounds and cumulative replacement work
 
 
 Evaluator5 adds bounded * and ? filename matching and corrects unquoted variable-supplied bracket expressions that earlier ran literally. A clean revision4 probe confirmed that earlier result before migration tests were authored. Unsupported bracket patterns now ask for the supported subset or literal quoting; prior results/credit remain history, with the first upgraded write protected by the non-overwriting v5 backup. New syntax never earns prior learners unrecorded answers. See SHELL_GLOBBING.md.
+
+
+The IPv4 routing integration adds only optional version1 workspace fields, omitted from earlier attempts. Assignment and ungraded practice each retain their own topology and incomplete raw configuration text. A pending different draft clears current completion even if the previously applied topology still passes; Check configuration applies all valid edits atomically. Invalid imported device/interface/cable structure or routing metadata attached to another activity is rejected before restoration. Existing original subnet, IPv6, terminal and script attempts keep their IDs/versions and data.

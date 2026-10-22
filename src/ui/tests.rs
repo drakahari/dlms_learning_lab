@@ -268,7 +268,10 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
-            State::Switching { .. } | State::Ipv6 { .. } | State::Filesystem { .. } => {
+            State::Switching { .. }
+            | State::Ipv6 { .. }
+            | State::Ipv4Routing { .. }
+            | State::Filesystem { .. } => {
                 unreachable!("This regression targets the original nine workspaces")
             }
         }
@@ -2281,4 +2284,235 @@ fn file_batch_editors_support_keyboard_run_and_release_focus_for_navigation() {
         assert!(!ctx.memory(|m| m.has_focus(editor)));
         assert!(ctx.memory(|m| m.focused()).is_some());
     }
+}
+
+#[test]
+fn routing_v4_native_typing_check_retry_focus_and_selected_reset() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    let earlier = a.progress.attempts["shell-handover"].clone();
+    let i = a.add_routing_fixture();
+    a.launch(i);
+    assert_eq!(a.routing_v4_view(i), teaching::View::Introduction);
+    draw(&ctx, &mut a);
+    let r = a.metrics.assignment_action.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let id = a.scenarios[i].id.clone();
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .routing_v4_draft
+            .as_ref()
+            .unwrap()
+            .selected_device,
+        "Client"
+    );
+    let field = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
+            },
+            egui::Event::Text("192.0.2.99/24".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    assert!(
+        a.metrics.completion,
+        "Manual entry should work without advanced settings"
+    );
+    let r = a.metrics.inputs[0];
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
+            },
+            egui::Event::Text("malformed".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+    check(&ctx, &mut a);
+    assert!(a.notice.as_ref().unwrap().contains("Malformed"));
+    a.launch(31);
+    a.launch(i);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .routing_v4_draft
+            .as_ref()
+            .unwrap()
+            .devices["Client"]
+            .interfaces["lan"]
+            .address,
+        "malformed"
+    );
+    let field = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    draw(&ctx, &mut a);
+    assert!(!ctx.memory(|m| m.has_focus(field)));
+    a.reset_attempt(i);
+    assert_eq!(a.progress.attempts[&id].state, a.scenarios[i].initial);
+    assert_eq!(a.progress.attempts["shell-handover"].state, earlier.state);
+}
+
+#[test]
+fn routing_v4_native_views_keep_controls_in_width_with_large_text_and_challenge_is_independent() {
+    for _ in 0..1 {
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            for routes in [false, true] {
+                for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
+                    let (ctx, mut a) = app();
+                    let i = a.add_routing_fixture();
+                    a.launch(i);
+                    a.scale = scale;
+                    a.set_routing_v4_view(i, view);
+                    let workspace = a
+                        .progress
+                        .attempts
+                        .get_mut(&a.scenarios[i].id)
+                        .unwrap()
+                        .workspace
+                        .as_mut()
+                        .unwrap();
+                    workspace.routing_v4_draft.as_mut().unwrap().show_routes = routes;
+                    workspace
+                        .routing_v4_learning
+                        .as_mut()
+                        .unwrap()
+                        .draft
+                        .show_routes = routes;
+                    for _ in 0..4 {
+                        frame(&ctx, &mut a, w, h, vec![]);
+                    }
+                    for r in a
+                        .metrics
+                        .inputs
+                        .iter()
+                        .chain(a.metrics.check.iter())
+                        .chain(a.metrics.lesson_tabs.iter())
+                    {
+                        assert!(
+                            r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                            "lab{i} {view:?} {w}/{scale} {r:?}"
+                        );
+                    }
+                    assert!(!a.metrics.help_visible);
+                    assert!(!a.metrics.guide);
+                    if w == 1200. && view == teaching::View::Assignment && !routes {
+                        assert!(
+                            a.metrics.check.unwrap().bottom() < 850.,
+                            "check below desktop lab{i}"
+                        );
+                    }
+                    a.progress
+                        .attempts
+                        .get_mut(&a.scenarios[i].id)
+                        .unwrap()
+                        .challenge = true;
+                    draw(&ctx, &mut a);
+                    assert_eq!(a.routing_v4_view(i), teaching::View::Assignment);
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn routing_v4_single_interface_router_is_editable_and_guideless_help_is_safe() {
+    let (ctx, mut a) = app();
+    let i = a.add_routing_fixture();
+    if let engine::Goal::Ipv4Routing { requirements } = &mut a.scenarios[i].goal {
+        requirements.push(dlms_learning_lab::ipv4_routing::Requirement::Forwarding {
+            device: "Client".into(),
+            enabled: true,
+        });
+    }
+    a.launch(i);
+    a.set_routing_v4_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let r = a.metrics.routing_router_options.unwrap();
+    click(&ctx, &mut a, r);
+    let r = a.metrics.routing_forward.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(
+        a.progress.attempts[&a.scenarios[i].id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .routing_v4_draft
+            .as_ref()
+            .unwrap()
+            .devices["Client"]
+            .forwarding
+    );
+    let r = a.metrics.help.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(a.help_open);
+    assert!(!a.metrics.guide); // Empty optional walkthrough is valid authoring data.
+    let r = a.metrics.inputs[0];
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers {
+                    command: true,
+                    ..egui::Modifiers::CTRL
+                },
+            },
+            egui::Event::Text("192.0.2.99/24".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    assert!(a.metrics.completion);
 }

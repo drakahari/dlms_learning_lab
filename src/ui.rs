@@ -12,6 +12,7 @@ mod script_learning;
 mod scripting;
 mod terminal_learning;
 use std::{path::PathBuf, time::Instant};
+mod ipv4_routing_workspace;
 mod ipv4_workspace;
 mod ipv6_workspace;
 mod smoke;
@@ -48,6 +49,8 @@ struct Metrics {
     editor_save: Option<egui::Rect>,
     editor_viewport: Option<egui::Rect>,
     probe: Option<egui::Rect>,
+    routing_forward: Option<egui::Rect>,
+    routing_router_options: Option<egui::Rect>,
     script_history: Option<egui::Rect>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
@@ -208,6 +211,8 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("file-batches")
             {
                 2500
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("routing-v4") {
+                2600
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("expansion") {
                 2400
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("vlan-resume") {
@@ -293,6 +298,22 @@ impl LabApp {
         if let Some(lesson) = &s.ipv6_teaching {
             dlms_learning_lab::ipv6_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.ipv4_routing_teaching {
+            dlms_learning_lab::ipv4_routing_teaching::prepare(a, lesson, new_attempt);
+        }
+        if new_attempt
+            && let engine::Goal::Ipv4Routing { requirements } = &s.goal
+            && let Some(device) =
+                dlms_learning_lab::ipv4_routing_teaching::preferred_device(requirements)
+        {
+            a.workspace
+                .as_mut()
+                .unwrap()
+                .routing_v4_draft
+                .as_mut()
+                .unwrap()
+                .selected_device = device;
+        }
         if new_attempt
             && let engine::Goal::Ipv6 { requirements } = &s.goal
             && let Some(device) = dlms_learning_lab::ipv6_teaching::preferred_device(requirements)
@@ -361,6 +382,21 @@ impl LabApp {
         }
         if let Some(lesson) = &s.ipv6_teaching {
             dlms_learning_lab::ipv6_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.ipv4_routing_teaching {
+            dlms_learning_lab::ipv4_routing_teaching::prepare(a, lesson, true);
+        }
+        if let engine::Goal::Ipv4Routing { requirements } = &s.goal
+            && let Some(device) =
+                dlms_learning_lab::ipv4_routing_teaching::preferred_device(requirements)
+        {
+            a.workspace
+                .as_mut()
+                .unwrap()
+                .routing_v4_draft
+                .as_mut()
+                .unwrap()
+                .selected_device = device;
         }
         if let engine::Goal::Ipv6 { requirements } = &s.goal
             && let Some(device) = dlms_learning_lab::ipv6_teaching::preferred_device(requirements)

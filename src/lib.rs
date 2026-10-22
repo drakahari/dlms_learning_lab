@@ -39,3 +39,6 @@ pub mod switching_teaching;
 pub mod switching_workspace;
 
 pub mod ipv4_routing;
+
+pub mod ipv4_routing_teaching;
+pub mod ipv4_routing_workspace;

@@ -22,6 +22,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_learning: Option<crate::ipv6_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub routing_v4_draft: Option<crate::ipv4_routing_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub routing_v4_learning: Option<crate::ipv4_routing_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_draft: Option<crate::switching_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_learning: Option<crate::switching_teaching::Learning>,
@@ -62,6 +66,8 @@ impl WorkspaceData {
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.ipv6_draft.as_ref().is_none_or(|d| d.valid())
             && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
+            && self.routing_v4_draft.as_ref().is_none_or(|d| d.valid())
+            && self.routing_v4_learning.as_ref().is_none_or(|l| l.valid())
             && self.command.len() <= 4096
             && [
                 &self.service_port,
@@ -131,6 +137,11 @@ pub fn prepare(a: &mut Attempt) {
         && w.ipv6_draft.is_none()
     {
         w.ipv6_draft = Some(crate::ipv6_workspace::Draft::new(topology));
+    }
+    if let State::Ipv4Routing { topology } = &a.state
+        && w.routing_v4_draft.is_none()
+    {
+        w.routing_v4_draft = Some(crate::ipv4_routing_workspace::Draft::new(topology));
     }
     if let Some(mut e) = ipv4::Exercise::from_state(&a.state) {
         w.migrated_host |= ipv4::upgrade_exercise(&mut e);

@@ -56,19 +56,27 @@ impl LabApp {
                 ui.label(RichText::new(&s.title).strong().size(23.));
                 if !matches!(
                     s.initial,
-                    State::Script { .. } | State::Ipv6 { .. } | State::Switching { .. }
+                    State::Script { .. }
+                        | State::Ipv6 { .. }
+                        | State::Ipv4Routing { .. }
+                        | State::Switching { .. }
                 ) && s.terminal_teaching.is_none()
                 {
                     ui.label(&s.objective);
                 }
                 if !challenge
                     && s.terminal_teaching.is_none()
-                    && !matches!(s.initial, State::Ipv6 { .. } | State::Switching { .. })
+                    && !matches!(
+                        s.initial,
+                        State::Ipv6 { .. } | State::Ipv4Routing { .. } | State::Switching { .. }
+                    )
                 {
                     ui.label(RichText::new(starting_point(&s.id)).color(palette(ui).muted));
                 }
                 if matches!(s.initial, State::Switching { .. }) {
                     self.switching_learning_workspace(ui, i);
+                } else if matches!(s.initial, State::Ipv4Routing { .. }) {
+                    self.routing_v4_learning_workspace(ui, i);
                 } else if matches!(s.initial, State::Ipv6 { .. }) {
                     self.ipv6_learning_workspace(ui, i);
                 } else if matches!(s.initial, State::Script { .. }) {
@@ -101,6 +109,8 @@ impl LabApp {
             }
             let show_help = if matches!(s.initial, State::Switching { .. }) {
                 self.switching_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::Ipv4Routing { .. }) {
+                self.routing_v4_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Ipv6 { .. }) {
                 self.ipv6_view(i) == teaching::View::Assignment
             } else if s.terminal_teaching.is_some() {
@@ -625,7 +635,7 @@ impl LabApp {
                 }
             });
         }
-        if !a.challenge {
+        if !a.challenge && !s.guide.is_empty() {
             let response = egui::CollapsingHeader::new("Optional walkthrough")
                 .id_salt(("walkthrough", i))
                 .show(ui, |ui| {
@@ -645,7 +655,7 @@ impl LabApp {
                             );
                         }
                         ui.label(&c.explanation);
-                        if matches!(a.state, State::Ipv6 { .. }) {
+                        if matches!(a.state, State::Ipv6 { .. } | State::Ipv4Routing { .. }) {
                             continue;
                         }
                         let r = ui.add(button("Insert command"));

@@ -1,0 +1,318 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-ipv4-routing",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 static routing",
+      "title": "IPv4 routing \u00b7 development fixture",
+      "summary": "Development-only native integration check. Not part of the curriculum.",
+      "objective": "Restore Client access to Server. Client belongs in 192.0.2.0/24; choose a free host address there. Keep the supplied R1 and Server addresses, allow R1 to forward traffic, and verify the complete path and reply.",
+      "difficulty": "Beginner",
+      "minutes": 10,
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.10",
+                    "prefix": 1
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "192.0.2.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.1",
+                    "prefix": 24
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "198.51.100.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "AddressIn",
+            "device": "Client",
+            "interface": "lan",
+            "network": {
+              "address": "192.0.2.0",
+              "length": 24
+            },
+            "exclude": [
+              "192.0.2.1"
+            ]
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "192.0.2.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "branch",
+            "assignment": {
+              "address": "198.51.100.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "198.51.100.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "steps": [
+        "Inspect the addresses and routing decisions.",
+        "Repair the client prefix, then verify both directions."
+      ],
+      "hints": [
+        "Compare Client\u2019s prefix with R1\u2019s office prefix.",
+        "The client\u2019s directly attached subnet must be /24. Its default route can then reach the other network."
+      ],
+      "solution": [
+        "address Client lan 192.0.2.10/24"
+      ],
+      "sources": [
+        "https://datatracker.ietf.org/doc/html/rfc1812"
+      ],
+      "simplifications": "Development fixture only. Native fields configure a bounded static-forwarding simulator, not IOS or Linux commands. No ARP packets, real ICMP, dynamic protocols, ECMP or recursive routes. Private/documentation endpoints, /1\u2013/30 interfaces, /0\u2013/32 route prefixes.",
+      "guide": [],
+      "explanation": "The client prefix describes its directly attached network. With /1, Client treats the remote destination as directly attached instead of using its default route. With /24, it sends remote traffic to R1, which forwards to Server. Server needs its own return route.",
+      "unit": "",
+      "prerequisites": [],
+      "ipv4_routing_teaching": {
+        "start_with_routes": false,
+        "prerequisite_note": "Development fixture \u00b7 Uses native address and route fields. No terminal or device setup is needed.",
+        "concepts": [
+          {
+            "title": "Local network or a router?",
+            "text": "An address identifies an interface; its /prefix identifies which destinations it treats as nearby. A destination outside that subnet needs a route through a neighboring router."
+          },
+          {
+            "title": "The return journey matters",
+            "text": "A router must allow forwarding between networks. The destination also needs a path back to the sender. Check configuration applies your edits and tests the trip and reply; pending edits remain separate."
+          }
+        ],
+        "example_description": "In a separate practice topology, Client is 10.10.4.10/16 but belongs in 10.10.4.0/24. Repair its prefix so the remote Server at 10.10.8.20 is reached through R1.",
+        "fixture": {
+          "devices": {
+            "Client": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "10.10.4.10",
+                    "prefix": 16
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.10.4.1",
+                  "distance": 1
+                }
+              ]
+            },
+            "R1": {
+              "forwarding": true,
+              "interfaces": {
+                "office": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "10.10.4.1",
+                    "prefix": 24
+                  }
+                },
+                "branch": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.10.8.1",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Server": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "branch",
+                  "up": true,
+                  "address": {
+                    "address": "10.10.8.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": [
+                {
+                  "destination": {
+                    "address": "0.0.0.0",
+                    "length": 0
+                  },
+                  "interface": "lan",
+                  "via": "10.10.8.1",
+                  "distance": 1
+                }
+              ]
+            }
+          }
+        },
+        "example_solution": [
+          "address Client lan 10.10.4.10/24"
+        ],
+        "outcomes": [
+          {
+            "kind": "AddressIn",
+            "device": "Client",
+            "interface": "lan",
+            "network": {
+              "address": "10.10.4.0",
+              "length": 24
+            },
+            "exclude": [
+              "10.10.4.1"
+            ]
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "office",
+            "assignment": {
+              "address": "10.10.4.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "R1",
+            "interface": "branch",
+            "assignment": {
+              "address": "10.10.8.1",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "KeepAddress",
+            "device": "Server",
+            "interface": "lan",
+            "assignment": {
+              "address": "10.10.8.20",
+              "prefix": 24
+            }
+          },
+          {
+            "kind": "Forwarding",
+            "device": "R1",
+            "enabled": true
+          },
+          {
+            "kind": "Reachable",
+            "label": "Client reaches Server and receives a reply",
+            "from": "Client",
+            "target_device": "Server",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "After the example works, change only Client\u2019s prefix back to /16 and test again. Then restore /24 or choose another free client host in the /24."
+      }
+    }
+  ]
+}

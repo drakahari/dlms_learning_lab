@@ -6,7 +6,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | --- | --- |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
-| `ipv4_routing.rs` | Pure bounded IPv4 static forwarding and endpoint-owner verification; native/progress/content integration pending |
+| `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; authored unit pending |
 | `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
 | `ipv4.rs` | Boundary math, host validation, numerical variants and retained legacy lesson/sandbox metadata |
@@ -108,3 +108,12 @@ Draft application is atomic, and current success rejects unapplied divergent set
 Evaluator4 bounds retained text/field count inside the shared expansion layer before append/allocation, including direct non-command consumers and quoted "$@". A per-VM Cell counter charges source/parameter/result/field work before scanning or copying, shared through nested arithmetic callbacks, functions, pipelines and later ticks. It is a finite resource counter, not a clock or host service; each case/new VM starts fresh. Exact evaluator3 history remains separately visible and non-overwriting v4 backup applies through the existing storage path. Large supplied-value inline UI previews truncate safely before escaping/formatting; existing full input details have bounded scrolling, so a legal large fixture cannot push the editor/Run/Stop behind a whitespace wall.
 
 Filename matching lives in shell/globbing.rs: iterative C-byte matching over the existing flat virtual map, fed per-byte quote provenance after splitting. It has no host glob/filesystem API. Matching shares the interpreter work limit; unsupported bracket/directory/recursive/non-C features fail explicitly. Evaluator5 retains earlier actual credit with the existing history/backup mechanism.
+
+
+### IPv4 routing integration boundary
+
+`State::Ipv4Routing` is separate from the approved original subnet worksheet and from IPv6. Typed outcomes bind a named endpoint/interface; current mutable IP ownership never selects the intended grader target. Fixed-address, subnet and forwarding constraints are explicit. `StaticRouteFor` asks for an actually selected static prefix serving the named endpoint, rather than accepting a dummy unused route alongside a host-route workaround. Controlled operational failures clone topology; positive normal-state reachability is mandatory. No negative-policy credit is inferred from failed probes.
+
+The normal native renderer uses device/address/route editors with one Check configuration action. It parses a clone, commits all valid settings together and reports current outcomes. Unfinished text remains saved and cannot borrow success from earlier applied state. Detailed results, forwarding paths, walkthrough and references are optional. One-interface router forwarding remains available through optional controls; native tools must be able to express every supported authored reference action.
+
+`routing_v4_draft` and `routing_v4_learning` are optional omitted/defaulted fields in the existing version1 workspace. The latter owns a separate topology, raw draft, selected view and check result. Import pins each topology's device/interface/cable shape to its assignment or practice fixture and rejects foreign routing metadata. The clearly named `tests/fixtures/ipv4-routing-preview.json` is only a development fixture, never bundled authored curriculum or objective evidence. See IPV4_ROUTING_SUBSET.md for exact scope, tests and future content requirements.

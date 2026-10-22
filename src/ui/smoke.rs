@@ -1,6 +1,17 @@
 //! Application-only Fedora renderer/input check with isolated /tmp progress.
 use super::*;
 impl LabApp {
+    pub(super) fn add_routing_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/ipv4-routing-preview.json"
+        ))
+        .expect("development fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
+
     pub(super) fn capture_events(&mut self, ctx: &egui::Context) {
         for event in ctx.input(|i| i.events.clone()) {
             if let egui::Event::Screenshot {
@@ -72,6 +83,249 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            2600 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                let i = self.add_routing_fixture();
+                self.launch(9);
+                self.launch(i);
+            }
+            2601 => {
+                let i = self.scenarios.len() - 1;
+                assert_eq!(self.routing_v4_view(i), teaching::View::Introduction);
+                shot = Some("routing-v4-fixture-introduction".into());
+            }
+            2602 => self
+                .pending_events
+                .extend(click(self.metrics.example_action.unwrap())),
+            2603 => {
+                let i = self.scenarios.len() - 1;
+                let lesson = self.scenarios[i].ipv4_routing_teaching.as_ref().unwrap();
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .routing_v4_learning
+                    .as_mut()
+                    .unwrap()
+                    .fill_example(lesson)
+                    .unwrap();
+            }
+            2604 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            2605 => {
+                let i = self.scenarios.len() - 1;
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                assert_eq!(a.state, self.scenarios[i].initial);
+                assert!(!progress::current_solved(a, &self.scenarios[i]));
+                assert!(
+                    a.workspace
+                        .as_ref()
+                        .unwrap()
+                        .routing_v4_learning
+                        .as_ref()
+                        .unwrap()
+                        .checks(self.scenarios[i].ipv4_routing_teaching.as_ref().unwrap())
+                        .iter()
+                        .all(|r| r.0)
+                );
+                shot = Some("routing-v4-fixture-example".into());
+            }
+            2606 => self
+                .pending_events
+                .extend(click(self.metrics.assignment_action.unwrap())),
+            2607 => shot = Some("routing-v4-fixture-assignment".into()),
+            2608 | 2612 | 2616 | 2622 | 2631 | 2634 | 2637 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            2609 => {
+                assert!(!self.metrics.completion);
+                assert!(self.checked);
+                shot = Some("routing-v4-fixture-prefix-retry".into());
+            }
+            2610 | 2614 | 2620 | 2629 => self.pending_events.extend(click(
+                self.metrics.inputs[if self.smoke_stage == 2629 { 1 } else { 0 }],
+            )),
+            2611 | 2615 | 2621 | 2630 => {
+                let text = match self.smoke_stage {
+                    2611 => "192.0.2.255/24",
+                    2615 => "192.0.2.99/24",
+                    2621 => "malformed",
+                    _ => "bad-next-hop",
+                };
+                self.pending_events.push(key(egui::Key::A, true));
+                self.pending_events.push(egui::Event::Text(text.into()));
+            }
+            2613 => {
+                assert!(!self.metrics.completion);
+                shot = Some("routing-v4-fixture-reserved-retry".into());
+            }
+            2617 => {
+                assert!(self.metrics.completion);
+                shot = Some("routing-v4-fixture-complete".into());
+            }
+            2618 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                self.selected = None;
+            }
+            2619 => {
+                let i = self.scenarios.len() - 1;
+                self.launch(i);
+                assert!(progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+            }
+            2623 => {
+                assert!(!self.metrics.completion);
+                assert!(self.notice.as_ref().unwrap().contains("Malformed"));
+                shot = Some("routing-v4-fixture-malformed-retry".into());
+            }
+            2624 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                let i = self.scenarios.len() - 1;
+                self.launch(i);
+            }
+            2625 => {
+                let i = self.scenarios.len() - 1;
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                assert!(!progress::current_solved(a, &self.scenarios[i]));
+                assert_eq!(
+                    a.workspace
+                        .as_ref()
+                        .unwrap()
+                        .routing_v4_draft
+                        .as_ref()
+                        .unwrap()
+                        .devices["Client"]
+                        .interfaces["lan"]
+                        .address,
+                    "malformed"
+                );
+                assert!(ctx.memory(|m| m.has_focus(self.metrics.focus.unwrap())));
+                self.pending_events.push(key(egui::Key::Tab, false));
+            }
+            2626 => {
+                assert!(!ctx.memory(|m| m.has_focus(self.metrics.focus.unwrap())));
+            }
+            2627 => {
+                let i = self.scenarios.len() - 1;
+                let d = self
+                    .progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .routing_v4_draft
+                    .as_mut()
+                    .unwrap();
+                d.devices
+                    .get_mut("Client")
+                    .unwrap()
+                    .interfaces
+                    .get_mut("lan")
+                    .unwrap()
+                    .address = "192.0.2.99/24".into();
+                d.show_routes = true;
+            }
+            2628 => shot = Some("routing-v4-fixture-routes".into()),
+            2632 => {
+                assert!(!self.metrics.completion);
+                assert!(self.notice.as_ref().unwrap().contains("immediate"));
+                shot = Some("routing-v4-fixture-route-parse-error".into());
+            }
+            2633 | 2636 => {
+                let i = self.scenarios.len() - 1;
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .routing_v4_draft
+                    .as_mut()
+                    .unwrap()
+                    .devices
+                    .get_mut("Client")
+                    .unwrap()
+                    .routes[0]
+                    .next_hop = if self.smoke_stage == 2633 {
+                    "192.0.2.98"
+                } else {
+                    "192.0.2.1"
+                }
+                .into();
+            }
+            2635 => {
+                assert!(!self.metrics.completion);
+                assert!(self.checked);
+                shot = Some("routing-v4-fixture-missing-neighbor".into());
+            }
+            2638 => {
+                assert!(self.metrics.completion);
+                self.save();
+            }
+            2639 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2640 => shot = Some("routing-v4-fixture-light-150".into()),
+            2641 | 2646 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(400., 400.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -900.),
+                    modifiers: Default::default(),
+                });
+            }
+            2642 | 2647 => {}
+            2643 => {
+                let r = self.metrics.check.unwrap();
+                assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
+                shot = Some("routing-v4-fixture-light-150-scrolled".into());
+            }
+            2644 => {
+                let i = self.scenarios.len() - 1;
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+            }
+            2645 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                assert!(!self.metrics.help_visible);
+                self.theme_id = "lab-navy".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2648 => shot = Some("routing-v4-fixture-challenge-dark-150".into()),
+            2649 => {
+                let i = self.scenarios.len() - 1;
+                self.reset_attempt(i);
+                assert_eq!(
+                    self.progress.attempts[&self.scenarios[i].id].state,
+                    self.scenarios[i].initial
+                );
+                assert!(self.progress.attempts.contains_key("shell-handover"));
+                println!(
+                    "PASS native IPv4 routing development fixture: introduction, isolated example, prefix/reserved/parse/missing-neighbor retry, keyboard edits, full endpoint checks, invalidation, save/reload, Tab focus, selected reset, route editors, resized light/dark150 scrolling and Challenge. Not authored curriculum or novice/platform acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+
             2400 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 let source = format!("printf '%s\\n' {}\n", "$spaces\"\"".repeat(32));
