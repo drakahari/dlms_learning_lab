@@ -13,6 +13,8 @@ pub struct WorkspaceData {
     pub script_learning: Option<crate::script_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub script_history: Option<crate::shell::Record>,
+    #[serde(skip_serializing_if = "Vec::is_empty")]
+    pub script_history_more: Vec<crate::shell::Record>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub terminal_learning: Option<crate::terminal_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -46,6 +48,11 @@ impl WorkspaceData {
                 .script_history
                 .as_ref()
                 .is_none_or(|r| r.valid() && r.engine_revision < crate::shell::EVALUATOR_REVISION)
+            && self.script_history_more.len() + usize::from(self.script_history.is_some()) <= 32
+            && self
+                .script_history_more
+                .iter()
+                .all(|r| r.valid() && r.engine_revision < crate::shell::EVALUATOR_REVISION)
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.ipv6_draft.as_ref().is_none_or(|d| d.valid())
             && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
@@ -63,15 +70,47 @@ impl WorkspaceData {
                 .all(|s| s.as_ref().is_none_or(|s| s.iter().all(|a| a.len() <= 64)))
     }
 }
+pub fn can_preserve_script_history(a: &Attempt) -> bool {
+    let State::Script {
+        run: Some(record), ..
+    } = &a.state
+    else {
+        return true;
+    };
+    if record.current() {
+        return true;
+    }
+    a.workspace.as_ref().is_none_or(|w| {
+        w.script_history
+            .as_ref()
+            .into_iter()
+            .chain(&w.script_history_more)
+            .any(|r| r == record)
+            || w.script_history_more.len() + usize::from(w.script_history.is_some()) < 32
+    })
+}
 pub fn preserve_script_history(a: &mut Attempt) {
+    // Imported/full history is rejected before entering a writable workspace.
+    if !can_preserve_script_history(a) {
+        return;
+    }
     if let State::Script { run, .. } = &mut a.state
         && run.as_ref().is_some_and(|r| !r.current())
     {
         let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+        let record = run.take().unwrap();
         if w.script_history.is_none() {
-            w.script_history = run.take();
-            w.checked = false;
+            w.script_history = Some(record);
+        } else if !w
+            .script_history
+            .as_ref()
+            .into_iter()
+            .chain(&w.script_history_more)
+            .any(|r| r == &record)
+        {
+            w.script_history_more.push(record);
         }
+        w.checked = false;
     }
 }
 pub fn prepare(a: &mut Attempt) {

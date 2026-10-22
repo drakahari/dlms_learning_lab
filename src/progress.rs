@@ -60,6 +60,12 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
     run.as_ref()
         .into_iter()
         .chain(a.workspace.as_ref().and_then(|w| w.script_history.as_ref()))
+        .chain(
+            a.workspace
+                .as_ref()
+                .into_iter()
+                .flat_map(|w| &w.script_history_more),
+        )
         .any(|r| {
             r.engine_revision < crate::shell::EVALUATOR_REVISION
                 && r.results.len() == cases.len()
@@ -162,6 +168,9 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err("Saved IPv6 device/interface/link structure differs from this scenario; original retained".into());
         }
         crate::pack::validate_state(&a.state)?;
+        if !crate::workspace::can_preserve_script_history(a) {
+            return Err("Saved script history is full; original retained. Keep a copy of the progress file; this profile needs a history migration.".into());
+        }
         if a.workspace.as_ref().is_some_and(|w| !w.valid()) {
             return Err("Invalid workspace data; original retained".into());
         }
@@ -198,6 +207,9 @@ pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
                 .is_some_and(|draft| !draft.same_shape(topology))
         {
             return Err("Invalid IPv6 draft structure; previous progress retained".into());
+        }
+        if !crate::workspace::can_preserve_script_history(a) {
+            return Err("Saved script history is full; original retained. Keep a copy of the progress file; this profile needs a history migration.".into());
         }
         if a.workspace.as_ref().is_some_and(|w| !w.valid()) {
             return Err("Invalid draft data; previous progress retained".into());

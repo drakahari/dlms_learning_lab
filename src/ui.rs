@@ -46,6 +46,7 @@ struct Metrics {
     guide: bool,
     editor_save: Option<egui::Rect>,
     editor_viewport: Option<egui::Rect>,
+    script_history: Option<egui::Rect>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
     why: Option<egui::Rect>,

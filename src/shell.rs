@@ -1,8 +1,9 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
+mod text_tools;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
-pub const EVALUATOR_REVISION: u32 = 1;
+pub const EVALUATOR_REVISION: u32 = 2;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -1230,6 +1231,7 @@ impl Vm {
         let saved_status = self.outcome.status;
         let saved_input = self.input.clone();
         let saved_pos = self.input_pos;
+        let mut consumed = 0;
         let mut pipe = String::new();
         for (i, cmd) in cmds.iter().enumerate() {
             if cmds.len() > 1 {
@@ -1244,6 +1246,9 @@ impl Vm {
                 self.input_pos = 0;
             }
             let output = self.command(cmd)?;
+            if i == 0 && cmds.len() > 1 {
+                consumed = self.input_pos;
+            }
             pipe = output;
             if self.done && cmds.len() > 1 {
                 self.done = false;
@@ -1256,7 +1261,7 @@ impl Vm {
             self.env = saved_env;
             self.args = saved_args;
             self.input = saved_input;
-            self.input_pos = saved_pos;
+            self.input_pos = saved_pos + consumed;
         }
         Ok(())
     }
@@ -1499,6 +1504,40 @@ impl Vm {
                 let status = i32::from(output.is_empty());
                 Ok((output, empty, status))
             }
+            "sort" | "uniq" | "cut" => {
+                let invocation = text_tools::parse(cmd, args)?;
+                // These utilities model only the C locale. LC_ALL overrides the
+                // individual category variables and LANG, as in real tools.
+                let locale = self.env.get("LC_ALL").filter(|s| !s.is_empty());
+                let unsupported_locale = if let Some(value) = locale {
+                    value != "C" && value != "POSIX"
+                } else {
+                    ["LC_COLLATE", "LC_CTYPE", "LANG"].iter().any(|name| {
+                        self.env.get(*name).is_some_and(|v| !v.is_empty() && v != "C" && v != "POSIX")
+                    })
+                };
+                if unsupported_locale {
+                    return Err("Unsupported text-utility locale; this simulator supports C/POSIX byte ordering only".into());
+                }
+                let file = invocation.file.as_deref().filter(|s| *s != "-");
+                let text = if let Some(file) = file {
+                    let p = path(file)?;
+                    let Some(text) = self.outcome.files.get(&p) else {
+                        let message = if cmd == "sort" {
+                            format!("sort: cannot read: {file}: No such file or directory\n")
+                        } else {
+                            format!("{cmd}: {file}: No such file or directory\n")
+                        };
+                        return Ok((empty, message, if cmd == "sort" { 2 } else { 1 }));
+                    };
+                    text
+                } else {
+                    &self.input[self.input_pos..]
+                };
+                let output = invocation.execute(text, MAX_OUTPUT)?;
+                if file.is_none() { self.input_pos = self.input.len(); }
+                Ok(ok(output))
+            }
             "read" if args.len() == 2 && args[0] == "-r" && name(&args[1]) => {
                 variable_target(&args[1])?;
                 let rest = &self.input[self.input_pos..];
@@ -1590,7 +1629,7 @@ impl Vm {
                 Ok((empty.clone(), empty, status))
             }
             _ => Err(format!(
-                "Unsupported command: {cmd}. Only documented in-process builtins are available; nothing was sent to the host."
+                "Unsupported command: {cmd}. Only documented in-process commands are available; nothing was sent to the host."
             )),
         }
     }

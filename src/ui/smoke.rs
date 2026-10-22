@@ -940,6 +940,26 @@ impl LabApp {
                         results: cases.iter().map(|c| shell::run(&original, c)).collect(),
                     }),
                 };
+                model::prepare(self.progress.attempts.get_mut(&s.id).unwrap());
+                // Model a second upgrade: an older failed history and a later
+                // earned result must both survive current verification.
+                let a = self.progress.attempts.get_mut(&s.id).unwrap();
+                a.workspace
+                    .as_mut()
+                    .unwrap()
+                    .script_history
+                    .as_mut()
+                    .unwrap()
+                    .results[0]
+                    .stdout = "Earlier incomplete output".into();
+                a.state = engine::State::Script {
+                    source: original.clone(),
+                    run: Some(shell::Record {
+                        engine_revision: 1,
+                        source: original.clone(),
+                        results: cases.iter().map(|c| shell::run(&original, c)).collect(),
+                    }),
+                };
                 self.launch(9);
                 self.set_script_view(9, teaching::View::Assignment);
                 self.selected = None;
@@ -956,9 +976,22 @@ impl LabApp {
                 ));
                 shot = Some("script-earlier-output-retained".into());
             }
-            1504 => self
-                .pending_events
-                .extend(click(self.metrics.check.unwrap())),
+            1504 => {
+                // The saved revision1 program was valid. An edit now introduces
+                // unsupported syntax; earlier earned credit remains separate.
+                if let engine::State::Script { source, run } = &mut self
+                    .progress
+                    .attempts
+                    .get_mut("shell-handover")
+                    .unwrap()
+                    .state
+                {
+                    *source = format!("IFS=,\n{source}");
+                    *run = None;
+                }
+                self.pending_events
+                    .extend(click(self.metrics.check.unwrap()));
+            }
             1505 | 1506 => {}
             1507 => {
                 assert!(!self.metrics.completion);
@@ -1041,6 +1074,27 @@ impl LabApp {
             1523 => {}
             1524 => shot = Some("script-history-scrolled-light-150".into()),
             1525 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.scale = 1.;
+                self.theme_id = "lab-navy".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(9);
+            }
+            1526 => {}
+            1527 => self
+                .pending_events
+                .extend(click(self.metrics.script_history.unwrap())),
+            1528 => shot = Some("script-successive-history-open".into()),
+            1529 => {
+                assert_eq!(
+                    self.progress.attempts["shell-handover"]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .script_history_more
+                        .len(),
+                    1
+                );
                 println!(
                     "PASS native evaluator upgrade: earlier script/output/credit retained separately; current unsupported retry, scoped-loop Stop, keyboard repair/current Run, saved reload and light150 scroll. Synthetic legacy fixture only; no personal progress or novice-user acceptance."
                 );

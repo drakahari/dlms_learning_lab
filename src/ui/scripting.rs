@@ -354,21 +354,55 @@ impl LabApp {
         else {
             return;
         };
-        let historical = self.progress.attempts[&self.scenarios[i].id]
+        let workspace = self.progress.attempts[&self.scenarios[i].id]
             .workspace
-            .as_ref()
-            .and_then(|w| w.script_history.as_ref());
-        let displayed = run.as_ref().or(historical);
+            .as_ref();
+        let histories: Vec<_> = workspace
+            .into_iter()
+            .flat_map(|w| {
+                w.script_history
+                    .as_ref()
+                    .into_iter()
+                    .chain(&w.script_history_more)
+            })
+            .collect();
+        let displayed = run.as_ref().or_else(|| histories.last().copied());
         let earlier = displayed.is_some_and(|r| !r.current());
         if earlier {
             ui.label("Earlier saved output · Your script and results are retained. Run the current draft to verify it with this simulator.");
         }
-        if let Some(history) = historical {
-            egui::CollapsingHeader::new("Earlier saved script")
-                .id_salt(("script-history", i))
-                .show(ui, |ui| {
+        if !histories.is_empty() {
+            let history_panel = egui::CollapsingHeader::new(if histories.len() == 1 {
+                "Earlier saved script"
+            } else {
+                "Earlier saved runs"
+            })
+            .id_salt(("script-history", i))
+            .show(ui, |ui| {
+                for (history_index, history) in histories.iter().enumerate().rev() {
+                    ui.label(format!(
+                        "Saved evaluator revision {} · Your earlier work",
+                        history.engine_revision
+                    ));
                     ui.add(egui::Label::new(RichText::new(&history.source).monospace()).wrap());
-                });
+                    if let Some(result) = history.results.get(case) {
+                        egui::CollapsingHeader::new("Saved output and virtual files")
+                            .id_salt((i, history_index))
+                            .show(ui, |ui| {
+                                outcome(ui, result);
+                                for (name, text) in &result.files {
+                                    ui.add(
+                                        egui::Label::new(
+                                            RichText::new(format!("{name}\n{text}")).monospace(),
+                                        )
+                                        .wrap(),
+                                    );
+                                }
+                            });
+                    }
+                }
+            });
+            self.metrics.script_history = Some(history_panel.header_response.rect);
         }
         let r = displayed.and_then(|r| r.results.get(case));
         let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
