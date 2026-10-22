@@ -1,5 +1,6 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
 mod arithmetic;
+mod globbing;
 mod text_tools;
 use serde::{Deserialize, Serialize};
 use std::{
@@ -8,7 +9,7 @@ use std::{
     collections::{BTreeMap, BTreeSet},
 };
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
-pub const EVALUATOR_REVISION: u32 = 4;
+pub const EVALUATOR_REVISION: u32 = 5;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -507,14 +508,9 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             tokens.push(Token::Op(op));
             continue;
         }
-        if matches!(c, '*' | '?' | '~') {
-            if c == '?' && bare.ends_with('$') {
-                bare.push(c);
-                i += 1;
-                continue;
-            }
+        if c == '~' {
             return Err(
-                "Globs and tilde expansion are unsupported; quote literal characters".into(),
+                "Tilde expansion is unsupported; use an ordinary virtual /work path".into(),
             );
         }
         bare.push(c);
@@ -1044,6 +1040,8 @@ impl Vm {
             return Ok(self.args.clone());
         }
         let mut fields = vec![String::new()];
+        let mut unquoted = vec![Vec::new()];
+        let mut pattern_possible = false;
         let mut retained = 0;
         let mut keep = false;
         let mut pending = false;
@@ -1063,36 +1061,92 @@ impl Vm {
             };
             self.charge_expansion(text.len())?;
             if split && p.quote == Quote::Bare {
-                if text.contains(['*', '?']) {
-                    return Err("Globbing is unsupported; quote the expanded value".into());
-                }
+                pattern_possible |= text.contains(['*', '?', '[']);
                 for c in text.chars() {
                     if matches!(c, ' ' | '\t' | '\n') {
                         pending = true;
                     } else {
                         if pending && (!fields.last().unwrap().is_empty() || keep) {
                             next_field(&mut fields)?;
+                            unquoted.push(Vec::new());
                             keep = false;
                         }
                         retained = bounded_expansion_bytes(retained, c.len_utf8())?;
                         fields.last_mut().unwrap().push(c);
+                        let flags = unquoted.last_mut().unwrap();
+                        flags.resize(flags.len() + c.len_utf8(), true);
                         pending = false;
                     }
                 }
             } else {
                 if pending && (!fields.last().unwrap().is_empty() || keep) {
                     next_field(&mut fields)?;
+                    unquoted.push(Vec::new());
                 }
                 retained = bounded_expansion_bytes(retained, text.len())?;
                 fields.last_mut().unwrap().push_str(&text);
+                let flags = unquoted.last_mut().unwrap();
+                flags.resize(flags.len() + text.len(), false);
                 keep = true;
                 pending = false;
             }
         }
         if !keep && fields.last().is_some_and(String::is_empty) {
             fields.pop();
+            unquoted.pop();
         }
-        Ok(fields)
+        if !split || !pattern_possible {
+            return Ok(fields);
+        }
+        let mut expanded = Vec::new();
+        let mut bytes = 0;
+        let mut push = |value: Cow<'_, str>| -> Result<(), String> {
+            if expanded.len() >= 128 {
+                return Err("Argument limit exceeded (128 expanded fields)".into());
+            }
+            bytes = bounded_expansion_bytes(bytes, value.len())?;
+            self.charge_expansion(value.len())?;
+            expanded.push(value.into_owned());
+            Ok(())
+        };
+        for (field, flags) in fields.into_iter().zip(unquoted) {
+            self.charge_expansion(field.len())?;
+            let Some(pattern) = globbing::Pattern::parse(&field, &flags)? else {
+                push(Cow::Owned(field))?;
+                continue;
+            };
+            let locale = self.env.get("LC_ALL").filter(|s| !s.is_empty());
+            let non_c = if let Some(value) = locale {
+                !matches!(value.as_str(), "C" | "POSIX")
+            } else {
+                ["LC_COLLATE", "LC_CTYPE", "LANG"].iter().any(|key| {
+                    self.env
+                        .get(*key)
+                        .is_some_and(|v| !v.is_empty() && !matches!(v.as_str(), "C" | "POSIX"))
+                })
+            };
+            if non_c {
+                return Err("Unsupported filename-matching locale; this simulator supports C/POSIX byte ordering only".into());
+            }
+            let mut matched = false;
+            for file in self.outcome.files.keys() {
+                let name = &file[6..];
+                if pattern.matches(name, |n| self.charge_expansion(n))? {
+                    let value = if pattern.absolute {
+                        file.as_str()
+                    } else {
+                        name
+                    };
+                    // The shared push checks count, bytes and work before cloning.
+                    push(Cow::Borrowed(value))?;
+                    matched = true;
+                }
+            }
+            if !matched {
+                push(Cow::Owned(field))?;
+            }
+        }
+        Ok(expanded)
     }
     fn words(&self, words: &[Word]) -> Result<Vec<String>, String> {
         let mut out = Vec::new();
@@ -1880,6 +1934,7 @@ pub fn literal_command(source: &str) -> Result<Vec<String>, String> {
     }
     lex(source)?.into_iter().map(|token| match token {
         Token::Word(w) => {
+            if w.0.iter().any(|p| p.quote == Quote::Bare && p.text.contains(['*', '?'])) { return Err("Filename expansion is unsupported in this terminal; use a literal quoted path. Script labs have a separate supported subset.".into()); }
             if w.0.iter().any(|p| p.quote != Quote::Single && p.text.contains('$')) { return Err("Variable expansion is unsupported in this terminal; use a literal quoted path.".into()); }
             Ok(w.0.into_iter().map(|p| p.text).collect())
         },

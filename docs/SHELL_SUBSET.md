@@ -5,6 +5,7 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 ## Accepted language
 
 - Scripts use LF line breaks. Commands separated by newline or `;`, comments at a word boundary, backslash escaping/line continuation, literal single quotes and expanding double quotes.
+- Unquoted `*`/`?` filename matching after splitting over flat virtual files; quoted/escaped bytes stay literal, no-match words remain unchanged, hidden names need an explicit leading dot, matches are C-byte sorted. See SHELL_GLOBBING.md for bounds/exclusions.
 - Integer arithmetic expansion `$(( expression ))` within the bounded contract below.
 - Named scalar assignments (assignment-only commands); `$name`, `${name}`, `$1`…`$9`, `$#`, `$?`. Undefined parameters expand to empty. Unquoted expansion uses default space/tab/newline field splitting. Sole `"$@"` expands each positional argument separately, including empty arguments. Other uses of `$@` are rejected.
 - `|`, `&&`, `||`; pipeline status is the last stage. Pipeline variable changes are isolated; virtual file writes and first-stage stdin consumption persist. A first-stage redirected or explicit file input leaves the caller’s finite stdin untouched. No pipefail/set -e.
@@ -15,7 +16,7 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 
 ## Honest exclusions
 
-Reject unsupported operators/syntax: command substitution, backticks, globbing, tilde/brace expansion, parameter operators, arrays, subshells, groups, background jobs, here-documents/strings, `case`, `until`, `select`, `break`, `continue`, `export`, `set`, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Unquoted wildcard values are rejected rather than pretending globbing occurred. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
+Reject unsupported operators/syntax: command substitution, backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, arrays, subshells, groups, background jobs, here-documents/strings, `case`, `until`, `select`, `break`, `continue`, `export`, `set`, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
 ## Bounded execution
 
@@ -86,3 +87,8 @@ Only this trailing single `<` on while loops is added; output/multiple redirects
 ### Expansion resource correction (evaluator4)
 
 Individual bounded values cannot be joined or split into arbitrarily large temporary fields before the final argument guard. Shared early checks cover ordinary commands, assignments, local declarations, input/output redirection, while-file input and sole quoted "$@". UTF-8 is counted in bytes while retaining valid text boundaries. The cumulative work budget bounds repeated text replacement even if whitespace later disappears. Limit diagnostics invalidate current grading and explain the likely cause; no new shell syntax or utility is added. Earlier evaluator credit stays historical with exact original-byte backup. See SHELL_EXPANSION_LIMITS.md for the pre-implementation contract, controlled prior/current evidence and known scope.
+
+
+## Filename matching (evaluator5)
+
+The contract in SHELL_GLOBBING.md is implemented before dependent content. Per-byte quote provenance survives splitting, so quoting a wildcard keeps it literal even next to an active wildcard. Only the current virtual file map is searched; no host glob API exists. Matching work shares the VM-wide expansion budget. A test of a file name remains distinct from a text-pattern test. Bracket expressions arriving through unquoted variables now fail honestly instead of silently remaining literal; actual evaluator4 results stay historical with exact-byte backup. This capability alone adds no authored assignments or certification coverage.

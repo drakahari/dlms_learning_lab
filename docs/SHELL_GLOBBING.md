@@ -1,0 +1,27 @@
+# Bounded filename matching contract (M27)
+
+Specified2026-10-22 before implementation. This extends the in-process shell subset; no dependency, host filesystem/process API or curriculum count is added by the capability itself.
+
+After variable replacement and default whitespace splitting, unquoted `*` matches zero or more filename bytes and unquoted `?` matches exactly one byte in the disclosed C-locale subset. Quoted/escaped wildcard bytes remain literal, including when joined to unquoted parts. Matches come only from the current virtual file map, in byte-sorted order; preserve a relative filename or an explicit `/work/` prefix as written. A leading dot must be explicitly literal at the start of the filename. No match retains the original word, as default Bash does. A quote-safe `"$@"` stays separate arguments without splitting/matching.
+
+Assignments and assignment-form local declarations suppress filename expansion; command arguments, loop lists and redirect words use it. Multiple redirect matches produce the existing ambiguous-redirection diagnostic before mutation. Only ordinary flat `/work` names are modeled; wildcard paths outside that namespace or containing directory components fail explicitly. No directory traversal, directory glob, host lookup, recursive `**` semantics, bracket/range/locale classes, extglob, glob options, GLOBIGNORE/GLOBSORT, non-C locale or unquoted backslash-bearing wildcard values are promised. Unsupported patterns fail clearly. Literal quoted names containing such characters remain usable.
+
+Retain per-byte quote provenance through splitting. Match a bounded pattern using an iterative wildcard matcher with a shared cumulative work counter; never recursive exponential backtracking. At most64 virtual files,128 resulting fields and256KiB field bytes, with the existing VM-wide1,000,000-byte expansion-work budget and all other VM limits. Enforce before cloning/appending. No-match words still encounter ordinary virtual-path validation when used for file I/O. Stop remains cooperative.
+
+Evaluator revision5 is needed: formerly accepted bracket expressions supplied through unquoted variables were treated literally (literal source bracket patterns were already rejected). Preserve actual earlier source/results/credit as history and retain the exact original bytes on first upgraded save; never invent current success. Existing authored IDs/versions stay intact.
+
+Verification before dependent teaching: quote/escape/mixed-part/variable/split behavior, hidden files, no-match/empty/UTF-8 C-byte semantics, order, new virtual files, relative/absolute forms, assignment/local/for/pipeline/redirect consumers, ambiguity without mutation, unsupported patterns/paths/locales, resource bounds/tick determinism/Stop and honest earlier-credit migration. Compare fixed controlled fixtures with Bash only in disposable development directories. Review accepted script workspaces after integration.
+
+Primary references checked2026-10-22: GNU Bash manual, Filename Expansion and Pattern Matching, https://www.gnu.org/software/bash/manual/html_node/Filename-Expansion.html and https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html . Both web fetches timed out; the official locally installed `/usr/share/info/bash.info.gz` nodes were available and inspected. No system packages changed. Runtime bounds and flat namespace are simulator policy, not Bash claims.
+
+
+A clean shell-only probe rebuilt from44c1f40 (SHA-256 b4581428104c6c31e22cc51d9856ab9677426fc9d64c1f422f3b19413f6c7560) confirmed the actual revision4 accepted `pattern='[ab].log'; printf '%s\n' $pattern` and printed the literal bracket word despite a matching a.log file. The upgrade regression retains that exact source/output/files/credit, rejects it currently, accepts literal quoting, and protects original bytes across save/export/recheck/reset. This is a controlled development fixture, not curriculum.
+
+
+## Verified capability evidence
+
+253 Rust tests pass, including eight new filename tests and a separate literal-terminal boundary regression. An independent dynamic-programming oracle checks the short pattern space; deterministic tests cover byte/quote/path/hidden/order/no-match behavior, all expansion consumers, ambiguity without mutation, shared work/tick/Stop limits and honest prior4 history. All554 controlled Bash5.3.9 fixtures agree (30 new fixed filename cases); independent review repeated25 targeted tests and the554 comparisons.
+
+Review caught the shared lexer’s effect on the separate Linux terminal language. literal_command now explicitly rejects bare * and ? while retaining quoted/escaped literal names, with full-state atomic-failure tests. That terminal does not gain expansion from this scripting capability. No material issue remained in matcher/provenance/namespace/work review. Clippy/formatter,21 Python tooling/boundary checks, all28 palettes and unchanged55/thirteen content/coverage validation pass.
+
+The actual Fedora native script regression ran through existing XWayland after integration: editor/Run/Stop, bounded error feedback, exact current-version backup, current repair, reload/edit invalidation and retained history, resized light/dark150% scrolling. This checks the unchanged native workspace, not a new glob lesson or novice acceptance; dependent authored teaching and its native flows remain the next milestone. Default-Wayland startup investigation and Windows/macOS desktop acceptance stay open. No release publication or new curriculum count.

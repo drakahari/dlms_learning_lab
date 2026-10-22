@@ -277,7 +277,7 @@ impl LabApp {
             2424 => shot = Some("expansion-challenge-dark-150".into()),
             2425 => {
                 println!(
-                    "PASS native expansion boundary: actual prior fixture history, current resource feedback, exact v4 backup, keyboard loop/Stop, repair/all3current cases, reload, edit invalidation and retained history, resized light/dark150. Development fixture only; no new curriculum or novice acceptance."
+                    "PASS native expansion boundary: actual prior fixture history, current resource feedback, exact revision-specific backup, keyboard loop/Stop, repair/all3current cases, reload, edit invalidation and retained history, resized light/dark150. Development fixture only; no new curriculum or novice acceptance."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

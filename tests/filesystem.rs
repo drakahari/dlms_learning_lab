@@ -372,3 +372,30 @@ fn entry_and_path_limits_and_invalid_goals_are_checked() {
     value["scenarios"] = serde_json::json!([lab]);
     assert!(pack::load(&value.to_string()).is_err());
 }
+
+#[test]
+fn scripting_globs_do_not_change_the_separate_literal_terminal_language() {
+    let mut t = tree();
+    t.execute("touch '*.log'").unwrap();
+    t.execute(r"touch x\?.txt").unwrap();
+    for command in [
+        "touch *.new",
+        "rm *",
+        "rm *.log",
+        "ls ?",
+        "touch 'quoted'*",
+        "rm x?.txt",
+    ] {
+        let before = t.clone();
+        let error = t.execute(command).unwrap_err();
+        assert!(
+            error.contains("Filename expansion is unsupported"),
+            "{command}: {error}"
+        );
+        assert_eq!(t, before);
+    }
+    t.execute(r"rm \*.log").unwrap();
+    t.execute("rm 'x?.txt'").unwrap();
+    assert!(!t.nodes.contains_key("/home/alex/*.log"));
+    assert!(!t.nodes.contains_key("/home/alex/x?.txt"));
+}

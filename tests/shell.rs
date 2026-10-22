@@ -165,7 +165,7 @@ fn unsupported_and_isolation() {
         "echo $(id)",
         "echo `id`",
         "echo ~",
-        "echo *",
+        "echo /etc/*",
         "x=(a b)",
         "eval echo hi",
         "echo yes &",

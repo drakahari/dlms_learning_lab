@@ -153,3 +153,16 @@ Source `85d0274ebbacf9e65376d6b44fc054a83b95b77e`,55 assignments/thirteen units,
 | `dlms-learning-lab-0.1.0-g85d0274ebbac-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `23447655b2f97aaa3cb16a20944b49a360537040771dc123ebb1ae33b675d223` |
 
 Fedora binary SHA-256 `145d2290d8dc7e53cccb5d6a1f23601ca6e5971faafb14c0b2296f398fe7f647`. Archive verified/extracted and installed/upgraded in the isolated /tmp acceptance root. Outside-checkout CLI validated55/thirteen and desktop-file-validate passed; exact synthetic sentinel remained (retained-file check). Installed native all4 VLAN flows passed outside checkout through existing XWayland, including keyboard repairs, checks, reset/resume, invalidation, malformed-entry feedback and150% light/dark views. The default-Wayland extra-start observation above remains unresolved; a smoke-only pre-map fullscreen experiment was ineffective and removed. No system/session/theme setting was changed. Actual Windows/macOS desktop runtime and macOS notice/signing gates remain open. No release publication.
+
+
+### M26 installed candidates (before evaluator5 filename matching)
+
+Source44c1f406f15c68c4bab73f9bed3c482271dc4b6b,55/thirteen, evaluator4. [Run39845121080](https://github.com/drakahari/dlms_learning_lab/actions/runs/39845121080) passed244 Rust tests and applicable native CI checks on all three runners. Ubuntu/Windows sidecars downloaded and locally hash-verified under ignored dist/native-ci-44c1f40.
+
+| Build | Candidate archive | SHA-256 |
+| --- | --- | --- |
+| Fedora44 | dlms-learning-lab-0.1.0-g44c1f406f15c-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | 561c2f8faf1c4b4930b541809ffa3e065c287ed5991d76e254578c5f9d51ad0f |
+| Ubuntu24.04 | dlms-learning-lab-0.1.0-g44c1f406f15c-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz | 7a09c72f712cf632eac72644111a2e97258008f7903c580c89c65fbfc94e60de |
+| Windows | dlms-learning-lab-0.1.0-g44c1f406f15c-x86_64-pc-windows-msvc-windows-candidate.zip | 069861a156b3a3675f123f6c283aeb2c745bc98af40f19013780f1bc0035c577 |
+
+Fedora binary SHA-256 c98f4827bbe5bfcd281ea11085ab16beb7b6584e48b81a1d0605652d57dcd87f. Clean archive installed/upgraded in the isolated /tmp test root; bundled validation55/thirteen, desktop entry validation and exact sentinel retention pass (retained-file check). Installed native stress flow outside checkout passed current limit feedback/history, exact backup, keyboard editor/Run/Stop, repair/all3cases, reload/edit invalidation and light/dark150%. These are synthetic development checks, not novice/platform acceptance. Default-Wayland startup investigation and actual Windows/macOS desktop acceptance remain open. macOS archive remains notice-gated. No release published.
