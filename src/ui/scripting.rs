@@ -114,7 +114,7 @@ impl LabApp {
                 });
             ui.label(
                 RichText::new(format!(
-                    "Run script checks all {} input sets using fresh virtual files",
+                    "Run script checks {} sets of sample inputs; simulated files reset for each test",
                     cases.len()
                 ))
                 .small()
@@ -240,7 +240,7 @@ impl LabApp {
             }
         }
         let c = &cases[selected];
-        egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the declared virtual files exist. Every Run starts fresh; editor work is retained.");});
+        egui::CollapsingHeader::new("Input details, expected results & virtual files").id_salt("script-fixture").show(ui,|ui|{ui.label(format!("Arguments: {:?}",c.args));ui.label(format!("Standard input: {:?}",c.stdin));for(k,v)in &c.env{ui.label(format!("{k} = {v:?}"));}ui.label(format!("Expected exit: {} · stdout: {:?} · stderr: {:?}",c.status,c.stdout,c.stderr));for(p,t)in &c.files{ui.label(RichText::new(format!("Input {p}\n{t}")).monospace());}if let engine::State::Script{run:Some(r),..}=&self.progress.attempts[&s.id].state && let Some(result)=r.results.get(selected){for(p,t)in &result.files{ui.label(RichText::new(format!("After run {p}\n{t}")).monospace());}}ui.label("Only the listed simulated files exist. Each test resets these files; your script stays saved.");});
     }
     fn script_editor(&mut self, ui: &mut egui::Ui, i: usize) {
         ui.label("Script · portable shell subset");

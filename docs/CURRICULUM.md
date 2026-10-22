@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Checked **2026-10-21**. This is a planning document, not a claim of complete exam preparation. Delivered content is the original nine authored assignments plus seven new scripting assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus seven new scripting assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -13,6 +13,8 @@ Checked **2026-10-21**. This is a planning document, not a claim of complete exa
 | Bash/Shell | Learning progression, no certification-coverage assertion; subset v1 | [POSIX Issue 8 shell language](https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html), [GNU Bash manual](https://www.gnu.org/s/bash/manual/bash.html), [expansion](https://www.gnu.org/s/bash/manual/html_node/Shell-Expansions.html), [redirection](https://www.gnu.org/s/bash/manual/html_node/Redirections.html) |
 
 The Cisco PDF and LPI objective pages were inspected, including versions and complete top-level objective identifiers. Cisco's dynamic learning-network page failed to render; official PDFs and the dated Cisco transition article supplied the evidence. Some GNU `software/` URLs timed out; the official `/s/bash/` manual and POSIX reference supplied the language reference. Do not infer objectives from an old training course or exam dumps. Recheck sources before every reviewed content batch, and attach finer subobjective evidence during authoring.
+
+Recheck evidence (2026-10-22): both official PDFs identify their blueprint versions; [Cisco’s certification page](https://www.cisco.com/web/go/ccna/) states the last v1.1 and first v2.0 testing dates. Both LPI overview/objective pages retain the versions above. No version changed in this recheck.
 
 ## Complete planning crosswalk
 
