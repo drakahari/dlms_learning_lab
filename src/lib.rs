@@ -18,3 +18,12 @@ pub mod script_teaching;
 pub mod backup;
 
 pub mod course;
+
+/// Public build identity; contains no profile or machine paths.
+pub fn build_identity() -> String {
+    format!(
+        "DLMS Learning Lab {} ({})",
+        env!("CARGO_PKG_VERSION"),
+        option_env!("DLMS_BUILD_REVISION").unwrap_or("development")
+    )
+}

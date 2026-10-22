@@ -125,7 +125,7 @@ impl LabApp {
         let scenarios = pack::bundled().expect("Bundled pack validates");
         let units = course::bundled(&scenarios).expect("Bundled units validate");
         let path = if smoke {
-            PathBuf::from("/tmp/dlms-workspaces-smoke/progress-v1.json")
+            std::env::temp_dir().join("dlms-workspaces-smoke/progress-v1.json")
         } else {
             progress::default_path()
                 .unwrap_or_else(|_| PathBuf::from("local-data/progress-v1.json"))

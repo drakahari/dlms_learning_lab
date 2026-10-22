@@ -362,6 +362,7 @@ impl LabApp {
                 ui.horizontal_wrapped(|ui| { ui.selectable_value(&mut self.settings_data,false,"Appearance");ui.selectable_value(&mut self.settings_data,true,"Your data"); });
                 if self.settings_data { egui::ScrollArea::vertical().id_salt("data-settings-scroll").max_height(ctx.content_rect().height()*0.65).show(ui,|ui|self.data_settings(ui)); } else {
                 ui.heading("Appearance");
+                ui.label(RichText::new(format!("Version {} · Build {}",env!("CARGO_PKG_VERSION"),option_env!("DLMS_BUILD_REVISION").unwrap_or("development").chars().take(12).collect::<String>())).small());
                 ui.push_id("settings-theme", |ui| { self.theme_dropdown(ui); });
                 ui.label(format!("{} · {}",theme::find(&self.theme_id).group,theme::find(&self.theme_id).name));
                 ui.label("Selection previews immediately and is saved locally. Your desktop theme stays unchanged.");

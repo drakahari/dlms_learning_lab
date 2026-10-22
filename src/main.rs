@@ -1,7 +1,15 @@
 #![forbid(unsafe_code)]
+#![cfg_attr(
+    all(target_os = "windows", not(debug_assertions)),
+    windows_subsystem = "windows"
+)]
 mod ui;
 fn main() -> eframe::Result<()> {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).is_some_and(|s| s == "--version" || s == "-V") {
+        println!("{}", dlms_learning_lab::build_identity());
+        return Ok(());
+    }
     if args.get(1).map(String::as_str) == Some("--validate-content") {
         match dlms_learning_lab::pack::bundled().and_then(|labs| {
             dlms_learning_lab::course::bundled(&labs).map(|units| (labs.len(), units.len()))

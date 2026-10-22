@@ -1,0 +1,64 @@
+name: Native milestone checks and candidates
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-2025, macos-15]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: '3.14'
+      - name: Inspect native toolchain
+        run: rustup show
+      - name: Select the tested compiler
+        run: rustup toolchain install 1.99.1 --profile minimal --component rustfmt --component clippy
+      - name: Select toolchain
+        run: rustup default 1.99.1
+      - name: Fetch locked sources for notice collection
+        run: cargo fetch --locked
+      - name: Format
+        run: cargo fmt --all -- --check
+      - name: Rust tests (headless; not desktop acceptance)
+        run: cargo test --locked --offline
+      - name: Clippy
+        run: cargo clippy --locked --offline --all-targets -- -D warnings
+      - name: Notice collector tests
+        run: python -m unittest discover -s tools/tests -p test_notices.py -v
+      - name: Candidate resource tests
+        run: python -m unittest discover -s tools/tests -p test_candidate.py -v
+      - name: Linux installer fixture tests
+        if: runner.os == 'Linux'
+        run: python -m unittest discover -s tools/tests -p test_installation.py -v
+      - name: Compile macOS native application
+        if: runner.os == 'macOS'
+        run: cargo build --release --locked --offline
+      - name: macOS candidate gate
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          echo 'macOS compiled/tested in CI only; no desktop acceptance.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Candidate packaging blocked: dispatch 0.2.0 original notice unavailable; signing/notarization and owner runtime acceptance remain open.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Prepare installation candidate (no release publication)
+        if: runner.os != 'macOS'
+        run: python tools/build_candidate.py
+      - name: Retain owner-test candidates and checksums
+        if: runner.os != 'macOS'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: milestone-${{ matrix.os }}-${{ github.sha }}
+          path: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error
+          retention-days: 14
