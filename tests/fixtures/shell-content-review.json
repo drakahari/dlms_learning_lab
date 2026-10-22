@@ -106,5 +106,29 @@
     "alternate": "if test \"$#\" -lt 3 || test -z \"$2\"; then printf 'Cannot build review\\n' >&2; exit 2; fi\noutput=$1\nfilter=$2\nshift 2\nfor input in \"$@\"; do\n    if test \"$input\" = \"$output\"; then printf 'Cannot build review\\n' >&2; exit 2; fi\n    if test -f \"$input\"; then :; else printf 'Cannot build review\\n' >&2; exit 2; fi\ndone\nprintf 'Review: %s\\n' \"$filter\" > \"$output\"\nfor input in \"$@\"; do\n    printf 'File: %s\\n' \"$input\" >> \"$output\"\n    grep -F \"$filter\" \"$input\" >> \"$output\"\ndone\nprintf 'Saved: %s\\n' \"$output\"\n",
     "incorrect": "valid_source() {\n    destination=$1\n    if [ \"$destination\" = \"$2\" ]; then return 1; fi\n    if [ -f \"$destination\" ]; then return 0; fi\n    return 1\n}\nif [ \"$#\" -lt 3 ] || [ -z \"$2\" ]; then\n    printf 'Cannot build review\\n' >&2\n    exit 2\nfi\ndestination=$1\nneedle=$2\nshift 2\nfor path in \"$@\"; do\n    if valid_source \"$path\" \"$destination\"; then\n        :\n    else\n        printf 'Cannot build review\\n' >&2\n        exit 2\n    fi\ndone\nprintf 'Review: %s\\n' \"$needle\" > \"$destination\"\nfor path in \"$@\"; do\n    printf 'File: %s\\n' \"$path\" >> \"$destination\"\n    grep -F \"$needle\" \"$path\" >> \"$destination\"\ndone\nprintf 'Saved: %s\\n' \"$destination\"\n",
     "misconception": "A helper uses a shared caller variable as scratch state; ordinary successful output hides the changed caller setting."
+  },
+  {
+    "id": "shell-cut-inventory",
+    "alternate": "cat \"$1\" | cut -f 3,1 -d : -s\n",
+    "incorrect": "cut -d : -f 1,3 \"$1\"\n",
+    "misconception": "A plausible text-processing stage preserves the wrong records or removes evidence needed by a later stage."
+  },
+  {
+    "id": "shell-sort-manifest",
+    "alternate": "sort \"$1\" | uniq\n",
+    "incorrect": "uniq \"$1\"\n",
+    "misconception": "A plausible text-processing stage preserves the wrong records or removes evidence needed by a later stage."
+  },
+  {
+    "id": "shell-uniq-counts",
+    "alternate": "cat \"$1\" | cut -f 1 -d : | sort | uniq -c\n",
+    "incorrect": "cut -d : -f 1 \"$1\" | sort -u | uniq -c\n",
+    "misconception": "A plausible text-processing stage preserves the wrong records or removes evidence needed by a later stage."
+  },
+  {
+    "id": "shell-text-capstone",
+    "alternate": "if test \"$#\" -ne 2 || test -z \"$2\" || test \"$1\" = \"$2\"; then printf 'Cannot audit inventory\\n' >&2; exit 2; fi\nif test -f \"$1\"; then :; else printf 'Cannot audit inventory\\n' >&2; exit 2; fi\nemit_duplicates() {\n    cut -d : -s -f 1 \"$1\" | sort -r | uniq -d | sort >> \"$2\"\n}\nprintf '%s\\n' 'Duplicate asset IDs' > \"$2\"\nemit_duplicates \"$1\" \"$2\"\nprintf '%s%s\\n' 'Saved: ' \"$2\"\n",
+    "incorrect": "if [ \"$#\" -ne 2 ] || [ -z \"$2\" ] || [ \"$1\" = \"$2\" ]; then\n    printf 'Cannot audit inventory\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    :\nelse\n    printf 'Cannot audit inventory\\n' >&2\n    exit 2\nfi\nprintf 'Duplicate asset IDs\\n' > \"$2\"\ncut -s -d : -f 1 \"$1\" | sort | uniq >> \"$2\"\nprintf 'Saved: %s\\n' \"$2\"\n",
+    "misconception": "A plausible text-processing stage preserves the wrong records or removes evidence needed by a later stage."
   }
 ]

@@ -1,0 +1,868 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-cut-inventory",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-text",
+      "topic": "Text processing",
+      "title": "Extract an inventory view",
+      "summary": "Select asset and owner fields without damaging spaces or empty values.",
+      "objective": "The argument names an existing inventory file. Records use asset:room:owner, with optional extra fields; lines without a colon are notes. Print fields 1 and 3, separated by a colon, in original record order. Skip notes, keep empty selected fields, ignore extra fields and print a newline after every selected record. If a later selected field is absent, print only selected fields that exist. Return 0, print no errors and leave every file unchanged. Supplied filenames never begin with a hyphen.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "The argument names an existing inventory file. Records use asset:room:owner, with optional extra fields; lines without a colon are notes. Print fields 1 and 3, separated by a colon, in original record order. Skip notes, keep empty selected fields, ignore extra fields and print a newline after every selected record. If a later selected field is absent, print only selected fields that exist. Return 0, print no errors and leave every file unchanged. Supplied filenames never begin with a hyphen.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A pipeline transforms data in stages; inspect the first stage where the result differs.",
+          "action": "Run the script, inspect its output and files, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Count fields from 1: asset, room, owner. A colon separates fields; spaces inside a field stay unchanged.",
+        "cut -f selects field numbers, -d chooses the delimiter, and -s skips lines with no delimiter.",
+        "A list such as 1,3 selects those fields in input order. It does not rearrange fields when you reverse the list."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax and the documented cut/sort/uniq option subset, tested with GNU tools in C/POSIX byte order. No numeric/key/locale sorting, CSV quoting, regex, awk or sed. Inputs are flat /work UTF-8 files with LF records, possibly an unterminated last line. Supplied filenames are canonical single names without directory parts or a leading hyphen; filename equality is not general real-filesystem alias protection. Execution and output limits apply; all learner work is simulated.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Select the asset and owner, excluding room and note lines.\ncut -d : -f 2 \"$1\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary inventory",
+            "args": [
+              "inventory.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/inventory.txt": "a1:North:Mina\nb2:West:Owen\n"
+            },
+            "stdout": "a1:Mina\nb2:Owen\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/inventory.txt": "a1:North:Mina\nb2:West:Owen\n"
+            }
+          },
+          {
+            "name": "Notes and empty owner",
+            "args": [
+              "inventory.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/inventory.txt": "notes only\na1:North:\n\nb2::Tess\n:Store:Empty asset\n"
+            },
+            "stdout": "a1:\nb2:Tess\n:Empty asset\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/inventory.txt": "notes only\na1:North:\n\nb2::Tess\n:Store:Empty asset\n"
+            }
+          },
+          {
+            "name": "Extra and missing fields",
+            "args": [
+              "short records.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/short records.txt": "short:row\na1:North:Alex:active\n"
+            },
+            "stdout": "short\na1:Alex\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/short records.txt": "short:row\na1:North:Alex:active\n"
+            }
+          },
+          {
+            "name": "Spaces and percent",
+            "args": [
+              "inventory.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/inventory.txt": "rack  A:Store:100% ready\n rack A :Store: Mina  \n"
+            },
+            "stdout": "rack  A:100% ready\n rack A : Mina  \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/inventory.txt": "rack  A:Store:100% ready\n rack A :Store: Mina  \n"
+            }
+          },
+          {
+            "name": "Unterminated record",
+            "args": [
+              "inventory.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/inventory.txt": "last:East:Remy"
+            },
+            "stdout": "last:Remy\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/inventory.txt": "last:East:Remy"
+            }
+          },
+          {
+            "name": "Empty file",
+            "args": [
+              "inventory.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/inventory.txt": ""
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/inventory.txt": ""
+            }
+          }
+        ]
+      },
+      "solution": [
+        "cut -s -d : -f 1,3 \"$1\"\n"
+      ],
+      "prerequisites": [
+        "shell-pipelines"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use quoted file arguments and pipelines from earlier units. This lesson introduces delimited fields and cut.",
+        "concepts": [
+          {
+            "title": "A record can contain several pieces",
+            "text": "A line such as cable:Store:Jules has three fields: cable, Store and Jules. A field is one piece separated by the chosen character. Here colon is the separator; spaces inside a piece remain data."
+          },
+          {
+            "title": "Select fields instead of searching for text",
+            "text": "cut -d : -f 1,3 prints fields 1 and 3 with the same separator. Numbering starts at 1. Add -s to skip lines with no separator. Selected fields stay in their original order, and a missing later field is simply absent."
+          },
+          {
+            "title": "Know which format you are reading",
+            "text": "This is simple delimiter-separated text, not quoted CSV: a colon always separates fields. The example uses different items. Run it, change the selection and inspect the output; no input file changes."
+          }
+        ],
+        "example": "cut -s -d : -f 1,3 labels.txt\n",
+        "inputs": "labels.txt contains cable:Store:Jules, a note without colons, and plug:Lab:Nora, each on its own line.",
+        "try_change": "Change 1,3 to 2,3 and run again. The location replaces the item in each output record.",
+        "fixture": {
+          "name": "Choose fields from a different list",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/labels.txt": "cable:Store:Jules\nno fields here\nplug:Lab:Nora\n"
+          },
+          "stdout": "cable:Jules\nplug:Nora\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/labels.txt": "cable:Store:Jules\nno fields here\nplug:Lab:Nora\n"
+          }
+        }
+      },
+      "retry_guidance": "If room names appear, check the field numbers. If notes remain, check -s. Empty owner fields should keep their separator; spaces are part of a field, not extra columns.",
+      "explanation": "cut selects existing fields in source order, preserves their text and uses the delimiter between selected fields. -s excludes note lines without a delimiter. Quoting the filename preserves spaces; it does not change the colon-based field format."
+    },
+    {
+      "id": "shell-sort-manifest",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-text",
+      "topic": "Text processing",
+      "title": "Make a stable unique manifest",
+      "summary": "Put a line-based queue in a predictable order with each distinct entry once.",
+      "objective": "The argument names an existing file containing one nonempty entry per line, in arbitrary order. Print each distinct whole entry once, in ascending C/POSIX byte order. Keep case, spaces and percent signs unchanged; uppercase and lowercase are different. Treat numeric-looking names as text (10 sorts before 2). Add a newline to the final output entry even if the input lacked one. Return 0, print no errors and change no files. An empty input prints nothing; supplied filenames never begin with a hyphen.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "The argument names an existing file containing one nonempty entry per line, in arbitrary order. Print each distinct whole entry once, in ascending C/POSIX byte order. Keep case, spaces and percent signs unchanged; uppercase and lowercase are different. Treat numeric-looking names as text (10 sorts before 2). Add a newline to the final output entry even if the input lacked one. Return 0, print no errors and change no files. An empty input prints nothing; supplied filenames never begin with a hyphen.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A pipeline transforms data in stages; inspect the first stage where the result differs.",
+          "action": "Run the script, inspect its output and files, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Each complete line is an entry. Sorting text is different from comparing numbers.",
+        "sort orders whole lines; -u keeps each identical line only once, including repetitions that were separated in the input.",
+        "Use a quoted file argument. Avoid changing case or collapsing spaces: those changes would merge different names."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax and the documented cut/sort/uniq option subset, tested with GNU tools in C/POSIX byte order. No numeric/key/locale sorting, CSV quoting, regex, awk or sed. Inputs are flat /work UTF-8 files with LF records, possibly an unterminated last line. Supplied filenames are canonical single names without directory parts or a leading hyphen; filename equality is not general real-filesystem alias protection. Execution and output limits apply; all learner work is simulated.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Repair the manifest: repeated entries may be far apart.\ncat \"$1\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Unsorted repeated entries",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "router\nswitch\nrouter\naccess point\n"
+            },
+            "stdout": "access point\nrouter\nswitch\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "router\nswitch\nrouter\naccess point\n"
+            }
+          },
+          {
+            "name": "Case and numeric-looking names",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "2\n10\na\nA\n2\n"
+            },
+            "stdout": "10\n2\nA\na\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "2\n10\na\nA\n2\n"
+            }
+          },
+          {
+            "name": "Spaces are part of a name",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "desk  A\ndesk A\ndesk  A\n100% ready\n"
+            },
+            "stdout": "100% ready\ndesk  A\ndesk A\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "desk  A\ndesk A\ndesk  A\n100% ready\n"
+            }
+          },
+          {
+            "name": "Final entry without newline",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "z\na\nz"
+            },
+            "stdout": "a\nz\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "z\na\nz"
+            }
+          },
+          {
+            "name": "Empty manifest",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": ""
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": ""
+            }
+          },
+          {
+            "name": "Unicode byte order",
+            "args": [
+              "unicode queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/unicode queue.txt": "é\nz\nÉ\né\n"
+            },
+            "stdout": "z\nÉ\né\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/unicode queue.txt": "é\nz\nÉ\né\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "sort -u \"$1\"\n"
+      ],
+      "prerequisites": [
+        "shell-cut-inventory"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use whole-line files and field extraction from the previous activity. This lesson introduces sorting and unique whole-line values.",
+        "concepts": [
+          {
+            "title": "Make the order predictable",
+            "text": "sort reads lines and prints them in order. These labs use C/POSIX byte order: spaces and uppercase/lowercase matter. Numeric-looking labels remain text, so 10 comes before 2. This is not a promise about every human-language alphabet or locale."
+          },
+          {
+            "title": "Keep one copy of each identical line",
+            "text": "sort -u combines sorting with removing identical lines, even when the original copies were far apart. It does not merge desk A with desk  A, because their spacing differs. The original file is left unchanged."
+          },
+          {
+            "title": "Print output or save it deliberately",
+            "text": "The example prints its result. A > redirection would replace a destination file, as in the earlier report lessons. The assignment only needs printed output; do not edit or overwrite its input."
+          }
+        ],
+        "example": "sort -u queue.txt\n",
+        "inputs": "queue.txt contains plug, cable and plug, each followed by a newline.",
+        "try_change": "Change -u to -r and run again. The queue reverses, and both plug lines remain.",
+        "fixture": {
+          "name": "A separate packing queue",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/queue.txt": "plug\ncable\nplug\n"
+          },
+          "stdout": "cable\nplug\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/queue.txt": "plug\ncable\nplug\n"
+          }
+        }
+      },
+      "retry_guidance": "If repeats remain, sort must also remove identical lines. If 2 precedes 10, the task calls for text order, not numeric sorting. Keep case and spacing exactly as supplied.",
+      "explanation": "Whole-line byte ordering makes the manifest deterministic without changing its names. -u removes identical sorted lines. An equivalent sort followed by adjacent deduplication also works; unsorted adjacent deduplication alone can miss separated copies."
+    },
+    {
+      "id": "shell-uniq-counts",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-text",
+      "topic": "Text processing",
+      "title": "Count locations without losing repeats",
+      "summary": "Build a location summary from unsorted inventory records.",
+      "objective": "The argument names an existing file of location:asset records; every record contains a colon. Print a count of records for each distinct location, ordered by location in C/POSIX byte order. Keep case and spaces; an empty location is a real value to count. Use the GNU-style uniq -c format: a right-aligned seven-column count, one space, the location and a newline. Return 0, print no errors and leave all files unchanged. Empty input prints nothing; supplied filenames never begin with a hyphen.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "The argument names an existing file of location:asset records; every record contains a colon. Print a count of records for each distinct location, ordered by location in C/POSIX byte order. Keep case and spaces; an empty location is a real value to count. Use the standard uniq -c format: a right-aligned seven-column count, one space, the location and a newline. Return 0, print no errors and leave all files unchanged. Empty input prints nothing; supplied filenames never begin with a hyphen.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A pipeline transforms data in stages; inspect the first stage where the result differs.",
+          "action": "Run the script, inspect its output and files, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "uniq compares adjacent lines only. Repeated locations may be separated in this inventory.",
+        "First extract the location field, then make identical locations adjacent, then count the groups.",
+        "uniq -c produces the requested padding itself. Sorting before counting orders locations; sorting the counts afterward is a different operation."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax and the documented cut/sort/uniq option subset, tested with GNU tools in C/POSIX byte order. No numeric/key/locale sorting, CSV quoting, regex, awk or sed. Inputs are flat /work UTF-8 files with LF records, possibly an unterminated last line. Supplied filenames are canonical single names without directory parts or a leading hyphen; filename equality is not general real-filesystem alias protection. Execution and output limits apply; all learner work is simulated.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Extract locations, then count their records.\ncut -d : -f 1 \"$1\" | uniq -c\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Nonadjacent locations",
+            "args": [
+              "locations.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/locations.txt": "West:pc1\nNorth:r1\nWest:pc2\nNorth:r2\nEast:a1\n"
+            },
+            "stdout": "      1 East\n      2 North\n      2 West\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/locations.txt": "West:pc1\nNorth:r1\nWest:pc2\nNorth:r2\nEast:a1\n"
+            }
+          },
+          {
+            "name": "One location",
+            "args": [
+              "locations.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/locations.txt": "Lab:a\nLab:b\nLab:c\n"
+            },
+            "stdout": "      3 Lab\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/locations.txt": "Lab:a\nLab:b\nLab:c\n"
+            }
+          },
+          {
+            "name": "Every location once",
+            "args": [
+              "locations.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/locations.txt": "Zulu:a\nAlpha:b\n"
+            },
+            "stdout": "      1 Alpha\n      1 Zulu\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/locations.txt": "Zulu:a\nAlpha:b\n"
+            }
+          },
+          {
+            "name": "Empty locations count",
+            "args": [
+              "locations.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/locations.txt": " :a\n:b\n:c\n :d\n"
+            },
+            "stdout": "      2 \n      2  \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/locations.txt": " :a\n:b\n:c\n :d\n"
+            }
+          },
+          {
+            "name": "Spaced and case-sensitive locations",
+            "args": [
+              "desk map.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/desk map.txt": "desk  A:x\ndesk A:y\ndesk  A:z\nDesk A:q"
+            },
+            "stdout": "      1 Desk A\n      2 desk  A\n      1 desk A\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/desk map.txt": "desk  A:x\ndesk A:y\ndesk  A:z\nDesk A:q"
+            }
+          },
+          {
+            "name": "Empty inventory",
+            "args": [
+              "locations.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/locations.txt": ""
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/locations.txt": ""
+            }
+          }
+        ]
+      },
+      "solution": [
+        "cut -d : -f 1 \"$1\" | sort | uniq -c\n"
+      ],
+      "prerequisites": [
+        "shell-sort-manifest"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use cut, whole-line sorting and pipelines from the previous two activities. This lesson introduces adjacent groups and uniq counts.",
+        "concepts": [
+          {
+            "title": "Adjacent means next to each other",
+            "text": "uniq combines runs of identical neighboring lines. It does not remember a name that appeared much earlier. sort first when you want all copies of a location to become one neighboring group."
+          },
+          {
+            "title": "Count a group without removing its evidence",
+            "text": "uniq -c prints how many input lines were in each group. The GNU-style count uses a seven-character-wide space-padded column followed by a space and the original value. Let the utility format it; no manual padding is needed. sort -u first would throw away the counts you need."
+          },
+          {
+            "title": "Transform records in useful stages",
+            "text": "The assignment starts with location:asset records. cut selects locations, sort puts equal values together, and uniq -c counts them. The example already contains one item per line, so it needs only the final two stages."
+          }
+        ],
+        "example": "sort queue.txt | uniq -c\n",
+        "inputs": "queue.txt contains plug, cable, plug, cable, cable, on separate lines. No arguments or supplied variables.",
+        "try_change": "Change -c to -d and run again. Repeated items are listed once, without counts.",
+        "fixture": {
+          "name": "Count different example items",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/queue.txt": "plug\ncable\nplug\ncable\ncable\n"
+          },
+          "stdout": "      3 cable\n      2 plug\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/queue.txt": "plug\ncable\nplug\ncable\ncable\n"
+          }
+        }
+      },
+      "retry_guidance": "Counts split into several entries for the same location mean identical lines were not made adjacent. Counts of 1 everywhere may mean -u removed duplicates before counting. Compare spaces and the empty-location group carefully.",
+      "explanation": "Extract fields before grouping so different asset names do not keep the same location apart. Sorting makes equal location lines adjacent. uniq -c counts every record in that group and provides consistent spacing; empty selected fields remain real empty lines."
+    },
+    {
+      "id": "shell-text-capstone",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-text",
+      "topic": "Text processing",
+      "title": "Audit duplicate asset identities",
+      "summary": "Combine field selection, grouping and safe report replacement into a data-quality audit.",
+      "objective": "Write an inventory audit. Exactly two arguments name an input file and output file. Data records have a nonempty asset ID before the first colon; lines without a colon are notes to skip. On success replace the output with Duplicate asset IDs plus a newline, then each ID appearing in at least two records once, in ascending C/POSIX byte order. Keep IDs case-sensitive and preserve spaces. Print Saved: OUTPUT plus a newline; return 0 with no errors. If the input is missing, the output-filename argument is empty/missing, argument count differs, or both names are identical, print only Cannot audit inventory plus a newline to standard error, return 2 and leave all files unchanged. Supplied filenames have no directory parts or leading hyphen; equality of these names is not general real-file alias protection.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Write an inventory audit. Exactly two arguments name an input file and output file. Data records have a nonempty asset ID before the first colon; lines without a colon are notes to skip. On success replace the output with Duplicate asset IDs plus a newline, then each ID appearing in at least two records once, in ascending C/POSIX byte order. Keep IDs case-sensitive and preserve spaces. Print Saved: OUTPUT plus a newline; return 0 with no errors. If the input is missing, the output is empty/missing, argument count differs, or both names are identical, print only Cannot audit inventory plus a newline to standard error, return 2 and leave all files unchanged. Supplied filenames have no directory parts or leading hyphen; equality of these names is not general real-file alias protection.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The script must work for all supplied inputs, including missing or empty values where specified.",
+          "action": "Compare the expected output and files with the latest run. Files and inputs are shown in optional input details.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A pipeline transforms data in stages; inspect the first stage where the result differs.",
+          "action": "Run the script, inspect its output and files, and repair the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "The report is about duplicate asset IDs, not identical whole records. Two rows can have the same ID but different locations.",
+        "Extract the first field, sort it, then choose only neighboring groups with more than one member. uniq -d emits each repeated group once.",
+        "Finish argument/input checks before opening output with >; append only the final pipeline result after the heading."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell syntax and the documented cut/sort/uniq option subset, tested with GNU tools in C/POSIX byte order. No numeric/key/locale sorting, CSV quoting, regex, awk or sed. Inputs are flat /work UTF-8 files with LF records, possibly an unterminated last line. Supplied filenames are canonical single names without directory parts or a leading hyphen; filename equality is not general real-filesystem alias protection. Execution and output limits apply; all learner work is simulated.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Arguments: an input inventory and an output audit filename.\ninput=$1\noutput=$2\n# Check the arguments and input before changing any file.\n# Build the audit heading and duplicate-ID list, then print confirmation.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Nonadjacent duplicate IDs",
+            "args": [
+              "assets.txt",
+              "audit.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/assets.txt": "r1:North\ns1:West\nr1:South\ns2:East\n",
+              "/work/audit.txt": "Old audit\n"
+            },
+            "stdout": "Saved: audit.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/assets.txt": "r1:North\ns1:West\nr1:South\ns2:East\n",
+              "/work/audit.txt": "Duplicate asset IDs\nr1\n"
+            }
+          },
+          {
+            "name": "No duplicate IDs",
+            "args": [
+              "assets.txt",
+              "audit.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/assets.txt": "r1:North\ns1:West\nnote only\n",
+              "/work/audit.txt": "Old audit\n"
+            },
+            "stdout": "Saved: audit.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/assets.txt": "r1:North\ns1:West\nnote only\n",
+              "/work/audit.txt": "Duplicate asset IDs\n"
+            }
+          },
+          {
+            "name": "Extra argument preserves existing files",
+            "args": [
+              "assets.txt",
+              "audit.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/assets.txt": "a:one\na:two\n",
+              "/work/audit.txt": "Keep this\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot audit inventory\n",
+            "status": 2,
+            "after": {
+              "/work/assets.txt": "a:one\na:two\n",
+              "/work/audit.txt": "Keep this\n"
+            }
+          },
+          {
+            "name": "Spaced case-sensitive IDs",
+            "args": [
+              "source.txt",
+              "shift  A.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "rack  A:one\nrack A:two\nrack  A:three\n10:x\n2:y\n10:z\nnote\n"
+            },
+            "stdout": "Saved: shift  A.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "rack  A:one\nrack A:two\nrack  A:three\n10:x\n2:y\n10:z\nnote\n",
+              "/work/shift  A.txt": "Duplicate asset IDs\n10\nrack  A\n"
+            }
+          },
+          {
+            "name": "Output cannot replace input",
+            "args": [
+              "assets.txt",
+              "assets.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/assets.txt": "a:one\na:two\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot audit inventory\n",
+            "status": 2,
+            "after": {
+              "/work/assets.txt": "a:one\na:two\n"
+            }
+          },
+          {
+            "name": "Missing source keeps old output",
+            "args": [
+              "missing.txt",
+              "audit.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/audit.txt": "Keep this\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot audit inventory\n",
+            "status": 2,
+            "after": {
+              "/work/audit.txt": "Keep this\n"
+            }
+          },
+          {
+            "name": "Missing source must not create output",
+            "args": [
+              "missing.txt",
+              "new.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Cannot audit inventory\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Empty destination",
+            "args": [
+              "assets.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/assets.txt": "a:one\na:two\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot audit inventory\n",
+            "status": 2,
+            "after": {
+              "/work/assets.txt": "a:one\na:two\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if [ \"$#\" -ne 2 ] || [ -z \"$2\" ] || [ \"$1\" = \"$2\" ]; then\n    printf 'Cannot audit inventory\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    :\nelse\n    printf 'Cannot audit inventory\\n' >&2\n    exit 2\nfi\nprintf 'Duplicate asset IDs\\n' > \"$2\"\ncut -s -d : -f 1 \"$1\" | sort | uniq -d >> \"$2\"\nprintf 'Saved: %s\\n' \"$2\"\n"
+      ],
+      "prerequisites": [
+        "shell-uniq-counts",
+        "shell-capstone"
+      ],
+      "teaching": {
+        "prerequisite_note": "Combines the three text-processing lessons with validation, exit status and safe redirection from the earlier report capstone. This lesson introduces uniq -d as the repeated-groups filter.",
+        "concepts": [
+          {
+            "title": "An identity collision can hide in different rows",
+            "text": "If cable appears in both cable:Store and cable:Desk, the full lines differ but the ID is duplicated. Select the identity field before deciding what repeats. Note lines without a colon are not records in this deliberately simple format."
+          },
+          {
+            "title": "Select repeated groups",
+            "text": "After sort makes equal IDs neighbors, uniq -d prints each group with two or more members once. uniq alone also prints singletons; sort -u removes the evidence of repetition. The small example finds repeated IDs without writing a report."
+          },
+          {
+            "title": "Protect data before publishing a report",
+            "text": "Validate both arguments and the source before any > or >>. Then replace the report heading and append the duplicate list. Supplied names are canonical single filenames; real filesystem links/alternate paths require more than textual equality, outside this activity."
+          }
+        ],
+        "example": "cut -s -d : -f 1 labels.txt | sort | uniq -d\n",
+        "inputs": "labels.txt contains cable:Store, plug:Lab, cable:Desk and note only, on separate lines.",
+        "try_change": "Change -d to -u and run again. Now only the ID that occurred once is printed.",
+        "fixture": {
+          "name": "Find repeated example labels",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/labels.txt": "cable:Store\nplug:Lab\ncable:Desk\nnote only\n"
+          },
+          "stdout": "cable\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/labels.txt": "cable:Store\nplug:Lab\ncable:Desk\nnote only\n"
+          }
+        }
+      },
+      "retry_guidance": "If single-use IDs appear, the last stage is not repeated-only selection. If a repeated ID is missing, check that sorting happens before grouping. If invalid input changes files, move redirection after validation.",
+      "explanation": "The pipeline answers a different question at each stage: which ID is in this row, which equal IDs can be grouped, and which groups contain more than one row? A heading-only report is a valid success when no duplicates exist. Validation precedes replacement so a missing source cannot destroy the old audit. The comparison applies only to the supplied simple filenames, not every real alias or file format."
+    }
+  ]
+}

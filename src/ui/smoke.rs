@@ -380,8 +380,10 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            n @ (250..=375 | 700..=771 | 900..=971 | 1600..=1653) => {
-                let (start, first) = if n >= 1600 {
+            n @ (250..=375 | 700..=771 | 900..=971 | 1600..=1653 | 1700..=1771) => {
+                let (start, first) = if n >= 1700 {
+                    (1700, 39)
+                } else if n >= 1600 {
                     (1600, 36)
                 } else if n >= 900 {
                     (900, 20)
@@ -437,7 +439,9 @@ impl LabApp {
                     }
                     6 => {
                         let lesson = self.scenarios[i].teaching.as_ref().unwrap();
-                        let (from, to) = if i >= 36 {
+                        let (from, to) = if i >= 39 {
+                            [("1,3", "2,3"), ("-u", "-r"), ("-c", "-d"), ("-d\n", "-u\n")][i - 39]
+                        } else if i >= 36 {
                             [
                                 ("local title=", "title="),
                                 ("loud", "busy"),
@@ -858,6 +862,68 @@ impl LabApp {
             979 => {
                 println!(
                     "PASS native reusable functions: four introductions, editable ungraded examples and suggested changes, assignment drafts, incorrect retry feedback, typed reference solutions and grading, light/dark 150% responsive rendering and independent Challenge. Synthetic profile only."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            1772 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                for i in 39..43 {
+                    assert!(progress::current_solved(
+                        &self.progress.attempts[&self.scenarios[i].id],
+                        &self.scenarios[i]
+                    ));
+                }
+                self.launch(41);
+                self.set_script_view(41, teaching::View::Assignment);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            1773 => shot = Some("shell-text-light-150".into()),
+            1774 => {
+                self.progress
+                    .attempts
+                    .get_mut("shell-uniq-counts")
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            1775 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("shell-text-challenge-dark-150".into());
+            }
+            1776 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -650.),
+                    modifiers: Default::default(),
+                });
+            }
+            1777 => {}
+            1778 => shot = Some("shell-text-challenge-scrolled-150".into()),
+            1779 => {
+                if let engine::State::Script { source, .. } = &mut self
+                    .progress
+                    .attempts
+                    .get_mut("shell-uniq-counts")
+                    .unwrap()
+                    .state
+                {
+                    source.push_str("\nprintf broken");
+                }
+                assert!(!progress::current_solved(
+                    &self.progress.attempts["shell-uniq-counts"],
+                    &self.scenarios[41]
+                ));
+                println!(
+                    "PASS native text processing: four introductions, isolated example Runs/edits, full assignments, wrong retries, keyboard repair/current Run, saved reload, invalidation and light/dark150 scrolling. Synthetic profile only; no novice or Windows/macOS desktop acceptance."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

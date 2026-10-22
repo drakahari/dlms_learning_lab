@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus eighteen scripting assignments in four units and six Linux file-management foundations, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-two scripting assignments in five units and six Linux file-management foundations, plus six IPv6 static-network assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -51,7 +51,7 @@ LPIC-2 assumes LPIC-1 foundations. Sequence capacity and boot recovery → advan
 
 ## Bash/Shell progression
 
-The first fifteen shell labs use **portable shell syntax**; the next three explicitly teach **Bash-specific function scope**. All are tested against Bash 5.3.9 on Fedora. Bash is the reference oracle, not the learner engine; this is not a claim of POSIX or Bash conformance.
+The first fifteen shell labs and four text-processing labs use **portable shell syntax**; the three scope lessons explicitly teach **Bash-specific function scope**. All are tested against Bash 5.3.9 on Fedora. Bash is the reference oracle, not the learner engine; this is not a claim of POSIX or Bash conformance.
 
 | Stage | Status / distinct assignments | Prerequisites | Capability and portability boundary |
 | --- | --- | --- | --- |
@@ -59,7 +59,7 @@ The first fifteen shell labs use **portable shell syntax**; the next three expli
 | 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x` and pipefail remain unsupported; Bash local is taught in the following scope unit |
 | 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Planned:** option parser and streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. getopts, compound/function-call redirects, command substitution and parameter defaults remain unsupported. Explain subshell scope/status before substitution |
 | 4. Structured Bash | **Planned:** safe filename queue; associative lookup; array-based command construction; regex validation | Reusable functions and argument boundaries | Bash-specific indexed/associative arrays, `[[ ]]`, `=~`, arithmetic, `${array[@]}`. Explicit Bash track labels; do not suggest portability |
-| 5. Text and data | **Planned:** delimiter-aware inventory transform; regex audit; compare snapshots; recover malformed rows | Streams, conditions and functions | Bounded C-locale sort/uniq/cut models implemented; dependent lessons and broader sed/awk/regex/locale behavior still needed. Distinguish shell language from external utility semantics |
+| 5. Text and data | **Implemented:** inventory field extraction, unique manifests, grouped location counts and a duplicate-ID audit. **Planned:** regex audit, snapshot comparison and broader malformed-row recovery | Streams, conditions and functions | Bounded C-locale sort/uniq/cut models and four reviewed assignments implemented; broader sed/awk/regex/locale behavior still needed. Distinguish shell language from external utility semantics |
 | 6. Safe automation projects | **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |
 
 Each planned stage includes a guided repair, independent construction and capstone with multiple deterministic cases, adverse inputs, alternate supported solutions and current-state invalidation. Do not simply vary constants to inflate counts. Before implementing unsupported syntax, extend the grammar, expansion order, evaluator and development-oracle fixtures; review fidelity and resource bounds before authoring the lesson.
@@ -69,3 +69,5 @@ Each planned stage includes a guided repair, independent construction and capsto
 The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Three [Bash scope/debugging assignments](SHELL_SCOPE.md) now follow the reusable unit, using the tested function-local subset. Next extend structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
 
 Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](LINUX_FILES.md). This delivers narrow practical slices of LPIC-1 103.1, 103.3 and 104.5; the full objectives remain partial.
+
+Four [text-record assignments](SHELL_TEXT.md) add narrow LPIC-1 103.2 filter practice, with separate cut/sort/uniq evidence. Full tool and option coverage remain open.

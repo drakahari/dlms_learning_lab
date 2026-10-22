@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking and Linux practice. Thirty-nine authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments and three Bash scope/debugging assignments, plus six Linux file-management foundations and six IPv6 configuration/troubleshooting assignments. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking and Linux practice. Forty-three authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments and three Bash scope/debugging assignments and four text-processing/audit assignments, plus six Linux file-management foundations and six IPv6 configuration/troubleshooting assignments. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -67,6 +67,8 @@ Completion comes from current state and does not require visiting walkthrough se
 Back to library retains the selected track, search and filters. Reset asks for confirmation and clears only that attempt, including drafts, transcript and numerical practice; favorites and other labs remain. Local state saves after edits using a synced temporary file and atomic replacement. Corrupt/future saves are retained and opened read-only. A profile writer lock prevents concurrent app copies from silently replacing each other’s drafts. Settings → Your data provides checked backup export/restore; see [progress recovery](docs/PROGRESS_RECOVERY.md).
 
 The [Bash scope unit](docs/SHELL_SCOPE.md) adds three practical debugging assignments: protect caller settings, trace nested filter visibility and repair a review builder that changes the wrong file. Explicitly Bash-specific `local` is taught before use; alternative supported repairs pass the same behavior tests.
+
+Four [text-record lessons](docs/SHELL_TEXT.md) teach delimited field selection, stable unique manifests, accurate grouped counts and a duplicate-identity audit. Scripts use the same bounded simulator, separate examples and behavior grading.
 
 Shell evaluator upgrades retain earlier output and credit separately from current success. Run rechecks the saved draft; unsupported behavior cannot reuse earlier completion. The first upgraded write keeps an exact non-overwriting backup. [Recovery details](docs/PROGRESS_RECOVERY.md).
 

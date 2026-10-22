@@ -27,6 +27,10 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("local title=", "title="),
         ("loud", "busy"),
         ("local destination=", "destination="),
+        ("1,3", "2,3"),
+        ("-u", "-r"),
+        ("-c", "-d"),
+        ("-d\n", "-u\n"),
     ];
     assert_eq!(
         edits.len(),
