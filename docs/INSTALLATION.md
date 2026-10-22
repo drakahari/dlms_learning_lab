@@ -103,3 +103,10 @@ Source `90039eefdddb0c1cb99482841664a3b602d4b2e1`,43 assignments/ten units, eval
 | Windows `...-g90039eefdddb-x86_64-pc-windows-msvc-windows-candidate.zip` | `93a106c27aac0425294581a6dff7117a9d66f1f8ab2f522fa7837229f49af56e` |
 
 Full prefix: `dlms-learning-lab-0.1.0`. Fedora archive was checksum-verified, extracted and installed/upgraded under an isolated /tmp root. Installed CLI validated43/ten outside the checkout; desktop-file-validate passed and the exact synthetic progress sentinel stayed intact. The installed native app then passed all4 text-lesson synthetic flows, including larger text/light/dark views. These are controlled installation/render/input checks; the sentinel is a retained-file test, not an old profile opened for acceptance. Real Windows/macOS desktop installation/runtime/accessibility and macOS notice/signing gates remain open. No release published.
+
+
+### M20 Fedora installation candidate
+
+Source `94b0dbe4883a5124033faf8c86e32abf21d74e9a` contains47 authored assignments/eleven units, evaluator3. Fedora44 archive `dlms-learning-lab-0.1.0-g94b0dbe4883a-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` SHA-256 `4453f212087bd8ff99f545ffccc60bbf0a66832a017be94d921112dcdb37064f`; binary `d49476cd39c19a8a567ae82c3174e0bc384eba1908aae5c7abf10d9c72338194`. Checksum-verified, extracted and installed/upgraded the isolated /tmp Fedora test root. Outside-checkout CLI validation and desktop-file-validate passed; the exact synthetic progress sentinel was retained (a file-retention check). Installed native full counter-unit flow passed all4 lessons, wrong retries, keyboard repair/current runs, save/reload/invalidation and light/dark150 rendering. No personal profile or release publication.
+
+Initial native CI run39828321927 at this source passed Ubuntu/macOS but failed a Windows restore-dialog UI assertion. Windows is not marked validated for this source; fixture diagnostics/geometry follow-up is under investigation. Earlier successful candidate identities remain above. macOS notice/signing and actual Windows/macOS desktop acceptance remain open.

@@ -1171,6 +1171,11 @@ fn data_preview(ctx: &egui::Context, a: &mut LabApp) {
     for _ in 0..100 {
         draw(ctx, a);
         if a.metrics.data_confirm.is_some() {
+            // Async inspection can first show the window on this frame. Let egui
+            // settle its measured geometry before using a synthetic pointer target.
+            draw(ctx, a);
+            draw(ctx, a);
+            assert!(a.metrics.data_confirm.is_some());
             return;
         }
         std::thread::yield_now();
@@ -1251,7 +1256,7 @@ fn restoring_corrupt_profile_protects_unsaved_read_only_session_work() {
     data_preview(&ctx, &mut a);
     let r = a.metrics.data_confirm.unwrap();
     click(&ctx, &mut a, r);
-    assert!(!a.read_only);
+    assert!(!a.read_only, "{}", a.data_tools.restore_diagnostic());
     assert_eq!(
         std::fs::read(dir.path().join("progress-before-restore-1.json")).unwrap(),
         b"corrupt original"

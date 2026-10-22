@@ -15,6 +15,14 @@ enum Mode {
     Restore,
 }
 impl Tools {
+    #[cfg(test)]
+    pub(super) fn restore_diagnostic(&self) -> String {
+        format!(
+            "message: {:?}; review still open: {}",
+            self.message,
+            self.candidate.is_some()
+        )
+    }
     pub(super) fn modal_open(&self) -> bool {
         self.browser.is_some() || self.inspection.is_some() || self.candidate.is_some()
     }
