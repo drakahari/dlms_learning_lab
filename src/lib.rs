@@ -7,6 +7,7 @@ pub mod pack;
 pub mod progress;
 
 pub mod ipv4;
+pub mod ipv6;
 
 pub mod workspace;
 
