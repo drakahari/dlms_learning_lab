@@ -81,11 +81,18 @@ fn every_script_has_a_working_alternate_and_rejects_a_plausible_mistake_and_hard
     }
 }
 #[test]
-fn composition_mistakes_can_be_partial_but_never_earn_full_credit() {
+fn authored_mistakes_can_be_partial_but_never_earn_full_credit() {
     let labs = pack::bundled().unwrap();
     let rows: Vec<Review> =
         serde_json::from_str(include_str!("fixtures/shell-content-review.json")).unwrap();
-    for id in ["shell-eof", "shell-batch-audit"] {
+    for id in [
+        "shell-eof",
+        "shell-batch-audit",
+        "shell-functions",
+        "shell-return",
+        "shell-shift",
+        "shell-bundle",
+    ] {
         let row = rows.iter().find(|r| r.id == id).unwrap();
         let lab = labs.iter().find(|s| s.id == id).unwrap();
         let Goal::Script { cases } = &lab.goal else {
@@ -132,4 +139,27 @@ fn literal_filter_must_not_assume_a_space_after_the_pattern() {
     let wrong = "grep -F 'ERROR ' \"$1\" | grep -F \"$2\"";
     let boundary = cases.last().unwrap();
     assert!(!boundary.accepts(&shell::run(wrong, boundary)));
+}
+#[test]
+fn preflight_failure_must_not_even_create_an_empty_new_destination() {
+    let labs = pack::bundled().unwrap();
+    let lab = labs.iter().find(|s| s.id == "shell-bundle").unwrap();
+    let Goal::Script { cases } = &lab.goal else {
+        panic!()
+    };
+    let dlms_learning_lab::engine::State::Script { source, .. } = &lab.initial else {
+        panic!()
+    };
+    let wrong = source.replace(
+        "printf '' > \"$destination\"",
+        "printf '' >> \"$destination\"",
+    );
+    let c = cases.last().unwrap();
+    let r = shell::run(&wrong, c);
+    assert_eq!(r.error, None);
+    assert_eq!(r.stdout, c.stdout);
+    assert_eq!(r.stderr, c.stderr);
+    assert_eq!(r.status, c.status);
+    assert!(r.files.contains_key("/work/new-bundle"));
+    assert!(!c.accepts(&r));
 }

@@ -20,7 +20,12 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("OPEN", "CLOSED"),
         (r#" || [ -n "$name" ]"#, ""),
         ("found_problem=yes", "found_problem=''"),
+        ("Rowan Reed", "Tess Ford"),
+        ("return 1", "exit 1"),
+        ("shift\n", "shift 0\n"),
+        (r#"if available "$@""#, "if available menu.txt"),
     ];
+    assert_eq!(edits.len(), labs.len() - 9);
     for (s, (from, to)) in labs.iter().skip(9).zip(edits) {
         let l = s.teaching.as_ref().unwrap();
         l.validate().unwrap();

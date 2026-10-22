@@ -199,7 +199,10 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("reusable")
+            {
+                900
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("composition-layout")
             {
                 772

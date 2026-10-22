@@ -1999,5 +1999,906 @@
       "status": 0,
       "after": {}
     }
+  },
+  {
+    "name": "shell-functions reference 0",
+    "source": "print_label() {\n    printf 'Label: %s\\n' \"$1\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+    "case": {
+      "name": "Several labels",
+      "args": [
+        "North",
+        "South"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: North\nLabel: South\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions alternate 0",
+    "source": "emit() { printf '%s%s\\n' 'Label: ' \"$1\"; }\nfor value in \"$@\"; do emit \"$value\"; done\n",
+    "case": {
+      "name": "Several labels",
+      "args": [
+        "North",
+        "South"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: North\nLabel: South\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions reference 1",
+    "source": "print_label() {\n    printf 'Label: %s\\n' \"$1\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+    "case": {
+      "name": "Space and percent",
+      "args": [
+        "West  desk",
+        "100% ready"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: West  desk\nLabel: 100% ready\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions alternate 1",
+    "source": "emit() { printf '%s%s\\n' 'Label: ' \"$1\"; }\nfor value in \"$@\"; do emit \"$value\"; done\n",
+    "case": {
+      "name": "Space and percent",
+      "args": [
+        "West  desk",
+        "100% ready"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: West  desk\nLabel: 100% ready\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions reference 2",
+    "source": "print_label() {\n    printf 'Label: %s\\n' \"$1\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+    "case": {
+      "name": "Empty label is still an argument",
+      "args": [
+        "",
+        "Next"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: \nLabel: Next\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions alternate 2",
+    "source": "emit() { printf '%s%s\\n' 'Label: ' \"$1\"; }\nfor value in \"$@\"; do emit \"$value\"; done\n",
+    "case": {
+      "name": "Empty label is still an argument",
+      "args": [
+        "",
+        "Next"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Label: \nLabel: Next\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions reference 3",
+    "source": "print_label() {\n    printf 'Label: %s\\n' \"$1\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+    "case": {
+      "name": "Empty queue",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions alternate 3",
+    "source": "emit() { printf '%s%s\\n' 'Label: ' \"$1\"; }\nfor value in \"$@\"; do emit \"$value\"; done\n",
+    "case": {
+      "name": "Empty queue",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-functions teaching",
+    "source": "badge() {\n    printf 'Visitor: %s\\n' \"$1\"\n}\nbadge Mina\nbadge 'Rowan Reed'\n",
+    "case": {
+      "name": "Two reusable calls",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Visitor: Mina\nVisitor: Rowan Reed\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return reference 0",
+    "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "All labels accepted",
+      "args": [
+        "North",
+        "West desk"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Accepted: North\nAccepted: West desk\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return alternate 0",
+    "source": "bad=''\nfor item in \"$@\"; do\nif test -n \"$item\"; then\nprintf '%s%s\\n' 'Accepted: ' \"$item\"\nelse\nprintf '%s\\n' 'Rejected: empty label' >&2\nbad=yes\nfi\ndone\nif test -n \"$bad\"; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "All labels accepted",
+      "args": [
+        "North",
+        "West desk"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Accepted: North\nAccepted: West desk\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return reference 1",
+    "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Reject first but continue",
+      "args": [
+        "",
+        "Later"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Accepted: Later\n",
+      "stderr": "Rejected: empty label\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return alternate 1",
+    "source": "bad=''\nfor item in \"$@\"; do\nif test -n \"$item\"; then\nprintf '%s%s\\n' 'Accepted: ' \"$item\"\nelse\nprintf '%s\\n' 'Rejected: empty label' >&2\nbad=yes\nfi\ndone\nif test -n \"$bad\"; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Reject first but continue",
+      "args": [
+        "",
+        "Later"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Accepted: Later\n",
+      "stderr": "Rejected: empty label\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return reference 2",
+    "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Rejection stays remembered",
+      "args": [
+        "First",
+        "",
+        "Last"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Accepted: First\nAccepted: Last\n",
+      "stderr": "Rejected: empty label\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return alternate 2",
+    "source": "bad=''\nfor item in \"$@\"; do\nif test -n \"$item\"; then\nprintf '%s%s\\n' 'Accepted: ' \"$item\"\nelse\nprintf '%s\\n' 'Rejected: empty label' >&2\nbad=yes\nfi\ndone\nif test -n \"$bad\"; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Rejection stays remembered",
+      "args": [
+        "First",
+        "",
+        "Last"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Accepted: First\nAccepted: Last\n",
+      "stderr": "Rejected: empty label\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return reference 3",
+    "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Two rejected labels",
+      "args": [
+        "",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Rejected: empty label\nRejected: empty label\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return alternate 3",
+    "source": "bad=''\nfor item in \"$@\"; do\nif test -n \"$item\"; then\nprintf '%s%s\\n' 'Accepted: ' \"$item\"\nelse\nprintf '%s\\n' 'Rejected: empty label' >&2\nbad=yes\nfi\ndone\nif test -n \"$bad\"; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "Two rejected labels",
+      "args": [
+        "",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Rejected: empty label\nRejected: empty label\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return reference 4",
+    "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "No labels",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return alternate 4",
+    "source": "bad=''\nfor item in \"$@\"; do\nif test -n \"$item\"; then\nprintf '%s%s\\n' 'Accepted: ' \"$item\"\nelse\nprintf '%s\\n' 'Rejected: empty label' >&2\nbad=yes\nfi\ndone\nif test -n \"$bad\"; then exit 2; fi\nexit 0\n",
+    "case": {
+      "name": "No labels",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-return teaching",
+    "source": "admit() {\n    if [ -z \"$1\" ]; then\n        printf 'Name needed\\n' >&2\n        return 1\n    fi\n    printf 'Welcome: %s\\n' \"$1\"\n}\nadmit ''\nprintf 'Still running\\n'\nadmit Mina\n",
+    "case": {
+      "name": "Return keeps the caller alive",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Still running\nWelcome: Mina\n",
+      "stderr": "Name needed\n",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift reference 0",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+    "case": {
+      "name": "Prefix then labels",
+      "args": [
+        "Team",
+        "North",
+        "South"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Team: North\nTeam: South\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift alternate 0",
+    "source": "labels() {\nheading=$1\nshift\nfor item in \"$@\"; do printf '%s: %s\\n' \"$heading\" \"$item\"; done\n}\nif test -n \"$1\"; then labels \"$@\"; else printf 'Prefix required\\n' >&2; exit 2; fi\n",
+    "case": {
+      "name": "Prefix then labels",
+      "args": [
+        "Team",
+        "North",
+        "South"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Team: North\nTeam: South\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift reference 1",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+    "case": {
+      "name": "Spaces and empty values",
+      "args": [
+        "Work 100%",
+        "West desk",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Work 100%: West desk\nWork 100%: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift alternate 1",
+    "source": "labels() {\nheading=$1\nshift\nfor item in \"$@\"; do printf '%s: %s\\n' \"$heading\" \"$item\"; done\n}\nif test -n \"$1\"; then labels \"$@\"; else printf 'Prefix required\\n' >&2; exit 2; fi\n",
+    "case": {
+      "name": "Spaces and empty values",
+      "args": [
+        "Work 100%",
+        "West desk",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Work 100%: West desk\nWork 100%: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift reference 2",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+    "case": {
+      "name": "Prefix only",
+      "args": [
+        "Group"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift alternate 2",
+    "source": "labels() {\nheading=$1\nshift\nfor item in \"$@\"; do printf '%s: %s\\n' \"$heading\" \"$item\"; done\n}\nif test -n \"$1\"; then labels \"$@\"; else printf 'Prefix required\\n' >&2; exit 2; fi\n",
+    "case": {
+      "name": "Prefix only",
+      "args": [
+        "Group"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift reference 3",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+    "case": {
+      "name": "No prefix",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Prefix required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift alternate 3",
+    "source": "labels() {\nheading=$1\nshift\nfor item in \"$@\"; do printf '%s: %s\\n' \"$heading\" \"$item\"; done\n}\nif test -n \"$1\"; then labels \"$@\"; else printf 'Prefix required\\n' >&2; exit 2; fi\n",
+    "case": {
+      "name": "No prefix",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Prefix required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift reference 4",
+    "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+    "case": {
+      "name": "Explicit empty prefix",
+      "args": [
+        "",
+        "Later"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Prefix required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift alternate 4",
+    "source": "labels() {\nheading=$1\nshift\nfor item in \"$@\"; do printf '%s: %s\\n' \"$heading\" \"$item\"; done\n}\nif test -n \"$1\"; then labels \"$@\"; else printf 'Prefix required\\n' >&2; exit 2; fi\n",
+    "case": {
+      "name": "Explicit empty prefix",
+      "args": [
+        "",
+        "Later"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Prefix required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-shift teaching",
+    "source": "heading=$1\nshift\nfor name in \"$@\"; do\n    printf '%s: %s\\n' \"$heading\" \"$name\"\ndone\nprintf 'Remaining=%s\\n' \"$#\"\n",
+    "case": {
+      "name": "Consume a heading",
+      "args": [
+        "Guest",
+        "Mina",
+        "Rowan Reed"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Guest: Mina\nGuest: Rowan Reed\nRemaining=2\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-bundle reference 0",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Replace after validating all sources",
+      "args": [
+        "bundle",
+        "north",
+        "south"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "keep old until safe\n",
+        "/work/north": "alpha\n",
+        "/work/south": "beta\n",
+        "/work/keep": "unchanged\n"
+      },
+      "stdout": "Saved: bundle\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/bundle": "Bundle\nFile: north\nalpha\nFile: south\nbeta\n",
+        "/work/north": "alpha\n",
+        "/work/south": "beta\n",
+        "/work/keep": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle alternate 0",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "Replace after validating all sources",
+      "args": [
+        "bundle",
+        "north",
+        "south"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "keep old until safe\n",
+        "/work/north": "alpha\n",
+        "/work/south": "beta\n",
+        "/work/keep": "unchanged\n"
+      },
+      "stdout": "Saved: bundle\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/bundle": "Bundle\nFile: north\nalpha\nFile: south\nbeta\n",
+        "/work/north": "alpha\n",
+        "/work/south": "beta\n",
+        "/work/keep": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle reference 1",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Filename spaces and final text",
+      "args": [
+        "merged notes",
+        "west desk",
+        "empty"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/west desk": "no final line break",
+        "/work/empty": ""
+      },
+      "stdout": "Saved: merged notes\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/west desk": "no final line break",
+        "/work/empty": "",
+        "/work/merged notes": "Bundle\nFile: west desk\nno final line breakFile: empty\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle alternate 1",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "Filename spaces and final text",
+      "args": [
+        "merged notes",
+        "west desk",
+        "empty"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/west desk": "no final line break",
+        "/work/empty": ""
+      },
+      "stdout": "Saved: merged notes\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/west desk": "no final line break",
+        "/work/empty": "",
+        "/work/merged notes": "Bundle\nFile: west desk\nno final line breakFile: empty\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle reference 2",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Missing first source",
+      "args": [
+        "bundle",
+        "absent",
+        "later"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "preserve\n",
+        "/work/later": "valid\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/bundle": "preserve\n",
+        "/work/later": "valid\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle alternate 2",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "Missing first source",
+      "args": [
+        "bundle",
+        "absent",
+        "later"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "preserve\n",
+        "/work/later": "valid\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/bundle": "preserve\n",
+        "/work/later": "valid\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle reference 3",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Missing later source",
+      "args": [
+        "bundle",
+        "first",
+        "absent"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "preserve\n",
+        "/work/first": "valid\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/bundle": "preserve\n",
+        "/work/first": "valid\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle alternate 3",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "Missing later source",
+      "args": [
+        "bundle",
+        "first",
+        "absent"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "preserve\n",
+        "/work/first": "valid\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/bundle": "preserve\n",
+        "/work/first": "valid\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle reference 4",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "No arguments",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep": "unchanged"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/keep": "unchanged"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle alternate 4",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "No arguments",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep": "unchanged"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/keep": "unchanged"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle reference 5",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Destination but no sources",
+      "args": [
+        "bundle"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "preserve\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/bundle": "preserve\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle alternate 5",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "Destination but no sources",
+      "args": [
+        "bundle"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bundle": "preserve\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/bundle": "preserve\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle teaching",
+    "source": "available() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            :\n        else\n            return 1\n        fi\n    done\n    return 0\n}\nif available \"$@\"; then\n    printf 'Ready to read\\n'\nelse\n    printf 'Nothing changed\\n'\nfi\n",
+    "case": {
+      "name": "Preflight without mutation",
+      "args": [
+        "menu.txt",
+        "missing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/menu.txt": "Soup\n"
+      },
+      "stdout": "Nothing changed\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/menu.txt": "Soup\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle new destination reference",
+    "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Invalid batch must not create a new destination",
+      "args": [
+        "new-bundle",
+        "first",
+        "absent"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/first": "valid\n",
+        "/work/keep": "untouched\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/first": "valid\n",
+        "/work/keep": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-bundle new destination alternate",
+    "source": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "case": {
+      "name": "Invalid batch must not create a new destination",
+      "args": [
+        "new-bundle",
+        "first",
+        "absent"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/first": "valid\n",
+        "/work/keep": "untouched\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot assemble bundle\n",
+      "status": 2,
+      "after": {
+        "/work/first": "valid\n",
+        "/work/keep": "untouched\n"
+      }
+    }
   }
 ]

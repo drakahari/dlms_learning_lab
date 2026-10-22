@@ -1,0 +1,738 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-functions",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-reusable",
+      "topic": "Reusable functions",
+      "title": "Reuse a label printer",
+      "summary": "Turn repeated label output into a small reusable function.",
+      "objective": "Build a reusable label printer and apply it to every supplied argument, in order. Print exactly Label: VALUE plus a newline for each argument; spaces, percent signs and empty values must survive unchanged. With no arguments print nothing. Return 0, print no error messages and change no files. The starter provides a function and the loop that calls it.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Build a reusable label printer and apply it to every supplied argument, in order. Print exactly Label: VALUE plus a newline for each argument; spaces, percent signs and empty values must survive unchanged. With no arguments print nothing. Return 0, print no error messages and change no files. The starter provides a function and the loop that calls it.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Inspect the call: how many arguments does print_label receive each time?",
+        "Inside a function, $1 means its first argument, even if the surrounding script has many arguments.",
+        "Quote each value both when passing it and when printing it."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable brace-body functions, return, shift and the documented bounded shell subset. Function calls must be separate commands; whole-function redirection and pipeline calls are unsupported. Scalars are shared, not automatically local. Only declared flat /work text files exist. Grading compares behavior and also accepts equivalent supported programs. Supplied filenames never begin with a hyphen; full utility option parsing is not implemented.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Repair the reusable printer; the caller already passes each label.\nprint_label() {\n    printf 'Label: %s\\n' \"$2\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Several labels",
+            "args": [
+              "North",
+              "South"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Label: North\nLabel: South\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Space and percent",
+            "args": [
+              "West  desk",
+              "100% ready"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Label: West  desk\nLabel: 100% ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty label is still an argument",
+            "args": [
+              "",
+              "Next"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Label: \nLabel: Next\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty queue",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "print_label() {\n    printf 'Label: %s\\n' \"$1\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-batch-audit"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on quoted arguments, for loops, printf and successful completion. No function knowledge is assumed.",
+        "concepts": [
+          {
+            "title": "A function names a reusable group of commands",
+            "text": "A function lets you write a small job once and call it with different values. badge() { starts a definition; } ends it. Defining the function does not run its commands. Place its definition before its first call."
+          },
+          {
+            "title": "Each call gets its own arguments",
+            "text": "badge Mina calls badge with one argument. Inside badge, $1 is Mina. A later badge call gets its own $1. When it finishes, the surrounding script gets its original positional arguments back."
+          },
+          {
+            "title": "Names and parameters are different",
+            "text": "Function arguments are temporary, but ordinary named variables remain shared in this portable subset. Do not assume an assignment inside a function is private. Quote values at the call and inside the function. The final command supplies the function\u2019s status."
+          }
+        ],
+        "example": "badge() {\n    printf 'Visitor: %s\\n' \"$1\"\n}\nbadge Mina\nbadge 'Rowan Reed'\n",
+        "inputs": "No inputs or files are supplied. Two calls use Mina and Rowan Reed.",
+        "try_change": "Change the second badge argument to a different two-word name and run again.",
+        "fixture": {
+          "name": "Two reusable calls",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Visitor: Mina\nVisitor: Rowan Reed\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "Compare labels across calls: a missing value may mean the function read the wrong positional argument; extra pieces usually mean a value was split.",
+      "explanation": "The loop supplies one label per call. That label becomes the function\u2019s first argument; the surrounding argument list is restored after every call. A fixed printf format keeps percent signs in data harmless. An empty argument still creates one label line."
+    },
+    {
+      "id": "shell-return",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-reusable",
+      "topic": "Function status",
+      "title": "Reject one item without ending the batch",
+      "summary": "Repair a helper so a bad item does not prevent later useful work.",
+      "objective": "For every label argument, print Accepted: LABEL plus a newline if it is nonempty. For an empty label print Rejected: empty label plus a newline to standard error, then continue to later labels. Finish with status 2 if any label was empty, otherwise 0; an empty batch succeeds with no output. Preserve values and all files. Repair the starter\u2019s early termination.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "For every label argument, print Accepted: LABEL plus a newline if it is nonempty. For an empty label print Rejected: empty label plus a newline to standard error, then continue to later labels. Finish with status 2 if any label was empty, otherwise 0; an empty batch succeeds with no output. Preserve values and all files. Repair the starter\u2019s early termination.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Which instruction stops just a helper, and which stops the entire script?",
+        "Keep checking later labels even when one call fails.",
+        "The final status must come from whether any item failed, not just the last call."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable brace-body functions, return, shift and the documented bounded shell subset. Function calls must be separate commands; whole-function redirection and pipeline calls are unsupported. Scalars are shared, not automatically local. Only declared flat /work text files exist. Grading compares behavior and also accepts equivalent supported programs. Supplied filenames never begin with a hyphen; full utility option parsing is not implemented.",
+      "initial": {
+        "kind": "Script",
+        "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        exit 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "All labels accepted",
+            "args": [
+              "North",
+              "West desk"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Accepted: North\nAccepted: West desk\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Reject first but continue",
+            "args": [
+              "",
+              "Later"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Accepted: Later\n",
+            "stderr": "Rejected: empty label\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Rejection stays remembered",
+            "args": [
+              "First",
+              "",
+              "Last"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Accepted: First\nAccepted: Last\n",
+            "stderr": "Rejected: empty label\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Two rejected labels",
+            "args": [
+              "",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Rejected: empty label\nRejected: empty label\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "No labels",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-functions",
+        "shell-batch-audit"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on function calls and the earlier batch failure flag. This lesson distinguishes return from exit.",
+        "concepts": [
+          {
+            "title": "Return ends this call; exit ends the script",
+            "text": "A helper can reject one item without stopping the whole batch. return 1 leaves the function and gives the caller status 1. exit 1 ends the complete script, so later items never get a chance."
+          },
+          {
+            "title": "The caller decides how to continue",
+            "text": "An if can call a function as its condition. Status 0 chooses then; nonzero chooses else. The caller can remember a failure and continue. return without a number uses the previous command\u2019s status."
+          },
+          {
+            "title": "Batch status remembers earlier problems",
+            "text": "A later successful item must not erase an earlier rejection. The shared failure flag records whether any item failed. The no-op : is a successful command for an intentionally empty branch."
+          }
+        ],
+        "example": "admit() {\n    if [ -z \"$1\" ]; then\n        printf 'Name needed\\n' >&2\n        return 1\n    fi\n    printf 'Welcome: %s\\n' \"$1\"\n}\nadmit ''\nprintf 'Still running\\n'\nadmit Mina\n",
+        "inputs": "No external inputs. The first call has an empty name and the second has Mina.",
+        "try_change": "Change return 1 to exit 1 and run again. Does Still running appear?",
+        "fixture": {
+          "name": "Return keeps the caller alive",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Still running\nWelcome: Mina\n",
+          "stderr": "Name needed\n",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "If later labels disappear, inspect early exit. If output is right but status is 0 after a rejection, check whether a later success erased an earlier failure.",
+      "explanation": "return hands control back to the caller; it does not make the entire task successful. The caller handles every label and retains a failure flag. This separates an item\u2019s result from the whole batch\u2019s result."
+    },
+    {
+      "id": "shell-shift",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-reusable",
+      "topic": "Argument handling",
+      "title": "Separate a header from the remaining items",
+      "summary": "Consume a leading argument while preserving the remaining item boundaries.",
+      "objective": "Argument 1 is a required nonempty prefix. If it is missing or empty, print Prefix required plus a newline to standard error, return 2 and print nothing else. Otherwise print PREFIX: LABEL plus a newline for each remaining argument, preserving spaces and empty labels. A prefix with no labels succeeds without output. Return 0 on success and change no files.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Argument 1 is a required nonempty prefix. If it is missing or empty, print Prefix required plus a newline to standard error, return 2 and print nothing else. Otherwise print PREFIX: LABEL plus a newline for each remaining argument, preserving spaces and empty labels. A prefix with no labels succeeds without output. Return 0 on success and change no files.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Save the prefix before removing its argument.",
+        "The remaining argument list should contain labels only.",
+        "Test both a prefix-only call and a label containing spaces."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable brace-body functions, return, shift and the documented bounded shell subset. Function calls must be separate commands; whole-function redirection and pipeline calls are unsupported. Scalars are shared, not automatically local. Only declared flat /work text files exist. Grading compares behavior and also accepts equivalent supported programs. Supplied filenames never begin with a hyphen; full utility option parsing is not implemented.",
+      "initial": {
+        "kind": "Script",
+        "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\n# Consume the prefix here before looping.\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Prefix then labels",
+            "args": [
+              "Team",
+              "North",
+              "South"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Team: North\nTeam: South\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Spaces and empty values",
+            "args": [
+              "Work 100%",
+              "West desk",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Work 100%: West desk\nWork 100%: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Prefix only",
+            "args": [
+              "Group"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "No prefix",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Prefix required\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Explicit empty prefix",
+            "args": [
+              "",
+              "Later"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Prefix required\n",
+            "status": 2,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-return"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on positional arguments, quoted \"$@\", conditions and loops. This introduces shift.",
+        "concepts": [
+          {
+            "title": "Arguments can play different roles",
+            "text": "A reusable program often receives one setting followed by several items. Save the setting before looping over the items. Otherwise the setting accidentally becomes an item too."
+          },
+          {
+            "title": "Shift removes leading positional arguments",
+            "text": "shift removes the current $1: the old $2 becomes $1 and $# decreases by one. shift 2 removes two; shift 0 changes nothing. A count larger than the number of arguments fails with status 1 and leaves them unchanged in this Bash reference subset."
+          },
+          {
+            "title": "Preserve each remaining item",
+            "text": "After consuming the header, \"$@\" still keeps every remaining argument separate, including a value containing spaces or an empty value. Inside a function, shift affects that function\u2019s arguments; its caller\u2019s arguments return unchanged when the function finishes."
+          }
+        ],
+        "example": "heading=$1\nshift\nfor name in \"$@\"; do\n    printf '%s: %s\\n' \"$heading\" \"$name\"\ndone\nprintf 'Remaining=%s\\n' \"$#\"\n",
+        "inputs": "Arguments are Guest, Mina and Rowan Reed. No files are supplied.",
+        "try_change": "Change shift to shift 0 and run again. Which extra item appears?",
+        "fixture": {
+          "name": "Consume a heading",
+          "args": [
+            "Guest",
+            "Mina",
+            "Rowan Reed"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Guest: Mina\nGuest: Rowan Reed\nRemaining=2\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "If the prefix prints as a label, it was never removed from the item list. If words split or empty labels vanish, check the quoted argument vector.",
+      "explanation": "The first argument configures the output; it is not a label to print. Save it, consume it with shift, then iterate over the remaining quoted argument vector. Validating before consuming prevents missing input from being mistaken for a valid setting."
+    },
+    {
+      "id": "shell-bundle",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-reusable",
+      "topic": "Safe composition capstone",
+      "title": "Assemble a bundle only after preflight checks",
+      "summary": "Capstone: validate a batch before replacing an existing destination.",
+      "objective": "Argument 1 is a destination filename; all later arguments are source filenames in order. Require at least one source and check that every source exists before changing any file. On invalid input print Cannot assemble bundle plus a newline to standard error, return 2 and leave all files unchanged. On success replace the destination with Bundle plus a newline, then for each source append File: PATH plus a newline followed by its exact contents. Print Saved: DESTINATION plus a newline, return 0 and leave all other files unchanged. Inputs use nonempty ordinary filenames; the destination is different from every source.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Argument 1 is a destination filename; all later arguments are source filenames in order. Require at least one source and check that every source exists before changing any file. On invalid input print Cannot assemble bundle plus a newline to standard error, return 2 and leave all files unchanged. On success replace the destination with Bundle plus a newline, then for each source append File: PATH plus a newline followed by its exact contents. Print Saved: DESTINATION plus a newline, return 0 and leave all other files unchanged. Inputs use nonempty ordinary filenames; the destination is different from every source.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The assignment must work for every input set, including empty or missing data where specified.",
+          "action": "Open the input details and compare the expected output and files with your latest result.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A script is a reusable program, not a recording of one example.",
+          "action": "Run your script, inspect any failing input set, and edit the cause. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Try the case where a later source is missing and inspect the old destination.",
+        "A validation helper should only inspect sources, not open the output.",
+        "Replace once after validation; append every heading and file body afterward."
+      ],
+      "sources": [
+        "https://www.gnu.org/s/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable brace-body functions, return, shift and the documented bounded shell subset. Function calls must be separate commands; whole-function redirection and pipeline calls are unsupported. Scalars are shared, not automatically local. Only declared flat /work text files exist. Grading compares behavior and also accepts equivalent supported programs. Supplied filenames never begin with a hyphen; full utility option parsing is not implemented.",
+      "initial": {
+        "kind": "Script",
+        "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nprintf '' > \"$destination\"\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Replace after validating all sources",
+            "args": [
+              "bundle",
+              "north",
+              "south"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/bundle": "keep old until safe\n",
+              "/work/north": "alpha\n",
+              "/work/south": "beta\n",
+              "/work/keep": "unchanged\n"
+            },
+            "stdout": "Saved: bundle\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/bundle": "Bundle\nFile: north\nalpha\nFile: south\nbeta\n",
+              "/work/north": "alpha\n",
+              "/work/south": "beta\n",
+              "/work/keep": "unchanged\n"
+            }
+          },
+          {
+            "name": "Filename spaces and final text",
+            "args": [
+              "merged notes",
+              "west desk",
+              "empty"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/west desk": "no final line break",
+              "/work/empty": ""
+            },
+            "stdout": "Saved: merged notes\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/west desk": "no final line break",
+              "/work/empty": "",
+              "/work/merged notes": "Bundle\nFile: west desk\nno final line breakFile: empty\n"
+            }
+          },
+          {
+            "name": "Missing first source",
+            "args": [
+              "bundle",
+              "absent",
+              "later"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/bundle": "preserve\n",
+              "/work/later": "valid\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot assemble bundle\n",
+            "status": 2,
+            "after": {
+              "/work/bundle": "preserve\n",
+              "/work/later": "valid\n"
+            }
+          },
+          {
+            "name": "Missing later source",
+            "args": [
+              "bundle",
+              "first",
+              "absent"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/bundle": "preserve\n",
+              "/work/first": "valid\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot assemble bundle\n",
+            "status": 2,
+            "after": {
+              "/work/bundle": "preserve\n",
+              "/work/first": "valid\n"
+            }
+          },
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep": "unchanged"
+            },
+            "stdout": "",
+            "stderr": "Cannot assemble bundle\n",
+            "status": 2,
+            "after": {
+              "/work/keep": "unchanged"
+            }
+          },
+          {
+            "name": "Destination but no sources",
+            "args": [
+              "bundle"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/bundle": "preserve\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot assemble bundle\n",
+            "status": 2,
+            "after": {
+              "/work/bundle": "preserve\n"
+            }
+          },
+          {
+            "name": "Invalid batch must not create a new destination",
+            "args": [
+              "new-bundle",
+              "first",
+              "absent"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/first": "valid\n",
+              "/work/keep": "untouched\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot assemble bundle\n",
+            "status": 2,
+            "after": {
+              "/work/first": "valid\n",
+              "/work/keep": "untouched\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-shift",
+        "shell-report",
+        "shell-loop"
+      ],
+      "teaching": {
+        "prerequisite_note": "Combines function return, shift, existence tests, loops and replacement/append. No new syntax is required.",
+        "concepts": [
+          {
+            "title": "Validate before changing the result",
+            "text": "A failed job should not destroy the last useful report. Checking only the first source is insufficient: a later source could be missing. Finish the complete check before opening the destination with >."
+          },
+          {
+            "title": "Separate checking from writing",
+            "text": "A helper can inspect all source arguments and return a status without changing files. The caller either reports a problem or builds the result. The example performs only the check, with different filenames."
+          },
+          {
+            "title": "Plan the replacement and append phases",
+            "text": "Replace the destination once when validation succeeds, then append each heading and exact file contents in order. cat does not add a missing final line break. The complete assignment specifies the header and output channels."
+          }
+        ],
+        "example": "available() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            :\n        else\n            return 1\n        fi\n    done\n    return 0\n}\nif available \"$@\"; then\n    printf 'Ready to read\\n'\nelse\n    printf 'Nothing changed\\n'\nfi\n",
+        "inputs": "Arguments are menu.txt and missing.txt. Only menu.txt exists with the text Soup plus a newline.",
+        "try_change": "In the if condition, replace \"$@\" with menu.txt and run again. Observe the successful check; assignment drafts are separate.",
+        "fixture": {
+          "name": "Preflight without mutation",
+          "args": [
+            "menu.txt",
+            "missing.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/menu.txt": "Soup\n"
+          },
+          "stdout": "Nothing changed\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/menu.txt": "Soup\n"
+          }
+        }
+      },
+      "retry_guidance": "If a failed test changed the destination, look for redirection before all input checks finished. If success differs, compare heading order, exact source contents and whether the destination was replaced only once.",
+      "explanation": "The destructive step is opening the destination with >. Complete validation first; only then replace the result and append source records. A failed preflight leaves the previous destination byte-for-byte intact. This models safe automation on virtual text files, not a real transactional filesystem."
+    }
+  ]
+}

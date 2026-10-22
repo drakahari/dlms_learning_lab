@@ -64,5 +64,29 @@
     "alternate": "problem=no\nfor item in \"$@\"; do\nif test -f \"$item\"; then\nprintf '%s%s\\n' 'File: ' \"$item\"\ngrep -F ERROR \"$item\"\nelse\nprintf '%s%s\\n' 'Missing: ' \"$item\" >&2\nproblem=yes\nfi\ndone\nif test \"$problem\" = yes; then exit 2; fi\nexit 0\n",
     "incorrect": "for path in \"$@\"; do\nif [ -f \"$path\" ]; then\nprintf 'File: %s\\n' \"$path\"\ngrep -F ERROR \"$path\"\nelse\nprintf 'Missing: %s\\n' \"$path\" >&2\nexit 2\nfi\ndone\nexit 0",
     "misconception": "Stops on first missing file and skips later valid work."
+  },
+  {
+    "id": "shell-functions",
+    "alternate": "emit() { printf '%s%s\\n' 'Label: ' \"$1\"; }\nfor value in \"$@\"; do emit \"$value\"; done\n",
+    "incorrect": "# Repair the reusable printer; the caller already passes each label.\nprint_label() {\n    printf 'Label: %s\\n' \"$2\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+    "misconception": "Read the second function argument when each call supplies only one."
+  },
+  {
+    "id": "shell-return",
+    "alternate": "bad=''\nfor item in \"$@\"; do\nif test -n \"$item\"; then\nprintf '%s%s\\n' 'Accepted: ' \"$item\"\nelse\nprintf '%s\\n' 'Rejected: empty label' >&2\nbad=yes\nfi\ndone\nif test -n \"$bad\"; then exit 2; fi\nexit 0\n",
+    "incorrect": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        exit 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+    "misconception": "Exit the whole script on a rejected item instead of continuing the batch."
+  },
+  {
+    "id": "shell-shift",
+    "alternate": "labels() {\nheading=$1\nshift\nfor item in \"$@\"; do printf '%s: %s\\n' \"$heading\" \"$item\"; done\n}\nif test -n \"$1\"; then labels \"$@\"; else printf 'Prefix required\\n' >&2; exit 2; fi\n",
+    "incorrect": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\n# Consume the prefix here before looping.\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+    "misconception": "Keep the leading setting in the item argument list."
+  },
+  {
+    "id": "shell-bundle",
+    "alternate": "if test \"$#\" -lt 2; then printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\noutput=$1\nshift\nfor input in \"$@\"; do\nif test -f \"$input\"; then :; else printf 'Cannot assemble bundle\\n' >&2; exit 2; fi\ndone\nprintf '%s\\n' Bundle > \"$output\"\nfor input in \"$@\"; do\nprintf '%s%s\\n' 'File: ' \"$input\" >> \"$output\"\ncat \"$input\" >> \"$output\"\ndone\nprintf '%s%s\\n' 'Saved: ' \"$output\"\n",
+    "incorrect": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nprintf '' > \"$destination\"\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+    "misconception": "Truncate the old destination before completing every source check."
   }
 ]

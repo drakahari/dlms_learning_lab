@@ -380,8 +380,14 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            n @ (250..=375 | 700..=771) => {
-                let (start, first) = if n >= 700 { (700, 16) } else { (250, 9) };
+            n @ (250..=375 | 700..=771 | 900..=971) => {
+                let (start, first) = if n >= 900 {
+                    (900, 20)
+                } else if n >= 700 {
+                    (700, 16)
+                } else {
+                    (250, 9)
+                };
                 let i = first + (n - start) / 18;
                 let id = self.scenarios[i].id.clone();
                 match (n - start) % 18 {
@@ -441,6 +447,10 @@ impl LabApp {
                             ("OPEN", "CLOSED"),
                             (r#" || [ -n "$name" ]"#, ""),
                             ("found_problem=yes", "found_problem=''"),
+                            ("Rowan Reed", "Tess Ford"),
+                            ("return 1", "exit 1"),
+                            ("shift\n", "shift 0\n"),
+                            (r#"if available "$@""#, "if available menu.txt"),
                         ][i - 9];
                         self.pending_events.extend([
                             key(egui::Key::A, true),
@@ -797,6 +807,47 @@ impl LabApp {
             779 => {
                 println!(
                     "PASS native composition: four introductions, editable ungraded examples and suggested changes, assignment drafts, incorrect retry feedback, typed reference solutions and grading, light/dark 150% responsive rendering and independent Challenge. Synthetic profile only."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            972 => {
+                self.launch(22);
+                self.set_script_view(22, teaching::View::Assignment);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+            }
+            973 => shot = Some("shell-reusable-light-150".into()),
+            974 => {
+                self.progress
+                    .attempts
+                    .get_mut("shell-shift")
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            975 => {
+                assert_eq!(self.script_view(22), teaching::View::Assignment);
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("shell-reusable-challenge-dark-150".into());
+            }
+            976 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -450.),
+                    modifiers: egui::Modifiers::default(),
+                });
+            }
+            977 => {}
+            978 => shot = Some("shell-reusable-challenge-scrolled-150".into()),
+            979 => {
+                println!(
+                    "PASS native reusable functions: four introductions, editable ungraded examples and suggested changes, assignment drafts, incorrect retry feedback, typed reference solutions and grading, light/dark 150% responsive rendering and independent Challenge. Synthetic profile only."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus eleven scripting assignments in two units. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus fifteen scripting assignments in three units. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -37,6 +37,8 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 
 | `shell-streams`, `shell-pipelines`, `shell-eof`, `shell-batch-audit` | Separate channels, pipeline intersection/status, EOF repair and resilient batches | No functions, shell option parser or broader utility suite |
 
+| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | No Bash local/arrays/substitution or complete option parser |
+
 ## Learning order and capability gates
 
 CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Add IPv6 and packet/routing models before authoring dual-stack or protocol diagnosis. OSPF, STP, LACP, DHCP and FHRP need explicit state transitions and negative tests before content is accepted. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
@@ -47,13 +49,13 @@ LPIC-2 assumes LPIC-1 foundations. Sequence capacity and boot recovery → advan
 
 ## Bash/Shell progression
 
-All eleven delivered shell labs use **portable shell syntax**, tested against Bash 5.3.9 on Fedora. Bash is the reference oracle, not the learner engine; this is not a claim of POSIX or Bash conformance.
+All fifteen delivered shell labs use **portable shell syntax**, tested against Bash 5.3.9 on Fedora. Bash is the reference oracle, not the learner engine; this is not a claim of POSIX or Bash conformance.
 
 | Stage | Status / distinct assignments | Prerequisites | Capability and portability boundary |
 | --- | --- | --- | --- |
 | 1. Foundations | **Implemented:** reliable handover; supplied-file labels; input without losing backslashes; missing-destination guard; incident report; multi-file handover; safe-report capstone | Listed preceding lab in the unit, advisory rather than a lock | Scalars, quoting, positional arguments, read, printf, status, test/if, redirects, for, literal grep/cat. Portable subset; 3–5 deterministic cases per assignment |
 | 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x`, Bash `local`, and pipefail must be explicitly modeled before teaching them |
-| 3. Reusable interfaces | **Planned:** argument validation library; option parser; reusable report function; streamed row validator | Stages 1–2 | Portable functions, return, shift/getopts, compound redirects, command substitution, parameter defaults. None implemented yet. Explain subshell scope and status before substitution |
+| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Planned:** option parser and streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. getopts, compound/function-call redirects, command substitution and parameter defaults remain unsupported. Explain subshell scope/status before substitution |
 | 4. Structured Bash | **Planned:** safe filename queue; associative lookup; array-based command construction; regex validation | Reusable functions and argument boundaries | Bash-specific indexed/associative arrays, `[[ ]]`, `=~`, arithmetic, `${array[@]}`. Explicit Bash track labels; do not suggest portability |
 | 5. Text and data | **Planned:** delimiter-aware inventory transform; regex audit; compare snapshots; recover malformed rows | Streams, conditions and functions | Correct sort/uniq/cut/sed/awk models and regex/locale boundaries needed; none delivered. Distinguish shell language from external utility semantics |
 | 6. Safe automation projects | **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |
@@ -62,4 +64,4 @@ Each planned stage includes a guided repair, independent construction and capsto
 
 ## Next capability batch
 
-The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). Next extend reusable interfaces (functions, return, argument handling and scope) only after faithful grammar/evaluation and bounded execution tests. IPv6 addressing/neighbor state is the next networking capability; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
+The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Next extend Bash scope, structured data and expansion only after faithful grammar/evaluation and bounded execution tests. IPv6 addressing/neighbor state is the next networking capability; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
