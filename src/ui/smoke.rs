@@ -72,6 +72,295 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            2320 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                let i = self
+                    .scenarios
+                    .iter()
+                    .position(|s| s.id == "ccna-vlan-access")
+                    .unwrap();
+                self.launch(i);
+                self.set_switching_view(i, teaching::View::Assignment);
+                let s = &self.scenarios[i];
+                let a = self.progress.attempts.get_mut(&s.id).unwrap();
+                for cmd in &s.solution {
+                    engine::execute(&mut a.state, cmd).unwrap();
+                }
+                let w = a.workspace.as_mut().unwrap();
+                w.switching_draft
+                    .as_mut()
+                    .unwrap()
+                    .switches
+                    .get_mut("office")
+                    .unwrap()
+                    .ports
+                    .get_mut("staff-b")
+                    .unwrap()
+                    .access = "bad".into();
+                w.checked = true;
+                self.checked = true;
+                self.dirty = true;
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                self.launch(i);
+            }
+            2321 => {
+                assert!(!self.metrics.completion);
+                shot = Some("vlan-resumed-divergent-draft".into());
+            }
+            2322 => self.pending_events = click(self.metrics.inputs[4]),
+            2323 => {
+                self.pending_events = vec![key(egui::Key::A, true), egui::Event::Text("10".into())]
+            }
+            2324 => self.pending_events = click(self.metrics.check.unwrap()),
+            2325 => {
+                assert!(self.metrics.completion);
+                shot = Some("vlan-resumed-draft-repaired".into());
+            }
+            2326 => {
+                println!(
+                    "PASS native resumed switching draft: applied state passes, accepted saved draft differs; no current success, keyboard repair and Check restores verified completion."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+
+            n @ 2200..=2299 => {
+                let unit = (n - 2200) / 25;
+                let step = (n - 2200) % 25;
+                let ids = [
+                    "ccna-vlan-access",
+                    "ccna-vlan-trunk",
+                    "ccna-vlan-native",
+                    "ccna-vlan-handover",
+                ];
+                let i = self
+                    .scenarios
+                    .iter()
+                    .position(|s| s.id == ids[unit])
+                    .unwrap();
+                match step {
+                    0 => {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        self.launch(i);
+                        assert_eq!(self.switching_view(i), teaching::View::Introduction);
+                    }
+                    1 => shot = Some(format!("{}-introduction", ids[unit])),
+                    2 => self.pending_events = click(self.metrics.example_action.unwrap()),
+                    3 => {
+                        assert_eq!(self.switching_view(i), teaching::View::Example);
+                        let s = &self.scenarios[i];
+                        self.progress
+                            .attempts
+                            .get_mut(&s.id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .switching_learning
+                            .as_mut()
+                            .unwrap()
+                            .fill_example(s.switching_teaching.as_ref().unwrap())
+                            .unwrap();
+                        self.dirty = true;
+                    }
+                    4 => self.pending_events = click(self.metrics.check.unwrap()),
+                    5 => {
+                        let s = &self.scenarios[i];
+                        let a = self.progress.attempts.get_mut(&s.id).unwrap();
+                        assert!(!progress::current_solved(a, s));
+                        let l = a
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .switching_learning
+                            .as_mut()
+                            .unwrap();
+                        assert!(
+                            l.checks(s.switching_teaching.as_ref().unwrap())
+                                .iter()
+                                .all(|c| c.0)
+                        );
+                        let action = [
+                            "access office studio-b 40",
+                            "trunk east uplink 90 30,90",
+                            "trunk east uplink 40 30,40,90",
+                            "vlan east 70 absent",
+                        ][unit];
+                        let mut candidate = l.fabric.clone();
+                        dlms_learning_lab::switching_workspace::adapter(&mut candidate, action)
+                            .unwrap();
+                        l.draft = dlms_learning_lab::switching_workspace::Draft::new(&candidate);
+                        l.checked = false;
+                        self.dirty = true;
+                    }
+                    6 => self.pending_events = click(self.metrics.check.unwrap()),
+                    7 => {
+                        let s = &self.scenarios[i];
+                        let a = &self.progress.attempts[&s.id];
+                        assert!(
+                            a.workspace
+                                .as_ref()
+                                .unwrap()
+                                .switching_learning
+                                .as_ref()
+                                .unwrap()
+                                .checks(s.switching_teaching.as_ref().unwrap())
+                                .iter()
+                                .any(|c| !c.0)
+                        );
+                        shot = Some(format!("{}-practice-retry", ids[unit]));
+                    }
+                    8 => self.set_switching_view(i, teaching::View::Assignment),
+                    9 => self.pending_events = click(self.metrics.check.unwrap()),
+                    10 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{}-assignment-retry", ids[unit]));
+                    }
+                    11 => {
+                        let s = &self.scenarios[i];
+                        let mut partial = s.initial.clone();
+                        for (index, action) in s.solution.iter().enumerate() {
+                            if index != [0, 2, 1, 0][unit] {
+                                engine::execute(&mut partial, action).unwrap();
+                            }
+                        }
+                        let engine::State::Switching { fabric } = partial else {
+                            panic!()
+                        };
+                        let mut d = dlms_learning_lab::switching_workspace::Draft::new(&fabric);
+                        d.selected_switch = ["office", "east", "east", "west"][unit].into();
+                        self.progress
+                            .attempts
+                            .get_mut(&s.id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .switching_draft = Some(d);
+                        self.checked = false;
+                        self.dirty = true;
+                    }
+                    12 => {}
+                    13 => self.pending_events = click(self.metrics.check.unwrap()),
+                    14 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{}-partial", ids[unit]));
+                    }
+                    15 => self.pending_events = click(self.metrics.inputs[[4, 4, 3, 2][unit]]),
+                    16 => {
+                        self.pending_events = vec![
+                            key(egui::Key::A, true),
+                            egui::Event::Text(["10", "10,20,99", "99", "30"][unit].into()),
+                        ]
+                    }
+                    17 => self.pending_events = click(self.metrics.check.unwrap()),
+                    18 => {
+                        assert!(self.metrics.completion, "{} native repair", ids[unit]);
+                        shot = Some(format!("{}-complete", ids[unit]));
+                        self.save();
+                    }
+                    19 => {
+                        let loaded = progress::load(&self.path, &self.scenarios).unwrap();
+                        assert!(progress::current_solved(
+                            &loaded.attempts[&self.scenarios[i].id],
+                            &self.scenarios[i]
+                        ));
+                        self.progress = loaded;
+                    }
+                    20 => self.pending_events = click(self.metrics.inputs[[4, 4, 3, 2][unit]]),
+                    21 => {
+                        self.pending_events =
+                            vec![key(egui::Key::A, true), egui::Event::Text("0".into())]
+                    }
+                    22 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&self.scenarios[i].id],
+                            &self.scenarios[i]
+                        ));
+                        shot = Some(format!("{}-draft-invalidation", ids[unit]));
+                    }
+                    23 => self.pending_events = click(self.metrics.check.unwrap()),
+                    24 => {
+                        assert!(
+                            self.notice
+                                .as_ref()
+                                .is_some_and(|s| s.contains("1 to 4094"))
+                        );
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{}-invalid-field", ids[unit]));
+                    }
+                    _ => {}
+                }
+            }
+            2300 => {
+                let i = self
+                    .scenarios
+                    .iter()
+                    .position(|s| s.id == "ccna-vlan-handover")
+                    .unwrap();
+                self.set_switching_view(i, teaching::View::Introduction);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(940., 760.)));
+            }
+            2301 => shot = Some("vlan-capstone-introduction-light-150".into()),
+            2302 => self.set_switching_view(self.selected.unwrap(), teaching::View::Assignment),
+            2303 => shot = Some("vlan-capstone-assignment-light-150".into()),
+            2304 => {
+                self.pending_events = vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -720.),
+                        modifiers: Default::default(),
+                    },
+                ]
+            }
+            2305 => shot = Some("vlan-capstone-scrolled-light-150".into()),
+            2306 => {
+                let i = self.selected.unwrap();
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.help_open = false;
+                self.lesson_scroll_reset = true;
+            }
+            2307 => shot = Some("vlan-capstone-challenge-dark-150".into()),
+            2308 => {
+                let i = self.selected.unwrap();
+                self.reset_attempt(i);
+                assert_eq!(
+                    self.progress.attempts[&self.scenarios[i].id].state,
+                    self.scenarios[i].initial
+                );
+                self.selected = None;
+                self.filter = Filter {
+                    track: "CCNA".into(),
+                    unit: "vlan-data-foundations".into(),
+                    ..Default::default()
+                };
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2309 => {}
+            2310 => {
+                assert_eq!(self.metrics.card_actions.len(), 4);
+                shot = Some("vlan-unit-library-light-150".into());
+            }
+            2311 => {
+                println!(
+                    "PASS native authored VLAN unit: all four introductions, isolated example experiments, wrong/partial feedback, keyboard final repair, native Check/completion, save/reload, edit invalidation, selected reset and light/dark150 resizing plus unit library. No equipment, novice-user or other-platform runtime acceptance claimed."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+
             2100 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 let fixture =

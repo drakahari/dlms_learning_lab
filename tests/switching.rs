@@ -167,7 +167,7 @@ fn unsupported_tagged_access_cannot_be_mistaken_for_a_valid_isolation_result() {
     assert!(
         f.broadcast("staff-left")
             .unwrap_err()
-            .contains("Unsupported tagged ingress")
+            .contains("Unsupported tagged input")
     );
     assert!(f.visibility("staff-left", "staff-right").is_err());
     let mut f = fabric();

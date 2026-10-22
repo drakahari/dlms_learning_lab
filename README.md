@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. Fifty-one authored assignments: the original nine, twenty-six scripting tasks, ten Linux file/access activities and six IPv6 static-network activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. Fifty-five authored assignments: the original nine, twenty-six scripting tasks, ten Linux file/access activities six IPv6 static-network activities and four VLAN data-plane activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -45,6 +45,8 @@ The accepted native workspace design remains the basis of all labs. The header a
 The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
 
 The **CCNA** course adds six [IPv6 static-network foundations](docs/IPV6_LESSONS.md): unique workstation addressing, prefix/gateway repair, interface-scoped next hops, route specificity, backup failover and a branch capstone. A small topology and selected-device native address/route editor keep the full assignment visible. Examples have independent saved drafts; Check configuration applies and tests only virtual state. This is narrow partial IPv6/static-routing practice, not complete CCNA coverage.
+
+The **VLAN groups, trunks and handover** unit adds four [native switching assignments](docs/VLAN_LESSONS.md): access membership, trunks versus active/allowed groups, native classification and a multi-fault handover. Edit native port tables and inspect simulated broadcasts; no Cisco terminal, STP or real network is involved. Each lesson has isolated examples and tests both working groups and separation.
 
 The new **Bash/Shell** track teaches reliable output, quoted arguments, input, guards/status, report redirection, multi-file loops and a safe-report capstone, followed by separate output channels, intersecting pipeline filters, end-of-input repair resilient batch auditing, reusable functions, per-item return status, argument consumption and a preflight bundle capstone. Scripts are written in a native editor and run against 3–7 deterministic sets of sample inputs with output/file-state grading. Run/Stop, case inspection and specific retry feedback stay together. Learn/Challenge retain the same assignments. Learn adds a skippable, reopenable introduction and a separately saved **Try example** workspace, with different example values and no completion credit. Challenge opens independent assignment work. Walkthroughs, progressive hints and worked solutions remain optional. See the [foundations teaching audit](docs/SCRIPT_TEACHING.md) and [composition content review](docs/SHELL_COMPOSITION.md) and [reusable-interface unit](docs/SHELL_REUSABLE.md). Drafts survive resume; edits invalidate old results. Tab indents the code editor, Escape releases its focus, and Ctrl+Enter runs.
 

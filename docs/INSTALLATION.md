@@ -135,3 +135,8 @@ Source `19aad147796b289c8aa89d9371dcaea372c9155c` contains51 assignments/twelve 
 | `dlms-learning-lab-0.1.0-g19aad147796b-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `9142e7a2edfc12cf428f827d5012b62a746530d6b296fe490f4132ba92c8c90e` |
 
 The clean Fedora archive was extracted and installed/upgraded in the isolated /tmp root. Installed CLI validated51/twelve outside the checkout; desktop-file-validate passed and the exact synthetic progress sentinel remained intact (file retention, not parsed legacy-profile acceptance). Installed native all-four access lesson flows passed, including light/dark150% views. Windows/macOS desktop runtime/install/accessibility and macOS notice/signing gates remain open. No release publication.
+
+
+### Native startup evidence to investigate after M25
+
+The full four-lesson M25 Fedora native flow completed, but extra default-Wayland resumed-draft runs stopped before the smoke harness’s first timed action. The same synthetic resume flow passed through existing XWayland. An app-only Wayland trace ends after committing a frame, with a pending callback after keyboard focus left; the session was active and unlocked. This suggests occlusion/repaint scheduling in the timed harness, but does not establish a root cause. Do not treat those stalled runs as startup acceptance. No user desktop/session setting was changed, and no security control was bypassed. Continue independent work and investigate the harness/window startup behavior before final acceptance.

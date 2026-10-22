@@ -131,14 +131,13 @@ impl LabApp {
                 if let Some(notice) = &learning.notice {
                     ui.colored_label(palette(ui).error, notice);
                 }
-                for (pass, message) in learning.checks(lesson) {
-                    ui.colored_label(
-                        if pass {
-                            palette(ui).success
-                        } else {
-                            palette(ui).error
-                        },
-                        format!("{} {message}", if pass { "Pass ·" } else { "Retry ·" }),
+                let checks = learning.checks(lesson);
+                if !checks.is_empty() {
+                    outcome_feedback(
+                        ui,
+                        checks,
+                        "Example checks pass · Your assignment remains separate.",
+                        (i, true),
                     );
                 }
                 inspect_paths(ui, i, true, &learning.fabric, &mut self.metrics);
@@ -246,21 +245,63 @@ impl LabApp {
         let a = &self.progress.attempts[&s.id];
         let pass = progress::current_solved(a, s);
         self.metrics.completion = pass;
-        if pass {
-            ui.colored_label(
-                palette(ui).success,
-                "Objective complete · All current checks pass.",
-            );
-            self.next_unit_lab(ui, i);
+        let checks = engine::checks(&a.state, &s.goal);
+        let pending = if let State::Switching { fabric } = &a.state {
+            a.workspace
+                .as_ref()
+                .and_then(|w| w.switching_draft.as_ref())
+                .is_some_and(|d| !d.matches(fabric))
         } else {
-            for (okay, message) in engine::checks(&a.state, &s.goal) {
-                if !okay {
-                    ui.colored_label(palette(ui).error, format!("Retry · {message}"));
-                }
-            }
+            false
+        };
+        if !pass && (pending || checks.iter().all(|c| c.0)) {
+            ui.label("Draft not verified · Check configuration to test the current draft.");
+            return;
+        }
+        outcome_feedback(
+            ui,
+            checks,
+            "Objective complete · All current checks pass.",
+            (i, false),
+        );
+        if pass {
+            self.next_unit_lab(ui, i);
         }
     }
 }
+fn outcome_feedback(
+    ui: &mut egui::Ui,
+    checks: Vec<(bool, String)>,
+    complete: &str,
+    id: (usize, bool),
+) {
+    let passed = checks.iter().filter(|c| c.0).count();
+    if passed == checks.len() {
+        ui.colored_label(palette(ui).success, complete);
+    } else {
+        for (_, message) in checks.iter().filter(|c| !c.0).take(2) {
+            ui.colored_label(palette(ui).error, format!("Retry · {message}"));
+        }
+    }
+    egui::CollapsingHeader::new(format!(
+        "Objective results · {passed}/{} passing",
+        checks.len()
+    ))
+    .id_salt(("vlan-objectives", id))
+    .show(ui, |ui| {
+        for (okay, message) in &checks {
+            ui.colored_label(
+                if *okay {
+                    palette(ui).success
+                } else {
+                    palette(ui).error
+                },
+                format!("{} · {message}", if *okay { "Pass" } else { "Retry" }),
+            );
+        }
+    });
+}
+
 fn configuration_editor(
     ui: &mut egui::Ui,
     index: usize,

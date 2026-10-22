@@ -1,6 +1,6 @@
 # VLAN data-plane capability contract
 
-Specified2026-10-22 before implementation/dependent teaching. This capability is a pure typed in-process model, with no learner host/network/process operations or new dependency. It does not yet add a playable lesson or objective evidence. The current51 authored assignments remain unchanged.
+Specified2026-10-22 before implementation/dependent teaching. This capability is a pure typed in-process model, with no learner host/network/process operations or new dependency. The M23/M24 capability milestones did not count authored coverage. M25 adds four reviewed assignments; the total catalog is55 assignments, with the control-protocol and platform limits below unchanged.
 
 ## Initial model
 
@@ -40,3 +40,6 @@ Additional pinned ingress reference: Cisco Nexus5000 NX-OS Layer2 Switching Guid
 The native workspace has a selected-switch port table (aligned desktop rows and stacked narrow controls), active VLAN editing, one Check configuration action and optional applied-state broadcast inspection. Introduction → Try example → Assignment is preserved. Practice is separately persisted, can load example settings only on explicit request, and cannot change assignment drafts or credit. Challenge opens the full assignment without unsolicited help. Feedback names both delivery directions, inactive/unattached endpoints and unsupported behavior.
 
 Declarative requirements and pack validation enforce the integration gates above. Save/import uses the existing byte-capped/versioned safe storage and checks authored shape; malformed bounded draft text remains editable. Native review uses a clearly labeled test-only fixture, not an additional lab or certification coverage claim. A later reviewed curriculum unit must teach every prerequisite and demonstrate positive/negative/alternate outcomes before coverage is recorded.
+
+
+Four M25 lessons now use these editors; see VLAN_LESSONS.md. They add narrowly scoped partial evidence only, not full CCNA2.1/2.2 or switching coverage. Full objective results are optional; default retries show the first two failures. Active-attachment diagnostics name the actual stopped port or missing VLAN before testing delivery. The complete policy is always graded, independent of which result rows are expanded.

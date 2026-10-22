@@ -204,8 +204,13 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("switching")
+            smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("vlan-resume")
             {
+                2320
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("vlans") {
+                2200
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("switching") {
                 2100
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("files-layout") {
                 1209

@@ -1,0 +1,2152 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-vlan-access",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "VLANs and broadcast paths",
+      "unit": "vlan-data-foundations",
+      "title": "Reconnect a workstation to its workgroup",
+      "summary": "Repair group membership on one switch while keeping visitors separate.",
+      "objective": "Two staff workstations must share VLAN 10; two guest workstations must share VLAN 20. Each pair must receive each other’s broadcasts, and staff and guests must stay separate. One port has the wrong group. Inspect the office switch, repair it, then Check configuration. Keep every workstation connected and its port up.",
+      "retry_guidance": "Compare both workstations and the ports along their path. Keep a working group working while you repair another. Use Inspect broadcast delivery to see where the applied settings send data.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Inspect the stated policy, edit the relevant ports and check the complete configuration."
+      ],
+      "guide": [],
+      "explanation": "Both staff ports need access VLAN 10 and both guest ports need access VLAN 20. Broadcasts stay within the local VLAN. Moving staff-b from 20 to 10 restores staff service without merging the groups. Both positive service checks and negative separation checks are necessary; stopping a port proves neither policy nor a usable network.",
+      "hints": [
+        "Match each port’s connected workstation to the two groups in the task.",
+        "Compare staff-a and staff-b. The workstation stays connected; its access VLAN determines its group."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus5000/sw/layer2/503_n1_1/Cisco_n5k_layer2_config_gd_rel_503_N1_1_chapter6.html",
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24063-pvid-inconsistency-24063.html"
+      ],
+      "simplifications": "Only bounded broadcast data-plane visibility is simulated, not ping, ARP, MAC learning, STP/PVST, routing, voice VLANs or Cisco commands. Workstations are untagged and fixed to their cables. Trunk native egress is untagged; allowed tagged native ingress follows the documented educational profile, not universal platform behavior. Lists use individual comma-separated VLAN IDs, not IOS range syntax. This is partial CCNA practice, not equipment or full-objective coverage.",
+      "initial": {
+        "kind": "Switching",
+        "fabric": {
+          "switches": {
+            "office": {
+              "label": "Office switch",
+              "vlans": [
+                10,
+                20
+              ],
+              "ports": {
+                "staff-a": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "staff-b": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "guest-a": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "guest-b": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "staff-a": {
+              "label": "Staff A",
+              "up": true
+            },
+            "staff-b": {
+              "label": "Staff B",
+              "up": true
+            },
+            "guest-a": {
+              "label": "Guest A",
+              "up": true
+            },
+            "guest-b": {
+              "label": "Guest B",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "staff-a",
+              "a": {
+                "kind": "host",
+                "host": "staff-a"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "staff-a"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-b",
+              "a": {
+                "kind": "host",
+                "host": "staff-b"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "staff-b"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-a",
+              "a": {
+                "kind": "host",
+                "host": "guest-a"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "guest-a"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-b",
+              "a": {
+                "kind": "host",
+                "host": "guest-b"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "guest-b"
+              },
+              "up": true
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Switching",
+        "requirements": [
+          {
+            "kind": "visibility",
+            "label": "Staff workgroup",
+            "from": "staff-a",
+            "to": "staff-b",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest workgroup",
+            "from": "guest-a",
+            "to": "guest-b",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Staff / guest separation",
+            "from": "staff-a",
+            "to": "guest-b",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest / staff separation",
+            "from": "guest-a",
+            "to": "staff-b",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "staff-a",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "staff-b",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "guest-a",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "guest-b",
+            "vlan": 20
+          }
+        ]
+      },
+      "solution": [
+        "access office staff-b 10"
+      ],
+      "prerequisites": [],
+      "switching_teaching": {
+        "prerequisite_note": "Start here: no binary, subnetting or command-line knowledge is needed. Select Assignment whenever you are ready; your example and assignment are saved separately.",
+        "concepts": [
+          {
+            "title": "One cable, several groups",
+            "text": "A switch connects workstations through named ports. A broadcast is a message offered to every other workstation in its group. A virtual local area network (VLAN) makes separate broadcast groups on the same switch; it is not an IP address or subnet mask."
+          },
+          {
+            "title": "Choose the workstation’s group",
+            "text": "An access port puts an ordinary workstation’s untagged messages into one VLAN. Up means the port can carry data. Keep the mode Access and edit its VLAN number. The number names a group, not the workstation. The group must also appear in Active VLANs."
+          },
+          {
+            "title": "Inspect, edit, check",
+            "text": "The port row says which workstation is connected. Changes are saved as a draft; Check configuration applies and tests them together. Pass results use both directions and do not count unplugging a workstation as separation. Optional broadcast inspection shows applied settings, not unsaved edits."
+          }
+        ],
+        "example_description": "A separate office uses studio VLAN 30 and visitor VLAN 40. Studio B is in the wrong group. Inspect its row, change the access VLAN to 30, and Apply and test example. Load example settings can fill the repair on request.",
+        "fixture": {
+          "switches": {
+            "office": {
+              "label": "Office switch",
+              "vlans": [
+                30,
+                40
+              ],
+              "ports": {
+                "studio-a": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "studio-b": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "visitor-a": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "visitor-b": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "studio-a": {
+              "label": "Studio A",
+              "up": true
+            },
+            "studio-b": {
+              "label": "Studio B",
+              "up": true
+            },
+            "visitor-a": {
+              "label": "Visitor A",
+              "up": true
+            },
+            "visitor-b": {
+              "label": "Visitor B",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "studio-a",
+              "a": {
+                "kind": "host",
+                "host": "studio-a"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "studio-a"
+              },
+              "up": true
+            },
+            {
+              "id": "studio-b",
+              "a": {
+                "kind": "host",
+                "host": "studio-b"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "studio-b"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-a",
+              "a": {
+                "kind": "host",
+                "host": "visitor-a"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "visitor-a"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-b",
+              "a": {
+                "kind": "host",
+                "host": "visitor-b"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "office",
+                "port": "visitor-b"
+              },
+              "up": true
+            }
+          ]
+        },
+        "example_solution": [
+          "access office studio-b 30"
+        ],
+        "outcomes": [
+          {
+            "kind": "visibility",
+            "label": "Studio workgroup",
+            "from": "studio-a",
+            "to": "studio-b",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor workgroup",
+            "from": "visitor-a",
+            "to": "visitor-b",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Studio / visitor separation",
+            "from": "studio-a",
+            "to": "visitor-b",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / studio separation",
+            "from": "visitor-a",
+            "to": "studio-b",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "studio-a",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "studio-b",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "visitor-a",
+            "vlan": 40
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "office",
+            "port": "visitor-b",
+            "vlan": 40
+          }
+        ],
+        "try_change": "Change studio-b back to VLAN 40 and apply. Studio service fails even though the visitor pair can still work; restore 30."
+      }
+    },
+    {
+      "id": "ccna-vlan-trunk",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "VLANs and broadcast paths",
+      "unit": "vlan-data-foundations",
+      "title": "Carry two groups between offices",
+      "summary": "Build a trunk and repair the difference between an active group and an allowed group.",
+      "objective": "Staff VLAN 10 and guest VLAN 20 each span west and east switches. Restore two-way broadcast delivery within each group and separation between groups. Keep workstation access memberships. The inter-switch uplinks must be up trunks using native VLAN 99. Investigate uplink modes, active VLANs and allowed lists; repair every fault, then check.",
+      "retry_guidance": "Compare both workstations and the ports along their path. Keep a working group working while you repair another. Use Inspect broadcast delivery to see where the applied settings send data.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Inspect the stated policy, edit the relevant ports and check the complete configuration."
+      ],
+      "guide": [],
+      "explanation": "A trunk needs compatible mode and native settings at both ends. Staff and guest VLANs must exist in both switches and be allowed along the link. Correcting the west mode alone leaves guest service broken because the east database and allowed list also omit 20. Extra unused allowed VLANs do not replace the required groups; the grader checks current service and separation, not one exact list string.",
+      "hints": [
+        "First check that both uplinks use Trunk. An access port can classify only one untagged group.",
+        "A guest frame needs VLAN 20 active on each switch and allowed at both trunk ends. These are different settings."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus5000/sw/layer2/503_n1_1/Cisco_n5k_layer2_config_gd_rel_503_N1_1_chapter6.html",
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24063-pvid-inconsistency-24063.html"
+      ],
+      "simplifications": "Only bounded broadcast data-plane visibility is simulated, not ping, ARP, MAC learning, STP/PVST, routing, voice VLANs or Cisco commands. Workstations are untagged and fixed to their cables. Trunk native egress is untagged; allowed tagged native ingress follows the documented educational profile, not universal platform behavior. Lists use individual comma-separated VLAN IDs, not IOS range syntax. This is partial CCNA practice, not equipment or full-objective coverage.",
+      "initial": {
+        "kind": "Switching",
+        "fabric": {
+          "switches": {
+            "west": {
+              "label": "West switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 99
+                  }
+                }
+              }
+            },
+            "east": {
+              "label": "East switch",
+              "vlans": [
+                10,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      99
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "staff-west": {
+              "label": "Staff west",
+              "up": true
+            },
+            "guest-west": {
+              "label": "Guest west",
+              "up": true
+            },
+            "staff-east": {
+              "label": "Staff east",
+              "up": true
+            },
+            "guest-east": {
+              "label": "Guest east",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "staff-west",
+              "a": {
+                "kind": "host",
+                "host": "staff-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-west",
+              "a": {
+                "kind": "host",
+                "host": "guest-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-east",
+              "a": {
+                "kind": "host",
+                "host": "staff-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-east",
+              "a": {
+                "kind": "host",
+                "host": "guest-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "office-link",
+              "a": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Switching",
+        "requirements": [
+          {
+            "kind": "visibility",
+            "label": "Staff workgroup",
+            "from": "staff-west",
+            "to": "staff-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest workgroup",
+            "from": "guest-west",
+            "to": "guest-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Staff / guest separation",
+            "from": "staff-west",
+            "to": "guest-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest / staff separation",
+            "from": "guest-west",
+            "to": "staff-east",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "west",
+            "port": "uplink",
+            "vlan": 99
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "east",
+            "port": "uplink",
+            "vlan": 99
+          }
+        ]
+      },
+      "solution": [
+        "trunk west uplink 99 10,20,99",
+        "vlan east 20 present",
+        "trunk east uplink 99 10,20,99"
+      ],
+      "prerequisites": [
+        "ccna-vlan-access"
+      ],
+      "switching_teaching": {
+        "prerequisite_note": "First try Reconnect a workstation to its workgroup. You should recognize access ports, VLAN group numbers, drafts and the difference between service and separation.",
+        "concepts": [
+          {
+            "title": "Carry several groups over one cable",
+            "text": "An inter-switch trunk can carry several VLANs. A tag is a small label added to a frame on that cable, so the next switch knows its group. Workstation access links remain untagged. A trunk at only one end is not a complete repair."
+          },
+          {
+            "title": "Two separate permissions to travel",
+            "text": "Active VLANs lists groups that exist on this switch. A trunk’s Allowed VLANs lists the groups permitted over that port. A number in an access field or allowed list does not create an active VLAN. Check both switches and both trunk ends."
+          },
+          {
+            "title": "The native group is the untagged exception",
+            "text": "This model sends the trunk’s native VLAN without a tag; other allowed VLANs carry tags. Both ends must agree. Use the task’s native VLAN 99 here, which has no workstation. Enter lists as 10,20,99; ranges such as 10-20 are outside these editors."
+          }
+        ],
+        "example_description": "The example connects studio VLAN 30 and visitor VLAN 40 across two switches, with native VLAN 90. The west uplink is still Access; east is missing the visitor group from both its active database and allowed list. Repair those three settings, then apply.",
+        "fixture": {
+          "switches": {
+            "west": {
+              "label": "West switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "studio": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 90
+                  }
+                }
+              }
+            },
+            "east": {
+              "label": "East switch",
+              "vlans": [
+                30,
+                90
+              ],
+              "ports": {
+                "studio": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      30,
+                      90
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "studio-west": {
+              "label": "Studio west",
+              "up": true
+            },
+            "visitor-west": {
+              "label": "Visitor west",
+              "up": true
+            },
+            "studio-east": {
+              "label": "Studio east",
+              "up": true
+            },
+            "visitor-east": {
+              "label": "Visitor east",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "studio-west",
+              "a": {
+                "kind": "host",
+                "host": "studio-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "studio"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-west",
+              "a": {
+                "kind": "host",
+                "host": "visitor-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "studio-east",
+              "a": {
+                "kind": "host",
+                "host": "studio-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "studio"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-east",
+              "a": {
+                "kind": "host",
+                "host": "visitor-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "office-link",
+              "a": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "example_solution": [
+          "trunk west uplink 90 30,40,90",
+          "vlan east 40 present",
+          "trunk east uplink 90 30,40,90"
+        ],
+        "outcomes": [
+          {
+            "kind": "visibility",
+            "label": "Studio workgroup",
+            "from": "studio-west",
+            "to": "studio-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor workgroup",
+            "from": "visitor-west",
+            "to": "visitor-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Studio / visitor separation",
+            "from": "studio-west",
+            "to": "visitor-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / studio separation",
+            "from": "visitor-west",
+            "to": "studio-east",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "studio",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "studio",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "visitor",
+            "vlan": 40
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "visitor",
+            "vlan": 40
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "west",
+            "port": "uplink",
+            "vlan": 90
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "east",
+            "port": "uplink",
+            "vlan": 90
+          }
+        ],
+        "try_change": "After the repair, remove 40 only from the east uplink’s allowed list and apply. The group still exists, but visitor traffic cannot cross. Restore 40."
+      }
+    },
+    {
+      "id": "ccna-vlan-native",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "VLANs and broadcast paths",
+      "unit": "vlan-data-foundations",
+      "title": "Align the meaning of untagged traffic",
+      "summary": "Trace native-VLAN classification in a restricted data-plane exercise.",
+      "objective": "In this data-plane exercise, west uses native VLAN 10 and east uses native VLAN 20. Staff VLAN 10 and guests VLAN 20 must each work across the link and stay separate. Adopt the requested native VLAN 99 at both up trunk ends, keep the stated access memberships, and verify both delivery directions. Actual Catalyst PVST can block native mismatches; that protection is not simulated here.",
+      "retry_guidance": "Compare both workstations and the ports along their path. Keep a working group working while you repair another. Use Inspect broadcast delivery to see where the applied settings send data.",
+      "difficulty": "Beginner",
+      "minutes": 19,
+      "steps": [
+        "Inspect the stated policy, edit the relevant ports and check the complete configuration."
+      ],
+      "guide": [],
+      "explanation": "With the requested native VLAN 99 at both ends, staff 10 and guest 20 travel tagged and the far switch retains their groups. Initially, untagged native traffic can be reclassified into the other group in this restricted model. Aligning just one end is incomplete. Real PVST/PVID protection may instead block mismatches; this lesson does not model or certify that control behavior.",
+      "hints": [
+        "An untagged frame has no group number on the cable. Each receiving trunk supplies its own native VLAN.",
+        "Use native VLAN 99 at both uplinks, as requested. Keep 10 and 20 in their active/allowed groups."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus5000/sw/layer2/503_n1_1/Cisco_n5k_layer2_config_gd_rel_503_N1_1_chapter6.html",
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24063-pvid-inconsistency-24063.html"
+      ],
+      "simplifications": "Only bounded broadcast data-plane visibility is simulated, not ping, ARP, MAC learning, STP/PVST, routing, voice VLANs or Cisco commands. Workstations are untagged and fixed to their cables. Trunk native egress is untagged; allowed tagged native ingress follows the documented educational profile, not universal platform behavior. Lists use individual comma-separated VLAN IDs, not IOS range syntax. This is partial CCNA practice, not equipment or full-objective coverage.",
+      "initial": {
+        "kind": "Switching",
+        "fabric": {
+          "switches": {
+            "west": {
+              "label": "West switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 10,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            },
+            "east": {
+              "label": "East switch",
+              "vlans": [
+                10,
+                20,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 20,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "staff-west": {
+              "label": "Staff west",
+              "up": true
+            },
+            "guest-west": {
+              "label": "Guest west",
+              "up": true
+            },
+            "staff-east": {
+              "label": "Staff east",
+              "up": true
+            },
+            "guest-east": {
+              "label": "Guest east",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "staff-west",
+              "a": {
+                "kind": "host",
+                "host": "staff-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-west",
+              "a": {
+                "kind": "host",
+                "host": "guest-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-east",
+              "a": {
+                "kind": "host",
+                "host": "staff-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-east",
+              "a": {
+                "kind": "host",
+                "host": "guest-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "office-link",
+              "a": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Switching",
+        "requirements": [
+          {
+            "kind": "visibility",
+            "label": "Staff workgroup",
+            "from": "staff-west",
+            "to": "staff-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest workgroup",
+            "from": "guest-west",
+            "to": "guest-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Staff / guest separation",
+            "from": "staff-west",
+            "to": "guest-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest / staff separation",
+            "from": "guest-west",
+            "to": "staff-east",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "west",
+            "port": "uplink",
+            "vlan": 99
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "east",
+            "port": "uplink",
+            "vlan": 99
+          }
+        ]
+      },
+      "solution": [
+        "trunk west uplink 99 10,20,99",
+        "trunk east uplink 99 10,20,99"
+      ],
+      "prerequisites": [
+        "ccna-vlan-trunk"
+      ],
+      "switching_teaching": {
+        "prerequisite_note": "Complete Carry two groups between offices first. This exercise examines data classification, not a prediction that every real switch will forward a native mismatch.",
+        "concepts": [
+          {
+            "title": "Untagged does not mean no group",
+            "text": "An untagged frame arriving on a trunk enters that receiving port’s native VLAN. A tagged frame uses its allowed tag in this educational profile. Egress in the native group loses its tag. The receiver cannot recover the sender’s group number from an absent tag."
+          },
+          {
+            "title": "A disagreement can change the group",
+            "text": "If one end sends its VLAN 30 untagged and the far end treats untagged data as VLAN 40, this restricted data plane places it in group 40. Check both directions: a one-way path is not full service, and a one-way leak is not separation."
+          },
+          {
+            "title": "Real control protocols add protection",
+            "text": "Real Catalyst PVST/PVID inconsistency detection can block a mismatched port, even on a simple tree. It is excluded here, along with STP and MAC learning. Use this lesson to understand tagging/classification; do not infer actual equipment forwarding or a troubleshooting command sequence."
+          }
+        ],
+        "example_description": "The studio/visitor example has native VLAN 30 at west and 40 at east. Inspect the applied broadcast recipients. Set both trunk native fields to the example’s reserved VLAN 90, keep both groups allowed, and apply.",
+        "fixture": {
+          "switches": {
+            "west": {
+              "label": "West switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "studio": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 30,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            },
+            "east": {
+              "label": "East switch",
+              "vlans": [
+                30,
+                40,
+                90
+              ],
+              "ports": {
+                "studio": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 40
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 40,
+                    "allowed": [
+                      30,
+                      40,
+                      90
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "studio-west": {
+              "label": "Studio west",
+              "up": true
+            },
+            "visitor-west": {
+              "label": "Visitor west",
+              "up": true
+            },
+            "studio-east": {
+              "label": "Studio east",
+              "up": true
+            },
+            "visitor-east": {
+              "label": "Visitor east",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "studio-west",
+              "a": {
+                "kind": "host",
+                "host": "studio-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "studio"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-west",
+              "a": {
+                "kind": "host",
+                "host": "visitor-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "studio-east",
+              "a": {
+                "kind": "host",
+                "host": "studio-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "studio"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-east",
+              "a": {
+                "kind": "host",
+                "host": "visitor-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "office-link",
+              "a": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "example_solution": [
+          "trunk west uplink 90 30,40,90",
+          "trunk east uplink 90 30,40,90"
+        ],
+        "outcomes": [
+          {
+            "kind": "visibility",
+            "label": "Studio workgroup",
+            "from": "studio-west",
+            "to": "studio-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor workgroup",
+            "from": "visitor-west",
+            "to": "visitor-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Studio / visitor separation",
+            "from": "studio-west",
+            "to": "visitor-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / studio separation",
+            "from": "visitor-west",
+            "to": "studio-east",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "studio",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "studio",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "visitor",
+            "vlan": 40
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "visitor",
+            "vlan": 40
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "west",
+            "port": "uplink",
+            "vlan": 90
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "east",
+            "port": "uplink",
+            "vlan": 90
+          }
+        ],
+        "try_change": "After repair, change only the east native field to 40 and apply. Inspect visitor-west and visitor-east in turn: one direction can still work while the reverse fails. Restore native 90."
+      }
+    },
+    {
+      "id": "ccna-vlan-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "VLANs and broadcast paths",
+      "unit": "vlan-data-foundations",
+      "title": "Hand over three working, separate groups",
+      "summary": "Diagnose several interacting faults and verify the whole office policy.",
+      "objective": "Hand over a two-switch office with three groups: staff VLAN 10, guests VLAN 20 and operations VLAN 30. Each west/east pair must exchange broadcasts in both directions; every group must remain separate from the others. Configure all six access ports with the stated memberships and use native VLAN 99 on both up trunks. Inspect all settings and applied delivery evidence, repair the interacting faults, and Check configuration. Keep every workstation connected and working.",
+      "retry_guidance": "Compare both workstations and the ports along their path. Keep a working group working while you repair another. Use Inspect broadcast delivery to see where the applied settings send data.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the stated policy, edit the relevant ports and check the complete configuration."
+      ],
+      "guide": [],
+      "explanation": "The handover requires five different repairs: operations-west joins access VLAN 30; east activates guest VLAN 20; west allows operations 30 across its trunk; east changes native to 99; and the east guest access port comes up. Correct access/native policy plus all positive and negative delivery cases rules out a partial repair or shutdown shortcut. Equivalent allowed-list order and extra unused active/allowed groups are accepted when the stated service and separation remain correct.",
+      "hints": [
+        "Check every host port’s access group and Up state before following the uplinks. A stopped guest is not successful isolation.",
+        "Operations needs 30 on both active databases and allowed trunk lists. The guest VLAN must exist on east even after its port is brought up.",
+        "Both trunks must use native 99. Repairing just access membership, just trunk permissions, or just link state is partial work."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9300/software/release/17-18/configuration_guide/vlan/b_1718_vlan_9300_cg/configuring_vlan_trunks.html",
+        "https://www.cisco.com/c/en/us/td/docs/switches/datacenter/nexus5000/sw/layer2/503_n1_1/Cisco_n5k_layer2_config_gd_rel_503_N1_1_chapter6.html",
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24063-pvid-inconsistency-24063.html"
+      ],
+      "simplifications": "Only bounded broadcast data-plane visibility is simulated, not ping, ARP, MAC learning, STP/PVST, routing, voice VLANs or Cisco commands. Workstations are untagged and fixed to their cables. Trunk native egress is untagged; allowed tagged native ingress follows the documented educational profile, not universal platform behavior. Lists use individual comma-separated VLAN IDs, not IOS range syntax. This is partial CCNA practice, not equipment or full-objective coverage.",
+      "initial": {
+        "kind": "Switching",
+        "fabric": {
+          "switches": {
+            "west": {
+              "label": "West switch",
+              "vlans": [
+                10,
+                20,
+                30,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "operations": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 99,
+                    "allowed": [
+                      10,
+                      20,
+                      99
+                    ]
+                  }
+                }
+              }
+            },
+            "east": {
+              "label": "East switch",
+              "vlans": [
+                10,
+                30,
+                99
+              ],
+              "ports": {
+                "staff": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 10
+                  }
+                },
+                "guest": {
+                  "up": false,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 20
+                  }
+                },
+                "operations": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 30
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 10,
+                    "allowed": [
+                      10,
+                      20,
+                      30,
+                      99
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "staff-west": {
+              "label": "Staff west",
+              "up": true
+            },
+            "guest-west": {
+              "label": "Guest west",
+              "up": true
+            },
+            "operations-west": {
+              "label": "Operations west",
+              "up": true
+            },
+            "staff-east": {
+              "label": "Staff east",
+              "up": true
+            },
+            "guest-east": {
+              "label": "Guest east",
+              "up": true
+            },
+            "operations-east": {
+              "label": "Operations east",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "staff-west",
+              "a": {
+                "kind": "host",
+                "host": "staff-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-west",
+              "a": {
+                "kind": "host",
+                "host": "guest-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "operations-west",
+              "a": {
+                "kind": "host",
+                "host": "operations-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "operations"
+              },
+              "up": true
+            },
+            {
+              "id": "staff-east",
+              "a": {
+                "kind": "host",
+                "host": "staff-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "staff"
+              },
+              "up": true
+            },
+            {
+              "id": "guest-east",
+              "a": {
+                "kind": "host",
+                "host": "guest-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "guest"
+              },
+              "up": true
+            },
+            {
+              "id": "operations-east",
+              "a": {
+                "kind": "host",
+                "host": "operations-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "operations"
+              },
+              "up": true
+            },
+            {
+              "id": "office-link",
+              "a": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Switching",
+        "requirements": [
+          {
+            "kind": "visibility",
+            "label": "Staff workgroup",
+            "from": "staff-west",
+            "to": "staff-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest workgroup",
+            "from": "guest-west",
+            "to": "guest-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Operations workgroup",
+            "from": "operations-west",
+            "to": "operations-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Staff / guest separation",
+            "from": "staff-west",
+            "to": "guest-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Staff / operations separation",
+            "from": "staff-west",
+            "to": "operations-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest / staff separation",
+            "from": "guest-west",
+            "to": "staff-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Guest / operations separation",
+            "from": "guest-west",
+            "to": "operations-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Operations / staff separation",
+            "from": "operations-west",
+            "to": "staff-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Operations / guest separation",
+            "from": "operations-west",
+            "to": "guest-east",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "staff",
+            "vlan": 10
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "guest",
+            "vlan": 20
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "operations",
+            "vlan": 30
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "operations",
+            "vlan": 30
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "west",
+            "port": "uplink",
+            "vlan": 99
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "east",
+            "port": "uplink",
+            "vlan": 99
+          }
+        ]
+      },
+      "solution": [
+        "access west operations 30",
+        "vlan east 20 present",
+        "trunk west uplink 99 10,20,30,99",
+        "trunk east uplink 99 10,20,30,99",
+        "port east guest up"
+      ],
+      "prerequisites": [
+        "ccna-vlan-native"
+      ],
+      "switching_teaching": {
+        "prerequisite_note": "This capstone combines the preceding three lessons: access membership, active VLAN databases, allowed trunk lists, native classification and checking both directions.",
+        "concepts": [
+          {
+            "title": "Keep the full policy in view",
+            "text": "A single passing path does not prove the office works. Each group needs its own west/east service, plus separation from the other groups. A down port can hide a wrong configuration, so all six workstations must remain operational."
+          },
+          {
+            "title": "Investigate in layers",
+            "text": "Start with the named workstation’s access mode, VLAN and Up state. Follow the cable to both trunks, then check the active database and allowed list on each switch. Use the applied broadcast inspector to test a hypothesis. Change one cause at a time if it helps; the complete assignment remains visible."
+          },
+          {
+            "title": "Verify the handover, not only the repair",
+            "text": "Recheck working groups after every change. Check configuration evaluates the whole current policy and clears stale success after edits. The example is a different practice office; loading or completing it cannot earn the assignment."
+          }
+        ],
+        "example_description": "The practice handover has design 50, visitors 60 and support 70, with native 90. Support-west has the wrong access group; visitors-east is stopped and its VLAN is absent on east; west omits support from the trunk; east has the wrong native group. Repair all five causes and apply.",
+        "fixture": {
+          "switches": {
+            "west": {
+              "label": "West switch",
+              "vlans": [
+                50,
+                60,
+                70,
+                90
+              ],
+              "ports": {
+                "design": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 50
+                  }
+                },
+                "visitor": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 60
+                  }
+                },
+                "support": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 50
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 90,
+                    "allowed": [
+                      50,
+                      60,
+                      90
+                    ]
+                  }
+                }
+              }
+            },
+            "east": {
+              "label": "East switch",
+              "vlans": [
+                50,
+                70,
+                90
+              ],
+              "ports": {
+                "design": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 50
+                  }
+                },
+                "visitor": {
+                  "up": false,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 60
+                  }
+                },
+                "support": {
+                  "up": true,
+                  "mode": {
+                    "kind": "access",
+                    "vlan": 70
+                  }
+                },
+                "uplink": {
+                  "up": true,
+                  "mode": {
+                    "kind": "trunk",
+                    "native": 50,
+                    "allowed": [
+                      50,
+                      60,
+                      70,
+                      90
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "hosts": {
+            "design-west": {
+              "label": "Design west",
+              "up": true
+            },
+            "visitor-west": {
+              "label": "Visitor west",
+              "up": true
+            },
+            "support-west": {
+              "label": "Support west",
+              "up": true
+            },
+            "design-east": {
+              "label": "Design east",
+              "up": true
+            },
+            "visitor-east": {
+              "label": "Visitor east",
+              "up": true
+            },
+            "support-east": {
+              "label": "Support east",
+              "up": true
+            }
+          },
+          "cables": [
+            {
+              "id": "design-west",
+              "a": {
+                "kind": "host",
+                "host": "design-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "design"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-west",
+              "a": {
+                "kind": "host",
+                "host": "visitor-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "support-west",
+              "a": {
+                "kind": "host",
+                "host": "support-west"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "support"
+              },
+              "up": true
+            },
+            {
+              "id": "design-east",
+              "a": {
+                "kind": "host",
+                "host": "design-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "design"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-east",
+              "a": {
+                "kind": "host",
+                "host": "visitor-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "visitor"
+              },
+              "up": true
+            },
+            {
+              "id": "support-east",
+              "a": {
+                "kind": "host",
+                "host": "support-east"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "support"
+              },
+              "up": true
+            },
+            {
+              "id": "office-link",
+              "a": {
+                "kind": "switch",
+                "switch": "west",
+                "port": "uplink"
+              },
+              "b": {
+                "kind": "switch",
+                "switch": "east",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "example_solution": [
+          "access west support 70",
+          "vlan east 60 present",
+          "trunk west uplink 90 50,60,70,90",
+          "trunk east uplink 90 50,60,70,90",
+          "port east visitor up"
+        ],
+        "outcomes": [
+          {
+            "kind": "visibility",
+            "label": "Design workgroup",
+            "from": "design-west",
+            "to": "design-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor workgroup",
+            "from": "visitor-west",
+            "to": "visitor-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Support workgroup",
+            "from": "support-west",
+            "to": "support-east",
+            "visible": true
+          },
+          {
+            "kind": "visibility",
+            "label": "Design / visitor separation",
+            "from": "design-west",
+            "to": "visitor-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Design / support separation",
+            "from": "design-west",
+            "to": "support-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / design separation",
+            "from": "visitor-west",
+            "to": "design-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Visitor / support separation",
+            "from": "visitor-west",
+            "to": "support-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Support / design separation",
+            "from": "support-west",
+            "to": "design-east",
+            "visible": false
+          },
+          {
+            "kind": "visibility",
+            "label": "Support / visitor separation",
+            "from": "support-west",
+            "to": "visitor-east",
+            "visible": false
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "design",
+            "vlan": 50
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "design",
+            "vlan": 50
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "visitor",
+            "vlan": 60
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "visitor",
+            "vlan": 60
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "west",
+            "port": "support",
+            "vlan": 70
+          },
+          {
+            "kind": "access_vlan",
+            "switch": "east",
+            "port": "support",
+            "vlan": 70
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "west",
+            "port": "uplink",
+            "vlan": 90
+          },
+          {
+            "kind": "native_vlan",
+            "switch": "east",
+            "port": "uplink",
+            "vlan": 90
+          }
+        ],
+        "try_change": "After a complete example, remove only VLAN 70 from the east active list and apply. Design and visitors can work while support fails. Restore 70 and recheck."
+      }
+    }
+  ]
+}

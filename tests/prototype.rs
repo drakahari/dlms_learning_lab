@@ -31,7 +31,7 @@ fn solution(s: &pack::Scenario) -> State {
 #[test]
 fn all_nine_start_unsolved_and_reach_success() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 51);
+    assert_eq!(labs.len(), 55);
     for s in labs.into_iter().take(9) {
         assert!(!engine::solved(&s.initial, &s.goal), "{}", s.id);
         assert!(engine::solved(&solution(&s), &s.goal), "{}", s.id);
@@ -205,7 +205,7 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
     for s in &labs {
         let mut a = Attempt::new(s, 3);
         a.state = solution(s);
-        a.step = 1;
+        a.step = 1.min(s.steps.len() - 1);
         a.hints = 1;
         a.challenge = true;
         p.attempts.insert(s.id.clone(), a);
@@ -217,7 +217,7 @@ fn resume_reset_only_selected_and_round_trip_all_states() {
     for s in &labs {
         let a = &q.attempts[&s.id];
         assert!(engine::solved(&a.state, &s.goal));
-        assert_eq!(a.step, 1);
+        assert_eq!(a.step, 1.min(s.steps.len() - 1));
         assert!(a.challenge);
     }
     q.attempts
@@ -347,7 +347,13 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::Ipv6 { topology } = &mut a.state {
+        if let State::Switching { fabric } = &mut a.state {
+            for s in fabric.switches.values_mut() {
+                for p in s.ports.values_mut() {
+                    p.up = false;
+                }
+            }
+        } else if let State::Ipv6 { topology } = &mut a.state {
             for d in topology.devices.values_mut() {
                 for p in d.interfaces.values_mut() {
                     p.up = false;

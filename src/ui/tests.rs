@@ -135,11 +135,18 @@ fn library_topic_is_visible_extra_filters_are_optional_and_catalog_navigation_su
     assert!(a.metrics.pagination);
     a.filter.track = "CCNA".into();
     draw(&ctx, &mut a);
+    assert_eq!(
+        a.metrics.pagination,
+        a.scenarios.iter().filter(|s| s.track == "CCNA").count() > 12
+    );
+    a.filter.unit = "ipv4-foundations".into();
+    draw(&ctx, &mut a);
     assert!(!a.metrics.pagination);
     let r = a.metrics.extras.unwrap();
     click(&ctx, &mut a, r);
     assert_eq!(a.metrics.filters.len(), 6);
     a.filter.track = "LPIC-1".into();
+    a.filter.unit.clear();
     a.filter.topic = "Permissions".into();
     a.filter.search = "report".into();
     a.progress.favorites.insert("lpic1-permissions".into());
@@ -2047,4 +2054,118 @@ fn switching_fixture_keeps_practice_separate_and_wraps_with_visible_keyboard_foc
         assert!(a.metrics.lesson_tabs.is_empty());
         assert!(!a.metrics.help_visible);
     }
+}
+
+#[test]
+fn authored_vlan_assignments_keep_tools_in_width_and_guidance_optional() {
+    for name in [
+        "ccna-vlan-access",
+        "ccna-vlan-trunk",
+        "ccna-vlan-native",
+        "ccna-vlan-handover",
+    ] {
+        for (width, height, scale) in [(1200., 850., 1.), (1080., 850., 1.), (720., 560., 1.5)] {
+            let (ctx, mut a) = app();
+            let i = a.scenarios.iter().position(|s| s.id == name).unwrap();
+            a.launch(i);
+            a.scale = scale;
+            for view in [
+                teaching::View::Introduction,
+                teaching::View::Example,
+                teaching::View::Assignment,
+            ] {
+                a.set_switching_view(i, view);
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                for r in a
+                    .metrics
+                    .inputs
+                    .iter()
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.lesson_tabs.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{name} {view:?} {width}/{scale}: {r:?}"
+                    );
+                }
+                assert!(!a.metrics.help_visible);
+                assert!(!a.metrics.completion);
+            }
+            a.progress.attempts.get_mut(name).unwrap().challenge = true;
+            frame(&ctx, &mut a, width, height, vec![]);
+            assert_eq!(a.switching_view(i), teaching::View::Assignment);
+            assert!(!a.metrics.inputs.is_empty());
+            assert!(a.metrics.lesson_tabs.is_empty());
+        }
+    }
+}
+
+#[test]
+fn resumed_switching_draft_never_shows_applied_state_as_current_completion() {
+    fn shape_text(shape: &egui::epaint::Shape, result: &mut String) {
+        match shape {
+            egui::epaint::Shape::Text(t) => {
+                result.push_str(&t.galley.job.text);
+                result.push('\n');
+            }
+            egui::epaint::Shape::Vec(shapes) => {
+                for s in shapes {
+                    shape_text(s, result);
+                }
+            }
+            _ => {}
+        }
+    }
+    let (ctx, mut a) = app();
+    let i = a
+        .scenarios
+        .iter()
+        .position(|s| s.id == "ccna-vlan-access")
+        .unwrap();
+    a.launch(i);
+    a.set_switching_view(i, teaching::View::Assignment);
+    let s = &a.scenarios[i];
+    let mut state = s.initial.clone();
+    for cmd in &s.solution {
+        engine::execute(&mut state, cmd).unwrap();
+    }
+    let attempt = a.progress.attempts.get_mut(&s.id).unwrap();
+    attempt.state = state;
+    let w = attempt.workspace.as_mut().unwrap();
+    w.checked = true;
+    w.switching_draft
+        .as_mut()
+        .unwrap()
+        .switches
+        .get_mut("office")
+        .unwrap()
+        .ports
+        .get_mut("staff-b")
+        .unwrap()
+        .access = "bad".into();
+    assert!(engine::solved(&attempt.state, &s.goal));
+    assert!(!progress::current_solved(attempt, s));
+    let raw = serde_json::to_vec(&a.progress).unwrap();
+    a.progress = progress::decode(&raw, &a.scenarios).unwrap();
+    a.checked = true;
+    draw(&ctx, &mut a);
+    let output = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1200., 850.),
+            )),
+            ..Default::default()
+        },
+        |ctx| a.render(ctx),
+    );
+    let mut text = String::new();
+    for shape in output.shapes {
+        shape_text(&shape.shape, &mut text);
+    }
+    assert!(!a.metrics.completion);
+    assert!(!text.contains("Objective complete"), "{text}");
+    assert!(text.contains("Draft not verified"), "{text}");
 }

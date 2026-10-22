@@ -378,7 +378,7 @@ impl Fabric {
                 (Mode::Access { vlan }, None) => *vlan,
                 (Mode::Access { .. }, Some(_)) => {
                     return Err(format!(
-                        "Unsupported tagged ingress on access port {switch}/{ingress}; platform/voice-VLAN behavior is outside this subset"
+                        "Unsupported tagged input: {switch}/{ingress} is Access but received a VLAN tag. This simulator cannot model that input; check whether both inter-switch ports should be Trunk."
                     ));
                 }
                 (Mode::Trunk { native, .. }, None) => *native,
@@ -499,26 +499,51 @@ impl Fabric {
                     && s.ports.keys().eq(initial.switches[id].ports.keys())
             })
     }
-    fn active_attachment(&self, host: &str) -> bool {
+    fn attachment_issue(&self, host: &str) -> Option<String> {
+        if !self.hosts[host].up {
+            return Some(format!(
+                "{host} is stopped. Keep the workstation running; stopping it does not prove VLAN separation."
+            ));
+        }
         let jack = Jack::Host { host: host.into() };
-        self.cables
-            .iter()
-            .find_map(|c| {
-                if c.a == jack {
-                    Some(&c.b)
-                } else if c.b == jack {
-                    Some(&c.a)
-                } else {
-                    None
-                }
-            })
-            .is_some_and(|j| match j {
-                Jack::Switch { switch, port } => match self.switches[switch].ports[port].mode {
-                    Mode::Access { vlan } => self.switches[switch].vlans.contains(&vlan),
-                    _ => false,
-                },
-                _ => false,
-            })
+        let Some((c, peer)) = self.cables.iter().find_map(|c| {
+            if c.a == jack {
+                Some((c, &c.b))
+            } else if c.b == jack {
+                Some((c, &c.a))
+            } else {
+                None
+            }
+        }) else {
+            return Some(format!(
+                "{host} has no cable. A disconnected workstation cannot prove working service or separation."
+            ));
+        };
+        if !c.up {
+            return Some(format!(
+                "The cable for {host} is down. Keep it working before testing the VLAN policy."
+            ));
+        }
+        let Jack::Switch { switch, port } = peer else {
+            return Some("This workstation needs a switch access port".into());
+        };
+        let p = &self.switches[switch].ports[port];
+        if !p.up {
+            return Some(format!(
+                "{switch}/{port} is down. Bring the workstation’s port up before testing its group."
+            ));
+        }
+        let Mode::Access { vlan } = p.mode else {
+            return Some(format!(
+                "{switch}/{port} connects an ordinary workstation. Use an access port for this activity."
+            ));
+        };
+        if !self.switches[switch].vlans.contains(&vlan) {
+            return Some(format!(
+                "{switch}/{port} uses VLAN {vlan}, but that group is not active on {switch}. Add it to Active VLANs; an access setting alone does not create the group."
+            ));
+        }
+        None
     }
 }
 impl Requirement {
@@ -567,14 +592,14 @@ impl Requirement {
                 to,
                 visible,
             } => {
-                if !f.live_path(from, to).unwrap_or(false)
-                    || !f.active_attachment(from)
-                    || !f.active_attachment(to)
-                {
+                if let Some(reason) = f.attachment_issue(from).or_else(|| f.attachment_issue(to)) {
+                    return (false, format!("{label}: {reason}"));
+                }
+                if !f.live_path(from, to).unwrap_or(false) {
                     return (
                         false,
                         format!(
-                            "{label}: keep both workstations attached to up access ports, with their VLANs active and every link in the path up. Disconnection does not prove isolation."
+                            "{label}: a port or cable between {from} and {to} is down. Keep the path working; disconnection does not prove VLAN separation."
                         ),
                     );
                 }
