@@ -1913,3 +1913,46 @@ fn earlier_script_runs_are_labeled_legacy_until_a_current_native_run_and_remain_
             .is_none()
     );
 }
+
+#[test]
+fn count_assignments_keep_the_editor_and_actions_in_width_and_stop_file_loops() {
+    for i in 43..47 {
+        for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
+            let (ctx, mut a) = app();
+            a.launch(i);
+            a.set_script_view(i, teaching::View::Assignment);
+            a.scale = scale;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            for r in a.metrics.inputs.iter().chain(a.metrics.check.iter()) {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "lab{i} {w}/{scale}: {r:?}"
+                );
+            }
+            assert!(a.metrics.editor_viewport.unwrap().height() >= 175.);
+            assert!(!a.metrics.help_visible);
+        }
+    }
+    let (ctx, mut a) = app();
+    a.launch(46);
+    a.set_script_view(46, teaching::View::Assignment);
+    if let State::Script { source, run } = &mut a
+        .progress
+        .attempts
+        .get_mut("shell-count-capstone")
+        .unwrap()
+        .state
+    {
+        *source = "while true; do :; done < alpha.txt".into();
+        *run = None;
+    }
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    assert!(a.script_job.is_some());
+    let r = a.metrics.stop.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(a.script_job.is_none());
+    assert!(!a.metrics.completion);
+}

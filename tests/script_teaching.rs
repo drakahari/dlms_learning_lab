@@ -31,6 +31,10 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("-u", "-r"),
         ("-c", "-d"),
         ("-d\n", "-u\n"),
+        ("visits + 1", "visits + 2"),
+        ("boxes * price + fee", "boxes * (price + fee)"),
+        ("tray=5", "tray=0"),
+        ("total + count", "total + 1"),
     ];
     assert_eq!(
         edits.len(),

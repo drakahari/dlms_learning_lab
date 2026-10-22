@@ -1,0 +1,950 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-number-records",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-counts",
+      "topic": "Counters and totals",
+      "title": "Number a handover queue",
+      "summary": "Add stable record numbers without losing blank or final lines.",
+      "objective": "The argument names an existing queue file. Print every record in order as NUMBER: TEXT, starting at 1, with a newline after each record. Count blank records too; an empty file prints nothing. Keep internal spaces, backslashes and percent signs literal. A final nonempty record may lack a newline. Return 0, print no errors and leave every file unchanged. Supplied records have no edge spaces or tabs.",
+      "retry_guidance": "If numbering restarts at 1, check where you initialize the counter. If the last row is missing, check EOF handling. Blank rows must still receive a number.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "The argument names an existing queue file. Print every record in order as NUMBER: TEXT, starting at 1, with a newline after each record. Count blank records too; an empty file prints nothing. Keep internal spaces, backslashes and percent signs literal. A final nonempty record may lack a newline. Return 0, print no errors and leave every file unchanged. Supplied records have no edge spaces or tabs.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "A calculation must handle empty input, zero and the final record correctly, not just the first example.",
+          "action": "Open input details when needed. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Keep input validation, calculation and publication in a deliberate order.",
+          "action": "Run, find the first differing result, then repair and retry. Optional help is available.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Start with a counter before the loop. Add one for every successful record, including an empty line.",
+        "Use $((number + 1)) to calculate the next value. Writing number=number+1 stores text instead.",
+        "Keep the EOF-safe condition from the earlier input lesson. Print the number and original record with separate %s values."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arithmetic-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell arithmetic expansion within the documented signed 64-bit subset, compared with Bash 5.3.9. Only small supplied nonnegative integers are calculated; no floating-point math, arithmetic commands, recursive variable expressions or general numeric-input validation. Named inputs are canonical single /work filenames without directory parts or leading hyphens. Text records have no leading/trailing spaces or tabs; internal spaces/backslashes/percent signs stay literal. Flat virtual files only; bounded simulation, never host execution.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Number each record, including blanks and the final record.\nnumber=0\n# Add your read loop and output here.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary queue",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "Inspect\nPack\nShip\n"
+            },
+            "stdout": "1: Inspect\n2: Pack\n3: Ship\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "Inspect\nPack\nShip\n"
+            }
+          },
+          {
+            "name": "Empty records still need numbers",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "First\n\nLast\n"
+            },
+            "stdout": "1: First\n2: \n3: Last\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "First\n\nLast\n"
+            }
+          },
+          {
+            "name": "Final record without newline",
+            "args": [
+              "day two.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/day two.txt": "Check\nClose"
+            },
+            "stdout": "1: Check\n2: Close\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/day two.txt": "Check\nClose"
+            }
+          },
+          {
+            "name": "Literal labels",
+            "args": [
+              "queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+            },
+            "stdout": "1: rack  A\n2: 100% ready\n3: path\\name\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+            }
+          },
+          {
+            "name": "Empty file",
+            "args": [
+              "empty.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/empty.txt": ""
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/empty.txt": ""
+            }
+          },
+          {
+            "name": "Only blank records",
+            "args": [
+              "blank.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/blank.txt": "\n\n"
+            },
+            "stdout": "1: \n2: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/blank.txt": "\n\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n"
+      ],
+      "prerequisites": [
+        "shell-eof"
+      ],
+      "teaching": {
+        "prerequisite_note": "Uses quoted printf arguments and the read/EOF loop from Preserve the final input line. Reopen those lessons if loops or || are unfamiliar.",
+        "concepts": [
+          {
+            "title": "Ask the shell to calculate",
+            "text": "count=2 stores text. count=$((count + 1)) asks the shell to add one, then stores the answer as decimal text. There are no spaces around the assignment =; spaces inside $(( )) are fine. Inside the calculation, name a variable without $. Starting at zero makes the first addition produce one."
+          },
+          {
+            "title": "Keep the record separate from the counter",
+            "text": "The number changes; the record does not. printf uses a separate %s for each value. Quote both arguments so spaces and punctuation stay data. Calculate before printing, rather than putting a calculation in the format string."
+          },
+          {
+            "title": "Read the supplied file once",
+            "text": "The lab supplies the filename as argument 1, available as \"$1\". Put < \"$1\" after done: the file opens once for the whole loop and each read gets the next record. Putting < inside read would reopen it each time. Earlier input is restored afterward. Keep an active source unchanged; the simulator rejects writes to it."
+          },
+          {
+            "title": "A blank record is still a record",
+            "text": "read succeeds for a blank line even though its value is empty. read -r record || [ -n \"$record\" ] also keeps a final nonempty line without a newline. An empty file has no records. Supplied lines have no edge spaces or tabs because ordinary read trims those."
+          },
+          {
+            "title": "Keep calculations deliberately small",
+            "text": "Use small whole numbers with no leading zeros. Arithmetic has finite bounds and cannot calculate arbitrary text. In Bash a leading zero means octal, a different number notation. These lessons supply valid decimal values; general numeric-input validation comes later."
+          }
+        ],
+        "example": "visits=0\nwhile read -r stop; do\n    visits=$((visits + 1))\n    printf 'Visit %s: %s\\n' \"$visits\" \"$stop\"\ndone < stops.txt\n",
+        "inputs": "stops.txt contains Lobby and Workshop on separate lines. The script creates visits and stop; the lab supplies the example file. It prints two labeled visits.",
+        "try_change": "Change visits + 1 to visits + 2 and run again. The labels become 2 and 4; the stop names do not change.",
+        "fixture": {
+          "name": "Two example visits",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/stops.txt": "Lobby\nWorkshop\n"
+          },
+          "stdout": "Visit 1: Lobby\nVisit 2: Workshop\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/stops.txt": "Lobby\nWorkshop\n"
+          }
+        }
+      },
+      "explanation": "One counter is initialized before reading. Each record advances it once, then printing keeps the text separate from the numeric value. A successful blank read is not end-of-file; a failed read with remaining text still contains the final record."
+    },
+    {
+      "id": "shell-order-total",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-counts",
+      "topic": "Counters and totals",
+      "title": "Calculate an order total",
+      "summary": "Accumulate quantities and calculate a whole-cent cost.",
+      "objective": "Argument 1 names an existing quantity file; argument 2 is the price per unit in whole cents. Print Units: TOTAL and Cost (cents): COST, each on its own line. Add all quantities, then apply the rate; empty input totals zero and a zero rate is valid. Return 0, print no errors and leave all files unchanged. Inputs contain up to 64 records, each a valid integer 0–999, with no blank lines, spaces, signs or leading zeros. The rate is 0–99 in the same notation. The final record may lack a newline.",
+      "retry_guidance": "If units equal the last quantity, the running total is being replaced. If cost resembles joined digits, use arithmetic expansion instead of text concatenation. Check zero and empty inputs too.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Argument 1 names an existing quantity file; argument 2 is the price per unit in whole cents. Print Units: TOTAL and Cost (cents): COST, each on its own line. Add all quantities, then apply the rate; empty input totals zero and a zero rate is valid. Return 0, print no errors and leave all files unchanged. Inputs contain up to 64 records, each a valid integer 0–999, with no blank lines, spaces, signs or leading zeros. The rate is 0–99 in the same notation. The final record may lack a newline.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "A calculation must handle empty input, zero and the final record correctly, not just the first example.",
+          "action": "Open input details when needed. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Keep input validation, calculation and publication in a deliberate order.",
+          "action": "Run, find the first differing result, then repair and retry. Optional help is available.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Add the value from each record, not just one per record. Initialize the total once before reading.",
+        "Either multiply the final unit total by the rate, or add each record's cost to a running cost total. Both are valid.",
+        "Use $(( ... )) for calculation, then quoted %s arguments for output. Keep the final nonempty input record."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arithmetic-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell arithmetic expansion within the documented signed 64-bit subset, compared with Bash 5.3.9. Only small supplied nonnegative integers are calculated; no floating-point math, arithmetic commands, recursive variable expressions or general numeric-input validation. Named inputs are canonical single /work filenames without directory parts or leading hyphens. Text records have no leading/trailing spaces or tabs; internal spaces/backslashes/percent signs stay literal. Flat virtual files only; bounded simulation, never host execution.",
+      "initial": {
+        "kind": "Script",
+        "source": "# The lab supplies a filename and a price as arguments.\nprice=$2\nunits=0\n# Read quantities, accumulate the total and print units/cost.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary quantities",
+            "args": [
+              "units.txt",
+              "17"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/units.txt": "2\n5\n1\n"
+            },
+            "stdout": "Units: 8\nCost (cents): 136\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/units.txt": "2\n5\n1\n"
+            }
+          },
+          {
+            "name": "Zero quantity and final record",
+            "args": [
+              "shift two.txt",
+              "3"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/shift two.txt": "0\n9\n2"
+            },
+            "stdout": "Units: 11\nCost (cents): 33\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/shift two.txt": "0\n9\n2"
+            }
+          },
+          {
+            "name": "Empty order",
+            "args": [
+              "units.txt",
+              "19"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/units.txt": ""
+            },
+            "stdout": "Units: 0\nCost (cents): 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/units.txt": ""
+            }
+          },
+          {
+            "name": "Free rate",
+            "args": [
+              "units.txt",
+              "0"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/units.txt": "7\n4\n"
+            },
+            "stdout": "Units: 11\nCost (cents): 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/units.txt": "7\n4\n"
+            }
+          },
+          {
+            "name": "Single quantity",
+            "args": [
+              "units.txt",
+              "25"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/units.txt": "12"
+            },
+            "stdout": "Units: 12\nCost (cents): 300\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/units.txt": "12"
+            }
+          },
+          {
+            "name": "Maximum supplied order",
+            "args": [
+              "bulk quantities.txt",
+              "99"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+            },
+            "stdout": "Units: 63936\nCost (cents): 6329664\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n"
+      ],
+      "prerequisites": [
+        "shell-number-records",
+        "shell-arguments"
+      ],
+      "teaching": {
+        "prerequisite_note": "Builds on record counting, quoted arguments and reading a virtual file. Arithmetic variables in the example are created in the script; assignment inputs arrive as arguments.",
+        "concepts": [
+          {
+            "title": "A total accumulates quantities",
+            "text": "A counter adds one for each record. A total adds the quantity in the record: total=$((total + quantity)). Start at zero outside the loop. Replacing the total with the latest quantity loses previous work; joining strings produces text, not addition."
+          },
+          {
+            "title": "Multiply units by a rate",
+            "text": "The * operator multiplies. If one item costs 8 cents, three items cost 3 * 8 = 24 cents. Multiplication happens before addition, so boxes * price + fee adds the fee after multiplying. Parentheses can make a different grouping explicit."
+          },
+          {
+            "title": "Whole cents avoid rounding here",
+            "text": "The assignment supplies small valid whole numbers: quantities 0 to 999, at most 64 records, and a price from 0 to 99 cents. Values have no leading zeros or signs; there are no blank records. You are calculating, not validating arbitrary user text. A zero rate is valid; empty input totals zero. No decimal fractions are supported."
+          }
+        ],
+        "example": "boxes=3\nprice=8\nfee=2\ncharge=$((boxes * price + fee))\nprintf 'Charge (cents): %s\\n' \"$charge\"\n",
+        "inputs": "Creates boxes=3, price=8 and fee=2. The example prints Charge (cents): 26. These are not assignment-supplied variables.",
+        "try_change": "Change boxes * price + fee to boxes * (price + fee) and run again. The charge becomes 30 because the fee is now included once per box.",
+        "fixture": {
+          "name": "Example charge",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Charge (cents): 26\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "explanation": "Addition accumulates quantities; multiplication applies a rate. Multiplying each row and summing gives the same result as multiplying the final total. Working in whole cents avoids pretending this shell subset performs decimal money arithmetic."
+    },
+    {
+      "id": "shell-pack-items",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-counts",
+      "topic": "Counters and totals",
+      "title": "Plan full cartons and leftovers",
+      "summary": "Use division and a guard to turn item counts into a packing plan.",
+      "objective": "Accept exactly two arguments: an item count 0–999 and a carton capacity 0–99, in valid decimal notation without leading zeros or signs. For a positive capacity, print Full cartons: COUNT and Loose items: COUNT, each on its own line, then return 0 without errors. Count only completely full cartons. If the argument count is wrong or capacity is zero, print only Cannot pack items followed by a newline on the error channel and return 2. Check before calculating. Leave every file unchanged; arbitrary nonnumeric input is outside this activity.",
+      "retry_guidance": "A division error means the guard ran too late or allowed zero. If an exact fit still has leftovers, check the remainder formula. The number of full cartons must not round upward.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Accept exactly two arguments: an item count 0–999 and a carton capacity 0–99, in valid decimal notation without leading zeros or signs. For a positive capacity, print Full cartons: COUNT and Loose items: COUNT, each on its own line, then return 0 without errors. Count only completely full cartons. If the argument count is wrong or capacity is zero, print only Cannot pack items followed by a newline on the error channel and return 2. Check before calculating. Leave every file unchanged; arbitrary nonnumeric input is outside this activity.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "A calculation must handle empty input, zero and the final record correctly, not just the first example.",
+          "action": "Open input details when needed. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Keep input validation, calculation and publication in a deliberate order.",
+          "action": "Run, find the first differing result, then repair and retry. Optional help is available.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Validate \"$#\" first. A missing argument must not silently become zero.",
+        "Integer / gives complete cartons; % gives leftovers. You can also subtract full-carton capacity from the original count.",
+        "Place both calculations after the capacity guard. A zero divisor should be an intentional rejection, not a simulator execution error."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arithmetic-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell arithmetic expansion within the documented signed 64-bit subset, compared with Bash 5.3.9. Only small supplied nonnegative integers are calculated; no floating-point math, arithmetic commands, recursive variable expressions or general numeric-input validation. Named inputs are canonical single /work filenames without directory parts or leading hyphens. Text records have no leading/trailing spaces or tabs; internal spaces/backslashes/percent signs stay literal. Flat virtual files only; bounded simulation, never host execution.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Validate argument count and nonzero capacity before calculating.\n# Build a packing plan from the supplied $1 and $2 values.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Leftover items",
+            "args": [
+              "23",
+              "6"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "Full cartons: 3\nLoose items: 5\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "Exact fit",
+            "args": [
+              "24",
+              "6"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "Full cartons: 4\nLoose items: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "Fewer items than one carton",
+            "args": [
+              "3",
+              "8"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "Full cartons: 0\nLoose items: 3\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "No items",
+            "args": [
+              "0",
+              "4"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "Full cartons: 0\nLoose items: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "Unit capacity",
+            "args": [
+              "19",
+              "1"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "Full cartons: 19\nLoose items: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "Zero capacity",
+            "args": [
+              "9",
+              "0"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot pack items\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "Missing capacity",
+            "args": [
+              "12"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot pack items\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          },
+          {
+            "name": "Extra argument",
+            "args": [
+              "12",
+              "4",
+              "unexpected"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "unchanged\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot pack items\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unchanged\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n"
+      ],
+      "prerequisites": [
+        "shell-order-total",
+        "shell-validation"
+      ],
+      "teaching": {
+        "prerequisite_note": "Uses earlier argument-count guards, if/test, separate error output and arithmetic totals. The task supplies valid integer notation; checking arbitrary text is outside this unit.",
+        "concepts": [
+          {
+            "title": "Whole groups and leftovers answer different questions",
+            "text": "Integer / counts only complete groups: 17 / 5 is 3, not 3.4. The % operator gives what is left: 17 % 5 is 2. For nonnegative items and a positive capacity, items = full * capacity + leftover, and leftover is smaller than capacity. A partial carton is not a full carton."
+          },
+          {
+            "title": "Check before dividing",
+            "text": "Zero cannot be a divisor. [ \"$tray\" -gt 0 ] asks whether tray is greater than zero; -eq means equal and -ne means not equal. These comparisons belong inside [ ], separate from $(( )) calculations. A rejected request should print a useful error and exit before division, not crash during calculation."
+          },
+          {
+            "title": "Count supplied arguments before using them",
+            "text": "The earlier \"$#\" value is the number of supplied arguments. Reject missing or extra values before reading them as numbers. All provided numeric values here are small nonnegative decimal integers without leading zeros. This guard is not a validator for arbitrary shell arithmetic text."
+          }
+        ],
+        "example": "items=17\ntray=5\nif [ \"$tray\" -gt 0 ]; then\n    full=$((items / tray))\n    left=$((items % tray))\n    printf 'Trays: %s; spare: %s\\n' \"$full\" \"$left\"\nelse\n    printf 'Choose a nonzero tray size\\n' >&2\n    exit 2\nfi\n",
+        "inputs": "The example creates items=17 and tray=5, then prints three trays and two spare items. No files or assignment inputs are used.",
+        "try_change": "Change tray=5 to tray=0 and run again. The guard prints the nonzero-size message on the error channel and exits 2 without dividing.",
+        "fixture": {
+          "name": "Example trays",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Trays: 3; spare: 2\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "explanation": "For positive capacities, integer division discards the fractional part, leaving only full cartons. The remainder accounts for everything else. Argument and zero-capacity guards make invalid requests predictable without attempting impossible arithmetic."
+    },
+    {
+      "id": "shell-count-capstone",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-counts",
+      "topic": "Counters and totals",
+      "title": "Publish a trustworthy count report",
+      "summary": "Validate a batch, count each file and publish a consistent total safely.",
+      "objective": "Argument 1 is a destination filename; remaining arguments name one or more source files. Validate the whole request before any file changes: the destination must be nonempty, every source must exist and none may equal the destination. Reject invalid requests with only Cannot count files plus a newline on the error channel, status 2, and no file changes or creations. On success replace the destination with Record counts, then FILENAME: COUNT for each source in argument order (including repeated names), then Total: COUNT; every row ends in a newline. Count blank records and a final nonempty record without a newline; empty files count zero. Print Saved: FILENAME with a newline, status 0 and no errors. Preserve all other files. Supplied source records have no edge spaces/tabs; each source has at most 16 records and there are at most 8 sources. Names are canonical single filenames.",
+      "retry_guidance": "If later counts grow unexpectedly, reset the per-file counter inside the outer loop. If missing input damages the report, preflight all inputs before redirection. Repeated filenames are separate requested counts.",
+      "difficulty": "Intermediate",
+      "minutes": 40,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Argument 1 is a destination filename; remaining arguments name one or more source files. Validate the whole request before any file changes: the destination must be nonempty, every source must exist and none may equal the destination. Reject invalid requests with only Cannot count files plus a newline on the error channel, status 2, and no file changes or creations. On success replace the destination with Record counts, then FILENAME: COUNT for each source in argument order (including repeated names), then Total: COUNT; every row ends in a newline. Count blank records and a final nonempty record without a newline; empty files count zero. Print Saved: FILENAME with a newline, status 0 and no errors. Preserve all other files. Supplied source records have no edge spaces/tabs; each source has at most 16 records and there are at most 8 sources. Names are canonical single filenames.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "A calculation must handle empty input, zero and the final record correctly, not just the first example.",
+          "action": "Open input details when needed. Compare expected and actual output and files after Run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Keep input validation, calculation and publication in a deliberate order.",
+          "action": "Run, find the first differing result, then repair and retry. Optional help is available.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Use one pass to validate the full request before redirecting. Require a destination and at least one input.",
+        "After saving the destination, shift makes \"$@\" the input list. Keep duplicate names and their order.",
+        "Use separate per-file and grand-total counters. Reset only the per-file counter before each source.",
+        "Replace the heading once, append the per-file rows and total, then print a saved message. No files may change after a rejected request."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arithmetic-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Arithmetic.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Portable shell arithmetic expansion within the documented signed 64-bit subset, compared with Bash 5.3.9. Only small supplied nonnegative integers are calculated; no floating-point math, arithmetic commands, recursive variable expressions or general numeric-input validation. Named inputs are canonical single /work filenames without directory parts or leading hyphens. Text records have no leading/trailing spaces or tabs; internal spaces/backslashes/percent signs stay literal. Flat virtual files only; bounded simulation, never host execution.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Build the complete report after validating every input.\ndestination=$1\n# Add validation, counting and publication.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Two sources replace an old report",
+            "args": [
+              "counts.txt",
+              "alpha.txt",
+              "beta.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/alpha.txt": "A\nB\n",
+              "/work/beta.txt": "C\n",
+              "/work/counts.txt": "old\n"
+            },
+            "stdout": "Saved: counts.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/alpha.txt": "A\nB\n",
+              "/work/beta.txt": "C\n",
+              "/work/counts.txt": "Record counts\nalpha.txt: 2\nbeta.txt: 1\nTotal: 3\n"
+            }
+          },
+          {
+            "name": "Repeated source counts twice",
+            "args": [
+              "day counts.txt",
+              "blank.txt",
+              "last.txt",
+              "blank.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/blank.txt": "\n\n",
+              "/work/last.txt": "One\nTwo"
+            },
+            "stdout": "Saved: day counts.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/blank.txt": "\n\n",
+              "/work/last.txt": "One\nTwo",
+              "/work/day counts.txt": "Record counts\nblank.txt: 2\nlast.txt: 2\nblank.txt: 2\nTotal: 6\n"
+            }
+          },
+          {
+            "name": "Eight sources include empty and maximum file",
+            "args": [
+              "new report.txt",
+              "empty source.txt",
+              "sixteen records.txt",
+              "one.txt",
+              "two.txt",
+              "three.txt",
+              "literal labels.txt",
+              "tail.txt",
+              "last.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/empty source.txt": "",
+              "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+              "/work/one.txt": "\n",
+              "/work/two.txt": "A\nB\n",
+              "/work/three.txt": "A\nB\nC",
+              "/work/literal labels.txt": "100%\npath\\name\n",
+              "/work/tail.txt": "end",
+              "/work/last.txt": "done\n"
+            },
+            "stdout": "Saved: new report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/empty source.txt": "",
+              "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+              "/work/one.txt": "\n",
+              "/work/two.txt": "A\nB\n",
+              "/work/three.txt": "A\nB\nC",
+              "/work/literal labels.txt": "100%\npath\\name\n",
+              "/work/tail.txt": "end",
+              "/work/last.txt": "done\n",
+              "/work/new report.txt": "Record counts\nempty source.txt: 0\nsixteen records.txt: 16\none.txt: 1\ntwo.txt: 2\nthree.txt: 3\nliteral labels.txt: 2\ntail.txt: 1\nlast.txt: 1\nTotal: 26\n"
+            }
+          },
+          {
+            "name": "Later missing source retains report",
+            "args": [
+              "counts.txt",
+              "ok.txt",
+              "missing.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/ok.txt": "safe\n",
+              "/work/counts.txt": "keep this\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot count files\n",
+            "status": 2,
+            "after": {
+              "/work/ok.txt": "safe\n",
+              "/work/counts.txt": "keep this\n"
+            }
+          },
+          {
+            "name": "Failure must not create report",
+            "args": [
+              "new.txt",
+              "missing.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "untouched\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot count files\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "untouched\n"
+            }
+          },
+          {
+            "name": "Destination is also a later input",
+            "args": [
+              "alpha.txt",
+              "beta.txt",
+              "alpha.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/alpha.txt": "keep A\n",
+              "/work/beta.txt": "keep B\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot count files\n",
+            "status": 2,
+            "after": {
+              "/work/alpha.txt": "keep A\n",
+              "/work/beta.txt": "keep B\n"
+            }
+          },
+          {
+            "name": "No input arguments",
+            "args": [
+              "existing.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/existing.txt": "keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot count files\n",
+            "status": 2,
+            "after": {
+              "/work/existing.txt": "keep\n"
+            }
+          },
+          {
+            "name": "Empty destination",
+            "args": [
+              "",
+              "ok.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/ok.txt": "keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot count files\n",
+            "status": 2,
+            "after": {
+              "/work/ok.txt": "keep\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n"
+      ],
+      "prerequisites": [
+        "shell-pack-items",
+        "shell-bundle"
+      ],
+      "teaching": {
+        "prerequisite_note": "Combines record counting with \"$@\", shift, file checks and validate-before-writing from the reusable bundle capstone. No new syntax is required. A helper function is optional.",
+        "concepts": [
+          {
+            "title": "Reset each file count, keep the grand total",
+            "text": "Initialize total before the outer loop. Initialize count inside that loop, before reading each file. Otherwise the second file inherits the first file's count. Add each finished count to the total once. If a name occurs twice, the request asks for two counts, in the same order."
+          },
+          {
+            "title": "Preflight the whole request before publishing",
+            "text": "The first pass checks every source and protects the destination from also being a source. Only a fully valid request may create or replace the report. A second pass performs counting. Checking each file just before reading it is too late if an earlier write has already destroyed the old report."
+          },
+          {
+            "title": "Filename equality has a limited purpose",
+            "text": "These supplied filenames are simple canonical names with no directory parts. Comparing their text is sufficient for this exercise, not a guarantee about links or alternate paths in a real filesystem. All reading/writing here occurs in the simulator. Finite records and files keep this exercise within execution limits."
+          }
+        ],
+        "example": "total=0\nfor file in morning.txt evening.txt; do\n    count=0\n    while read -r note || [ -n \"$note\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\"\n    total=$((total + count))\ndone\nprintf 'Combined: %s\\n' \"$total\"\n",
+        "inputs": "morning.txt contains two notes and evening.txt one note. The example prints each file count and a combined total; it does not publish a report.",
+        "try_change": "Change total + count to total + 1 and run again. Combined becomes 2, counting files instead of records. The individual file counts stay unchanged.",
+        "fixture": {
+          "name": "Example per-file count",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/morning.txt": "Open\nInspect\n",
+            "/work/evening.txt": "Close\n"
+          },
+          "stdout": "morning.txt: 2\nevening.txt: 1\nCombined: 3\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/morning.txt": "Open\nInspect\n",
+            "/work/evening.txt": "Close\n"
+          }
+        }
+      },
+      "explanation": "Two passes separate validation from mutation. The per-file counter starts again for each request entry, while the total spans all entries. This makes repeated sources explicit rather than accidentally deduplicated. EOF-safe reads retain final records and valid blank records without inventing an extra record for an empty file."
+    }
+  ]
+}

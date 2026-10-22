@@ -547,7 +547,7 @@ enum Code {
     For(String, Vec<Word>, usize),
     Next(usize),
     Status(i32),
-    WhileStart,
+    WhileStart(Option<Word>, usize),
     WhileBody,
     WhileEnd,
     Define(String, usize, usize),
@@ -686,7 +686,8 @@ impl Parser {
             return Ok(());
         }
         if self.eat("while") {
-            self.code.push(Code::WhileStart);
+            let entry = self.code.len();
+            self.code.push(Code::WhileStart(None, 0));
             let start = self.code.len();
             self.list(&["do"])?;
             if start == self.code.len() {
@@ -697,10 +698,25 @@ impl Parser {
             self.code.push(Code::JumpIf(false, 0));
             self.body(&["done"])?;
             self.expect("done")?;
+            let input = if self.eat("<") {
+                let Some(Token::Word(word)) = self.tokens.get(self.pos) else {
+                    return Err("Loop input redirection needs a file path".into());
+                };
+                let word = word.clone();
+                self.pos += 1;
+                Some(word)
+            } else {
+                None
+            };
+            if matches!(self.tokens.get(self.pos), Some(Token::Op(op)) if op.contains('>') || op == "<")
+            {
+                return Err("Unsupported loop redirection; only one trailing < FILE on a while loop is supported".into());
+            }
             self.code.push(Code::WhileBody);
             self.code.push(Code::Jump(start));
             self.patch(branch);
             self.code.push(Code::WhileEnd);
+            self.code[entry] = Code::WhileStart(input, self.code.len());
             return Ok(());
         }
         if self.eat("for") {
@@ -841,11 +857,17 @@ enum Dest {
     File(String),
 }
 type LocalDeclaration = (String, Option<String>);
+struct InputFrame {
+    input: String,
+    pos: usize,
+    file: String,
+}
 struct CallFrame {
     pc: usize,
     args: Vec<String>,
     loops: usize,
     whiles: usize,
+    inputs: usize,
     locals: BTreeMap<String, Option<String>>,
 }
 pub struct Vm {
@@ -857,7 +879,8 @@ pub struct Vm {
     input: String,
     input_pos: usize,
     loops: Vec<(String, Vec<String>, usize)>,
-    while_status: Vec<i32>,
+    while_status: Vec<(i32, bool)>,
+    inputs: Vec<InputFrame>,
     functions: BTreeMap<String, usize>,
     calls: Vec<CallFrame>,
     pub outcome: Outcome,
@@ -878,6 +901,7 @@ impl Vm {
             input_pos: 0,
             loops: Vec::new(),
             while_status: Vec::new(),
+            inputs: Vec::new(),
             functions: BTreeMap::new(),
             calls: Vec::new(),
             outcome: Outcome {
@@ -1050,14 +1074,44 @@ impl Vm {
             let r = (|| -> Result<(), String> {
                 match code {
                     Code::Status(s) => self.outcome.status = s,
-                    Code::WhileStart => self.while_status.push(0),
+                    Code::WhileStart(word, end) => {
+                        if let Some(word) = word {
+                            let fields = self.expand(&word, true)?;
+                            if fields.len() != 1 {
+                                return Err(
+                                    "Ambiguous loop input redirection: quote a single file path"
+                                        .into(),
+                                );
+                            }
+                            let file = path(&fields[0])?;
+                            if let Some(text) = self.outcome.files.get(&file).cloned() {
+                                let input = std::mem::replace(&mut self.input, text);
+                                let pos = std::mem::replace(&mut self.input_pos, 0);
+                                self.inputs.push(InputFrame { input, pos, file });
+                                self.while_status.push((0, true));
+                            } else {
+                                self.outcome.status = 1;
+                                self.emit(
+                                    &Dest::Err,
+                                    &format!("shell: {}: No such file\n", fields[0]),
+                                )?;
+                                self.pc = end;
+                            }
+                        } else {
+                            self.while_status.push((0, false));
+                        }
+                    }
                     Code::WhileBody => {
-                        *self.while_status.last_mut().ok_or("Invalid while state")? =
+                        self.while_status.last_mut().ok_or("Invalid while state")?.0 =
                             self.outcome.status
                     }
                     Code::WhileEnd => {
-                        self.outcome.status =
-                            self.while_status.pop().ok_or("Invalid while state")?
+                        let (status, redirected) =
+                            self.while_status.pop().ok_or("Invalid while state")?;
+                        self.outcome.status = status;
+                        if redirected {
+                            self.restore_input()?;
+                        }
                     }
                     Code::Define(n, start, end) => {
                         if self.functions.len() >= 64 && !self.functions.contains_key(&n) {
@@ -1125,6 +1179,9 @@ impl Vm {
         self.args = frame.args;
         self.loops.truncate(frame.loops);
         self.while_status.truncate(frame.whiles);
+        while self.inputs.len() > frame.inputs {
+            self.restore_input()?;
+        }
         Ok(())
     }
     fn enter_function(&mut self, cmd: &Command) -> Result<bool, String> {
@@ -1153,10 +1210,24 @@ impl Vm {
             args: old_args,
             loops: self.loops.len(),
             whiles: self.while_status.len(),
+            inputs: self.inputs.len(),
             locals: BTreeMap::new(),
         });
         self.pc = start;
         Ok(true)
+    }
+    fn restore_input(&mut self) -> Result<(), String> {
+        let saved = self.inputs.pop().ok_or("Invalid loop input state")?;
+        self.input = saved.input;
+        self.input_pos = saved.pos;
+        Ok(())
+    }
+    fn writable_file(&self, file: &str) -> Result<(), String> {
+        if self.inputs.iter().any(|f| f.file == file) {
+            Err("Unsupported write to an active loop input; finish reading the source before changing it".into())
+        } else {
+            Ok(())
+        }
     }
     fn limits(&self) -> Result<(), String> {
         let visible: BTreeSet<_> = self
@@ -1178,6 +1249,11 @@ impl Vm {
                     .map(|(name, value)| name.len() + value.len())
                     .sum::<usize>()
                 + self.input.len()
+                + self
+                    .inputs
+                    .iter()
+                    .map(|f| f.input.len() + f.file.len())
+                    .sum::<usize>()
                 + self
                     .calls
                     .iter()
@@ -1208,6 +1284,9 @@ impl Vm {
         Ok(())
     }
     fn emit(&mut self, dest: &Dest, text: &str) -> Result<(), String> {
+        if let Dest::File(file) = dest {
+            self.writable_file(file)?;
+        }
         if text.len() > MAX_OUTPUT {
             return Err("Command output exceeds 32 KiB".into());
         }
@@ -1415,6 +1494,7 @@ impl Vm {
                 };
                 input = Some(text.clone());
             } else {
+                self.writable_file(&p)?;
                 if !self.outcome.files.contains_key(&p) && self.outcome.files.len() >= 64 {
                     return Err("Virtual file limit exceeded".into());
                 }
@@ -1436,6 +1516,7 @@ impl Vm {
             self.input = s;
             self.input_pos = 0;
         }
+        let input_depth = self.inputs.len();
         let (out, err, status) = if let Some(declarations) = declarations {
             self.apply_local_declarations(declarations)?;
             (String::new(), String::new(), 0)
@@ -1451,7 +1532,7 @@ impl Vm {
             }
             self.builtin(&args)?
         };
-        if redirected {
+        if redirected && self.inputs.len() == input_depth {
             self.input = old_input;
             self.input_pos = old_pos;
         }

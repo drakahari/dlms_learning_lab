@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking and Linux practice. Forty-three authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments and three Bash scope/debugging assignments and four text-processing/audit assignments, plus six Linux file-management foundations and six IPv6 configuration/troubleshooting assignments. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking and Linux practice. Forty-seven authored scenarios: the accepted nine across CCNA, LPIC-1 and LPIC-2, plus seven shell foundations, four shell composition and four reusable-function/safe-composition assignments and three Bash scope/debugging assignments and four text-processing/audit assignments and four counters/totals/publication assignments, plus six Linux file-management foundations and six IPv6 configuration/troubleshooting assignments. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -89,3 +89,5 @@ See [architecture and authoring](docs/ARCHITECTURE.md), [content sources and sim
 Native Fedora development prototype. Windows and macOS use the same native Rust stack but have **not** been runtime accepted. No releases or distribution packages have been published. Local development installation candidates are prepared separately; see [installation and platform gates](docs/INSTALLATION.md).
 
 Original code and authored curriculum are licensed under [MIT](LICENSE), approved by the owner on 2026-10-22. Third-party licenses and attribution remain in [NOTICE](NOTICE) and the palette notices. Candidates include target-specific dependency/font/standard-library notices and original source archives. macOS notice provenance and actual cross-platform installation/runtime acceptance remain explicit gates.
+
+Four [counter and totals assignments](docs/SHELL_COUNTS.md) add sequential virtual-file input, stable record numbering, whole-cent costs, guarded division/remainder and a preflight multi-file count capstone. Small valid integer inputs and read-only active-source limitations are explicit; no arbitrary numeric validation or floating-point behavior is claimed.

@@ -380,8 +380,10 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            n @ (250..=375 | 700..=771 | 900..=971 | 1600..=1653 | 1700..=1771) => {
-                let (start, first) = if n >= 1700 {
+            n @ (250..=375 | 700..=771 | 900..=971 | 1600..=1653 | 1700..=1771 | 1900..=1971) => {
+                let (start, first) = if n >= 1900 {
+                    (1900, 43)
+                } else if n >= 1700 {
                     (1700, 39)
                 } else if n >= 1600 {
                     (1600, 36)
@@ -415,6 +417,9 @@ impl LabApp {
                     }
                     4 => {}
                     5 => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
                         let a = &self.progress.attempts[&id];
                         let l = a
                             .workspace
@@ -439,7 +444,14 @@ impl LabApp {
                     }
                     6 => {
                         let lesson = self.scenarios[i].teaching.as_ref().unwrap();
-                        let (from, to) = if i >= 39 {
+                        let (from, to) = if i >= 43 {
+                            [
+                                ("visits + 1", "visits + 2"),
+                                ("boxes * price + fee", "boxes * (price + fee)"),
+                                ("tray=5", "tray=0"),
+                                ("total + count", "total + 1"),
+                            ][i - 43]
+                        } else if i >= 39 {
                             [("1,3", "2,3"), ("-u", "-r"), ("-c", "-d"), ("-d\n", "-u\n")][i - 39]
                         } else if i >= 36 {
                             [
@@ -476,6 +488,9 @@ impl LabApp {
                         .extend(click(self.metrics.check.unwrap())),
                     8 => {}
                     9 => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
                         let a = &self.progress.attempts[&id];
                         let result = a
                             .workspace
@@ -512,6 +527,9 @@ impl LabApp {
                         .pending_events
                         .extend(click(self.metrics.check.unwrap())),
                     13 => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
                         assert!(!self.metrics.completion);
                         if i == 9 || i >= 16 {
                             shot = Some(format!("{id}-retry-feedback"));
@@ -527,6 +545,9 @@ impl LabApp {
                         .extend(click(self.metrics.check.unwrap())),
                     16 => {}
                     _ => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
                         assert!(self.metrics.completion, "{id} retry");
                         if i == 9 || i >= 16 {
                             shot = Some(format!("{id}-teaching-complete"));
@@ -928,6 +949,117 @@ impl LabApp {
             1826 => {
                 println!(
                     "PASS native arithmetic capability: keyboard sum/guard/current grading, division feedback/current invalidation, responsive counter Stop, repair/reload and light150 rendering. Synthetic developer script in an existing lab; no new curriculum or novice acceptance claimed."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            1980 => {
+                self.launch(46);
+                self.set_script_view(46, teaching::View::Assignment);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            1981 | 1987 => self.pending_events.extend(click(self.metrics.inputs[0])),
+            1982 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("while true; do :; done < alpha.txt".into()),
+            ]),
+            1983 | 1989 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            1984 => {
+                assert!(self.script_job.is_some());
+                self.pending_events
+                    .extend(click(self.metrics.stop.unwrap()));
+            }
+            1985 => {}
+            1986 => {
+                assert!(self.script_job.is_none());
+                assert!(!self.metrics.completion);
+                shot = Some("shell-counts-loop-stopped".into());
+            }
+            1988 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text(self.scenarios[46].solution[0].clone()),
+            ]),
+            1990 => {
+                if self.script_job.is_some() {
+                    return;
+                }
+            }
+            1991 => {
+                assert!(self.metrics.completion);
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(progress::current_solved(
+                    &self.progress.attempts["shell-count-capstone"],
+                    &self.scenarios[46]
+                ));
+                shot = Some("shell-counts-after-stop-repaired".into());
+            }
+            1992 => {
+                println!(
+                    "PASS native while-file input: responsive Stop on an infinite file loop, no credit, keyboard repair/Run through all eight inputs, current success and saved reload. Synthetic profile only."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            1972 => {
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                for i in 43..47 {
+                    assert!(progress::current_solved(
+                        &self.progress.attempts[&self.scenarios[i].id],
+                        &self.scenarios[i]
+                    ));
+                }
+                self.launch(46);
+                self.set_script_view(46, teaching::View::Assignment);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            1973 => shot = Some("shell-counts-light-150".into()),
+            1974 => {
+                self.progress
+                    .attempts
+                    .get_mut("shell-count-capstone")
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.theme_id = "omarchy-catppuccin".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            1975 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("shell-counts-challenge-dark-150".into());
+            }
+            1976 => {
+                self.pending_events
+                    .push(egui::Event::PointerMoved(egui::pos2(500., 500.)));
+                self.pending_events.push(egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -650.),
+                    modifiers: Default::default(),
+                });
+            }
+            1977 => {}
+            1978 => shot = Some("shell-counts-challenge-scrolled-150".into()),
+            1979 => {
+                if let engine::State::Script { source, .. } = &mut self
+                    .progress
+                    .attempts
+                    .get_mut("shell-count-capstone")
+                    .unwrap()
+                    .state
+                {
+                    source.push_str("\nprintf broken");
+                }
+                assert!(!progress::current_solved(
+                    &self.progress.attempts["shell-count-capstone"],
+                    &self.scenarios[46]
+                ));
+                println!(
+                    "PASS native counters/totals: four introductions, isolated example Runs/edits, full assignments, wrong retries, keyboard repair/current Run, saved reload, invalidation and light/dark150 scrolling. Synthetic profile only; no novice or Windows/macOS desktop acceptance."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }

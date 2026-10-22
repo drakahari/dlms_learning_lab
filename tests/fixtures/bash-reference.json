@@ -8212,5 +8212,1648 @@
       "status": 0,
       "after": {}
     }
+  },
+  {
+    "name": "shell-number-records reference Ordinary queue",
+    "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+    "case": {
+      "name": "Ordinary queue",
+      "args": [
+        "queue.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/queue.txt": "Inspect\nPack\nShip\n"
+      },
+      "stdout": "1: Inspect\n2: Pack\n3: Ship\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/queue.txt": "Inspect\nPack\nShip\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records reference Empty records still need numbers",
+    "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+    "case": {
+      "name": "Empty records still need numbers",
+      "args": [
+        "queue.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/queue.txt": "First\n\nLast\n"
+      },
+      "stdout": "1: First\n2: \n3: Last\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/queue.txt": "First\n\nLast\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records reference Final record without newline",
+    "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+    "case": {
+      "name": "Final record without newline",
+      "args": [
+        "day two.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/day two.txt": "Check\nClose"
+      },
+      "stdout": "1: Check\n2: Close\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/day two.txt": "Check\nClose"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records reference Literal labels",
+    "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+    "case": {
+      "name": "Literal labels",
+      "args": [
+        "queue.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+      },
+      "stdout": "1: rack  A\n2: 100% ready\n3: path\\name\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records reference Empty file",
+    "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+    "case": {
+      "name": "Empty file",
+      "args": [
+        "empty.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.txt": ""
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-number-records reference Only blank records",
+    "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+    "case": {
+      "name": "Only blank records",
+      "args": [
+        "blank.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/blank.txt": "\n\n"
+      },
+      "stdout": "1: \n2: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/blank.txt": "\n\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records alternate Ordinary queue",
+    "source": "next=1\nwhile read -r item || [ -n \"$item\" ]; do\n    printf '%s: %s\\n' \"$next\" \"$item\"\n    next=$((1 + next))\ndone < \"$1\"\n",
+    "case": {
+      "name": "Ordinary queue",
+      "args": [
+        "queue.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/queue.txt": "Inspect\nPack\nShip\n"
+      },
+      "stdout": "1: Inspect\n2: Pack\n3: Ship\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/queue.txt": "Inspect\nPack\nShip\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records alternate Empty records still need numbers",
+    "source": "next=1\nwhile read -r item || [ -n \"$item\" ]; do\n    printf '%s: %s\\n' \"$next\" \"$item\"\n    next=$((1 + next))\ndone < \"$1\"\n",
+    "case": {
+      "name": "Empty records still need numbers",
+      "args": [
+        "queue.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/queue.txt": "First\n\nLast\n"
+      },
+      "stdout": "1: First\n2: \n3: Last\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/queue.txt": "First\n\nLast\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records alternate Final record without newline",
+    "source": "next=1\nwhile read -r item || [ -n \"$item\" ]; do\n    printf '%s: %s\\n' \"$next\" \"$item\"\n    next=$((1 + next))\ndone < \"$1\"\n",
+    "case": {
+      "name": "Final record without newline",
+      "args": [
+        "day two.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/day two.txt": "Check\nClose"
+      },
+      "stdout": "1: Check\n2: Close\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/day two.txt": "Check\nClose"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records alternate Literal labels",
+    "source": "next=1\nwhile read -r item || [ -n \"$item\" ]; do\n    printf '%s: %s\\n' \"$next\" \"$item\"\n    next=$((1 + next))\ndone < \"$1\"\n",
+    "case": {
+      "name": "Literal labels",
+      "args": [
+        "queue.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+      },
+      "stdout": "1: rack  A\n2: 100% ready\n3: path\\name\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records alternate Empty file",
+    "source": "next=1\nwhile read -r item || [ -n \"$item\" ]; do\n    printf '%s: %s\\n' \"$next\" \"$item\"\n    next=$((1 + next))\ndone < \"$1\"\n",
+    "case": {
+      "name": "Empty file",
+      "args": [
+        "empty.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty.txt": ""
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-number-records alternate Only blank records",
+    "source": "next=1\nwhile read -r item || [ -n \"$item\" ]; do\n    printf '%s: %s\\n' \"$next\" \"$item\"\n    next=$((1 + next))\ndone < \"$1\"\n",
+    "case": {
+      "name": "Only blank records",
+      "args": [
+        "blank.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/blank.txt": "\n\n"
+      },
+      "stdout": "1: \n2: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/blank.txt": "\n\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records teaching example",
+    "source": "visits=0\nwhile read -r stop; do\n    visits=$((visits + 1))\n    printf 'Visit %s: %s\\n' \"$visits\" \"$stop\"\ndone < stops.txt\n",
+    "case": {
+      "name": "Two example visits",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/stops.txt": "Lobby\nWorkshop\n"
+      },
+      "stdout": "Visit 1: Lobby\nVisit 2: Workshop\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/stops.txt": "Lobby\nWorkshop\n"
+      }
+    }
+  },
+  {
+    "name": "shell-number-records teaching experiment",
+    "source": "visits=0\nwhile read -r stop; do\n    visits=$((visits + 2))\n    printf 'Visit %s: %s\\n' \"$visits\" \"$stop\"\ndone < stops.txt\n",
+    "case": {
+      "name": "Two example visits",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/stops.txt": "Lobby\nWorkshop\n"
+      },
+      "stdout": "Visit 1: Lobby\nVisit 2: Workshop\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/stops.txt": "Lobby\nWorkshop\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total reference Ordinary quantities",
+    "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+    "case": {
+      "name": "Ordinary quantities",
+      "args": [
+        "units.txt",
+        "17"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": "2\n5\n1\n"
+      },
+      "stdout": "Units: 8\nCost (cents): 136\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": "2\n5\n1\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total reference Zero quantity and final record",
+    "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+    "case": {
+      "name": "Zero quantity and final record",
+      "args": [
+        "shift two.txt",
+        "3"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/shift two.txt": "0\n9\n2"
+      },
+      "stdout": "Units: 11\nCost (cents): 33\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/shift two.txt": "0\n9\n2"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total reference Empty order",
+    "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+    "case": {
+      "name": "Empty order",
+      "args": [
+        "units.txt",
+        "19"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": ""
+      },
+      "stdout": "Units: 0\nCost (cents): 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-order-total reference Free rate",
+    "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+    "case": {
+      "name": "Free rate",
+      "args": [
+        "units.txt",
+        "0"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": "7\n4\n"
+      },
+      "stdout": "Units: 11\nCost (cents): 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": "7\n4\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total reference Single quantity",
+    "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+    "case": {
+      "name": "Single quantity",
+      "args": [
+        "units.txt",
+        "25"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": "12"
+      },
+      "stdout": "Units: 12\nCost (cents): 300\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": "12"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total reference Maximum supplied order",
+    "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+    "case": {
+      "name": "Maximum supplied order",
+      "args": [
+        "bulk quantities.txt",
+        "99"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+      },
+      "stdout": "Units: 63936\nCost (cents): 6329664\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total alternate Ordinary quantities",
+    "source": "rate=$2\ncount=0\ncharge=0\nwhile read -r amount || [ -n \"$amount\" ]; do\n    count=$((amount + count))\n    charge=$((charge + amount * rate))\ndone < \"$1\"\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$count\" \"$charge\"\n",
+    "case": {
+      "name": "Ordinary quantities",
+      "args": [
+        "units.txt",
+        "17"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": "2\n5\n1\n"
+      },
+      "stdout": "Units: 8\nCost (cents): 136\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": "2\n5\n1\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total alternate Zero quantity and final record",
+    "source": "rate=$2\ncount=0\ncharge=0\nwhile read -r amount || [ -n \"$amount\" ]; do\n    count=$((amount + count))\n    charge=$((charge + amount * rate))\ndone < \"$1\"\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$count\" \"$charge\"\n",
+    "case": {
+      "name": "Zero quantity and final record",
+      "args": [
+        "shift two.txt",
+        "3"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/shift two.txt": "0\n9\n2"
+      },
+      "stdout": "Units: 11\nCost (cents): 33\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/shift two.txt": "0\n9\n2"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total alternate Empty order",
+    "source": "rate=$2\ncount=0\ncharge=0\nwhile read -r amount || [ -n \"$amount\" ]; do\n    count=$((amount + count))\n    charge=$((charge + amount * rate))\ndone < \"$1\"\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$count\" \"$charge\"\n",
+    "case": {
+      "name": "Empty order",
+      "args": [
+        "units.txt",
+        "19"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": ""
+      },
+      "stdout": "Units: 0\nCost (cents): 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": ""
+      }
+    }
+  },
+  {
+    "name": "shell-order-total alternate Free rate",
+    "source": "rate=$2\ncount=0\ncharge=0\nwhile read -r amount || [ -n \"$amount\" ]; do\n    count=$((amount + count))\n    charge=$((charge + amount * rate))\ndone < \"$1\"\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$count\" \"$charge\"\n",
+    "case": {
+      "name": "Free rate",
+      "args": [
+        "units.txt",
+        "0"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": "7\n4\n"
+      },
+      "stdout": "Units: 11\nCost (cents): 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": "7\n4\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total alternate Single quantity",
+    "source": "rate=$2\ncount=0\ncharge=0\nwhile read -r amount || [ -n \"$amount\" ]; do\n    count=$((amount + count))\n    charge=$((charge + amount * rate))\ndone < \"$1\"\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$count\" \"$charge\"\n",
+    "case": {
+      "name": "Single quantity",
+      "args": [
+        "units.txt",
+        "25"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/units.txt": "12"
+      },
+      "stdout": "Units: 12\nCost (cents): 300\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/units.txt": "12"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total alternate Maximum supplied order",
+    "source": "rate=$2\ncount=0\ncharge=0\nwhile read -r amount || [ -n \"$amount\" ]; do\n    count=$((amount + count))\n    charge=$((charge + amount * rate))\ndone < \"$1\"\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$count\" \"$charge\"\n",
+    "case": {
+      "name": "Maximum supplied order",
+      "args": [
+        "bulk quantities.txt",
+        "99"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+      },
+      "stdout": "Units: 63936\nCost (cents): 6329664\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+      }
+    }
+  },
+  {
+    "name": "shell-order-total teaching example",
+    "source": "boxes=3\nprice=8\nfee=2\ncharge=$((boxes * price + fee))\nprintf 'Charge (cents): %s\\n' \"$charge\"\n",
+    "case": {
+      "name": "Example charge",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Charge (cents): 26\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-order-total teaching experiment",
+    "source": "boxes=3\nprice=8\nfee=2\ncharge=$((boxes * (price + fee)))\nprintf 'Charge (cents): %s\\n' \"$charge\"\n",
+    "case": {
+      "name": "Example charge",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Charge (cents): 26\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-pack-items reference Leftover items",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Leftover items",
+      "args": [
+        "23",
+        "6"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 3\nLoose items: 5\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference Exact fit",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Exact fit",
+      "args": [
+        "24",
+        "6"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 4\nLoose items: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference Fewer items than one carton",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Fewer items than one carton",
+      "args": [
+        "3",
+        "8"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 0\nLoose items: 3\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference No items",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "No items",
+      "args": [
+        "0",
+        "4"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 0\nLoose items: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference Unit capacity",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Unit capacity",
+      "args": [
+        "19",
+        "1"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 19\nLoose items: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference Zero capacity",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Zero capacity",
+      "args": [
+        "9",
+        "0"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot pack items\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference Missing capacity",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Missing capacity",
+      "args": [
+        "12"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot pack items\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items reference Extra argument",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+    "case": {
+      "name": "Extra argument",
+      "args": [
+        "12",
+        "4",
+        "unexpected"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot pack items\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Leftover items",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Leftover items",
+      "args": [
+        "23",
+        "6"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 3\nLoose items: 5\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Exact fit",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Exact fit",
+      "args": [
+        "24",
+        "6"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 4\nLoose items: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Fewer items than one carton",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Fewer items than one carton",
+      "args": [
+        "3",
+        "8"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 0\nLoose items: 3\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate No items",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "No items",
+      "args": [
+        "0",
+        "4"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 0\nLoose items: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Unit capacity",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Unit capacity",
+      "args": [
+        "19",
+        "1"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "Full cartons: 19\nLoose items: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Zero capacity",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Zero capacity",
+      "args": [
+        "9",
+        "0"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot pack items\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Missing capacity",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Missing capacity",
+      "args": [
+        "12"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot pack items\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items alternate Extra argument",
+    "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nif [ \"$2\" -gt 0 ]; then\n    full=$(($1 / $2))\n    remaining=$(($1 - full * $2))\n    printf 'Full cartons: %s\\nLoose items: %s\\n' \"$full\" \"$remaining\"\nelse\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Extra argument",
+      "args": [
+        "12",
+        "4",
+        "unexpected"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "unchanged\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot pack items\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "shell-pack-items teaching example",
+    "source": "items=17\ntray=5\nif [ \"$tray\" -gt 0 ]; then\n    full=$((items / tray))\n    left=$((items % tray))\n    printf 'Trays: %s; spare: %s\\n' \"$full\" \"$left\"\nelse\n    printf 'Choose a nonzero tray size\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Example trays",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Trays: 3; spare: 2\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-pack-items teaching experiment",
+    "source": "items=17\ntray=0\nif [ \"$tray\" -gt 0 ]; then\n    full=$((items / tray))\n    left=$((items % tray))\n    printf 'Trays: %s; spare: %s\\n' \"$full\" \"$left\"\nelse\n    printf 'Choose a nonzero tray size\\n' >&2\n    exit 2\nfi\n",
+    "case": {
+      "name": "Example trays",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Trays: 3; spare: 2\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Two sources replace an old report",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Two sources replace an old report",
+      "args": [
+        "counts.txt",
+        "alpha.txt",
+        "beta.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/alpha.txt": "A\nB\n",
+        "/work/beta.txt": "C\n",
+        "/work/counts.txt": "old\n"
+      },
+      "stdout": "Saved: counts.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/alpha.txt": "A\nB\n",
+        "/work/beta.txt": "C\n",
+        "/work/counts.txt": "Record counts\nalpha.txt: 2\nbeta.txt: 1\nTotal: 3\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Repeated source counts twice",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Repeated source counts twice",
+      "args": [
+        "day counts.txt",
+        "blank.txt",
+        "last.txt",
+        "blank.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/blank.txt": "\n\n",
+        "/work/last.txt": "One\nTwo"
+      },
+      "stdout": "Saved: day counts.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/blank.txt": "\n\n",
+        "/work/last.txt": "One\nTwo",
+        "/work/day counts.txt": "Record counts\nblank.txt: 2\nlast.txt: 2\nblank.txt: 2\nTotal: 6\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Eight sources include empty and maximum file",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Eight sources include empty and maximum file",
+      "args": [
+        "new report.txt",
+        "empty source.txt",
+        "sixteen records.txt",
+        "one.txt",
+        "two.txt",
+        "three.txt",
+        "literal labels.txt",
+        "tail.txt",
+        "last.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty source.txt": "",
+        "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+        "/work/one.txt": "\n",
+        "/work/two.txt": "A\nB\n",
+        "/work/three.txt": "A\nB\nC",
+        "/work/literal labels.txt": "100%\npath\\name\n",
+        "/work/tail.txt": "end",
+        "/work/last.txt": "done\n"
+      },
+      "stdout": "Saved: new report.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty source.txt": "",
+        "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+        "/work/one.txt": "\n",
+        "/work/two.txt": "A\nB\n",
+        "/work/three.txt": "A\nB\nC",
+        "/work/literal labels.txt": "100%\npath\\name\n",
+        "/work/tail.txt": "end",
+        "/work/last.txt": "done\n",
+        "/work/new report.txt": "Record counts\nempty source.txt: 0\nsixteen records.txt: 16\none.txt: 1\ntwo.txt: 2\nthree.txt: 3\nliteral labels.txt: 2\ntail.txt: 1\nlast.txt: 1\nTotal: 26\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Later missing source retains report",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Later missing source retains report",
+      "args": [
+        "counts.txt",
+        "ok.txt",
+        "missing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/ok.txt": "safe\n",
+        "/work/counts.txt": "keep this\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/ok.txt": "safe\n",
+        "/work/counts.txt": "keep this\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Failure must not create report",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Failure must not create report",
+      "args": [
+        "new.txt",
+        "missing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "untouched\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Destination is also a later input",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Destination is also a later input",
+      "args": [
+        "alpha.txt",
+        "beta.txt",
+        "alpha.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/alpha.txt": "keep A\n",
+        "/work/beta.txt": "keep B\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/alpha.txt": "keep A\n",
+        "/work/beta.txt": "keep B\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference No input arguments",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "No input arguments",
+      "args": [
+        "existing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/existing.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/existing.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone reference Empty destination",
+    "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+    "case": {
+      "name": "Empty destination",
+      "args": [
+        "",
+        "ok.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/ok.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/ok.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Two sources replace an old report",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Two sources replace an old report",
+      "args": [
+        "counts.txt",
+        "alpha.txt",
+        "beta.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/alpha.txt": "A\nB\n",
+        "/work/beta.txt": "C\n",
+        "/work/counts.txt": "old\n"
+      },
+      "stdout": "Saved: counts.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/alpha.txt": "A\nB\n",
+        "/work/beta.txt": "C\n",
+        "/work/counts.txt": "Record counts\nalpha.txt: 2\nbeta.txt: 1\nTotal: 3\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Repeated source counts twice",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Repeated source counts twice",
+      "args": [
+        "day counts.txt",
+        "blank.txt",
+        "last.txt",
+        "blank.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/blank.txt": "\n\n",
+        "/work/last.txt": "One\nTwo"
+      },
+      "stdout": "Saved: day counts.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/blank.txt": "\n\n",
+        "/work/last.txt": "One\nTwo",
+        "/work/day counts.txt": "Record counts\nblank.txt: 2\nlast.txt: 2\nblank.txt: 2\nTotal: 6\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Eight sources include empty and maximum file",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Eight sources include empty and maximum file",
+      "args": [
+        "new report.txt",
+        "empty source.txt",
+        "sixteen records.txt",
+        "one.txt",
+        "two.txt",
+        "three.txt",
+        "literal labels.txt",
+        "tail.txt",
+        "last.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/empty source.txt": "",
+        "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+        "/work/one.txt": "\n",
+        "/work/two.txt": "A\nB\n",
+        "/work/three.txt": "A\nB\nC",
+        "/work/literal labels.txt": "100%\npath\\name\n",
+        "/work/tail.txt": "end",
+        "/work/last.txt": "done\n"
+      },
+      "stdout": "Saved: new report.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/empty source.txt": "",
+        "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+        "/work/one.txt": "\n",
+        "/work/two.txt": "A\nB\n",
+        "/work/three.txt": "A\nB\nC",
+        "/work/literal labels.txt": "100%\npath\\name\n",
+        "/work/tail.txt": "end",
+        "/work/last.txt": "done\n",
+        "/work/new report.txt": "Record counts\nempty source.txt: 0\nsixteen records.txt: 16\none.txt: 1\ntwo.txt: 2\nthree.txt: 3\nliteral labels.txt: 2\ntail.txt: 1\nlast.txt: 1\nTotal: 26\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Later missing source retains report",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Later missing source retains report",
+      "args": [
+        "counts.txt",
+        "ok.txt",
+        "missing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/ok.txt": "safe\n",
+        "/work/counts.txt": "keep this\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/ok.txt": "safe\n",
+        "/work/counts.txt": "keep this\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Failure must not create report",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Failure must not create report",
+      "args": [
+        "new.txt",
+        "missing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "untouched\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/keep.txt": "untouched\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Destination is also a later input",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Destination is also a later input",
+      "args": [
+        "alpha.txt",
+        "beta.txt",
+        "alpha.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/alpha.txt": "keep A\n",
+        "/work/beta.txt": "keep B\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/alpha.txt": "keep A\n",
+        "/work/beta.txt": "keep B\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate No input arguments",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "No input arguments",
+      "args": [
+        "existing.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/existing.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/existing.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone alternate Empty destination",
+    "source": "reject() { printf 'Cannot count files\\n' >&2; exit 2; }\nif [ \"$#\" -lt 2 ]; then reject; fi\nout=$1\nshift\nif [ -z \"$out\" ]; then reject; fi\nfor path in \"$@\"; do\n    if [ \"$path\" = \"$out\" ]; then reject; fi\n    if [ -f \"$path\" ]; then :; else reject; fi\ndone\ncount_file() {\n    local line='' count=0\n    while read -r line || [ -n \"$line\" ]; do\n        count=$((1 + count))\n    done < \"$1\"\n    printf '%s: %s\\n' \"$1\" \"$count\" >> \"$out\"\n    total=$((count + total))\n}\ntotal=0\nprintf 'Record counts\\n' > \"$out\"\nfor path in \"$@\"; do count_file \"$path\"; done\nprintf 'Total: %s\\n' \"$total\" >> \"$out\"\nprintf 'Saved: %s\\n' \"$out\"\n",
+    "case": {
+      "name": "Empty destination",
+      "args": [
+        "",
+        "ok.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/ok.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot count files\n",
+      "status": 2,
+      "after": {
+        "/work/ok.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone teaching example",
+    "source": "total=0\nfor file in morning.txt evening.txt; do\n    count=0\n    while read -r note || [ -n \"$note\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\"\n    total=$((total + count))\ndone\nprintf 'Combined: %s\\n' \"$total\"\n",
+    "case": {
+      "name": "Example per-file count",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/morning.txt": "Open\nInspect\n",
+        "/work/evening.txt": "Close\n"
+      },
+      "stdout": "morning.txt: 2\nevening.txt: 1\nCombined: 3\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/morning.txt": "Open\nInspect\n",
+        "/work/evening.txt": "Close\n"
+      }
+    }
+  },
+  {
+    "name": "shell-count-capstone teaching experiment",
+    "source": "total=0\nfor file in morning.txt evening.txt; do\n    count=0\n    while read -r note || [ -n \"$note\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\"\n    total=$((total + 1))\ndone\nprintf 'Combined: %s\\n' \"$total\"\n",
+    "case": {
+      "name": "Example per-file count",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/morning.txt": "Open\nInspect\n",
+        "/work/evening.txt": "Close\n"
+      },
+      "stdout": "morning.txt: 2\nevening.txt: 1\nCombined: 3\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/morning.txt": "Open\nInspect\n",
+        "/work/evening.txt": "Close\n"
+      }
+    }
+  },
+  {
+    "name": "while-file-input open once and preserve caller",
+    "source": "read -r first\nprintf '%s\\n' \"$first\"\np='outer file'\nn=0\nwhile read -r row || [ -n \"$row\" ]; do p=other; n=$((n+1)); printf '%s:%s\\n' \"$n\" \"$row\"; done < \"$p\"\nread -r next\nprintf '%s:%s:%s\\n' \"$next\" \"$p\" \"$n\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input nested inputs",
+    "source": "while read -r a || [ -n \"$a\" ]; do printf 'A:%s\\n' \"$a\"; while read -r b; do printf 'B:%s\\n' \"$b\"; done < inner; done < 'outer file'\nread -r first\nprintf '%s\\n' \"$first\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input function shares loop input",
+    "source": "f() { read -r a; printf 'Fn:%s\\n' \"$a\"; }\nwhile read -r row; do printf 'Row:%s\\n' \"$row\"; f; done < inner\nread -r first\nprintf '%s\\n' \"$first\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input empty condition preserves status",
+    "source": "while false; do :; done < inner\nprintf '%s\\n' \"$?\"\nwhile read -r row; do false; done < inner\nprintf '%s\\n' \"$?\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input command input restores loop cursor",
+    "source": "while read -r row; do read -r x < other; printf '%s:%s\\n' \"$row\" \"$x\"; done < inner\nread -r first\nprintf '%s\\n' \"$first\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input early return",
+    "source": "f() { while read -r x; do printf 'F:%s\\n' \"$x\"; return 7; done < inner; }\nwhile read -r line || [ -n \"$line\" ]; do printf 'L:%s\\n' \"$line\"; f; printf 'Status:%s\\n' \"$?\"; done < 'outer file'\nread -r first\nprintf '%s\\n' \"$first\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input early return < other",
+    "source": "f() { while read -r x; do printf 'F:%s\\n' \"$x\"; return 7 < other; done < inner; }\nwhile read -r line || [ -n \"$line\" ]; do printf 'L:%s\\n' \"$line\"; f; printf 'Status:%s\\n' \"$?\"; done < 'outer file'\nread -r first\nprintf '%s\\n' \"$first\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input simple return input",
+    "source": "f() { return 7 < other; }; f; read -r next; printf '<%s>\\n' \"$next\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input simple return input in caller loop",
+    "source": "f() { return 7 < other; }; while read -r row; do f; printf '<%s>\\n' \"$row\"; done < inner; read -r next; printf '<%s>\\n' \"$next\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input unredirected loop return input",
+    "source": "f() { while true; do return 7 < other; done; }; f; read -r next; printf '<%s>\\n' \"$next\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "while-file-input unredirected loop return input in caller loop",
+    "source": "f() { while true; do return 7 < other; done; }; while read -r row; do f; printf '<%s>\\n' \"$row\"; done < inner; read -r next; printf '<%s>\\n' \"$next\"",
+    "case": {
+      "name": "While input scopes",
+      "args": [],
+      "stdin": "before\nafter\nlast",
+      "env": {},
+      "files": {
+        "/work/outer file": "red\n\nblue",
+        "/work/inner": "one\ntwo\n",
+        "/work/other": "separate\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
   }
 ]

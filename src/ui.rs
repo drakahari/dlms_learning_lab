@@ -209,6 +209,10 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("scope-recovery")
             {
                 1500
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("counts-stop") {
+                1980
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("counts") {
+                1900
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arithmetic") {
                 1800
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("text") {
