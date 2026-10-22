@@ -6,6 +6,12 @@ fn app() -> (egui::Context, LabApp) {
     a.smoke = false;
     (ctx, a)
 }
+fn open_assignment(a: &mut LabApp, i: usize) {
+    a.launch(i);
+    if a.scenarios[i].address_teaching.is_some() {
+        a.set_address_view(i, teaching::View::Assignment);
+    }
+}
 fn frame(ctx: &egui::Context, a: &mut LabApp, w: f32, h: f32, events: Vec<egui::Event>) {
     let modifiers = events
         .iter()
@@ -84,7 +90,7 @@ fn all_nine_keep_workspace_prominent_and_controls_inside_width_at_both_modes_and
         for challenge in [false, true] {
             for (width, height, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
                 let (ctx, mut a) = app();
-                a.launch(i);
+                open_assignment(&mut a, i);
                 a.scale = scale;
                 a.progress
                     .attempts
@@ -153,7 +159,7 @@ fn library_topic_is_visible_extra_filters_are_optional_and_catalog_navigation_su
     a.filter.favorites = true;
     draw(&ctx, &mut a);
     assert_eq!(a.metrics.card_actions.len(), 1);
-    a.launch(3);
+    open_assignment(&mut a, 3);
     a.selected = None;
     draw(&ctx, &mut a);
     assert_eq!(a.filter.search, "report");
@@ -184,7 +190,7 @@ fn library_topic_is_visible_extra_filters_are_optional_and_catalog_navigation_su
 #[test]
 fn ipv4_native_form_checks_partial_answers_and_clears_stale_topology_success() {
     let (ctx, mut a) = app();
-    a.launch(0);
+    open_assignment(&mut a, 0);
     draw(&ctx, &mut a);
     assert_eq!(a.metrics.inputs.len(), 5);
     let first = a.metrics.focus.unwrap();
@@ -232,7 +238,7 @@ fn ipv4_native_form_checks_partial_answers_and_clears_stale_topology_success() {
 fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gates() {
     for i in 0..9 {
         let (ctx, mut a) = app();
-        a.launch(i);
+        open_assignment(&mut a, i);
         if i == 0 {
             solve(&mut a, i);
             a.load_ipv4_view(i);
@@ -285,7 +291,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
 #[test]
 fn service_editor_saves_without_starting_and_resume_preserves_unsaved_draft() {
     let (ctx, mut a) = app();
-    a.launch(6);
+    open_assignment(&mut a, 6);
     draw(&ctx, &mut a);
     a.progress
         .attempts
@@ -327,7 +333,7 @@ fn service_editor_saves_without_starting_and_resume_preserves_unsaved_draft() {
         .unwrap()
         .service_port = Some("unfinished draft".into());
     a.selected = None;
-    a.launch(6);
+    open_assignment(&mut a, 6);
     draw(&ctx, &mut a);
     assert_eq!(
         a.progress.attempts["lpic2-service"]
@@ -346,7 +352,7 @@ fn service_editor_saves_without_starting_and_resume_preserves_unsaved_draft() {
 #[test]
 fn dns_and_mount_editors_stage_configuration_then_terminal_verifies_application() {
     let (ctx, mut a) = app();
-    a.launch(7);
+    open_assignment(&mut a, 7);
     draw(&ctx, &mut a);
     let original = a.progress.attempts["lpic2-dns"].state.clone();
     let w = a
@@ -380,7 +386,7 @@ fn dns_and_mount_editors_stage_configuration_then_terminal_verifies_application(
     a.submit(7);
     draw(&ctx, &mut a);
     assert!(a.metrics.completion);
-    a.launch(8);
+    open_assignment(&mut a, 8);
     draw(&ctx, &mut a);
     a.progress
         .attempts
@@ -410,7 +416,7 @@ fn dns_and_mount_editors_stage_configuration_then_terminal_verifies_application(
 #[test]
 fn terminal_enter_focus_and_query_invalidation_work_in_normal_app() {
     let (ctx, mut a) = app();
-    a.launch(5);
+    open_assignment(&mut a, 5);
     draw(&ctx, &mut a);
     let focus = a.metrics.focus.unwrap();
     assert_eq!(ctx.memory(|m| m.focused()), Some(focus));
@@ -460,13 +466,13 @@ fn terminal_enter_focus_and_query_invalidation_work_in_normal_app() {
 #[test]
 fn reset_resume_and_numerical_practice_preserve_other_attempts_and_original_answers() {
     let (ctx, mut a) = app();
-    a.launch(0);
+    open_assignment(&mut a, 0);
     solve(&mut a, 0);
     a.load_ipv4_view(0);
     draw(&ctx, &mut a);
     check(&ctx, &mut a);
     let original = a.progress.attempts["ccna-ipv4"].state.clone();
-    a.launch(5);
+    open_assignment(&mut a, 5);
     a.input = "unfinished command".into();
     a.progress
         .attempts
@@ -476,7 +482,7 @@ fn reset_resume_and_numerical_practice_preserve_other_attempts_and_original_answ
         .as_mut()
         .unwrap()
         .command = a.input.clone();
-    a.launch(0);
+    open_assignment(&mut a, 0);
     let attempt = a.progress.attempts.get_mut("ccna-ipv4").unwrap();
     let e = ipv4::Exercise::from_state(&attempt.state).unwrap();
     let mut l = ipv4::Lesson::from_legacy(e.ip, e.prefix, 0);
@@ -494,10 +500,10 @@ fn reset_resume_and_numerical_practice_preserve_other_attempts_and_original_answ
     let p = progress::load(&a.path, &a.scenarios).unwrap();
     assert_eq!(p.attempts["ccna-ipv4"].state, original);
     a.progress = p;
-    a.launch(5);
+    open_assignment(&mut a, 5);
     assert_eq!(a.input, "unfinished command");
     a.progress.favorites.insert("lpic1-logs".into());
-    a.launch(0);
+    open_assignment(&mut a, 0);
     draw(&ctx, &mut a);
     let before_reset = a.progress.attempts["ccna-ipv4"].state.clone();
     let r = a.metrics.reset.unwrap();
@@ -523,7 +529,7 @@ fn reset_resume_and_numerical_practice_preserve_other_attempts_and_original_answ
 fn assistance_is_optional_and_inserting_a_command_never_executes_it() {
     for i in [3, 6] {
         let (ctx, mut a) = app();
-        a.launch(i);
+        open_assignment(&mut a, i);
         draw(&ctx, &mut a);
         let id = a.scenarios[i].id.clone();
         let original = a.progress.attempts[&id].state.clone();
@@ -598,7 +604,7 @@ fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
             for scale in [1., 1.5] {
                 for challenge in [false, true] {
                     let (ctx, mut a) = app();
-                    a.launch(i);
+                    open_assignment(&mut a, i);
                     a.set_script_view(i, teaching::View::Assignment);
                     a.scale = scale;
                     a.progress
@@ -638,7 +644,7 @@ fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
 #[test]
 fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     a.set_script_view(9, teaching::View::Assignment);
     draw(&ctx, &mut a);
     let editor = a.metrics.focus.unwrap();
@@ -681,8 +687,8 @@ fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
         draw(&ctx, &mut a);
     }
     assert!(a.metrics.completion);
-    a.launch(10);
-    a.launch(9);
+    open_assignment(&mut a, 10);
+    open_assignment(&mut a, 9);
     draw(&ctx, &mut a);
     assert!(a.metrics.completion);
     frame(
@@ -726,8 +732,8 @@ fn scripting_native_run_stop_focus_resume_and_success_invalidation() {
     assert!(a.script_job.is_none());
     assert!(!a.metrics.completion);
     let draft = a.progress.attempts["shell-handover"].state.clone();
-    a.launch(0);
-    a.launch(9);
+    open_assignment(&mut a, 0);
+    open_assignment(&mut a, 9);
     assert_eq!(a.progress.attempts["shell-handover"].state, draft);
     a.reset_attempt(9);
     assert_eq!(
@@ -758,7 +764,7 @@ fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_r
     let (ctx, mut a) = app();
     let dir = tempfile::tempdir().unwrap();
     a.path = dir.path().join("progress.json");
-    a.launch(9);
+    open_assignment(&mut a, 9);
     draw(&ctx, &mut a);
     assert_eq!(a.script_view(9), teaching::View::Introduction);
     assert!(a.metrics.check.is_none());
@@ -855,8 +861,8 @@ fn learn_examples_are_editable_ungraded_and_drafts_survive_navigation_save_and_r
     assert_eq!(a.progress.attempts["shell-handover"].state, solved);
     a.save();
     a.progress = progress::load(&a.path, &a.scenarios).unwrap();
-    a.launch(10);
-    a.launch(9);
+    open_assignment(&mut a, 10);
+    open_assignment(&mut a, 9);
     assert_eq!(a.script_view(9), teaching::View::Example);
     assert_eq!(
         a.progress.attempts["shell-handover"]
@@ -890,7 +896,7 @@ fn all_introductions_and_examples_wrap_at_large_text_and_challenge_stays_indepen
             for scale in [1., 1.5] {
                 for width in [720., 1200.] {
                     let (ctx, mut a) = app();
-                    a.launch(i);
+                    open_assignment(&mut a, i);
                     a.set_script_view(i, view);
                     a.scale = scale;
                     if view == teaching::View::Example {
@@ -976,7 +982,7 @@ fn settings_moves_samples_off_toolbar_and_theme_changes_persist() {
 #[test]
 fn example_keyboard_run_syntax_retry_and_stop_do_not_grade_the_assignment() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     a.set_script_view(9, teaching::View::Example);
     draw(&ctx, &mut a);
     let original = a.progress.attempts["shell-handover"].state.clone();
@@ -1104,7 +1110,7 @@ fn legacy_subnet_credit_does_not_invent_a_host_and_requires_new_check() {
         *second = None;
     }
     a.progress.attempts.insert(s.id.clone(), old);
-    a.launch(0);
+    open_assignment(&mut a, 0);
     draw(&ctx, &mut a);
     assert!(!a.metrics.completion);
     assert!(progress::legacy_credit(&a.progress.attempts["ccna-ipv4"]));
@@ -1134,7 +1140,7 @@ fn historical_auto_host_snapshot_is_reviewed_resumed_and_invalidated() {
     let (ctx, mut a) = app();
     let dir = tempfile::tempdir().unwrap();
     a.path = dir.path().join("progress.json");
-    a.launch(0);
+    open_assignment(&mut a, 0);
     solve(&mut a, 0);
     let attempt = a.progress.attempts.get_mut("ccna-ipv4").unwrap();
     attempt.workspace.as_mut().unwrap().migrated_host = true;
@@ -1142,7 +1148,7 @@ fn historical_auto_host_snapshot_is_reviewed_resumed_and_invalidated() {
         &ipv4::Exercise::from_state(&attempt.state).unwrap(),
     ));
     let before = attempt.state.clone();
-    a.launch(0);
+    open_assignment(&mut a, 0);
     draw(&ctx, &mut a);
     assert_eq!(a.progress.attempts["ccna-ipv4"].state, before);
     assert!(!a.metrics.completion);
@@ -1151,7 +1157,7 @@ fn historical_auto_host_snapshot_is_reviewed_resumed_and_invalidated() {
     assert!(a.metrics.completion);
     a.save();
     a.progress = progress::load(&a.path, &a.scenarios).unwrap();
-    a.launch(0);
+    open_assignment(&mut a, 0);
     draw(&ctx, &mut a);
     assert!(a.metrics.completion);
     a.ipv4_view.as_mut().unwrap().exercise.second = Some("192.168.10.77".into());
@@ -1198,7 +1204,7 @@ fn data_ui_exports_previews_cancels_then_restores_without_losing_current_drafts(
     let dir = tempfile::tempdir().unwrap();
     a.path = dir.path().join("progress.json");
     a.smoke = true;
-    a.launch(9);
+    open_assignment(&mut a, 9);
     if let State::Script { source, .. } =
         &mut a.progress.attempts.get_mut("shell-handover").unwrap().state
     {
@@ -1244,7 +1250,7 @@ fn restoring_corrupt_profile_protects_unsaved_read_only_session_work() {
     let dir = tempfile::tempdir().unwrap();
     a.path = dir.path().join("progress.json");
     a.smoke = true;
-    a.launch(9);
+    open_assignment(&mut a, 9);
     dlms_learning_lab::backup::export(
         &dir.path().join("dlms-learning-backup.json"),
         &a.progress,
@@ -1289,7 +1295,7 @@ fn backup_dialog_does_not_allow_background_editor_shortcuts_to_run_labs() {
     let dir = tempfile::tempdir().unwrap();
     a.path = dir.path().join("progress.json");
     a.smoke = true;
-    a.launch(9);
+    open_assignment(&mut a, 9);
     a.set_script_view(9, teaching::View::Assignment);
     a.settings_open = true;
     a.settings_data = true;
@@ -1332,7 +1338,7 @@ fn course_start_and_unit_filters_keep_search_favorites_and_resume_navigation() {
     a.filter.favorites = true;
     draw(&ctx, &mut a);
     assert_eq!(a.metrics.card_actions.len(), 1);
-    a.launch(9);
+    open_assignment(&mut a, 9);
     draw(&ctx, &mut a);
     let r = a.metrics.back.unwrap();
     click(&ctx, &mut a, r);
@@ -1369,7 +1375,7 @@ fn unit_filter_controls_wrap_at_narrow_widths_and_large_text() {
 #[test]
 fn function_scripts_run_cooperatively_in_the_existing_workspace_and_preserve_drafts() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     a.set_script_view(9, teaching::View::Assignment);
     let source = "handover() { printf 'Site: %s\\nTask: %s\\n' \"$1\" \"$2\"; }\nhandover \"$SITE\" \"$TASK\"";
     if let State::Script { source: draft, run } =
@@ -1398,8 +1404,8 @@ fn function_scripts_run_cooperatively_in_the_existing_workspace_and_preserve_dra
     click(&ctx, &mut a, stop);
     assert!(a.script_job.is_none());
     let draft = a.progress.attempts["shell-handover"].state.clone();
-    a.launch(10);
-    a.launch(9);
+    open_assignment(&mut a, 10);
+    open_assignment(&mut a, 9);
     assert_eq!(a.progress.attempts["shell-handover"].state, draft);
     assert!(!a.metrics.completion);
 }
@@ -1412,7 +1418,7 @@ fn terminal_introduction_practice_and_assignment_keep_drafts_focus_and_credit_se
         .iter()
         .position(|s| s.id == "lpic1-file-navigation")
         .unwrap();
-    a.launch(i);
+    open_assignment(&mut a, i);
     draw(&ctx, &mut a);
     assert_eq!(a.terminal_view(i), teaching::View::Introduction);
     assert!(a.metrics.terminal.is_none());
@@ -1515,7 +1521,7 @@ fn file_lesson_layouts_wrap_and_challenge_keeps_full_assignment_at_large_text() 
                     teaching::View::Assignment,
                 ] {
                     let (ctx, mut a) = app();
-                    a.launch(i);
+                    open_assignment(&mut a, i);
                     a.scale = scale;
                     a.set_terminal_view(i, view);
                     for _ in 0..3 {
@@ -1554,7 +1560,7 @@ fn file_lesson_layouts_wrap_and_challenge_keeps_full_assignment_at_large_text() 
 #[test]
 fn file_assignments_grade_then_invalidate_and_selected_reset_preserves_other_labs() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     let old = a.progress.attempts["shell-handover"].state.clone();
     let indexes: Vec<_> = a
         .scenarios
@@ -1564,7 +1570,7 @@ fn file_assignments_grade_then_invalidate_and_selected_reset_preserves_other_lab
         .map(|(i, _)| i)
         .collect();
     for i in indexes {
-        a.launch(i);
+        open_assignment(&mut a, i);
         a.set_terminal_view(i, teaching::View::Assignment);
         for cmd in a.scenarios[i].solution.clone() {
             a.input = cmd;
@@ -1610,7 +1616,7 @@ fn new_linux_learners_start_with_file_foundations_without_reordering_saved_ids()
 #[test]
 fn terminal_example_insert_only_populates_input_and_tab_releases_the_field() {
     let (ctx, mut a) = app();
-    a.launch(24);
+    open_assignment(&mut a, 24);
     a.set_terminal_view(24, teaching::View::Example);
     draw(&ctx, &mut a);
     let r = a.metrics.insert.unwrap();
@@ -1642,9 +1648,9 @@ fn terminal_example_insert_only_populates_input_and_tab_releases_the_field() {
 #[test]
 fn ipv6_native_typing_check_retry_focus_and_selected_reset() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     let earlier = a.progress.attempts["shell-handover"].clone();
-    a.launch(30);
+    open_assignment(&mut a, 30);
     assert_eq!(a.ipv6_view(30), teaching::View::Introduction);
     draw(&ctx, &mut a);
     let r = a.metrics.assignment_action.unwrap();
@@ -1706,8 +1712,8 @@ fn ipv6_native_typing_check_retry_focus_and_selected_reset() {
     ));
     check(&ctx, &mut a);
     assert!(a.notice.as_ref().unwrap().contains("Malformed"));
-    a.launch(31);
-    a.launch(30);
+    open_assignment(&mut a, 31);
+    open_assignment(&mut a, 30);
     draw(&ctx, &mut a);
     assert_eq!(
         a.progress.attempts[&id]
@@ -1736,7 +1742,7 @@ fn ipv6_native_typing_check_retry_focus_and_selected_reset() {
 fn ipv6_examples_apply_without_credit_and_open_assignment_without_overwriting_draft() {
     let (ctx, mut a) = app();
     for i in 30..36 {
-        a.launch(i);
+        open_assignment(&mut a, i);
         let id = a.scenarios[i].id.clone();
         let assignment = a.progress.attempts[&id]
             .workspace
@@ -1789,7 +1795,7 @@ fn ipv6_native_views_keep_controls_in_width_with_large_text_and_challenge_is_ind
             for routes in [false, true] {
                 for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
                     let (ctx, mut a) = app();
-                    a.launch(i);
+                    open_assignment(&mut a, i);
                     a.scale = scale;
                     a.set_ipv6_view(i, view);
                     let workspace = a
@@ -1842,7 +1848,7 @@ fn ipv6_native_views_keep_controls_in_width_with_large_text_and_challenge_is_ind
 #[test]
 fn earlier_script_runs_are_labeled_legacy_until_a_current_native_run_and_remain_saved() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     let lab = a.scenarios[9].clone();
     let engine::Goal::Script { cases } = &lab.goal else {
         panic!()
@@ -1857,7 +1863,7 @@ fn earlier_script_runs_are_labeled_legacy_until_a_current_native_run_and_remain_
             results: cases.iter().map(|c| shell::run(&original, c)).collect(),
         }),
     };
-    a.launch(9);
+    open_assignment(&mut a, 9);
     a.set_script_view(9, teaching::View::Assignment);
     draw(&ctx, &mut a);
     assert!(!a.metrics.completion);
@@ -1911,8 +1917,8 @@ fn earlier_script_runs_are_labeled_legacy_until_a_current_native_run_and_remain_
         .unwrap()
         .script_history
         .clone();
-    a.launch(10);
-    a.launch(9);
+    open_assignment(&mut a, 10);
+    open_assignment(&mut a, 9);
     draw(&ctx, &mut a);
     assert!(a.metrics.completion);
     assert_eq!(
@@ -1939,7 +1945,7 @@ fn count_assignments_keep_the_editor_and_actions_in_width_and_stop_file_loops() 
     for i in 43..47 {
         for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
             let (ctx, mut a) = app();
-            a.launch(i);
+            open_assignment(&mut a, i);
             a.set_script_view(i, teaching::View::Assignment);
             a.scale = scale;
             for _ in 0..4 {
@@ -1956,7 +1962,7 @@ fn count_assignments_keep_the_editor_and_actions_in_width_and_stop_file_loops() 
         }
     }
     let (ctx, mut a) = app();
-    a.launch(46);
+    open_assignment(&mut a, 46);
     a.set_script_view(46, teaching::View::Assignment);
     if let State::Script { source, run } = &mut a
         .progress
@@ -1993,7 +1999,7 @@ fn switching_fixture_keeps_practice_separate_and_wraps_with_visible_keyboard_foc
                 .remove(0),
         );
         let i = a.scenarios.len() - 1;
-        a.launch(i);
+        open_assignment(&mut a, i);
         a.scale = scale;
         assert_eq!(a.switching_view(i), teaching::View::Introduction);
         for view in [
@@ -2070,7 +2076,7 @@ fn authored_vlan_assignments_keep_tools_in_width_and_guidance_optional() {
         for (width, height, scale) in [(1200., 850., 1.), (1080., 850., 1.), (720., 560., 1.5)] {
             let (ctx, mut a) = app();
             let i = a.scenarios.iter().position(|s| s.id == name).unwrap();
-            a.launch(i);
+            open_assignment(&mut a, i);
             a.scale = scale;
             for view in [
                 teaching::View::Introduction,
@@ -2127,7 +2133,7 @@ fn resumed_switching_draft_never_shows_applied_state_as_current_completion() {
         .iter()
         .position(|s| s.id == "ccna-vlan-access")
         .unwrap();
-    a.launch(i);
+    open_assignment(&mut a, i);
     a.set_switching_view(i, teaching::View::Assignment);
     let s = &a.scenarios[i];
     let mut state = s.initial.clone();
@@ -2183,7 +2189,7 @@ fn file_batch_lessons_keep_native_tools_in_width_and_challenge_guidance_optional
         ] {
             for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.5)] {
                 let (ctx, mut a) = app();
-                a.launch(i);
+                open_assignment(&mut a, i);
                 a.set_script_view(i, view);
                 a.scale = scale;
                 for _ in 0..4 {
@@ -2226,7 +2232,7 @@ fn file_batch_lessons_keep_native_tools_in_width_and_challenge_guidance_optional
 fn file_batch_editors_support_keyboard_run_and_release_focus_for_navigation() {
     for i in 55..58 {
         let (ctx, mut a) = app();
-        a.launch(i);
+        open_assignment(&mut a, i);
         a.set_script_view(i, teaching::View::Assignment);
         draw(&ctx, &mut a);
         let editor = a.metrics.focus.unwrap();
@@ -2289,10 +2295,10 @@ fn file_batch_editors_support_keyboard_run_and_release_focus_for_navigation() {
 #[test]
 fn routing_v4_native_typing_check_retry_focus_and_selected_reset() {
     let (ctx, mut a) = app();
-    a.launch(9);
+    open_assignment(&mut a, 9);
     let earlier = a.progress.attempts["shell-handover"].clone();
     let i = a.add_routing_fixture();
-    a.launch(i);
+    open_assignment(&mut a, i);
     assert_eq!(a.routing_v4_view(i), teaching::View::Introduction);
     draw(&ctx, &mut a);
     let r = a.metrics.assignment_action.unwrap();
@@ -2366,8 +2372,8 @@ fn routing_v4_native_typing_check_retry_focus_and_selected_reset() {
     ));
     check(&ctx, &mut a);
     assert!(a.notice.as_ref().unwrap().contains("Malformed"));
-    a.launch(31);
-    a.launch(i);
+    open_assignment(&mut a, 31);
+    open_assignment(&mut a, i);
     draw(&ctx, &mut a);
     assert_eq!(
         a.progress.attempts[&id]
@@ -2404,7 +2410,7 @@ fn routing_v4_native_views_keep_controls_in_width_with_large_text_and_challenge_
                 for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.), (720., 560., 1.5)] {
                     let (ctx, mut a) = app();
                     let i = a.add_routing_fixture();
-                    a.launch(i);
+                    open_assignment(&mut a, i);
                     a.scale = scale;
                     a.set_routing_v4_view(i, view);
                     let workspace = a
@@ -2469,7 +2475,7 @@ fn routing_v4_single_interface_router_is_editable_and_guideless_help_is_safe() {
             enabled: true,
         });
     }
-    a.launch(i);
+    open_assignment(&mut a, i);
     a.set_routing_v4_view(i, teaching::View::Assignment);
     draw(&ctx, &mut a);
     let r = a.metrics.routing_router_options.unwrap();
@@ -2526,7 +2532,7 @@ fn ipv4_authored_route_entry_supports_keyboard_tab_and_default_distance_without_
             .iter()
             .position(|s| s.id == "ccna-ipv4-network-route")
             .unwrap();
-        a.launch(i);
+        open_assignment(&mut a, i);
         draw(&ctx, &mut a);
         let r = a.metrics.assignment_action.unwrap();
         click(&ctx, &mut a, r);
@@ -2669,7 +2675,7 @@ fn six_authored_ipv4_workspaces_keep_full_tasks_tools_and_guidance_separate_at_e
             ] {
                 let (ctx, mut a) = app();
                 let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
-                a.launch(i);
+                open_assignment(&mut a, i);
                 a.set_routing_v4_view(i, view);
                 a.scale = scale;
                 for _ in 0..4 {
@@ -2702,6 +2708,262 @@ fn six_authored_ipv4_workspaces_keep_full_tasks_tools_and_guidance_separate_at_e
                 assert_eq!(a.routing_v4_view(i), teaching::View::Assignment);
                 assert!(a.metrics.lesson_tabs.is_empty());
                 assert!(!a.metrics.help_visible);
+            }
+        }
+    }
+}
+
+#[test]
+fn addressing_introduction_examples_and_assignments_preserve_drafts_and_credit() {
+    for i in [0, 1] {
+        let (ctx, mut a) = app();
+        let dir = tempfile::tempdir().unwrap();
+        a.path = dir.path().join("progress.json");
+        a.launch(i);
+        draw(&ctx, &mut a);
+        assert_eq!(a.address_view(i), teaching::View::Introduction);
+        assert!(a.metrics.check.is_none());
+        assert_eq!(a.metrics.lesson_tabs.len(), 3);
+        assert!(!a.metrics.help_visible);
+        let id = a.scenarios[i].id.clone();
+        let original = a.progress.attempts[&id].state.clone();
+        let r = a.metrics.example_action.unwrap();
+        click(&ctx, &mut a, r);
+        assert_eq!(a.address_view(i), teaching::View::Example);
+        let example_focus = a.metrics.focus.unwrap();
+        assert!(ctx.memory(|m| m.has_focus(example_focus)));
+        let r = a.metrics.insert.unwrap();
+        click(&ctx, &mut a, r);
+        check(&ctx, &mut a);
+        draw(&ctx, &mut a);
+        let example = &a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .address_learning
+            .as_ref()
+            .unwrap();
+        assert!(example.solved());
+        assert!(!a.metrics.completion);
+        assert!(!progress::current_solved(
+            &a.progress.attempts[&id],
+            &a.scenarios[i]
+        ));
+        assert_eq!(a.progress.attempts[&id].state, original);
+        let saved_example = serde_json::to_value(example).unwrap();
+        let r = a.metrics.assignment_action.unwrap();
+        click(&ctx, &mut a, r);
+        assert_eq!(
+            a.address_view(i),
+            teaching::View::Assignment,
+            "lab{i} action {r:?}"
+        );
+        assert_eq!(a.progress.attempts[&id].state, original);
+        let actions = a.scenarios[i].solution.clone();
+        for action in actions {
+            engine::execute(
+                &mut a.progress.attempts.get_mut(&id).unwrap().state,
+                &action,
+            )
+            .unwrap();
+        }
+        a.load_ipv4_view(i);
+        draw(&ctx, &mut a);
+        check(&ctx, &mut a);
+        assert!(a.metrics.completion);
+        let solved = a.progress.attempts[&id].state.clone();
+        a.set_address_view(i, teaching::View::Example);
+        draw(&ctx, &mut a);
+        assert_eq!(a.progress.attempts[&id].state, solved);
+        assert_eq!(
+            serde_json::to_value(
+                a.progress.attempts[&id]
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .address_learning
+                    .as_ref()
+                    .unwrap()
+            )
+            .unwrap()["state"],
+            saved_example["state"]
+        );
+        let r = a.metrics.example_reset.unwrap();
+        click(&ctx, &mut a, r);
+        assert_eq!(a.progress.attempts[&id].state, solved);
+        assert!(
+            !a.progress.attempts[&id]
+                .workspace
+                .as_ref()
+                .unwrap()
+                .address_learning
+                .as_ref()
+                .unwrap()
+                .solved()
+        );
+        a.save();
+        a.progress = progress::load(&a.path, &a.scenarios).unwrap();
+        a.launch(i);
+        assert_eq!(a.address_view(i), teaching::View::Example);
+        assert_eq!(a.progress.attempts[&id].state, solved);
+        a.reset_attempt(i);
+        assert_eq!(a.address_view(i), teaching::View::Introduction);
+        assert_eq!(a.progress.attempts[&id].state, original);
+        // Pre-teaching attempts reopen their intact assignment rather than forcing a lesson.
+        a.progress
+            .attempts
+            .get_mut(&id)
+            .unwrap()
+            .workspace
+            .as_mut()
+            .unwrap()
+            .address_learning = None;
+        a.launch(i);
+        assert_eq!(a.address_view(i), teaching::View::Assignment);
+    }
+}
+#[test]
+fn addressing_fields_namespace_keyboard_undo_between_example_and_assignment() {
+    for i in [0, 1] {
+        let (ctx, mut a) = app();
+        a.launch(i);
+        a.set_address_view(i, teaching::View::Example);
+        draw(&ctx, &mut a);
+        let example_id = a.metrics.focus.unwrap();
+        let command = |key| egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers {
+                command: true,
+                ..egui::Modifiers::CTRL
+            },
+        };
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![egui::Event::Text("example-draft".into())],
+        );
+        draw(&ctx, &mut a);
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![
+                command(egui::Key::A),
+                egui::Event::Text("example-edit".into()),
+            ],
+        );
+        draw(&ctx, &mut a);
+        let id = a.scenarios[i].id.clone();
+        let example = a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .address_learning
+            .as_ref()
+            .unwrap()
+            .state
+            .clone();
+        a.set_address_view(i, teaching::View::Assignment);
+        draw(&ctx, &mut a);
+        let assignment_id = a.metrics.focus.unwrap();
+        assert_ne!(assignment_id, example_id);
+        assert!(ctx.memory(|m| m.has_focus(assignment_id)));
+        let original = a.progress.attempts[&id].state.clone();
+        frame(&ctx, &mut a, 1200., 850., vec![command(egui::Key::Z)]);
+        draw(&ctx, &mut a);
+        assert_eq!(a.progress.attempts[&id].state, original);
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![egui::Event::Text("assignment-draft".into())],
+        );
+        draw(&ctx, &mut a);
+        let draft = a.progress.attempts[&id].state.clone();
+        assert_ne!(draft, original);
+        a.set_address_view(i, teaching::View::Example);
+        draw(&ctx, &mut a);
+        assert_eq!(
+            a.progress.attempts[&id]
+                .workspace
+                .as_ref()
+                .unwrap()
+                .address_learning
+                .as_ref()
+                .unwrap()
+                .state,
+            example
+        );
+        frame(&ctx, &mut a, 1200., 850., vec![command(egui::Key::Z)]);
+        draw(&ctx, &mut a);
+        assert_eq!(a.progress.attempts[&id].state, draft);
+    }
+}
+#[test]
+fn addressing_views_wrap_and_challenge_keeps_complete_independent_assignments() {
+    for i in [0, 1] {
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            for (w, h, scale) in [
+                (1200., 850., 1.),
+                (960., 740., 1.5),
+                (720., 560., 1.),
+                (720., 560., 1.5),
+            ] {
+                let (ctx, mut a) = app();
+                a.launch(i);
+                a.scale = scale;
+                a.set_address_view(i, view);
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                for r in a
+                    .metrics
+                    .inputs
+                    .iter()
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.lesson_tabs.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{i} {view:?} {w}/{scale} {r:?}"
+                    );
+                }
+                if let Some(r) = a.metrics.address_diagram {
+                    assert!(
+                        r.height() < 400. && r.right() <= ctx.content_rect().right() + 1.,
+                        "diagram {w}/{scale} {r:?}"
+                    );
+                }
+                if w == 1200. && view != teaching::View::Introduction {
+                    assert!(a.metrics.check.unwrap().bottom() < 850.);
+                }
+                a.progress
+                    .attempts
+                    .get_mut(&a.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                assert_eq!(a.address_view(i), teaching::View::Assignment);
+                assert!(a.metrics.lesson_tabs.is_empty());
+                assert!(a.metrics.insert.is_none());
+                assert_eq!(a.metrics.inputs.len(), if i == 0 { 5 } else { 3 });
+                assert!(!a.metrics.help_visible);
+                assert!(!a.metrics.help.is_none());
             }
         }
     }

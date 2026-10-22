@@ -197,3 +197,16 @@ Fedora binary SHA-2562523d408a182e9d5747a4740ac1b710acb01b8eb787e8b7408d5e10c42e
 ### M29 prepared Fedora capability candidate
 
 Sourcea1245b4431786ddccb88dba7480c7d69303465d6,58/fourteen, evaluator5. [Run39852335952](https://github.com/drakahari/dlms_learning_lab/actions/runs/39852335952) passed270 Rust tests and applicable checks on all3 native CI runners. Fedora clean candidate `dlms-learning-lab-0.1.0-ga1245b443178-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` has SHA-256 `6d32fe01d60bb1f67c5a59eb9365b44f3f7ab7acf38e0f16d9474fd66f704770`; binary `e07ef599ca0d244649534a9d176883e7b50caf0d0ef67922691ea036e86957f8`. This is build/hash evidence, not additional installed-runtime acceptance. No release published; macOS archive notice gate, actual Windows/macOS desktop acceptance and default-Wayland startup investigation remain open.
+
+
+### M31 installed routing candidate
+
+Source `b778fb567f8cacb500b62c3d627cafd1ec849626`,64 authored assignments/fifteen units. [Native CI39858444151](https://github.com/drakahari/dlms_learning_lab/actions/runs/39858444151) passed on Ubuntu24.04, Windows2025 and macOS15. Archives/hash manifests were downloaded and verified locally; native CI is build/test evidence, not actual Windows/macOS desktop acceptance.
+
+| Platform | Candidate | SHA-256 |
+| --- | --- | --- |
+| Fedora44 | dlms-learning-lab-0.1.0-gb778fb567f8c-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | 71d20d9b022ab5aa8e5c6fd33ce3730a46d5e5b349d0eac0a76763ecf96cf7c8 |
+| Ubuntu24.04 | dlms-learning-lab-0.1.0-gb778fb567f8c-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz | 7147b52c628f028f8e146a921e0e82f5406f255ce870df4c2435c64a8e50f917 |
+| Windows | dlms-learning-lab-0.1.0-gb778fb567f8c-x86_64-pc-windows-msvc-windows-candidate.zip | 0c9fe4df55c3166d50e44c89faa74c472156e2d93ded5517270177eae3f4a2f9 |
+
+Fedora binary SHA-256 `565b485d8db497e9d393df0f9ac03f5595ef77b749995a0325b596e4ee6ae50e`. Extracted and upgraded the prior isolated `/tmp` install; validated its desktop file and bundled64/15 content outside the checkout, retained the exact synthetic progress sentinel and passed the full installed all-six routing native flow. Sentinel retention proves file preservation, not parsed legacy-progress acceptance (covered separately by model/UI tests). This candidate predates M32 teaching improvements. No public release. macOS notice gate, Windows/macOS actual runtime acceptance and default-Wayland startup investigation remain open.

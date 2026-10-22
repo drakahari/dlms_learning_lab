@@ -7,6 +7,7 @@ use dlms_learning_lab::{
 };
 use dlms_learning_lab::{course, script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
+mod address_learning;
 mod data;
 mod script_learning;
 mod scripting;
@@ -26,6 +27,8 @@ struct Metrics {
     header: Vec<egui::Rect>,
     lesson_tabs: Vec<egui::Rect>,
     example_action: Option<egui::Rect>,
+    example_reset: Option<egui::Rect>,
+    address_diagram: Option<egui::Rect>,
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
     data_export: Option<egui::Rect>,
@@ -105,6 +108,7 @@ pub struct LabApp {
     extra_filters: bool,
     host_activity: bool,
     ipv4_view: Option<ipv4_workspace::Assignment>,
+    address_example: Option<ipv4_workspace::Assignment>,
     smoke: bool,
     started: Instant,
     smoke_stage: usize,
@@ -210,11 +214,14 @@ impl LabApp {
             extra_filters: false,
             host_activity: false,
             ipv4_view: None,
+            address_example: None,
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("file-batches")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("addressing")
             {
+                2900
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("file-batches") {
                 2500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("routing-v4") {
                 2600
@@ -300,6 +307,9 @@ impl LabApp {
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.address_teaching {
+            dlms_learning_lab::address_teaching::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
         }
@@ -349,6 +359,7 @@ impl LabApp {
         self.help_open = false;
         self.host_activity = false;
         self.load_ipv4_view(i);
+        self.load_address_example(i);
         self.dirty = true;
     }
     fn load_ipv4_view(&mut self, i: usize) {
@@ -384,6 +395,9 @@ impl LabApp {
         model::prepare(a);
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.address_teaching {
+            dlms_learning_lab::address_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
@@ -430,6 +444,7 @@ impl LabApp {
         self.help_open = false;
         self.host_activity = false;
         self.load_ipv4_view(i);
+        self.load_address_example(i);
         self.dirty = true;
     }
     fn save(&mut self) {

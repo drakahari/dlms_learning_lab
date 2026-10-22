@@ -14,7 +14,7 @@ The executable embeds its scenario pack and fonts; it can run outside this direc
 
 Try these first:
 
-1. **Read an IPv4 address** — subnet boundaries and a second workstation.
+1. **Read an IPv4 address** — start with Introduction, try a separate example, then solve the complete workstation assignment.
 2. **Share a report safely** — permission repair with multiple valid solutions.
 3. **Bring the service back** — diagnose configuration, restart, and enable separately.
 
@@ -43,6 +43,8 @@ The checked-in Cargo.lock pins dependencies. First-time builds need crates.io ac
 The accepted native workspace design remains the basis of all labs. The header adds a native theme picker with samples under **Settings → Appearance → Theme samples**: all five stock DLMS palettes and all 22 official Omarchy v4.0.4 palettes, plus the existing Navy default (**28 choices**). Selection and text size persist independently of progress. No desktop settings are changed. Exact inventory, source revision, contrast adaptation and MIT notices: [themes](docs/THEMES.md).
 
 The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
+
+The existing subnet and VLSM labs now teach address groups, prefixes/masks, usable hosts, capacity, alignment and non-overlap before their unchanged full assignments. Learn has skippable introductions and separate editable examples; existing attempts reopen their saved assignment with Introduction available. [Teaching and validation](docs/ADDRESSING_TEACHING.md).
 
 The **CCNA** course adds six [IPv6 static-network foundations](docs/IPV6_LESSONS.md): unique workstation addressing, prefix/gateway repair, interface-scoped next hops, route specificity, backup failover and a branch capstone. A small topology and selected-device native address/route editor keep the full assignment visible. Examples have independent saved drafts; Check configuration applies and tests only virtual state. This is narrow partial IPv6/static-routing practice, not complete CCNA coverage.
 

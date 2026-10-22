@@ -329,6 +329,7 @@ impl Assignment {
                 )
                 .wrap(),
             );
+            ui.label("Within each eight-bit number, the positions are worth 128, 64, 32, 16, 8, 4, 2 and 1. Add the values where the address has a 1: for example, 10000001 is 128 + 1 = 129.");
             ui.label("Address bits encode the computer’s number. Mask bits select which positions stay fixed: 1 keeps that address bit; 0 lets it vary.");
             ui.label("Keep the network bits unchanged. Setting every host bit to 0 gives the network address; setting every host bit to 1 gives the broadcast address in this exercise. Neither boundary can be assigned to a workstation.");
             ui.label("Other prefixes can move the boundary into earlier octets. This conventional broadcast-subnet exercise excludes /31 and /32.");

@@ -1,6 +1,13 @@
 //! Application-only Fedora renderer/input check with isolated /tmp progress.
 use super::*;
 impl LabApp {
+    // Historical assignment-only checks explicitly skip new skippable introductions.
+    fn launch_assignment_fixture(&mut self, i: usize) {
+        self.launch(i);
+        if self.scenarios[i].address_teaching.is_some() {
+            self.set_address_view(i, teaching::View::Assignment);
+        }
+    }
     pub(super) fn add_routing_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
             "../../tests/fixtures/ipv4-routing-preview.json"
@@ -83,13 +90,264 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 2900..=2939 => {
+                let i = (n - 2900) / 20;
+                let id = self.scenarios[i].id.clone();
+                let phase = (n - 2900) % 20;
+                match phase {
+                    0 => {
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        self.launch(i);
+                        assert_eq!(self.address_view(i), teaching::View::Introduction);
+                    }
+                    1 => {
+                        assert!(self.metrics.check.is_none());
+                        shot = Some(format!("addressing-{i}-introduction"));
+                    }
+                    2 => self
+                        .pending_events
+                        .extend(click(self.metrics.example_action.unwrap())),
+                    3 => self
+                        .pending_events
+                        .extend(click(self.metrics.insert.unwrap())),
+                    4 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    5 => {
+                        let a = &self.progress.attempts[&id];
+                        assert!(
+                            a.workspace
+                                .as_ref()
+                                .unwrap()
+                                .address_learning
+                                .as_ref()
+                                .unwrap()
+                                .solved()
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("addressing-{i}-example"));
+                    }
+                    6 | 15 => self.pending_events.extend(click(self.metrics.inputs[0])),
+                    7 | 16 => self.pending_events.extend([
+                        key(egui::Key::A, true),
+                        egui::Event::Text(
+                            if i == 0 {
+                                "192.168.5.139"
+                            } else {
+                                "192.0.2.0/30"
+                            }
+                            .into(),
+                        ),
+                    ]),
+                    8 | 13 | 17 => self
+                        .pending_events
+                        .extend(click(self.metrics.check.unwrap())),
+                    9 => {
+                        assert!(
+                            !self.progress.attempts[&id]
+                                .workspace
+                                .as_ref()
+                                .unwrap()
+                                .address_learning
+                                .as_ref()
+                                .unwrap()
+                                .solved()
+                        );
+                        shot = Some(format!("addressing-{i}-example-retry"));
+                    }
+                    10 => self
+                        .pending_events
+                        .extend(click(self.metrics.insert.unwrap())),
+                    11 => self
+                        .pending_events
+                        .extend(click(self.metrics.assignment_action.unwrap())),
+                    12 => {
+                        assert_eq!(self.address_view(i), teaching::View::Assignment);
+                        assert_eq!(self.progress.attempts[&id].state, self.scenarios[i].initial);
+                        let actions = self.scenarios[i].solution.clone();
+                        for action in actions {
+                            engine::execute(
+                                &mut self.progress.attempts.get_mut(&id).unwrap().state,
+                                &action,
+                            )
+                            .unwrap();
+                        }
+                        self.load_ipv4_view(i);
+                    }
+                    14 => {
+                        assert!(self.metrics.completion);
+                        shot = Some(format!("addressing-{i}-assignment"));
+                    }
+                    18 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        self.launch(i);
+                        assert_eq!(self.address_view(i), teaching::View::Assignment);
+                        shot = Some(format!("addressing-{i}-resumed-retry"));
+                    }
+                    19 => {
+                        self.reset_attempt(i);
+                        assert_eq!(self.address_view(i), teaching::View::Introduction);
+                        assert_eq!(self.progress.attempts[&id].state, self.scenarios[i].initial);
+                    }
+                    _ => unreachable!(),
+                }
+            }
+            2940 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 740.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(0);
+                self.set_address_view(0, teaching::View::Introduction);
+            }
+            2941 => shot = Some("addressing-introduction-light-150".into()),
+            2942 => {
+                let p = ctx.content_rect().center();
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(p),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1300.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            2943 => {
+                let r = self.metrics.example_action.unwrap();
+                assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
+                shot = Some("addressing-introduction-scrolled-light-150".into());
+            }
+            2944 => self
+                .pending_events
+                .extend(click(self.metrics.example_action.unwrap())),
+            2945 => self
+                .pending_events
+                .extend(click(self.metrics.insert.unwrap())),
+            2946 => {
+                let p = ctx.content_rect().center();
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(p),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1000.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            2947 => shot = Some("addressing-example-scrolled-light-150".into()),
+            2948 => {
+                let r = self.metrics.check.unwrap();
+                assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
+                self.pending_events.extend(click(r));
+            }
+            2949 => {
+                assert!(
+                    self.progress.attempts[&self.scenarios[0].id]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .address_learning
+                        .as_ref()
+                        .unwrap()
+                        .solved()
+                );
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.set_address_view(0, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[0].id)
+                    .unwrap()
+                    .challenge = true;
+            }
+            2950 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("addressing-challenge-dark-150".into());
+            }
+            2951 => {
+                self.launch(1);
+                self.set_address_view(1, teaching::View::Introduction);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            2952 => shot = Some("addressing-vlsm-introduction-light-150".into()),
+            2953 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(0);
+                self.set_address_view(0, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[0].id)
+                    .unwrap()
+                    .challenge = false;
+            }
+            2954 => self.pending_events.extend(click(self.metrics.why.unwrap())),
+            2955 => shot = Some("addressing-prefix-explanation".into()),
+            2956 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 740.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.launch(1);
+                self.set_address_view(1, teaching::View::Example);
+                let lesson = self.scenarios[1].address_teaching.as_ref().unwrap();
+                let l = self
+                    .progress
+                    .attempts
+                    .get_mut(&self.scenarios[1].id)
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .address_learning
+                    .as_mut()
+                    .unwrap();
+                l.fill_example(lesson).unwrap();
+                if let engine::State::Vlsm { allocations, .. } = &mut l.state {
+                    allocations[0].cidr = "192.0.2.0/30".into();
+                }
+                l.check();
+            }
+            2957 => shot = Some("addressing-vlsm-example-light-150".into()),
+            2958 => {
+                let p = ctx.content_rect().center();
+                self.pending_events.extend([
+                    egui::Event::PointerMoved(p),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -1000.),
+                        modifiers: Default::default(),
+                    },
+                ]);
+            }
+            2959 => shot = Some("addressing-vlsm-example-scrolled-light-150".into()),
+            2960 => self.set_address_view(1, teaching::View::Assignment),
+            2961 => shot = Some("addressing-vlsm-assignment-light-150".into()),
+            2962 => {
+                println!(
+                    "PASS native addressing: fresh introductions, isolated examples and wrong-answer retry, full unchanged assignments, current success/invalidation, save/reload/reset, native input, resized150% light/dark and reachable scroll controls. Reference assignment answers were populated from authored solutions; this is not novice usability acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             n @ 2700..=2807 => {
                 let i = 58 + (n - 2700) / 18;
                 let id = self.scenarios[i].id.clone();
                 match (n - 2700) % 18 {
                     0 => {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                     }
                     1 => {
                         assert_eq!(self.routing_v4_view(i), teaching::View::Introduction);
@@ -195,8 +453,8 @@ impl LabApp {
                         ));
                         self.save();
                         self.progress = progress::load(&self.path, &self.scenarios).unwrap();
-                        self.launch(9);
-                        self.launch(i);
+                        self.launch_assignment_fixture(9);
+                        self.launch_assignment_fixture(i);
                     }
                     15 => {
                         let a = &self.progress.attempts[&id];
@@ -228,7 +486,7 @@ impl LabApp {
                 self.scale = 1.5;
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
-                self.launch(63);
+                self.launch_assignment_fixture(63);
                 self.set_routing_v4_view(63, teaching::View::Introduction);
             }
             2809 => shot = Some("ipv4-unit-introduction-light-150".into()),
@@ -309,7 +567,7 @@ impl LabApp {
             2822 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 self.scale = 1.;
-                self.launch(58);
+                self.launch_assignment_fixture(58);
                 self.set_routing_v4_view(58, teaching::View::Assignment);
             }
             2823 => self
@@ -372,8 +630,8 @@ impl LabApp {
             2600 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 let i = self.add_routing_fixture();
-                self.launch(9);
-                self.launch(i);
+                self.launch_assignment_fixture(9);
+                self.launch_assignment_fixture(i);
             }
             2601 => {
                 let i = self.scenarios.len() - 1;
@@ -460,7 +718,7 @@ impl LabApp {
             }
             2619 => {
                 let i = self.scenarios.len() - 1;
-                self.launch(i);
+                self.launch_assignment_fixture(i);
                 assert!(progress::current_solved(
                     &self.progress.attempts[&self.scenarios[i].id],
                     &self.scenarios[i]
@@ -475,7 +733,7 @@ impl LabApp {
                 self.save();
                 self.progress = progress::load(&self.path, &self.scenarios).unwrap();
                 let i = self.scenarios.len() - 1;
-                self.launch(i);
+                self.launch_assignment_fixture(i);
             }
             2625 => {
                 let i = self.scenarios.len() - 1;
@@ -686,7 +944,7 @@ impl LabApp {
                 let original = serde_json::to_vec_pretty(&self.progress).unwrap();
                 std::fs::write(&self.path, &original).unwrap();
                 std::fs::write(root.join("exact-original.json"), original).unwrap();
-                self.launch(i);
+                self.launch_assignment_fixture(i);
             }
             2401 => {
                 let i = self.selected.unwrap();
@@ -829,7 +1087,7 @@ impl LabApp {
                     .iter()
                     .position(|s| s.id == "ccna-vlan-access")
                     .unwrap();
-                self.launch(i);
+                self.launch_assignment_fixture(i);
                 self.set_switching_view(i, teaching::View::Assignment);
                 let s = &self.scenarios[i];
                 let a = self.progress.attempts.get_mut(&s.id).unwrap();
@@ -852,7 +1110,7 @@ impl LabApp {
                 self.dirty = true;
                 self.save();
                 self.progress = progress::load(&self.path, &self.scenarios).unwrap();
-                self.launch(i);
+                self.launch_assignment_fixture(i);
             }
             2321 => {
                 assert!(!self.metrics.completion);
@@ -891,7 +1149,7 @@ impl LabApp {
                 match step {
                     0 => {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                         assert_eq!(self.switching_view(i), teaching::View::Introduction);
                     }
                     1 => shot = Some(format!("{}-introduction", ids[unit])),
@@ -1118,7 +1376,7 @@ impl LabApp {
                         .unwrap()
                         .remove(0);
                 self.scenarios.push(fixture);
-                self.launch(self.scenarios.len() - 1);
+                self.launch_assignment_fixture(self.scenarios.len() - 1);
             }
             2101 => shot = Some("switching-fixture-introduction".into()),
             2102 => self.pending_events = click(self.metrics.example_action.unwrap()),
@@ -1312,7 +1570,7 @@ impl LabApp {
             n @ 2..=37 => {
                 let i = (n - 2) / 4;
                 match (n - 2) % 4 {
-                    0 => self.launch(i),
+                    0 => self.launch_assignment_fixture(i),
                     1 => {
                         assert!(!self.metrics.guide);
                         shot = Some(format!("{}-learn", self.scenarios[i].id));
@@ -1345,7 +1603,7 @@ impl LabApp {
             42 => {
                 self.filter = Filter::default();
                 self.extra_filters = false;
-                self.launch(0);
+                self.launch_assignment_fixture(0);
                 self.progress
                     .attempts
                     .get_mut("ccna-ipv4")
@@ -1396,7 +1654,7 @@ impl LabApp {
             66 => self.pending_events.extend(click(self.metrics.why.unwrap())),
             67 => shot = Some("ipv4-binary-explanation".into()),
             68 => {
-                self.launch(6);
+                self.launch_assignment_fixture(6);
                 self.progress
                     .attempts
                     .get_mut("lpic2-service")
@@ -1439,7 +1697,7 @@ impl LabApp {
                 shot = Some("service-configured-and-verified".into());
             }
             75 => {
-                self.launch(5);
+                self.launch_assignment_fixture(5);
                 self.progress
                     .attempts
                     .get_mut("lpic1-logs")
@@ -1479,9 +1737,9 @@ impl LabApp {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
             }
             84 => shot = Some("library-150-percent".into()),
-            85 => self.launch(0),
+            85 => self.launch_assignment_fixture(0),
             86 => shot = Some("ipv4-150-percent".into()),
-            87 => self.launch(6),
+            87 => self.launch_assignment_fixture(6),
             88 => shot = Some("service-150-percent".into()),
             89 => {
                 self.selected = None;
@@ -1505,7 +1763,7 @@ impl LabApp {
                     0 => {
                         self.theme_id = theme::inventory()[index].id.clone();
                         theme::apply(ctx, &self.theme_id);
-                        self.launch(9);
+                        self.launch_assignment_fixture(9);
                         self.theme_preview = true;
                     }
                     1 => {}
@@ -1523,7 +1781,7 @@ impl LabApp {
                         self.settings_open = false;
                         self.theme_id = "lab-navy".into();
                         theme::apply(ctx, &self.theme_id);
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                         self.set_script_view(i, teaching::View::Assignment);
                         self.progress
                             .attempts
@@ -1642,7 +1900,7 @@ impl LabApp {
                         if i == first {
                             ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                         }
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                     }
                     1 => {
                         assert_eq!(self.script_view(i), teaching::View::Introduction);
@@ -1803,7 +2061,7 @@ impl LabApp {
                 }
             }
             376 => {
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 self.set_script_view(9, teaching::View::Introduction);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -1831,7 +2089,7 @@ impl LabApp {
                 self.save();
                 let saved = progress::load(&self.path, &self.scenarios).unwrap();
                 self.progress = saved;
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 assert_eq!(self.script_view(9), teaching::View::Assignment);
                 assert!(engine::solved(
                     &self.progress.attempts["shell-handover"].state,
@@ -1843,7 +2101,7 @@ impl LabApp {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             400 => {
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 self.scale = 1.5;
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -1945,7 +2203,7 @@ impl LabApp {
                         .unwrap()
                         .join("dlms-learning-backup.json"),
                 );
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 self.set_script_view(9, teaching::View::Assignment);
                 if let engine::State::Script { source, .. } = &mut self
                     .progress
@@ -2028,7 +2286,7 @@ impl LabApp {
                     *second = None;
                 }
                 self.progress.attempts.insert(s.id.clone(), a);
-                self.launch(0);
+                self.launch_assignment_fixture(0);
             }
             516 => {
                 assert!(!self.metrics.completion);
@@ -2052,7 +2310,7 @@ impl LabApp {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             772 => {
-                self.launch(18);
+                self.launch_assignment_fixture(18);
                 self.set_script_view(18, teaching::View::Assignment);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -2093,7 +2351,7 @@ impl LabApp {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             972 => {
-                self.launch(22);
+                self.launch_assignment_fixture(22);
                 self.set_script_view(22, teaching::View::Assignment);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -2135,7 +2393,7 @@ impl LabApp {
             }
             1800 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 self.set_script_view(9, teaching::View::Assignment);
             }
             1801 | 1807 | 1813 | 1819 => self.pending_events.extend(click(self.metrics.inputs[0])),
@@ -2242,7 +2500,7 @@ impl LabApp {
                         &self.scenarios[i]
                     ));
                 }
-                self.launch(47);
+                self.launch_assignment_fixture(47);
                 self.set_terminal_view(47, teaching::View::Introduction);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -2285,7 +2543,7 @@ impl LabApp {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             1980 => {
-                self.launch(46);
+                self.launch_assignment_fixture(46);
                 self.set_script_view(46, teaching::View::Assignment);
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
             }
@@ -2342,7 +2600,7 @@ impl LabApp {
                         &self.scenarios[i]
                     ));
                 }
-                self.launch(55);
+                self.launch_assignment_fixture(55);
                 self.set_script_view(55, teaching::View::Assignment);
                 self.focus_input = true;
             }
@@ -2380,7 +2638,7 @@ impl LabApp {
             }
             2560 => shot = Some("file-batches-light-150-scrolled".into()),
             2561 => {
-                self.launch(57);
+                self.launch_assignment_fixture(57);
                 self.progress
                     .attempts
                     .get_mut("shell-file-batch-capstone")
@@ -2459,7 +2717,7 @@ impl LabApp {
                         &self.scenarios[i]
                     ));
                 }
-                self.launch(46);
+                self.launch_assignment_fixture(46);
                 self.set_script_view(46, teaching::View::Assignment);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -2521,7 +2779,7 @@ impl LabApp {
                         &self.scenarios[i]
                     ));
                 }
-                self.launch(41);
+                self.launch_assignment_fixture(41);
                 self.set_script_view(41, teaching::View::Assignment);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -2583,7 +2841,7 @@ impl LabApp {
                         &self.scenarios[i]
                     ));
                 }
-                self.launch(38);
+                self.launch_assignment_fixture(38);
                 self.set_script_view(38, teaching::View::Assignment);
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
@@ -2638,7 +2896,7 @@ impl LabApp {
             }
             1500 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 let s = self.scenarios[9].clone();
                 let engine::Goal::Script { cases } = &s.goal else {
                     panic!()
@@ -2673,14 +2931,14 @@ impl LabApp {
                         results: cases.iter().map(|c| shell::run(&original, c)).collect(),
                     }),
                 };
-                self.launch(9);
+                self.launch_assignment_fixture(9);
                 self.set_script_view(9, teaching::View::Assignment);
                 self.selected = None;
                 self.filter.track = "Bash/Shell".into();
                 self.filter.search = s.title;
             }
             1501 => shot = Some("script-earlier-credit-library".into()),
-            1502 => self.launch(9),
+            1502 => self.launch_assignment_fixture(9),
             1503 => {
                 assert!(!self.metrics.completion);
                 assert!(progress::legacy_script_credit(
@@ -2772,7 +3030,7 @@ impl LabApp {
                 self.scale = 1.5;
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
-                self.launch(9);
+                self.launch_assignment_fixture(9);
             }
             1521 => shot = Some("script-history-light-150".into()),
             1522 => {
@@ -2791,7 +3049,7 @@ impl LabApp {
                 self.scale = 1.;
                 self.theme_id = "lab-navy".into();
                 theme::apply(ctx, &self.theme_id);
-                self.launch(9);
+                self.launch_assignment_fixture(9);
             }
             1526 => {}
             1527 => self
@@ -2819,7 +3077,7 @@ impl LabApp {
                 match (n - 1300) % 18 {
                     0 => {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                     }
                     1 => {
                         assert_eq!(self.ipv6_view(i), teaching::View::Introduction);
@@ -2944,8 +3202,8 @@ impl LabApp {
                         self.save();
                     }
                     15 => {
-                        self.launch(9);
-                        self.launch(i);
+                        self.launch_assignment_fixture(9);
+                        self.launch_assignment_fixture(i);
                     }
                     16 => {
                         assert!(!progress::current_solved(
@@ -2962,7 +3220,7 @@ impl LabApp {
                 self.scale = 1.5;
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
-                self.launch(31);
+                self.launch_assignment_fixture(31);
                 self.reset_attempt(31);
                 self.set_ipv6_view(31, teaching::View::Introduction);
             }
@@ -3034,7 +3292,7 @@ impl LabApp {
                 match (n - 2000) % 18 {
                     0 => {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                     }
                     1 => {
                         assert_eq!(self.terminal_view(i), teaching::View::Introduction);
@@ -3177,7 +3435,7 @@ impl LabApp {
                 match (n - 1100) % 18 {
                     0 => {
                         ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
-                        self.launch(i);
+                        self.launch_assignment_fixture(i);
                     }
                     1 => {
                         assert_eq!(self.terminal_view(i), teaching::View::Introduction);
@@ -3298,7 +3556,7 @@ impl LabApp {
                 self.scale = 1.5;
                 self.theme_id = "dlms-light".into();
                 theme::apply(ctx, &self.theme_id);
-                self.launch(24);
+                self.launch_assignment_fixture(24);
                 self.set_terminal_view(24, teaching::View::Introduction);
             }
             1210 => shot = Some("files-introduction-light-150".into()),
@@ -3375,7 +3633,7 @@ impl LabApp {
                     }
                     self.progress.attempts.insert(s.id.clone(), a);
                 }
-                self.launch(2);
+                self.launch_assignment_fixture(2);
                 self.checked = true;
                 self.progress
                     .attempts

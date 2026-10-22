@@ -13,7 +13,7 @@ Six distinct authored assignments in `scenarios/ipv4-static-v1.json`, unit `ipv4
 
 ## Teach, try, apply
 
-Learn introductions teach local versus remote directions, route fields, immediate neighbors, both-direction verification, prefix specificity before preference, host exceptions, source addresses, eligible floating routes and the difference between absent neighbors and withdrawn interfaces. Earlier units supply subnet/address ideas; they still need their separate first-time beginner teaching audit before full course acceptance.
+Learn introductions teach local versus remote directions, route fields, immediate neighbors, both-direction verification, prefix specificity before preference, host exceptions, source addresses, eligible floating routes and the difference between absent neighbors and withdrawn interfaces. The earlier subnet/VLSM assignments now have foundational introductions and isolated editable examples (ADDRESSING_TEACHING.md). First-time novice usability acceptance remains separate and open.
 
 Every introduction has a separate private-address example and a concrete experiment. Load example settings fills only its practice draft; Apply and test example applies only that topology. Assignment drafts, state and credit stay separate across views and restarts. Suggested experiments include alternate distances, a single-host patch that fails an office-network requirement, a deliberately broken specific direction, an oversized exception, an ineligible backup and disabled forwarding. Tests execute each described change, not merely the reference example.
 

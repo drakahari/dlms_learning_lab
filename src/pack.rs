@@ -39,6 +39,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv4_routing_teaching: Option<crate::ipv4_routing_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub address_teaching: Option<crate::address_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -160,6 +162,18 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                     s.id
                 ));
             }
+        }
+        if let Some(lesson) = &s.address_teaching {
+            if crate::address_teaching::goal(&s.initial).is_none()
+                || std::mem::discriminant(&s.initial) != std::mem::discriminant(&lesson.fixture)
+                || !crate::address_teaching::distinct_example(&s.initial, &lesson.fixture)
+            {
+                return Err(format!(
+                    "{}: addressing teaching needs a separate compatible example problem",
+                    s.id
+                ));
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
         if let Some(lesson) = &s.ipv4_routing_teaching {
             if !matches!(s.initial, State::Ipv4Routing { .. }) {
@@ -312,6 +326,7 @@ pub fn validate_state(s: &State) -> Result<(), String> {
                         a.hosts > 0
                             && a.hosts <= 1_000_000
                             && !a.name.is_empty()
+                            && a.name.len() <= 80
                             && a.name
                                 .bytes()
                                 .all(|c| c.is_ascii_alphanumeric() || c == b'-')

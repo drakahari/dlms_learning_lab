@@ -76,6 +76,12 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if crate::address_teaching::goal(&s.initial).is_some()
+        && !crate::address_teaching::same_assignment(&a.state, &s.initial)
+    {
+        return false;
+    }
+
     if let State::Switching { fabric } = &a.state
         && a.workspace
             .as_ref()
@@ -214,6 +220,26 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
                 return Err("Saved IPv4 device/interface/link structure differs from this activity; original retained".into());
             }
         }
+        if crate::address_teaching::goal(&s.initial).is_some()
+            && !crate::address_teaching::same_assignment(&a.state, &s.initial)
+        {
+            return Err(
+                "Saved addressing assignment inputs differ from this lab; original retained".into(),
+            );
+        }
+        validate_address_workspace(a)?;
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.address_learning.as_ref())
+            && s.address_teaching.as_ref().is_none_or(|lesson| {
+                !crate::address_teaching::same_problem(&l.state, &lesson.fixture)
+            })
+        {
+            return Err(
+                "Saved addressing example differs from this lesson; original retained".into(),
+            );
+        }
         validate_routing_workspace(a)?;
         if let Some(l) = a
             .workspace
@@ -253,6 +279,20 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_address_workspace(a: &Attempt) -> Result<(), String> {
+    if let Some(l) = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.address_learning.as_ref())
+        && (crate::address_teaching::goal(&a.state).is_none()
+            || std::mem::discriminant(&a.state) != std::mem::discriminant(&l.state))
+    {
+        return Err(
+            "Addressing example metadata on an incompatible activity; original retained".into(),
+        );
+    }
+    Ok(())
+}
 fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else {
         return Ok(());
@@ -278,6 +318,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_address_workspace(a)?;
         validate_routing_workspace(a)?;
         if let State::Switching { fabric } = &a.state
             && a.workspace

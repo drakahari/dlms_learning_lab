@@ -26,6 +26,8 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub routing_v4_learning: Option<crate::ipv4_routing_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub address_learning: Option<crate::address_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_draft: Option<crate::switching_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_learning: Option<crate::switching_teaching::Learning>,
@@ -68,6 +70,7 @@ impl WorkspaceData {
             && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
             && self.routing_v4_draft.as_ref().is_none_or(|d| d.valid())
             && self.routing_v4_learning.as_ref().is_none_or(|l| l.valid())
+            && self.address_learning.as_ref().is_none_or(|l| l.valid())
             && self.command.len() <= 4096
             && [
                 &self.service_port,

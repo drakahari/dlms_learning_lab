@@ -42,3 +42,5 @@ pub mod ipv4_routing;
 
 pub mod ipv4_routing_teaching;
 pub mod ipv4_routing_workspace;
+
+pub mod address_teaching;

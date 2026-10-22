@@ -9,6 +9,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; six authored route/recovery tasks |
 | `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
+| `address_teaching.rs`, `ui/address_learning.rs` | Bounded subnet/VLSM introductions and isolated native examples, current-state checks and immutable supplied problems |
 | `ipv4.rs` | Boundary math, host validation, numerical variants and retained legacy lesson/sandbox metadata |
 | `workspace.rs` | Versioned draft/check metadata, compatibility preparation, pure editor operations and state-specific diagnostic feedback |
 | `pack.rs` | Versioned declarative JSON validation and reference-solution reachability |

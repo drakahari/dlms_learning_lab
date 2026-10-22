@@ -69,7 +69,49 @@
         }
       ],
       "explanation": "A /27 leaves five host bits: 32 addresses per block. The block containing .77 starts at .64 and ends at .95. The network is 192.168.10.64, broadcast is 192.168.10.95, and usable hosts run from .65 through .94 (30 hosts).",
-      "unit": "ipv4-foundations"
+      "unit": "ipv4-foundations",
+      "address_teaching": {
+        "prerequisite_note": "Start here even if you have never used binary. Type addresses into the labeled fields; Check configuration checks your choices. Your original assignment and example stay separate.",
+        "concepts": [
+          {
+            "title": "A computer belongs to an address group",
+            "text": "An IPv4 address has four numbers from 0 to 255, separated by dots. The full address identifies a computer’s interface. Its subnet is the group of addresses treated as local neighbors. The subnet mask describes that grouping; it is a rule, not another computer’s address."
+          },
+          {
+            "title": "The /prefix tells you how large the group is",
+            "text": "IPv4 has 32 on/off positions, called bits. Each bit has two choices: 0 or 1. A /26 reserves 26 positions for the network and leaves 6 for hosts: 2 × 2 × 2 × 2 × 2 × 2 = 64 addresses. A /27 leaves 5 host bits and gives 32 addresses. A larger prefix number means a smaller group."
+          },
+          {
+            "title": "Read the group’s boundaries",
+            "text": "In the example below, the last number 139 lies in the 128–191 block. The first address names the network; the last is broadcast, used to address all hosts on this subnet. Neither is assigned to a workstation in this exercise. The usable range lies between them; choose a different unused address for the second workstation."
+          },
+          {
+            "title": "The same method extends beyond the last number",
+            "text": "Some prefixes place the boundary in an earlier number. For /20, groups change in the third number and the whole fourth number can vary. The optional prefix explanation shows that boundary. This conventional network/broadcast exercise excludes /31 and /32."
+          }
+        ],
+        "example_description": "Work with 192.168.5.139/26 first, then apply the method to the assignment’s different address and prefix. /26 is also written as subnet mask 255.255.255.192; the mask marks network positions, while 192.168.5.139 is the computer’s address.",
+        "fixture": {
+          "kind": "Subnet",
+          "ip": "192.168.5.139",
+          "prefix": 26,
+          "answers": [
+            "",
+            "",
+            "",
+            ""
+          ],
+          "second": ""
+        },
+        "example_solution": [
+          "answer network 192.168.5.128",
+          "answer broadcast 192.168.5.191",
+          "answer first 192.168.5.129",
+          "answer last 192.168.5.190",
+          "answer second 192.168.5.140"
+        ],
+        "try_change": "Use the example values, check them, then give Workstation 2 another free address between 129 and 190 while avoiding 139. Try 191 next and read why it cannot be assigned. The assignment remains untouched."
+      }
     },
     {
       "id": "ccna-vlsm",
@@ -146,7 +188,47 @@
         }
       ],
       "explanation": "60 hosts require at least /26 (62 usable), 28 require /27 (30 usable), and 12 require /28 (14 usable). One plan is 10.20.0.0/26, 10.20.0.64/27 and 10.20.0.96/28. Other aligned, disjoint plans within the /24 are equally valid.",
-      "unit": "ipv4-foundations"
+      "unit": "ipv4-foundations",
+      "address_teaching": {
+        "prerequisite_note": "First use the subnet lesson’s network, broadcast and usable-host ideas. Here you plan several address groups inside one supplied pool. An allocation is simply one team’s chosen subnet.",
+        "concepts": [
+          {
+            "title": "Count all addresses, then reserve two",
+            "text": "Each team needs room for its computers plus network and broadcast addresses. A /28 has 16 addresses and 14 usable hosts; a /27 has 32 addresses and 30 usable hosts. For 30 hosts, /28 is too small. Choose a block size such as 8, 16, 32 or 64 addresses—each size doubles—with enough usable places. These are powers of two."
+          },
+          {
+            "title": "Start on a real boundary",
+            "text": "A block must begin at one of its own boundaries. In a /24 pool, /27 blocks begin at last numbers 0, 32, 64 and so on; /29 blocks begin at 0, 8, 16 and so on. Starting a /27 at 10 does not create a new boundary. Type its network/prefix, not an individual host address."
+          },
+          {
+            "title": "Fit distinct groups inside the pool",
+            "text": "Give the largest requirement space first, then place smaller aligned blocks in unused space. Every block must stay inside the supplied pool and must not overlap another team. This is variable-length subnet masking, or VLSM: different teams can use different block sizes. Larger-than-minimum valid blocks are allowed if everything still fits."
+          }
+        ],
+        "example_description": "In a separate 192.0.2.0/24 pool, plan for Staff 30 hosts and Visitors 6 hosts. A /27 supplies 30 usable places; a /29 supplies 6. The example table shows the chosen network/prefix for each team, and Check example verifies capacity, boundaries, containment and overlap.",
+        "fixture": {
+          "kind": "Vlsm",
+          "base": "192.0.2.0",
+          "prefix": 24,
+          "allocations": [
+            {
+              "name": "staff",
+              "hosts": 30,
+              "cidr": ""
+            },
+            {
+              "name": "visitors",
+              "hosts": 6,
+              "cidr": ""
+            }
+          ]
+        },
+        "example_solution": [
+          "allocate staff 192.0.2.0/27",
+          "allocate visitors 192.0.2.32/29"
+        ],
+        "try_change": "After checking the example, move Visitors to 192.0.2.64/29 and check again: another free aligned block is valid. Then try 192.0.2.8/29 and inspect the overlap with Staff. Restore a separate block before opening the assignment."
+      }
     },
     {
       "id": "ccna-gateway",

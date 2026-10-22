@@ -50,7 +50,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(self.progress.attempts[&s.id].state, State::Subnet { .. }) {
+            if s.address_teaching.is_some() {
+                self.address_learning_workspace(ui, i);
+            } else if matches!(self.progress.attempts[&s.id].state, State::Subnet { .. }) {
                 self.ipv4_assignment(ui, i);
             } else {
                 ui.label(RichText::new(&s.title).strong().size(23.));
@@ -107,7 +109,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::Switching { .. }) {
+            let show_help = if s.address_teaching.is_some() {
+                self.address_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::Switching { .. }) {
                 self.switching_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Ipv4Routing { .. }) {
                 self.routing_v4_view(i) == teaching::View::Assignment
@@ -169,7 +173,7 @@ impl LabApp {
         }
         self.report(ui, i);
     }
-    fn ipv4_assignment(&mut self, ui: &mut egui::Ui, i: usize) {
+    pub(super) fn ipv4_assignment(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = &self.scenarios[i];
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         let practice = a.ipv4.as_ref().is_some_and(|l| l.use_variant);
@@ -184,7 +188,9 @@ impl LabApp {
         let before = view.exercise.clone();
         let checked_before = view.checked_answers.clone();
         let hints = view.hints;
-        view.render(ui, a.challenge, &mut self.metrics);
+        ui.push_id(("ipv4-assignment", &s.id, practice), |ui| {
+            view.render(ui, a.challenge, &mut self.metrics)
+        });
         let w = a.workspace.as_mut().unwrap();
         view.save_ui(w, practice);
         if checked_before != view.checked_answers && view.checked_answers.is_some() {
@@ -216,92 +222,20 @@ impl LabApp {
             self.next_unit_lab(ui, i);
         }
     }
-    fn allocations(&mut self, ui: &mut egui::Ui, i: usize) {
-        let s = &self.scenarios[i];
-        let state = &mut self.progress.attempts.get_mut(&s.id).unwrap().state;
-        let State::Vlsm {
-            base,
-            prefix,
-            allocations,
-        } = state
-        else {
-            return;
-        };
-        ui.label(RichText::new(format!("Address pool: {base}/{prefix}")).color(palette(ui).accent));
-        let wide = ui.available_width() >= 640.;
-        let label_width = (ui.available_width() * 0.4).clamp(100., 154.);
-        let width = (ui.available_width() - label_width - 12.).clamp(70., 220.);
-        let feedback_width = (ui.available_width() - label_width - width - 24.).max(80.);
-        let mut first = true;
-        let issues: Vec<_> = (0..allocations.len())
-            .map(|n| {
-                model::vlsm_issue(
-                    &State::Vlsm {
-                        base: *base,
-                        prefix: *prefix,
-                        allocations: allocations.clone(),
-                    },
-                    n,
-                )
-            })
-            .collect();
-        egui::Grid::new("vlsm-table")
-            .num_columns(if wide { 3 } else { 2 })
-            .spacing([12., 8.])
-            .show(ui, |ui| {
-                ui.label(RichText::new("Team / required hosts").strong());
-                ui.label(RichText::new("Network/prefix").strong());
-                if wide {
-                    ui.label("Feedback");
-                }
-                ui.end_row();
-                for (index, allocation) in allocations.iter_mut().enumerate() {
-                    row_label(
-                        ui,
-                        &format!("{} · {} hosts", allocation.name, allocation.hosts),
-                        label_width,
-                    );
-                    let r = ui.add_sized(
-                        [width, CONTROL],
-                        egui::TextEdit::singleline(&mut allocation.cidr)
-                            .id_salt(("allocation", index))
-                            .hint_text("Network/prefix")
-                            .char_limit(64),
-                    );
-                    self.metrics.inputs.push(r.rect);
-                    if first {
-                        self.metrics.focus = Some(r.id);
-                        if self.focus_input {
-                            r.request_focus();
-                            self.focus_input = false;
-                        }
-                        first = false;
-                    }
-                    if r.changed() {
-                        bound(&mut allocation.cidr, 64);
-                        self.dirty = true;
-                    }
-                    if wide {
-                        ui.allocate_ui_with_layout(
-                            egui::vec2(feedback_width, CONTROL),
-                            egui::Layout::left_to_right(egui::Align::Center),
-                            |ui| {
-                                if self.checked
-                                    && let Some(issue) = &issues[index]
-                                {
-                                    ui.add(
-                                        egui::Label::new(
-                                            RichText::new(issue).color(palette(ui).error),
-                                        )
-                                        .wrap(),
-                                    );
-                                }
-                            },
-                        );
-                    }
-                    ui.end_row();
-                }
-            });
+    pub(super) fn allocations(&mut self, ui: &mut egui::Ui, i: usize) {
+        let state = &mut self
+            .progress
+            .attempts
+            .get_mut(&self.scenarios[i].id)
+            .unwrap()
+            .state;
+        self.dirty |= allocation_fields(
+            ui,
+            state,
+            self.checked,
+            &mut self.metrics,
+            &mut self.focus_input,
+        );
     }
     fn configuration(&mut self, ui: &mut egui::Ui, i: usize) {
         let a = self
@@ -868,4 +802,94 @@ fn refresh_drafts(w: &mut model::WorkspaceData, before: &State, after: &State) {
         ) => replace(&mut w.mount_device, old.clone(), new.clone()),
         _ => {}
     }
+}
+
+pub(super) fn allocation_fields(
+    ui: &mut egui::Ui,
+    state: &mut State,
+    checked: bool,
+    metrics: &mut Metrics,
+    focus_input: &mut bool,
+) -> bool {
+    let mut changed = false;
+    let State::Vlsm {
+        base,
+        prefix,
+        allocations,
+    } = state
+    else {
+        return false;
+    };
+    ui.label(RichText::new(format!("Address pool: {base}/{prefix}")).color(palette(ui).accent));
+    let wide = ui.available_width() >= 640.;
+    let label_width = (ui.available_width() * 0.4).clamp(100., 154.);
+    let width = (ui.available_width() - label_width - 12.).clamp(70., 220.);
+    let feedback_width = (ui.available_width() - label_width - width - 24.).max(80.);
+    let mut first = true;
+    let issues: Vec<_> = (0..allocations.len())
+        .map(|n| {
+            model::vlsm_issue(
+                &State::Vlsm {
+                    base: *base,
+                    prefix: *prefix,
+                    allocations: allocations.clone(),
+                },
+                n,
+            )
+        })
+        .collect();
+    egui::Grid::new("vlsm-table")
+        .num_columns(if wide { 3 } else { 2 })
+        .spacing([12., 8.])
+        .show(ui, |ui| {
+            ui.label(RichText::new("Team / required hosts").strong());
+            ui.label(RichText::new("Network/prefix").strong());
+            if wide {
+                ui.label("Feedback");
+            }
+            ui.end_row();
+            for (index, allocation) in allocations.iter_mut().enumerate() {
+                row_label(
+                    ui,
+                    &format!("{} · {} hosts", allocation.name, allocation.hosts),
+                    label_width,
+                );
+                let r = ui.add_sized(
+                    [width, CONTROL],
+                    egui::TextEdit::singleline(&mut allocation.cidr)
+                        .id_salt(("allocation", index))
+                        .hint_text("Network/prefix")
+                        .char_limit(64),
+                );
+                metrics.inputs.push(r.rect);
+                if first {
+                    metrics.focus = Some(r.id);
+                    if *focus_input {
+                        r.request_focus();
+                        *focus_input = false;
+                    }
+                    first = false;
+                }
+                if r.changed() {
+                    bound(&mut allocation.cidr, 64);
+                    changed = true;
+                }
+                if wide {
+                    ui.allocate_ui_with_layout(
+                        egui::vec2(feedback_width, CONTROL),
+                        egui::Layout::left_to_right(egui::Align::Center),
+                        |ui| {
+                            if checked && let Some(issue) = &issues[index] {
+                                ui.add(
+                                    egui::Label::new(RichText::new(issue).color(palette(ui).error))
+                                        .wrap(),
+                                );
+                            }
+                        },
+                    );
+                }
+                ui.end_row();
+            }
+        });
+    changed
 }
