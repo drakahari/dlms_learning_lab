@@ -60,7 +60,7 @@ Learn and Challenge keep the same assignments. Learn offers a short starting poi
 
 Completion comes from current state and does not require visiting walkthrough sections. A later edit or command that breaks the state removes current success. Native forms, editors, terminal input/output and feedback stay together. Narrow windows and larger text scroll cleanly; fonts are not shrunk to fit. Tab/Shift+Tab navigate controls and Enter runs terminal commands. The header controls text size.
 
-Back to library retains the selected track, search and filters. Reset asks for confirmation and clears only that attempt, including drafts, transcript and numerical practice; favorites and other labs remain. Local state saves after edits using a synced temporary file and atomic replacement. Corrupt/future saves are retained and opened read-only. Concurrent application writers remain unsupported.
+Back to library retains the selected track, search and filters. Reset asks for confirmation and clears only that attempt, including drafts, transcript and numerical practice; favorites and other labs remain. Local state saves after edits using a synced temporary file and atomic replacement. Corrupt/future saves are retained and opened read-only. A profile writer lock prevents concurrent app copies from silently replacing each other’s drafts. Settings → Your data provides checked backup export/restore; see [progress recovery](docs/PROGRESS_RECOVERY.md).
 
 ## Saved-progress compatibility
 

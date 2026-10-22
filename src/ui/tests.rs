@@ -591,12 +591,10 @@ fn scripting_workspaces_keep_tasks_and_controls_at_sizes_scales_and_modes() {
                     for _ in 0..3 {
                         frame(&ctx, &mut a, width, 850., vec![]);
                     }
-                    if width == 1200. && scale == 1. {
-                        assert!(
-                            a.metrics.editor_viewport.unwrap().height() >= 175.,
-                            "usable script editor collapsed"
-                        );
-                    }
+                    assert!(
+                        a.metrics.editor_viewport.unwrap().height() >= 175.,
+                        "usable script editor collapsed"
+                    );
                     assert!(!a.metrics.help_visible);
                     assert!(!a.metrics.guide);
                     for r in a
@@ -1134,4 +1132,150 @@ fn historical_auto_host_snapshot_is_reviewed_resumed_and_invalidated() {
         &a.progress.attempts["ccna-ipv4"],
         &a.scenarios[0]
     ));
+}
+
+fn data_preview(ctx: &egui::Context, a: &mut LabApp) {
+    let r = a.metrics.data_restore.unwrap();
+    click(ctx, a, r);
+    let r = a.metrics.data_filename.unwrap();
+    click(ctx, a, r);
+    frame(
+        ctx,
+        a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("dlms-learning-backup.json".into())],
+    );
+    draw(ctx, a);
+    let r = a.metrics.data_file_action.unwrap();
+    click(ctx, a, r);
+    for _ in 0..100 {
+        draw(ctx, a);
+        if a.metrics.data_confirm.is_some() {
+            return;
+        }
+        std::thread::yield_now();
+    }
+    panic!("Restore preview did not finish");
+}
+#[test]
+fn data_ui_exports_previews_cancels_then_restores_without_losing_current_drafts() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.smoke = true;
+    a.launch(9);
+    if let State::Script { source, .. } =
+        &mut a.progress.attempts.get_mut("shell-handover").unwrap().state
+    {
+        *source = "saved='draft'".into();
+    }
+    a.settings_open = true;
+    a.settings_data = true;
+    draw(&ctx, &mut a);
+    let r = a.metrics.data_export.unwrap();
+    click(&ctx, &mut a, r);
+    let r = a.metrics.data_file_action.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(dir.path().join("dlms-learning-backup.json").exists());
+    a.reset_attempt(9);
+    draw(&ctx, &mut a);
+    data_preview(&ctx, &mut a);
+    let r = a.metrics.data_cancel.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(
+        a.progress.attempts["shell-handover"].state,
+        a.scenarios[9].initial
+    );
+    data_preview(&ctx, &mut a);
+    let r = a.metrics.data_confirm.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(
+        matches!(&a.progress.attempts["shell-handover"].state,State::Script{source,..}if source=="saved='draft'")
+    );
+    let safety = progress::load(
+        &dir.path().join("progress-before-restore-1.json"),
+        &a.scenarios,
+    )
+    .unwrap();
+    assert_eq!(
+        safety.attempts["shell-handover"].state,
+        a.scenarios[9].initial
+    );
+    assert!(!a.dirty);
+}
+#[test]
+fn restoring_corrupt_profile_protects_unsaved_read_only_session_work() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.smoke = true;
+    a.launch(9);
+    dlms_learning_lab::backup::export(
+        &dir.path().join("dlms-learning-backup.json"),
+        &a.progress,
+        &a.scenarios,
+    )
+    .unwrap();
+    std::fs::write(&a.path, b"corrupt original").unwrap();
+    a.read_only = true;
+    a.storage_error = Some("controlled invalid profile".into());
+    if let State::Script { source, .. } =
+        &mut a.progress.attempts.get_mut("shell-handover").unwrap().state
+    {
+        *source = "keep='unsaved session'".into();
+    }
+    a.dirty = true;
+    a.settings_open = true;
+    a.settings_data = true;
+    draw(&ctx, &mut a);
+    data_preview(&ctx, &mut a);
+    let r = a.metrics.data_confirm.unwrap();
+    click(&ctx, &mut a, r);
+    assert!(!a.read_only);
+    assert_eq!(
+        std::fs::read(dir.path().join("progress-before-restore-1.json")).unwrap(),
+        b"corrupt original"
+    );
+    let session = dlms_learning_lab::backup::inspect(
+        &dir.path().join("session-before-restore-1.json"),
+        &a.scenarios,
+        &std::sync::atomic::AtomicBool::new(false),
+        &std::sync::atomic::AtomicUsize::new(0),
+    )
+    .unwrap();
+    assert!(
+        matches!(&session.progress.attempts["shell-handover"].state,State::Script{source,..}if source=="keep='unsaved session'")
+    );
+}
+
+#[test]
+fn backup_dialog_does_not_allow_background_editor_shortcuts_to_run_labs() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.smoke = true;
+    a.launch(9);
+    a.set_script_view(9, teaching::View::Assignment);
+    a.settings_open = true;
+    a.settings_data = true;
+    draw(&ctx, &mut a);
+    let r = a.metrics.data_export.unwrap();
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Key {
+            key: egui::Key::Enter,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers::CTRL,
+        }],
+    );
+    draw(&ctx, &mut a);
+    assert!(a.script_job.is_none());
+    assert!(!a.metrics.completion);
 }

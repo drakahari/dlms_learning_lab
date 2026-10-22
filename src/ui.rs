@@ -7,6 +7,7 @@ use dlms_learning_lab::{
 };
 use dlms_learning_lab::{script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
+mod data;
 mod script_learning;
 mod scripting;
 use std::{path::PathBuf, time::Instant};
@@ -23,6 +24,12 @@ struct Metrics {
     example_action: Option<egui::Rect>,
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
+    data_export: Option<egui::Rect>,
+    data_restore: Option<egui::Rect>,
+    data_file_action: Option<egui::Rect>,
+    data_filename: Option<egui::Rect>,
+    data_confirm: Option<egui::Rect>,
+    data_cancel: Option<egui::Rect>,
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
@@ -67,6 +74,9 @@ pub struct LabApp {
     theme_id: String,
     theme_preview: bool,
     settings_open: bool,
+    settings_data: bool,
+    data_tools: data::Tools,
+    profile_lock: Option<progress::ProfileLock>,
     preferences_error: Option<String>,
     preferences_read_only: bool,
     script_job: Option<scripting::Job>,
@@ -121,6 +131,13 @@ impl LabApp {
             schema_version: 1,
             ..Default::default()
         };
+        let lock = if smoke {
+            Ok(None)
+        } else {
+            progress::lock_profile(&path).map(Some)
+        };
+        let lock_error = lock.as_ref().err().cloned();
+        let profile_lock = lock.ok().flatten();
         let (progress, storage_error) = if smoke {
             (fresh(), None)
         } else {
@@ -129,6 +146,7 @@ impl LabApp {
                 Err(e) => (fresh(), Some(e)),
             }
         };
+        let storage_error = storage_error.or(lock_error.clone());
         let read_only = storage_error.is_some();
         let preferences = if smoke {
             Ok(theme::Preferences::default())
@@ -136,7 +154,7 @@ impl LabApp {
             theme::Preferences::load(&path.with_file_name("preferences-v1.json"))
         };
         let preferences_error = preferences.as_ref().err().cloned();
-        let preferences_read_only = preferences_error.is_some();
+        let preferences_read_only = preferences_error.is_some() || lock_error.is_some();
         let preferences = preferences.unwrap_or_default();
         theme::apply(ctx, &preferences.theme);
         Self {
@@ -159,6 +177,9 @@ impl LabApp {
             theme_id: preferences.theme,
             theme_preview: false,
             settings_open: false,
+            settings_data: false,
+            data_tools: data::Tools::default(),
+            profile_lock,
             preferences_error,
             preferences_read_only,
             script_job: None,
@@ -174,8 +195,10 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching-layout")
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("recovery")
+            {
+                500
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching-layout")
             {
                 400
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching") {
@@ -268,9 +291,9 @@ impl LabApp {
     fn save(&mut self) {
         if self.dirty && !self.read_only {
             match progress::save(&self.path, &self.progress) {
-                Ok(()) => {
+                Ok(saved) => {
                     self.dirty = false;
-                    self.storage_error = None
+                    self.storage_error = saved.durability_warning
                 }
                 Err(e) => self.storage_error = Some(format!("Progress not saved: {e}")),
             }
@@ -760,6 +783,7 @@ impl LabApp {
         let previous = (self.theme_id.clone(), self.scale);
         self.header(ctx);
         self.appearance_preview(ctx);
+        self.data_dialog(ctx);
         self.sync_appearance(ctx, previous);
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
@@ -797,11 +821,13 @@ impl LabApp {
                             egui::Layout::top_down(egui::Align::Min),
                             |ui| {
                                 ui.set_width(width);
-                                if let Some(i) = self.selected {
-                                    self.workspace(ui, i)
-                                } else {
-                                    self.library(ui)
-                                }
+                                ui.add_enabled_ui(!self.data_tools.modal_open(), |ui| {
+                                    if let Some(i) = self.selected {
+                                        self.workspace(ui, i)
+                                    } else {
+                                        self.library(ui)
+                                    }
+                                });
                             },
                         );
                     });

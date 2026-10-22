@@ -174,7 +174,7 @@ impl LabApp {
         } else {
             w.migrated_host
         } {
-            ui.label(RichText::new("Your earlier subnet analysis is retained as legacy credit. Complete and check the second-workstation requirement yourself. Older compatibility-supplied values are retained for review, not counted as new mastery.").small().color(palette(ui).muted));
+            ui.label(RichText::new("Your earlier subnet analysis stays complete. This lab now also asks for a second workstation: enter and check its address. If an older app supplied a value, review it before checking.").small().color(palette(ui).muted));
         }
         self.metrics.completion = view.verified();
         if self.metrics.completion

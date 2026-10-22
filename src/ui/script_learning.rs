@@ -190,7 +190,7 @@ impl LabApp {
         let r = area.inner;
         self.metrics.inputs.push(r.rect);
         self.metrics.focus = Some(r.id);
-        if self.focus_input {
+        if self.focus_input && ui.is_enabled() {
             r.request_focus();
             self.focus_input = false;
         }
@@ -219,6 +219,11 @@ impl LabApp {
             self.metrics.check = Some(r.rect);
             run = r.clicked()
                 || (!running
+                    && ui.is_enabled()
+                    && self
+                        .metrics
+                        .focus
+                        .is_some_and(|id| ui.memory(|m| m.has_focus(id)))
                     && ui.input_mut(|i| i.consume_key(egui::Modifiers::CTRL, egui::Key::Enter)));
             let r = ui.add_enabled(running, button("Stop"));
             self.metrics.stop = Some(r.rect);

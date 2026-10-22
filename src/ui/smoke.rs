@@ -641,6 +641,119 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            500 => {
+                let _ = std::fs::remove_file(
+                    self.path
+                        .parent()
+                        .unwrap()
+                        .join("dlms-learning-backup.json"),
+                );
+                self.launch(9);
+                self.set_script_view(9, teaching::View::Assignment);
+                if let engine::State::Script { source, .. } = &mut self
+                    .progress
+                    .attempts
+                    .get_mut("shell-handover")
+                    .unwrap()
+                    .state
+                {
+                    *source = "visitor='unfinished draft'".into();
+                }
+                self.progress.favorites.insert("shell-handover".into());
+                self.dirty = true;
+                self.settings_open = true;
+                self.settings_data = true;
+            }
+            501 => shot = Some("settings-your-data".into()),
+            502 => self
+                .pending_events
+                .extend(click(self.metrics.data_export.unwrap())),
+            503 => {
+                shot = Some("export-native-file-picker".into());
+                self.pending_events
+                    .extend(click(self.metrics.data_file_action.unwrap()));
+            }
+            504 => {}
+            505 => {
+                assert!(
+                    self.path
+                        .parent()
+                        .unwrap()
+                        .join("dlms-learning-backup.json")
+                        .is_file()
+                );
+                shot = Some("export-backup-saved".into());
+                self.reset_attempt(9);
+            }
+            506 => self
+                .pending_events
+                .extend(click(self.metrics.data_restore.unwrap())),
+            507 => self
+                .pending_events
+                .extend(click(self.metrics.data_filename.unwrap())),
+            508 => self
+                .pending_events
+                .push(egui::Event::Text("dlms-learning-backup.json".into())),
+            509 => self
+                .pending_events
+                .extend(click(self.metrics.data_file_action.unwrap())),
+            510 => {}
+            511 => {
+                assert!(self.metrics.data_confirm.is_some());
+                shot = Some("restore-review-preview".into());
+            }
+            512 => self
+                .pending_events
+                .extend(click(self.metrics.data_confirm.unwrap())),
+            513 => {}
+            514 => {
+                assert!(
+                    matches!(&self.progress.attempts["shell-handover"].state,engine::State::Script{source,..}if source=="visitor='unfinished draft'")
+                );
+                assert!(self.progress.favorites.contains("shell-handover"));
+                shot = Some("restore-complete-with-safety-copy".into());
+            }
+            515 => {
+                self.settings_open = false;
+                let s = &self.scenarios[0];
+                let mut a = Attempt::new(s, 1);
+                if let engine::State::Subnet {
+                    answers, second, ..
+                } = &mut a.state
+                {
+                    *answers = [
+                        "192.168.10.64",
+                        "192.168.10.95",
+                        "192.168.10.65",
+                        "192.168.10.94",
+                    ]
+                    .map(String::from);
+                    *second = None;
+                }
+                self.progress.attempts.insert(s.id.clone(), a);
+                self.launch(0);
+            }
+            516 => {
+                assert!(!self.metrics.completion);
+                assert!(progress::legacy_credit(
+                    &self.progress.attempts["ccna-ipv4"]
+                ));
+                shot = Some("legacy-analysis-new-requirement".into());
+            }
+            517 => {
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                self.settings_open = true;
+                self.settings_data = true;
+            }
+            518 => shot = Some("settings-data-light-150".into()),
+            519 => {
+                println!(
+                    "PASS native recovery: export picker, backup, reset, import typed filename, verified preview, confirmed restore, saved draft/favorite recovery, legacy new-requirement disclosure and light 150% Settings."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             _ => {}
         }
         if let Some(name) = shot {

@@ -257,6 +257,7 @@ impl LabApp {
         let area = egui::ScrollArea::both()
             .id_salt(("source-scroll", i))
             .max_height(height)
+            .min_scrolled_height(height)
             .show(ui, |ui| {
                 ui.add_sized(
                     [ui.available_width(), height],
@@ -272,7 +273,7 @@ impl LabApp {
         let response = area.inner;
         self.metrics.inputs.push(response.rect);
         self.metrics.focus = Some(id);
-        if self.focus_input {
+        if self.focus_input && ui.is_enabled() {
             response.request_focus();
             self.focus_input = false;
         }
@@ -313,6 +314,11 @@ impl LabApp {
             self.metrics.check = Some(r.rect);
             run = r.clicked()
                 || (!running
+                    && ui.is_enabled()
+                    && self
+                        .metrics
+                        .focus
+                        .is_some_and(|id| ui.memory(|m| m.has_focus(id)))
                     && ui.input_mut(|i| i.consume_key(egui::Modifiers::CTRL, egui::Key::Enter)));
             let s = ui.add_enabled(
                 running,
@@ -353,6 +359,8 @@ impl LabApp {
         if self.settings_open || self.theme_preview {
             let mut open = true;
             egui::Window::new("Settings").open(&mut open).default_width(500.).resizable(true).show(ctx,|ui|{
+                ui.horizontal_wrapped(|ui| { ui.selectable_value(&mut self.settings_data,false,"Appearance");ui.selectable_value(&mut self.settings_data,true,"Your data"); });
+                if self.settings_data { egui::ScrollArea::vertical().id_salt("data-settings-scroll").max_height(ctx.content_rect().height()*0.65).show(ui,|ui|self.data_settings(ui)); } else {
                 ui.heading("Appearance");
                 ui.push_id("settings-theme", |ui| { self.theme_dropdown(ui); });
                 ui.label(format!("{} · {}",theme::find(&self.theme_id).group,theme::find(&self.theme_id).name));
@@ -384,6 +392,7 @@ impl LabApp {
                         ui.label(include_str!("../../assets/themes/LICENSE.omarchy"));
                     });
                 });
+                }
             });
             self.settings_open = open;
             if !open {

@@ -14,3 +14,5 @@ pub mod shell;
 pub mod theme;
 
 pub mod script_teaching;
+
+pub mod backup;
