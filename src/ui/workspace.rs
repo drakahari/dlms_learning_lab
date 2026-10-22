@@ -177,13 +177,8 @@ impl LabApp {
             ui.label(RichText::new("Your earlier subnet analysis stays complete. This lab now also asks for a second workstation: enter and check its address. If an older app supplied a value, review it before checking.").small().color(palette(ui).muted));
         }
         self.metrics.completion = view.verified();
-        if self.metrics.completion
-            && i + 1 < self.scenarios.len()
-            && ui
-                .link(format!("Next lab: {}", self.scenarios[i + 1].title))
-                .clicked()
-        {
-            self.launch(i + 1);
+        if self.metrics.completion {
+            self.next_unit_lab(ui, i);
         }
     }
     fn allocations(&mut self, ui: &mut egui::Ui, i: usize) {
@@ -543,13 +538,7 @@ impl LabApp {
                     .strong()
                     .color(palette(ui).success),
             );
-            if i + 1 < self.scenarios.len()
-                && ui
-                    .link(format!("Next lab: {}", self.scenarios[i + 1].title))
-                    .clicked()
-            {
-                self.launch(i + 1);
-            }
+            self.next_unit_lab(ui, i);
         } else if matches!(a.state, State::Vlsm { .. }) && ui.available_width() < 640. {
             let State::Vlsm { allocations, .. } = &a.state else {
                 unreachable!()

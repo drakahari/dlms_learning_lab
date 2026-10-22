@@ -50,7 +50,7 @@ The [curriculum plan](docs/CURRICULUM.md) and [165-row coverage map](docs/CURRIC
 
 ## Use
 
-Choose a certification and topic, or search titles/goals. Favorites and Recent / continue keep navigation focused. Difficulty, completion and duration live under **More filters**, with an active-filter summary when collapsed. Cards have aligned actions; pagination appears only above 12 results. `--developer` exposes a clearly marked 900-item synthetic catalog for navigation testing; those entries are not playable curriculum.
+Choose a track, unit and topic, or search titles/goals. Start/continue course opens the first unfinished assignment; experienced learners can open any lab. Unit prerequisites are advice, not locks. Completion stays within the current unit. Favorites and Recent / continue keep navigation focused. Difficulty, completion and duration live under **More filters**, with an active-filter summary when collapsed. Cards have aligned actions; pagination appears only above 12 results. `--developer` exposes a clearly marked 900-item synthetic catalog for navigation testing; those entries are not playable curriculum.
 
 Every lab keeps its complete objective and appropriate workspace together. IPv4 has the approved compact five-field assignment, a two-workstation topology and one **Check configuration** action. Workstation 2 accepts any different usable address. Its topology shows the typed address and checked status, which clears when that answer changes. Progressive hints and a binary explanation are optional; **network bits | host bits** and the all-zero/all-one host rules are explicit when requested. Numerical variants and a separate host-bit activity remain under optional practice, without adding lab titles. /31 and /32 remain excluded.
 

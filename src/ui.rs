@@ -5,7 +5,7 @@ use dlms_learning_lab::{
     progress::{self, Attempt, Progress},
     workspace as model,
 };
-use dlms_learning_lab::{script_teaching as teaching, shell, theme};
+use dlms_learning_lab::{course, script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
 mod data;
 mod script_learning;
@@ -30,6 +30,7 @@ struct Metrics {
     data_filename: Option<egui::Rect>,
     data_confirm: Option<egui::Rect>,
     data_cancel: Option<egui::Rect>,
+    course_start: Option<egui::Rect>,
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
@@ -56,6 +57,7 @@ struct Metrics {
 }
 pub struct LabApp {
     scenarios: Vec<Scenario>,
+    units: Vec<course::Unit>,
     progress: Progress,
     path: PathBuf,
     filter: Filter,
@@ -121,6 +123,7 @@ impl LabApp {
             .insert(egui::TextStyle::Monospace, egui::FontId::monospace(15.));
         ctx.set_style(style);
         let scenarios = pack::bundled().expect("Bundled pack validates");
+        let units = course::bundled(&scenarios).expect("Bundled units validate");
         let path = if smoke {
             PathBuf::from("/tmp/dlms-workspaces-smoke/progress-v1.json")
         } else {
@@ -159,6 +162,7 @@ impl LabApp {
         theme::apply(ctx, &preferences.theme);
         Self {
             scenarios,
+            units,
             progress,
             path,
             filter: Filter::default(),
@@ -195,8 +199,9 @@ impl LabApp {
             ipv4_view: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("recovery")
-            {
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("courses") {
+                600
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("recovery") {
                 500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("teaching-layout")
             {
@@ -393,6 +398,101 @@ impl LabApp {
             }
         }
     }
+    fn course_entry(&mut self, ui: &mut egui::Ui) {
+        if let Some(unit) = self
+            .units
+            .iter()
+            .find(|u| u.id == self.filter.unit)
+            .cloned()
+        {
+            let done = unit
+                .labs
+                .iter()
+                .filter(|id| {
+                    self.progress.attempts.get(*id).is_some_and(|a| {
+                        self.scenarios
+                            .iter()
+                            .find(|s| &s.id == *id)
+                            .is_some_and(|s| progress::current_solved(a, s))
+                    })
+                })
+                .count();
+            ui.label(format!(
+                "{} · {done}/{} labs complete",
+                unit.title,
+                unit.labs.len()
+            ));
+            ui.label(&unit.summary);
+            if !unit.prerequisites.is_empty() {
+                ui.label(
+                    RichText::new(format!(
+                        "Suggested preparation: {}. You can still open any lab.",
+                        unit.prerequisites
+                            .iter()
+                            .filter_map(|id| self.units.iter().find(|u| &u.id == id))
+                            .map(|u| u.title.as_str())
+                            .collect::<Vec<_>>()
+                            .join(", ")
+                    ))
+                    .small()
+                    .color(palette(ui).muted),
+                );
+            }
+        } else if !self.filter.track.is_empty()
+            && self.filter.search.is_empty()
+            && !self.filter.favorites
+            && !self.filter.recent
+        {
+            let next = self.scenarios.iter().position(|s| {
+                s.track == self.filter.track
+                    && self
+                        .progress
+                        .attempts
+                        .get(&s.id)
+                        .is_none_or(|a| !progress::current_solved(a, s))
+            });
+            ui.horizontal_wrapped(|ui| {
+                ui.label("Follow the course order, or choose any lab below.");
+                if let Some(i) = next {
+                    let r = ui.add(button(
+                        if self.progress.attempts.contains_key(&self.scenarios[i].id) {
+                            "Continue course"
+                        } else {
+                            "Start course"
+                        },
+                    ));
+                    self.metrics.course_start = Some(r.rect);
+                    if r.clicked() {
+                        self.launch(i);
+                    }
+                }
+            });
+        }
+    }
+    fn next_unit_lab(&mut self, ui: &mut egui::Ui, i: usize) {
+        let Some(unit) = self.units.iter().find(|u| u.id == self.scenarios[i].unit) else {
+            return;
+        };
+        if let Some(next) =
+            course::next(unit, &self.scenarios[i].id, &self.scenarios, &self.progress)
+        {
+            if ui
+                .link(format!("Next in unit: {}", self.scenarios[next].title))
+                .clicked()
+            {
+                self.launch(next);
+            }
+        } else {
+            ui.label("Unit complete · All its current assignments pass.");
+            if ui.link("Back to this unit").clicked() {
+                self.filter.track = unit.track.clone();
+                self.filter.unit = unit.id.clone();
+                self.filter.topic.clear();
+                self.filter.search.clear();
+                self.selected = None;
+            }
+        }
+    }
     fn library(&mut self, ui: &mut egui::Ui) {
         ui.heading("Practice library");
         ui.add_space(2.);
@@ -408,6 +508,10 @@ impl LabApp {
                     .selectable_label(self.filter.track == value, label)
                     .clicked()
                 {
+                    if self.filter.track != value {
+                        self.filter.unit.clear();
+                        self.filter.topic.clear();
+                    }
                     self.filter.track = value.into();
                     self.page = 0;
                 }
@@ -436,9 +540,58 @@ impl LabApp {
         {
             self.page = 0;
         }
+        self.course_entry(ui);
         ui.horizontal_wrapped(|ui| {
-            let topics: std::collections::BTreeSet<_> =
-                self.scenarios.iter().map(|s| s.topic.clone()).collect();
+            let previous = self.filter.unit.clone();
+            let chosen = self
+                .units
+                .iter()
+                .find(|u| u.id == self.filter.unit)
+                .map_or("Any unit", |u| u.title.as_str());
+            let unit_width = 220_f32.min(ui.available_width());
+            let r = ui
+                .allocate_ui_with_layout(
+                    egui::vec2(unit_width, CONTROL),
+                    egui::Layout::left_to_right(egui::Align::Center),
+                    |ui| {
+                        ui.set_width(unit_width);
+                        egui::ComboBox::from_id_salt("unit-filter")
+                            .width(220_f32.min(ui.available_width()))
+                            .truncate()
+                            .selected_text(chosen)
+                            .show_ui(ui, |ui| {
+                                ui.selectable_value(
+                                    &mut self.filter.unit,
+                                    String::new(),
+                                    "Any unit",
+                                );
+                                for u in self.units.iter().filter(|u| {
+                                    self.filter.track.is_empty() || u.track == self.filter.track
+                                }) {
+                                    ui.selectable_value(
+                                        &mut self.filter.unit,
+                                        u.id.clone(),
+                                        &u.title,
+                                    );
+                                }
+                            })
+                    },
+                )
+                .inner;
+            self.metrics.filters.push(r.response.rect);
+            if previous != self.filter.unit {
+                self.filter.topic.clear();
+                self.page = 0;
+            }
+            let topics: std::collections::BTreeSet<_> = self
+                .scenarios
+                .iter()
+                .filter(|s| {
+                    (self.filter.track.is_empty() || s.track == self.filter.track)
+                        && (self.filter.unit.is_empty() || s.unit == self.filter.unit)
+                })
+                .map(|s| s.topic.clone())
+                .collect();
             let before = self.filter.topic.clone();
             let r = combo(
                 ui,
@@ -468,6 +621,7 @@ impl LabApp {
                 && (!self.filter.search.is_empty()
                     || !self.filter.track.is_empty()
                     || !self.filter.topic.is_empty()
+                    || !self.filter.unit.is_empty()
                     || count > 0
                     || self.filter.favorites
                     || self.filter.recent)
@@ -879,20 +1033,29 @@ fn combo<'a>(
     options: impl Iterator<Item = &'a str>,
     width: f32,
 ) -> egui::Response {
-    egui::ComboBox::from_id_salt(id)
-        .width(width)
-        .selected_text(if value.is_empty() {
-            any.to_owned()
-        } else {
-            value.clone()
-        })
-        .show_ui(ui, |ui| {
-            ui.selectable_value(value, String::new(), any);
-            for option in options {
-                ui.selectable_value(value, option.to_owned(), option);
-            }
-        })
-        .response
+    ui.allocate_ui_with_layout(
+        egui::vec2(width, CONTROL),
+        egui::Layout::left_to_right(egui::Align::Center),
+        |ui| {
+            ui.set_width(width);
+            egui::ComboBox::from_id_salt(id)
+                .width(width)
+                .truncate()
+                .selected_text(if value.is_empty() {
+                    any.to_owned()
+                } else {
+                    value.clone()
+                })
+                .show_ui(ui, |ui| {
+                    ui.selectable_value(value, String::new(), any);
+                    for option in options {
+                        ui.selectable_value(value, option.to_owned(), option);
+                    }
+                })
+                .response
+        },
+    )
+    .inner
 }
 impl eframe::App for LabApp {
     fn raw_input_hook(&mut self, _: &egui::Context, input: &mut egui::RawInput) {

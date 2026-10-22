@@ -2,6 +2,18 @@
 mod ui;
 fn main() -> eframe::Result<()> {
     let args: Vec<String> = std::env::args().collect();
+    if args.get(1).map(String::as_str) == Some("--validate-content") {
+        match dlms_learning_lab::pack::bundled().and_then(|labs| {
+            dlms_learning_lab::course::bundled(&labs).map(|units| (labs.len(), units.len()))
+        }) {
+            Ok((labs, units)) => println!("Validated {labs} authored labs and {units} units"),
+            Err(e) => {
+                eprintln!("{e}");
+                std::process::exit(1);
+            }
+        }
+        return Ok(());
+    }
     if args.get(1).map(String::as_str) == Some("--validate-pack") {
         let result = args
             .get(2)

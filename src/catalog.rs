@@ -4,6 +4,7 @@ pub struct Filter {
     pub search: String,
     pub track: String,
     pub topic: String,
+    pub unit: String,
     pub difficulty: String,
     pub status: String,
     pub max_minutes: u16,
@@ -18,6 +19,7 @@ pub fn matches(s: &Scenario, f: &Filter, started: bool, complete: bool, favorite
             .contains(&q))
         && (f.track.is_empty() || f.track == s.track)
         && (f.topic.is_empty() || f.topic == s.topic)
+        && (f.unit.is_empty() || f.unit == s.unit)
         && (f.difficulty.is_empty() || f.difficulty == s.difficulty)
         && (f.max_minutes == 0 || s.minutes <= f.max_minutes)
         && (!f.favorites || favorite)

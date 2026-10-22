@@ -34,3 +34,11 @@ The owner explicitly approved MIT for original code and authored curriculum, usi
 - Independent read-only review exercised backend safety and found reserved-filename, unsaved-session and post-commit reporting edge cases, which were addressed. Oversized-current-file recovery deliberately requires a manual safe move, documented in PROGRESS_RECOVERY.md.
 - 82 Rust tests pass, including seven backup tests, a controlled post-commit sync failure, two native UI data flows, background-shortcut isolation and prior regressions. Native Fedora capture pass exercises export, typed import filename, preview, confirmation, draft/favorite recovery, legacy disclosure and light 150% Settings. Captures remain ignored local artifacts; no personal profile is used.
 - Full curriculum and cross-platform installer/runtime acceptance remain open; proceed to unit navigation and reviewed capability/content batches.
+
+## 2026-10-22 — M4: unit navigation and scalable bundled authoring
+
+- Added a versioned unit index covering every existing assignment, advisory prerequisite guidance and course entry points. Unit/topic controls share consistent constrained widths and wrap cleanly; track/search/favorites/resume remain available.
+- Completion continues within the same unit and offers earlier unfinished work; it cannot silently jump to another certification. New scripting learners enter the approved introduction; experienced learners can open any assignment.
+- Added bounded multi-pack validation with global dependency checks, plus `--validate-content`. No executable packs, plugin platform, dependencies or extra curriculum titles were added in this milestone.
+- Validation: 88 Rust tests, Clippy, bundled validation; native Fedora course start/return, unit/prerequisite screens, completion, 900-item synthetic filtering and light 150% rendering. Visual review confirmed baseline alignment and readable wrapping.
+- Implemented navigation foundation, not full curriculum coverage. Next is the authored shell composition/debugging unit with independent content review and per-lab alternate/negative behavior tests.

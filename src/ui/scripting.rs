@@ -230,13 +230,8 @@ impl LabApp {
                     .wrap(),
                 );
             }
-            if complete
-                && i + 1 < self.scenarios.len()
-                && ui
-                    .link(format!("Next lab: {}", self.scenarios[i + 1].title))
-                    .clicked()
-            {
-                self.launch(i + 1);
+            if complete {
+                self.next_unit_lab(ui, i);
             }
         }
         let c = &cases[selected];

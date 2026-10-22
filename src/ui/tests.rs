@@ -131,14 +131,14 @@ fn all_nine_keep_workspace_prominent_and_controls_inside_width_at_both_modes_and
 fn library_topic_is_visible_extra_filters_are_optional_and_catalog_navigation_survives_return() {
     let (ctx, mut a) = app();
     draw(&ctx, &mut a);
-    assert_eq!(a.metrics.filters.len(), 1);
+    assert_eq!(a.metrics.filters.len(), 2);
     assert!(a.metrics.pagination);
     a.filter.track = "CCNA".into();
     draw(&ctx, &mut a);
     assert!(!a.metrics.pagination);
     let r = a.metrics.extras.unwrap();
     click(&ctx, &mut a, r);
-    assert_eq!(a.metrics.filters.len(), 5);
+    assert_eq!(a.metrics.filters.len(), 6);
     a.filter.track = "LPIC-1".into();
     a.filter.topic = "Permissions".into();
     a.filter.search = "report".into();
@@ -1278,4 +1278,52 @@ fn backup_dialog_does_not_allow_background_editor_shortcuts_to_run_labs() {
     draw(&ctx, &mut a);
     assert!(a.script_job.is_none());
     assert!(!a.metrics.completion);
+}
+
+#[test]
+fn course_start_and_unit_filters_keep_search_favorites_and_resume_navigation() {
+    let (ctx, mut a) = app();
+    a.filter.track = "Bash/Shell".into();
+    draw(&ctx, &mut a);
+    let r = a.metrics.course_start.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.selected, Some(9));
+    assert_eq!(a.script_view(9), teaching::View::Introduction);
+    let r = a.metrics.back.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.filter.track, "Bash/Shell");
+    a.filter.unit = "shell-foundations".into();
+    a.filter.search = "handover".into();
+    a.progress.favorites.insert("shell-handover".into());
+    a.filter.favorites = true;
+    draw(&ctx, &mut a);
+    assert_eq!(a.metrics.card_actions.len(), 1);
+    a.launch(9);
+    draw(&ctx, &mut a);
+    let r = a.metrics.back.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.filter.unit, "shell-foundations");
+    assert_eq!(a.filter.search, "handover");
+    assert!(a.filter.favorites);
+}
+#[test]
+fn unit_filter_controls_wrap_at_narrow_widths_and_large_text() {
+    for width in [720., 1200.] {
+        for scale in [1., 1.5] {
+            let (ctx, mut a) = app();
+            a.filter.track = "LPIC-2".into();
+            a.filter.unit = "linux-service-recovery".into();
+            a.scale = scale;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, width, 850., vec![]);
+            }
+            for r in &a.metrics.filters {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "{width}/{scale}: {r:?}, screen {:?}",
+                    ctx.content_rect()
+                );
+            }
+        }
+    }
 }

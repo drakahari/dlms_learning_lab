@@ -754,6 +754,87 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            600 => {
+                self.filter.track = "Bash/Shell".into();
+            }
+            601 => {
+                assert!(self.metrics.course_start.is_some());
+                shot = Some("course-shell-entry".into());
+            }
+            602 => self
+                .pending_events
+                .extend(click(self.metrics.course_start.unwrap())),
+            603 => {
+                assert_eq!(self.selected, Some(9));
+                assert_eq!(self.script_view(9), teaching::View::Introduction);
+                shot = Some("course-start-opens-introduction".into());
+            }
+            604 => self
+                .pending_events
+                .extend(click(self.metrics.back.unwrap())),
+            605 => {
+                assert_eq!(self.filter.track, "Bash/Shell");
+                self.filter.unit = "shell-foundations".into();
+            }
+            606 => shot = Some("unit-shell-foundations".into()),
+            607 => {
+                self.filter.track = "LPIC-2".into();
+                self.filter.unit = "linux-service-recovery".into();
+            }
+            608 => shot = Some("unit-linux-prerequisite-guidance".into()),
+            609 => {
+                for i in 0..3 {
+                    let s = &self.scenarios[i];
+                    let mut a = Attempt::new(s, 1);
+                    for command in &s.solution {
+                        engine::execute(&mut a.state, command).unwrap();
+                    }
+                    self.progress.attempts.insert(s.id.clone(), a);
+                }
+                self.launch(2);
+                self.checked = true;
+                self.progress
+                    .attempts
+                    .get_mut("ccna-gateway")
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .checked = true;
+            }
+            610 => {
+                assert!(self.metrics.completion);
+                shot = Some("unit-completion-no-cross-track-jump".into());
+            }
+            611 => {
+                self.selected = None;
+                self.filter = Filter {
+                    unit: "shell-foundations".into(),
+                    ..Default::default()
+                };
+                self.developer = true;
+                self.synthetic = true;
+            }
+            612 => shot = Some("synthetic-unit-filter-navigation".into()),
+            613 => {
+                self.synthetic = false;
+                self.developer = false;
+                self.filter = Filter {
+                    track: "Bash/Shell".into(),
+                    unit: "shell-foundations".into(),
+                    ..Default::default()
+                };
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+            }
+            614 => shot = Some("unit-library-light-150".into()),
+            615 => {
+                println!(
+                    "PASS native courses: course entry opens Learn introduction, return preserves track, units and advisory prerequisites, unit completion stays in track, synthetic unit filter and light 150% library."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             _ => {}
         }
         if let Some(name) = shot {

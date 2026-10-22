@@ -8,6 +8,8 @@ pub struct Scenario {
     pub version: u32,
     pub track: String,
     pub topic: String,
+    #[serde(default)]
+    pub unit: String,
     pub title: String,
     pub summary: String,
     pub objective: String,
@@ -55,6 +57,9 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
         return Err("Pack exceeds 2 MB".into());
     }
     let p: Pack = serde_json::from_str(text).map_err(|e| e.to_string())?;
+    validate(p)
+}
+fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
     if p.schema_version != 1 || p.scenarios.is_empty() || p.scenarios.len() > 1000 {
         return Err("Unsupported schema or catalog size".into());
     }
@@ -75,6 +80,12 @@ pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
             || !["Beginner", "Intermediate"].contains(&s.difficulty.as_str())
             || s.minutes == 0
             || s.minutes > 180
+            || s.unit.len() > 80
+            || (!s.unit.is_empty()
+                && !s
+                    .unit
+                    .bytes()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == b'-'))
         {
             return Err(format!("{}: invalid metadata", s.id));
         }
@@ -289,11 +300,36 @@ pub fn validate_state(s: &State) -> Result<(), String> {
         Err("Invalid modeled initial state".into())
     }
 }
+/// Bound each declarative pack independently, then validate the combined prerequisite graph.
+pub fn load_catalog(packs: &[&str]) -> Result<Vec<Scenario>, String> {
+    if packs.is_empty()
+        || packs.len() > 100
+        || packs.iter().map(|p| p.len()).sum::<usize>() > 32_000_000
+    {
+        return Err("Invalid pack collection size".into());
+    }
+    let mut all = Pack {
+        schema_version: 1,
+        scenarios: Vec::new(),
+    };
+    for text in packs {
+        if text.len() > 2_000_000 {
+            return Err("Pack exceeds 2 MB".into());
+        }
+        let p: Pack = serde_json::from_str(text).map_err(|e| e.to_string())?;
+        if p.schema_version != 1 || p.scenarios.is_empty() {
+            return Err("Unsupported or empty pack".into());
+        }
+        if all.scenarios.len() + p.scenarios.len() > 1000 {
+            return Err("Catalog exceeds 1,000 authored labs".into());
+        }
+        all.scenarios.extend(p.scenarios);
+    }
+    validate(all)
+}
 pub fn bundled() -> Result<Vec<Scenario>, String> {
-    let mut all: Pack = serde_json::from_str(include_str!("../scenarios/starter-v1.json"))
-        .map_err(|e| e.to_string())?;
-    let unit: Pack = serde_json::from_str(include_str!("../scenarios/shell-unit-v1.json"))
-        .map_err(|e| e.to_string())?;
-    all.scenarios.extend(unit.scenarios);
-    load(&serde_json::to_string(&all).map_err(|e| e.to_string())?)
+    load_catalog(&[
+        include_str!("../scenarios/starter-v1.json"),
+        include_str!("../scenarios/shell-unit-v1.json"),
+    ])
 }
