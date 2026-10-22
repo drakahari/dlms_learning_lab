@@ -1,9 +1,10 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
+mod arithmetic;
 mod text_tools;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
-pub const EVALUATOR_REVISION: u32 = 2;
+pub const EVALUATOR_REVISION: u32 = 3;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -142,6 +143,11 @@ enum Quote {
 #[derive(Clone, Debug)]
 struct Word(Vec<Part>);
 impl Word {
+    fn assignment(&self) -> bool {
+        self.0.first().is_some_and(|p| {
+            p.quote == Quote::Bare && p.text.split_once('=').is_some_and(|(n, _)| name(n))
+        })
+    }
     fn literal(&self) -> Option<&str> {
         if self.0.len() == 1 && self.0[0].quote == Quote::Bare {
             Some(&self.0[0].text)
@@ -356,6 +362,12 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             let mut text = String::new();
             let mut closed = false;
             while i < cs.len() {
+                if quote == Quote::Double && cs[i..].starts_with(&['$', '(', '(']) {
+                    let end = arithmetic::end(&cs, i)?;
+                    text.extend(cs[i..end].iter());
+                    i = end;
+                    continue;
+                }
                 if cs[i] == c {
                     closed = true;
                     i += 1;
@@ -420,6 +432,12 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             return Err(format!(
                 "Unsupported syntax: {c}. See the supported shell subset"
             ));
+        }
+        if c == '$' && cs[i..].starts_with(&['$', '(', '(']) {
+            let end = arithmetic::end(&cs, i)?;
+            bare.extend(cs[i..end].iter());
+            i = end;
+            continue;
         }
         if c == '$' && cs.get(i + 1) == Some(&'{') {
             bare.push(c);
@@ -822,6 +840,7 @@ enum Dest {
     Err,
     File(String),
 }
+type LocalDeclaration = (String, Option<String>);
 struct CallFrame {
     pc: usize,
     args: Vec<String>,
@@ -912,6 +931,15 @@ impl Vm {
             if cs[i] != '$' {
                 result.push(cs[i]);
                 i += 1;
+                continue;
+            }
+            if cs[i..].starts_with(&['$', '(', '(']) {
+                let end = arithmetic::end(&cs, i)?;
+                let expression = cs[i + 3..end - 2].iter().collect::<String>();
+                let expanded = self.expand_text(&expression)?;
+                let number = arithmetic::evaluate(&expanded, |name| self.variable(name))?;
+                result.push_str(&number.to_string());
+                i = end;
                 continue;
             }
             i += 1;
@@ -1103,19 +1131,16 @@ impl Vm {
         if cmd.words.first().and_then(Word::literal) == Some("local") {
             return Ok(false);
         }
-        if self.functions.is_empty()
-            || cmd
-                .words
-                .first()
-                .and_then(Word::literal)
-                .is_some_and(|s| s.split_once('=').is_some_and(|(n, _)| name(n)))
-        {
+        if self.functions.is_empty() || cmd.words.first().is_some_and(Word::assignment) {
             return Ok(false);
         }
-        let args = self.words(&cmd.words)?;
-        let Some(start) = args.first().and_then(|n| self.functions.get(n)).copied() else {
+        let Some(start) = self
+            .command_head(cmd)?
+            .and_then(|n| self.functions.get(&n).copied())
+        else {
             return Ok(false);
         };
+        let args = self.words(&cmd.words)?;
         if !cmd.redirects.is_empty() {
             return Err("Unsupported redirection on a function call; redirect individual commands inside its body".into());
         }
@@ -1215,11 +1240,21 @@ impl Vm {
         }
         self.limits()
     }
+    fn command_head(&self, cmd: &Command) -> Result<Option<String>, String> {
+        if cmd.words.first().is_some_and(Word::assignment) {
+            return Ok(None);
+        }
+        for word in &cmd.words {
+            if let Some(head) = self.words(std::slice::from_ref(word))?.first() {
+                return Ok(Some(head.clone()));
+            }
+        }
+        Ok(None)
+    }
     fn pipeline(&mut self, cmds: &[Command]) -> Result<(), String> {
         if cmds.len() > 1 {
             for cmd in cmds {
-                let args = self.words(&cmd.words)?;
-                if args.first().is_some_and(|s| {
+                if self.command_head(cmd)?.as_ref().is_some_and(|s| {
                     self.functions.contains_key(s) || s == "return" || s == "local"
                 }) {
                     return Err("Unsupported function call, return or local declaration in a pipeline; use separate commands".into());
@@ -1265,9 +1300,9 @@ impl Vm {
         }
         Ok(())
     }
-    fn local_declarations(&mut self, cmd: &Command) -> Result<bool, String> {
+    fn local_declarations(&self, cmd: &Command) -> Result<Option<Vec<LocalDeclaration>>, String> {
         if cmd.words.first().and_then(Word::literal) != Some("local") {
-            return Ok(false);
+            return Ok(None);
         }
         if self.calls.is_empty() {
             return Err(
@@ -1281,9 +1316,7 @@ impl Vm {
         // Bash declaration assignments suppress splitting; all arguments expand before mutation.
         let mut declarations = Vec::new();
         for word in &cmd.words[1..] {
-            let assignment = word.0.first().is_some_and(|p| {
-                p.quote == Quote::Bare && p.text.split_once('=').is_some_and(|(n, _)| name(n))
-            });
+            let assignment = word.assignment();
             let values = if assignment {
                 self.expand(word, false)?
             } else {
@@ -1314,6 +1347,12 @@ impl Vm {
         if declarations.is_empty() {
             return Err("Unsupported local listing; supply a valid variable argument".into());
         }
+        Ok(Some(declarations))
+    }
+    fn apply_local_declarations(
+        &mut self,
+        declarations: Vec<LocalDeclaration>,
+    ) -> Result<(), String> {
         for (key, new_value) in declarations {
             let locals = &mut self.calls.last_mut().unwrap().locals;
             if !locals.contains_key(&key) {
@@ -1324,9 +1363,32 @@ impl Vm {
             }
             self.limits()?;
         }
-        Ok(true)
+        Ok(())
     }
     fn command(&mut self, cmd: &Command) -> Result<String, String> {
+        // Command/declaration argument expansion precedes redirection. Assignment-only
+        // values remain sequential and follow the Bash no-command ordering below.
+        let assignments = cmd.words.iter().all(Word::assignment);
+        let declarations = self.local_declarations(cmd)?;
+        let args = if declarations.is_none() && !assignments {
+            Some(self.words(&cmd.words)?)
+        } else {
+            None
+        };
+        // With no command name, Bash applies assignments sequentially before
+        // redirection; even a later missing input retains those assignments.
+        if assignments && !cmd.words.is_empty() {
+            for w in &cmd.words {
+                let mut w = w.clone();
+                let (n, rest) = w.0[0].text.split_once('=').unwrap();
+                let n = n.to_string();
+                variable_target(&n)?;
+                w.0[0].text = rest.to_string();
+                let value = self.expand(&w, false)?.join("");
+                self.env.insert(n, value);
+                self.limits()?;
+            }
+        }
         let mut stdout = Dest::Out;
         let mut stderr = Dest::Err;
         let mut input = None;
@@ -1374,28 +1436,13 @@ impl Vm {
             self.input = s;
             self.input_pos = 0;
         }
-        // Assignment-only commands preserve quoting but never perform field splitting.
-        let assignments = cmd.words.iter().all(|w| {
-            w.0.first().is_some_and(|p| {
-                p.quote == Quote::Bare && p.text.split_once('=').is_some_and(|(n, _)| name(n))
-            })
-        });
-        let (out, err, status) = if self.local_declarations(cmd)? {
+        let (out, err, status) = if let Some(declarations) = declarations {
+            self.apply_local_declarations(declarations)?;
             (String::new(), String::new(), 0)
         } else if assignments && !cmd.words.is_empty() {
-            for w in &cmd.words {
-                let mut w = w.clone();
-                let (n, rest) = w.0[0].text.split_once('=').unwrap();
-                let n = n.to_string();
-                variable_target(&n)?;
-                w.0[0].text = rest.to_string();
-                let value = self.expand(&w, false)?.join("");
-                self.env.insert(n, value);
-                self.limits()?;
-            }
             (String::new(), String::new(), 0)
         } else {
-            let args = self.words(&cmd.words)?;
+            let args = args.unwrap_or_default();
             if args
                 .first()
                 .is_some_and(|a| a.split_once('=').is_some_and(|(n, _)| name(n)))

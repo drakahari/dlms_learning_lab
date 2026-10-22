@@ -386,3 +386,88 @@ fn revision_one_pipeline_credit_is_retained_while_current_consumption_rejects_re
         source
     );
 }
+
+#[test]
+fn revision_two_redirection_credit_is_preserved_when_assignment_order_is_corrected() {
+    let labs = pack::bundled().unwrap();
+    let lab = labs.iter().find(|s| s.id == "shell-report").unwrap();
+    let Goal::Script { cases } = &lab.goal else {
+        panic!()
+    };
+    let source = format!(
+        "target=$2\ntarget=staging-scratch > \"$target\"\n{}",
+        lab.solution[0]
+    );
+    let mut a = Attempt::new(lab, 1);
+    a.state = State::Script {
+        source: source.clone(),
+        run: Some(shell::Record {
+            engine_revision: 2,
+            source: source.clone(),
+            results: cases
+                .iter()
+                .map(|c| shell::run(&lab.solution[0], c))
+                .collect(),
+        }),
+    };
+    assert!(progress::legacy_script_credit(&a, lab));
+    assert!(!progress::current_solved(&a, lab));
+    workspace::prepare(&mut a);
+    let State::Script { run, .. } = &mut a.state else {
+        panic!()
+    };
+    *run = Some(shell::Record {
+        engine_revision: shell::EVALUATOR_REVISION,
+        source: source.clone(),
+        results: cases.iter().map(|c| shell::run(&source, c)).collect(),
+    });
+    assert!(progress::legacy_script_credit(&a, lab));
+    assert!(!progress::current_solved(&a, lab));
+    let State::Script { run: Some(r), .. } = &a.state else {
+        panic!()
+    };
+    assert!(
+        r.results
+            .iter()
+            .all(|r| r.error.is_none() && r.files.contains_key("/work/staging-scratch"))
+    );
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    p.attempts.insert(lab.id.clone(), a);
+    let bytes = serde_json::to_vec(&p).unwrap();
+    let restored = progress::decode(&bytes, &labs).unwrap();
+    assert_eq!(serde_json::to_vec(&restored).unwrap(), bytes);
+}
+#[test]
+fn every_earlier_evaluator_result_survives_another_upgrade_without_merging_credit() {
+    let labs = pack::bundled().unwrap();
+    let lab = &labs[9];
+    let mut a = earlier(lab, false);
+    workspace::prepare(&mut a);
+    for revision in 1..shell::EVALUATOR_REVISION {
+        a.state = earlier(lab, false).state;
+        if let State::Script { run: Some(r), .. } = &mut a.state {
+            r.engine_revision = revision;
+        }
+        workspace::prepare(&mut a);
+    }
+    let w = a.workspace.as_ref().unwrap();
+    assert_eq!(
+        w.script_history_more.len(),
+        (shell::EVALUATOR_REVISION - 1) as usize
+    );
+    assert!(progress::legacy_script_credit(&a, lab));
+    assert!(!progress::current_solved(&a, lab));
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    p.attempts.insert(lab.id.clone(), a);
+    let bytes = serde_json::to_vec(&p).unwrap();
+    assert_eq!(
+        serde_json::to_vec(&progress::decode(&bytes, &labs).unwrap()).unwrap(),
+        bytes
+    );
+}

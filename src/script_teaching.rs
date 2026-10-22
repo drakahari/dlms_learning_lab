@@ -136,7 +136,11 @@ pub fn diagnostic_title(message: &str) -> &'static str {
 }
 pub fn diagnostic_advice(message: &str) -> &'static str {
     let m = message.to_ascii_lowercase();
-    if m.contains("quoted string") {
+    if m.contains("division by zero") {
+        "A division needs a nonzero divisor. Check or reject zero input before calculating, then retry."
+    } else if m.contains("invalid integer") {
+        "Use an integer value. A leading 0 means octal (digits 0–7); floating-point values and expressions stored in named variables are outside this subset."
+    } else if m.contains("quoted string") {
         "A quote was opened but not closed. Add the matching single or double quote."
     } else if m.contains("expected fi") {
         "An if choice ends with fi. Check that every if has its matching ending on a separate line or after a semicolon."

@@ -90,3 +90,16 @@ The full filename prefix is `dlms-learning-lab-0.1.0`. No macOS archive is suppl
 | Windows `...-gc6d8afe61585-x86_64-pc-windows-msvc-windows-candidate.zip` | `8c3bd51c5d15bb790a94369be102f7e9addbcdc52de6dcea23b990ff9ce452e6` |
 
 The full prefix is `dlms-learning-lab-0.1.0`. Fedora installed/upgraded/opened outside the checkout under an isolated root; synthetic progress was retained and native IPv6/light150 screens inspected. These are milestone identities, not the final complete course or Windows/macOS desktop acceptance. macOS packaging remains gated above.
+
+
+### M18 clean owner-test candidates
+
+Source `90039eefdddb0c1cb99482841664a3b602d4b2e1`,43 assignments/ten units, evaluator revision2. [Run39821972644](https://github.com/drakahari/dlms_learning_lab/actions/runs/39821972644) passed181 Rust tests and applicable native build/tooling checks on all three runners. Ubuntu/Windows archives were downloaded and their sidecar hashes verified under ignored `dist/native-ci-90039ee/`. They precede M19 arithmetic/order corrections.
+
+| Candidate | SHA-256 |
+| --- | --- |
+| Fedora44 `...-g90039eefdddb-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` | `f6cd92838924b57fe78c1a4f24fba4b6214f41fe06b5880a422dd61ebf47f199` |
+| Ubuntu24.04 `...-g90039eefdddb-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `073dbb6be7d4498ca373a5d007a8150716d28a43428bfb8465395807d72bf107` |
+| Windows `...-g90039eefdddb-x86_64-pc-windows-msvc-windows-candidate.zip` | `93a106c27aac0425294581a6dff7117a9d66f1f8ab2f522fa7837229f49af56e` |
+
+Full prefix: `dlms-learning-lab-0.1.0`. Fedora archive was checksum-verified, extracted and installed/upgraded under an isolated /tmp root. Installed CLI validated43/ten outside the checkout; desktop-file-validate passed and the exact synthetic progress sentinel stayed intact. The installed native app then passed all4 text-lesson synthetic flows, including larger text/light/dark views. These are controlled installation/render/input checks; the sentinel is a retained-file test, not an old profile opened for acceptance. Real Windows/macOS desktop installation/runtime/accessibility and macOS notice/signing gates remain open. No release published.

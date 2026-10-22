@@ -865,6 +865,72 @@ impl LabApp {
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
+            1800 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.launch(9);
+                self.set_script_view(9, teaching::View::Assignment);
+            }
+            1801 | 1807 | 1813 | 1819 => self.pending_events.extend(click(self.metrics.inputs[0])),
+            1802 | 1820 => {
+                let source = format!(
+                    "total=0\nfor amount in 2 3; do total=$((total+amount)); done\nif [ \"$total\" -ne 5 ]; then exit 2; fi\n{}",
+                    self.scenarios[9].solution[0]
+                );
+                self.pending_events
+                    .extend([key(egui::Key::A, true), egui::Event::Text(source)]);
+            }
+            1803 | 1809 | 1815 | 1821 => self
+                .pending_events
+                .extend(click(self.metrics.check.unwrap())),
+            1804 | 1805 | 1810 | 1811 | 1822 | 1823 => {}
+            1806 => {
+                assert!(self.metrics.completion);
+                shot = Some("arithmetic-native-current-run".into());
+            }
+            1808 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text(format!("total=$((1/0))\n{}", self.scenarios[9].solution[0])),
+            ]),
+            1812 => {
+                assert!(!self.metrics.completion);
+                shot = Some("arithmetic-native-division-feedback".into());
+            }
+            1814 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("total=0\nwhile true; do total=$((total+1)); done".into()),
+            ]),
+            1816 => {
+                assert!(self.script_job.is_some());
+                self.pending_events
+                    .extend(click(self.metrics.stop.unwrap()));
+            }
+            1817 => {}
+            1818 => {
+                assert!(self.script_job.is_none());
+                assert!(!self.metrics.completion);
+                shot = Some("arithmetic-native-stopped-counter".into());
+            }
+            1824 => {
+                assert!(self.metrics.completion);
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(progress::current_solved(
+                    &self.progress.attempts["shell-handover"],
+                    &self.scenarios[9]
+                ));
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            1825 => shot = Some("arithmetic-native-light-150".into()),
+            1826 => {
+                println!(
+                    "PASS native arithmetic capability: keyboard sum/guard/current grading, division feedback/current invalidation, responsive counter Stop, repair/reload and light150 rendering. Synthetic developer script in an existing lab; no new curriculum or novice acceptance claimed."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             1772 => {
                 self.save();
                 self.progress = progress::load(&self.path, &self.scenarios).unwrap();
