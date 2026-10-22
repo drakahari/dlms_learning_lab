@@ -1619,5 +1619,385 @@
       "status": 0,
       "after": {}
     }
+  },
+  {
+    "name": "functions: arguments restored",
+    "source": "label() { printf '<%s> count=%s\\n' \"$1\" \"$#\"; }\nlabel 'inside value'\nprintf '<%s> count=%s\\n' \"$1\" \"$#\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: global assignments",
+    "source": "value=before\nupdate() { value='after change'; }\nupdate\nprintf '%s\\n' \"$value\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: return explicit",
+    "source": "guard() { if [ -z \"$1\" ]; then return 2; fi; printf 'Yes: %s\\n' \"$1\"; }\nguard ''\nprintf 'status=%s\\n' \"$?\"\nguard good\nprintf 'status=%s\\n' \"$?\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: return previous status",
+    "source": "previous() { return; printf unreachable; }\nfalse\nprevious\nprintf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: implicit status",
+    "source": "no() { false; }\nno\nprintf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: return unwinds only own loops",
+    "source": "inner() { for x in a b; do while true; do printf '%s\\n' \"$x\"; return 3; done; done; }\nfor path in one two; do inner; printf '%s %s\\n' \"$path\" \"$?\"; done\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: nested call arguments",
+    "source": "inner() { printf 'in:%s\\n' \"$1\"; return 4; }\nouter() { inner child; printf 'out:%s status=%s\\n' \"$1\" \"$?\"; }\nouter parent\nprintf 'top:%s\\n' \"$1\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: shift zero excessive default",
+    "source": "shift 0\nprintf 'zero:%s %s\\n' \"$1\" \"$?\"\nshift 9\nprintf 'excessive:%s %s\\n' \"$1\" \"$?\"\nshift\nprintf 'default:%s %s %s\\n' \"$1\" \"$#\" \"$?\"\nshift\nshift\nprintf 'empty:%s %s\\n' \"$#\" \"$?\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: function shift",
+    "source": "consume() { while [ \"$#\" -gt 0 ]; do printf '<%s>\\n' \"$1\"; shift; done; }\nconsume a 'b c' ''\nprintf 'caller:%s %s\\n' \"$1\" \"$#\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: shift pipeline isolation",
+    "source": "shift | printf '%s %s\\n' \"$1\" \"$#\"\nprintf '%s %s\\n' \"$1\" \"$#\"\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: function reads common input",
+    "source": "line() { read -r text; printf '<%s>\\n' \"$text\"; }\nline\nline\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: function internal redirection",
+    "source": "save() { printf '%s\\n' \"$1\" > \"$2\"; printf done >&2; }\nsave 'two words' saved\ncat saved\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: function inside condition",
+    "source": "allowed() { test \"$1\" = yes; }\nif allowed no; then printf wrong; else printf 'denied\\n'; fi\nallowed yes && printf 'allowed\\n'\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: dynamic function name",
+    "source": "greet() { printf '%s\\n' \"$1\"; }\ncall=greet\n\"$call\" hello\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: runtime definition order",
+    "source": "if false; then hidden() { printf wrong; }; fi\nactive() { printf first; }\nactive\nactive() { printf second; }\nactive\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: finite recursive calls",
+    "source": "visit() { if [ \"$#\" -gt 0 ]; then printf '%s\\n' \"$1\"; shift; visit \"$@\"; fi; }\nvisit a 'b c' d\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: nested function definition",
+    "source": "define() { child() { printf '%s\\n' \"$1\"; }; }\ndefine\nchild nested\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: function exit entire script",
+    "source": "finish() { printf goodbye; exit 3; }\nfinish\nprintf unreachable\n",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "functions: expanded return redirection",
+    "source": "f() { r=return; \"$r\" > output; printf wrong; }; f",
+    "case": {
+      "name": "function reference",
+      "args": [
+        "outer value",
+        "second"
+      ],
+      "stdin": "first line\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source": "sample\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
   }
 ]

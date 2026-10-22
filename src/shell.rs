@@ -133,6 +133,89 @@ fn name(s: &str) -> bool {
         .is_some_and(|c| c.is_ascii_alphabetic() || c == '_')
         && c.all(|c| c.is_ascii_alphanumeric() || c == '_')
 }
+fn reserved_function_name(n: &str) -> bool {
+    // Keywords cannot become ordinary calls; no Bash builtin replacement is modeled.
+    [
+        "if",
+        "then",
+        "else",
+        "elif",
+        "fi",
+        "for",
+        "while",
+        "until",
+        "do",
+        "done",
+        "in",
+        "case",
+        "esac",
+        "select",
+        "function",
+        "time",
+        "coproc",
+        "alias",
+        "bg",
+        "bind",
+        "break",
+        "builtin",
+        "caller",
+        "cd",
+        "command",
+        "compgen",
+        "complete",
+        "compopt",
+        "continue",
+        "declare",
+        "dirs",
+        "disown",
+        "echo",
+        "enable",
+        "eval",
+        "exec",
+        "exit",
+        "export",
+        "false",
+        "fc",
+        "fg",
+        "getopts",
+        "hash",
+        "help",
+        "history",
+        "jobs",
+        "kill",
+        "let",
+        "local",
+        "logout",
+        "mapfile",
+        "popd",
+        "printf",
+        "pushd",
+        "pwd",
+        "read",
+        "readarray",
+        "readonly",
+        "return",
+        "set",
+        "shift",
+        "shopt",
+        "source",
+        "suspend",
+        "test",
+        "times",
+        "trap",
+        "true",
+        "type",
+        "typeset",
+        "ulimit",
+        "umask",
+        "unalias",
+        "unset",
+        "wait",
+        "cat",
+        "grep",
+    ]
+    .contains(&n)
+}
 fn lex(source: &str) -> Result<Vec<Token>, String> {
     if source.len() > MAX_SOURCE {
         return Err("Script exceeds 16 KiB".into());
@@ -247,7 +330,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             i += 1;
             continue;
         }
-        if matches!(c, '`' | '(' | ')' | '{' | '}') {
+        if c == '`' || (matches!(c, '{' | '}') && (!bare.is_empty() || !parts.is_empty())) {
             // Braces inside ${name} are consumed below.
             return Err(format!(
                 "Unsupported syntax: {c}. See the supported shell subset"
@@ -266,8 +349,11 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             }
             continue;
         }
+        if c == '(' && bare.ends_with('$') {
+            return Err("Command substitution is unsupported".into());
+        }
         if c == '\n'
-            || matches!(c, ';' | '|' | '&' | '<' | '>')
+            || matches!(c, '(' | ')' | ';' | '|' | '&' | '<' | '>')
             || (matches!(c, '1' | '2')
                 && bare.is_empty()
                 && parts.is_empty()
@@ -303,8 +389,8 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
                 }
             }
             if ![
-                ";", "|", "&&", "||", "<", ">", ">>", "1>", "1>>", "2>", "2>>", ">&2", "1>&2",
-                "2>&1",
+                "(", ")", ";", "|", "&&", "||", "<", ">", ">>", "1>", "1>>", "2>", "2>>", ">&2",
+                "1>&2", "2>&1",
             ]
             .contains(&op.as_str())
             {
@@ -361,6 +447,8 @@ enum Code {
     WhileStart,
     WhileBody,
     WhileEnd,
+    Define(String, usize, usize),
+    FunctionEnd,
 }
 struct Parser {
     tokens: Vec<Token>,
@@ -436,6 +524,37 @@ impl Parser {
         Ok(())
     }
     fn compound(&mut self) -> Result<(), String> {
+        let function = match (
+            self.tokens.get(self.pos),
+            self.tokens.get(self.pos + 1),
+            self.tokens.get(self.pos + 2),
+        ) {
+            (Some(Token::Word(w)), Some(Token::Op(a)), Some(Token::Op(b)))
+                if a == "(" && b == ")" =>
+            {
+                w.literal().filter(|n| name(n)).map(str::to_owned)
+            }
+            _ => None,
+        };
+        if let Some(n) = function {
+            if reserved_function_name(&n) {
+                return Err("Unsupported function name: builtin and keyword replacement is outside this subset".into());
+            }
+            self.pos += 3;
+            while self.eat("\n") {}
+            self.expect("{")?;
+            let def = self.code.len();
+            self.code.push(Code::Define(n.clone(), def + 1, 0));
+            self.body(&["}"])?;
+            self.expect("}")?;
+            self.code.push(Code::FunctionEnd);
+            let end = self.code.len();
+            self.code[def] = Code::Define(n, def + 1, end);
+            return Ok(());
+        }
+        if self.is("(") || self.is("{") || self.is(")") || self.is("}") {
+            return Err("Unsupported group/subshell syntax; only name() { commands; } function definitions are supported".into());
+        }
         if self.eat("if") {
             let start = self.code.len();
             self.list(&["then"])?;
@@ -617,6 +736,12 @@ enum Dest {
     Err,
     File(String),
 }
+struct CallFrame {
+    pc: usize,
+    args: Vec<String>,
+    loops: usize,
+    whiles: usize,
+}
 pub struct Vm {
     code: Vec<Code>,
     pc: usize,
@@ -627,6 +752,8 @@ pub struct Vm {
     input_pos: usize,
     loops: Vec<(String, Vec<String>, usize)>,
     while_status: Vec<i32>,
+    functions: BTreeMap<String, usize>,
+    calls: Vec<CallFrame>,
     pub outcome: Outcome,
     done: bool,
 }
@@ -645,6 +772,8 @@ impl Vm {
             input_pos: 0,
             loops: Vec::new(),
             while_status: Vec::new(),
+            functions: BTreeMap::new(),
+            calls: Vec::new(),
             outcome: Outcome {
                 stdout: String::new(),
                 stderr: String::new(),
@@ -809,7 +938,20 @@ impl Vm {
                         self.outcome.status =
                             self.while_status.pop().ok_or("Invalid while state")?
                     }
-                    Code::Pipe(cmds) => self.pipeline(&cmds)?,
+                    Code::Define(n, start, end) => {
+                        if self.functions.len() >= 64 && !self.functions.contains_key(&n) {
+                            return Err("Function definition limit exceeded (64)".into());
+                        }
+                        self.functions.insert(n, start);
+                        self.pc = end;
+                        self.outcome.status = 0;
+                    }
+                    Code::FunctionEnd => self.leave_function()?,
+                    Code::Pipe(cmds) => {
+                        if cmds.len() != 1 || !self.enter_function(&cmds[0])? {
+                            self.pipeline(&cmds)?;
+                        }
+                    }
                     Code::Jump(t) => self.pc = t,
                     Code::JumpIf(success, t) => {
                         if (self.outcome.status == 0) == success {
@@ -846,11 +988,65 @@ impl Vm {
             }
         }
     }
+    fn leave_function(&mut self) -> Result<(), String> {
+        let frame = self
+            .calls
+            .pop()
+            .ok_or("Unsupported return outside a function")?;
+        self.pc = frame.pc;
+        self.args = frame.args;
+        self.loops.truncate(frame.loops);
+        self.while_status.truncate(frame.whiles);
+        Ok(())
+    }
+    fn enter_function(&mut self, cmd: &Command) -> Result<bool, String> {
+        if self.functions.is_empty()
+            || cmd
+                .words
+                .first()
+                .and_then(Word::literal)
+                .is_some_and(|s| s.split_once('=').is_some_and(|(n, _)| name(n)))
+        {
+            return Ok(false);
+        }
+        let args = self.words(&cmd.words)?;
+        let Some(start) = args.first().and_then(|n| self.functions.get(n)).copied() else {
+            return Ok(false);
+        };
+        if !cmd.redirects.is_empty() {
+            return Err("Unsupported redirection on a function call; redirect individual commands inside its body".into());
+        }
+        if self.calls.len() >= 32 {
+            return Err("Function call depth limit exceeded (32)".into());
+        }
+        let old_args = std::mem::replace(&mut self.args, args[1..].to_vec());
+        self.calls.push(CallFrame {
+            pc: self.pc,
+            args: old_args,
+            loops: self.loops.len(),
+            whiles: self.while_status.len(),
+        });
+        self.pc = start;
+        Ok(true)
+    }
     fn limits(&self) -> Result<(), String> {
         if self.env.len() > 256
             || self.outcome.files.len() > 64
             || self.env.values().map(String::len).sum::<usize>()
                 + self.outcome.files.values().map(String::len).sum::<usize>()
+                + self.args.iter().map(String::len).sum::<usize>()
+                + self
+                    .calls
+                    .iter()
+                    .flat_map(|f| &f.args)
+                    .map(String::len)
+                    .sum::<usize>()
+                + self
+                    .loops
+                    .iter()
+                    .flat_map(|(_, values, _)| values)
+                    .map(String::len)
+                    .sum::<usize>()
                 > MAX_TEXT
         {
             return Err("Virtual memory/file limit exceeded".into());
@@ -894,7 +1090,19 @@ impl Vm {
         self.limits()
     }
     fn pipeline(&mut self, cmds: &[Command]) -> Result<(), String> {
+        if cmds.len() > 1 {
+            for cmd in cmds {
+                let args = self.words(&cmd.words)?;
+                if args
+                    .first()
+                    .is_some_and(|s| self.functions.contains_key(s) || s == "return")
+                {
+                    return Err("Unsupported function call or return in a pipeline; call functions as separate commands".into());
+                }
+            }
+        }
         let saved_env = self.env.clone();
+        let saved_args = self.args.clone();
         let saved_status = self.outcome.status;
         let saved_input = self.input.clone();
         let saved_pos = self.input_pos;
@@ -903,6 +1111,7 @@ impl Vm {
             if cmds.len() > 1 {
                 self.outcome.status = saved_status;
                 self.env = saved_env.clone();
+                self.args = saved_args.clone();
                 self.input = if i == 0 {
                     saved_input[saved_pos..].to_string()
                 } else {
@@ -921,6 +1130,7 @@ impl Vm {
         }
         if cmds.len() > 1 {
             self.env = saved_env;
+            self.args = saved_args;
             self.input = saved_input;
             self.input_pos = saved_pos;
         }
@@ -1149,6 +1359,34 @@ impl Vm {
                     _ => return usage(),
                 };
                 Ok((empty.clone(), empty, i32::from(!value)))
+            }
+            "shift" if args.len() <= 1 => {
+                let count = if args.is_empty() {
+                    1
+                } else {
+                    args[0]
+                        .parse::<usize>()
+                        .map_err(|_| "Unsupported shift count; use a nonnegative decimal integer")?
+                };
+                let status = if count > self.args.len() {
+                    1
+                } else {
+                    self.args.drain(..count);
+                    0
+                };
+                Ok((empty.clone(), empty, status))
+            }
+            "return" if args.len() <= 1 => {
+                let status = if args.is_empty() {
+                    self.outcome.status
+                } else {
+                    args[0]
+                        .parse::<u8>()
+                        .map_err(|_| "Unsupported return status; use 0…255")?
+                        as i32
+                };
+                self.leave_function()?;
+                Ok((empty.clone(), empty, status))
             }
             "exit" if args.len() <= 1 => {
                 let status = if args.is_empty() {

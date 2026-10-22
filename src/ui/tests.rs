@@ -1327,3 +1327,40 @@ fn unit_filter_controls_wrap_at_narrow_widths_and_large_text() {
         }
     }
 }
+#[test]
+fn function_scripts_run_cooperatively_in_the_existing_workspace_and_preserve_drafts() {
+    let (ctx, mut a) = app();
+    a.launch(9);
+    a.set_script_view(9, teaching::View::Assignment);
+    let source = "handover() { printf 'Site: %s\\nTask: %s\\n' \"$1\" \"$2\"; }\nhandover \"$SITE\" \"$TASK\"";
+    if let State::Script { source: draft, run } =
+        &mut a.progress.attempts.get_mut("shell-handover").unwrap().state
+    {
+        *draft = source.into();
+        *run = None;
+    }
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    for _ in 0..12 {
+        draw(&ctx, &mut a);
+    }
+    assert!(a.metrics.completion);
+    if let State::Script { source, run } =
+        &mut a.progress.attempts.get_mut("shell-handover").unwrap().state
+    {
+        *source = "spin() { while true; do :; done; }\nspin".into();
+        *run = None;
+    }
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    check(&ctx, &mut a);
+    assert!(a.script_job.is_some());
+    let stop = a.metrics.stop.unwrap();
+    click(&ctx, &mut a, stop);
+    assert!(a.script_job.is_none());
+    let draft = a.progress.attempts["shell-handover"].state.clone();
+    a.launch(10);
+    a.launch(9);
+    assert_eq!(a.progress.attempts["shell-handover"].state, draft);
+    assert!(!a.metrics.completion);
+}
