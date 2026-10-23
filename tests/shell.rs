@@ -166,7 +166,7 @@ fn unsupported_and_isolation() {
         "echo `id`",
         "echo ~",
         "echo /etc/*",
-        "x=(a b)",
+        "x=([2]=b)",
         "eval echo hi",
         "echo yes &",
         "cat <<EOF",

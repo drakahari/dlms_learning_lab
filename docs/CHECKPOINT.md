@@ -1,6 +1,6 @@
 # Implementation continuation checkpoint
 
-2026-10-23, after M42 startup investigation and M40 installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
+2026-10-23, after M43 typed-array capability, M42 startup investigation and M40 installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
 
 ## Delivered and pushed
 
@@ -20,7 +20,7 @@ M42 investigated the historical Wayland stall without a speculative fix:105 scop
 
 ## Next independent implementation
 
-Proceed with the bounded Bash indexed-array capability contract in SHELL_ARRAYS.md: typed values/shared mutation and restoration, separate compound-assignment parse node, quote-preserving expansion, reserved-base guards and resource limits. Do not author array lessons until implementation/oracle/negative/migration tests pass. No new dependency is presently needed. Then author a reviewed practical array unit with separate examples and meaningful assignments; other planned shell expansion/status/debugging/safe-automation gaps remain Open. Preserve evaluator5 historical outcomes through explicit revision migration if advancing semantics.
+M43 implemented the bounded indexed-array contract in SHELL_ARRAYS.md with evaluator6,371 Rust tests/624 controlled Bash comparisons/Clippy/24 Python tooling checks and independent read-only review. Earlier evaluator results remain separate credit/history with exact before-shell-v6 backup. No new dependency or runtime host execution. Catalog and coverage unchanged. Next author a reviewed practical array unit with separate runnable examples and meaningful assignments, multi-case alternatives/wrong/partial/hardcoded/invalidation/reset/resume tests and actual native editor flows. Other planned shell expansion/status/debugging/safe-automation gaps remain Open.
 
 Continue CCNA/LPIC-1/LPIC-2 capability/content batches against CURRICULUM.csv and SKILL_COVERAGE.csv; the new DNS unit only strengthens narrow forward-record/reload slices.1240 overlapping references currently97Partial/1143Open, not a completion percentage. Most networking control protocols, Linux boot/kernel/storage/service families and advanced shell capabilities/content remain absent. Never mark the completion checklist satisfied merely from lab/test counts. Native accessibility/live feedback and actual reader/physical-device/novice work remain unverified.
 

@@ -2,14 +2,16 @@
 mod arithmetic;
 mod globbing;
 mod text_tools;
+mod values;
 use serde::{Deserialize, Serialize};
 use std::{
     borrow::Cow,
     cell::Cell,
     collections::{BTreeMap, BTreeSet},
 };
+use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
-pub const EVALUATOR_REVISION: u32 = 5;
+pub const EVALUATOR_REVISION: u32 = 6;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -468,13 +470,20 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
                 && parts.is_empty()
                 && cs.get(i + 1) == Some(&'>'))
         {
+            let adjacent_array = c == '(' && (!bare.is_empty() || !parts.is_empty());
             word(&mut tokens, &mut parts, &mut bare);
+            let array_opener = adjacent_array
+                && matches!(tokens.last(), Some(Token::Word(w)) if w.literal().is_some_and(|s| s.ends_with('=')));
             if c == '\n' {
                 tokens.push(Token::Op("\n".into()));
                 i += 1;
                 continue;
             }
-            let mut op = c.to_string();
+            let mut op = if array_opener {
+                "=(".to_string()
+            } else {
+                c.to_string()
+            };
             i += 1;
             if c == '1' || c == '2' {
                 op.push('>');
@@ -498,8 +507,8 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
                 }
             }
             if ![
-                "(", ")", ";", "|", "&&", "||", "<", ">", ">>", "1>", "1>>", "2>", "2>>", ">&2",
-                "1>&2", "2>&1",
+                "=(", "(", ")", ";", "|", "&&", "||", "<", ">", ">>", "1>", "1>>", "2>", "2>>",
+                ">&2", "1>&2", "2>&1",
             ]
             .contains(&op.as_str())
             {
@@ -524,7 +533,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
         if let Token::Word(w) = token {
             for p in &w.0 {
                 if p.quote == Quote::Bare
-                    && p.text.contains(['[', ']'])
+                    && values::bracket_glob(&p.text)?
                     && p.text != "["
                     && p.text != "]"
                 {
@@ -543,6 +552,7 @@ struct Command {
 #[derive(Clone, Debug)]
 enum Code {
     Pipe(Vec<Command>),
+    ArrayAssign(String, Vec<Word>),
     Jump(usize),
     JumpIf(bool, usize),
     For(String, Vec<Word>, usize),
@@ -628,6 +638,40 @@ impl Parser {
         Ok(())
     }
     fn compound(&mut self) -> Result<(), String> {
+        if let (Some(Token::Word(word)), Some(Token::Op(op))) =
+            (self.tokens.get(self.pos), self.tokens.get(self.pos + 1))
+            && op == "=("
+            && let Some(text) = word.literal()
+            && text.ends_with('=')
+        {
+            let key = text.strip_suffix('=').unwrap();
+            if !name(key) {
+                return Err("Unsupported array assignment; use a standalone name=(words) without += or indices".into());
+            }
+            variable_target(key)?;
+            let key = key.to_string();
+            self.pos += 2;
+            let mut words = Vec::new();
+            loop {
+                match self.tokens.get(self.pos) {
+                    Some(Token::Word(word)) => {words.push(word.clone());self.pos+=1;}
+                    Some(Token::Op(op)) if op == "\n" => self.pos+=1,
+                    Some(Token::Op(op)) if op == ")" => {self.pos+=1;break;}
+                    None => return Err("Close the compound array assignment with )".into()),
+                    _ => return Err("Unsupported array element syntax: use ordinary words, quotes and supported expansions, without indexed writes or nested commands".into()),
+                }
+                if words.len() > 128 {
+                    return Err("Array assignment exceeds128 source elements".into());
+                }
+            }
+            if matches!(self.tokens.get(self.pos), Some(Token::Word(_)))
+                || matches!(self.tokens.get(self.pos),Some(Token::Op(op)) if op == "|" || op.contains('>') || op == "<")
+            {
+                return Err("Unsupported compound array assignment with a command, pipeline or redirection; put it on its own line".into());
+            }
+            self.code.push(Code::ArrayAssign(key, words));
+            return Ok(());
+        }
         let function = match (
             self.tokens.get(self.pos),
             self.tokens.get(self.pos + 1),
@@ -871,6 +915,9 @@ fn expansion_fields_size(fields: &[String]) -> Result<usize, String> {
         .iter()
         .try_fold(0, |n, s| bounded_expansion_bytes(n, s.len()))
 }
+fn strings_bytes(values: &[String]) -> usize {
+    values.iter().map(String::len).sum::<usize>() + std::mem::size_of_val(values)
+}
 type LocalDeclaration = (String, Option<String>);
 struct InputFrame {
     input: String,
@@ -883,14 +930,14 @@ struct CallFrame {
     loops: usize,
     whiles: usize,
     inputs: usize,
-    locals: BTreeMap<String, Option<String>>,
+    locals: BTreeMap<String, Option<Value>>,
 }
 pub struct Vm {
     code: Vec<Code>,
     pc: usize,
     steps: usize,
     expansion_work: Cell<usize>,
-    env: BTreeMap<String, String>,
+    env: BTreeMap<String, Value>,
     args: Vec<String>,
     input: String,
     input_pos: usize,
@@ -901,6 +948,7 @@ pub struct Vm {
     calls: Vec<CallFrame>,
     pub outcome: Outcome,
     done: bool,
+    pipeline_bytes: usize,
 }
 impl Vm {
     pub fn new(source: &str, case: &Case) -> Result<Self, String> {
@@ -912,7 +960,11 @@ impl Vm {
             pc: 0,
             steps: 0,
             expansion_work: Cell::new(0),
-            env: case.env.clone(),
+            env: case
+                .env
+                .iter()
+                .map(|(k, v)| (k.clone(), Value::Scalar(v.clone())))
+                .collect(),
             args: case.args.clone(),
             input: case.stdin.clone(),
             input_pos: 0,
@@ -929,6 +981,7 @@ impl Vm {
                 error: None,
             },
             done: false,
+            pipeline_bytes: 0,
         })
     }
     pub fn done(&self) -> bool {
@@ -957,6 +1010,16 @@ impl Vm {
         Ok(())
     }
     fn variable(&self, key: &str) -> Result<String, String> {
+        if let Some(parameter) = values::array_ref(key)? {
+            let value: Cow<'_, str> = match parameter {
+                ArrayRef::Element(base,index) => Cow::Borrowed(self.env.get(base).and_then(|v|v.elements().get(index as usize)).map_or("",String::as_str)),
+                ArrayRef::Count(base) => Cow::Owned(self.env.get(base).map_or(0,|v|v.elements().len()).to_string()),
+                ArrayRef::All(_) => return Err("Unsupported mixed or unquoted array expansion; use sole quoted \"${name[@]}\" as one complete word".into()),
+            };
+            bounded_expansion_bytes(0, value.len())?;
+            self.charge_expansion(value.len())?;
+            return Ok(value.into_owned());
+        }
         if unmodeled_variable(key) {
             return Err(format!("Unsupported special variable: {key}"));
         }
@@ -972,7 +1035,7 @@ impl Vm {
                     .get(key.parse::<usize>().unwrap() - 1)
                     .map_or("", String::as_str),
             ),
-            key if name(key) => Cow::Borrowed(self.env.get(key).map_or("", String::as_str)),
+            key if name(key) => Cow::Borrowed(self.env.get(key).map_or("", Value::scalar)),
             _ => return Err("Unsupported parameter expansion".into()),
         };
         bounded_expansion_bytes(0, value.len())?;
@@ -1034,6 +1097,21 @@ impl Vm {
         Ok(result)
     }
     fn expand(&self, w: &Word, split: bool) -> Result<Vec<String>, String> {
+        if w.0.len() == 1
+            && w.0[0].quote == Quote::Double
+            && let Some(key) = w.0[0]
+                .text
+                .strip_prefix("${")
+                .and_then(|s| s.strip_suffix('}'))
+            && !key.contains(['{', '}'])
+            && let Some(ArrayRef::All(base)) = values::array_ref(key)?
+        {
+            let elements = self.env.get(base).map_or(&[][..], Value::elements);
+            let bytes = expansion_fields_size(elements)?;
+            bounded_expansion_bytes(bytes, std::mem::size_of_val(elements))?;
+            self.charge_expansion(bytes + std::mem::size_of_val(elements))?;
+            return Ok(elements.to_vec());
+        }
         if w.0.len() == 1 && w.0[0].quote == Quote::Double && w.0[0].text == "$@" {
             let bytes = expansion_fields_size(&self.args)?;
             self.charge_expansion(bytes)?;
@@ -1115,14 +1193,13 @@ impl Vm {
                 push(Cow::Owned(field))?;
                 continue;
             };
-            let locale = self.env.get("LC_ALL").filter(|s| !s.is_empty());
+            let locale = self.scalar("LC_ALL").filter(|s| !s.is_empty());
             let non_c = if let Some(value) = locale {
-                !matches!(value.as_str(), "C" | "POSIX")
+                !matches!(value, "C" | "POSIX")
             } else {
                 ["LC_COLLATE", "LC_CTYPE", "LANG"].iter().any(|key| {
-                    self.env
-                        .get(*key)
-                        .is_some_and(|v| !v.is_empty() && !matches!(v.as_str(), "C" | "POSIX"))
+                    self.scalar(key)
+                        .is_some_and(|v| !v.is_empty() && !matches!(v, "C" | "POSIX"))
                 })
             };
             if non_c {
@@ -1179,6 +1256,12 @@ impl Vm {
             self.pc += 1;
             let r = (|| -> Result<(), String> {
                 match code {
+                    Code::ArrayAssign(key, words) => {
+                        // Expand all words using the prior binding before publishing a new list.
+                        let elements = self.words(&words)?;
+                        self.store_value(key, Value::Indexed(elements))?;
+                        self.outcome.status = 0;
+                    }
                     Code::Status(s) => self.outcome.status = s,
                     Code::WhileStart(word, end) => {
                         if let Some(word) = word {
@@ -1245,16 +1328,25 @@ impl Vm {
                             self.pc = end;
                             self.outcome.status = 0;
                         } else {
-                            self.env.insert(n.clone(), values[0].clone());
+                            self.charge_expansion(values[0].len())?;
+                            self.assign_scalar(n.clone(), values[0].clone())?;
+                            self.reserve_memory(n.len() + strings_bytes(&values))?;
                             self.loops.push((n, values, 1));
                         }
                     }
                     Code::Next(start) => {
+                        let copy_bytes = self
+                            .loops
+                            .last()
+                            .and_then(|(_, values, index)| values.get(*index))
+                            .map_or(0, String::len);
+                        self.charge_expansion(copy_bytes)?;
                         let (n, values, index) =
                             self.loops.last_mut().ok_or("Invalid loop state")?;
                         if *index < values.len() {
-                            self.env.insert(n.clone(), values[*index].clone());
+                            let (key, value) = (n.clone(), values[*index].clone());
                             *index += 1;
+                            self.assign_scalar(key, value)?;
                             self.pc = start;
                         } else {
                             self.loops.pop();
@@ -1303,14 +1395,16 @@ impl Vm {
         else {
             return Ok(false);
         };
-        let args = self.words(&cmd.words)?;
+        let mut args = self.words(&cmd.words)?;
         if !cmd.redirects.is_empty() {
             return Err("Unsupported redirection on a function call; redirect individual commands inside its body".into());
         }
         if self.calls.len() >= 32 {
             return Err("Function call depth limit exceeded (32)".into());
         }
-        let old_args = std::mem::replace(&mut self.args, args[1..].to_vec());
+        self.reserve_memory(strings_bytes(&args[1..]))?;
+        args.remove(0);
+        let old_args = std::mem::replace(&mut self.args, args);
         self.calls.push(CallFrame {
             pc: self.pc,
             args: old_args,
@@ -1335,53 +1429,118 @@ impl Vm {
             Ok(())
         }
     }
+    fn scalar(&self, key: &str) -> Option<&str> {
+        self.env.get(key).map(Value::scalar)
+    }
+    fn reserve_memory(&self, additional: usize) -> Result<(), String> {
+        if self
+            .memory_bytes()
+            .checked_add(additional)
+            .is_none_or(|n| n > MAX_TEXT)
+        {
+            Err("Virtual memory/file limit exceeded".into())
+        } else {
+            Ok(())
+        }
+    }
+    fn memory_bytes(&self) -> usize {
+        self.env
+            .iter()
+            .map(|(n, v)| n.len() + v.bytes())
+            .sum::<usize>()
+            + self
+                .outcome
+                .files
+                .iter()
+                .map(|(n, v)| n.len() + v.len())
+                .sum::<usize>()
+            + self.input.len()
+            + self
+                .inputs
+                .iter()
+                .map(|f| f.input.len() + f.file.len())
+                .sum::<usize>()
+            + self
+                .calls
+                .iter()
+                .flat_map(|f| &f.locals)
+                .map(|(n, v)| n.len() + v.as_ref().map_or(0, Value::bytes))
+                .sum::<usize>()
+            + strings_bytes(&self.args)
+            + self
+                .calls
+                .iter()
+                .map(|f| strings_bytes(&f.args))
+                .sum::<usize>()
+            + self
+                .loops
+                .iter()
+                .map(|(n, v, _)| n.len() + strings_bytes(v))
+                .sum::<usize>()
+            + self.pipeline_bytes
+    }
+    fn preflight_value(&self, key: &str, bytes: usize) -> Result<(), String> {
+        variable_target(key)?;
+        if !name(key) {
+            return Err("Unsupported variable name".into());
+        }
+        let old = self.env.get(key).map_or(0, Value::bytes);
+        let additional_name = if self.env.contains_key(key) {
+            0
+        } else {
+            key.len()
+        };
+        let next = self
+            .memory_bytes()
+            .checked_sub(old)
+            .and_then(|n| n.checked_add(bytes))
+            .and_then(|n| n.checked_add(additional_name));
+        if next.is_none_or(|n| n > MAX_TEXT) {
+            return Err("Virtual memory/file limit exceeded".into());
+        }
+        let visible: BTreeSet<_> = self
+            .env
+            .keys()
+            .chain(self.calls.iter().flat_map(|f| f.locals.keys()))
+            .map(String::as_str)
+            .collect();
+        if !visible.contains(key) && visible.len() >= 256 {
+            return Err("Variable limit exceeded (256 names)".into());
+        }
+        Ok(())
+    }
+    fn store_value(&mut self, key: String, value: Value) -> Result<(), String> {
+        if value.elements().len() > 128 {
+            return Err("Array element limit exceeded (128)".into());
+        }
+        self.preflight_value(&key, value.bytes())?;
+        self.env.insert(key, value);
+        Ok(())
+    }
+    fn assign_scalar(&mut self, key: String, value: String) -> Result<(), String> {
+        let bytes = match self.env.get(&key) {
+            Some(Value::Indexed(elements)) => {
+                elements.iter().skip(1).map(String::len).sum::<usize>()
+                    + elements.len().max(1) * std::mem::size_of::<String>()
+                    + value.len()
+            }
+            _ => value.len(),
+        };
+        self.preflight_value(&key, bytes)?;
+        if let Some(previous) = self.env.get_mut(&key) {
+            previous.assign_scalar(value);
+        } else {
+            self.env.insert(key, Value::Scalar(value));
+        }
+        Ok(())
+    }
     fn limits(&self) -> Result<(), String> {
         let visible: BTreeSet<_> = self
             .env
             .keys()
             .chain(self.calls.iter().flat_map(|f| f.locals.keys()))
             .collect();
-        if visible.len() > 256
-            || self.outcome.files.len() > 64
-            || self
-                .env
-                .iter()
-                .map(|(name, value)| name.len() + value.len())
-                .sum::<usize>()
-                + self
-                    .outcome
-                    .files
-                    .iter()
-                    .map(|(name, value)| name.len() + value.len())
-                    .sum::<usize>()
-                + self.input.len()
-                + self
-                    .inputs
-                    .iter()
-                    .map(|f| f.input.len() + f.file.len())
-                    .sum::<usize>()
-                + self
-                    .calls
-                    .iter()
-                    .flat_map(|f| &f.locals)
-                    .map(|(name, value)| name.len() + value.as_ref().map_or(0, String::len))
-                    .sum::<usize>()
-                + self.args.iter().map(String::len).sum::<usize>()
-                + self
-                    .calls
-                    .iter()
-                    .flat_map(|f| &f.args)
-                    .map(String::len)
-                    .sum::<usize>()
-                + self
-                    .loops
-                    .iter()
-                    .map(|(name, values, _)| {
-                        name.len() + values.iter().map(String::len).sum::<usize>()
-                    })
-                    .sum::<usize>()
-                > MAX_TEXT
-        {
+        if visible.len() > 256 || self.outcome.files.len() > 64 || self.memory_bytes() > MAX_TEXT {
             return Err("Virtual memory/file limit exceeded".into());
         }
         if self.outcome.stdout.len() + self.outcome.stderr.len() > MAX_OUTPUT {
@@ -1404,10 +1563,10 @@ impl Vm {
                 return Err("Output limit reached (32 KiB)".into());
             }
             Dest::File(_)
-                if self.env.values().map(String::len).sum::<usize>()
-                    + self.outcome.files.values().map(String::len).sum::<usize>()
-                    + text.len()
-                    > MAX_TEXT =>
+                if self
+                    .memory_bytes()
+                    .checked_add(text.len())
+                    .is_none_or(|n| n > MAX_TEXT) =>
             {
                 return Err("Virtual memory/file limit exceeded".into());
             }
@@ -1437,6 +1596,27 @@ impl Vm {
         Ok(None)
     }
     fn pipeline(&mut self, cmds: &[Command]) -> Result<(), String> {
+        if cmds.len() == 1 {
+            let output = self.command(&cmds[0])?;
+            return self.emit(&Dest::Out, &output);
+        }
+        let snapshot_bytes = self
+            .env
+            .iter()
+            .map(|(n, v)| n.len() + v.bytes())
+            .sum::<usize>()
+            + self.args.iter().map(String::len).sum::<usize>()
+            + self.args.len() * std::mem::size_of::<String>()
+            + self.input.len();
+        if self
+            .memory_bytes()
+            .checked_add(snapshot_bytes)
+            .is_none_or(|n| n > MAX_TEXT)
+        {
+            return Err(
+                "Virtual memory/file limit exceeded while retaining pipeline variables".into(),
+            );
+        }
         if cmds.len() > 1 {
             for cmd in cmds {
                 if self.command_head(cmd)?.as_ref().is_some_and(|s| {
@@ -1446,6 +1626,8 @@ impl Vm {
                 }
             }
         }
+        self.charge_expansion(snapshot_bytes)?;
+        self.pipeline_bytes += snapshot_bytes;
         let saved_env = self.env.clone();
         let saved_args = self.args.clone();
         let saved_status = self.outcome.status;
@@ -1455,6 +1637,7 @@ impl Vm {
         let mut pipe = String::new();
         for (i, cmd) in cmds.iter().enumerate() {
             if cmds.len() > 1 {
+                self.charge_expansion(snapshot_bytes + if i == 0 { 0 } else { pipe.len() })?;
                 self.outcome.status = saved_status;
                 self.env = saved_env.clone();
                 self.args = saved_args.clone();
@@ -1483,6 +1666,7 @@ impl Vm {
             self.input = saved_input;
             self.input_pos = saved_pos + consumed;
         }
+        self.pipeline_bytes -= snapshot_bytes;
         Ok(())
     }
     fn local_declarations(&self, cmd: &Command) -> Result<Option<Vec<LocalDeclaration>>, String> {
@@ -1541,10 +1725,15 @@ impl Vm {
         for (key, new_value) in declarations {
             let locals = &mut self.calls.last_mut().unwrap().locals;
             if !locals.contains_key(&key) {
-                locals.insert(key.clone(), self.env.remove(&key));
+                let previous = self.env.remove(&key);
+                let array = matches!(&previous, Some(Value::Indexed(_)));
+                locals.insert(key.clone(), previous);
+                if array {
+                    self.env.insert(key.clone(), Value::Indexed(Vec::new()));
+                }
             }
             if let Some(value) = new_value {
-                self.env.insert(key, value);
+                self.assign_scalar(key, value)?;
             }
             self.limits()?;
         }
@@ -1570,7 +1759,7 @@ impl Vm {
                 variable_target(&n)?;
                 w.0[0].text = rest.to_string();
                 let value = self.expand(&w, false)?.join("");
-                self.env.insert(n, value);
+                self.assign_scalar(n, value)?;
                 self.limits()?;
             }
         }
@@ -1742,12 +1931,12 @@ impl Vm {
                 let invocation = text_tools::parse(cmd, args)?;
                 // These utilities model only the C locale. LC_ALL overrides the
                 // individual category variables and LANG, as in real tools.
-                let locale = self.env.get("LC_ALL").filter(|s| !s.is_empty());
+                let locale = self.scalar("LC_ALL").filter(|s| !s.is_empty());
                 let unsupported_locale = if let Some(value) = locale {
                     value != "C" && value != "POSIX"
                 } else {
                     ["LC_COLLATE", "LC_CTYPE", "LANG"].iter().any(|name| {
-                        self.env.get(*name).is_some_and(|v| !v.is_empty() && v != "C" && v != "POSIX")
+                        self.scalar(name).is_some_and(|v| !v.is_empty() && v != "C" && v != "POSIX")
                     })
                 };
                 if unsupported_locale {
@@ -1780,8 +1969,7 @@ impl Vm {
                 } else {
                     (rest, 1, rest.len())
                 };
-                self.env
-                    .insert(args[1].clone(), line.trim_matches([' ', '\t']).into());
+                self.assign_scalar(args[1].clone(), line.trim_matches([' ', '\t']).into())?;
                 self.input_pos += used;
                 Ok((empty.clone(), empty, status))
             }

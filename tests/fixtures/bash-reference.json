@@ -11885,5 +11885,511 @@
         "/work/practice.txt": "Notes\nblue.note\nred.note\n"
       }
     }
+  },
+  {
+    "name": "array empty and scalar",
+    "source": "printf '%s\\n' \"${#missing[@]}\"; a=(); b=(''); c=''; printf '%s:%s:%s\\n' \"${#a[@]}\" \"${#b[@]}\" \"${#c[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array indexed reads",
+    "source": "a=('two words' '' '*'); printf '<%s>\\n' \"${a[0]}\" \"${a[1]}\" \"${a[2]}\" \"${a[128]}\" \"${a[4294967295]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array whole quoted",
+    "source": "a=('two words' '' '*'); printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array prior binding",
+    "source": "a=(before tail); a=(\"${a[1]}\" \"${a[0]}\" \"${a[@]}\"); printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array glob assignment",
+    "source": "pattern='*.log'; a=($pattern '*.log' \"*.log\"); printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array argument capture",
+    "source": "a=(\"$@\"); printf '%s\\n' \"${#a[@]}\"; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array scalar write",
+    "source": "a=(first tail); a=replaced; printf '<%s>\\n' \"${a[@]}\"; a=(); a=new; printf '%s:%s\\n' \"${#a[@]}\" \"$a\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array read target",
+    "source": "a=(first tail); read -r a; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array loop target",
+    "source": "a=(first tail); for a in one two; do :; done; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array local type",
+    "source": "a=(outer tail); f() { local a; printf '%s\\n' \"${#a[@]}\"; a=(inside second); local a; printf '<%s>\\n' \"${a[@]}\"; }; f; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array local initialized",
+    "source": "a=(outer tail); f() { local a=inside; printf '%s:%s\\n' \"${#a[@]}\" \"$a\"; }; f; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array dynamic local",
+    "source": "a=(outer tail); child() { a=child; }; f() { local a; a=(local second); child; printf '<%s>\\n' \"${a[@]}\"; }; f; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array local shadow nested",
+    "source": "a=(outer tail); child() { local a; a=(child); }; f() { local a; a=(parent second); child; printf '<%s>\\n' \"${a[@]}\"; }; f; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array pipeline restoration",
+    "source": "a=(outer tail); a=child | sort; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array loop quoted",
+    "source": "a=('two words' '' '*'); for item in \"${a[@]}\"; do printf '<%s>\\n' \"$item\"; done",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array function forwarding",
+    "source": "a=(\"$@\"); f() { printf '%s\\n' \"$#\"; printf '<%s>\\n' \"$@\"; }; f \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array empty forwarding",
+    "source": "a=(); f() { printf '%s\\n' \"$#\"; }; f \"${a[@]}\"; f \"${missing[@]}\"; scalar=''; f \"${scalar[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array arithmetic first",
+    "source": "a=(4 ignored); printf '%s\\n' \"$((a + 2))\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array count bare",
+    "source": "a=(first second); printf '%s\\n' ${#a[@]}",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array replacement empty",
+    "source": "a=(first second); a=(); printf '%s:<%s>\\n' \"${#a[@]}\" \"$a\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array scalar constant read",
+    "source": "a=scalar; printf '<%s>\\n' \"${a[0]}\" \"${a[1]}\"; printf '<%s>\\n' \"${a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array locale first",
+    "source": "LC_ALL=(C ignored); printf '%s\\n' *.log",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array composed scalar reads",
+    "source": "a=(one two); x=prefix; printf '%s\\n' \"${a[0]}-${a[1]}\" \"${x}${a[0]}\" \"${#a[@]}:${#a[@]}\"",
+    "case": {
+      "name": "array reference",
+      "args": [
+        "two words",
+        "",
+        "*.log"
+      ],
+      "stdin": "from input\n",
+      "env": {},
+      "files": {
+        "/work/a.log": "a\n",
+        "/work/two words.log": "b\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
   }
 ]

@@ -26,7 +26,7 @@ for fixture in fixtures:
             destination.parent.mkdir(parents=True, exist_ok=True)
             destination.write_bytes(text.encode())
         result = subprocess.run([BASH, '--noprofile', '--norc', '-c', fixture['source'], 'fixture', *case['args']],
-                                cwd=work, env={'PATH': '/usr/bin:/bin', 'HOME': temporary, 'LC_ALL': 'C', **case['env']},
+                                cwd=work, env={'PATH': '/usr/bin:/bin', 'LC_ALL': 'C', **case['env']},
                                 input=case['stdin'].encode(), capture_output=True, timeout=2)
         after = {'/work/' + str(p.relative_to(work)): p.read_bytes().decode() for p in work.rglob('*') if p.is_file()}
         actual = json.loads(subprocess.run([str(PROBE)],input=json.dumps({'source': fixture['source'], 'case': case}),capture_output=True,text=True,check=True,timeout=2).stdout)
