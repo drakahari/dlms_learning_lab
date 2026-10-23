@@ -67,3 +67,5 @@ pub mod storage_workspace;
 pub mod storage_teaching;
 
 pub mod acl;
+
+pub mod acl_routing;

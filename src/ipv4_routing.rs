@@ -8,6 +8,7 @@ use std::{
     fmt,
     marker::PhantomData,
     net::Ipv4Addr,
+    ops::ControlFlow,
 };
 fn name(s: &str) -> bool {
     s.as_bytes().first().is_some_and(u8::is_ascii_alphanumeric)
@@ -259,6 +260,21 @@ pub struct Probe {
     pub forward: Trace,
     pub reply: Trace,
 }
+/// Internal transit hooks share the existing forwarding loop; no learner callbacks.
+pub(crate) enum Boundary<'a> {
+    Inbound {
+        device: &'a str,
+        interface: &'a str,
+    },
+    Outbound {
+        device: &'a str,
+        selected: &'a Selected,
+    },
+}
+pub(crate) enum ForwardResult<T> {
+    Delivered(Trace),
+    Interrupted(T),
+}
 impl Topology {
     pub fn decode(text: &str) -> Result<Self, String> {
         if text.len() > 1_000_000 {
@@ -407,18 +423,37 @@ impl Topology {
         Ok(false)
     }
     fn path(&self, start: &str, destination: Ipv4Addr) -> Result<Trace, String> {
+        match self.path_controlled(start, destination, |_| Ok(ControlFlow::<()>::Continue(())))? {
+            ForwardResult::Delivered(trace) => Ok(trace),
+            ForwardResult::Interrupted(()) => unreachable!("The original path never interrupts"),
+        }
+    }
+    pub(crate) fn path_controlled<T>(
+        &self,
+        start: &str,
+        destination: Ipv4Addr,
+        mut boundary: impl FnMut(Boundary<'_>) -> Result<ControlFlow<T>, String>,
+    ) -> Result<ForwardResult<T>, String> {
         let mut current = start.to_string();
-        let mut hops = Vec::new();
+        let mut hops: Vec<Hop> = Vec::new();
         let mut visited = BTreeSet::new();
         for _ in 0..16 {
             if self.local(&current, destination)? {
-                return Ok(Trace {
+                return Ok(ForwardResult::Delivered(Trace {
                     hops,
                     destination_device: current,
-                });
+                }));
             }
             if !visited.insert(current.clone()) {
                 return Err(format!("Routing loop: {current} was visited again"));
+            }
+            if let Some(hop) = hops.last()
+                && let ControlFlow::Break(reason) = boundary(Boundary::Inbound {
+                    device: &current,
+                    interface: &hop.peer_interface,
+                })?
+            {
+                return Ok(ForwardResult::Interrupted(reason));
             }
             if !hops.is_empty() && !self.devices[&current].forwarding {
                 return Err(format!(
@@ -426,6 +461,14 @@ impl Topology {
                 ));
             }
             let selected = self.select(&current, destination)?;
+            if !hops.is_empty()
+                && let ControlFlow::Break(reason) = boundary(Boundary::Outbound {
+                    device: &current,
+                    selected: &selected,
+                })?
+            {
+                return Ok(ForwardResult::Interrupted(reason));
+            }
             let next_hop = selected.via.unwrap_or(destination);
             let outgoing = &self.devices[&current].interfaces[&selected.interface];
             let a=outgoing.address.as_ref().filter(|a|a.usable()).ok_or("Outgoing interface has no usable IPv4 source; unnumbered interfaces are unsupported")?;
