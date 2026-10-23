@@ -1,6 +1,10 @@
 //! Application-only Fedora renderer/input check with isolated /tmp progress.
 use super::*;
 impl LabApp {
+    fn click_dns_control(&mut self, ctx: &egui::Context, rect: Option<egui::Rect>) -> bool {
+        let r = rect.expect("DNS control is present");
+        self.reveal_smoke_control(ctx, r) && self.click_smoke_control(ctx, Some(r))
+    }
     /// Settle hover after scrolling, then deliver one native click event batch.
     fn click_smoke_control(&mut self, ctx: &egui::Context, rect: Option<egui::Rect>) -> bool {
         let id = egui::Id::new(("native-click-phases", self.smoke_stage));
@@ -88,6 +92,16 @@ impl LabApp {
         self.scenarios.push(lab);
         index
     }
+    pub(super) fn add_dns_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/dns-workspace-preview.json"
+        ))
+        .expect("development DNS fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
 
     pub(super) fn capture_events(&mut self, ctx: &egui::Context) {
         for event in ctx.input(|i| i.events.clone()) {
@@ -160,6 +174,372 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            4250 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                let i = self.add_dns_fixture();
+                self.launch(i);
+                self.set_dns_view(i, teaching::View::Assignment);
+            }
+            4251 => {
+                assert!(self.metrics.inputs[1].width() >= 295.);
+                assert!(!self.metrics.dns_editor_overflow);
+                shot = Some("dns-layout-desktop-dark-100".into());
+            }
+            4252 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 740.)));
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.focus_input = false;
+                self.lesson_scroll_reset = true;
+            }
+            4253 | 4257 => {
+                let id = egui::Id::new(("dns-layout-settle", self.smoke_stage));
+                let ticks = ctx.data_mut(|d| {
+                    let n = d.get_temp::<u8>(id).unwrap_or(0) + 1;
+                    d.insert_temp(id, n);
+                    n
+                });
+                if ticks < 3 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+                let bounds = ctx.content_rect();
+                assert!(
+                    self.metrics
+                        .dns_pickers
+                        .iter()
+                        .chain(self.metrics.inputs.iter())
+                        .all(|r| r.right() <= bounds.right() + 1.)
+                );
+                shot = Some(
+                    if self.smoke_stage == 4253 {
+                        "dns-layout-light-150"
+                    } else {
+                        "dns-layout-dark-200"
+                    }
+                    .into(),
+                );
+            }
+            4254 | 4258 => {
+                let r = self.metrics.check.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            4255 => shot = Some("dns-layout-light-150-scrolled".into()),
+            4256 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            4259 => shot = Some("dns-layout-dark-200-scrolled".into()),
+            4260 => {
+                println!(
+                    "PASS native DNS focused layout: reserved desktop lookup-name width, short-line editor without horizontal overflow, settled150% light/200% dark and fully visible lookup selectors/Check after scrolling. Development fixture only; this does not repeat the full editing/reset/resume walkthrough."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            4200 => {
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                self.launch(0);
+                let i = self.add_dns_fixture();
+                self.launch(i);
+            }
+            4201 => shot = Some("dns-fixture-introduction".into()),
+            4202 => {
+                if !self.click_dns_control(ctx, self.metrics.example_action) {
+                    return;
+                }
+            }
+            4203 => shot = Some("dns-fixture-example".into()),
+            4204 => {
+                if !self.click_dns_control(ctx, self.metrics.insert) {
+                    return;
+                }
+            }
+            4205 => {
+                if !self.click_dns_control(ctx, self.metrics.editor_save) {
+                    return;
+                }
+            }
+            4206 => {
+                if !self.click_dns_control(ctx, self.metrics.dns_reload) {
+                    return;
+                }
+            }
+            4207 => {
+                if !self.click_dns_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            4208 => {
+                let i = self.scenarios.len() - 1;
+                let l = self.progress.attempts[&self.scenarios[i].id]
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .dns_learning
+                    .as_ref()
+                    .unwrap();
+                assert!(
+                    l.checks(self.scenarios[i].dns_teaching.as_ref().unwrap())
+                        .iter()
+                        .any(|c| !c.0)
+                );
+                shot = Some("dns-fixture-example-partial".into());
+            }
+            4209 => {
+                if !self.click_dns_control(ctx, self.metrics.dns_update) {
+                    return;
+                }
+            }
+            4210 => {
+                if !self.click_dns_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            4211 => {
+                let i = self.scenarios.len() - 1;
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                let l = a.workspace.as_ref().unwrap().dns_learning.as_ref().unwrap();
+                assert!(
+                    l.checks(self.scenarios[i].dns_teaching.as_ref().unwrap())
+                        .iter()
+                        .all(|c| c.0)
+                );
+                assert!(!progress::current_solved(a, &self.scenarios[i]));
+                shot = Some("dns-fixture-example-verified".into());
+            }
+            4212 => {
+                let i = self.scenarios.len() - 1;
+                self.set_dns_view(i, teaching::View::Assignment);
+            }
+            4213 => shot = Some("dns-fixture-assignment".into()),
+            4214 => {
+                if !self.click_dns_control(ctx, self.metrics.inputs.get(1).copied()) {
+                    return;
+                }
+            }
+            4215 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("portal.preview.test.".into()),
+            ]),
+            4216 => {
+                if !self.click_dns_control(ctx, self.metrics.probe) {
+                    return;
+                }
+            }
+            4217 => {
+                let i = self.scenarios.len() - 1;
+                assert!(
+                    self.progress.attempts[&self.scenarios[i].id]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .dns_draft
+                        .as_ref()
+                        .unwrap()
+                        .output
+                        .contains("Servfail")
+                );
+                shot = Some("dns-fixture-alias-diagnosis".into());
+            }
+            4218 | 4222 => {
+                if !self.click_dns_control(ctx, self.metrics.editor_viewport) {
+                    return;
+                }
+            }
+            4219 | 4223 => {
+                let i = self.scenarios.len() - 1;
+                let mut reference = self.scenarios[i].initial.clone();
+                for action in &self.scenarios[i].solution {
+                    engine::execute(&mut reference, action).unwrap();
+                }
+                let engine::State::AuthoritativeDns { server } = &reference else {
+                    unreachable!()
+                };
+                let d = dlms_learning_lab::dns_workspace::Draft::new(server);
+                let text = if self.smoke_stage == 4219 {
+                    d.text.replace("192.0.2.42", "999.0.2.42")
+                } else {
+                    d.text
+                };
+                self.pending_events
+                    .extend([key(egui::Key::A, true), egui::Event::Text(text)]);
+                // Serial is entered independently, rather than applying solved server state.
+                if self.smoke_stage == 4223 {
+                    self.progress
+                        .attempts
+                        .get_mut(&self.scenarios[i].id)
+                        .unwrap()
+                        .workspace
+                        .as_mut()
+                        .unwrap()
+                        .dns_draft
+                        .as_mut()
+                        .unwrap()
+                        .serial = "11".into();
+                }
+            }
+            4220 | 4224 => {
+                if !self.click_dns_control(ctx, self.metrics.editor_save) {
+                    return;
+                }
+            }
+            4221 => {
+                let i = self.scenarios.len() - 1;
+                assert!(
+                    self.progress.attempts[&self.scenarios[i].id]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .dns_draft
+                        .as_ref()
+                        .unwrap()
+                        .notice
+                        .as_ref()
+                        .unwrap()
+                        .contains("Cannot save: Line")
+                );
+                shot = Some("dns-fixture-syntax-retry".into());
+            }
+            4225 => {
+                if !self.click_dns_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            4226 => {
+                assert!(!self.metrics.completion);
+                shot = Some("dns-fixture-publication-needed".into());
+            }
+            4227 => {
+                if !self.click_dns_control(ctx, self.metrics.dns_reload) {
+                    return;
+                }
+            }
+            4228 => {
+                if !self.click_dns_control(ctx, self.metrics.dns_update) {
+                    return;
+                }
+            }
+            4229 => {
+                if !self.click_dns_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            4230 => {}
+            4231 => {
+                assert!(self.metrics.completion);
+                shot = Some("dns-fixture-complete".into());
+            }
+            4232 => {
+                if !self.click_dns_control(ctx, self.metrics.editor_viewport) {
+                    return;
+                }
+            }
+            4233 => self.pending_events.extend([
+                key(egui::Key::A, true),
+                egui::Event::Text("unfinished record".into()),
+            ]),
+            4234 => {
+                ctx.data_mut(|d| {
+                    d.insert_temp(egui::Id::new("dns-native-editor-focus"), self.metrics.focus)
+                });
+                self.pending_events.push(key(egui::Key::Tab, false));
+                let i = self.scenarios.len() - 1;
+                assert!(!progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                progress::save(&self.path, &self.progress).unwrap();
+                let saved = serde_json::to_vec(&self.progress).unwrap();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert_eq!(serde_json::to_vec(&self.progress).unwrap(), saved);
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.focus_input = false;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 740.)));
+            }
+            4235 => {
+                let previous = ctx
+                    .data(|d| {
+                        d.get_temp::<Option<egui::Id>>(egui::Id::new("dns-native-editor-focus"))
+                    })
+                    .unwrap();
+                assert_ne!(
+                    self.metrics.focus, previous,
+                    "Tab must leave the record editor"
+                );
+            }
+            4236 => shot = Some("dns-fixture-light-150".into()),
+            4237 | 4241 => {
+                let r = self.metrics.check.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            4238 => shot = Some("dns-fixture-light-150-scrolled".into()),
+            4239 => {
+                let i = self.scenarios.len() - 1;
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            4240 => {
+                let id = egui::Id::new("dns-native-zoom-settle");
+                let ticks = ctx.data_mut(|d| {
+                    let n = d.get_temp::<u8>(id).unwrap_or(0) + 1;
+                    d.insert_temp(id, n);
+                    n
+                });
+                if ticks < 3 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+                assert!(self.metrics.lesson_tabs.is_empty());
+                shot = Some("dns-fixture-challenge-dark-200".into());
+            }
+            4242 => shot = Some("dns-fixture-challenge-dark-200-scrolled".into()),
+            4243 => {
+                let r = self.metrics.reset.unwrap();
+                if !self.reveal_smoke_control(ctx, r) || !self.click_dns_control(ctx, Some(r)) {
+                    return;
+                }
+            }
+            4244 => {
+                let r = self.metrics.confirm_reset.unwrap();
+                if !self.reveal_smoke_control(ctx, r) || !self.click_dns_control(ctx, Some(r)) {
+                    return;
+                }
+            }
+            4245 => {
+                let i = self.scenarios.len() - 1;
+                assert_eq!(
+                    self.progress.attempts[&self.scenarios[i].id].state,
+                    self.scenarios[i].initial
+                );
+                assert!(self.progress.attempts.contains_key("ccna-ipv4"));
+                println!(
+                    "PASS native DNS development workspace: separate intro/example/assignment, explicit fill/save/reload/update and partial retry, typed alias lookup, typed malformed/correct record edits, current checks/invalidation, exact resume and selected reset,150% light/200% dark narrow scroll controls. Reference records were supplied through native editor events; serial was set by the harness. Not authored curriculum, novice, physical-device or real-DNS acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             3100..=3270 => {
                 let case = (self.smoke_stage - 3100) / 14;
                 let step = (self.smoke_stage - 3100) % 14;

@@ -43,6 +43,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub service_teaching: Option<crate::service_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dns_teaching: Option<crate::dns_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -175,6 +177,27 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
+        if let Some(lesson) = &s.dns_teaching {
+            let State::AuthoritativeDns { server } = &s.initial else {
+                return Err("DNS teaching needs an authoritative DNS activity".into());
+            };
+            if crate::dns::canonical_name(&server.configured.origin).ok()
+                == crate::dns::canonical_name(&lesson.fixture.configured.origin).ok()
+            {
+                return Err("DNS example must use a different zone from the assignment".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let Goal::AuthoritativeDns { requirements } = &s.goal {
+            let State::AuthoritativeDns { server } = &s.initial else {
+                return Err("DNS objectives need an authoritative DNS state".into());
+            };
+            if !crate::dns_workspace::valid_requirements(requirements, server) {
+                return Err(
+                    "DNS objectives need bounded outcomes, publication and a served lookup".into(),
+                );
+            }
+        }
         if let Some(lesson) = &s.address_teaching {
             if crate::address_teaching::goal(&s.initial).is_none()
                 || std::mem::discriminant(&s.initial) != std::mem::discriminant(&lesson.fixture)
@@ -306,6 +329,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::AuthoritativeDns { server } => server.validate().is_ok(),
         State::Switching { fabric } => fabric.validate().is_ok(),
         State::Ipv6 { topology } => topology.valid(),
         State::Ipv4Routing { topology } => topology.valid(),

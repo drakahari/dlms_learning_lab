@@ -1,0 +1,550 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "development-dns-workspace",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "",
+      "title": "DNS workspace \u00b7 Development fixture",
+      "summary": "Exercise record editing and publication; not authored curriculum.",
+      "objective": "Publish app.preview.test. as 192.0.2.42 and 2001:db8::42. Repair the portal.preview.test. CNAME path to app.preview.test., keeping the portal as an alias. Add mail.preview.test. at 192.0.2.25 and MX preference 10 for the zone. Preserve its nameserver, then bring the secondary to the same current copy.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Inspect the served records and repair the saved zone."
+      ],
+      "guide": [],
+      "explanation": "A/AAAA records hold addresses; CNAME redirects a name; MX identifies a mail host with its own address. Saving and publishing are different. The secondary needs a newer serial to accept the changed primary copy.",
+      "hints": [
+        "Look up portal A on the primary to see the alias failure.",
+        "Add the mail host address as well as the MX record.",
+        "After saving, reload the primary and then update the secondary with a newer serial."
+      ],
+      "sources": [
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1982"
+      ],
+      "simplifications": "Development-only fixture, absent from the catalog. Bounded record editor and in-memory copies, no DNS packets, recursive lookup, BIND configuration grammar, actual services or mail delivery.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "preview.test.",
+            "serial": 10,
+            "records": [
+              {
+                "owner": "preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.preview.test."
+                }
+              },
+              {
+                "owner": "ns.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.8"
+                }
+              },
+              {
+                "owner": "app.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::42"
+                }
+              },
+              {
+                "owner": "portal.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.preview.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "preview.test.",
+            "serial": 10,
+            "records": [
+              {
+                "owner": "preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.preview.test."
+                }
+              },
+              {
+                "owner": "ns.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.8"
+                }
+              },
+              {
+                "owner": "app.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::42"
+                }
+              },
+              {
+                "owner": "portal.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.preview.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "preview.test.",
+            "serial": 10,
+            "records": [
+              {
+                "owner": "preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.preview.test."
+                }
+              },
+              {
+                "owner": "ns.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.8"
+                }
+              },
+              {
+                "owner": "app.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::42"
+                }
+              },
+              {
+                "owner": "portal.preview.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.preview.test."
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "portal.preview.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.42"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "app.preview.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::42"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "preview.test.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.preview.test."
+              }
+            ]
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "preview.test.",
+            "record_type": "NS",
+            "target": "ns.preview.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Primary",
+            "owner": "preview.test.",
+            "record_type": "MX",
+            "data": [
+              {
+                "type": "MX",
+                "preference": 10,
+                "exchange": "mail.preview.test."
+              }
+            ]
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Secondary",
+            "owner": "preview.test.",
+            "record_type": "MX",
+            "target": "mail.preview.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "mail.preview.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.25"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "app.preview.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.42"
+              }
+            ]
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "portal.preview.test.",
+            "record_type": "A",
+            "target": "app.preview.test."
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"preview.test.\",\"serial\":11,\"records\":[{\"owner\":\"preview.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.preview.test.\"}},{\"owner\":\"ns.preview.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"app.preview.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.42\"}},{\"owner\":\"app.preview.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::42\"}},{\"owner\":\"portal.preview.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"app.preview.test.\"}},{\"owner\":\"preview.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":10,\"exchange\":\"mail.preview.test.\"}},{\"owner\":\"mail.preview.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.25\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      "prerequisites": [],
+      "dns_teaching": {
+        "prerequisite_note": "Development check: explains the editor before exercising all supported record types. This is not a finished authored lesson.",
+        "concepts": [
+          {
+            "title": "Names point to data",
+            "text": "A maps a full name to an IPv4 address; AAAA maps it to an IPv6 address. CNAME points to another full name. Type records in the editor, one per line: app.practice.test. 300 IN A 192.0.2.42. The final dot makes the name absolute; 300 is its lifetime in seconds (caching is not simulated). IN means Internet class."
+          },
+          {
+            "title": "Save, publish, inspect",
+            "text": "Save zone changes only the saved copy. Reload primary publishes it. A secondary keeps its prior copy until an update sees a newer SOA serial, the zone revision number. Look up reads the selected served copy, not unsaved editor text."
+          },
+          {
+            "title": "Mail and nameservers",
+            "text": "NS names a zone nameserver. MX names a mail host and preference; smaller preference is preferred. Each in-zone target needs its own A or AAAA address. DNS records alone do not prove the service is reachable."
+          }
+        ],
+        "example_description": "Try the separate practice.test. zone with the same editor controls. Fill worked example supplies reference records in this practice editor only; save, publish and inspect them yourself.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "practice.test.",
+            "serial": 10,
+            "records": [
+              {
+                "owner": "practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.practice.test."
+                }
+              },
+              {
+                "owner": "ns.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.9"
+                }
+              },
+              {
+                "owner": "app.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::42"
+                }
+              },
+              {
+                "owner": "portal.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.practice.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "practice.test.",
+            "serial": 10,
+            "records": [
+              {
+                "owner": "practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.practice.test."
+                }
+              },
+              {
+                "owner": "ns.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.9"
+                }
+              },
+              {
+                "owner": "app.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::42"
+                }
+              },
+              {
+                "owner": "portal.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.practice.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "practice.test.",
+            "serial": 10,
+            "records": [
+              {
+                "owner": "practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.practice.test."
+                }
+              },
+              {
+                "owner": "ns.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.9"
+                }
+              },
+              {
+                "owner": "app.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::42"
+                }
+              },
+              {
+                "owner": "portal.practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.practice.test."
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"practice.test.\",\"serial\":11,\"records\":[{\"owner\":\"practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.practice.test.\"}},{\"owner\":\"ns.practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"app.practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.42\"}},{\"owner\":\"app.practice.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::42\"}},{\"owner\":\"portal.practice.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"app.practice.test.\"}},{\"owner\":\"practice.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":10,\"exchange\":\"mail.practice.test.\"}},{\"owner\":\"mail.practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.25\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "portal.practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.42"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "app.practice.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::42"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "practice.test.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.practice.test."
+              }
+            ]
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "practice.test.",
+            "record_type": "NS",
+            "target": "ns.practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Primary",
+            "owner": "practice.test.",
+            "record_type": "MX",
+            "data": [
+              {
+                "type": "MX",
+                "preference": 10,
+                "exchange": "mail.practice.test."
+              }
+            ]
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Secondary",
+            "owner": "practice.test.",
+            "record_type": "MX",
+            "target": "mail.practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "mail.practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.25"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "app.practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.42"
+              }
+            ]
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "portal.practice.test.",
+            "record_type": "A",
+            "target": "app.practice.test."
+          }
+        ],
+        "try_change": "Keep the same serial while changing the app address. Reload the primary and update the secondary; compare their lookups, then repair the mismatch with a newer serial."
+      }
+    }
+  ]
+}

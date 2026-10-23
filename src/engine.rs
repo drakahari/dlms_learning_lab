@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    AuthoritativeDns {
+        server: crate::dns::Server,
+    },
     Switching {
         fabric: crate::switching::Fabric,
     },
@@ -100,6 +103,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    AuthoritativeDns {
+        requirements: Vec<crate::dns_workspace::Requirement>,
+    },
     Switching {
         requirements: Vec<crate::switching::Requirement>,
     },
@@ -209,6 +215,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::AuthoritativeDns { server }, Goal::AuthoritativeDns { requirements }) => {
+            requirements.iter().map(|r| r.check(server)).collect()
+        }
         (State::Switching { fabric }, Goal::Switching { requirements }) => {
             requirements.iter().map(|r| r.check(fabric)).collect()
         }
@@ -444,6 +453,9 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::AuthoritativeDns { .. } => {
+            "Use the native record editor, explicit Save zone / Reload primary / Update secondary controls and in-memory lookups. Only the disclosed record subset is supported; reference actions are not Linux commands."
+        }
         State::Switching { .. } => {
             "Use native switch/port tables and broadcast traces. This bounded VLAN data plane is not a Cisco CLI, ping, MAC learning or STP simulator."
         }
@@ -485,6 +497,9 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::AuthoritativeDns { server } = s {
+        return crate::dns_workspace::adapter(server, input);
+    }
     if let State::Switching { fabric } = s {
         return crate::switching_workspace::adapter(fabric, input);
     }
@@ -536,7 +551,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Switching { .. }
+        State::AuthoritativeDns { .. }
+        | State::Switching { .. }
         | State::Ipv6 { .. }
         | State::Ipv4Routing { .. }
         | State::Filesystem { .. }
@@ -968,6 +984,13 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::AuthoritativeDns { server } => format!(
+            "{} · saved serial {} · primary {} · secondary {}",
+            server.configured.origin,
+            server.configured.serial,
+            server.primary.serial,
+            server.secondary.serial
+        ),
         State::Switching { fabric } => format!(
             "VLAN data plane · {} switches · {} workstations",
             fabric.switches.len(),

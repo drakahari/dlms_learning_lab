@@ -277,7 +277,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
-            State::Switching { .. }
+            State::AuthoritativeDns { .. }
+            | State::Switching { .. }
             | State::Ipv6 { .. }
             | State::Ipv4Routing { .. }
             | State::Filesystem { .. } => {
@@ -4041,4 +4042,466 @@ fn validated_restore_clears_requested_worked_help_without_losing_imported_exampl
             .or(n.value())
             .is_some_and(|s| s.starts_with("Worked example:"))
     }));
+}
+
+#[test]
+fn dns_workspace_examples_keep_drafts_credit_and_keyboard_focus_separate() {
+    let (ctx, mut a) = app();
+    let i = a.add_dns_fixture();
+    a.launch(i);
+    draw(&ctx, &mut a);
+    assert_eq!(a.dns_view(i), teaching::View::Introduction);
+    assert_eq!(a.metrics.lesson_tabs.len(), 3);
+    let assignment = serde_json::to_vec(&a.progress.attempts[&a.scenarios[i].id].state).unwrap();
+    let r = a.metrics.example_action.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert_eq!(a.dns_view(i), teaching::View::Example);
+    let r = a.metrics.insert.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts[&a.scenarios[i].id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .dns_learning
+        .as_ref()
+        .unwrap();
+    assert!(!l.checked);
+    assert!(!l.draft.matches(&l.server));
+    assert_eq!(
+        serde_json::to_vec(&a.progress.attempts[&a.scenarios[i].id].state).unwrap(),
+        assignment
+    );
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&a.scenarios[i].id],
+        &a.scenarios[i]
+    ));
+    let id = a.scenarios[i].id.clone();
+    a.set_dns_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let editor = a.metrics.terminal.unwrap();
+    click(&ctx, &mut a, editor);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("; My independent draft\n".into())],
+    );
+    draw(&ctx, &mut a);
+    let w = a.progress.attempts[&id].workspace.as_ref().unwrap();
+    assert!(
+        w.dns_draft
+            .as_ref()
+            .unwrap()
+            .text
+            .contains("My independent draft")
+    );
+    assert!(
+        !w.dns_learning
+            .as_ref()
+            .unwrap()
+            .draft
+            .text
+            .contains("My independent draft")
+    );
+    let focused = a.metrics.focus.unwrap();
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Key {
+            key: egui::Key::Tab,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: Default::default(),
+        }],
+    );
+    draw(&ctx, &mut a);
+    assert_ne!(a.metrics.focus, Some(focused));
+    a.set_dns_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    a.set_dns_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .dns_draft
+            .as_ref()
+            .unwrap()
+            .text
+            .contains("My independent draft")
+    );
+    a.progress.attempts.get_mut(&id).unwrap().challenge = true;
+    draw(&ctx, &mut a);
+    assert!(a.metrics.lesson_tabs.is_empty());
+    assert!(a.metrics.insert.is_none());
+    assert!(a.metrics.editor_save.is_some());
+    assert!(a.metrics.dns_reload.is_some());
+}
+#[test]
+fn dns_workspace_save_reload_update_checks_and_unsaved_changes_invalidate_current_success() {
+    use dlms_learning_lab::dns_workspace::Draft;
+    let (ctx, mut a) = app();
+    let i = a.add_dns_fixture();
+    a.launch(i);
+    a.set_dns_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let id = a.scenarios[i].id.clone();
+    let mut reference = a.scenarios[i].initial.clone();
+    for action in &a.scenarios[i].solution {
+        engine::execute(&mut reference, action).unwrap();
+    }
+    let State::AuthoritativeDns { server } = &reference else {
+        panic!()
+    };
+    a.progress
+        .attempts
+        .get_mut(&id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .dns_draft = Some(Draft::new(server));
+    draw(&ctx, &mut a);
+    let r = a.metrics.editor_save.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let r = a.metrics.check.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    let r = a.metrics.dns_reload.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let r = a.metrics.check.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    let r = a.metrics.dns_update.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    let r = a.metrics.check.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    a.progress
+        .attempts
+        .get_mut(&id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .dns_draft
+        .as_mut()
+        .unwrap()
+        .text
+        .push_str("\nmalformed draft");
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+    let before = a.progress.attempts[&id].state.clone();
+    let r = a.metrics.editor_save.unwrap();
+    click(&ctx, &mut a, r);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts[&id].state, before);
+    assert!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .dns_draft
+            .as_ref()
+            .unwrap()
+            .notice
+            .as_ref()
+            .unwrap()
+            .contains("Line ")
+    );
+    a.reset_attempt(i);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts[&id].state, a.scenarios[i].initial);
+    assert_eq!(a.dns_view(i), teaching::View::Introduction);
+}
+#[test]
+fn dns_workspace_reflows_full_editor_lookup_and_check_at_large_text_and_narrow_widths() {
+    let (ctx, mut a) = app();
+    let i = a.add_dns_fixture();
+    a.launch(i);
+    a.set_dns_view(i, teaching::View::Assignment);
+    for (w, h, scale) in [
+        (1920., 1080., 1.),
+        (1200., 900., 1.5),
+        (960., 900., 2.),
+        (720., 900., 1.5),
+    ] {
+        a.scale = scale;
+        for _ in 0..4 {
+            frame(&ctx, &mut a, w, h, vec![]);
+        }
+        let bounds = ctx.content_rect();
+        if w / scale >= 1000. {
+            assert!(
+                a.metrics.inputs[1].width() >= 295.,
+                "Desktop lookup name width must be reserved"
+            );
+            assert!(
+                !a.metrics.dns_editor_overflow,
+                "Short record lines need no horizontal scrolling on desktop"
+            );
+        }
+        for r in a
+            .metrics
+            .inputs
+            .iter()
+            .chain(a.metrics.editor_viewport.iter())
+            .chain(a.metrics.check.iter())
+            .chain(a.metrics.dns_reload.iter())
+            .chain(a.metrics.dns_update.iter())
+            .chain(a.metrics.dns_pickers.iter())
+            .chain(a.metrics.probe.iter())
+        {
+            assert!(
+                r.left() >= bounds.left() - 1. && r.right() <= bounds.right() + 1.,
+                "control {r:?} outside {bounds:?} at{scale}"
+            );
+        }
+        // Check may scroll vertically at larger text. It must remain reachable by real wheel input.
+        for _ in 0..12 {
+            let r = a.metrics.check.unwrap();
+            if r.bottom() <= bounds.bottom() - 20. && r.top() > 80. {
+                break;
+            }
+            let delta = (bounds.bottom() - r.bottom() - 35.).min(-30.);
+            frame(
+                &ctx,
+                &mut a,
+                w,
+                h,
+                vec![
+                    egui::Event::PointerMoved(bounds.center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., delta),
+                        modifiers: Default::default(),
+                    },
+                ],
+            );
+        }
+        for _ in 0..4 {
+            frame(&ctx, &mut a, w, h, vec![]);
+        }
+        assert!(
+            a.metrics.check.unwrap().bottom() <= bounds.bottom(),
+            "Check not reachable at{scale}"
+        );
+    }
+}
+
+#[test]
+fn dns_secondary_alias_outcome_keeps_secondary_controls_available() {
+    use dlms_learning_lab::{
+        dns::QueryType,
+        dns_workspace::{Requirement, Snapshot},
+    };
+    let (ctx, mut a) = app();
+    let i = a.add_dns_fixture();
+    let engine::Goal::AuthoritativeDns { requirements } = &mut a.scenarios[i].goal else {
+        panic!()
+    };
+    requirements.retain(|r| {
+        matches!(
+            r,
+            Requirement::Resolves {
+                copy: Snapshot::Primary,
+                ..
+            }
+        )
+    });
+    requirements.push(Requirement::Published { secondary: false });
+    requirements.push(Requirement::AliasTo {
+        copy: Snapshot::Secondary,
+        owner: "portal.preview.test.".into(),
+        record_type: QueryType::A,
+        target: "app.preview.test.".into(),
+    });
+    a.launch(i);
+    a.set_dns_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.dns_update.is_some());
+}
+
+#[test]
+fn dns_record_editor_accepts_long_ascii_and_bounds_unicode_without_losing_progress() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    let i = a.add_dns_fixture();
+    a.launch(i);
+    a.set_dns_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let r = a.metrics.editor_viewport.unwrap();
+    click(&ctx, &mut a, r);
+    let ctrl = egui::Modifiers {
+        ctrl: true,
+        command: true,
+        ..Default::default()
+    };
+    let select = || egui::Event::Key {
+        key: egui::Key::A,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers: ctrl,
+    };
+    let text = format!(";{}", "x".repeat(14_000));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![select(), egui::Event::Text(text.clone())],
+    );
+    draw(&ctx, &mut a);
+    let id = a.scenarios[i].id.clone();
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .dns_draft
+            .as_ref()
+            .unwrap()
+            .text,
+        text
+    );
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![select(), egui::Event::Text("é".repeat(24_001))],
+    );
+    draw(&ctx, &mut a);
+    let draft = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .dns_draft
+        .as_ref()
+        .unwrap();
+    assert_eq!(draft.text.len(), 48_000);
+    assert!(draft.valid());
+    assert!(draft.text.ends_with('é'));
+    progress::save(&a.path, &a.progress).unwrap();
+    let p = progress::load(&a.path, &a.scenarios).unwrap();
+    assert_eq!(
+        p.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .dns_draft
+            .as_ref()
+            .unwrap()
+            .text,
+        draft.text
+    );
+}
+#[test]
+fn dns_example_and_assignment_keep_independent_native_undo_histories() {
+    let (ctx, mut a) = app();
+    let i = a.add_dns_fixture();
+    a.launch(i);
+    let id = a.scenarios[i].id.clone();
+    let ctrl = egui::Modifiers {
+        ctrl: true,
+        command: true,
+        ..Default::default()
+    };
+    let key = |key| egui::Event::Key {
+        key,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers: ctrl,
+    };
+    a.set_dns_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let r = a.metrics.editor_viewport.unwrap();
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            key(egui::Key::A),
+            egui::Event::Text("; practice-only edit".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    let practice = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .dns_learning
+        .as_ref()
+        .unwrap()
+        .draft
+        .text
+        .clone();
+    assert!(practice.contains("practice-only"));
+    a.set_dns_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let r = a.metrics.editor_viewport.unwrap();
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            key(egui::Key::A),
+            egui::Event::Text("; assignment-only edit".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Z)]);
+    draw(&ctx, &mut a);
+    let w = a.progress.attempts[&id].workspace.as_ref().unwrap();
+    assert!(!w.dns_draft.as_ref().unwrap().text.contains("practice-only"));
+    assert!(
+        !w.dns_draft
+            .as_ref()
+            .unwrap()
+            .text
+            .contains("assignment-only")
+    );
+    assert_eq!(w.dns_learning.as_ref().unwrap().draft.text, practice);
+    let assignment = w.dns_draft.as_ref().unwrap().text.clone();
+    a.set_dns_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let r = a.metrics.editor_viewport.unwrap();
+    click(&ctx, &mut a, r);
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Z)]);
+    draw(&ctx, &mut a);
+    let w = a.progress.attempts[&id].workspace.as_ref().unwrap();
+    assert!(
+        !w.dns_learning
+            .as_ref()
+            .unwrap()
+            .draft
+            .text
+            .contains("assignment-only")
+    );
+    assert_ne!(w.dns_learning.as_ref().unwrap().draft.text, practice);
+    assert_eq!(w.dns_draft.as_ref().unwrap().text, assignment);
 }

@@ -6,7 +6,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | --- | --- |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
-| `dns.rs` | Bounded authoritative RRsets/aliases, distinct configured/primary/secondary copies, typed target-address readiness and RFC1982 serial decisions; native integration/content pending |
+| `dns.rs`, `dns_workspace.rs`, `dns_teaching.rs`, `ui/dns_workspace.rs` | Bounded authoritative RRsets/aliases, separate configured/primary/secondary copies, typed readiness/serial decisions, current outcomes, native record editing/lookups and isolated saved practice; reviewed authored content pending |
 | `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; six authored route/recovery tasks |
 | `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |

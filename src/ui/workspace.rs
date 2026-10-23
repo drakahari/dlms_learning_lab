@@ -58,7 +58,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if s.service_teaching.is_some() {
+            if matches!(s.initial, State::AuthoritativeDns { .. }) {
+                self.dns_workspace(ui, i);
+            } else if s.service_teaching.is_some() {
                 self.service_learning_workspace(ui, i);
             } else if s.address_teaching.is_some() {
                 self.address_learning_workspace(ui, i);
@@ -119,7 +121,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if s.service_teaching.is_some() {
+            let show_help = if matches!(s.initial, State::AuthoritativeDns { .. }) {
+                self.dns_view(i) == teaching::View::Assignment
+            } else if s.service_teaching.is_some() {
                 self.service_view(i) == teaching::View::Assignment
             } else if s.address_teaching.is_some() {
                 self.address_view(i) == teaching::View::Assignment
@@ -622,7 +626,12 @@ impl LabApp {
                             );
                         }
                         ui.label(&c.explanation);
-                        if matches!(a.state, State::Ipv6 { .. } | State::Ipv4Routing { .. }) {
+                        if matches!(
+                            a.state,
+                            State::AuthoritativeDns { .. }
+                                | State::Ipv6 { .. }
+                                | State::Ipv4Routing { .. }
+                        ) {
                             continue;
                         }
                         let r = ui.add(button("Insert command"));

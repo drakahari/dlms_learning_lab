@@ -76,6 +76,19 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::AuthoritativeDns { server } = &a.state {
+        let State::AuthoritativeDns { server: initial } = &s.initial else {
+            return false;
+        };
+        if !crate::dns_workspace::same_problem(server, initial)
+            || a.workspace
+                .as_ref()
+                .and_then(|w| w.dns_draft.as_ref())
+                .is_some_and(|d| !d.matches(server))
+        {
+            return false;
+        }
+    }
     if crate::workspace::pending_service_draft(a) {
         return false;
     }
@@ -231,6 +244,22 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             );
         }
         validate_service_workspace(a)?;
+        validate_dns_workspace(a)?;
+        if let (State::AuthoritativeDns { server }, State::AuthoritativeDns { server: initial }) =
+            (&a.state, &s.initial)
+            && !crate::dns_workspace::same_problem(server, initial)
+        {
+            return Err(
+                "Saved DNS zone identity differs from this assignment; original retained".into(),
+            );
+        }
+        if let Some(l) = a.workspace.as_ref().and_then(|w| w.dns_learning.as_ref())
+            && s.dns_teaching.as_ref().is_none_or(|lesson| {
+                !crate::dns_workspace::same_problem(&l.server, &lesson.fixture)
+            })
+        {
+            return Err("Saved DNS example differs from this lesson; original retained".into());
+        }
         validate_address_workspace(a)?;
         if let Some(l) = a
             .workspace
@@ -302,6 +331,16 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_dns_workspace(a: &Attempt) -> Result<(), String> {
+    if a.workspace
+        .as_ref()
+        .is_some_and(|w| w.dns_learning.is_some() || w.dns_draft.is_some())
+        && !matches!(a.state, State::AuthoritativeDns { .. })
+    {
+        return Err("DNS editor/practice metadata on another activity; original retained".into());
+    }
+    Ok(())
+}
 fn validate_service_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace
         .as_ref()
@@ -351,6 +390,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_dns_workspace(a)?;
         validate_service_workspace(a)?;
         validate_address_workspace(a)?;
         validate_routing_workspace(a)?;

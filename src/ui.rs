@@ -10,6 +10,7 @@ use eframe::egui::{self, RichText};
 mod address_learning;
 mod controls;
 mod data;
+mod dns_workspace;
 mod script_learning;
 mod scripting;
 mod service_learning;
@@ -53,6 +54,10 @@ struct Metrics {
     completion: bool,
     guide: bool,
     editor_save: Option<egui::Rect>,
+    dns_reload: Option<egui::Rect>,
+    dns_update: Option<egui::Rect>,
+    dns_pickers: Vec<egui::Rect>,
+    dns_editor_overflow: bool,
     editor_viewport: Option<egui::Rect>,
     probe: Option<egui::Rect>,
     routing_forward: Option<egui::Rect>,
@@ -223,6 +228,12 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout")
+            {
+                4250
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-workspace") {
+                4200
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("addressing-layout")
             {
                 2940
@@ -323,6 +334,9 @@ impl LabApp {
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.dns_teaching {
+            dlms_learning_lab::dns_teaching::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.address_teaching {
             dlms_learning_lab::address_teaching::prepare(a, lesson, new_attempt);
         }
@@ -415,6 +429,9 @@ impl LabApp {
         }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.dns_teaching {
+            dlms_learning_lab::dns_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.address_teaching {
             dlms_learning_lab::address_teaching::prepare(a, lesson, true);
