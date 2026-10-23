@@ -571,7 +571,7 @@ fn inspect_paths(
         for requirement in requirements {if !requirement.valid_for(topology){ui.label("Required device or interface is missing.");continue;}
         if let Requirement::Reachable{label,from,target,scope,when,..}=requirement {
             ui.label(RichText::new(label).strong());let mut candidate=topology.clone();for c in when {candidate.devices.get_mut(&c.device).unwrap().interfaces.get_mut(&c.interface).unwrap().up=c.up;}
-            match candidate.ping(from,*target,scope.as_deref()) {Ok(ping)=>{ui.label(format!("Reply received · source {} → {target}",ping.source));for (heading,path) in [("Forward",ping.forward),("Reply",ping.reply)] {for hop in path.hops{ui.add(egui::Label::new(format!("{heading}: {} / {} → {} via {} / {}",hop.device,hop.interface,hop.next_hop,hop.peer,hop.peer_interface)).wrap());}}},Err(error)=>{ui.colored_label(palette(ui).error,error);}}
+            match candidate.ping(from,*target,scope.as_deref()) {Ok(ping)=>{ui.label(format!("Reply received · source {} to {target}",ping.source));for (heading,path) in [("Forward",ping.forward),("Reply",ping.reply)] {for hop in path.hops{ui.add(egui::Label::new(format!("{heading}: {} / {} to {} via {} / {}",hop.device,hop.interface,hop.next_hop,hop.peer,hop.peer_interface)).wrap());}}},Err(error)=>{ui.colored_label(palette(ui).error,error);}}
         }}
     });
 }

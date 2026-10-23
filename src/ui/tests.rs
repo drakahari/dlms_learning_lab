@@ -5932,3 +5932,340 @@ fn status_feedback_accepts_meaningful_nonzero_results_and_explains_a_wrong_zero(
     };
     assert!(progress::current_solved(&a.progress.attempts[&s.id], &s));
 }
+
+fn acl_ctrl(key: egui::Key) -> egui::Event {
+    egui::Event::Key {
+        key,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers: egui::Modifiers {
+            ctrl: true,
+            command: true,
+            ..Default::default()
+        },
+    }
+}
+fn acl_replace(ctx: &egui::Context, a: &mut LabApp, text: &str) {
+    a.focus_input = true;
+    draw(ctx, a);
+    frame(
+        ctx,
+        a,
+        1200.,
+        850.,
+        vec![acl_ctrl(egui::Key::A), egui::Event::Text(text.into())],
+    );
+}
+#[test]
+fn acl_native_workspace_reflows_at_all_scales_and_challenge_keeps_guidance_optional() {
+    for (width, height) in [(1200., 850.), (720., 560.)] {
+        for scale in [1., 1.5, 2.] {
+            for (view, challenge) in [
+                (teaching::View::Introduction, false),
+                (teaching::View::Example, false),
+                (teaching::View::Assignment, false),
+                (teaching::View::Assignment, true),
+            ] {
+                let (ctx, mut a) = app();
+                let i = a.add_acl_fixture();
+                a.launch(i);
+                a.set_acl_view(i, view);
+                a.scale = scale;
+                a.progress
+                    .attempts
+                    .get_mut("test-acl-workspace")
+                    .unwrap()
+                    .challenge = challenge;
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                for rect in a
+                    .metrics
+                    .lesson_tabs
+                    .iter()
+                    .chain(a.metrics.acl_router.iter())
+                    .chain(a.metrics.acl_diagram.iter())
+                    .chain(a.metrics.editor_viewport.iter())
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                {
+                    assert!(
+                        rect.left() >= 0. && rect.right() <= ctx.content_rect().right() + 1.,
+                        "{width}/{scale} {view:?} challenge={challenge}: {rect:?} vs {:?}",
+                        ctx.content_rect()
+                    );
+                }
+                assert!(!a.metrics.help_visible);
+                if challenge {
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+                if view != teaching::View::Introduction || challenge {
+                    assert!(a.metrics.editor_viewport.is_some());
+                }
+            }
+        }
+    }
+}
+#[test]
+fn acl_native_check_is_fresh_keyboard_edits_allow_retry_and_reset_resume_is_exact() {
+    let (ctx, mut a) = app();
+    let i = a.add_acl_fixture();
+    a.launch(i);
+    a.set_acl_view(i, teaching::View::Assignment);
+    let s = a.scenarios[i].clone();
+    draw(&ctx, &mut a);
+    let initial = s.initial.clone();
+    // Native editor input and Ctrl+Enter traverse the same callbacks as the button.
+    acl_replace(&ctx, &mut a, "not supported IOS syntax");
+    frame(&ctx, &mut a, 1200., 850., vec![acl_ctrl(egui::Key::Enter)]);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts[&s.id].state, initial);
+    assert!(
+        a.progress.attempts[&s.id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .acl_draft
+            .as_ref()
+            .unwrap()
+            .notice
+            .is_some()
+    );
+    assert!(!progress::current_solved(&a.progress.attempts[&s.id], &s));
+    let partial = "ip access-list extended partial\n permit tcp any any eq 443\nexit\ninterface office\n ip access-group partial in";
+    acl_replace(&ctx, &mut a, partial);
+    frame(&ctx, &mut a, 1200., 850., vec![acl_ctrl(egui::Key::Enter)]);
+    draw(&ctx, &mut a);
+    let engine::State::Ipv4Acl { network } = &a.progress.attempts[&s.id].state else {
+        panic!()
+    };
+    let engine::Goal::Ipv4Acl { definition } = &s.goal else {
+        panic!()
+    };
+    let d = &a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .acl_draft
+        .as_ref()
+        .unwrap()
+        .documents;
+    let checks = dlms_learning_lab::acl_workspace::checks(network, definition, d);
+    assert!(checks.iter().any(|c| c.0) && checks.iter().any(|c| !c.0));
+    let alternate = "ip access-list extended alternate\n deny tcp any any eq 22\n permit ip any any\nexit\ninterface office\n ip access-group alternate in";
+    acl_replace(&ctx, &mut a, alternate);
+    frame(&ctx, &mut a, 1200., 850., vec![acl_ctrl(egui::Key::Enter)]);
+    draw(&ctx, &mut a);
+    assert!(progress::current_solved(&a.progress.attempts[&s.id], &s));
+    assert!(a.metrics.completion);
+    a.set_acl_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    a.progress.attempts.get_mut(&s.id).unwrap().challenge = true;
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    assert!(a.metrics.lesson_tabs.is_empty());
+    assert!(!a.metrics.help_visible);
+    a.progress.attempts.get_mut(&s.id).unwrap().challenge = false;
+    a.set_acl_view(i, teaching::View::Assignment);
+    let encoded = serde_json::to_vec(&a.progress).unwrap();
+    a.progress = progress::decode(&encoded, &a.scenarios).unwrap();
+    a.launch(i);
+    a.set_acl_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert!(progress::current_solved(&a.progress.attempts[&s.id], &s));
+    acl_replace(&ctx, &mut a, "changed pending draft");
+    draw(&ctx, &mut a);
+    assert!(!progress::current_solved(&a.progress.attempts[&s.id], &s));
+    assert!(!a.metrics.completion);
+    assert!(!a.checked);
+    let other = a.scenarios[0].id.clone();
+    a.launch(0);
+    let keep = serde_json::to_vec(&a.progress.attempts[&other]).unwrap();
+    a.launch(i);
+    a.reset_attempt(i);
+    assert_eq!(a.progress.attempts[&s.id].state, initial);
+    assert_eq!(
+        serde_json::to_vec(&a.progress.attempts[&other]).unwrap(),
+        keep
+    );
+}
+#[test]
+fn acl_example_fill_is_unapplied_ungraded_and_uses_separate_native_undo() {
+    let (ctx, mut a) = app();
+    let i = a.add_acl_fixture();
+    a.launch(i);
+    a.set_acl_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    acl_replace(&ctx, &mut a, "assignment draft retained");
+    let assignment = serde_json::to_vec(
+        &a.progress.attempts["test-acl-workspace"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .acl_draft,
+    )
+    .unwrap();
+    a.set_acl_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let before = a.progress.attempts["test-acl-workspace"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .acl_learning
+        .as_ref()
+        .unwrap()
+        .network
+        .clone();
+    let fill = a.metrics.insert.unwrap();
+    click(&ctx, &mut a, fill);
+    let l = a.progress.attempts["test-acl-workspace"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .acl_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.network, before);
+    assert!(!l.checked);
+    assert_eq!(
+        l.draft.documents.routers,
+        a.scenarios[i]
+            .acl_teaching
+            .as_ref()
+            .unwrap()
+            .example_documents
+            .routers
+    );
+    assert!(!progress::current_solved(
+        &a.progress.attempts["test-acl-workspace"],
+        &a.scenarios[i]
+    ));
+    acl_replace(&ctx, &mut a, "separate example draft");
+    assert_eq!(
+        serde_json::to_vec(
+            &a.progress.attempts["test-acl-workspace"]
+                .workspace
+                .as_ref()
+                .unwrap()
+                .acl_draft
+        )
+        .unwrap(),
+        assignment
+    );
+    let focused = ctx.memory(|m| m.focused());
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    assert_ne!(ctx.memory(|m| m.focused()), focused);
+    a.set_acl_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    frame(&ctx, &mut a, 1200., 850., vec![acl_ctrl(egui::Key::Z)]);
+    assert!(
+        !a.progress.attempts["test-acl-workspace"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .acl_draft
+            .as_ref()
+            .unwrap()
+            .documents
+            .routers
+            .values()
+            .any(|s| s == "separate example draft")
+    );
+}
+
+#[test]
+fn acl_native_router_documents_preserve_the_aggregate_draft_bound_before_saving() {
+    let (ctx, mut a) = app();
+    let i = a.add_acl_fixture();
+    let State::Ipv4Acl { network } = &mut a.scenarios[i].initial else {
+        panic!()
+    };
+    let mut spare = network.topology.devices["Gateway"].clone();
+    for port in spare.interfaces.values_mut() {
+        port.up = false;
+        port.address = None;
+    }
+    spare.routes.clear();
+    for name in ["SpareA", "SpareB", "SpareC", "SpareD"] {
+        network.topology.devices.insert(name.into(), spare.clone());
+    }
+    let initial_network = network.clone();
+    let engine::Goal::Ipv4Acl { definition } = &mut a.scenarios[i].goal else {
+        panic!()
+    };
+    definition.initial = initial_network;
+    a.launch(i);
+    a.set_acl_view(i, teaching::View::Assignment);
+    let draft = a
+        .progress
+        .attempts
+        .get_mut("test-acl-workspace")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .acl_draft
+        .as_mut()
+        .unwrap();
+    for (name, text) in &mut draft.documents.routers {
+        *text = "#".repeat(if name == "Gateway" { 20_000 } else { 60_000 });
+    }
+    assert!(draft.valid());
+    let before = draft.documents.routers["Gateway"].clone();
+    acl_replace(&ctx, &mut a, &"#".repeat(30_000));
+    let draft = a.progress.attempts["test-acl-workspace"]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .acl_draft
+        .as_ref()
+        .unwrap();
+    assert!(draft.valid());
+    assert_eq!(draft.documents.routers["Gateway"], before);
+    assert!(draft.notice.as_ref().unwrap().contains("256 KiB"));
+    progress::decode(&serde_json::to_vec(&a.progress).unwrap(), &a.scenarios).unwrap();
+}
+#[test]
+fn acl_native_tab_change_focuses_the_new_editor_in_the_same_rendered_frame() {
+    let (ctx, mut a) = app();
+    let i = a.add_acl_fixture();
+    a.launch(i);
+    a.set_acl_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let old = a.metrics.focus.unwrap();
+    let assignment = a.metrics.lesson_tabs[2];
+    click(&ctx, &mut a, assignment);
+    assert_eq!(a.acl_view(i), teaching::View::Assignment);
+    assert_ne!(a.metrics.focus, Some(old));
+    assert_eq!(ctx.memory(|m| m.focused()), a.metrics.focus);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            acl_ctrl(egui::Key::A),
+            egui::Event::Text("new assignment only".into()),
+        ],
+    );
+    let w = a.progress.attempts["test-acl-workspace"]
+        .workspace
+        .as_ref()
+        .unwrap();
+    assert_eq!(
+        w.acl_draft.as_ref().unwrap().documents.routers["Gateway"],
+        "new assignment only"
+    );
+    assert!(
+        !w.acl_learning
+            .as_ref()
+            .unwrap()
+            .draft
+            .documents
+            .routers
+            .values()
+            .any(|s| s == "new assignment only")
+    );
+}

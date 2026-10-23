@@ -567,3 +567,35 @@ fn feedback_names_visible_rule_positions_sequences_and_implicit_denial() {
         assert!(feedback.contains("Gateway/office in"), "{feedback}");
     }
 }
+
+#[test]
+fn feedback_distinguishes_blocked_required_service_from_wrong_boundary_and_guarded_denial() {
+    let s = scenario();
+    for (text, needles) in [
+        (
+            "ip access-list extended x\n permit tcp any any eq 443\nexit\ninterface office\n ip access-group x in",
+            vec![
+                "This flow must be allowed",
+                "Required allowed traffic also fails",
+            ],
+        ),
+        (
+            "ip access-list extended x\n permit tcp any any eq 443\n permit udp any any eq 53\nexit\ninterface service\n ip access-group x out",
+            vec!["the task requires Gateway/office in"],
+        ),
+    ] {
+        let documents = editor::Drafts {
+            schema_version: 1,
+            routers: BTreeMap::from([("Gateway".into(), text.into())]),
+        };
+        let applied = aw::apply_documents(network(&s.initial), &documents).unwrap();
+        let checks = aw::checks(&applied, definition(&s), &documents);
+        assert!(!checks.iter().all(|c| c.0));
+        for needle in needles {
+            assert!(
+                checks.iter().any(|c| !c.0 && c.1.contains(needle)),
+                "{checks:?}"
+            );
+        }
+    }
+}

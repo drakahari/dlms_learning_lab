@@ -1,6 +1,6 @@
 # Account records, memberships and virtual ownership — foundation
 
-Pure capability under review, checked2026-10-23. No authored lessons, bundle registration, engine/progress integration or coverage promotion. `accounts` is an original in-process Rust module; no host account, filesystem, process, command, credential or clock API is called. Strings such as `/etc/passwd` refer only to derived simulated records.
+Pure capability accepted after independent source review and main-checkout verification, checked2026-10-23. No authored lessons, bundle registration, engine/progress integration or coverage promotion. `accounts` is an original in-process Rust module; no host account, filesystem, process, command, credential or clock API is called. Strings such as `/etc/passwd` refer only to derived simulated records.
 
 ## Why a separate model
 
@@ -60,3 +60,5 @@ Official GNU [id](https://www.gnu.org/software/coreutils/manual/html_node/id-inv
 Tests in `tests/accounts.rs` are fixed synthetic pure-core regressions, not controlled host-administration experiments. Initial guarded author checks passed47 library tests and26 accounts integrations; scoped library/accounts Clippy with warnings denied passed after removing one unused test import and simplifying one conditional. The copied rustfmt formatted only the owned worktree paths. These checks do not claim independent review, engine/native acceptance or authored practice. All heavy checks used MAIN `tools/dev.py`, shared disk target `target/acl-foundation`, two jobs/two test threads, zero debug profiles and no incremental compilation. No dependencies, public shell revision, historical fixture, engine, progress, UI or curriculum changes accompany this foundation. All existing licenses/notices remain; original code/prose only, no copied shadow/GNU implementation/manual body.
 
 The subsequent512-byte retained-error cap and27th accounts regression passed a fresh guarded47-library/27-accounts recheck and scoped Clippy with warnings denied. This confirms the final retained-feedback bound in the pure core; independent review and engine/native integration remain separate gates.
+
+Main integration checkpoint: accepted pure-core commit8cbdceb passed47library/27accounts tests and all-targetClippy in the main checkout. Root independently reviewed candidate publication requirements and preclone bounds. Engine/teaching backend and native/authored practice remain separate acceptance gates; the source-only work does not promote107.1 coverage.

@@ -312,3 +312,117 @@ pub fn feedback<R>(
     }
     result
 }
+
+/// Equal measured cards for a simple three-device path. Narrow views stack cleanly.
+pub fn topology_chain(ui: &mut egui::Ui, cards: &[[&str; 3]], caption: &str) -> egui::Response {
+    let roles = palette(ui);
+    let line = ui.text_style_height(&egui::TextStyle::Body).ceil();
+    let count = cards.len().max(1);
+    let stacked = ui.available_width() < line * 9. * count as f32;
+    let gap = 2. * GAP;
+    let width = if stacked {
+        ui.available_width()
+    } else {
+        ((ui.available_width() - gap * (count - 1) as f32) / count as f32).min(270.)
+    };
+    let font = egui::TextStyle::Body.resolve(ui.style());
+    let rows: Vec<Vec<_>> = cards
+        .iter()
+        .map(|texts| {
+            texts
+                .iter()
+                .map(|text| {
+                    ui.painter().layout(
+                        (*text).into(),
+                        font.clone(),
+                        roles.text,
+                        (width - 2. * PAD_X as f32).max(1.),
+                    )
+                })
+                .collect()
+        })
+        .collect();
+    let heights: Vec<_> = (0..3)
+        .map(|row| rows.iter().map(|g| g[row].size().y).fold(line, f32::max))
+        .collect();
+    let height = heights.iter().sum::<f32>() + 2. * PAD_X as f32;
+    let graph_height = if stacked {
+        height * count as f32 + gap * (count - 1) as f32
+    } else {
+        height
+    };
+    let description = format!(
+        "Network diagram. {}. Connections: {caption}.",
+        cards
+            .iter()
+            .map(|c| c.join("; "))
+            .collect::<Vec<_>>()
+            .join(". ")
+    );
+    let caption_galley = ui.painter().layout(
+        caption.into(),
+        egui::TextStyle::Small.resolve(ui.style()),
+        roles.muted,
+        ui.available_width(),
+    );
+    let (area, response) = ui.allocate_exact_size(
+        egui::vec2(
+            ui.available_width(),
+            graph_height + GAP + caption_galley.size().y.max(line),
+        ),
+        egui::Sense::hover(),
+    );
+    response.widget_info(|| {
+        egui::WidgetInfo::labeled(egui::WidgetType::Image, ui.is_enabled(), &description)
+    });
+    let mut rects = Vec::new();
+    let horizontal_start = area.center().x - (count as f32 * width + (count - 1) as f32 * gap) / 2.;
+    for index in 0..cards.len() {
+        let origin = if stacked {
+            area.min + egui::vec2(0., index as f32 * (height + gap))
+        } else {
+            egui::pos2(horizontal_start + index as f32 * (width + gap), area.top())
+        };
+        rects.push(egui::Rect::from_min_size(origin, egui::vec2(width, height)));
+    }
+    for pair in rects.windows(2) {
+        ui.painter().line_segment(
+            if stacked {
+                [pair[0].center_bottom(), pair[1].center_top()]
+            } else {
+                [pair[0].right_center(), pair[1].left_center()]
+            },
+            egui::Stroke::new(2_f32, roles.accent),
+        );
+    }
+    for (rect, galleys) in rects.iter().zip(&rows) {
+        ui.painter().rect(
+            *rect,
+            6.,
+            roles.background,
+            egui::Stroke::new(1_f32, roles.muted),
+            egui::StrokeKind::Inside,
+        );
+        let mut y = rect.top() + PAD_X as f32;
+        for (galley, h) in galleys.iter().zip(&heights) {
+            ui.painter().with_clip_rect(rect.shrink(2.)).galley(
+                egui::pos2(
+                    rect.center().x - galley.size().x / 2.,
+                    y + (h - galley.size().y) / 2.,
+                ),
+                galley.clone(),
+                roles.text,
+            );
+            y += h;
+        }
+    }
+    ui.painter().galley(
+        egui::pos2(
+            area.center().x - caption_galley.size().x / 2.,
+            area.top() + graph_height + GAP,
+        ),
+        caption_galley,
+        roles.muted,
+    );
+    response
+}

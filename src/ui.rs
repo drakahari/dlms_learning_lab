@@ -7,6 +7,7 @@ use dlms_learning_lab::{
 };
 use dlms_learning_lab::{course, script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
+mod acl_workspace;
 mod address_learning;
 mod controls;
 mod data;
@@ -38,6 +39,8 @@ struct Metrics {
     example_reset: Option<egui::Rect>,
     command_insert: Option<egui::Rect>,
     address_diagram: Option<egui::Rect>,
+    acl_diagram: Option<egui::Rect>,
+    acl_router: Option<egui::Rect>,
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
     data_export: Option<egui::Rect>,
@@ -260,7 +263,12 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("capture-lessons")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-layout")
+            {
+                7660
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
+                7600
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("capture-lessons")
             {
                 7200
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("substitution") {
@@ -397,6 +405,10 @@ impl LabApp {
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
+        if let Some(lesson) = &s.acl_teaching {
+            dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated ACL lesson");
+        }
         if let Some(lesson) = &s.storage_teaching {
             dlms_learning_lab::storage_teaching::prepare(a, lesson, new_attempt);
         }
@@ -502,6 +514,10 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        if let Some(lesson) = &s.acl_teaching {
+            dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
+                .expect("validated ACL lesson");
+        }
         if let Some(lesson) = &s.storage_teaching {
             dlms_learning_lab::storage_teaching::prepare(a, lesson, true);
         }

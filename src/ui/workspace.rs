@@ -58,7 +58,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::PersistentMounts { .. }) {
+            if matches!(s.initial, State::Ipv4Acl { .. }) {
+                self.acl_workspace(ui, i);
+            } else if matches!(s.initial, State::PersistentMounts { .. }) {
                 self.storage_workspace(ui, i);
             } else if matches!(s.initial, State::Discovery { .. }) {
                 self.discovery_learning_workspace(ui, i);
@@ -129,7 +131,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::PersistentMounts { .. }) {
+            let show_help = if matches!(s.initial, State::Ipv4Acl { .. }) {
+                self.acl_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::PersistentMounts { .. }) {
                 self.storage_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Discovery { .. }) {
                 self.discovery_view(i) == teaching::View::Assignment
@@ -170,7 +174,11 @@ impl LabApp {
                     self.help_open = !self.help_open;
                 }
                 if self.help_open {
-                    self.help(ui, i);
+                    if matches!(s.initial, State::Ipv4Acl { .. }) {
+                        ui.push_id(("acl-help", &s.id, challenge), |ui| self.acl_help(ui, i));
+                    } else {
+                        self.help(ui, i);
+                    }
                 }
             }
         });

@@ -188,47 +188,61 @@ impl Draft {
         Ok(())
     }
 }
+fn location(at: &routing::Location) -> String {
+    format!(
+        "{}/{} {}",
+        at.device,
+        at.interface,
+        match at.direction {
+            routing::Direction::Inbound => "in",
+            routing::Direction::Outbound => "out",
+        }
+    )
+}
+fn cause_matches(expected: &Option<routing::ExpectedCause>, actual: &acl::Cause) -> bool {
+    match (expected, actual) {
+        (None, _) => true,
+        (Some(routing::ExpectedCause::Implicit {}), acl::Cause::ImplicitDeny) => true,
+        (
+            Some(routing::ExpectedCause::Explicit { rule }),
+            acl::Cause::Matched { rule: hit, .. },
+        ) => rule.as_ref().is_none_or(|r| r == hit),
+        _ => false,
+    }
+}
 pub fn checks(
     network: &routing::Network,
     definition: &editor::Definition,
     documents: &editor::Drafts,
 ) -> Vec<(bool, String)> {
-    match editor::grade(definition, network, documents) {
-        Err(e) => vec![(false, e.to_string())],
-        Ok(report) => report.cases.into_iter().map(|case| {
-            let detail = match &case.observation.actual {
-                routing::Outcome::Delivered { .. } => {
-                    if case.passed {
-                        "allowed as required".to_owned()
-                    } else {
-                        "allowed, but the task requires a denial at the specified boundary".into()
-                    }
-                }
-                routing::Outcome::Denied { denial, .. } => {
-                    let cause = match &denial.decision.cause {
-                        acl::Cause::Matched { rule, row } => {
-                            match rule.strip_prefix("seq-").and_then(|s| s.parse::<u16>().ok()) {
-                                Some(sequence) => format!("sequence {sequence} (rule {})", row + 1),
-                                None => format!("rule {}", row + 1),
-                            }
-                        }
-                        acl::Cause::ImplicitDeny => "implicit deny (no rule matched)".into(),
-                    };
-                    format!("{} at {}/{} {} via {cause}",
-                        if case.passed { "denied as required" } else {
-                            "denial observed; check required allowed flows, location or requested cause"
-                        }, denial.at.device, denial.at.interface,
-                        match denial.at.direction {
-                            routing::Direction::Inbound => "in",
-                            routing::Direction::Outbound => "out",
-                        })
-                }
-                routing::Outcome::Failed { failure, .. } => format!(
-                    "path/configuration failure is not an ACL denial: {}", failure.message),
-            };
-            (case.passed, format!("{}: {detail}", case.label))
-        }).collect(),
-    }
+    let report = match editor::grade(definition, network, documents) {
+        Err(e) => return vec![(false, e.to_string())],
+        Ok(report) => report,
+    };
+    report.cases.into_iter().zip(&definition.cases).map(|(case,task)| {
+        let detail = match &case.observation.actual {
+            routing::Outcome::Delivered{..} => if case.passed { "allowed as required".to_owned() }
+                else { "allowed, but this flow must be blocked. Check the attachment direction and matching rule.".into() },
+            routing::Outcome::Denied{denial,..} => {
+                let cause = match &denial.decision.cause {
+                    acl::Cause::Matched{rule,row} => match rule.strip_prefix("seq-").and_then(|s|s.parse::<u16>().ok()) {
+                        Some(sequence) => format!("sequence {sequence} (rule {})",row+1), None=>format!("rule {}",row+1),
+                    },
+                    acl::Cause::ImplicitDeny => "implicit deny (no rule matched)".into(),
+                };
+                let observed=format!("at {} via {cause}",location(&denial.at));
+                if case.passed { format!("denied as required {observed}") }
+                else { match &task.expectation {
+                    editor::Expectation::Allowed{} => format!("blocked {observed}. This flow must be allowed; check matching and earlier rules."),
+                    editor::Expectation::Denied{expected} if denial.at != expected.at => format!("blocked {observed}, but the task requires {}. Check the interface and direction.",location(&expected.at)),
+                    editor::Expectation::Denied{expected} if !cause_matches(&expected.cause,&denial.decision.cause) => format!("blocked {observed}, but the task requires a different deny rule or explicit/implicit cause. Review that requirement."),
+                    editor::Expectation::Denied{..} => format!("block observed {observed}. Required allowed traffic also fails; restore those flows before this security check can pass."),
+                }}
+            },
+            routing::Outcome::Failed{failure,..} => format!("path/configuration failure is not an ACL denial: {}",failure.message),
+        };
+        (case.passed,format!("{}: {detail}",case.label))
+    }).collect()
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
