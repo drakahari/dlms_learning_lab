@@ -62,7 +62,7 @@ fn invalid() -> Error {
 fn unsupported() -> Error {
     err(
         ErrorKind::Unsupported,
-        "Unsupported account command: see the bounded account help",
+        "Command or option is not supported in this simulator. Open Help to see supported commands.",
     )
 }
 fn name(s: &str) -> bool {
@@ -1338,6 +1338,29 @@ fn words(line: &str) -> Result<Vec<String>> {
     }
     Ok(out)
 }
+// Recognized incomplete forms remain errors; only their diagnostic differs.
+fn missing_usermod_operands(args: &[String]) -> Option<&'static str> {
+    let words = args.iter().map(String::as_str).collect::<Vec<_>>();
+    match words.as_slice() {
+        ["-G" | "--groups"] | ["-G" | "--groups", _] => Some(
+            "usermod -G requires a GROUP_LIST and USER. A replacement list drops omitted supplementary memberships; see Help for supported forms.",
+        ),
+        ["-aG"]
+        | ["-aG", _]
+        | ["-a" | "--append", "-G" | "--groups"]
+        | ["-a" | "--append", "-G" | "--groups", _]
+        | ["-G" | "--groups", _, "-a" | "--append"] => Some(
+            "usermod -aG requires a GROUP_LIST and USER. Appending keeps the existing supplementary memberships.",
+        ),
+        ["-g" | "--gid"] | ["-g" | "--gid", _] => Some(
+            "usermod -g requires a GROUP and USER. This changes the primary group, separately from supplementary memberships.",
+        ),
+        ["-e" | "--expiredate"] | ["-e" | "--expiredate", _] => Some(
+            "usermod -e requires a DATE and USER. The date is stored expiry metadata, not an authentication or login test.",
+        ),
+        _ => None,
+    }
+}
 /// Parsing is lexical only. Name-to-ID resolution happens against the state.
 pub fn parse(line: &str) -> Result<Request> {
     let w = words(line)?;
@@ -1433,6 +1456,9 @@ pub fn parse(line: &str) -> Result<Request> {
             })
         }
         "usermod" => {
+            if let Some(message) = missing_usermod_operands(a) {
+                return Err(err(ErrorKind::Invalid, message));
+            }
             let (o, n) = options(a, &[('a', false), ('G', true), ('g', true), ('e', true)])?;
             if o.contains_key(&'G') && o.len() == 1 + usize::from(o.contains_key(&'a')) {
                 change(Action::Supplementary {
@@ -1721,6 +1747,174 @@ pub fn requirements_from_json(initial: &State, text: &str) -> Result<Vec<Require
     }
     Ok(rs.0)
 }
+
+// Feedback is explanatory only: the equality/state predicates below still grade
+// the complete typed outcomes. Never include file bodies or password material.
+fn bounded_feedback(message: String) -> String {
+    err(ErrorKind::Invalid, message).message
+}
+fn group_numbers(groups: &BTreeSet<u32>) -> String {
+    if groups.is_empty() {
+        "none".into()
+    } else {
+        groups
+            .iter()
+            .map(u32::to_string)
+            .collect::<Vec<_>>()
+            .join(", ")
+    }
+}
+fn expiry_description(date: Option<EpochDay>) -> String {
+    date.map_or_else(|| "not set".into(), |d| format!("{} UTC", d.iso()))
+}
+fn user_difference(name: &str, actual: Option<&User>, expected: &User) -> String {
+    let Some(actual) = actual else {
+        return format!(
+            "{name}: account record is missing. Use getent passwd to inspect the local records."
+        );
+    };
+    if actual.uid != expected.uid {
+        format!(
+            "{name}: UID is {}, but the task requires {}. Names and numeric identities are different; inspect id or getent passwd.",
+            actual.uid, expected.uid
+        )
+    } else if actual.primary_gid != expected.primary_gid {
+        format!(
+            "{name}: primary GID is {}, but the task requires {}. id shows the primary group; changing supplementary groups does not change it.",
+            actual.primary_gid, expected.primary_gid
+        )
+    } else if actual.supplementary != expected.supplementary {
+        format!(
+            "{name}: supplementary GIDs are [{}]; requested [{}]. Replacing the list drops omitted memberships; appending keeps existing ones.",
+            group_numbers(&actual.supplementary),
+            group_numbers(&expected.supplementary)
+        )
+    } else if actual.home != expected.home {
+        format!(
+            "{name}: home is {}, but the task requires {}. A home path in the record and actual home files are checked separately.",
+            actual.home, expected.home
+        )
+    } else if actual.shell != expected.shell {
+        format!(
+            "{name}: shell is {}, but the task requires {}. Inspect the shell field with getent passwd; this is account metadata, not a login test.",
+            actual.shell, expected.shell
+        )
+    } else if actual.expires != expected.expires {
+        format!(
+            "{name}: expiry metadata is {}; requested {}. getent shadow shows the stored expiry field; no authentication or login result is inferred.",
+            expiry_description(actual.expires),
+            expiry_description(expected.expires)
+        )
+    } else if actual.comment != expected.comment {
+        format!(
+            "{name}: the account comment differs from the requested record. Inspect getent passwd; keep unrequested account fields unchanged."
+        )
+    } else {
+        format!("{name}: account record matches the requested fields")
+    }
+}
+fn group_difference(name: &str, actual: Option<&Group>, expected: &Group) -> String {
+    match actual {
+        None => format!(
+            "{name}: group record is missing; requested GID {}. Inspect getent group before using it as a primary or supplementary group.",
+            expected.gid
+        ),
+        Some(actual) => format!(
+            "{name}: GID is {}, but the task requires {}. A matching name with a different number is a different group identity.",
+            actual.gid, expected.gid
+        ),
+    }
+}
+fn entry_kind(kind: &Kind) -> &'static str {
+    match kind {
+        Kind::Directory => "directory",
+        Kind::Text { .. } => "regular file",
+    }
+}
+fn entry_difference(path: &str, actual: Option<&Entry>, expected: &Entry) -> String {
+    let Some(actual) = actual else {
+        return format!(
+            "{path}: entry is missing; the task requires a {}. Use ls -ld to inspect the supplied virtual path.",
+            entry_kind(&expected.data)
+        );
+    };
+    if actual.uid != expected.uid {
+        format!(
+            "{path}: owner UID is {}, but the task requires {}. Ownership stays numeric even if an account name disappears; inspect ls -ln on the containing directory.",
+            actual.uid, expected.uid
+        )
+    } else if actual.gid != expected.gid {
+        format!(
+            "{path}: group GID is {}, but the task requires {}. Compare numeric group ownership with the requested change; preserve unrelated entries.",
+            actual.gid, expected.gid
+        )
+    } else if actual.mode != expected.mode {
+        format!(
+            "{path}: mode is {:04o}, but the task requires {:04o}. Keep the requested permission bits while repairing accounts or ownership.",
+            actual.mode, expected.mode
+        )
+    } else if std::mem::discriminant(&actual.data) != std::mem::discriminant(&expected.data) {
+        format!(
+            "{path}: entry is a {}, but the task requires a {}. A matching path alone does not preserve its type.",
+            entry_kind(&actual.data),
+            entry_kind(&expected.data)
+        )
+    } else {
+        format!(
+            "{path}: text differs ({} bytes now; {} bytes requested). Use cat to inspect the virtual file; preserve the requested contents.",
+            actual.bytes(),
+            expected.bytes()
+        )
+    }
+}
+fn configuration_difference(actual: &Configuration, expected: &Configuration) -> String {
+    // Borrow bounded maps; do not clone configurations or format their contents.
+    for (name, wanted) in &expected.users {
+        if actual.users.get(name) != Some(wanted) {
+            return user_difference(name, actual.users.get(name), wanted);
+        }
+    }
+    if let Some((name, user)) = actual
+        .users
+        .iter()
+        .find(|(name, _)| !expected.users.contains_key(*name))
+    {
+        return format!(
+            "{name}: unexpected account record remains (UID {}). Compare getent passwd with the task's requested final records.",
+            user.uid
+        );
+    }
+    for (name, wanted) in &expected.groups {
+        if actual.groups.get(name) != Some(wanted) {
+            return group_difference(name, actual.groups.get(name), wanted);
+        }
+    }
+    if let Some((name, group)) = actual
+        .groups
+        .iter()
+        .find(|(name, _)| !expected.groups.contains_key(*name))
+    {
+        return format!(
+            "{name}: unexpected group record remains (GID {}). Compare getent group with the requested final records.",
+            group.gid
+        );
+    }
+    for (path, wanted) in &expected.entries {
+        if actual.entries.get(path) != Some(wanted) {
+            return entry_difference(path, actual.entries.get(path), wanted);
+        }
+    }
+    if let Some(path) = actual
+        .entries
+        .keys()
+        .find(|path| !expected.entries.contains_key(*path))
+    {
+        return format!(
+            "{path}: unexpected entry remains. Check the task's required creation or removal without changing unrelated data."
+        );
+    }
+    "The current configuration matches".into()
+}
 pub fn checks(initial: &State, state: &State, requirements: &[Requirement]) -> Vec<(bool, String)> {
     if !valid_requirements(initial, requirements) || !state.valid_against(initial) {
         return vec![(
@@ -1729,14 +1923,77 @@ pub fn checks(initial: &State, state: &State, requirements: &[Requirement]) -> V
         )];
     }
     let c = &state.configuration;
-    requirements.iter().map(|r|match r{
-        Requirement::User{name,expected}=>(c.users.get(name)==Some(expected),format!("{name}: requested account identity, membership and policy")),
-        Requirement::Group{name,expected}=>(c.groups.get(name)==Some(expected),format!("{name}: requested group identity")),
-        Requirement::UserAbsent{name,uid}=>(!c.users.contains_key(name)&&!c.users.values().any(|u|u.uid==*uid),format!("{name}: account removed without reassigning its UID")),
-        Requirement::GroupAbsent{name,gid}=>(!c.groups.contains_key(name)&&!c.groups.values().any(|g|g.gid==*gid),format!("{name}: group removed without reassigning its GID")),
-        Requirement::Entry{path,expected}=>(c.entries.get(path)==Some(expected),format!("{path}: retained text, kind, mode and numeric ownership")),
-        Requirement::AbsentPath{path}=>(!c.entries.contains_key(path),format!("{path}: entry absent")),
-        Requirement::Configuration{expected}=>(c==expected,"All requested account/group records and virtual entries, including unaffected data".into()),
-        Requirement::ExpiryRange{name,first,last}=>(c.users.get(name).and_then(|u|u.expires).is_some_and(|d|d>=*first&&d<=*last),format!("{name}: requested account-expiry metadata range")),
+    requirements.iter().map(|r| {
+        let (passed, message) = match r {
+            Requirement::User { name, expected } => {
+                let passed = c.users.get(name) == Some(expected);
+                (passed, if passed { format!("{name}: requested account identity, membership and policy") }
+                    else { user_difference(name, c.users.get(name), expected) })
+            }
+            Requirement::Group { name, expected } => {
+                let passed = c.groups.get(name) == Some(expected);
+                (passed, if passed { format!("{name}: requested group identity") }
+                    else { group_difference(name, c.groups.get(name), expected) })
+            }
+            Requirement::UserAbsent { name, uid } => {
+                let passed = !c.users.contains_key(name) && !c.users.values().any(|u| u.uid == *uid);
+                let message = if passed { format!("{name}: account removed without reassigning its UID") }
+                    else if let Some(user) = c.users.get(name) {
+                        format!("{name}: account record is still present (UID {}). The task requires its removal; getent passwd can verify record absence.", user.uid)
+                    } else if let Some((other, _)) = c.users.iter().find(|(_, u)| u.uid == *uid) {
+                        format!("{name}: the name is absent, but UID {uid} now belongs to {other}. Retirement must not transfer that numeric identity to another account.")
+                    } else { unreachable!("failed absence predicate has a retained name or UID") };
+                (passed, message)
+            }
+            Requirement::GroupAbsent { name, gid } => {
+                let passed = !c.groups.contains_key(name) && !c.groups.values().any(|g| g.gid == *gid);
+                let message = if passed { format!("{name}: group removed without reassigning its GID") }
+                    else if let Some(group) = c.groups.get(name) {
+                        format!("{name}: group record is still present (GID {}). The task requires its removal; inspect getent group.", group.gid)
+                    } else if let Some((other, _)) = c.groups.iter().find(|(_, g)| g.gid == *gid) {
+                        format!("{name}: the name is absent, but GID {gid} now belongs to {other}. This removal task requires the numeric group identity to be absent too.")
+                    } else { unreachable!("failed absence predicate has a retained name or GID") };
+                (passed, message)
+            }
+            Requirement::Entry { path, expected } => {
+                let passed = c.entries.get(path) == Some(expected);
+                (passed, if passed { format!("{path}: retained text, kind, mode and numeric ownership") }
+                    else { entry_difference(path, c.entries.get(path), expected) })
+            }
+            Requirement::AbsentPath { path } => {
+                let passed = !c.entries.contains_key(path);
+                (passed, if passed { format!("{path}: entry absent") }
+                    else if path.starts_with("/home/") { format!("{path}: entry is still present. Removing an account record alone does not remove its home; compare the requested home cleanup.") }
+                    else { format!("{path}: entry is still present; the task requires its removal. Keep unrelated virtual entries unchanged.") })
+            }
+            Requirement::Configuration { expected } => {
+                let passed = c == expected;
+                (passed, if passed { "All requested account/group records and virtual entries, including unaffected data".into() }
+                    else { format!("First remaining difference: {}", configuration_difference(c, expected)) })
+            }
+            Requirement::ExpiryRange { name, first, last } => {
+                let passed = c.users.get(name).and_then(|u| u.expires).is_some_and(|d| d >= *first && d <= *last);
+                let message = if passed { format!("{name}: requested account-expiry metadata range") }
+                    else if let Some(user) = c.users.get(name) {
+                        format!("{name}: expiry metadata is {}; requested {} through {} UTC, inclusive. This is stored metadata only, not a login or authentication result.", expiry_description(user.expires), first.iso(), last.iso())
+                    } else { format!("{name}: the account record is missing, so its requested expiry metadata cannot be checked.") };
+                (passed, message)
+            }
+        };
+        (passed, bounded_feedback(message))
     }).collect()
+}
+
+#[cfg(test)]
+mod feedback_bound_tests {
+    use super::*;
+
+    #[test]
+    fn educational_feedback_has_a_retained_utf8_byte_bound() {
+        let message = bounded_feedback("é🙂".repeat(1000));
+        assert!(message.len() <= MAX_ERROR_BYTES);
+        assert!(message.capacity() <= MAX_ERROR_BYTES);
+        assert!(message.ends_with('…'));
+        assert!(message.is_char_boundary(message.len()));
+    }
 }
