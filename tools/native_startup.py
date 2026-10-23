@@ -56,7 +56,7 @@ def launch(command, logfile, cwd, env, timeout, cap=MAX_LOG, on_timeout=None):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--app', type=Path, required=True)
     parser.add_argument('--count', type=int, default=20)
     parser.add_argument('--timeout', type=int, default=12)

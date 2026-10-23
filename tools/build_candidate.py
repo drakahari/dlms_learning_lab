@@ -18,22 +18,31 @@ import tomllib
 import zipfile
 
 from dependency_notices import collect
+from build_safety import workflow, project_root, disk_directory, run as safe_run, checkpoint, capture
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def command(args, **kwargs):
-    return subprocess.check_output(args, cwd=ROOT, text=True, **kwargs).strip()
+    checkpoint()
+    # Metadata is small; the shared monitor still guards each additional phase.
+    return capture(args, cwd=ROOT, **kwargs).strip()
 
 
 def sha256(path):
-    return hashlib.sha256(path.read_bytes()).hexdigest()
+    digest = hashlib.sha256()
+    with path.open('rb') as stream:
+        for chunk in iter(lambda: stream.read(1024 * 1024), b''):
+            checkpoint()
+            digest.update(chunk)
+    return digest.hexdigest()
 
 
 def copy_tracked_tree(relative, destination):
     # Never sweep ignored/untracked profile files or recordings into a candidate.
     paths = subprocess.check_output(['git', 'ls-files', '-z', '--', relative], cwd=ROOT).decode().split('\0')
     for tracked in filter(None, paths):
+        checkpoint()
         source = ROOT / tracked
         component = ROOT
         for part in Path(tracked).parts:
@@ -49,10 +58,15 @@ def copy_tracked_tree(relative, destination):
 
 def compile_native(cargo, target, binary_name, env):
     # Explicit CLI options override Cargo environment and config target settings.
-    build_dir = ROOT / 'target/candidate-build'
+    common = project_root(ROOT)
+    build_dir = (common / 'target/candidate-build').resolve()
+    if not build_dir.is_relative_to(common):
+        raise ValueError('Candidate build target escaped the project volume')
+    disk_directory(build_dir)
     env = {k: v for k, v in env.items() if k not in ('CARGO_BUILD_TARGET', 'CARGO_TARGET_DIR')}
-    subprocess.run([cargo, 'build', '--release', '--locked', '--offline', '--target', target,
-                    '--target-dir', str(build_dir)], cwd=ROOT, env=env, check=True)
+    env = {**env, 'CARGO_BUILD_JOBS': '2', 'RUST_TEST_THREADS': '2'}
+    safe_run([cargo, 'build', '--jobs', '2', '--release', '--locked', '--offline', '--target', target,
+                    '--target-dir', str(build_dir)], cwd=ROOT, env=env)
     artifact = build_dir / target / 'release' / binary_name
     if not artifact.is_file() or artifact.is_symlink():
         raise ValueError('Expected native compiler artifact was not created')
@@ -75,6 +89,11 @@ def embedded_content_hashes():
 
 
 def build(output, allow_dirty=False):
+    with workflow(ROOT, 'candidate'):
+        return _build(output, allow_dirty)
+
+
+def _build(output, allow_dirty=False):
     if platform.system() not in ('Linux', 'Windows', 'Darwin'):
         raise ValueError('Unsupported native build OS')
     revision = command(['git', 'rev-parse', 'HEAD'])
@@ -103,6 +122,9 @@ def build(output, allow_dirty=False):
     flavor = re.sub(r'[^a-zA-Z0-9_.-]', '-', flavor)
     identity = f'dlms-learning-lab-{version}-g{revision[:12]}-{target}-{flavor}-candidate' + ('-dirty' if dirty else '')
     output = Path(output).resolve()
+    if not output.is_relative_to(project_root(ROOT)):
+        raise ValueError('Candidate output must stay on the project disk-backed volume')
+    disk_directory(output)
     output.mkdir(parents=True, exist_ok=True)
     destination = output / identity
     if destination.exists() or (output / (identity + '.tar.gz')).exists() or (output / (identity + '.zip')).exists():
@@ -119,11 +141,13 @@ def build(output, allow_dirty=False):
     env.pop('RUSTFLAGS', None)
     env['CARGO_ENCODED_RUSTFLAGS'] = '\x1f'.join([*existing_flags, *remaps])
     binary_name = 'dlms-learning-lab.exe' if platform.system() == 'Windows' else 'dlms-learning-lab'
+    checkpoint()
     binary = compile_native(cargo, target, binary_name, env)
     # Use fresh staging; a failed notice check cannot leave a candidate labeled complete.
-    with tempfile.TemporaryDirectory(prefix='dlms-candidate-') as temporary:
+    with tempfile.TemporaryDirectory(prefix='dlms-candidate-', dir=project_root(ROOT) / '.build-artifacts/tmp') as temporary:
         stage = Path(temporary) / identity
         stage.mkdir()
+        checkpoint()
         contents = stage
         resources = stage
         if platform.system() == 'Darwin':
@@ -143,6 +167,7 @@ def build(output, allow_dirty=False):
         copy_tracked_tree('docs', resources / 'docs')
         copy_tracked_tree('assets/themes', resources / 'theme-notices')
         shutil.copyfile(ROOT / 'packaging/icon.svg', resources / 'icon.svg')
+        checkpoint()
         inventory = collect(metadata, resources / 'third-party', dependencies=dependencies, target=target)
         if inventory['unresolved']:
             raise ValueError('Unresolved notice/source obligations: ' + '; '.join(inventory['unresolved']))
@@ -170,24 +195,31 @@ def build(output, allow_dirty=False):
             raise ValueError('Candidate may contain ordinary resources only')
         manifest = stage / 'INSTALL_FILES.txt'
         manifest.write_text('\n'.join(sorted([p.relative_to(stage).as_posix() for p in files] + ['INSTALL_FILES.txt'])) + '\n')
+        checkpoint()
         shutil.copytree(stage, destination)
+    checkpoint()
     if platform.system() == 'Linux':
         archive = output / (identity + '.tar.gz')
         with tarfile.open(archive, 'w:gz') as tar:
-            tar.add(destination, arcname=identity)
+            def checked(info):
+                checkpoint()
+                return info
+            tar.add(destination, arcname=identity, filter=checked)
     else:
         archive = output / (identity + '.zip')
         with zipfile.ZipFile(archive, 'w', compression=zipfile.ZIP_DEFLATED) as zipped:
             for file in sorted(destination.rglob('*')):
+                checkpoint()
                 if file.is_file():
                     zipped.write(file, Path(identity) / file.relative_to(destination))
+    checkpoint()
     (output / (archive.name + '.sha256')).write_text(sha256(archive) + '  ' + archive.name + '\n')
     print(json.dumps({'candidate': str(archive), 'sha256': sha256(archive), 'build': info}, indent=2))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=ROOT / 'dist')
+    parser.add_argument('--output', type=Path, default=project_root(ROOT) / 'dist')
     parser.add_argument('--allow-dirty', action='store_true')
     args = parser.parse_args()
     build(args.output, args.allow_dirty)

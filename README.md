@@ -23,18 +23,14 @@ Try these first:
 Use stable Rust (tested with 1.99.1 on Fedora 44):
 
 ```sh
-cargo build --locked
-cargo test --locked
-cargo clippy --locked --all-targets -- -D warnings
+python3 tools/dev.py build --locked --offline
+python3 tools/dev.py test --locked --offline --all-targets
+python3 tools/dev.py clippy --locked --offline --all-targets -- -D warnings
 cargo fmt --all -- --check
 ./target/debug/dlms-learning-lab --validate-pack scenarios/starter-v1.json
 ```
 
-This development session used an isolated Rust toolchain under `/tmp`; it made no system package changes. If Rust is absent from PATH while that toolchain remains available:
-
-```sh
-CARGO_HOME=/tmp/dlms-cargo RUSTUP_HOME=/tmp/dlms-rustup /tmp/dlms-cargo/bin/cargo build --locked --offline
-```
+Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two test threads, one shared heavy-work lock across worktrees, disk-backed temporary/cache data and lightweight memory-pressure observations. The local isolated Rust toolchain was copied into ignored `.build-artifacts/toolchains`; its original temporary copies were retained. No system packages, global shell settings, mounts, GPU reservations, swap or model settings were changed. First-time developer toolchain preparation is described in that guide; installed learners need none of it.
 
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 

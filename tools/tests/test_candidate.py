@@ -52,11 +52,14 @@ class NativeProvenance(unittest.TestCase):
             def compiler(args, **kwargs):
                 self.assertEqual(args[args.index('--target') + 1], target)
                 self.assertEqual(Path(args[args.index('--target-dir') + 1]), root / 'target/candidate-build')
+                self.assertEqual(args[args.index('--jobs') + 1], '2')
+                self.assertEqual(kwargs['env']['CARGO_BUILD_JOBS'], '2')
+                self.assertEqual(kwargs['env']['RUST_TEST_THREADS'], '2')
                 self.assertNotIn('CARGO_BUILD_TARGET', kwargs['env'])
                 self.assertNotIn('CARGO_TARGET_DIR', kwargs['env'])
                 expected.parent.mkdir(parents=True)
                 expected.write_text('fresh native executable')
-            with patch.object(candidate, 'ROOT', root), patch.object(candidate.subprocess, 'run', side_effect=compiler):
+            with patch.object(candidate, 'ROOT', root), patch.object(candidate, 'safe_run', side_effect=compiler), patch.object(candidate, 'project_root', return_value=root):
                 actual = candidate.compile_native('cargo', target, 'dlms-learning-lab', {'CARGO_BUILD_TARGET': 'other', 'CARGO_TARGET_DIR': '/elsewhere'})
             self.assertEqual(actual, expected)
             self.assertEqual(actual.read_text(), 'fresh native executable')
