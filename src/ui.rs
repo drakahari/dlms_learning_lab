@@ -227,9 +227,10 @@ impl LabApp {
             address_worked: Default::default(),
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout")
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit")
             {
+                4500
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout") {
                 4250
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-workspace") {
                 4200

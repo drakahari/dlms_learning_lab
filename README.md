@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. Sixty-four authored assignments: the original nine, twenty-nine scripting tasks, ten Linux file/access activities, six IPv6 static-network activities, six IPv4 static-routing activities and four VLAN data-plane activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. Seventy authored assignments: the original nine, twenty-nine scripting tasks, ten Linux file/access activities, six IPv6 static-network activities, six IPv4 static-routing activities, four VLAN data-plane activities and six forward-DNS activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -77,6 +77,8 @@ Back to library retains the selected track, search and filters. Reset asks for c
 The [Bash scope unit](docs/SHELL_SCOPE.md) adds three practical debugging assignments: protect caller settings, trace nested filter visibility and repair a review builder that changes the wrong file. Explicitly Bash-specific `local` is taught before use; alternative supported repairs pass the same behavior tests.
 
 Four [text-record lessons](docs/SHELL_TEXT.md) teach delimited field selection, stable unique manifests, accurate grouped counts and a duplicate-identity audit. Scripts use the same bounded simulator, separate examples and behavior grading.
+
+Six [forward-DNS lessons](docs/DNS_LESSONS.md) teach dual-stack host records, alias-loop repair, primary/backup mail discovery, safe address retirement, stale secondary diagnosis and a combined service handover. They use a native record editor and in-memory lookups, separate ungraded examples and current-state grading. Full BIND, reverse zones, recursion and real transfers remain outside this subset.
 
 Shell evaluator upgrades retain earlier output and credit separately from current success. Run rechecks the saved draft; unsupported behavior cannot reuse earlier completion. The first upgraded write keeps an exact non-overwriting backup. [Recovery details](docs/PROGRESS_RECOVERY.md).
 

@@ -1,0 +1,4010 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-dns-dualstack",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "dns-forward",
+      "title": "Add a service with IPv4 and IPv6",
+      "summary": "Add a new host without losing the existing zone.",
+      "objective": "Add files.workshop.test. with A 192.0.2.40 and AAAA 2001:db8::40. Publish the records on the primary. Keep web.workshop.test. at 192.0.2.20, db.workshop.test. at 192.0.2.30 and the existing nameserver records.",
+      "retry_guidance": "Compare the saved editor with the full assignment, then inspect the requested type on the intended served copy. Save and publish before retrying. Preserve unrelated records.",
+      "difficulty": "Beginner",
+      "minutes": 12,
+      "steps": [
+        "Investigate the current records, make the repair, publish and verify."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Add a new host without losing the existing zone.",
+          "action": "Use the native record editor and served-copy lookups. The Introduction and separate practice example can be reopened without losing assignment work.",
+          "commands": []
+        }
+      ],
+      "explanation": "files needs two records because A and AAAA are different address families. The existing nameserver, web and database records remain useful and must survive the edit. Saving changes the stored zone; only reload changes what the primary serves.",
+      "hints": [
+        "A and AAAA are separate records at the same full name; one cannot replace the other.",
+        "Append the two files records rather than replacing the whole zone. Keep its NS and existing host lines.",
+        "Save the zone, then reload the primary. Use A and AAAA lookups to compare the served values."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1035",
+        "https://datatracker.ietf.org/doc/html/rfc2181",
+        "https://datatracker.ietf.org/doc/html/rfc1982",
+        "https://datatracker.ietf.org/doc/html/rfc6604",
+        "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
+      ],
+      "simplifications": "Offline bounded forward-DNS resource-record editor and in-memory authoritative copies. Full names end in a dot; explicit decimal TTL and IN are required. A/AAAA/CNAME/MX/apex NS only; SOA serial is edited separately. No full BIND grammar/configuration/utilities, host zone files, caching, recursion, reverse/PTR, delegation/glue, transfer packets/timers, DNSSEC/TSIG or real DNS/mail/network activity. TTL values are retained but prescribed TTL choices are not graded.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "workshop.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.workshop.test."
+                }
+              },
+              {
+                "owner": "ns.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "db.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.30"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "workshop.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.workshop.test."
+                }
+              },
+              {
+                "owner": "ns.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "db.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.30"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "workshop.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.workshop.test."
+                }
+              },
+              {
+                "owner": "ns.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "db.workshop.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.30"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "files.workshop.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.40"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "files.workshop.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::40"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.workshop.test."
+              }
+            ],
+            "owner": "workshop.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "workshop.test.",
+            "record_type": "NS",
+            "target": "ns.workshop.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.40"
+              }
+            ],
+            "owner": "files.workshop.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::40"
+              }
+            ],
+            "owner": "files.workshop.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.workshop.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "db.workshop.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.30"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.workshop.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"workshop.test.\",\"serial\":101,\"records\":[{\"owner\":\"workshop.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.workshop.test.\"}},{\"owner\":\"ns.workshop.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.workshop.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.20\"}},{\"owner\":\"db.workshop.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.30\"}},{\"owner\":\"files.workshop.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.40\"}},{\"owner\":\"files.workshop.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::40\"}}]}",
+        "reload-primary"
+      ],
+      "prerequisites": [],
+      "dns_teaching": {
+        "prerequisite_note": "Start here: no DNS or shell-command knowledge is assumed. Address values are supplied; this workspace edits only a simulated zone.",
+        "concepts": [
+          {
+            "title": "Give a name an address",
+            "text": "DNS lets a readable name stand for data such as a computer address. A zone is the part of DNS you manage. A records hold IPv4 addresses; AAAA records hold IPv6 addresses. All addresses for this exercise are supplied; you do not need to calculate subnets. NS identifies the nameserver responsible for this zone. Its target ns.workshop.test. has its own A address line; keep both existing lines."
+          },
+          {
+            "title": "Write one complete record per line",
+            "text": "Type in Resource records. For example: files.dual-practice.test. 300 IN A 192.0.2.140. The name ends with a dot so it is complete. 300 is the TTL in seconds, how long a resolver may cache the answer; caching is not simulated here. IN means Internet class. An IPv6 example is a separate line:\nfiles.dual-practice.test. 300 IN AAAA 2001:db8::140\nKeep both A and AAAA records at the same name."
+          },
+          {
+            "title": "Saved is different from served",
+            "text": "Save zone stores your edit inside this simulation. Reload primary makes that saved zone available to lookups. SOA serial is the zone revision number; increase it when editing. Look up with type A, then AAAA, checks the primary copy. Check configuration evaluates the whole assignment."
+          }
+        ],
+        "example_description": "In dual-practice.test., add files with A 192.0.2.140 and AAAA 2001:db8::140. Preserve web, db and ns. The worked example fills this practice editor only; save and reload it yourself.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "dual-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.dual-practice.test."
+                }
+              },
+              {
+                "owner": "ns.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "db.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.30"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "dual-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.dual-practice.test."
+                }
+              },
+              {
+                "owner": "ns.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "db.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.30"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "dual-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.dual-practice.test."
+                }
+              },
+              {
+                "owner": "ns.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "db.dual-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.30"
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"dual-practice.test.\",\"serial\":901,\"records\":[{\"owner\":\"dual-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.dual-practice.test.\"}},{\"owner\":\"ns.dual-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.dual-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.20\"}},{\"owner\":\"db.dual-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.30\"}},{\"owner\":\"files.dual-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.140\"}},{\"owner\":\"files.dual-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::140\"}}]}",
+          "reload-primary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "files.dual-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.140"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "files.dual-practice.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::140"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.dual-practice.test."
+              }
+            ],
+            "owner": "dual-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "dual-practice.test.",
+            "record_type": "NS",
+            "target": "ns.dual-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.140"
+              }
+            ],
+            "owner": "files.dual-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::140"
+              }
+            ],
+            "owner": "files.dual-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.dual-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "db.dual-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.30"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.dual-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ],
+        "try_change": "Change only the practice host IPv4 address, save without reloading, and compare its A lookup before and after reload."
+      }
+    },
+    {
+      "id": "lpic2-dns-aliases",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "dns-forward",
+      "title": "Repair a looping service alias",
+      "summary": "Trace and repair an alias path while keeping canonical addresses.",
+      "objective": "Restore portal.studio.test. and status.studio.test. as working CNAME paths to app.studio.test. Keep app at A 192.0.2.60 and AAAA 2001:db8::60, legacy.studio.test. at 192.0.2.50 and the nameserver records. Publish on the primary. Either alias may point through the other, but both must reach app.",
+      "retry_guidance": "Compare the saved editor with the full assignment, then inspect the requested type on the intended served copy. Save and publish before retrying. Preserve unrelated records.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Investigate the current records, make the repair, publish and verify."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Trace and repair an alias path while keeping canonical addresses.",
+          "action": "Use the native record editor and served-copy lookups. The Introduction and separate practice example can be reopened without losing assignment work.",
+          "commands": []
+        }
+      ],
+      "explanation": "The failure is a cycle in names, not a missing subnet or an IPv4 calculation. Redirecting one edge to app ends the loop; the other alias can follow that path. Both canonical addresses and unrelated records stay in place. Direct A replacement would lose the requested alias relationship.",
+      "hints": [
+        "Inspect the portal and status CNAME lines; following either currently returns to a name already visited.",
+        "Break the cycle by pointing one existing alias toward app. The other may continue through it.",
+        "Keep the A and AAAA records on app. Copying its number into portal as A does not keep portal as a CNAME alias."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1035",
+        "https://datatracker.ietf.org/doc/html/rfc2181",
+        "https://datatracker.ietf.org/doc/html/rfc1982",
+        "https://datatracker.ietf.org/doc/html/rfc6604",
+        "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
+      ],
+      "simplifications": "Offline bounded forward-DNS resource-record editor and in-memory authoritative copies. Full names end in a dot; explicit decimal TTL and IN are required. A/AAAA/CNAME/MX/apex NS only; SOA serial is edited separately. No full BIND grammar/configuration/utilities, host zone files, caching, recursion, reverse/PTR, delegation/glue, transfer packets/timers, DNSSEC/TSIG or real DNS/mail/network activity. TTL values are retained but prescribed TTL choices are not graded.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "studio.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.studio.test."
+                }
+              },
+              {
+                "owner": "ns.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.60"
+                }
+              },
+              {
+                "owner": "app.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::60"
+                }
+              },
+              {
+                "owner": "legacy.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              },
+              {
+                "owner": "portal.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "status.studio.test."
+                }
+              },
+              {
+                "owner": "status.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.studio.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "studio.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.studio.test."
+                }
+              },
+              {
+                "owner": "ns.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.60"
+                }
+              },
+              {
+                "owner": "app.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::60"
+                }
+              },
+              {
+                "owner": "legacy.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              },
+              {
+                "owner": "portal.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "status.studio.test."
+                }
+              },
+              {
+                "owner": "status.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.studio.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "studio.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.studio.test."
+                }
+              },
+              {
+                "owner": "ns.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.60"
+                }
+              },
+              {
+                "owner": "app.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::60"
+                }
+              },
+              {
+                "owner": "legacy.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              },
+              {
+                "owner": "portal.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "status.studio.test."
+                }
+              },
+              {
+                "owner": "status.studio.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.studio.test."
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "portal.studio.test.",
+            "record_type": "A",
+            "target": "app.studio.test."
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "status.studio.test.",
+            "record_type": "A",
+            "target": "app.studio.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "portal.studio.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.60"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "status.studio.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.60"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.studio.test."
+              }
+            ],
+            "owner": "studio.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "studio.test.",
+            "record_type": "NS",
+            "target": "ns.studio.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "app.studio.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.60"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "app.studio.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::60"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "legacy.studio.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.50"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.studio.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"studio.test.\",\"serial\":101,\"records\":[{\"owner\":\"studio.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.studio.test.\"}},{\"owner\":\"ns.studio.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"app.studio.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.60\"}},{\"owner\":\"app.studio.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::60\"}},{\"owner\":\"legacy.studio.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.50\"}},{\"owner\":\"portal.studio.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"status.studio.test.\"}},{\"owner\":\"status.studio.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"app.studio.test.\"}}]}",
+        "reload-primary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-dualstack"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Builds on the earlier forward-DNS lessons. The editor, absolute record syntax and save/reload workflow are reused; new ideas are explained below. Prerequisites are guidance, not a lock.",
+        "concepts": [
+          {
+            "title": "A second name for one host",
+            "text": "A CNAME record redirects a name to another name, not an IP address. The destination that owns the final A/AAAA records is the canonical host. For example, portal.alias-practice.test. 300 IN CNAME app.alias-practice.test. lets an A lookup follow the name to its address."
+          },
+          {
+            "title": "Follow the path, not just the number",
+            "text": "Look up CNAME to inspect one alias target; look up A to follow the supported in-zone path. If two aliases point back to each other, no address is reached: the simulator reports Servfail and names the loop. Matching address text alone does not repair the intended host relationship."
+          },
+          {
+            "title": "Repair one link and verify both names",
+            "text": "Use the existing record editor, Save zone and Reload primary. A CNAME name cannot also hold ordinary A/AAAA data. Preserve the canonical host records and test each requested alias. A valid intermediate alias is allowed; a direct copied A record is not this task."
+          }
+        ],
+        "example_description": "In alias-practice.test., portal and status loop. Repair both CNAME paths to app, whose supplied addresses are 192.0.2.160 and 2001:db8::160. Keep legacy and the nameserver.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "alias-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.alias-practice.test."
+                }
+              },
+              {
+                "owner": "ns.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.160"
+                }
+              },
+              {
+                "owner": "app.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::160"
+                }
+              },
+              {
+                "owner": "legacy.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              },
+              {
+                "owner": "portal.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "status.alias-practice.test."
+                }
+              },
+              {
+                "owner": "status.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.alias-practice.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "alias-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.alias-practice.test."
+                }
+              },
+              {
+                "owner": "ns.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.160"
+                }
+              },
+              {
+                "owner": "app.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::160"
+                }
+              },
+              {
+                "owner": "legacy.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              },
+              {
+                "owner": "portal.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "status.alias-practice.test."
+                }
+              },
+              {
+                "owner": "status.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.alias-practice.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "alias-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.alias-practice.test."
+                }
+              },
+              {
+                "owner": "ns.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.160"
+                }
+              },
+              {
+                "owner": "app.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::160"
+                }
+              },
+              {
+                "owner": "legacy.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              },
+              {
+                "owner": "portal.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "status.alias-practice.test."
+                }
+              },
+              {
+                "owner": "status.alias-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "portal.alias-practice.test."
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"alias-practice.test.\",\"serial\":901,\"records\":[{\"owner\":\"alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.alias-practice.test.\"}},{\"owner\":\"ns.alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"app.alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.160\"}},{\"owner\":\"app.alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::160\"}},{\"owner\":\"legacy.alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.50\"}},{\"owner\":\"portal.alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"status.alias-practice.test.\"}},{\"owner\":\"status.alias-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"app.alias-practice.test.\"}}]}",
+          "reload-primary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "portal.alias-practice.test.",
+            "record_type": "A",
+            "target": "app.alias-practice.test."
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "status.alias-practice.test.",
+            "record_type": "A",
+            "target": "app.alias-practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "portal.alias-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.160"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "status.alias-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.160"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.alias-practice.test."
+              }
+            ],
+            "owner": "alias-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "alias-practice.test.",
+            "record_type": "NS",
+            "target": "ns.alias-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "app.alias-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.160"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "app.alias-practice.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::160"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "legacy.alias-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.50"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.alias-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ],
+        "try_change": "Point the practice status alias to itself, save/reload and inspect an A lookup. Repair it again without changing the app addresses."
+      }
+    },
+    {
+      "id": "lpic2-dns-mail",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "dns-forward",
+      "title": "Restore primary and backup mail discovery",
+      "summary": "Repair MX targets and their address records without changing the web service.",
+      "objective": "For mailroom.test., publish MX preference 10 to mx-a.mailroom.test. and preference 20 to mx-b.mailroom.test. Keep mx-a at A 192.0.2.25 and restore mx-b at A 192.0.2.26. MX targets must name these hosts directly. Keep web.mailroom.test. at 192.0.2.20 and the nameserver records. Diagnose the saved-zone problem before reloading.",
+      "retry_guidance": "Compare the saved editor with the full assignment, then inspect the requested type on the intended served copy. Save and publish before retrying. Preserve unrelated records.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Investigate the current records, make the repair, publish and verify."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Repair MX targets and their address records without changing the web service.",
+          "action": "Use the native record editor and served-copy lookups. The Introduction and separate practice example can be reopened without losing assignment work.",
+          "commands": []
+        }
+      ],
+      "explanation": "The primary MX targets mx-a directly at preference 10; the backup targets mx-b at preference 20. Each target owns an address record. A mail-alias CNAME cannot substitute for the canonical MX target. The old loaded answer can mask a bad saved configuration until publication is attempted.",
+      "hints": [
+        "Compare the saved MX target with the CNAME line. MX must name the canonical mx-a host directly.",
+        "mx-b needs its own A record as well as the backup MX record.",
+        "Preserve the complete two-member MX set and web/nameserver data; then save and reload the primary."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1035",
+        "https://datatracker.ietf.org/doc/html/rfc2181",
+        "https://datatracker.ietf.org/doc/html/rfc1982",
+        "https://datatracker.ietf.org/doc/html/rfc6604",
+        "https://bind9.readthedocs.io/en/v9.20.12/reference.html#namedconf-statement-check-mx-cname",
+        "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
+      ],
+      "simplifications": "Offline bounded forward-DNS resource-record editor and in-memory authoritative copies. Full names end in a dot; explicit decimal TTL and IN are required. A/AAAA/CNAME/MX/apex NS only; SOA serial is edited separately. No full BIND grammar/configuration/utilities, host zone files, caching, recursion, reverse/PTR, delegation/glue, transfer packets/timers, DNSSEC/TSIG or real DNS/mail/network activity. TTL values are retained but prescribed TTL choices are not graded.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "mailroom.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.mailroom.test."
+                }
+              },
+              {
+                "owner": "ns.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "mx-a.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "mail-alias.mailroom.test."
+                }
+              },
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mx-b.mailroom.test."
+                }
+              },
+              {
+                "owner": "mail-alias.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "mx-a.mailroom.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "mailroom.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.mailroom.test."
+                }
+              },
+              {
+                "owner": "ns.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "mx-a.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "mx-b.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "mx-a.mailroom.test."
+                }
+              },
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mx-b.mailroom.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "mailroom.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.mailroom.test."
+                }
+              },
+              {
+                "owner": "ns.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "mx-a.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "mx-b.mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "mx-a.mailroom.test."
+                }
+              },
+              {
+                "owner": "mailroom.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mx-b.mailroom.test."
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "MX",
+            "data": [
+              {
+                "type": "MX",
+                "preference": 10,
+                "exchange": "mx-a.mailroom.test."
+              },
+              {
+                "type": "MX",
+                "preference": 20,
+                "exchange": "mx-b.mailroom.test."
+              }
+            ],
+            "owner": "mailroom.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "mailroom.test.",
+            "record_type": "MX",
+            "target": "mx-a.mailroom.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "mailroom.test.",
+            "record_type": "MX",
+            "target": "mx-b.mailroom.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "mx-b.mailroom.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.26"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.mailroom.test."
+              }
+            ],
+            "owner": "mailroom.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "mailroom.test.",
+            "record_type": "NS",
+            "target": "ns.mailroom.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "mx-a.mailroom.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.25"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.mailroom.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.mailroom.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"mailroom.test.\",\"serial\":101,\"records\":[{\"owner\":\"mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.mailroom.test.\"}},{\"owner\":\"ns.mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.20\"}},{\"owner\":\"mx-a.mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.25\"}},{\"owner\":\"mx-b.mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.26\"}},{\"owner\":\"mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":10,\"exchange\":\"mx-a.mailroom.test.\"}},{\"owner\":\"mailroom.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":20,\"exchange\":\"mx-b.mailroom.test.\"}}]}",
+        "reload-primary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-aliases"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Builds on the earlier forward-DNS lessons. The editor, absolute record syntax and save/reload workflow are reused; new ideas are explained below. Prerequisites are guidance, not a lock.",
+        "concepts": [
+          {
+            "title": "How mail finds a host",
+            "text": "MX records name mail hosts and a preference number. A smaller number is preferred. For example: mail-practice.test. 300 IN MX 10 mx-a.mail-practice.test. The exchange is a full host name, not an IP address."
+          },
+          {
+            "title": "A target also needs an address",
+            "text": "An in-zone mail host needs its own A or AAAA record. MX/NS targets must be canonical names rather than CNAME aliases. Here the intended mail host names and IPv4 addresses are supplied. Repair both the MX target and any missing host address; an MX line alone is insufficient."
+          },
+          {
+            "title": "The old primary can still answer",
+            "text": "The saved copy contains a problem, while the primary still holds the prior loaded records. Read the editor and try reload: in this simulator invalid alias targets leave the primary unchanged with a specific diagnostic. Repair, save and reload, then query MX and each host A. This proves DNS data only, not mail delivery. Real BIND has configurable warning/failure policy; this editor is not a full BIND loader."
+          }
+        ],
+        "example_description": "In mail-practice.test., repair the same kinds of saved-zone faults. Use MX 10 mx-a / MX 20 mx-b, with A 192.0.2.125 and 192.0.2.126. Keep web at 192.0.2.20 and ns.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "mail-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.mail-practice.test."
+                }
+              },
+              {
+                "owner": "ns.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "mx-a.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.125"
+                }
+              },
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "mail-alias.mail-practice.test."
+                }
+              },
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mx-b.mail-practice.test."
+                }
+              },
+              {
+                "owner": "mail-alias.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "mx-a.mail-practice.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "mail-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.mail-practice.test."
+                }
+              },
+              {
+                "owner": "ns.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "mx-a.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.125"
+                }
+              },
+              {
+                "owner": "mx-b.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.126"
+                }
+              },
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "mx-a.mail-practice.test."
+                }
+              },
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mx-b.mail-practice.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "mail-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.mail-practice.test."
+                }
+              },
+              {
+                "owner": "ns.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              },
+              {
+                "owner": "mx-a.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.125"
+                }
+              },
+              {
+                "owner": "mx-b.mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.126"
+                }
+              },
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "mx-a.mail-practice.test."
+                }
+              },
+              {
+                "owner": "mail-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mx-b.mail-practice.test."
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"mail-practice.test.\",\"serial\":901,\"records\":[{\"owner\":\"mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.mail-practice.test.\"}},{\"owner\":\"ns.mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.20\"}},{\"owner\":\"mx-a.mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.125\"}},{\"owner\":\"mx-b.mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.126\"}},{\"owner\":\"mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":10,\"exchange\":\"mx-a.mail-practice.test.\"}},{\"owner\":\"mail-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":20,\"exchange\":\"mx-b.mail-practice.test.\"}}]}",
+          "reload-primary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "MX",
+            "data": [
+              {
+                "type": "MX",
+                "preference": 10,
+                "exchange": "mx-a.mail-practice.test."
+              },
+              {
+                "type": "MX",
+                "preference": 20,
+                "exchange": "mx-b.mail-practice.test."
+              }
+            ],
+            "owner": "mail-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "mail-practice.test.",
+            "record_type": "MX",
+            "target": "mx-a.mail-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "mail-practice.test.",
+            "record_type": "MX",
+            "target": "mx-b.mail-practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "mx-b.mail-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.126"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.mail-practice.test."
+              }
+            ],
+            "owner": "mail-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "mail-practice.test.",
+            "record_type": "NS",
+            "target": "ns.mail-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "mx-a.mail-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.125"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.mail-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.mail-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ],
+        "try_change": "Change practice MX preferences to 30 and 5 and query MX after publishing. Notice which number is smaller; this simulator does not send mail."
+      }
+    },
+    {
+      "id": "lpic2-dns-rrsets",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "dns-forward",
+      "title": "Retire an obsolete address safely",
+      "summary": "Edit one address set while preserving active IPv4, IPv6 and peer records.",
+      "objective": "Remove obsolete A 192.0.2.99 from web.gateway.test. Retain exactly A 192.0.2.10 and 192.0.2.11, plus its AAAA 2001:db8::10. Keep api.gateway.test. at 192.0.2.20 and the nameserver records. Save and publish on the primary; verify the complete A answer, not only its first line.",
+      "retry_guidance": "Compare the saved editor with the full assignment, then inspect the requested type on the intended served copy. Save and publish before retrying. Preserve unrelated records.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Investigate the current records, make the repair, publish and verify."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Edit one address set while preserving active IPv4, IPv6 and peer records.",
+          "action": "Use the native record editor and served-copy lookups. The Introduction and separate practice example can be reopened without losing assignment work.",
+          "commands": []
+        }
+      ],
+      "explanation": "The successful set has both active A addresses and excludes .99. AAAA belongs to another type and survives unchanged, as do api and the nameserver. Reordering or duplicating an existing row changes no RRset membership; removing a valid member breaks the assignment.",
+      "hints": [
+        "An A query must contain both active addresses and no retired one. Inspect all returned rows.",
+        "Delete only the obsolete A line. Do not replace the whole host block or remove its AAAA record.",
+        "Preserve api and ns, save and reload before checking the served set."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1035",
+        "https://datatracker.ietf.org/doc/html/rfc2181",
+        "https://datatracker.ietf.org/doc/html/rfc1982",
+        "https://datatracker.ietf.org/doc/html/rfc6604",
+        "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
+      ],
+      "simplifications": "Offline bounded forward-DNS resource-record editor and in-memory authoritative copies. Full names end in a dot; explicit decimal TTL and IN are required. A/AAAA/CNAME/MX/apex NS only; SOA serial is edited separately. No full BIND grammar/configuration/utilities, host zone files, caching, recursion, reverse/PTR, delegation/glue, transfer packets/timers, DNSSEC/TSIG or real DNS/mail/network activity. TTL values are retained but prescribed TTL choices are not graded.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "gateway.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.gateway.test."
+                }
+              },
+              {
+                "owner": "ns.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.10"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.11"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.99"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::10"
+                }
+              },
+              {
+                "owner": "api.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "gateway.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.gateway.test."
+                }
+              },
+              {
+                "owner": "ns.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.10"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.11"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.99"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::10"
+                }
+              },
+              {
+                "owner": "api.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "gateway.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.gateway.test."
+                }
+              },
+              {
+                "owner": "ns.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.10"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.11"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.99"
+                }
+              },
+              {
+                "owner": "web.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::10"
+                }
+              },
+              {
+                "owner": "api.gateway.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.10"
+              },
+              {
+                "type": "A",
+                "address": "192.0.2.11"
+              }
+            ],
+            "owner": "web.gateway.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "web.gateway.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.10"
+              },
+              {
+                "type": "A",
+                "address": "192.0.2.11"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.gateway.test."
+              }
+            ],
+            "owner": "gateway.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "gateway.test.",
+            "record_type": "NS",
+            "target": "ns.gateway.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.gateway.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::10"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "api.gateway.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.gateway.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"gateway.test.\",\"serial\":101,\"records\":[{\"owner\":\"gateway.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.gateway.test.\"}},{\"owner\":\"ns.gateway.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.gateway.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.10\"}},{\"owner\":\"web.gateway.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.11\"}},{\"owner\":\"web.gateway.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::10\"}},{\"owner\":\"api.gateway.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.20\"}}]}",
+        "reload-primary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-mail"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Builds on the earlier forward-DNS lessons. The editor, absolute record syntax and save/reload workflow are reused; new ideas are explained below. Prerequisites are guidance, not a lock.",
+        "concepts": [
+          {
+            "title": "One name can have several records",
+            "text": "Records with the same name and type form a resource record set (RRset). A lookup may return more than one A address. For web.rrset-practice.test., the active addresses are 192.0.2.110 and 192.0.2.111. Both are needed; deleting one good line is not a safe cleanup."
+          },
+          {
+            "title": "Preserve other kinds of data",
+            "text": "The AAAA record at that same name is a separate set. Another host name is separate again. Inspect the complete current A output and remove only the retired member; preserve the IPv6 and peer-host lines."
+          },
+          {
+            "title": "Order is not a delivery promise",
+            "text": "Case, record order and exact duplicate rows do not create new DNS data. This simulator sorts output consistently for inspection; it does not model client address selection, balancing, caching or failover. Compare all members, then use Check configuration."
+          }
+        ],
+        "example_description": "In rrset-practice.test., remove web A 192.0.2.99 but retain A 192.0.2.110 / 192.0.2.111, AAAA 2001:db8::110, api and ns.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "rrset-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.rrset-practice.test."
+                }
+              },
+              {
+                "owner": "ns.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.110"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.111"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.99"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::110"
+                }
+              },
+              {
+                "owner": "api.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "rrset-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.rrset-practice.test."
+                }
+              },
+              {
+                "owner": "ns.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.110"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.111"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.99"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::110"
+                }
+              },
+              {
+                "owner": "api.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "rrset-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.rrset-practice.test."
+                }
+              },
+              {
+                "owner": "ns.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.110"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.111"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.99"
+                }
+              },
+              {
+                "owner": "web.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::110"
+                }
+              },
+              {
+                "owner": "api.rrset-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.20"
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"rrset-practice.test.\",\"serial\":901,\"records\":[{\"owner\":\"rrset-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.rrset-practice.test.\"}},{\"owner\":\"ns.rrset-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.rrset-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.110\"}},{\"owner\":\"web.rrset-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.111\"}},{\"owner\":\"web.rrset-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::110\"}},{\"owner\":\"api.rrset-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.20\"}}]}",
+          "reload-primary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.110"
+              },
+              {
+                "type": "A",
+                "address": "192.0.2.111"
+              }
+            ],
+            "owner": "web.rrset-practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "web.rrset-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.110"
+              },
+              {
+                "type": "A",
+                "address": "192.0.2.111"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.rrset-practice.test."
+              }
+            ],
+            "owner": "rrset-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "rrset-practice.test.",
+            "record_type": "NS",
+            "target": "ns.rrset-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.rrset-practice.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::110"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "api.rrset-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.rrset-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ],
+        "try_change": "Add an exact duplicate of one active practice A line and compare the served lookup. Then remove the duplicate again; record order does not define client delivery order."
+      }
+    },
+    {
+      "id": "lpic2-dns-secondary",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "dns-forward",
+      "title": "Bring a stale secondary up to date",
+      "summary": "Compare served copies and repair revision-controlled publication.",
+      "objective": "The primary already serves web.branch.test. at 203.0.113.80, but the secondary still returns 203.0.113.8. Make both serve the new address and the same current saved zone. Keep api.branch.test. at 203.0.113.20 and the nameserver records. Choose a newer SOA serial, publish and update without reverting the primary to the old address.",
+      "retry_guidance": "Compare the saved editor with the full assignment, then inspect the requested type on the intended served copy. Save and publish before retrying. Preserve unrelated records.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Investigate the current records, make the repair, publish and verify."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Compare served copies and repair revision-controlled publication.",
+          "action": "Use the native record editor and served-copy lookups. The Introduction and separate practice example can be reopened without losing assignment work.",
+          "commands": []
+        }
+      ],
+      "explanation": "The secondary correctly ignores an equal serial even when the primary data changed. A newer saved serial must first become the loaded primary revision before the secondary can accept it. Copying the old answer back to the primary would agree on the wrong result; explicit address outcomes prevent that false pass.",
+      "hints": [
+        "Query web on Primary and Secondary. The equal serials do not describe equal data in this exercise.",
+        "Do not change the primary back to the old address. Increase the saved serial from its current value.",
+        "Save zone, Reload primary, then Update secondary. Compare the new served A answer on both copies."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1035",
+        "https://datatracker.ietf.org/doc/html/rfc2181",
+        "https://datatracker.ietf.org/doc/html/rfc1982",
+        "https://datatracker.ietf.org/doc/html/rfc6604",
+        "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
+      ],
+      "simplifications": "Offline bounded forward-DNS resource-record editor and in-memory authoritative copies. Full names end in a dot; explicit decimal TTL and IN are required. A/AAAA/CNAME/MX/apex NS only; SOA serial is edited separately. No full BIND grammar/configuration/utilities, host zone files, caching, recursion, reverse/PTR, delegation/glue, transfer packets/timers, DNSSEC/TSIG or real DNS/mail/network activity. TTL values are retained but prescribed TTL choices are not graded. Serial comparison uses unsigned32-bit DNS arithmetic; exactly half-range differences are diagnosed as undefined.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "branch.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.branch.test."
+                }
+              },
+              {
+                "owner": "ns.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.80"
+                }
+              },
+              {
+                "owner": "api.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.20"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "branch.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.branch.test."
+                }
+              },
+              {
+                "owner": "ns.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.80"
+                }
+              },
+              {
+                "owner": "api.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.20"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "branch.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.branch.test."
+                }
+              },
+              {
+                "owner": "ns.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.8"
+                }
+              },
+              {
+                "owner": "api.branch.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.20"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "web.branch.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.80"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "api.branch.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.branch.test."
+              }
+            ],
+            "owner": "branch.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "branch.test.",
+            "record_type": "NS",
+            "target": "ns.branch.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "ns.branch.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.branch.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.80"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "api.branch.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.branch.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"branch.test.\",\"serial\":101,\"records\":[{\"owner\":\"branch.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.branch.test.\"}},{\"owner\":\"ns.branch.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.branch.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"203.0.113.80\"}},{\"owner\":\"api.branch.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"203.0.113.20\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-rrsets"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Builds on the earlier forward-DNS lessons. The editor, absolute record syntax and save/reload workflow are reused; new ideas are explained below. Prerequisites are guidance, not a lock.",
+        "concepts": [
+          {
+            "title": "Two servers can hold different copies",
+            "text": "A primary publishes the saved zone. A secondary keeps another copy for availability. Select Primary or Secondary before an A lookup to compare their answers. A matching name does not prove both have the same revision."
+          },
+          {
+            "title": "A revision number controls the update",
+            "text": "SOA serial is the zone revision number. A primary can load changed data with an equal serial, but the secondary then sees no newer revision and retains its copy. For ordinary small changes, increase the saved serial, save, reload the primary and update the secondary. Any supported newer value is accepted; no particular decimal format is required."
+          },
+          {
+            "title": "Verify the new value and the peers",
+            "text": "Check web on both copies, and preserve api/ns. This explicit Update secondary control models only the serial decision and copy, not DNS transfer packets or refresh timers. Advanced serial wraparound limits are available in the optional references."
+          }
+        ],
+        "example_description": "In secondary-practice.test., primary web is 203.0.113.180 and secondary web is 203.0.113.18 at equal serials. Publish a newer revision while retaining api and ns.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "secondary-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.secondary-practice.test."
+                }
+              },
+              {
+                "owner": "ns.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.180"
+                }
+              },
+              {
+                "owner": "api.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.20"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "secondary-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.secondary-practice.test."
+                }
+              },
+              {
+                "owner": "ns.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.180"
+                }
+              },
+              {
+                "owner": "api.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.20"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "secondary-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.secondary-practice.test."
+                }
+              },
+              {
+                "owner": "ns.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "web.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.18"
+                }
+              },
+              {
+                "owner": "api.secondary-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.20"
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"secondary-practice.test.\",\"serial\":901,\"records\":[{\"owner\":\"secondary-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.secondary-practice.test.\"}},{\"owner\":\"ns.secondary-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"web.secondary-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"203.0.113.180\"}},{\"owner\":\"api.secondary-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"203.0.113.20\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "web.secondary-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.180"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "api.secondary-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.secondary-practice.test."
+              }
+            ],
+            "owner": "secondary-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "secondary-practice.test.",
+            "record_type": "NS",
+            "target": "ns.secondary-practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "ns.secondary-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "web.secondary-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.180"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "api.secondary-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "203.0.113.20"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.secondary-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ],
+        "try_change": "First try Update secondary with the equal serial and compare both A lookups. Then increase the serial and follow save \u2192 reload \u2192 update."
+      }
+    },
+    {
+      "id": "lpic2-dns-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Authoritative DNS",
+      "unit": "dns-forward",
+      "title": "Complete a DNS service handover",
+      "summary": "Combine host, alias, mail and secondary verification without losing peers.",
+      "objective": "Publish app.handover.test. at A 192.0.2.110 and AAAA 2001:db8::110. Keep portal.handover.test. as a CNAME path to app. Set zone MX 10 to mail.handover.test. at A 192.0.2.35 and MX 20 to backup.handover.test. at A 192.0.2.36. Keep api at 192.0.2.50, archive at 192.0.2.90 and the existing nameserver records. Bring primary and secondary to the same current saved zone and verify the secondary portal answer.",
+      "retry_guidance": "Compare the saved editor with the full assignment, then inspect the requested type on the intended served copy. Save and publish before retrying. Preserve unrelated records.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Investigate the current records, make the repair, publish and verify."
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Combine host, alias, mail and secondary verification without losing peers.",
+          "action": "Use the native record editor and served-copy lookups. The Introduction and separate practice example can be reopened without losing assignment work.",
+          "commands": []
+        }
+      ],
+      "explanation": "The handover changes the intended app/mail addresses and MX priority, preserves useful peers and keeps portal linked to app. Publishing a newer primary revision and then updating the secondary makes the saved and served copies agree. A copied portal A, wrong canonical host, lost peer, missing MX target address or stale secondary is incomplete even when one lookup looks right.",
+      "hints": [
+        "Separate the task into host addresses, alias relationship, mail records and data to preserve. Keep the entire assignment available while editing.",
+        "MX preference 10 belongs to mail and 20 to backup. Both hosts need their own supplied A addresses.",
+        "Use a newer serial, save/reload the primary and update the secondary. Verify the secondary portal A; do not delete api, archive or ns to simplify the zone."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://datatracker.ietf.org/doc/html/rfc1034",
+        "https://datatracker.ietf.org/doc/html/rfc1035",
+        "https://datatracker.ietf.org/doc/html/rfc2181",
+        "https://datatracker.ietf.org/doc/html/rfc1982",
+        "https://datatracker.ietf.org/doc/html/rfc6604",
+        "https://www.rfc-editor.org/rfc/rfc3596.html#section-2"
+      ],
+      "simplifications": "Offline bounded forward-DNS resource-record editor and in-memory authoritative copies. Full names end in a dot; explicit decimal TTL and IN are required. A/AAAA/CNAME/MX/apex NS only; SOA serial is edited separately. No full BIND grammar/configuration/utilities, host zone files, caching, recursion, reverse/PTR, delegation/glue, transfer packets/timers, DNSSEC/TSIG or real DNS/mail/network activity. TTL values are retained but prescribed TTL choices are not graded.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "handover.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover.test."
+                }
+              },
+              {
+                "owner": "ns.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.100"
+                }
+              },
+              {
+                "owner": "app.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::100"
+                }
+              },
+              {
+                "owner": "archive.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.90"
+                }
+              },
+              {
+                "owner": "portal.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "archive.handover.test."
+                }
+              },
+              {
+                "owner": "mail.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "backup.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mail.handover.test."
+                }
+              },
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "backup.handover.test."
+                }
+              },
+              {
+                "owner": "api.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "handover.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover.test."
+                }
+              },
+              {
+                "owner": "ns.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.100"
+                }
+              },
+              {
+                "owner": "app.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::100"
+                }
+              },
+              {
+                "owner": "archive.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.90"
+                }
+              },
+              {
+                "owner": "portal.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "archive.handover.test."
+                }
+              },
+              {
+                "owner": "mail.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "backup.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mail.handover.test."
+                }
+              },
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "backup.handover.test."
+                }
+              },
+              {
+                "owner": "api.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "handover.test.",
+            "serial": 100,
+            "records": [
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover.test."
+                }
+              },
+              {
+                "owner": "ns.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.100"
+                }
+              },
+              {
+                "owner": "app.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::100"
+                }
+              },
+              {
+                "owner": "archive.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.90"
+                }
+              },
+              {
+                "owner": "portal.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "archive.handover.test."
+                }
+              },
+              {
+                "owner": "mail.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "backup.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mail.handover.test."
+                }
+              },
+              {
+                "owner": "handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "backup.handover.test."
+                }
+              },
+              {
+                "owner": "api.handover.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "app.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.110"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "app.handover.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8::110"
+              }
+            ]
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "portal.handover.test.",
+            "record_type": "A",
+            "target": "app.handover.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "portal.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.110"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "MX",
+            "data": [
+              {
+                "type": "MX",
+                "preference": 10,
+                "exchange": "mail.handover.test."
+              },
+              {
+                "type": "MX",
+                "preference": 20,
+                "exchange": "backup.handover.test."
+              }
+            ],
+            "owner": "handover.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "handover.test.",
+            "record_type": "MX",
+            "target": "mail.handover.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "handover.test.",
+            "record_type": "MX",
+            "target": "backup.handover.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "mail.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.35"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "backup.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.36"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.handover.test."
+              }
+            ],
+            "owner": "handover.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "handover.test.",
+            "record_type": "NS",
+            "target": "ns.handover.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "api.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.50"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "archive.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.90"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.handover.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"handover.test.\",\"serial\":101,\"records\":[{\"owner\":\"handover.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.test.\"}},{\"owner\":\"ns.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"app.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.110\"}},{\"owner\":\"app.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8::110\"}},{\"owner\":\"archive.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.90\"}},{\"owner\":\"portal.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"app.handover.test.\"}},{\"owner\":\"mail.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.35\"}},{\"owner\":\"backup.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.36\"}},{\"owner\":\"handover.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":10,\"exchange\":\"mail.handover.test.\"}},{\"owner\":\"handover.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":20,\"exchange\":\"backup.handover.test.\"}},{\"owner\":\"api.handover.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.50\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-secondary"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Builds on the earlier forward-DNS lessons. The editor, absolute record syntax and save/reload workflow are reused; new ideas are explained below. Prerequisites are guidance, not a lock.",
+        "concepts": [
+          {
+            "title": "Use the earlier record skills together",
+            "text": "This handover combines A/AAAA, CNAME paths, MX preference/canonical targets, preservation and primary/secondary publication. All target names and addresses are supplied. Start by comparing the current records with the full assignment; use lookups to inspect served evidence rather than replacing the zone blindly."
+          },
+          {
+            "title": "Choose a safe publication order",
+            "text": "Repair the editor draft, keep unrelated api/archive/ns data, choose a newer serial and save. Reload primary validates the saved records and publishes them. Repair any reload diagnostic before updating the secondary. A successful primary lookup alone does not finish a two-copy handover."
+          },
+          {
+            "title": "Verify relationships, not only numbers",
+            "text": "Keep portal as an alias to app, and keep mail/backup as hosts with their own address records. Query the secondary portal A and the zone MX set. The assignment checks the entire current state; a later harmful edit or an unsaved divergent draft removes current completion."
+          }
+        ],
+        "example_description": "Practice the handover in handover-practice.test. with app A 198.51.100.110 / AAAA 2001:db8:1::110, mail 198.51.100.35 and backup 198.51.100.36. Keep portal as an alias, MX 10 mail / MX 20 backup and the supplied api/archive/ns data.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "handover-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover-practice.test."
+                }
+              },
+              {
+                "owner": "ns.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.100"
+                }
+              },
+              {
+                "owner": "app.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::100"
+                }
+              },
+              {
+                "owner": "archive.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.90"
+                }
+              },
+              {
+                "owner": "portal.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "archive.handover-practice.test."
+                }
+              },
+              {
+                "owner": "mail.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "backup.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mail.handover-practice.test."
+                }
+              },
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "backup.handover-practice.test."
+                }
+              },
+              {
+                "owner": "api.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "handover-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover-practice.test."
+                }
+              },
+              {
+                "owner": "ns.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.100"
+                }
+              },
+              {
+                "owner": "app.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::100"
+                }
+              },
+              {
+                "owner": "archive.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.90"
+                }
+              },
+              {
+                "owner": "portal.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "archive.handover-practice.test."
+                }
+              },
+              {
+                "owner": "mail.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "backup.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mail.handover-practice.test."
+                }
+              },
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "backup.handover-practice.test."
+                }
+              },
+              {
+                "owner": "api.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "handover-practice.test.",
+            "serial": 900,
+            "records": [
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover-practice.test."
+                }
+              },
+              {
+                "owner": "ns.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.53"
+                }
+              },
+              {
+                "owner": "app.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.100"
+                }
+              },
+              {
+                "owner": "app.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "AAAA",
+                  "address": "2001:db8::100"
+                }
+              },
+              {
+                "owner": "archive.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.90"
+                }
+              },
+              {
+                "owner": "portal.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "CNAME",
+                  "target": "archive.handover-practice.test."
+                }
+              },
+              {
+                "owner": "mail.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.25"
+                }
+              },
+              {
+                "owner": "backup.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.26"
+                }
+              },
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 20,
+                  "exchange": "mail.handover-practice.test."
+                }
+              },
+              {
+                "owner": "handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "MX",
+                  "preference": 10,
+                  "exchange": "backup.handover-practice.test."
+                }
+              },
+              {
+                "owner": "api.handover-practice.test.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "192.0.2.50"
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"handover-practice.test.\",\"serial\":901,\"records\":[{\"owner\":\"handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover-practice.test.\"}},{\"owner\":\"ns.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.53\"}},{\"owner\":\"app.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"198.51.100.110\"}},{\"owner\":\"app.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8:1::110\"}},{\"owner\":\"archive.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.90\"}},{\"owner\":\"portal.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"app.handover-practice.test.\"}},{\"owner\":\"mail.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"198.51.100.35\"}},{\"owner\":\"backup.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"198.51.100.36\"}},{\"owner\":\"handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":10,\"exchange\":\"mail.handover-practice.test.\"}},{\"owner\":\"handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"MX\",\"preference\":20,\"exchange\":\"backup.handover-practice.test.\"}},{\"owner\":\"api.handover-practice.test.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.50\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "app.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "198.51.100.110"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "app.handover-practice.test.",
+            "record_type": "AAAA",
+            "data": [
+              {
+                "type": "AAAA",
+                "address": "2001:db8:1::110"
+              }
+            ]
+          },
+          {
+            "kind": "AliasTo",
+            "copy": "Primary",
+            "owner": "portal.handover-practice.test.",
+            "record_type": "A",
+            "target": "app.handover-practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "name": "portal.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "198.51.100.110"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "MX",
+            "data": [
+              {
+                "type": "MX",
+                "preference": 10,
+                "exchange": "mail.handover-practice.test."
+              },
+              {
+                "type": "MX",
+                "preference": 20,
+                "exchange": "backup.handover-practice.test."
+              }
+            ],
+            "owner": "handover-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "handover-practice.test.",
+            "record_type": "MX",
+            "target": "mail.handover-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "handover-practice.test.",
+            "record_type": "MX",
+            "target": "backup.handover-practice.test."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "mail.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "198.51.100.35"
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "name": "backup.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "198.51.100.36"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.handover-practice.test."
+              }
+            ],
+            "owner": "handover-practice.test."
+          },
+          {
+            "kind": "TargetAddress",
+            "copy": "Primary",
+            "owner": "handover-practice.test.",
+            "record_type": "NS",
+            "target": "ns.handover-practice.test."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "api.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.50"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "archive.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.90"
+              }
+            ]
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "ns.handover-practice.test.",
+            "record_type": "A",
+            "data": [
+              {
+                "type": "A",
+                "address": "192.0.2.53"
+              }
+            ]
+          }
+        ],
+        "try_change": "After a successful practice handover, make one unsaved alias edit and observe why current checks need a saved, published configuration. Retry after restoring the intended relationship."
+      }
+    }
+  ]
+}

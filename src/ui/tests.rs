@@ -8,6 +8,9 @@ fn app() -> (egui::Context, LabApp) {
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].dns_teaching.is_some() {
+        a.set_dns_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].address_teaching.is_some() {
         a.set_address_view(i, teaching::View::Assignment);
     }
@@ -4504,4 +4507,62 @@ fn dns_example_and_assignment_keep_independent_native_undo_histories() {
     );
     assert_ne!(w.dns_learning.as_ref().unwrap().draft.text, practice);
     assert_eq!(w.dns_draft.as_ref().unwrap().text, assignment);
+}
+
+#[test]
+fn authored_dns_lessons_keep_complete_tasks_and_tools_in_both_modes_at_scaled_sizes() {
+    let (ctx, mut a) = app();
+    let indices = a
+        .scenarios
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.unit == "dns-forward")
+        .map(|(i, _)| i)
+        .collect::<Vec<_>>();
+    assert_eq!(indices.len(), 6);
+    for i in indices {
+        a.launch(i);
+        draw(&ctx, &mut a);
+        assert_eq!(a.dns_view(i), teaching::View::Introduction);
+        assert!(a.metrics.example_action.is_some());
+        a.set_dns_view(i, teaching::View::Assignment);
+        for (w, h, scale) in [(1920., 1080., 1.), (1200., 900., 1.5), (960., 900., 2.)] {
+            a.scale = scale;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            let bounds = ctx.content_rect();
+            assert!(a.metrics.editor_save.is_some());
+            assert!(a.metrics.dns_reload.is_some());
+            assert!(a.metrics.check.is_some());
+            for r in a
+                .metrics
+                .inputs
+                .iter()
+                .chain(a.metrics.dns_pickers.iter())
+                .chain(a.metrics.probe.iter())
+                .chain(a.metrics.editor_viewport.iter())
+            {
+                assert!(
+                    r.left() >= bounds.left() - 1. && r.right() <= bounds.right() + 1.,
+                    "{} {r:?} at{scale}",
+                    a.scenarios[i].id
+                );
+            }
+        }
+        let id = a.scenarios[i].id.clone();
+        a.progress.attempts.get_mut(&id).unwrap().challenge = true;
+        a.set_dns_view(i, teaching::View::Introduction);
+        for _ in 0..4 {
+            frame(&ctx, &mut a, 960., 900., vec![]);
+        }
+        assert_eq!(a.dns_view(i), teaching::View::Assignment);
+        assert!(a.metrics.lesson_tabs.is_empty());
+        assert!(a.metrics.insert.is_none());
+        assert!(a.metrics.editor_save.is_some());
+        assert!(a.metrics.check.is_some());
+        a.reset_attempt(i);
+        assert_eq!(a.progress.attempts[&id].state, a.scenarios[i].initial);
+        assert_eq!(a.dns_view(i), teaching::View::Introduction);
+    }
 }

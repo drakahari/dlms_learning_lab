@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-nine scripting assignments in seven units and ten Linux file/access assignments, plus six IPv6 static-network assignments and four VLAN data-plane assignments, plus six IPv4 static-routing assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus twenty-nine scripting assignments in seven units and ten Linux file/access assignments, plus six IPv6 static-network assignments and four VLAN data-plane assignments, plus six IPv4 static-routing assignments and six forward-DNS assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -78,3 +78,5 @@ Four [access-policy assignments](LINUX_ACCESS.md) follow the six file foundation
 
 
 Three [filename-selection/batch assignments](SHELL_FILE_BATCHES.md) add simple * pattern practice, incident harvesting, and a captured-source handover that rejects collisions before writing. Flat virtual paths only; advanced/directory/bracket patterns, command substitution and the broader safe-automation path remain open. This strengthens a narrow LPIC-1 103.3 slice; the separate Linux terminal does not gain expansion.
+
+M40 LPIC-2 source recheck2026-10-23 confirms v4.5/201-450/202-450. Six distinct forward-DNS assignments add editable record syntax, typed alias/MX/address-set diagnosis, safe preservation and explicit primary/secondary revision practice; see DNS_LESSONS.md. This is a narrow207.1 reload /207.2 forward-record slice. Full BIND paths/configuration/tools, reverse zones, recursion, delegation/glue, transfer protocol and security remain missing. Catalog70/sixteen units; no full exam or future-version coverage claim. The complete objective source fingerprint inventory retains its last full2026-10-22 check date.

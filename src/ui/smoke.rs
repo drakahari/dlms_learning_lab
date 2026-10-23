@@ -174,6 +174,188 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            4500..=4622 => {
+                let case = (self.smoke_stage - 4500) / 20;
+                let phase = (self.smoke_stage - 4500) % 20;
+                let indices = self
+                    .scenarios
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, s)| s.unit == "dns-forward")
+                    .map(|(i, _)| i)
+                    .collect::<Vec<_>>();
+                assert_eq!(indices.len(), 6);
+                if case == 6 {
+                    if phase == 0 {
+                        self.selected = None;
+                        self.filter = catalog::Filter {
+                            track: "LPIC-2".into(),
+                            unit: "dns-forward".into(),
+                            ..Default::default()
+                        };
+                        self.lesson_scroll_reset = true;
+                    }
+                    if phase == 1 {
+                        shot = Some("dns-unit-library".into());
+                    }
+                    if phase == 2 {
+                        println!(
+                            "PASS native six authored DNS lessons: fresh introductions, isolated worked examples with explicit save/reload/update/check, full assignments, initial error feedback, authored reference drafts saved/published/checked, current invalidation, exact resume and selected resets preserving other attempts; normal unit library. Records were populated from authored references. No novice, physical-device, real-DNS or Windows/macOS desktop claim."
+                        );
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    }
+                } else {
+                    let i = indices[case];
+                    let id = self.scenarios[i].id.clone();
+                    match phase {
+                        0 => {
+                            if case == 0 {
+                                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                                self.launch(0);
+                            }
+                            self.launch(i);
+                            self.theme_id = if case.is_multiple_of(2) {
+                                "dlms-dark"
+                            } else {
+                                "dlms-light"
+                            }
+                            .into();
+                            theme::apply(ctx, &self.theme_id);
+                            self.scale = 1.;
+                            self.lesson_scroll_reset = true;
+                        }
+                        1 => {
+                            assert_eq!(self.dns_view(i), teaching::View::Introduction);
+                            shot = Some(format!("dns-unit-{case}-introduction"));
+                        }
+                        2 => self.set_dns_view(i, teaching::View::Example),
+                        3 => {
+                            if !self.click_dns_control(ctx, self.metrics.insert) {
+                                return;
+                            }
+                        }
+                        4 => {
+                            if !self.click_dns_control(ctx, self.metrics.editor_save) {
+                                return;
+                            }
+                        }
+                        5 => {
+                            if !self.click_dns_control(ctx, self.metrics.dns_reload) {
+                                return;
+                            }
+                        }
+                        6 => {
+                            if case >= 4 && !self.click_dns_control(ctx, self.metrics.dns_update) {
+                                return;
+                            }
+                        }
+                        7 => {
+                            if !self.click_dns_control(ctx, self.metrics.check) {
+                                return;
+                            }
+                        }
+                        8 => {
+                            let a = &self.progress.attempts[&id];
+                            let l = a.workspace.as_ref().unwrap().dns_learning.as_ref().unwrap();
+                            assert!(l.checked);
+                            assert!(
+                                l.checks(self.scenarios[i].dns_teaching.as_ref().unwrap())
+                                    .iter()
+                                    .all(|c| c.0)
+                            );
+                            assert!(!progress::current_solved(a, &self.scenarios[i]));
+                            if case == 0 || case == 5 {
+                                shot = Some(format!("dns-unit-{case}-example-verified"));
+                            }
+                        }
+                        9 => self.set_dns_view(i, teaching::View::Assignment),
+                        10 => shot = Some(format!("dns-unit-{case}-assignment")),
+                        11 => {
+                            if !self.click_dns_control(ctx, self.metrics.check) {
+                                return;
+                            }
+                        }
+                        12 => {
+                            assert!(!self.metrics.completion);
+                            let mut state = self.scenarios[i].initial.clone();
+                            for action in &self.scenarios[i].solution {
+                                engine::execute(&mut state, action).unwrap();
+                            }
+                            let engine::State::AuthoritativeDns { server } = &state else {
+                                unreachable!()
+                            };
+                            self.progress
+                                .attempts
+                                .get_mut(&id)
+                                .unwrap()
+                                .workspace
+                                .as_mut()
+                                .unwrap()
+                                .dns_draft =
+                                Some(dlms_learning_lab::dns_workspace::Draft::new(server));
+                            self.dirty = true;
+                        }
+                        13 => {
+                            if !self.click_dns_control(ctx, self.metrics.editor_save) {
+                                return;
+                            }
+                        }
+                        14 => {
+                            if !self.click_dns_control(ctx, self.metrics.dns_reload) {
+                                return;
+                            }
+                        }
+                        15 => {
+                            if case >= 4 && !self.click_dns_control(ctx, self.metrics.dns_update) {
+                                return;
+                            }
+                        }
+                        16 => {
+                            if !self.click_dns_control(ctx, self.metrics.check) {
+                                return;
+                            }
+                        }
+                        17 => {
+                            assert!(self.metrics.completion, "Authored lesson failed {id}");
+                            if case == 0 || case == 2 || case >= 4 {
+                                shot = Some(format!("dns-unit-{case}-complete"));
+                            }
+                        }
+                        18 => {
+                            self.progress
+                                .attempts
+                                .get_mut(&id)
+                                .unwrap()
+                                .workspace
+                                .as_mut()
+                                .unwrap()
+                                .dns_draft
+                                .as_mut()
+                                .unwrap()
+                                .text
+                                .push_str("\nunfinished record");
+                            assert!(!progress::current_solved(
+                                &self.progress.attempts[&id],
+                                &self.scenarios[i]
+                            ));
+                            progress::save(&self.path, &self.progress).unwrap();
+                            let bytes = serde_json::to_vec(&self.progress).unwrap();
+                            self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                            assert_eq!(serde_json::to_vec(&self.progress).unwrap(), bytes);
+                        }
+                        19 => {
+                            self.reset_attempt(i);
+                            assert_eq!(
+                                self.progress.attempts[&id].state,
+                                self.scenarios[i].initial
+                            );
+                            assert!(self.progress.attempts.contains_key("ccna-ipv4"));
+                            assert_eq!(self.progress.attempts.len(), case + 2);
+                        }
+                        _ => unreachable!(),
+                    }
+                }
+            }
             4250 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 self.scale = 1.;
