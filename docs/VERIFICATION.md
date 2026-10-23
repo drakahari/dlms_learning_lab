@@ -1,3 +1,7 @@
+# M53 persistent-mount capability verification — 2026-10-23
+
+512 all-target Rust tests pass; after the final exact-UUID-case correction, all17 storage tests and8 fixed findmnt field comparisons were rerun. Final Clippy/formatter,27 Python tooling checks,28 palette/notices and coverage integrity pass. Independent latest17 Rust+3 tool-boundary+8 fixed comparisons and source review accepted. State is pure capability only, not native integrated/teaching coverage or real kernel acceptance. STORAGE_SUBSET.md records bounds, exclusions, references and further authoring gates. Catalog82/nineteen and109Partial/1Supporting/1130Open unchanged; full completion remains Open.
+
 # M52 gated parser verification — 2026-10-23
 
 495 Rust all-target tests pass after integrating reviewed parser foundation2162c39, with no capture execution or evaluator revision change. Scoped isolated99 tests/Clippy/fmt and frozen native golden657 outcomes plus33 authored records/182 cases passed before integration; source/artifact review accepted. No fresh Bash rerun or new teaching/coverage claim. Capture runtime and migration remain unfinished.

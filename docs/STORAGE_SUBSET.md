@@ -1,0 +1,35 @@
+# Persistent-mount model — capability foundation
+
+Checked 2026-10-23. This pure Rust module is **not yet a native lesson or counted coverage**. The original `lpic2-storage` seed and saved attempts are unchanged. No host device, file, service, network, subprocess, mount namespace or kernel interface is used by the model. Original code/tests are MIT; upstream manuals informed behavior and are linked, not copied or bundled as project code.
+
+## State and operations
+
+At most eight fixed virtual volumes have distinct canonical lowercase ext4/XFS UUIDs and declared filesystem types. Each has one `/dev` alias. Up to eight canonical, non-nested mountpoints are supplied by the activity. This is metadata over clean synthetic volumes; there are no blocks, files, journaling or hardware read-only states.
+
+Saved configuration text and the typed live mount table are separate. Saving changes only the text, including bounded mistakes that can then be diagnosed. Validation parses and resolves the table without mounting. A target mount resolves its saved source/type and changes only that live entry; `noauto` does not forbid explicit mounting. An occupied target with a different volume or policy requires unmounting first in this subset. An exact repeated request reports already mounted. Failures leave current state intact.
+
+A fresh-session test makes an independent copy, clears its live table and applies an explicitly authored permutation of the existing device aliases. It processes automatic entries in file order, recording each success/failure and continuing after independent resolution failures. Manual entries are skipped: **skipped does not mean valid or mountable**. Syntax/unsupported-plan errors block the whole test. This is neither a real reboot nor a simulation of systemd generators or `mount -a`. The learner's original session/aliases remain unchanged.
+
+## Configuration grammar and boundaries
+
+Six whitespace-separated fields per entry: source, target, type, options, dump frequency and check order. Whole-line comments/blank lines are accepted. Sources are literal inventory `/dev` paths or `UUID=…`; UUID source spelling is retained and must exactly match inventory when resolved. The model does not infer Linux-wide case-folding behavior. Teach learners to copy the canonical lowercase UUID reported by the inventory.
+
+Types: `ext4`, `xfs`. Options: `defaults`, `ro`, `rw`, `auto`, `noauto`. Baseline policy is writable/automatic; explicit conflicting options use the last occurrence. `defaults` does not erase earlier explicit choices. No other default flags are modeled. The two numeric fields accept nonnegative 32-bit integers and are retained, **without running dump or filesystem checks**.
+
+Quoted/escaped fields, inline comments, missing fields, LABEL/PARTUUID/network sources, other types/options, duplicate targets, stacking/nested mounts and multiple live mounts of one volume are rejected or explicitly unsupported. Real Linux supports many of these. These are simulator boundaries, not Linux prohibitions. Different aliases for one volume do not bypass the one-volume restriction. Remount option merging, swap, systemd units, privilege checks, busy files/processes, encryption, creation/repair, LVM/RAID and physical device behavior remain absent. No terminal command is claimed implemented merely because a core method exists.
+
+Configuration is capped at 16KiB/128 lines/eight entries. `State::from_json` caps 64KiB; direct deserialization requires the caller’s bounded enclosing document. Map/sequence decoders bound collections and reject duplicate keys. Constructors check collection/scalar bounds before derived allocations. State fields are private; deserialization revalidates live identities. Future pack/progress integration must additionally pin the inventory to the authored initial state (`same_inventory`), validate every goal and separate pending editor drafts from saved text. Structurally valid edited inventory is not an authorized progress import.
+
+## Verification and authoring gate
+
+Seventeen model tests cover UUID/type/target errors, saved/live separation, alternate option ordering, duplicate aliases, manual versus automatic selection, independent partial failures, wrong same-type volume after renumbering, current-state breakage, bounded malformed snapshots and all-eight/max-text round trips. Independent review found and corrected constructor allocation ordering, alias-key permutation and skipped-manual validity assumptions; all17 tests were independently rerun. UUID case normalization was removed after source review: parser comparison cannot prove resolver case folding.
+
+Eight fixed development fixtures compare six parsed fields with **findmnt from util-linux2.41.5**, using only a private synthetic table, `--fstab --nocanonicalize --list --json`, explicit columns and no `--evaluate`. No real mount/UUID probe or personal file is accessed. Policy is checked by an independent equation over observed option tokens, not kernel behavior. The development probe parses stdin only. Reproduce with `cargo build --example storage_probe` then `python3 tools/storage_reference.py`; it accepts no arguments/external fixture path. Three tooling tests check the fixed invocation/input boundary. This evidence does not establish libmount/Bash/kernel conformance.
+
+Next: native inventory/live-state table, focused configuration editor and simulated investigation terminal, typed declarative current/persistent/fresh-session goals, isolated teaching examples, import identity pinning and current draft invalidation. Only then author/review four distinct identification, saved/live-policy, manual-maintenance and handover assignments. Do not count planned tasks or promote objective coverage before these work end to end.
+
+## Primary references
+
+- [LPI official LPIC-2 Exam201/202 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/), current v4.5 rechecked2026-10-23:203.1 UUID/blkid and saved mounts are intended slices, not delivered new lesson coverage. Swap/systemd and203.2 maintenance remain Open.
+- Upstream util-linux **v2.41.2** [mount manual](https://github.com/util-linux/util-linux/blob/v2.41.2/sys-utils/mount.8.adoc), [blkid manual](https://raw.githubusercontent.com/util-linux/util-linux/v2.41.2/misc-utils/blkid.8.adoc), [findmnt manual](https://raw.githubusercontent.com/util-linux/util-linux/v2.41.2/misc-utils/findmnt.8.adoc), read2026-10-23. Validate is explicitly simulator-only; `mount -a` is not taught as a configuration validator. Hardware read-only fallback was deliberately deferred rather than modeled incorrectly.
+- Upstream-authored [fstab manual](https://man7.org/linux/man-pages/man5/fstab.5.html), read2026-10-23; displayed build `util-linux2.43.devel-739-eee2e`, dated2026-05-24/upstream snapshot2026-08-04. The attempted v2.41.2 `sys-utils/fstab.5.adoc` URL was unavailable; this fallback is not represented as the pinned older manual. It supports the source-identity and field distinctions, not an assertion that only the implemented grammar is valid Linux.
