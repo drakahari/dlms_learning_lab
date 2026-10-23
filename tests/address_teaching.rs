@@ -298,3 +298,57 @@ fn metadata_changes_are_not_distinct_examples_and_team_names_are_bounded() {
     p.attempts.insert(labs[1].id.clone(), a);
     assert!(progress::decode(&serde_json::to_vec(&p).unwrap(), &labs).is_err());
 }
+
+#[test]
+fn explicit_worked_summaries_explain_math_without_grading_or_mutation() {
+    for lesson in [subnet(), allocation()] {
+        let mut learning = Learning::new(&lesson);
+        assert!(address_teaching::worked_summary(&learning.state).is_none());
+        learning.fill_example(&lesson).unwrap();
+        let before = learning.clone();
+        let explanation = address_teaching::worked_summary(&learning.state).unwrap();
+        assert!(explanation.contains("ungraded"));
+        assert_eq!(learning, before);
+        assert!(!learning.solved());
+        if matches!(learning.state, State::Subnet { .. }) {
+            for expected in [
+                "6 host bits",
+                "64 addresses",
+                "192.168.5.128",
+                "192.168.5.191",
+                "192.168.5.129",
+                "192.168.5.190",
+                "192.168.5.140",
+            ] {
+                assert!(explanation.contains(expected), "{explanation}");
+            }
+            if let State::Subnet { second, .. } = &mut learning.state {
+                *second = Some("192.168.5.191".into());
+            }
+        } else {
+            for expected in ["30 usable places", "6 usable places", "avoids overlap"] {
+                assert!(explanation.contains(expected), "{explanation}");
+            }
+            if let State::Vlsm { allocations, .. } = &mut learning.state {
+                allocations[1].cidr = "192.0.2.8/29".into();
+            }
+        }
+        assert!(address_teaching::worked_summary(&learning.state).is_none());
+    }
+    let e = dlms_learning_lab::ipv4::Exercise {
+        ip: "192.168.20.77".parse().unwrap(),
+        prefix: 20,
+        answers: Default::default(),
+        second: Some(String::new()),
+    };
+    assert_eq!(e.capacity(), Some(4096));
+    assert_eq!(
+        e.expected().unwrap().map(|a| a.to_string()),
+        [
+            "192.168.16.0",
+            "192.168.31.255",
+            "192.168.16.1",
+            "192.168.31.254"
+        ]
+    );
+}

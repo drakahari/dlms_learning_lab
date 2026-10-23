@@ -32,6 +32,14 @@ impl LabApp {
             self.metrics.reset = Some(r.rect);
             if r.clicked() {
                 self.reset_pending = true;
+                self.lesson_scroll_reset = true;
+                self.focus_input = false;
+                if let Some(view) = &mut self.ipv4_view {
+                    view.focus = false;
+                }
+                if let Some(view) = &mut self.address_example {
+                    view.focus = false;
+                }
             }
         });
         if self.reset_pending {

@@ -336,6 +336,7 @@ impl Assignment {
             ui.label("Address bits encode the computer’s number. Mask bits select which positions stay fixed: 1 keeps that address bit; 0 lets it vary.");
             ui.label("Keep the network bits unchanged. Setting every host bit to 0 gives the network address; setting every host bit to 1 gives the broadcast address in this exercise. Neither boundary can be assigned to a workstation.");
             ui.label("Other prefixes can move the boundary into earlier octets. This conventional broadcast-subnet exercise excludes /31 and /32.");
+            ui.label("For example, 192.168.20.77/20 leaves 12 host bits: 4096 addresses. Its third-number block is 16–31; the entire fourth number can vary from 0 to 255. The network is 192.168.16.0 and broadcast is 192.168.31.255. A block spanning earlier numbers contains more addresses than the size of that one-number interval.");
         }
     }
 }

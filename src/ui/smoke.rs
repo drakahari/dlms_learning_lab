@@ -1,6 +1,73 @@
 //! Application-only Fedora renderer/input check with isolated /tmp progress.
 use super::*;
 impl LabApp {
+    /// Settle hover after scrolling, then deliver one native click event batch.
+    fn click_smoke_control(&mut self, ctx: &egui::Context, rect: Option<egui::Rect>) -> bool {
+        let id = egui::Id::new(("native-click-phases", self.smoke_stage));
+        let phase = ctx.data(|d| d.get_temp::<u8>(id)).unwrap_or(0);
+        if phase >= 2 {
+            ctx.data_mut(|d| d.remove::<u8>(id));
+            return true;
+        }
+        let point = rect.expect("visible target before native click").center();
+        self.pending_events.push(egui::Event::PointerMoved(point));
+        if phase == 1 {
+            for pressed in [true, false] {
+                self.pending_events.push(egui::Event::PointerButton {
+                    pos: point,
+                    button: egui::PointerButton::Primary,
+                    pressed,
+                    modifiers: Default::default(),
+                });
+            }
+        }
+        ctx.data_mut(|d| d.insert_temp(id, phase + 1));
+        self.started = Instant::now();
+        ctx.request_repaint();
+        false
+    }
+    fn reveal_smoke_control(&mut self, ctx: &egui::Context, r: egui::Rect) -> bool {
+        let top = self
+            .metrics
+            .header
+            .iter()
+            .map(|r| r.bottom())
+            .fold(0_f32, f32::max)
+            + 20.;
+        let bottom = ctx.content_rect().bottom() - 16.;
+        let delta = if r.bottom() > bottom {
+            bottom - r.bottom()
+        } else if r.top() < top {
+            top - r.top()
+        } else {
+            return true;
+        };
+        let id = egui::Id::new(("bounded-native-scroll", self.smoke_stage));
+        let tries = ctx.data_mut(|d| {
+            let n = d.get_temp::<usize>(id).unwrap_or(0) + 1;
+            d.insert_temp(id, n);
+            n
+        });
+        assert!(
+            tries <= 20,
+            "Control did not become visible: {r:?}, viewport {:?}, header bottom {top}",
+            ctx.content_rect()
+        );
+        self.pending_events.extend([
+            egui::Event::PointerMoved(egui::pos2(
+                ctx.content_rect().center().x,
+                (top + bottom) * 0.5,
+            )),
+            egui::Event::MouseWheel {
+                unit: egui::MouseWheelUnit::Point,
+                delta: egui::vec2(0., delta),
+                modifiers: Default::default(),
+            },
+        ]);
+        self.started = Instant::now();
+        ctx.request_repaint();
+        false
+    }
     // Historical assignment-only checks explicitly skip new skippable introductions.
     fn launch_assignment_fixture(&mut self, i: usize) {
         self.launch(i);
@@ -526,7 +593,20 @@ impl LabApp {
                 self.launch(0);
                 self.set_address_view(0, teaching::View::Introduction);
             }
-            2941 => shot = Some("addressing-introduction-light-150".into()),
+            2941 => {
+                let id = egui::Id::new("addressing-resize-settle");
+                let frames = ctx.data_mut(|d| {
+                    let n = d.get_temp::<usize>(id).unwrap_or(0) + 1;
+                    d.insert_temp(id, n);
+                    n
+                });
+                if frames <= 2 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+                shot = Some("addressing-introduction-light-150".into());
+            }
             2942 => {
                 let p = ctx.content_rect().center();
                 self.pending_events.extend([
@@ -540,15 +620,22 @@ impl LabApp {
             }
             2943 => {
                 let r = self.metrics.example_action.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
                 assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
                 shot = Some("addressing-introduction-scrolled-light-150".into());
             }
-            2944 => self
-                .pending_events
-                .extend(click(self.metrics.example_action.unwrap())),
-            2945 => self
-                .pending_events
-                .extend(click(self.metrics.insert.unwrap())),
+            2944 => {
+                if !self.click_smoke_control(ctx, self.metrics.example_action) {
+                    return;
+                }
+            }
+            2945 => {
+                if !self.click_smoke_control(ctx, self.metrics.insert) {
+                    return;
+                }
+            }
             2946 => {
                 let p = ctx.content_rect().center();
                 self.pending_events.extend([
@@ -563,6 +650,9 @@ impl LabApp {
             2947 => shot = Some("addressing-example-scrolled-light-150".into()),
             2948 => {
                 let r = self.metrics.check.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
                 assert!(r.top() >= 0. && r.bottom() < ctx.content_rect().bottom());
                 self.pending_events.extend(click(r));
             }
@@ -610,8 +700,16 @@ impl LabApp {
                     .unwrap()
                     .challenge = false;
             }
-            2954 => self.pending_events.extend(click(self.metrics.why.unwrap())),
-            2955 => shot = Some("addressing-prefix-explanation".into()),
+            2954 => {
+                let r = self.metrics.why.unwrap();
+                if !self.reveal_smoke_control(ctx, r) || !self.click_smoke_control(ctx, Some(r)) {
+                    return;
+                }
+            }
+            2955 => {
+                assert!(self.metrics.help_visible);
+                shot = Some("addressing-prefix-explanation".into());
+            }
             2956 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
                 ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 740.)));
@@ -654,9 +752,15 @@ impl LabApp {
             2960 => self.set_address_view(1, teaching::View::Assignment),
             2961 => shot = Some("addressing-vlsm-assignment-light-150".into()),
             2962 => {
-                println!(
-                    "PASS native addressing: fresh introductions, isolated examples and wrong-answer retry, full unchanged assignments, current success/invalidation, save/reload/reset, native input, resized150% light/dark and reachable scroll controls. Reference assignment answers were populated from authored solutions; this is not novice usability acceptance."
-                );
+                if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("addressing-layout") {
+                    println!(
+                        "PASS native addressing layout: settled resize, bounded wheel scrolling, native example entry/fill/Check, independent Challenge, optional prefix help and VLSM feedback in150% light/dark. Synthetic profile; not the full original assignment walkthrough or physical-device acceptance."
+                    );
+                } else {
+                    println!(
+                        "PASS native addressing: fresh introductions, isolated examples and wrong-answer retry, full unchanged assignments, current success/invalidation, save/reload/reset, native input, resized150% light/dark and reachable scroll controls. Reference assignment answers were populated from authored solutions; this is not novice usability acceptance."
+                    );
+                }
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             n @ 2700..=2807 => {

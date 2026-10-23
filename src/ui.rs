@@ -112,6 +112,7 @@ pub struct LabApp {
     host_activity: bool,
     ipv4_view: Option<ipv4_workspace::Assignment>,
     address_example: Option<ipv4_workspace::Assignment>,
+    address_worked: std::collections::BTreeMap<String, String>,
     smoke: bool,
     started: Instant,
     smoke_stage: usize,
@@ -218,10 +219,14 @@ impl LabApp {
             host_activity: false,
             ipv4_view: None,
             address_example: None,
+            address_worked: Default::default(),
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("alignment")
+            smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("addressing-layout")
             {
+                2940
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("alignment") {
                 3100
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("service-teaching")
@@ -401,6 +406,7 @@ impl LabApp {
     }
     fn reset_attempt(&mut self, i: usize) {
         let s = &self.scenarios[i];
+        self.address_worked.remove(&s.id);
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);

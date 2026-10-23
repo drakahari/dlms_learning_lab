@@ -14,6 +14,48 @@ pub fn goal(state: &State) -> Option<Goal> {
         _ => None,
     }
 }
+
+/// Explain an explicitly filled, solved practice state; never awards/checks credit.
+pub fn worked_summary(state: &State) -> Option<String> {
+    if !engine::solved(state, &goal(state)?) {
+        return None;
+    }
+    match state {
+        State::Subnet { .. } => {
+            let e = crate::ipv4::Exercise::from_state(state)?;
+            let [network, broadcast, first, last] = e.expected()?;
+            Some(format!(
+                "Worked example: /{} leaves {} host bits, giving {} addresses. The first address, {network}, identifies the network; the last, {broadcast}, is broadcast. Usable hosts run from {first} through {last}. {} is one valid choice for workstation 2; it differs from {}. These are ungraded reference values; your edits are checked separately.",
+                e.prefix,
+                32 - e.prefix,
+                e.capacity()?,
+                e.second.as_deref()?,
+                e.ip
+            ))
+        }
+        State::Vlsm { allocations, .. } => {
+            let parts: Option<Vec<String>> = allocations
+                .iter()
+                .map(|a| {
+                    let (network, broadcast, _prefix) = engine::cidr(&a.cidr)?;
+                    let total = u64::from(broadcast) - u64::from(network) + 1;
+                    Some(format!(
+                        "{}: {} gives {total} addresses and {} usable places for {} hosts",
+                        a.name,
+                        a.cidr,
+                        total - 2,
+                        a.hosts
+                    ))
+                })
+                .collect();
+            Some(format!(
+                "Worked example: {}. Each starts on its own boundary, stays inside the pool and avoids overlap. These are ungraded reference allocations; your edits are checked separately.",
+                parts?.join("; ")
+            ))
+        }
+        _ => None,
+    }
+}
 /// Answers/allocations may change. The supplied problem must not change on resume/import.
 pub fn same_problem(a: &State, b: &State) -> bool {
     match (a, b) {

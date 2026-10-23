@@ -143,7 +143,7 @@ impl LabApp {
         }
         let mut reload = false;
         ui.horizontal_wrapped(|ui| {
-            let r = ui.add(button("Use example values"));
+            let r = ui.add(button("Fill worked example"));
             self.metrics.insert = Some(r.rect);
             if r.clicked() {
                 let l = self
@@ -160,6 +160,9 @@ impl LabApp {
                 if let Err(e) = l.fill_example(lesson) {
                     self.notice = Some(e);
                 } else {
+                    if let Some(explanation) = address_teaching::worked_summary(&l.state) {
+                        self.address_worked.insert(s.id.clone(), explanation);
+                    }
                     reload = true;
                     self.dirty = true;
                 }
@@ -167,6 +170,7 @@ impl LabApp {
             let r = ui.add(button("Reset example only"));
             self.metrics.example_reset = Some(r.rect);
             if r.clicked() {
+                self.address_worked.remove(&s.id);
                 let mut l = address_teaching::Learning::new(lesson);
                 l.view = teaching::View::Example;
                 self.progress
@@ -181,6 +185,9 @@ impl LabApp {
                 self.dirty = true;
             }
         });
+        if let Some(explanation) = self.address_worked.get(&s.id) {
+            ui.label(explanation);
+        }
         if reload {
             self.load_address_example(i);
         }

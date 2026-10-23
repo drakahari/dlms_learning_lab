@@ -234,6 +234,8 @@ impl LabApp {
                     match result {
                         Ok(safety) => {
                             self.progress = candidate.progress;
+                            self.address_worked.clear();
+                            self.address_example = None;
                             self.selected = None;
                             self.script_job = None;
                             self.ipv4_view = None;

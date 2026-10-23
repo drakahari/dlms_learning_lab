@@ -2754,6 +2754,26 @@ fn addressing_introduction_examples_and_assignments_preserve_drafts_and_credit()
         ));
         assert_eq!(a.progress.attempts[&id].state, original);
         let saved_example = serde_json::to_value(example).unwrap();
+        // Requested worked help can extend a shorter viewport; use the real scroll path.
+        for _ in 0..8 {
+            if a.metrics.assignment_action.unwrap().bottom() < ctx.content_rect().bottom() {
+                break;
+            }
+            frame(
+                &ctx,
+                &mut a,
+                1200.,
+                850.,
+                vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -180.),
+                        modifiers: Default::default(),
+                    },
+                ],
+            );
+        }
         let r = a.metrics.assignment_action.unwrap();
         click(&ctx, &mut a, r);
         assert_eq!(
@@ -3891,4 +3911,134 @@ fn shared_native_field_clicks_select_and_edit_the_character_under_the_cursor() {
         edit_frame(&ctx, &mut value, vec![egui::Event::Text("X".into())]);
         assert_eq!(value, "ABXD");
     }
+}
+
+#[test]
+fn explicit_worked_fill_explains_only_the_example_and_reset_hides_the_help() {
+    for i in [0, 1] {
+        let (ctx, mut a) = app();
+        a.launch(i);
+        let id = a.scenarios[i].id.clone();
+        let original = a.progress.attempts[&id].state.clone();
+        a.set_address_view(i, teaching::View::Example);
+        draw(&ctx, &mut a);
+        let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+        assert!(
+            tree.nodes
+                .iter()
+                .any(|(_, n)| n.label().or(n.value()) == Some("Fill worked example"))
+        );
+        assert!(!tree.nodes.iter().any(|(_, n)| {
+            n.label()
+                .or(n.value())
+                .is_some_and(|s| s.starts_with("Worked example:"))
+        }));
+        let fill = a.metrics.insert.unwrap();
+        click(&ctx, &mut a, fill);
+        let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+        assert!(
+            tree.nodes.iter().any(|(_, n)| {
+                n.label()
+                    .or(n.value())
+                    .is_some_and(|s| s.starts_with("Worked example:") && s.contains("ungraded"))
+            }),
+            "tree text: {:?}",
+            tree.nodes
+                .iter()
+                .filter_map(|(_, n)| n.label().or(n.value()).or(n.value()))
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(a.progress.attempts[&id].state, original);
+        let learning = a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .address_learning
+            .as_ref()
+            .unwrap();
+        assert!(learning.checked.is_none());
+        assert!(!learning.solved());
+        let reset = a.metrics.example_reset.unwrap();
+        click(&ctx, &mut a, reset);
+        let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+        assert!(!tree.nodes.iter().any(|(_, n)| {
+            n.label()
+                .or(n.value())
+                .is_some_and(|s| s.starts_with("Worked example:"))
+        }));
+        let fill = a.metrics.insert.unwrap();
+        click(&ctx, &mut a, fill);
+        assert!(a.address_worked.contains_key(&id));
+        let reset = a.metrics.reset.unwrap();
+        click(&ctx, &mut a, reset);
+        let confirm = a.metrics.confirm_reset.unwrap();
+        assert!(
+            confirm.top() >= 0. && confirm.bottom() < ctx.content_rect().bottom(),
+            "{id}: confirm {confirm:?}"
+        );
+        click(&ctx, &mut a, confirm);
+        assert!(
+            !a.address_worked.contains_key(&id),
+            "{id}: reset_pending={}, confirm={confirm:?}",
+            a.reset_pending
+        );
+        a.set_address_view(i, teaching::View::Example);
+        draw(&ctx, &mut a);
+        a.progress.attempts.get_mut(&id).unwrap().challenge = true;
+        let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+        assert!(!tree.nodes.iter().any(|(_, n)| {
+            n.label().or(n.value()) == Some("Fill worked example")
+                || n.label()
+                    .or(n.value())
+                    .is_some_and(|s| s.starts_with("Worked example:"))
+        }));
+        assert_eq!(a.metrics.inputs.len(), if i == 0 { 5 } else { 3 });
+    }
+}
+
+#[test]
+fn validated_restore_clears_requested_worked_help_without_losing_imported_example_drafts() {
+    let (ctx, mut a) = app();
+    let temp = tempfile::tempdir().unwrap();
+    a.path = temp.path().join("progress.json");
+    a.smoke = true;
+    a.launch(0);
+    a.set_address_view(0, teaching::View::Example);
+    draw(&ctx, &mut a);
+    dlms_learning_lab::backup::export(
+        &temp.path().join("dlms-learning-backup.json"),
+        &a.progress,
+        &a.scenarios,
+    )
+    .unwrap();
+    let fill = a.metrics.insert.unwrap();
+    click(&ctx, &mut a, fill);
+    assert!(a.address_worked.contains_key("ccna-ipv4"));
+    a.settings_open = true;
+    a.settings_data = true;
+    draw(&ctx, &mut a);
+    data_preview(&ctx, &mut a);
+    let confirm = a.metrics.data_confirm.unwrap();
+    click(&ctx, &mut a, confirm);
+    assert!(a.address_worked.is_empty());
+    assert!(a.address_example.is_none());
+    a.settings_open = false;
+    a.launch(0);
+    a.set_address_view(0, teaching::View::Example);
+    draw(&ctx, &mut a);
+    assert!(
+        a.address_example
+            .as_ref()
+            .unwrap()
+            .exercise
+            .answers
+            .iter()
+            .all(String::is_empty)
+    );
+    let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+    assert!(!tree.nodes.iter().any(|(_, n)| {
+        n.label()
+            .or(n.value())
+            .is_some_and(|s| s.starts_with("Worked example:"))
+    }));
 }
