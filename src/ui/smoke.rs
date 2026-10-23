@@ -1,6 +1,54 @@
 //! Application-only Fedora renderer/input check with isolated /tmp progress.
 use super::*;
 impl LabApp {
+    fn storage_reference_action(
+        &mut self,
+        ctx: &egui::Context,
+        i: usize,
+        practice: bool,
+        action: &str,
+        phase: usize,
+    ) -> bool {
+        use dlms_learning_lab::storage_workspace::Action;
+        if let Some(json) = action.strip_prefix("storage ") {
+            let Action::Save { text } = serde_json::from_str(json).expect("authored action") else {
+                panic!("native unit references use Save plus actual supported terminal commands")
+            };
+            if phase == 0 {
+                let w = self.progress.attempts[&self.scenarios[i].id]
+                    .workspace
+                    .as_ref()
+                    .unwrap();
+                let d = if practice {
+                    &w.storage_learning.as_ref().unwrap().draft
+                } else {
+                    w.storage_draft.as_ref().unwrap()
+                };
+                assert_eq!(d.text, text);
+                return self.click_visible_smoke_control(ctx, self.metrics.editor_save);
+            }
+        } else if phase == 0 {
+            return self.click_visible_smoke_control(ctx, self.metrics.storage_command);
+        } else if phase == 1 {
+            self.pending_events = vec![
+                egui::Event::Key {
+                    key: egui::Key::A,
+                    physical_key: None,
+                    pressed: true,
+                    repeat: false,
+                    modifiers: egui::Modifiers {
+                        ctrl: true,
+                        command: true,
+                        ..Default::default()
+                    },
+                },
+                egui::Event::Text(action.into()),
+            ];
+        } else if phase == 2 {
+            return self.click_visible_smoke_control(ctx, self.metrics.storage_run);
+        }
+        true
+    }
     fn click_visible_smoke_control(
         &mut self,
         ctx: &egui::Context,
@@ -222,6 +270,232 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            6400..=6799 => {
+                use dlms_learning_lab::storage_workspace::Draft;
+                let ordinal = (self.smoke_stage - 6400) / 100;
+                let phase = (self.smoke_stage - 6400) % 100;
+                let id = [
+                    "lpic2-mount-identity",
+                    "lpic2-mount-policy",
+                    "lpic2-mount-manual",
+                    "lpic2-mount-handover",
+                ][ordinal]
+                    .to_owned();
+                let i = self.scenarios.iter().position(|s| s.id == id).unwrap();
+                let scenario = self.scenarios[i].clone();
+                let lesson = scenario.storage_teaching.as_ref().unwrap();
+                assert!(scenario.solution.len() <= 5 && lesson.example_solution.len() <= 5);
+                match phase {
+                    0 => {
+                        self.launch(i);
+                        self.scale = 1.;
+                        self.theme_id = "dlms-dark".into();
+                        theme::apply(ctx, &self.theme_id);
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                    }
+                    1 => shot = Some(format!("{id}-introduction")),
+                    2 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                            return;
+                        }
+                    }
+                    3 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.insert) {
+                            return;
+                        }
+                    }
+                    4 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .storage_learning
+                            .as_ref()
+                            .unwrap();
+                        assert_eq!(a.state, scenario.initial);
+                        assert_eq!(l.state, lesson.fixture);
+                        assert!(!l.checked);
+                        assert!(!progress::current_solved(a, &scenario));
+                    }
+                    5..=34 => {
+                        let slot = (phase - 5) / 6;
+                        let part = (phase - 5) % 6;
+                        if let Some(action) = lesson.example_solution.get(slot)
+                            && !self.storage_reference_action(ctx, i, true, action, part)
+                        {
+                            return;
+                        }
+                    }
+                    35 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                            return;
+                        }
+                    }
+                    36 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .storage_learning
+                            .as_ref()
+                            .unwrap();
+                        assert!(l.checks(lesson).iter().all(|c| c.0));
+                        assert_eq!(a.state, scenario.initial);
+                        assert!(!progress::current_solved(a, &scenario));
+                        shot = Some(format!("{id}-example-complete-ungraded"));
+                    }
+                    37 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.assignment_action) {
+                            return;
+                        }
+                    }
+                    38 => shot = Some(format!("{id}-assignment")),
+                    39 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                            return;
+                        }
+                    }
+                    40 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-initial-feedback"));
+                    }
+                    41 => {
+                        let mut repaired = scenario.initial.clone();
+                        for action in &scenario.solution {
+                            engine::execute(&mut repaired, action).unwrap();
+                        }
+                        let engine::State::PersistentMounts { storage } = &repaired else {
+                            unreachable!()
+                        };
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .storage_draft = Some(Draft::new(storage));
+                        self.dirty = true;
+                    }
+                    42..=71 => {
+                        let slot = (phase - 42) / 6;
+                        let part = (phase - 42) % 6;
+                        if let Some(action) = scenario.solution.get(slot)
+                            && !self.storage_reference_action(ctx, i, false, action, part)
+                        {
+                            return;
+                        }
+                    }
+                    72 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                            return;
+                        }
+                    }
+                    73 => {
+                        assert!(self.metrics.completion, "{id}");
+                        assert_eq!(self.progress.attempts[&id].step, 0);
+                        let before = serde_json::to_vec(&self.progress.attempts[&id]).unwrap();
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        assert_eq!(
+                            before,
+                            serde_json::to_vec(&self.progress.attempts[&id]).unwrap()
+                        );
+                    }
+                    74 => shot = Some(format!("{id}-complete")),
+                    75 => {
+                        let engine::State::PersistentMounts { storage } =
+                            &mut self.progress.attempts.get_mut(&id).unwrap().state
+                        else {
+                            unreachable!()
+                        };
+                        let target = storage.live().keys().next().unwrap().clone();
+                        storage.umount(&target).unwrap();
+                        self.dirty = true;
+                    }
+                    76 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &scenario
+                        ));
+                    }
+                    77 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                            return;
+                        }
+                    }
+                    78 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                            return;
+                        }
+                    }
+                    79 => {
+                        assert_eq!(self.progress.attempts[&id].state, scenario.initial);
+                        self.progress.attempts.get_mut(&id).unwrap().challenge = true;
+                        self.set_storage_view(i, teaching::View::Assignment);
+                    }
+                    80 => {
+                        assert!(self.metrics.lesson_tabs.is_empty());
+                        assert!(!self.metrics.help_visible);
+                        shot = Some(format!("{id}-challenge"));
+                        self.smoke_stage = 6400 + ordinal * 100 + 99;
+                    }
+                    _ => {}
+                }
+            }
+            6800 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "LPIC-2".into(),
+                    unit: "persistent-mounts".into(),
+                    ..Default::default()
+                };
+            }
+            6801 => shot = Some("storage-unit-library-dark-100".into()),
+            6802 => {
+                let i = self
+                    .scenarios
+                    .iter()
+                    .position(|s| s.id == "lpic2-mount-handover")
+                    .unwrap();
+                self.launch(i);
+                self.set_storage_view(i, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut("lpic2-mount-handover")
+                    .unwrap()
+                    .challenge = true;
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            6804 => shot = Some("storage-unit-light-150".into()),
+            6805 | 6809 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.check.unwrap()) {
+                    return;
+                }
+            }
+            6806 => shot = Some("storage-unit-light-150-scrolled".into()),
+            6807 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            6808 => shot = Some("storage-unit-dark-200".into()),
+            6810 => shot = Some("storage-unit-dark-200-scrolled".into()),
+            6811 => {
+                println!(
+                    "PASS native four authored persistent-mount lessons: introductions, separate fill-only examples, actual Save/terminal events/Check, initial feedback, reference-populated assignment drafts, Step0 completion, exact resume/current invalidation, selected reset, Challenge/library and light150/dark200. Reference data supplied programmatically; not novice, physical-device, kernel or Windows/macOS acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             6270 => {
                 let i = self.add_storage_fixture();
                 self.launch(i);

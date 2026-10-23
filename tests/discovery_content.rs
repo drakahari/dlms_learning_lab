@@ -473,7 +473,7 @@ fn each_small_example_and_typed_try_change_is_isolated_and_fill_never_sends_or_a
 #[test]
 fn current_unsaved_edits_and_saved_invalid_ttl_clock_and_practice_drafts_survive_selected_reset() {
     let old = old_catalog();
-    assert_eq!(old.len(), 78);
+    assert_eq!(old.len(), 82);
     let all = catalog();
     let mut p = Progress {
         schema_version: 1,

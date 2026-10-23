@@ -90,3 +90,7 @@ Four authored LPIC-1 assignments extend Linux foundations through ownership-awar
 ## LLDP discovery continuation — M50
 
 Four authored CCNA assignments teach receive direction, stale advertised inventory, selective transmit/reception and a multi-attachment recovery. Each retains a separate runnable example and a full native editing/verification task. Current CCNA v1.1 2.3 gains narrow LLDP Partial practice only; CDP/IOS/automatic scheduling/full TLVs and equipment conformance remain absent. Current official v1.1 PDF and exam overview rechecked2026-10-23. Existing78 definitions/progress unchanged. Catalog82/nineteen units:23CCNA,17LPIC-1,9LPIC-2,33Bash.109Partial/1Supporting/1130Open references remain overlapping gap/evidence bookkeeping, not percentages.
+
+## M55 — persistent mounts and UUIDs
+
+Four distinct LPIC-2 assignments now teach stable supplied identity, saved versus current access policy, manual-only mounting and a preserved multi-volume handover. Catalog86/twenty units:23CCNA,17LPIC-1,13LPIC-2,33Bash. Narrow203.1 UUID/blkid evidence brings the overlapping ledger to111Partial/1Supporting/1128Open; no filesystem-maintenance, swap, systemd-unit or real-boot coverage is claimed. Official LPIC-2 v4.5 objectives rechecked2026-10-23, full inventory fingerprints remain2026-10-22. See STORAGE_LESSONS.md.

@@ -353,6 +353,10 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                 device.enabled = false;
             }
             simulation.reconfigure(wrong).unwrap();
+        } else if let State::PersistentMounts { storage } = &mut a.state {
+            storage
+                .save_configuration("unfinished mount row\n".into())
+                .unwrap();
         } else if let State::Processes { table } = &mut a.state {
             // Every authored process task preserves its current session controller.
             // Breaking that real requirement must still yield a resumable attempt.

@@ -1,0 +1,370 @@
+[
+  {
+    "id": "lpic2-mount-identity",
+    "alternate": [
+      "storage {\"kind\":\"Save\",\"text\":\"# Alternate supported spelling; final policy is unchanged\\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 rw,ro,defaults,auto 0 2\\nUUID=11111111-1111-4111-8111-111111111111 /work ext4 ro,rw,defaults,auto 0 2\\n\"}",
+      "umount /reports",
+      "mount /reports",
+      "mount /work"
+    ],
+    "practice_repair": [
+      "storage {\"kind\":\"Save\",\"text\":\"UUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1 /practice-work ext4 rw,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2 /practice-reports ext4 ro,auto 0 2\\n\"}"
+    ],
+    "negatives": [
+      {
+        "name": "saved-only",
+        "start": "initial",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=11111111-1111-4111-8111-111111111111 /work ext4 rw,auto 0 2\\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Persistent identity is repaired, but the required work live mount is missing."
+      },
+      {
+        "name": "live-only",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=99999999-9999-4999-8999-999999999999 /work ext4 rw,auto 0 2\\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Correct current mounts do not repair a bad persistent source."
+      },
+      {
+        "name": "current-device-name",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"/dev/vdb1 /work ext4 rw,auto 0 2\\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The source resolves today but must fail a changed-name saved-identity check."
+      },
+      {
+        "name": "deleted-peer-row",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=11111111-1111-4111-8111-111111111111 /work ext4 rw,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Keeping a peer live does not replace its required saved entry."
+      },
+      {
+        "name": "all-manual",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=11111111-1111-4111-8111-111111111111 /work ext4 rw,noauto 0 2\\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Automatic positive mounts are required in every fresh table."
+      },
+      {
+        "name": "all-unmounted",
+        "start": "solved",
+        "actions": [
+          "umount /work",
+          "umount /reports"
+        ],
+        "expected_complete": false,
+        "reason": "A valid saved table alone does not satisfy the current assignment."
+      },
+      {
+        "name": "swapped-equal-type-identities",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=22222222-2222-4222-8222-222222222222 /work ext4 rw,auto 0 2\\nUUID=11111111-1111-4111-8111-111111111111 /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Both sources exist and have matching types; the assigned roles are still wrong."
+      }
+    ]
+  },
+  {
+    "id": "lpic2-mount-policy",
+    "alternate": [
+      "storage {\"kind\":\"Save\",\"text\":\"# Alternate supported spelling; final policy is unchanged\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 rw,ro,defaults,auto 0 2\\nUUID=33333333-3333-4333-8333-333333333333 /workspace ext4 ro,rw,defaults,auto 0 2\\n\"}",
+      "umount /archive",
+      "umount /workspace",
+      "mount /archive",
+      "mount /workspace"
+    ],
+    "practice_repair": [
+      "storage {\"kind\":\"Save\",\"text\":\"UUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb1 /practice-build ext4 rw,auto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbb2 /practice-review ext4 ro,auto 0 2\\n\"}"
+    ],
+    "negatives": [
+      {
+        "name": "saved-only",
+        "start": "initial",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 rw,auto 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Both current policies remain reversed."
+      },
+      {
+        "name": "live-only",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 ro 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 rw 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Correct live policies cannot hide wrong saved policies."
+      },
+      {
+        "name": "only-workspace-applied",
+        "start": "initial",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 rw,auto 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 ro,auto 0 2\\n\"}",
+          "umount /workspace",
+          "mount /workspace"
+        ],
+        "expected_complete": false,
+        "reason": "Archive remains writable."
+      },
+      {
+        "name": "only-archive-applied",
+        "start": "initial",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 rw,auto 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 ro,auto 0 2\\n\"}",
+          "umount /archive",
+          "mount /archive"
+        ],
+        "expected_complete": false,
+        "reason": "Workspace remains read-only."
+      },
+      {
+        "name": "both-read-only",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 ro 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The work role requires writable access."
+      },
+      {
+        "name": "both-writable",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 rw,auto 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 rw 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The archive role requires read-only access."
+      },
+      {
+        "name": "changed-check-fields",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=33333333-3333-4333-8333-333333333333 /workspace ext4 rw,auto 0 2\\nUUID=44444444-4444-4444-8444-444444444444 /archive ext4 ro,auto 1 0\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The ticket requires the supplied metadata fields to remain unchanged."
+      }
+    ]
+  },
+  {
+    "id": "lpic2-mount-manual",
+    "alternate": [
+      "storage {\"kind\":\"Save\",\"text\":\"# Alternate supported spelling; final policy is unchanged\\nUUID=77777777-7777-4777-8777-777777777777 /maintenance xfs rw,ro,defaults,noauto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 rw,ro,defaults,auto 0 2\\nUUID=55555555-5555-4555-8555-555555555555 /work ext4 ro,rw,defaults,auto 0 2\\n\"}",
+      "umount /archive",
+      "umount /work",
+      "mount /maintenance",
+      "mount /archive",
+      "mount /work"
+    ],
+    "practice_repair": [
+      "storage {\"kind\":\"Save\",\"text\":\"UUID=cccccccc-cccc-4ccc-8ccc-ccccccccccc1 /practice-work ext4 rw,auto 0 2\\nUUID=cccccccc-cccc-4ccc-8ccc-ccccccccccc2 /practice-archive ext4 ro,auto 0 2\\nUUID=cccccccc-cccc-4ccc-8ccc-ccccccccccc3 /practice-tool xfs ro,noauto 0 2\\n\"}"
+    ],
+    "negatives": [
+      {
+        "name": "left-automatic",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 ro,auto 0 2\\nUUID=77777777-7777-4777-8777-777777777777 /maintenance xfs ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Maintenance must not return automatically."
+      },
+      {
+        "name": "saved-only-left-unmounted",
+        "start": "initial",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 ro,auto 0 2\\nUUID=77777777-7777-4777-8777-777777777777 /maintenance xfs ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Maintenance must also be available in the current session."
+      },
+      {
+        "name": "deleted-manual-row",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The required manual saved entry cannot be deleted."
+      },
+      {
+        "name": "wrong-type-in-skipped-row",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 ro,auto 0 2\\nUUID=77777777-7777-4777-8777-777777777777 /maintenance ext4 ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Skipping a row cannot hide its type mismatch."
+      },
+      {
+        "name": "wrong-uuid-in-skipped-row",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 ro,auto 0 2\\nUUID=eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee /maintenance xfs ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "ConfigValid includes skipped manual rows."
+      },
+      {
+        "name": "manual-current-device-name",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 ro,auto 0 2\\n/dev/vdd1 /maintenance xfs ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Saved identity must remain correct in clone inventories even though noauto skips mounting."
+      },
+      {
+        "name": "damaged-healthy-archive",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=55555555-5555-4555-8555-555555555555 /work ext4 rw,auto 0 2\\nUUID=66666666-6666-4666-8666-666666666666 /archive ext4 rw 0 2\\nUUID=77777777-7777-4777-8777-777777777777 /maintenance xfs ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Unrelated healthy archive policy is part of the complete task."
+      }
+    ]
+  },
+  {
+    "id": "lpic2-mount-handover",
+    "alternate": [
+      "storage {\"kind\":\"Save\",\"text\":\"# Alternate supported spelling; final policy is unchanged\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 rw,ro,defaults,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 rw,ro,defaults,noauto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs rw,ro,defaults,auto 0 2\\nUUID=88888888-8888-4888-8888-888888888888 /applications ext4 ro,rw,defaults,auto 0 2\\n\"}",
+      "umount /reports",
+      "umount /archive",
+      "umount /applications",
+      "mount /reports",
+      "mount /archive",
+      "mount /applications"
+    ],
+    "practice_repair": [
+      "umount /practice-maintenance"
+    ],
+    "negatives": [
+      {
+        "name": "omitted-stable-application-source",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"/dev/vdb1 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Current source works but changed-name identity fails."
+      },
+      {
+        "name": "omitted-archive-type",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive ext4 ro,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The archive type must match xfs inventory."
+      },
+      {
+        "name": "omitted-saved-archive-policy",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs rw 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Correct live read-only access cannot hide the wrong saved policy."
+      },
+      {
+        "name": "omitted-live-archive-policy",
+        "start": "initial",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The existing archive remains writable after Save."
+      },
+      {
+        "name": "omitted-manual-uuid",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\nUUID=ffffffff-ffff-4fff-8fff-ffffffffffff /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Skipped rows still need valid saved identity."
+      },
+      {
+        "name": "manual-device-alias",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\n/dev/vdd1 /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The manual source must preserve its role under every rotation."
+      },
+      {
+        "name": "mounted-manual-handover",
+        "start": "solved",
+        "actions": [
+          "mount /maintenance"
+        ],
+        "expected_complete": false,
+        "reason": "The actual session must leave maintenance unmounted."
+      },
+      {
+        "name": "deleted-manual-row",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Absence is not a substitute for a valid manual entry."
+      },
+      {
+        "name": "swapped-equal-type-roles",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=88888888-8888-4888-8888-888888888888 /reports ext4 ro,auto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "Valid unique ext4 sources are not proof of correct role assignment."
+      },
+      {
+        "name": "damaged-healthy-reports",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,auto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,auto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 rw 0 2\\n\"}",
+          "umount /reports",
+          "mount /reports"
+        ],
+        "expected_complete": false,
+        "reason": "A handover cannot silently weaken the healthy reports policy."
+      },
+      {
+        "name": "all-manual",
+        "start": "solved",
+        "actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=88888888-8888-4888-8888-888888888888 /applications ext4 rw,noauto 0 2\\nUUID=99999999-9999-4999-8999-999999999999 /archive xfs ro,noauto 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa /maintenance ext4 ro,noauto 0 2\\nUUID=bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb /reports ext4 ro,noauto 0 2\\n\"}"
+        ],
+        "expected_complete": false,
+        "reason": "The three automatic positive mounts remain required."
+      },
+      {
+        "name": "all-unmounted",
+        "start": "solved",
+        "actions": [
+          "umount /applications",
+          "umount /archive",
+          "umount /reports"
+        ],
+        "expected_complete": false,
+        "reason": "A valid saved plan cannot replace required current mounts."
+      }
+    ]
+  }
+]

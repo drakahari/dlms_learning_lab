@@ -3719,11 +3719,18 @@ fn all_authored_assignment_controls_fit_at_two_hundred_percent_and_vlandrafts_su
             for _ in 0..4 {
                 frame(&ctx, &mut a, w, h, vec![]);
             }
+            // A no-wrap configuration editor can have wider scroll contents;
+            // its visible viewport, rather than its child text rectangle, must fit.
+            let terminal = if matches!(a.scenarios[i].initial, State::PersistentMounts { .. }) {
+                a.metrics.editor_viewport.iter()
+            } else {
+                a.metrics.terminal.iter()
+            };
             for r in a
                 .metrics
                 .inputs
                 .iter()
-                .chain(a.metrics.terminal.iter())
+                .chain(terminal)
                 .chain(a.metrics.check.iter())
                 .chain(a.metrics.editor_save.iter())
             {
@@ -5553,6 +5560,62 @@ fn storage_large_text_outer_wheel_scroll_reaches_the_check_below_nested_editors(
         "check{r:?} viewport{vp:?} offset{:?}",
         a.metrics.main_scroll_offset
     );
+}
+
+#[test]
+fn four_authored_storage_lessons_keep_full_tasks_editors_and_terminal_at_all_supported_scales() {
+    let (_, base) = app();
+    let indices = base
+        .scenarios
+        .iter()
+        .enumerate()
+        .filter_map(|(i, s)| (s.unit == "persistent-mounts").then_some(i))
+        .collect::<Vec<_>>();
+    assert_eq!(indices.len(), 4);
+    for i in indices {
+        for (width, height) in [(1200., 850.), (720., 560.)] {
+            for scale in [1., 1.5, 2.] {
+                for (view, challenge) in [
+                    (teaching::View::Introduction, false),
+                    (teaching::View::Example, false),
+                    (teaching::View::Assignment, false),
+                    (teaching::View::Assignment, true),
+                ] {
+                    let (ctx, mut a) = app();
+                    a.launch(i);
+                    a.set_storage_view(i, view);
+                    a.scale = scale;
+                    let id = a.scenarios[i].id.clone();
+                    a.progress.attempts.get_mut(&id).unwrap().challenge = challenge;
+                    for _ in 0..3 {
+                        frame(&ctx, &mut a, width, height, vec![]);
+                    }
+                    for r in a
+                        .metrics
+                        .inputs
+                        .iter()
+                        .chain(a.metrics.editor_viewport.iter())
+                        .chain(a.metrics.output.iter())
+                        .chain(a.metrics.editor_save.iter())
+                        .chain(a.metrics.storage_run.iter())
+                        .chain(a.metrics.storage_validate.iter())
+                        .chain(a.metrics.storage_test.iter())
+                        .chain(a.metrics.check.iter())
+                    {
+                        assert!(
+                            r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                            "{id}/{width}/{scale}/{view:?}: {r:?} vs{:?}",
+                            ctx.content_rect()
+                        );
+                    }
+                    assert!(!a.metrics.help_visible);
+                    if challenge {
+                        assert!(a.metrics.lesson_tabs.is_empty());
+                    }
+                }
+            }
+        }
+    }
 }
 
 #[test]

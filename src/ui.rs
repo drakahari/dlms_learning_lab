@@ -266,6 +266,8 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("storage-layout")
             {
                 6270
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("storage-unit") {
+                6400
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arrays") {
                 4800
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arrays-stop") {
@@ -1231,6 +1233,11 @@ impl LabApp {
                                                 (6, "Up to 6 min"),
                                                 (8, "Up to 8 min"),
                                                 (10, "Up to 10 min"),
+                                                (20, "Up to 20 min"),
+                                                (30, "Up to 30 min"),
+                                                (60, "Up to 60 min"),
+                                                (120, "Up to 120 min"),
+                                                (180, "Up to 180 min"),
                                             ] {
                                                 ui.selectable_value(
                                                     &mut self.filter.max_minutes,

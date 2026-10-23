@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **82 authored assignments:** 23 CCNA,17 LPIC-1,9 LPIC-2 and33 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **86 authored assignments:** 23 CCNA,17 LPIC-1,13 LPIC-2 and33 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -45,6 +45,8 @@ The accepted native workspace design remains the basis of all labs. The header a
 The original **Bring the service back** task now explains background services, saved configuration versus the current run, and startup at boot before independent diagnosis. A separate editor/terminal example keeps its own state and history; inserting a command never executes it. [Service teaching](docs/SERVICE_TEACHING.md).
 
 The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
+
+The **Persistent mounts and UUIDs** unit adds four [storage assignments](docs/STORAGE_LESSONS.md): stable identity, saved versus live access policy, a manual-only volume, and a multi-fault handover. A native configuration editor and simulated administrator terminal keep diagnosis and verification together. Fresh-session tests change only virtual device names; no actual mount, boot or device operation occurs.
 
 The **Processes and priority** unit adds four [Linux terminal assignments](docs/PROCESS_LESSONS.md): choose the right owner before pausing, finish pending termination, change an existing batch process’s priority, and repair a process-family handover. Teaching and practice use a separate table; all processes and signals stay virtual.
 

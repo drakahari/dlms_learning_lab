@@ -57,7 +57,7 @@ fn fixture_is_reachable_but_unbundled_and_teaching_is_required() {
     assert!(!engine::solved(&s.initial, &s.goal));
     assert!(progress::current_solved(&solved(&s), &s));
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 82);
+    assert_eq!(all.len(), 86);
     assert!(all.iter().all(|s| s.id != "test-storage-workspace"));
     let mut value: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/storage-workspace-preview.json")).unwrap();
@@ -470,7 +470,7 @@ fn progress_roundtrip_keeps_invalid_drafts_separate_examples_and_all_previous_at
     }
     let encoded = serde_json::to_vec(&p).unwrap();
     let restored = progress::decode(&encoded, &catalog).unwrap();
-    assert_eq!(restored.attempts.len(), 83);
+    assert_eq!(restored.attempts.len(), 87);
     assert!(restored.favorites.contains(&s.id));
     assert!(!progress::current_solved(&restored.attempts[&s.id], &s));
     assert_eq!(

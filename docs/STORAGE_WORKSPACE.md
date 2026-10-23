@@ -1,6 +1,6 @@
 # Native persistent-mount workspace
 
-M54 integration, 2026-10-23. A development fixture exercises the normal native route; it is not bundled curriculum or an extra authored lab. The catalog stays82/nineteen units until the separate content milestone is accepted. The old one-volume `lpic2-storage` scenario and all previous attempts are unchanged. The [model contract](STORAGE_SUBSET.md) describes supported behavior and omissions.
+M54 integration and M55 authored content, 2026-10-23. Four bundled lessons now use this workspace; see STORAGE_LESSONS.md. The separate development fixture is not catalogued or counted. The old one-volume `lpic2-storage` scenario and all previous attempts are unchanged. The [model contract](STORAGE_SUBSET.md) describes supported behavior and omissions.
 
 The complete assignment stays visible above current live mounts, a configuration editor and an investigation terminal. Wide windows use two columns; smaller windows/larger text stack them. Editor rows retain literal newlines, with horizontal scrolling for long records. Text/cursor/selection remain native egui geometry. Single-line commands use shared centered fields and font-derived button/input heights. Save, Validate and Test saved mounts are separate from the one primary Check configuration action. No configuration or command is executed by merely inserting worked text.
 
@@ -18,7 +18,7 @@ Test saved mounts reports actual clone volume IDs/UUIDs and manual-source resolu
 
 Version1 optional workspace fields preserve assignment/practice independently. Up to16Ki characters of editor work (64KiB UTF-8) can remain as an invalid unsaved draft; Save enforces the model's16KiB/128-line file bound and preserves the draft on error. Output is capped32KiB. Restoration pins both assignment inventory and practice fixture identities/aliases/mountpoints, including coordinated rewrites. Wrong-type metadata and malformed imports are rejected; selected reset retains other attempts and favorites. Existing progress envelope/old scenario definitions remain unchanged.
 
-Authors supply `storage_teaching`, full typed requirements, a distinct-UUID fixture, real supported example commands, reference actions and a tested change. The pack loader rejects missing teaching, ambiguous maps, incomplete objectives, unreachable solutions and worked examples that reuse assignment UUIDs. Use the unbundled `tests/fixtures/storage-workspace-preview.json` as schema evidence, not a finished lab. Four proposed identification, live-policy, manual-maintenance and handover tasks still require separate content tests and native review before counting coverage.
+Authors supply `storage_teaching`, full typed requirements, a distinct-UUID fixture, real supported example commands, reference actions and a tested change. The pack loader rejects missing teaching, ambiguous maps, incomplete objectives, unreachable solutions and worked examples that reuse assignment UUIDs. Use the unbundled `tests/fixtures/storage-workspace-preview.json` as schema evidence, not a finished lab. Four accepted identity, live-policy, manual-only maintenance-volume and handover assignments are documented in STORAGE_LESSONS.md.
 
 ## Verification scope
 
