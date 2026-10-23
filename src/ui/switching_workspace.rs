@@ -225,10 +225,13 @@ impl LabApp {
                     .as_mut()
                     .unwrap()
                     .switching_draft = Some(draft);
-                if let Some(notice) = &self.notice {
-                    ui.colored_label(palette(ui).error, notice);
-                }
-                self.report_switching(ui, i);
+                let result = controls::feedback(ui, r.clicked(), |ui| {
+                    if let Some(notice) = &self.notice {
+                        ui.colored_label(palette(ui).error, notice);
+                    }
+                    self.report_switching(ui, i);
+                });
+                self.metrics.feedback = Some(result.response.rect);
                 if let (State::Switching { fabric }, engine::Goal::Switching { .. }) =
                     (&self.progress.attempts[&s.id].state, &s.goal)
                 {

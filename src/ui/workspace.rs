@@ -197,7 +197,8 @@ impl LabApp {
                 .checked = true;
             self.dirty = true;
         }
-        self.report(ui, i);
+        let result = controls::feedback(ui, r.clicked(), |ui| self.report(ui, i));
+        self.metrics.feedback = Some(result.response.rect);
     }
     pub(super) fn ipv4_assignment(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = &self.scenarios[i];

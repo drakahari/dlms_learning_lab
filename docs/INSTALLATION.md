@@ -304,3 +304,20 @@ CI39976264683 completed successfully on all3 native runners. Its Windows and Ubu
 | --- | --- |
 | Windows x86_64 MSVC `...-ge2b020064826-x86_64-pc-windows-msvc-windows-candidate.zip` | `39a1d2e58aa9adcb9a5176a11e574e0785d0ee3d948d7a2f11d3786b1d684563` |
 | Ubuntu24.04 x86_64 `...-ge2b020064826-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `ab6ed5f5b939422d237358582435ca2d8e7b2e95694f2b31abf5bd67b2f002ce` |
+
+
+## M50 verified Fedora candidate — 82 labs, 2026-10-23
+
+Clean source `a741b65558ca4ef43735594fb7af915f96cd84f1` bundles 82 authored labs in nineteen units. It is a tested milestone, **not curriculum completion**.
+
+```sh
+./dist/dlms-learning-lab-0.1.0-ga741b65558ca-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA-256: `3b0694a6693d2565d16a3864ad9dcc0d89920699be1c6cc30488ad4cc188aaf4`.
+Executable SHA-256: `f71491b5e1bf4aedf495cbe04874c5d98b976f0007b3693f1886af49831a159c`.
+The archive has the same directory name plus `.tar.gz`. Linux target 223 dependency source archives/notices, Rust, fonts and all 28 theme notices resolve.
+
+Actual isolated upgrade from e2b0200, clean install/uninstall/reinstall, desktop-file validation, outside-checkout build/content identity and exact original-nine synthetic progress-byte retention pass. The installed executable passes all four LLDP lessons with isolated examples, native Apply/Send/Check, partial/current grading, expiry invalidation, save/reload, selected reset and Challenge. Reference drafts are populated programmatically; this is not novice or physical-input acceptance. The installed 72-capture IPv4/VLAN matrix covers wide/narrow, light/dark and 100/150/200% text; representative fields, focus, labels, columns and scrolling were reviewed. Ten quiet default-Wayland startup/readback launches pass 10/10; artificial harness pacing means these are not performance measurements. Historical unanswered-frame startup cause remains unresolved/unreproduced.
+
+Evidence: `/tmp/dlms-m44-install-06kni51t/m50-acceptance.json`, `/tmp/dlms-m50-installed-discovery.log`, `/tmp/dlms-m50-installed-alignment.log`, `/tmp/dlms-m50-packaged-quiet/results.json`. Native CI [39986036392](https://github.com/drakahari/dlms_learning_lab/actions/runs/39986036392) passes all three native runners at this exact source. CI compile/tests are not Windows/macOS desktop acceptance; macOS packaging remains gated by the recorded dispatch notice. M51's subsequent feedback-visibility/accessibility descriptions are not inside this artifact. No public release.

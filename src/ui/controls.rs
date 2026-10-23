@@ -74,6 +74,11 @@ pub fn topology_pair(
     status: egui::Color32,
     caption: &str,
 ) {
+    let description = format!(
+        "Network diagram. First device: {}. Second device: {}. Connection: {caption}.",
+        left.join("; "),
+        right.join("; ")
+    );
     let line = ui.text_style_height(&egui::TextStyle::Body).ceil();
     let stacked = ui.available_width() < 360.;
     let width = if stacked {
@@ -110,13 +115,16 @@ pub fn topology_pair(
         palette(ui).muted,
         ui.available_width(),
     );
-    let (rect, _) = ui.allocate_exact_size(
+    let (rect, response) = ui.allocate_exact_size(
         egui::vec2(
             ui.available_width(),
             total_h + caption_galley.size().y.max(line) + GAP,
         ),
         egui::Sense::hover(),
     );
+    response.widget_info(|| {
+        egui::WidgetInfo::labeled(egui::WidgetType::Image, ui.is_enabled(), &description)
+    });
     let a = egui::Rect::from_min_size(rect.min, egui::vec2(width, h));
     let b = egui::Rect::from_min_size(
         if stacked {
@@ -179,6 +187,15 @@ pub fn topology_star(
     if !(2..=3).contains(&peers.len()) || ui.available_width() < 360. {
         return false;
     }
+    let description = format!(
+        "Network diagram. Central device: {}. Connected devices: {}. Physical connections: {caption}.",
+        hub.join("; "),
+        peers
+            .iter()
+            .map(|p| p.join("; "))
+            .collect::<Vec<_>>()
+            .join(". ")
+    );
     let line = ui.text_style_height(&egui::TextStyle::Body).ceil();
     let width =
         ((ui.available_width() - GAP * (peers.len() - 1) as f32) / peers.len() as f32).min(270.);
@@ -208,13 +225,16 @@ pub fn topology_star(
         palette(ui).muted,
         ui.available_width(),
     );
-    let (rect, _) = ui.allocate_exact_size(
+    let (rect, response) = ui.allocate_exact_size(
         egui::vec2(
             ui.available_width(),
             2. * h + 24. + GAP + cap.size().y.max(line),
         ),
         egui::Sense::hover(),
     );
+    response.widget_info(|| {
+        egui::WidgetInfo::labeled(egui::WidgetType::Image, ui.is_enabled(), &description)
+    });
     let hub_rect = egui::Rect::from_min_size(
         egui::pos2(rect.center().x - width / 2., rect.top()),
         egui::vec2(width, h),
@@ -265,4 +285,23 @@ pub fn topology_star(
         palette(ui).muted,
     );
     true
+}
+
+/// Reveal the result of an explicit check in the nearest existing scroll area.
+/// It adds no permanent panel and never scrolls merely because state rerenders.
+pub fn feedback<R>(
+    ui: &mut egui::Ui,
+    reveal: bool,
+    body: impl FnOnce(&mut egui::Ui) -> R,
+) -> egui::InnerResponse<R> {
+    let result = ui.vertical(body);
+    if reveal && result.response.rect.height() > 0. {
+        let align = if result.response.rect.height() > ui.clip_rect().height() {
+            egui::Align::TOP
+        } else {
+            egui::Align::BOTTOM
+        };
+        result.response.scroll_to_me(Some(align));
+    }
+    result
 }

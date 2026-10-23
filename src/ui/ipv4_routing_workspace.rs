@@ -243,10 +243,13 @@ impl LabApp {
                     .as_mut()
                     .unwrap()
                     .routing_v4_draft = Some(draft);
-                if let Some(notice) = &self.notice {
-                    ui.colored_label(palette(ui).error, notice);
-                }
-                self.report_routing_v4(ui, i);
+                let result = controls::feedback(ui, r.clicked(), |ui| {
+                    if let Some(notice) = &self.notice {
+                        ui.colored_label(palette(ui).error, notice);
+                    }
+                    self.report_routing_v4(ui, i);
+                });
+                self.metrics.feedback = Some(result.response.rect);
                 if let (
                     State::Ipv4Routing { topology },
                     engine::Goal::Ipv4Routing { requirements },

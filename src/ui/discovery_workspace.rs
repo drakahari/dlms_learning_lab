@@ -201,35 +201,38 @@ impl LabApp {
                         .checked = true;
                     self.dirty = true;
                 }
-                let a = &self.progress.attempts[&s.id];
-                let now = progress::current_solved(a, &s);
-                self.metrics.completion = self.checked && now;
-                if self.checked {
-                    let engine::State::Discovery { simulation } = &a.state else {
-                        unreachable!()
-                    };
-                    if !a
-                        .workspace
-                        .as_ref()
-                        .unwrap()
-                        .discovery_draft
-                        .as_ref()
-                        .unwrap()
-                        .matches(simulation)
-                    {
-                        ui.colored_label(palette(ui).error,"Unsaved settings · Apply the editor changes before checking current neighbors.");
-                    } else if now {
-                        ui.colored_label(
-                            palette(ui).success,
-                            "Objective complete · All current checks pass.",
-                        );
-                        self.next_unit_lab(ui, i);
-                    } else {
-                        for issue in model::issues(&a.state, &s.goal) {
-                            ui.colored_label(palette(ui).error, issue);
+                let result = controls::feedback(ui, r.clicked(), |ui| {
+                    let a = &self.progress.attempts[&s.id];
+                    let now = progress::current_solved(a, &s);
+                    self.metrics.completion = self.checked && now;
+                    if self.checked {
+                        let engine::State::Discovery { simulation } = &a.state else {
+                            unreachable!()
+                        };
+                        if !a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .discovery_draft
+                            .as_ref()
+                            .unwrap()
+                            .matches(simulation)
+                        {
+                            ui.colored_label(palette(ui).error,"Unsaved settings · Apply the editor changes before checking current neighbors.");
+                        } else if now {
+                            ui.colored_label(
+                                palette(ui).success,
+                                "Objective complete · All current checks pass.",
+                            );
+                            self.next_unit_lab(ui, i);
+                        } else {
+                            for issue in model::issues(&a.state, &s.goal) {
+                                ui.colored_label(palette(ui).error, issue);
+                            }
                         }
                     }
-                }
+                });
+                self.metrics.feedback = Some(result.response.rect);
             }
         }
     }

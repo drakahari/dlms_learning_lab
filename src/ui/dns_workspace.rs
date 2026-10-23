@@ -232,38 +232,41 @@ impl LabApp {
                         .checked = true;
                     self.dirty = true;
                 }
-                if self.checked {
-                    let a = &self.progress.attempts[&scenario.id];
-                    let pass = progress::current_solved(a, &scenario);
-                    self.metrics.completion = pass;
-                    if pass {
-                        ui.label(
-                            RichText::new("Objective complete · All current checks pass.")
-                                .strong()
-                                .color(palette(ui).success),
-                        );
-                        if !a.challenge {
-                            ui.label(&scenario.explanation);
-                        }
-                        self.next_unit_lab(ui, i);
-                    } else if let engine::State::AuthoritativeDns { server } = &a.state {
-                        if !draft.matches(server) {
-                            ui.label(RichText::new("Unsaved changes · Save the zone, then verify the published answers.").color(palette(ui).error));
-                        } else {
-                            for (_, text) in requirements
-                                .iter()
-                                .map(|r| r.check(server))
-                                .filter(|c| !c.0)
-                                .take(2)
-                            {
-                                ui.label(
-                                    RichText::new(format!("Needs attention: {text}"))
-                                        .color(palette(ui).error),
-                                );
+                let result = controls::feedback(ui, r.clicked(), |ui| {
+                    if self.checked {
+                        let a = &self.progress.attempts[&scenario.id];
+                        let pass = progress::current_solved(a, &scenario);
+                        self.metrics.completion = pass;
+                        if pass {
+                            ui.label(
+                                RichText::new("Objective complete · All current checks pass.")
+                                    .strong()
+                                    .color(palette(ui).success),
+                            );
+                            if !a.challenge {
+                                ui.label(&scenario.explanation);
+                            }
+                            self.next_unit_lab(ui, i);
+                        } else if let engine::State::AuthoritativeDns { server } = &a.state {
+                            if !draft.matches(server) {
+                                ui.label(RichText::new("Unsaved changes · Save the zone, then verify the published answers.").color(palette(ui).error));
+                            } else {
+                                for (_, text) in requirements
+                                    .iter()
+                                    .map(|r| r.check(server))
+                                    .filter(|c| !c.0)
+                                    .take(2)
+                                {
+                                    ui.label(
+                                        RichText::new(format!("Needs attention: {text}"))
+                                            .color(palette(ui).error),
+                                    );
+                                }
                             }
                         }
                     }
-                }
+                });
+                self.metrics.feedback = Some(result.response.rect);
             }
         }
     }

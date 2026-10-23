@@ -54,6 +54,7 @@ struct Metrics {
     check: Option<egui::Rect>,
     focus: Option<egui::Id>,
     completion: bool,
+    feedback: Option<egui::Rect>,
     guide: bool,
     editor_save: Option<egui::Rect>,
     dns_reload: Option<egui::Rect>,

@@ -226,10 +226,13 @@ impl LabApp {
                     .as_mut()
                     .unwrap()
                     .ipv6_draft = Some(draft);
-                if let Some(notice) = &self.notice {
-                    ui.colored_label(palette(ui).error, notice);
-                }
-                self.report_ipv6(ui, i);
+                let result = controls::feedback(ui, r.clicked(), |ui| {
+                    if let Some(notice) = &self.notice {
+                        ui.colored_label(palette(ui).error, notice);
+                    }
+                    self.report_ipv6(ui, i);
+                });
+                self.metrics.feedback = Some(result.response.rect);
                 if let (State::Ipv6 { topology }, engine::Goal::Ipv6 { requirements }) =
                     (&self.progress.attempts[&s.id].state, &s.goal)
                 {

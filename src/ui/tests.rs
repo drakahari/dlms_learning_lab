@@ -5256,3 +5256,150 @@ fn authored_discovery_lessons_keep_all_tools_in_width_and_guidance_optional_at_l
         }
     }
 }
+
+#[test]
+fn native_accessibility_topology_images_expose_addresses_connections_and_updated_states() {
+    use egui::accesskit::Role;
+    let (ctx, mut a) = app();
+    open_assignment(&mut a, 0);
+    let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+    let diagram = tree
+        .nodes
+        .iter()
+        .map(|(_, n)| n)
+        .find(|n| {
+            n.role() == Role::Image && n.label().is_some_and(|s| s.starts_with("Network diagram."))
+        })
+        .expect("painted topology has a native image description");
+    let label = diagram.label().unwrap();
+    assert!(
+        label.contains("192.168.10.77") && label.contains("Workstation 2") && label.contains("/27")
+    );
+    let i = a
+        .scenarios
+        .iter()
+        .position(|s| s.id == "ccna-lldp-handover")
+        .unwrap();
+    open_assignment(&mut a, i);
+    let summary = |tree: &egui::accesskit::TreeUpdate| {
+        tree.nodes
+            .iter()
+            .filter_map(|(_, n)| (n.role() == Role::Image).then(|| n.label()).flatten())
+            .find(|s| s.starts_with("Network diagram."))
+            .unwrap()
+            .to_owned()
+    };
+    let before = summary(&accessibility_tree(&ctx, &mut a, 1200., 850.));
+    assert!(
+        before.contains("finance; Finance; LLDP disabled") && before.contains("relay/finance"),
+        "{before}"
+    );
+    let engine::State::Discovery { simulation } = &mut a
+        .progress
+        .attempts
+        .get_mut("ccna-lldp-handover")
+        .unwrap()
+        .state
+    else {
+        panic!()
+    };
+    let mut topology = simulation.topology().clone();
+    topology.devices.get_mut("finance").unwrap().enabled = true;
+    simulation.reconfigure(topology).unwrap();
+    let after = summary(&accessibility_tree(&ctx, &mut a, 1200., 850.));
+    assert!(after.contains("finance; Finance; LLDP enabled"), "{after}");
+    assert_ne!(before, after);
+}
+
+#[test]
+fn explicit_configuration_check_reveals_success_or_retry_feedback_below_the_fold() {
+    for solved in [false, true] {
+        let (ctx, mut a) = app();
+        let i = a
+            .scenarios
+            .iter()
+            .position(|s| s.id == "ccna-lldp-handover")
+            .unwrap();
+        open_assignment(&mut a, i);
+        let id = a.scenarios[i].id.clone();
+        if solved {
+            for command in a.scenarios[i].solution.clone() {
+                engine::execute(
+                    &mut a.progress.attempts.get_mut(&id).unwrap().state,
+                    &command,
+                )
+                .unwrap();
+            }
+            let State::Discovery { simulation } = &a.progress.attempts[&id].state else {
+                panic!()
+            };
+            let draft = dlms_learning_lab::discovery_workspace::Draft::new(simulation);
+            a.progress
+                .attempts
+                .get_mut(&id)
+                .unwrap()
+                .workspace
+                .as_mut()
+                .unwrap()
+                .discovery_draft = Some(draft);
+        }
+        draw(&ctx, &mut a);
+        for _ in 0..20 {
+            let r = a.metrics.check.unwrap();
+            if r.bottom() <= 825. && r.top() > 85. {
+                break;
+            }
+            frame(
+                &ctx,
+                &mut a,
+                1200.,
+                850.,
+                vec![
+                    egui::Event::PointerMoved(egui::pos2(600., 500.)),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., (825. - r.bottom()).min(-25.)),
+                        modifiers: Default::default(),
+                    },
+                ],
+            );
+        }
+        for _ in 0..20 {
+            draw(&ctx, &mut a);
+        }
+        let state_before = a.progress.attempts[&id].state.clone();
+        let draft_before = serde_json::to_vec(
+            &a.progress.attempts[&id]
+                .workspace
+                .as_ref()
+                .unwrap()
+                .discovery_draft,
+        )
+        .unwrap();
+        let r = a.metrics.check.unwrap();
+        assert!(r.bottom() <= 850.);
+        click(&ctx, &mut a, r);
+        for _ in 0..20 {
+            draw(&ctx, &mut a);
+        }
+        let feedback = a.metrics.feedback.unwrap();
+        assert!(feedback.height() > 0.);
+        assert!(
+            feedback.top() >= 60. && feedback.bottom() <= 850.,
+            "solved{solved} feedback{feedback:?}"
+        );
+        assert_eq!(a.metrics.completion, solved);
+        assert_eq!(a.progress.attempts[&id].state, state_before);
+        assert_eq!(
+            serde_json::to_vec(
+                &a.progress.attempts[&id]
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .discovery_draft
+            )
+            .unwrap(),
+            draft_before
+        );
+    }
+}
