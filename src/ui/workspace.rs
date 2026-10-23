@@ -58,7 +58,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::Discovery { .. }) {
+            if matches!(s.initial, State::PersistentMounts { .. }) {
+                self.storage_workspace(ui, i);
+            } else if matches!(s.initial, State::Discovery { .. }) {
                 self.discovery_learning_workspace(ui, i);
             } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_workspace(ui, i);
@@ -127,7 +129,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::Discovery { .. }) {
+            let show_help = if matches!(s.initial, State::PersistentMounts { .. }) {
+                self.storage_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::Discovery { .. }) {
                 self.discovery_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_view(i) == teaching::View::Assignment

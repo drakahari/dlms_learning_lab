@@ -39,6 +39,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discovery_teaching: Option<crate::discovery_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub storage_teaching: Option<crate::storage_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv4_routing_teaching: Option<crate::ipv4_routing_teaching::Lesson>,
@@ -191,6 +193,36 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("DNS example must use a different zone from the assignment".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let State::PersistentMounts { storage } = &s.initial {
+            let Some(lesson) = &s.storage_teaching else {
+                return Err("Persistent mount activities require validated introduction and separate practice".into());
+            };
+            let Goal::PersistentMounts {
+                initial,
+                requirements,
+            } = &s.goal
+            else {
+                return Err("Storage objectives require the matching typed state".into());
+            };
+            if initial != storage.inventory()
+                || !crate::storage_workspace::valid_requirements(requirements, initial)
+            {
+                return Err("Invalid or unpinned persistent mount objectives".into());
+            }
+            if storage.inventory().volumes().values().any(|v| {
+                lesson
+                    .fixture
+                    .inventory()
+                    .volumes()
+                    .values()
+                    .any(|other| other.uuid == v.uuid)
+            }) {
+                return Err("Use different volume UUIDs for the ungraded storage example".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        } else if s.storage_teaching.is_some() || matches!(s.goal, Goal::PersistentMounts { .. }) {
+            return Err("Storage teaching/objectives attached to another activity".into());
         }
         if matches!(s.initial, State::Discovery { .. }) && s.discovery_teaching.is_none() {
             return Err(
@@ -387,6 +419,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::PersistentMounts { storage } => storage.validate().is_ok(),
         State::Discovery { simulation } => simulation.validate().is_ok(),
         State::Processes { table } => table.valid(),
         State::AuthoritativeDns { server } => server.validate().is_ok(),

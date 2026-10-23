@@ -1,3 +1,7 @@
+# M54 native persistent-mount integration — 2026-10-23
+
+531 all-target Rust tests pass. Final85UI rerun/Clippy/formatter,27Python,28palettes/notices and coverage validation pass; independent15integration+4UI checks pass and both original malformed-goal/manual-source proof packs now reject. Source/root/independent native render review accepted. Full native fixture flow and final short-toolbar follow-through pass, including actual200% Check/feedback; all72 shared IPv4/VLAN native alignment captures pass. Exact logs and limits in STORAGE_WORKSPACE.md and IMPLEMENTATION_LEDGER.md. No new authored count/coverage:82/nineteen,109Partial/1Supporting/1130Open. No novice/physical-device/screen-reader, Windows/macOS desktop or historical-startup-cure claim. Latest installed package remains eff98f0; new source is not implied inside it.
+
 # M53 persistent-mount capability verification — 2026-10-23
 
 512 all-target Rust tests pass; after the final exact-UUID-case correction, all17 storage tests and8 fixed findmnt field comparisons were rerun. Final Clippy/formatter,27 Python tooling checks,28 palette/notices and coverage integrity pass. Independent latest17 Rust+3 tool-boundary+8 fixed comparisons and source review accepted. State is pure capability only, not native integrated/teaching coverage or real kernel acceptance. STORAGE_SUBSET.md records bounds, exclusions, references and further authoring gates. Catalog82/nineteen and109Partial/1Supporting/1130Open unchanged; full completion remains Open.

@@ -113,7 +113,7 @@ fn bounded_config(text: &str) -> Result<()> {
 }
 
 // Reject duplicate keys and bound allocations before accepting a snapshot.
-fn map<'de, D: serde::Deserializer<'de>, V: Deserialize<'de>>(
+pub(crate) fn map<'de, D: serde::Deserializer<'de>, V: Deserialize<'de>>(
     d: D,
 ) -> std::result::Result<BTreeMap<String, V>, D::Error> {
     use serde::de::{Error as _, MapAccess, Visitor};
@@ -520,6 +520,14 @@ impl State {
     }
     pub fn inventory(&self) -> &Inventory {
         &self.inventory
+    }
+    pub fn validate(&self) -> Result<()> {
+        Self::new(
+            self.inventory.clone(),
+            self.configuration.clone(),
+            self.live.clone(),
+        )
+        .map(|_| ())
     }
     pub fn configuration(&self) -> &str {
         &self.configuration

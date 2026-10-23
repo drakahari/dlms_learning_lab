@@ -1,6 +1,6 @@
 # Persistent-mount model — capability foundation
 
-Checked 2026-10-23. This pure Rust module is **not yet a native lesson or counted coverage**. The original `lpic2-storage` seed and saved attempts are unchanged. No host device, file, service, network, subprocess, mount namespace or kernel interface is used by the model. Original code/tests are MIT; upstream manuals informed behavior and are linked, not copied or bundled as project code.
+Checked 2026-10-23. This pure Rust module has M54 native/persistence integration described in STORAGE_WORKSPACE.md, but **no new bundled lesson or counted coverage yet**. The original `lpic2-storage` seed and saved attempts are unchanged. No host device, file, service, network, subprocess, mount namespace or kernel interface is used by the model. Original code/tests are MIT; upstream manuals informed behavior and are linked, not copied or bundled as project code.
 
 ## State and operations
 
@@ -26,7 +26,7 @@ Seventeen model tests cover UUID/type/target errors, saved/live separation, alte
 
 Eight fixed development fixtures compare six parsed fields with **findmnt from util-linux2.41.5**, using only a private synthetic table, `--fstab --nocanonicalize --list --json`, explicit columns and no `--evaluate`. No real mount/UUID probe or personal file is accessed. Policy is checked by an independent equation over observed option tokens, not kernel behavior. The development probe parses stdin only. Reproduce with `cargo build --example storage_probe` then `python3 tools/storage_reference.py`; it accepts no arguments/external fixture path. Three tooling tests check the fixed invocation/input boundary. This evidence does not establish libmount/Bash/kernel conformance.
 
-Next: native inventory/live-state table, focused configuration editor and simulated investigation terminal, typed declarative current/persistent/fresh-session goals, isolated teaching examples, import identity pinning and current draft invalidation. Only then author/review four distinct identification, saved/live-policy, manual-maintenance and handover assignments. Do not count planned tasks or promote objective coverage before these work end to end.
+M54 adds the focused native editor/live-state display/investigation terminal, typed saved/live/fresh goals, isolated teaching, import pinning and draft invalidation. Next author/review four distinct identification, saved/live-policy, manual-maintenance and handover assignments. Do not count planned tasks or promote objective coverage before these work end to end.
 
 ## Primary references
 

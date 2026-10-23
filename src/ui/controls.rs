@@ -33,6 +33,13 @@ pub fn height(ui: &egui::Ui) -> f32 {
     .ceil()
         + 2. * PAD_Y as f32
 }
+pub fn button_width(ui: &egui::Ui, text: &str) -> f32 {
+    let font = egui::TextStyle::Button.resolve(ui.style());
+    let color = palette(ui).text;
+    ui.fonts_mut(|f| f.layout_no_wrap(text.into(), font, color).size().x)
+        .ceil()
+        + 2. * ui.spacing().button_padding.x
+}
 pub fn singleline<'a>(ui: &egui::Ui, value: &'a mut dyn egui::TextBuffer) -> egui::TextEdit<'a> {
     egui::TextEdit::singleline(value)
         .font(egui::TextStyle::Body)

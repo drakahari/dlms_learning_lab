@@ -43,14 +43,23 @@ impl LabApp {
         false
     }
     fn reveal_smoke_control(&mut self, ctx: &egui::Context, r: egui::Rect) -> bool {
-        let top = self
+        let visible = self
             .metrics
-            .header
-            .iter()
-            .map(|r| r.bottom())
-            .fold(0_f32, f32::max)
-            + 20.;
-        let bottom = ctx.content_rect().bottom() - 16.;
+            .main_viewport
+            .unwrap_or(ctx.content_rect())
+            .intersect(ctx.content_rect());
+        let top = visible.top();
+        let bottom = visible.bottom();
+        if self.smoke_stage == 6255 && std::env::var_os("DLMS_SMOKE_DIAGNOSTICS").is_some() {
+            eprintln!(
+                "scroll diagnostic: target={r:?}, outer={:?}, offset={:?}, size={:?}, pointer={:?}, delta={:?}",
+                self.metrics.main_viewport,
+                self.metrics.main_scroll_offset,
+                self.metrics.main_content_size,
+                ctx.input(|i| i.pointer.hover_pos()),
+                ctx.input(|i| i.raw_scroll_delta)
+            );
+        }
         let delta = if r.bottom() > bottom {
             bottom - r.bottom()
         } else if r.top() < top {
@@ -70,10 +79,7 @@ impl LabApp {
             ctx.content_rect()
         );
         self.pending_events.extend([
-            egui::Event::PointerMoved(egui::pos2(
-                ctx.content_rect().center().x,
-                (top + bottom) * 0.5,
-            )),
+            egui::Event::PointerMoved(egui::pos2(visible.left() + 1., visible.center().y)),
             egui::Event::MouseWheel {
                 unit: egui::MouseWheelUnit::Point,
                 delta: egui::vec2(0., delta),
@@ -109,6 +115,16 @@ impl LabApp {
             "../../tests/fixtures/discovery-workspace-preview.json"
         ))
         .expect("development discovery fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
+    pub(super) fn add_storage_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/storage-workspace-preview.json"
+        ))
+        .expect("development storage fixture validates")
         .remove(0);
         let index = self.scenarios.len();
         self.scenarios.push(lab);
@@ -206,6 +222,311 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            6270 => {
+                let i = self.add_storage_fixture();
+                self.launch(i);
+                self.set_storage_view(i, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut("test-storage-workspace")
+                    .unwrap()
+                    .challenge = true;
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.smoke_stage = 6253;
+            }
+            6200 => {
+                let i = self.add_storage_fixture();
+                self.launch(i);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            6201 => shot = Some("storage-preview-introduction".into()),
+            6202 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                    return;
+                }
+            }
+            6203 => shot = Some("storage-preview-example-initial".into()),
+            6204 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.insert) {
+                    return;
+                }
+            }
+            6205 => {
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                let l = a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .storage_learning
+                    .as_ref()
+                    .unwrap();
+                assert_eq!(
+                    l.state,
+                    self.scenarios[i].storage_teaching.as_ref().unwrap().fixture
+                );
+                assert!(!l.draft.matches(&l.state));
+                assert_eq!(a.state, self.scenarios[i].initial);
+                shot = Some("storage-preview-example-filled-not-run".into());
+            }
+            6206 | 6222 | 6227 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.editor_save) {
+                    return;
+                }
+            }
+            6207 | 6229 | 6234 | 6239 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.storage_command) {
+                    return;
+                }
+            }
+            6208 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("mount /practice-work".into()),
+                ]
+            }
+            6209 | 6231 | 6236 | 6241 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.storage_run) {
+                    return;
+                }
+            }
+            6210 | 6215 | 6223 | 6228 | 6232 | 6237 | 6242 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            6211 => {
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                let l = a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .storage_learning
+                    .as_ref()
+                    .unwrap();
+                assert!(
+                    l.checks(self.scenarios[i].storage_teaching.as_ref().unwrap())
+                        .iter()
+                        .all(|c| c.0)
+                );
+                assert_eq!(a.state, self.scenarios[i].initial);
+                assert!(!progress::current_solved(a, &self.scenarios[i]));
+                shot = Some("storage-preview-example-complete-ungraded".into());
+            }
+            6212 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.assignment_action) {
+                    return;
+                }
+            }
+            6213 => shot = Some("storage-preview-assignment".into()),
+            6214 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.storage_validate) {
+                    return;
+                }
+            }
+            6216 => {
+                assert!(!self.metrics.completion);
+                shot = Some("storage-preview-assignment-initial-feedback".into());
+            }
+            6217 | 6225 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.editor_viewport) {
+                    return;
+                }
+            }
+            6218 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("broken config".into()),
+                ]
+            }
+            6219 => {
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                assert_eq!(
+                    a.workspace
+                        .as_ref()
+                        .unwrap()
+                        .storage_draft
+                        .as_ref()
+                        .unwrap()
+                        .text,
+                    "broken config"
+                );
+                assert!(!progress::current_solved(a, &self.scenarios[i]));
+                self.smoke_stage = 6221;
+            }
+            6224 => {
+                assert!(!self.metrics.completion);
+                shot = Some("storage-preview-malformed-feedback".into());
+            }
+            6226 => {
+                let i = self.selected.unwrap();
+                let mut state = self.scenarios[i].initial.clone();
+                for action in &self.scenarios[i].solution {
+                    engine::execute(&mut state, action).unwrap();
+                }
+                let engine::State::PersistentMounts { storage } = &state else {
+                    unreachable!()
+                };
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text(storage.configuration().into()),
+                ];
+            }
+            6230 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("mount /work".into()),
+                ]
+            }
+            6233 => {
+                assert!(self.metrics.completion);
+                let i = self.selected.unwrap();
+                assert_eq!(self.progress.attempts[&self.scenarios[i].id].step, 0);
+                shot = Some("storage-preview-complete".into());
+            }
+            6235 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("umount /reports".into()),
+                ]
+            }
+            6238 => {
+                assert!(!self.metrics.completion);
+                shot = Some("storage-preview-current-invalidated".into());
+            }
+            6240 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("mount /reports".into()),
+                ]
+            }
+            6243 => {
+                assert!(self.metrics.completion);
+                let i = self.selected.unwrap();
+                let id = self.scenarios[i].id.clone();
+                let before = serde_json::to_vec(&self.progress.attempts[&id]).unwrap();
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert_eq!(
+                    before,
+                    serde_json::to_vec(&self.progress.attempts[&id]).unwrap()
+                );
+                assert!(progress::current_solved(
+                    &self.progress.attempts[&id],
+                    &self.scenarios[i]
+                ));
+            }
+            6244 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                    return;
+                }
+            }
+            6245 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                    return;
+                }
+            }
+            6246 => {
+                let i = self.selected.unwrap();
+                let a = &mut self
+                    .progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap();
+                assert_eq!(a.state, self.scenarios[i].initial);
+                a.challenge = true;
+                self.set_storage_view(i, teaching::View::Assignment);
+            }
+            6247 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                assert!(!self.metrics.help_visible);
+                shot = Some("storage-preview-challenge".into());
+            }
+            6248 => {
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            6250 => shot = Some("storage-preview-light-150".into()),
+            6251 | 6255 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.check.unwrap()) {
+                    return;
+                }
+            }
+            6252 => shot = Some("storage-preview-light-150-scrolled".into()),
+            6253 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            6254 => shot = Some("storage-preview-dark-200".into()),
+            6256 => shot = Some("storage-preview-dark-200-scrolled".into()),
+            6257 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            6258 => {
+                assert!(self.checked);
+                assert!(!self.metrics.completion);
+                let feedback = self.metrics.feedback.expect("checked result");
+                let viewport = self.metrics.main_viewport.unwrap();
+                assert!(
+                    feedback.top() >= viewport.top() - 1. && feedback.top() < viewport.bottom(),
+                    "feedback{feedback:?} viewport{viewport:?}"
+                );
+                shot = Some("storage-preview-dark-200-feedback".into());
+            }
+            6259 => {
+                self.scale = 1.;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            6260 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.storage_test) {
+                    return;
+                }
+            }
+            6261 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.output.unwrap()) {
+                    return;
+                }
+            }
+            6262 => {
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                assert_eq!(a.state, self.scenarios[i].initial);
+                let output = &a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .storage_draft
+                    .as_ref()
+                    .unwrap()
+                    .output;
+                assert!(output.contains("UUID="));
+                assert!(output.contains("Test copy 2"));
+                shot = Some("storage-preview-fresh-session-output".into());
+            }
+            6263 => {
+                println!(
+                    "PASS native unbundled storage workspace: separate intro/example, fill-only practice, actual editor and terminal events, malformed/retry/partial/current grading, no practice credit, Step0 completion/invalidation, exact saved reload, selected reset, Challenge and light150/dark200. Supplied synthetic reference text is not novice or physical-device acceptance. No authored count promotion."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             5600..=5919 => {
                 use dlms_learning_lab::{
                     discovery_teaching::Learning,

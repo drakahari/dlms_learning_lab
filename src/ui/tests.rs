@@ -8,6 +8,9 @@ fn app() -> (egui::Context, LabApp) {
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].storage_teaching.is_some() {
+        a.set_storage_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].discovery_teaching.is_some() {
         a.set_discovery_view(i, teaching::View::Assignment);
     }
@@ -268,6 +271,9 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             .unwrap()
             .state
         {
+            State::PersistentMounts { storage } => {
+                storage.save_configuration("broken".into()).unwrap()
+            }
             State::Processes { table } => {
                 let State::Processes { table: initial } = &a.scenarios[i].initial else {
                     panic!()
@@ -5402,4 +5408,242 @@ fn explicit_configuration_check_reveals_success_or_retry_feedback_below_the_fold
             draft_before
         );
     }
+}
+
+#[test]
+fn native_storage_fixture_reflows_editors_terminal_and_actions_without_font_locking() {
+    for (width, height) in [(1200., 850.), (720., 560.)] {
+        for scale in [1., 1.5, 2.] {
+            for (view, challenge) in [
+                (teaching::View::Introduction, false),
+                (teaching::View::Example, false),
+                (teaching::View::Assignment, false),
+                (teaching::View::Assignment, true),
+            ] {
+                let (ctx, mut a) = app();
+                let i = a.add_storage_fixture();
+                a.launch(i);
+                a.set_storage_view(i, view);
+                a.scale = scale;
+                a.progress
+                    .attempts
+                    .get_mut("test-storage-workspace")
+                    .unwrap()
+                    .challenge = challenge;
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                for r in a
+                    .metrics
+                    .inputs
+                    .iter()
+                    .chain(a.metrics.editor_viewport.iter())
+                    .chain(a.metrics.output.iter())
+                    .chain(a.metrics.editor_save.iter())
+                    .chain(a.metrics.storage_run.iter())
+                    .chain(a.metrics.storage_validate.iter())
+                    .chain(a.metrics.storage_test.iter())
+                    .chain(a.metrics.check.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{width}/{scale} {view:?} challenge{challenge}: {r:?}"
+                    );
+                }
+                assert!(!a.metrics.help_visible);
+                if challenge {
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn storage_fresh_output_shows_actual_identity_including_skipped_manual_sources() {
+    let (_, mut a) = app();
+    let i = a.add_storage_fixture();
+    let s = a.scenarios[i].clone();
+    let mut state = s.initial.clone();
+    for command in &s.solution {
+        engine::execute(&mut state, command).unwrap();
+    }
+    let State::PersistentMounts { storage } = &mut state else {
+        unreachable!()
+    };
+    storage
+        .save_configuration(
+            storage
+                .configuration()
+                .replace("UUID=22222222-2222-4222-8222-222222222222", "/dev/vdc1")
+                .replace("/reports ext4 ro", "/reports ext4 ro,noauto"),
+        )
+        .unwrap();
+    let engine::Goal::PersistentMounts { requirements, .. } = &s.goal else {
+        unreachable!()
+    };
+    let before = storage.clone();
+    let output = storage_workspace::fresh_report(storage, requirements);
+    assert!(output.contains("Saved manual /reports: resolves to volume reports"));
+    assert!(output.contains("Saved manual /reports: resolves to volume work"));
+    assert!(output.contains("UUID=11111111-1111-4111-8111-111111111111"));
+    assert_eq!(*storage, before);
+}
+
+#[test]
+fn storage_large_text_outer_wheel_scroll_reaches_the_check_below_nested_editors() {
+    let (ctx, mut a) = app();
+    let i = a.add_storage_fixture();
+    open_assignment(&mut a, i);
+    a.scale = 2.;
+    a.theme_id = "dlms-dark".into();
+    theme::apply(&ctx, &a.theme_id);
+    for _ in 0..4 {
+        frame(&ctx, &mut a, 822., 382., vec![]);
+    }
+    let before = a.metrics.main_scroll_offset;
+    let theme = a.metrics.header[3];
+    let settings = a.metrics.settings.unwrap();
+    assert!(
+        (theme.center().y - settings.center().y).abs() < 1.,
+        "related toolbar controls should share their row when measured widths fit: theme{theme:?} settings{settings:?}"
+    );
+    for _ in 0..20 {
+        let viewport = a.metrics.main_viewport.unwrap();
+        let target = a.metrics.check.unwrap();
+        if target.bottom() <= viewport.bottom() && target.top() >= viewport.top() {
+            break;
+        }
+        let point = egui::pos2(viewport.left() + 1., viewport.center().y);
+        let delta = if target.bottom() > viewport.bottom() {
+            viewport.bottom() - target.bottom()
+        } else {
+            viewport.top() - target.top()
+        };
+        frame(
+            &ctx,
+            &mut a,
+            822.,
+            382.,
+            vec![
+                egui::Event::PointerMoved(point),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., delta),
+                    modifiers: Default::default(),
+                },
+            ],
+        );
+        for _ in 0..10 {
+            frame(&ctx, &mut a, 822., 382., vec![]);
+        }
+    }
+    assert!(
+        a.metrics.main_scroll_offset.y > before.y,
+        "before{before:?} after{:?} viewport{:?} size{:?} pointer{:?}",
+        a.metrics.main_scroll_offset,
+        a.metrics.main_viewport,
+        a.metrics.main_content_size,
+        ctx.input(|i| i.pointer.hover_pos())
+    );
+    let r = a.metrics.check.unwrap();
+    let vp = a.metrics.main_viewport.unwrap();
+    assert!(
+        r.bottom() <= vp.bottom() + 1. && r.top() >= vp.top() - 1.,
+        "check{r:?} viewport{vp:?} offset{:?}",
+        a.metrics.main_scroll_offset
+    );
+}
+
+#[test]
+fn storage_editor_keyboard_changes_preserve_applied_state_and_keep_separate_undo() {
+    let command_key = |key| egui::Event::Key {
+        key,
+        physical_key: None,
+        pressed: true,
+        repeat: false,
+        modifiers: egui::Modifiers {
+            ctrl: true,
+            command: true,
+            ..Default::default()
+        },
+    };
+    let (ctx, mut a) = app();
+    let i = a.add_storage_fixture();
+    open_assignment(&mut a, i);
+    draw(&ctx, &mut a);
+    let original = a.progress.attempts["test-storage-workspace"].state.clone();
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            command_key(egui::Key::A),
+            egui::Event::Text("broken editor".into()),
+        ],
+    );
+    assert_eq!(
+        a.progress.attempts["test-storage-workspace"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .storage_draft
+            .as_ref()
+            .unwrap()
+            .text,
+        "broken editor"
+    );
+    assert_eq!(
+        a.progress.attempts["test-storage-workspace"].state,
+        original
+    );
+    frame(&ctx, &mut a, 1200., 850., vec![command_key(egui::Key::Z)]);
+    assert_eq!(
+        a.progress.attempts["test-storage-workspace"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .storage_draft
+            .as_ref()
+            .unwrap()
+            .text,
+        if let State::PersistentMounts { storage } = &original {
+            storage.configuration()
+        } else {
+            unreachable!()
+        }
+    );
+    a.set_storage_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            command_key(egui::Key::A),
+            egui::Event::Text("separate example edit".into()),
+        ],
+    );
+    assert_eq!(
+        a.progress.attempts["test-storage-workspace"].state,
+        original
+    );
+    a.set_storage_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert_ne!(
+        a.progress.attempts["test-storage-workspace"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .storage_draft
+            .as_ref()
+            .unwrap()
+            .text,
+        "separate example edit"
+    );
+    let before = ctx.memory(|m| m.focused());
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    assert_ne!(ctx.memory(|m| m.focused()), before);
 }

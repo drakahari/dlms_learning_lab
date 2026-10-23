@@ -61,3 +61,7 @@ pub mod discovery_teaching;
 pub mod discovery_workspace;
 
 pub mod storage;
+
+pub mod storage_workspace;
+
+pub mod storage_teaching;

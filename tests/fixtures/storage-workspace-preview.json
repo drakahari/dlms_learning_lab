@@ -1,0 +1,304 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-storage-workspace",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Persistent mounts and UUIDs",
+      "unit": "",
+      "title": "Development persistent-mount workspace fixture",
+      "summary": "Unbundled development fixture; not authored curriculum or objective coverage.",
+      "objective": "The work filesystem is UUID 11111111-1111-4111-8111-111111111111. Repair its saved source, attach it writable at /work and make it survive the independent device-name tests. Keep reports (UUID 22222222-2222-4222-8222-222222222222) at /reports read-only and automatic, with its final live mount intact. Keep the supplied dump/check fields. Save file edits, inspect the live mounts and check the complete configuration.",
+      "retry_guidance": "Compare the saved source and current live state. A valid file alone does not create a live mount.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Repair saved identity",
+        "Mount and verify current and saved behavior"
+      ],
+      "guide": [],
+      "explanation": "The work UUID identifies the intended volume even when its connection name changes. Saving repaired the persistent instruction; mounting made it live. Reports retained its identity and read-only policy in both sessions.",
+      "hints": [
+        "Compare the work UUID with the available inventory.",
+        "Saving and validation do not create a live mount.",
+        "Test copies change device names; a current /dev source can point to a different same-type volume."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://man7.org/linux/man-pages/man5/fstab.5.html"
+      ],
+      "simplifications": "Pure clean-volume metadata and bounded literal terminal commands only; no disk blocks, files, actual mount, boot, systemd, privilege or filesystem repair. Validate configuration and Test saved mounts are simulator actions. Native integration fixture only, unbundled/not counted.",
+      "initial": {
+        "kind": "PersistentMounts",
+        "storage": {
+          "inventory": {
+            "volumes": {
+              "work": {
+                "uuid": "11111111-1111-4111-8111-111111111111",
+                "filesystem": "ext4"
+              },
+              "reports": {
+                "uuid": "22222222-2222-4222-8222-222222222222",
+                "filesystem": "ext4"
+              }
+            },
+            "devices": {
+              "/dev/vdb1": "work",
+              "/dev/vdc1": "reports"
+            },
+            "mountpoints": [
+              "/work",
+              "/reports"
+            ]
+          },
+          "configuration": "UUID=99999999-9999-4999-8999-999999999999 /work ext4 rw 0 2\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 ro 0 2\n",
+          "live": {
+            "/reports": {
+              "volume": "reports",
+              "read_only": true
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "PersistentMounts",
+        "initial": {
+          "volumes": {
+            "work": {
+              "uuid": "11111111-1111-4111-8111-111111111111",
+              "filesystem": "ext4"
+            },
+            "reports": {
+              "uuid": "22222222-2222-4222-8222-222222222222",
+              "filesystem": "ext4"
+            }
+          },
+          "devices": {
+            "/dev/vdb1": "work",
+            "/dev/vdc1": "reports"
+          },
+          "mountpoints": [
+            "/work",
+            "/reports"
+          ]
+        },
+        "requirements": [
+          {
+            "kind": "Configured",
+            "target": "/work",
+            "volume": "work",
+            "read_only": false,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/work",
+            "volume": "work",
+            "read_only": false
+          },
+          {
+            "kind": "Configured",
+            "target": "/reports",
+            "volume": "reports",
+            "read_only": true,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/reports",
+            "volume": "reports",
+            "read_only": true
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/vdb1": "work",
+              "/dev/vdc1": "reports"
+            },
+            "expected": {
+              "/work": {
+                "volume": "work",
+                "read_only": false
+              },
+              "/reports": {
+                "volume": "reports",
+                "read_only": true
+              }
+            }
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/vdb1": "reports",
+              "/dev/vdc1": "work"
+            },
+            "expected": {
+              "/work": {
+                "volume": "work",
+                "read_only": false
+              },
+              "/reports": {
+                "volume": "reports",
+                "read_only": true
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "storage {\"kind\":\"Save\",\"text\":\"UUID=11111111-1111-4111-8111-111111111111 /work ext4 rw 0 2\\nUUID=22222222-2222-4222-8222-222222222222 /reports ext4 ro 0 2\\n\"}",
+        "mount /work"
+      ],
+      "prerequisites": [],
+      "storage_teaching": {
+        "prerequisite_note": "Assumes basic Linux paths and typing a command. This lesson introduces mountpoints, filesystem identities and saved versus live mount settings. You can reopen this introduction or skip to the complete assignment.",
+        "concepts": [
+          {
+            "title": "Attach a filesystem to a directory",
+            "text": "A mount makes a filesystem available at a directory called a mountpoint. The activity supplies clean simulated volumes. It does not create a disk or change anything on your computer."
+          },
+          {
+            "title": "Use the identity from the ticket",
+            "text": "The ticket tells you which UUID belongs to each role. blkid lists the available UUIDs and filesystem types. A /dev name is a current connection name; it can change. A filesystem UUID identifies the same volume across the controlled name changes in this exercise."
+          },
+          {
+            "title": "Saved instructions and live mounts are separate",
+            "text": "Each saved line has six fields: source, mountpoint, type, options, dump and check. rw means writable; ro means read-only. Keep the last two supplied numbers: this simulator stores them without running backups or checks. Save stores the file; Validate checks it without mounting. A mount command attaches the saved entry. Test saved mounts tries independent copies with changed device names, not a real system boot."
+          }
+        ],
+        "example_description": "In this separate example, practice work is UUID aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1 at /practice-work. Keep practice reports at /practice-reports read-only. Fill worked example supplies only this example file; save it, inspect it and mount the work target yourself.",
+        "fixture": {
+          "inventory": {
+            "volumes": {
+              "practice-work": {
+                "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1",
+                "filesystem": "ext4"
+              },
+              "practice-reports": {
+                "uuid": "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2",
+                "filesystem": "ext4"
+              }
+            },
+            "devices": {
+              "/dev/practice1": "practice-work",
+              "/dev/practice2": "practice-reports"
+            },
+            "mountpoints": [
+              "/practice-work",
+              "/practice-reports"
+            ]
+          },
+          "configuration": "UUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa9 /practice-work ext4 rw 0 2\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2 /practice-reports ext4 ro 0 2\n",
+          "live": {
+            "/practice-reports": {
+              "volume": "practice-reports",
+              "read_only": true
+            }
+          }
+        },
+        "example_solution": [
+          "storage {\"kind\":\"Save\",\"text\":\"UUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa1 /practice-work ext4 rw 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2 /practice-reports ext4 ro 0 2\\n\"}",
+          "mount /practice-work"
+        ],
+        "example_commands": [
+          {
+            "command": "blkid",
+            "explanation": "List simulated device names, UUIDs and types; compare them with the ticket. This does not discover a volume\u2019s business purpose.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /etc/fstab",
+            "explanation": "Read the saved file. The editor may still contain unsaved changes.",
+            "simulator_only": false
+          },
+          {
+            "command": "mount /practice-work",
+            "explanation": "Attach the volume named by the saved /practice-work entry. This command succeeds only after its source is repaired and saved.",
+            "simulator_only": false
+          },
+          {
+            "command": "mount",
+            "explanation": "List the live mounts and their read-only or writable policy. Listing them does not change them.",
+            "simulator_only": false
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Configured",
+            "target": "/practice-work",
+            "volume": "practice-work",
+            "read_only": false,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/practice-work",
+            "volume": "practice-work",
+            "read_only": false
+          },
+          {
+            "kind": "Configured",
+            "target": "/practice-reports",
+            "volume": "practice-reports",
+            "read_only": true,
+            "automatic": true,
+            "dump": 0,
+            "pass": 2
+          },
+          {
+            "kind": "Mounted",
+            "target": "/practice-reports",
+            "volume": "practice-reports",
+            "read_only": true
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/practice1": "practice-work",
+              "/dev/practice2": "practice-reports"
+            },
+            "expected": {
+              "/practice-work": {
+                "volume": "practice-work",
+                "read_only": false
+              },
+              "/practice-reports": {
+                "volume": "practice-reports",
+                "read_only": true
+              }
+            }
+          },
+          {
+            "kind": "FreshSession",
+            "devices": {
+              "/dev/practice1": "practice-reports",
+              "/dev/practice2": "practice-work"
+            },
+            "expected": {
+              "/practice-work": {
+                "volume": "practice-work",
+                "read_only": false
+              },
+              "/practice-reports": {
+                "volume": "practice-reports",
+                "read_only": true
+              }
+            }
+          }
+        ],
+        "try_change": "After solving the example, replace its work source with /dev/practice1, save and test again. It works with today\u2019s names but selects the wrong volume in the swapped test copy. Restore the UUID to repair it. Your assignment stays unchanged.",
+        "try_actions": [
+          "storage {\"kind\":\"Save\",\"text\":\"/dev/practice1 /practice-work ext4 rw 0 2\\nUUID=aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaa2 /practice-reports ext4 ro 0 2\\n\"}"
+        ]
+      }
+    }
+  ]
+}

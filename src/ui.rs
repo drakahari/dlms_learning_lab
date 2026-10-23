@@ -16,6 +16,7 @@ mod process_learning;
 mod script_learning;
 mod scripting;
 mod service_learning;
+mod storage_workspace;
 mod terminal_learning;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_routing_workspace;
@@ -28,6 +29,9 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    main_viewport: Option<egui::Rect>,
+    main_scroll_offset: egui::Vec2,
+    main_content_size: egui::Vec2,
     header: Vec<egui::Rect>,
     lesson_tabs: Vec<egui::Rect>,
     example_action: Option<egui::Rect>,
@@ -57,6 +61,10 @@ struct Metrics {
     feedback: Option<egui::Rect>,
     guide: bool,
     editor_save: Option<egui::Rect>,
+    storage_validate: Option<egui::Rect>,
+    storage_test: Option<egui::Rect>,
+    storage_command: Option<egui::Rect>,
+    storage_run: Option<egui::Rect>,
     dns_reload: Option<egui::Rect>,
     dns_update: Option<egui::Rect>,
     dns_pickers: Vec<egui::Rect>,
@@ -251,6 +259,13 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup") {
                 4700
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("storage-workspace")
+            {
+                6200
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("storage-layout")
+            {
+                6270
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arrays") {
                 4800
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arrays-stop") {
@@ -372,6 +387,9 @@ impl LabApp {
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
+        if let Some(lesson) = &s.storage_teaching {
+            dlms_learning_lab::storage_teaching::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.discovery_teaching {
             discovery_workspace::prepare(a, lesson, new_attempt);
         }
@@ -474,6 +492,9 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        if let Some(lesson) = &s.storage_teaching {
+            dlms_learning_lab::storage_teaching::prepare(a, lesson, true);
+        }
         if let Some(lesson) = &s.discovery_teaching {
             discovery_workspace::prepare(a, lesson, true);
         }
@@ -565,7 +586,11 @@ impl LabApp {
         self.metrics.header.push(r.response.rect);
     }
     fn theme_picker(&mut self, ui: &mut egui::Ui) {
-        self.theme_dropdown(ui);
+        let reserve = controls::button_width(ui, "Settings") + controls::GAP;
+        let minimum =
+            ui.text_style_height(&egui::TextStyle::Body) * 4. + 2. * controls::PAD_X as f32;
+        let width = (ui.available_size_before_wrap().x - reserve).clamp(minimum, 195.);
+        self.theme_dropdown_width(ui, width);
         let r = ui.button("Settings");
         self.metrics.settings = Some(r.rect);
         if r.clicked() {
@@ -573,23 +598,25 @@ impl LabApp {
         }
     }
     fn theme_dropdown(&mut self, ui: &mut egui::Ui) {
-        let r = egui::ComboBox::from_id_salt("native-theme-picker")
-            .width(195.)
-            .truncate()
-            .selected_text(format!(
-                "{} · {}",
-                theme::find(&self.theme_id).group,
-                theme::find(&self.theme_id).name
-            ))
-            .show_ui(ui, |ui| {
-                for t in theme::inventory() {
-                    ui.selectable_value(
-                        &mut self.theme_id,
-                        t.id.clone(),
-                        format!("{} · {}", t.group, t.name),
-                    );
-                }
-            });
+        self.theme_dropdown_width(ui, 195.);
+    }
+    fn theme_dropdown_width(&mut self, ui: &mut egui::Ui, width: f32) {
+        let r = controls::cell(ui, width, |ui| {
+            egui::ComboBox::from_id_salt("native-theme-picker")
+                .width(width)
+                .truncate()
+                .selected_text(theme::find(&self.theme_id).name.clone())
+                .show_ui(ui, |ui| {
+                    for t in theme::inventory() {
+                        ui.selectable_value(
+                            &mut self.theme_id,
+                            t.id.clone(),
+                            format!("{} · {}", t.group, t.name),
+                        );
+                    }
+                })
+        })
+        .inner;
         name_control(&r.response, "Application theme");
         self.metrics.header.push(r.response.rect);
     }
@@ -1271,18 +1298,27 @@ impl LabApp {
                 }
             });
         }
+        // Preserve a full native control row when a short window and large text
+        // leave little room below the toolbar. Font sizes/control heights stay
+        // unchanged; normal windows retain the existing generous margins.
+        let control_height = ctx.style().spacing.interact_size.y;
+        let vertical_margin = ((ctx.available_rect().height() - control_height) / 2.)
+            .clamp(0., 18.)
+            .floor() as i8;
         egui::CentralPanel::default()
             .frame(
                 egui::Frame::new()
                     .fill(theme::roles(ctx).background)
-                    .inner_margin(18.),
+                    .inner_margin(egui::Margin::symmetric(18, vertical_margin)),
             )
             .show(ctx, |ui| {
-                let mut area = egui::ScrollArea::vertical().id_salt(("main", self.selected));
+                let mut area = egui::ScrollArea::vertical()
+                    .id_salt(("main", self.selected))
+                    .min_scrolled_height(0.);
                 if std::mem::take(&mut self.lesson_scroll_reset) {
                     area = area.vertical_scroll_offset(0.);
                 }
-                area.auto_shrink([false, false]).show(ui, |ui| {
+                let scroll = area.auto_shrink([false, false]).show(ui, |ui| {
                     let width = ui.available_width().min(if self.selected.is_some() {
                         1060.
                     } else {
@@ -1305,6 +1341,9 @@ impl LabApp {
                         );
                     });
                 });
+                self.metrics.main_viewport = Some(scroll.inner_rect);
+                self.metrics.main_scroll_offset = scroll.state.offset;
+                self.metrics.main_content_size = scroll.content_size;
             });
         if self.host_activity
             && let Some(i) = self.selected

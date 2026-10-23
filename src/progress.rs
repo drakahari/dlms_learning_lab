@@ -76,6 +76,19 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::PersistentMounts { storage } = &a.state {
+        let State::PersistentMounts { storage: initial } = &s.initial else {
+            return false;
+        };
+        if !storage.same_inventory(initial)
+            || a.workspace
+                .as_ref()
+                .and_then(|w| w.storage_draft.as_ref())
+                .is_some_and(|d| !d.matches(storage))
+        {
+            return false;
+        }
+    }
     if let State::Discovery { simulation } = &a.state {
         let State::Discovery {
             simulation: initial,
@@ -287,6 +300,26 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
                 "Saved addressing assignment inputs differ from this lab; original retained".into(),
             );
         }
+        validate_storage_workspace(a)?;
+        if let (State::PersistentMounts { storage }, State::PersistentMounts { storage: initial }) =
+            (&a.state, &s.initial)
+            && !storage.same_inventory(initial)
+        {
+            return Err("Saved storage identities, device aliases or mountpoints differ from this assignment; original retained".into());
+        }
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.storage_learning.as_ref())
+            && s.storage_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.state.same_inventory(&lesson.fixture))
+        {
+            return Err(
+                "Saved storage practice identities differ from this lesson; original retained"
+                    .into(),
+            );
+        }
         validate_service_workspace(a)?;
         validate_discovery_workspace(a)?;
         if let (
@@ -420,6 +453,16 @@ fn validate_discovery_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_storage_workspace(a: &Attempt) -> Result<(), String> {
+    if a.workspace
+        .as_ref()
+        .is_some_and(|w| w.storage_draft.is_some() || w.storage_learning.is_some())
+        && !matches!(a.state, State::PersistentMounts { .. })
+    {
+        return Err("Storage workspace metadata on another activity; original retained".into());
+    }
+    Ok(())
+}
 fn validate_process_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace
         .as_ref()
@@ -489,6 +532,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_storage_workspace(a)?;
         validate_discovery_workspace(a)?;
         validate_process_workspace(a)?;
         validate_dns_workspace(a)?;

@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    PersistentMounts {
+        storage: crate::storage::State,
+    },
     Discovery {
         simulation: crate::discovery::State,
     },
@@ -109,6 +112,10 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    PersistentMounts {
+        initial: crate::storage::Inventory,
+        requirements: Vec<crate::storage_workspace::Requirement>,
+    },
     Discovery {
         initial: crate::discovery::Topology,
         requirements: Vec<crate::discovery::Requirement>,
@@ -228,6 +235,24 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (
+            State::PersistentMounts { storage },
+            Goal::PersistentMounts {
+                initial,
+                requirements,
+            },
+        ) => {
+            if storage.inventory() != initial
+                || !crate::storage_workspace::valid_requirements(requirements, initial)
+            {
+                vec![c(
+                    false,
+                    "Storage inventory or authored objectives differ from this assignment",
+                )]
+            } else {
+                crate::storage_workspace::checks(storage, requirements)
+            }
+        }
         (
             State::Discovery { simulation },
             Goal::Discovery {
@@ -476,6 +501,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::PersistentMounts { .. } => crate::storage_workspace::HELP,
         State::Discovery { .. } => {
             "Use the native discovery settings and explicit Send advertisement / Advance time controls. These model LLDP events, not router commands or real packets. Timers are manual; no CDP or automatic scheduling is simulated."
         }
@@ -524,6 +550,9 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::PersistentMounts { storage } = s {
+        return crate::storage_workspace::adapter(storage, input);
+    }
     if let State::Discovery { simulation } = s {
         return crate::discovery_workspace::adapter(simulation, input);
     }
@@ -593,7 +622,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Discovery { .. }
+        State::PersistentMounts { .. }
+        | State::Discovery { .. }
         | State::Processes { .. }
         | State::AuthoritativeDns { .. }
         | State::Switching { .. }
@@ -1028,6 +1058,11 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::PersistentMounts { storage } => format!(
+            "Virtual storage · {} volumes · {} live mounts · saved configuration and live state are separate",
+            storage.inventory().volumes().len(),
+            storage.live().len()
+        ),
         State::Discovery { simulation } => format!(
             "LLDP discovery · {} virtual devices · simulated time {}s · no real packets",
             simulation.topology().devices.len(),
