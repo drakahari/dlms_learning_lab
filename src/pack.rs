@@ -37,6 +37,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_teaching: Option<crate::process_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub discovery_teaching: Option<crate::discovery_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv4_routing_teaching: Option<crate::ipv4_routing_teaching::Lesson>,
@@ -187,6 +189,37 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 == crate::dns::canonical_name(&lesson.fixture.configured.origin).ok()
             {
                 return Err("DNS example must use a different zone from the assignment".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if matches!(s.initial, State::Discovery { .. }) && s.discovery_teaching.is_none() {
+            return Err(
+                "Discovery activities require validated introduction and practice content".into(),
+            );
+        }
+        if let Goal::Discovery {
+            initial,
+            requirements,
+        } = &s.goal
+        {
+            let State::Discovery { simulation } = &s.initial else {
+                return Err("Discovery objectives require a discovery topology".into());
+            };
+            if initial != simulation.topology()
+                || !crate::discovery_workspace::valid_requirements(requirements, initial)
+            {
+                return Err("Invalid, unpinned or excessive discovery objectives".into());
+            }
+        }
+        if let Some(lesson) = &s.discovery_teaching {
+            let State::Discovery { simulation } = &s.initial else {
+                return Err("Discovery teaching requires a discovery assignment".into());
+            };
+            if simulation
+                .topology()
+                .same_identity(lesson.fixture.topology())
+            {
+                return Err("Use a different topology for the discovery practice example".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
@@ -354,6 +387,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Discovery { simulation } => simulation.validate().is_ok(),
         State::Processes { table } => table.valid(),
         State::AuthoritativeDns { server } => server.validate().is_ok(),
         State::Switching { fabric } => fabric.validate().is_ok(),

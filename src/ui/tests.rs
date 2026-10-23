@@ -8,6 +8,9 @@ fn app() -> (egui::Context, LabApp) {
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].discovery_teaching.is_some() {
+        a.set_discovery_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].dns_teaching.is_some() {
         a.set_dns_view(i, teaching::View::Assignment);
     }
@@ -289,7 +292,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
-            State::AuthoritativeDns { .. }
+            State::Discovery { .. }
+            | State::AuthoritativeDns { .. }
             | State::Switching { .. }
             | State::Ipv6 { .. }
             | State::Ipv4Routing { .. }
@@ -4953,4 +4957,156 @@ fn process_insert_does_not_execute_and_example_cannot_overwrite_assignment() {
     a.set_process_view(i, teaching::View::Assignment);
     draw(&ctx, &mut a);
     assert_eq!(a.progress.attempts[&id].state, initial);
+}
+
+#[test]
+fn discovery_native_views_reflow_without_clipping_fields_or_revealing_challenge_guidance() {
+    for view in [
+        teaching::View::Introduction,
+        teaching::View::Example,
+        teaching::View::Assignment,
+    ] {
+        for (w, h, scale) in [
+            (1920., 1080., 1.),
+            (1200., 850., 1.),
+            (720., 700., 1.5),
+            (720., 700., 2.),
+        ] {
+            let (ctx, mut a) = app();
+            let i = a.add_discovery_fixture();
+            a.launch(i);
+            a.set_discovery_view(i, view);
+            a.scale = scale;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            for r in a
+                .metrics
+                .inputs
+                .iter()
+                .chain(a.metrics.editor_save.iter())
+                .chain(a.metrics.check.iter())
+                .chain(a.metrics.discovery_send.iter().map(|(_, r)| r))
+            {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "{view:?} {w}/{scale}: {r:?} vs {:?}; fields {:?}",
+                    ctx.content_rect(),
+                    a.metrics.discovery_fields
+                );
+            }
+            a.progress
+                .attempts
+                .get_mut(&a.scenarios[i].id)
+                .unwrap()
+                .challenge = true;
+            for _ in 0..3 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            assert_eq!(a.discovery_view(i), teaching::View::Assignment);
+            assert!(a.metrics.lesson_tabs.is_empty());
+            assert!(!a.metrics.help_visible);
+        }
+    }
+}
+#[test]
+fn discovery_example_fill_is_nonexecuting_and_keeps_assignment_and_drafts_independent() {
+    let (ctx, mut a) = app();
+    let i = a.add_discovery_fixture();
+    a.launch(i);
+    let id = a.scenarios[i].id.clone();
+    let original = a.progress.attempts[&id].state.clone();
+    a.set_discovery_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let before = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .discovery_learning
+        .as_ref()
+        .unwrap()
+        .simulation
+        .clone();
+    let r = a.metrics.command_insert.unwrap();
+    click(&ctx, &mut a, r);
+    let l = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .discovery_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.simulation, before);
+    assert!(!l.draft.matches(&before));
+    assert!(!l.checked);
+    assert_eq!(a.progress.attempts[&id].state, original);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+    a.set_discovery_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts[&id].state, original);
+}
+#[test]
+fn discovery_single_line_editing_uses_real_focus_and_invalidates_success_before_apply() {
+    let (ctx, mut a) = app();
+    let i = a.add_discovery_fixture();
+    a.launch(i);
+    let id = a.scenarios[i].id.clone();
+    for action in a.scenarios[i].solution.clone() {
+        engine::execute(
+            &mut a.progress.attempts.get_mut(&id).unwrap().state,
+            &action,
+        )
+        .unwrap();
+    }
+    let engine::State::Discovery { simulation } = &a.progress.attempts[&id].state else {
+        panic!()
+    };
+    let d = dlms_learning_lab::discovery_workspace::Draft::new(simulation);
+    a.progress
+        .attempts
+        .get_mut(&id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .discovery_draft = Some(d);
+    a.set_discovery_view(i, teaching::View::Assignment);
+    a.checked = true;
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    let r = a.metrics.inputs[0];
+    click(&ctx, &mut a, r);
+    let modifiers = egui::Modifiers {
+        ctrl: true,
+        command: true,
+        ..Default::default()
+    };
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers,
+            },
+            egui::Event::Text("invalid".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    let w = a.progress.attempts[&id].workspace.as_ref().unwrap();
+    let d = w.discovery_draft.as_ref().unwrap();
+    assert_eq!(d.devices[&d.selected_device].ttl, "invalid");
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
 }

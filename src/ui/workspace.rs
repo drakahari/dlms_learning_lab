@@ -58,7 +58,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::AuthoritativeDns { .. }) {
+            if matches!(s.initial, State::Discovery { .. }) {
+                self.discovery_learning_workspace(ui, i);
+            } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_workspace(ui, i);
             } else if s.service_teaching.is_some() {
                 self.service_learning_workspace(ui, i);
@@ -125,7 +127,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::AuthoritativeDns { .. }) {
+            let show_help = if matches!(s.initial, State::Discovery { .. }) {
+                self.discovery_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_view(i) == teaching::View::Assignment
             } else if s.service_teaching.is_some() {
                 self.service_view(i) == teaching::View::Assignment
@@ -638,7 +642,8 @@ impl LabApp {
                         ui.label(&c.explanation);
                         if matches!(
                             a.state,
-                            State::AuthoritativeDns { .. }
+                            State::Discovery { .. }
+                                | State::AuthoritativeDns { .. }
                                 | State::Ipv6 { .. }
                                 | State::Ipv4Routing { .. }
                         ) {
@@ -680,7 +685,7 @@ impl LabApp {
             });
         egui::CollapsingHeader::new("Supported commands, limits & sources").id_salt(("references",i)).show(ui,|ui|{
             ui.add(egui::Label::new(engine::help(&a.state)).wrap());ui.label(&s.simplifications);
-            if matches!(a.state,State::Processes{..}) {ui.label("Only this activity’s virtual process table exists. No host processes are inspected or changed. show is a simulator-only snapshot; shell syntax and job control are not supported.");} else if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
+            if matches!(a.state,State::Discovery{..}) {ui.label("Native controls act only on the virtual LLDP topology. Manual advertisements and the simulated clock are teaching controls; no IOS/Linux CLI, CDP or real network is modeled.");} else if matches!(a.state,State::Processes{..}) {ui.label("Only this activity’s virtual process table exists. No host processes are inspected or changed. show is a simulator-only snapshot; shell syntax and job control are not supported.");} else if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
             for source in &s.sources{ui.add(egui::Label::new(source).wrap());}
         });
         if matches!(a.state, State::Subnet { .. }) {

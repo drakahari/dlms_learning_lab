@@ -20,6 +20,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub process_learning: Option<crate::process_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub discovery_draft: Option<crate::discovery_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub discovery_learning: Option<crate::discovery_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_draft: Option<crate::ipv6_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_learning: Option<crate::ipv6_teaching::Learning>,
@@ -75,6 +79,8 @@ impl WorkspaceData {
                 .all(|r| r.valid() && r.engine_revision < crate::shell::EVALUATOR_REVISION)
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.process_learning.as_ref().is_none_or(|l| l.valid())
+            && self.discovery_draft.as_ref().is_none_or(|d| d.valid())
+            && self.discovery_learning.as_ref().is_none_or(|l| l.valid())
             && self.ipv6_draft.as_ref().is_none_or(|d| d.valid())
             && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
             && self.routing_v4_draft.as_ref().is_none_or(|d| d.valid())
@@ -143,6 +149,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::Discovery { simulation } = &a.state
+        && w.discovery_draft.is_none()
+    {
+        w.discovery_draft = Some(crate::discovery_workspace::Draft::new(simulation));
+    }
     if let State::AuthoritativeDns { server } = &a.state
         && w.dns_draft.is_none()
     {

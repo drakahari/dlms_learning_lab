@@ -1,0 +1,512 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-discovery-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "LLDP neighbor discovery",
+      "title": "Development LLDP workspace fixture",
+      "summary": "Private development fixture only; not bundled, counted as curriculum or evidence of full CCNA objective coverage.",
+      "objective": "Repair the one-way LLDP configuration by enabling receive on Birch uplink. Apply the settings and explicitly send advertisements from Cedar and Birch so each uplink records its directly attached peer as current. Preserve every other global and port setting, both chassis/port identities, and the live physical link. Configuration changes alone do not populate neighbor caches.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Understand the fixed topology",
+        "Repair and apply the receive setting",
+        "Send and verify both current neighbors"
+      ],
+      "guide": [],
+      "hints": [
+        "Transmit and receive are separate settings. Inspect the receiving uplink first.",
+        "Applying configuration does not send an advertisement. Use the explicit native send control for each device."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9600/software/release/17-18/configuration_guide/int_hw/b_1718_int_and_hw_9600_cg/configuring_lldp__lldp_med__and_wired_location_service.html"
+      ],
+      "simplifications": "Offline typed LLDP point-to-point simulation only; no real packets, IOS CLI, CDP, bridge forwarding or automatic transmission scheduler. Simulated time and advertisements are explicit. Historical caches do not prove current delivery. Development fixture only, not a bundled lesson or objective promotion.",
+      "initial": {
+        "kind": "Discovery",
+        "simulation": {
+          "topology": {
+            "devices": {
+              "cedar": {
+                "chassis_id": "cedar-chassis",
+                "system_name": "Cedar",
+                "enabled": true,
+                "ttl": 30,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "Link to birch",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "spare": {
+                    "port_id": "spare",
+                    "description": "Preserve this unused port",
+                    "up": true,
+                    "transmit": false,
+                    "receive": true
+                  }
+                }
+              },
+              "birch": {
+                "chassis_id": "birch-chassis",
+                "system_name": "Birch",
+                "enabled": true,
+                "ttl": 30,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "Link to cedar",
+                    "up": true,
+                    "transmit": true,
+                    "receive": false
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "assignment-wire",
+                "a": {
+                  "device": "cedar",
+                  "port": "uplink"
+                },
+                "b": {
+                  "device": "birch",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": []
+        }
+      },
+      "goal": {
+        "kind": "Discovery",
+        "initial": {
+          "devices": {
+            "cedar": {
+              "chassis_id": "cedar-chassis",
+              "system_name": "Cedar",
+              "enabled": true,
+              "ttl": 30,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "Link to birch",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "spare": {
+                  "port_id": "spare",
+                  "description": "Preserve this unused port",
+                  "up": true,
+                  "transmit": false,
+                  "receive": true
+                }
+              }
+            },
+            "birch": {
+              "chassis_id": "birch-chassis",
+              "system_name": "Birch",
+              "enabled": true,
+              "ttl": 30,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "Link to cedar",
+                  "up": true,
+                  "transmit": true,
+                  "receive": false
+                }
+              }
+            }
+          },
+          "links": [
+            {
+              "id": "assignment-wire",
+              "a": {
+                "device": "cedar",
+                "port": "uplink"
+              },
+              "b": {
+                "device": "birch",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "requirements": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "cedar",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "birch",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "birch",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "cedar",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "cedar": {
+                  "chassis_id": "cedar-chassis",
+                  "system_name": "Cedar",
+                  "enabled": true,
+                  "ttl": 30,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "Link to birch",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "spare": {
+                      "port_id": "spare",
+                      "description": "Preserve this unused port",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    }
+                  }
+                },
+                "birch": {
+                  "chassis_id": "birch-chassis",
+                  "system_name": "Birch",
+                  "enabled": true,
+                  "ttl": 30,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "Link to cedar",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "assignment-wire",
+                  "a": {
+                    "device": "cedar",
+                    "port": "uplink"
+                  },
+                  "b": {
+                    "device": "birch",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "solution": [
+        "discovery {\"kind\":\"port_configuration\",\"local\":{\"device\":\"birch\",\"port\":\"uplink\"},\"up\":true,\"transmit\":true,\"receive\":true,\"description\":\"Link to cedar\"}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"cedar\",\"port\":\"uplink\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"birch\",\"port\":\"uplink\"}}"
+      ],
+      "prerequisites": [],
+      "discovery_teaching": {
+        "prerequisite_note": "Identify a device and its local port before editing. This isolated example uses different devices from the assignment; LLDP transmit and receive settings act independently.",
+        "concepts": [
+          {
+            "title": "Learn the directly attached port",
+            "text": "LLDP advertises local chassis and port identity to the directly attached receiving port. A device does not forward its learned neighbor information to another port. This native simulator implements a bounded LLDP subset; CDP and IOS commands are not implemented."
+          },
+          {
+            "title": "Transmit and receive are independent",
+            "text": "An enabled transmitter can still advertise when its own receive setting is off. For both directions to learn, each transmitting endpoint must reach a live peer with reception enabled. Preserve unrelated ports, global settings and the physical link while repairing the requested receive setting."
+          },
+          {
+            "title": "A cache records an advertisement",
+            "text": "Applying settings does not automatically advertise. Send from each device explicitly. The receiver stores the advertised TTL; a newer advertisement refreshes it. Unexpired information can still be historical when advertised fields change. A current outcome also checks the current sender fields and ability to deliver."
+          },
+          {
+            "title": "Time advances only when you request it",
+            "text": "The simulated clock has no background scheduler. Advance time explicitly to age records; an entry expires exactly at its receive time plus its advertised TTL. Filling this example changes draft settings only and does not send advertisements or advance time."
+          }
+        ],
+        "example_description": "In this separate practice topology, demo-oak can transmit but its uplink does not receive. Enable only that receive setting, apply the draft, then send an advertisement from demo-maple and from demo-oak. Inspect each current neighbor without changing the spare port or physical link.",
+        "fixture": {
+          "topology": {
+            "devices": {
+              "demo-maple": {
+                "chassis_id": "demo-maple-chassis",
+                "system_name": "Demo-Maple",
+                "enabled": true,
+                "ttl": 6,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "Link to demo-oak",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "spare": {
+                    "port_id": "spare",
+                    "description": "Preserve this unused port",
+                    "up": true,
+                    "transmit": false,
+                    "receive": true
+                  }
+                }
+              },
+              "demo-oak": {
+                "chassis_id": "demo-oak-chassis",
+                "system_name": "Demo-Oak",
+                "enabled": true,
+                "ttl": 6,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "Link to demo-maple",
+                    "up": true,
+                    "transmit": true,
+                    "receive": false
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "example-wire",
+                "a": {
+                  "device": "demo-maple",
+                  "port": "uplink"
+                },
+                "b": {
+                  "device": "demo-oak",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": []
+        },
+        "example_solution": [
+          {
+            "kind": "port_configuration",
+            "local": {
+              "device": "demo-oak",
+              "port": "uplink"
+            },
+            "up": true,
+            "transmit": true,
+            "receive": true,
+            "description": "Link to demo-maple"
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "demo-maple",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "demo-oak",
+              "port": "uplink"
+            }
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "demo-maple",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "demo-oak",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "demo-oak",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "demo-maple",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "demo-maple": {
+                  "chassis_id": "demo-maple-chassis",
+                  "system_name": "Demo-Maple",
+                  "enabled": true,
+                  "ttl": 6,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "Link to demo-oak",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "spare": {
+                      "port_id": "spare",
+                      "description": "Preserve this unused port",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    }
+                  }
+                },
+                "demo-oak": {
+                  "chassis_id": "demo-oak-chassis",
+                  "system_name": "Demo-Oak",
+                  "enabled": true,
+                  "ttl": 6,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "Link to demo-maple",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "example-wire",
+                  "a": {
+                    "device": "demo-maple",
+                    "port": "uplink"
+                  },
+                  "b": {
+                    "device": "demo-oak",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After both neighbors are current, advance exactly six simulated seconds without sending. Both caches should be empty while the repaired configuration and physical link remain unchanged. Send again to refresh a current neighbor.",
+          "actions": [
+            {
+              "kind": "advance",
+              "seconds": 6
+            }
+          ],
+          "outcomes": [
+            {
+              "kind": "absent_neighbor",
+              "local": {
+                "device": "demo-maple",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "absent_neighbor",
+              "local": {
+                "device": "demo-oak",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "configuration",
+              "expected": {
+                "devices": {
+                  "demo-maple": {
+                    "chassis_id": "demo-maple-chassis",
+                    "system_name": "Demo-Maple",
+                    "enabled": true,
+                    "ttl": 6,
+                    "ports": {
+                      "uplink": {
+                        "port_id": "uplink",
+                        "description": "Link to demo-oak",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      },
+                      "spare": {
+                        "port_id": "spare",
+                        "description": "Preserve this unused port",
+                        "up": true,
+                        "transmit": false,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "demo-oak": {
+                    "chassis_id": "demo-oak-chassis",
+                    "system_name": "Demo-Oak",
+                    "enabled": true,
+                    "ttl": 6,
+                    "ports": {
+                      "uplink": {
+                        "port_id": "uplink",
+                        "description": "Link to demo-maple",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  }
+                },
+                "links": [
+                  {
+                    "id": "example-wire",
+                    "a": {
+                      "device": "demo-maple",
+                      "port": "uplink"
+                    },
+                    "b": {
+                      "device": "demo-oak",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

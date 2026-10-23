@@ -279,3 +279,28 @@ From the checkout open the exact verified build:
 ```sh
 ./dist/dlms-learning-lab-0.1.0-g017e875aeb77-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
+
+## M47/M48 clean Fedora candidate —78 labs,2026-10-23
+
+Source `e2b020064826f8befae64cc6cdc6ec2475a72d34` includes the reviewed process unit and the unintegrated LLDP capability foundation. It bundles78 authored labs/eighteen units, **not complete curriculum**. Linux target223 dependency archives/notices, Rust notice, fonts and28 theme notices resolve; no public release.
+
+```
+./dist/dlms-learning-lab-0.1.0-ge2b020064826-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive: `dist/dlms-learning-lab-0.1.0-ge2b020064826-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz`
+SHA-256: `502c6a10a83b678717e2ae0a38edfab3b822160614bc241117aa982916d8b022`
+Executable SHA-256: `d7e3e713f8a70ffff8bf99271cafe646305574def5bde9eb3c97fd3493f990f3`.
+
+Actual isolated per-user Fedora install, upgrade from017e875, clean install/uninstall/reinstall, desktop-file validation, outside-checkout identity/content checks and exact synthetic progress-byte retention pass. The old fixture was technical test data, not the owner’s real profile. Installed launcher `/tmp/dlms-m44-install-06kni51t/bin/dlms-learning-lab`; local evidence `m47-acceptance.json` in that isolated root.
+
+The **installed executable** passes the normal all-four process-unit flow, including final concise wrong-state feedback and final post-CONT inspection, plus the full72-capture IPv4/VLAN alignment matrix100/150/200%, wide/narrow/light/dark. Representative actual fields, populated values, labels, columns, focus outlines and scrolling were visually reviewed. Ten additional quiet default-Wayland startup/readback launches pass10/10;0.965–0.966s includes artificial test pacing and is not a performance benchmark. Logs `/tmp/dlms-m47-installed-process.log`, `/tmp/dlms-m47-installed-alignment.log`, `/tmp/dlms-m47-packaged-quiet/results.json`. These flows inject authored synthetic actions, not novice, physical-device or screen-reader acceptance. Historical unanswered-frame startup cause remains unresolved/unreproduced.
+
+Native CI [39976264683](https://github.com/drakahari/dlms_learning_lab/actions/runs/39976264683) was dispatched at the same exact source. Final CI results/artifacts are recorded below; never infer Windows/macOS desktop acceptance. The existing macOS notice/signing gate remains separate. Subsequent in-progress discovery workspace source is not included in this candidate.
+
+CI39976264683 completed successfully on all3 native runners. Its Windows and Ubuntu archives were downloaded under ignored `dist/native-ci-e2b0200/`, sidecar SHA-256 and embedded exact source revision checked locally. macOS compiled/tested, with packaging still blocked by the recorded dispatch notice; no desktop runtime inference.
+
+| Sourcee2b0200 CI candidate | SHA-256 |
+| --- | --- |
+| Windows x86_64 MSVC `...-ge2b020064826-x86_64-pc-windows-msvc-windows-candidate.zip` | `39a1d2e58aa9adcb9a5176a11e574e0785d0ee3d948d7a2f11d3786b1d684563` |
+| Ubuntu24.04 x86_64 `...-ge2b020064826-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `ab6ed5f5b939422d237358582435ca2d8e7b2e95694f2b31abf5bd67b2f002ce` |

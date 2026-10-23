@@ -76,6 +76,22 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::Discovery { simulation } = &a.state {
+        let State::Discovery {
+            simulation: initial,
+        } = &s.initial
+        else {
+            return false;
+        };
+        if !simulation.topology().same_identity(initial.topology())
+            || a.workspace
+                .as_ref()
+                .and_then(|w| w.discovery_draft.as_ref())
+                .is_some_and(|d| !d.matches(simulation))
+        {
+            return false;
+        }
+    }
     if let State::Processes { table } = &a.state {
         let State::Processes { table: initial } = &s.initial else {
             return false;
@@ -272,6 +288,31 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             );
         }
         validate_service_workspace(a)?;
+        validate_discovery_workspace(a)?;
+        if let (
+            State::Discovery { simulation },
+            State::Discovery {
+                simulation: initial,
+            },
+        ) = (&a.state, &s.initial)
+            && !simulation.topology().same_identity(initial.topology())
+        {
+            return Err("Saved discovery identities or attachments differ from this assignment; original retained".into());
+        }
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.discovery_learning.as_ref())
+            && s.discovery_teaching.as_ref().is_none_or(|lesson| {
+                !l.simulation
+                    .topology()
+                    .same_identity(lesson.fixture.topology())
+            })
+        {
+            return Err(
+                "Saved discovery practice differs from this lesson; original retained".into(),
+            );
+        }
         validate_process_workspace(a)?;
         validate_dns_workspace(a)?;
         if let (State::AuthoritativeDns { server }, State::AuthoritativeDns { server: initial }) =
@@ -360,6 +401,25 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_discovery_workspace(a: &Attempt) -> Result<(), String> {
+    if let Some(w) = &a.workspace {
+        match &a.state {
+            State::Discovery { simulation } => {
+                if w.discovery_draft
+                    .as_ref()
+                    .is_some_and(|d| !d.same_shape(simulation))
+                {
+                    return Err("Invalid discovery draft identities; original retained".into());
+                }
+            }
+            _ if w.discovery_draft.is_some() || w.discovery_learning.is_some() => {
+                return Err("Discovery metadata on another activity; original retained".into());
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
 fn validate_process_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace
         .as_ref()
@@ -429,6 +489,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_discovery_workspace(a)?;
         validate_process_workspace(a)?;
         validate_dns_workspace(a)?;
         validate_service_workspace(a)?;

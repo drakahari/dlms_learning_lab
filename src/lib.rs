@@ -56,3 +56,6 @@ pub mod processes;
 pub mod process_teaching;
 
 pub mod discovery;
+
+pub mod discovery_teaching;
+pub mod discovery_workspace;

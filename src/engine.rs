@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Discovery {
+        simulation: crate::discovery::State,
+    },
     Processes {
         table: crate::processes::Table,
     },
@@ -106,6 +109,10 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Discovery {
+        initial: crate::discovery::Topology,
+        requirements: Vec<crate::discovery::Requirement>,
+    },
     Processes {
         requirements: Vec<crate::processes::Requirement>,
     },
@@ -221,6 +228,13 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (
+            State::Discovery { simulation },
+            Goal::Discovery {
+                initial,
+                requirements,
+            },
+        ) => crate::discovery_workspace::checks(initial, simulation, requirements),
         (State::Processes { table }, Goal::Processes { requirements }) => {
             requirements.iter().map(|r| r.check(table)).collect()
         }
@@ -462,6 +476,9 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Discovery { .. } => {
+            "Use the native discovery settings and explicit Send advertisement / Advance time controls. These model LLDP events, not router commands or real packets. Timers are manual; no CDP or automatic scheduling is simulated."
+        }
         State::Processes { .. } => crate::processes::HELP,
         State::AuthoritativeDns { .. } => {
             "Use the native record editor, explicit Save zone / Reload primary / Update secondary controls and in-memory lookups. Only the disclosed record subset is supported; reference actions are not Linux commands."
@@ -507,6 +524,9 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::Discovery { simulation } = s {
+        return crate::discovery_workspace::adapter(simulation, input);
+    }
     if let State::Processes { table } = s {
         let output = table.execute(input)?;
         let text = format!("{}{}", output.stdout, output.stderr);
@@ -573,7 +593,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Processes { .. }
+        State::Discovery { .. }
+        | State::Processes { .. }
         | State::AuthoritativeDns { .. }
         | State::Switching { .. }
         | State::Ipv6 { .. }
@@ -1007,6 +1028,11 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Discovery { simulation } => format!(
+            "LLDP discovery · {} virtual devices · simulated time {}s · no real packets",
+            simulation.topology().devices.len(),
+            simulation.now()
+        ),
         State::Processes { table } => format!(
             "Virtual process workspace · User: {} · Inspect with ps. Only fixed simulated PIDs exist.",
             table.user.name

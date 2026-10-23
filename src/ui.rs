@@ -10,6 +10,7 @@ use eframe::egui::{self, RichText};
 mod address_learning;
 mod controls;
 mod data;
+mod discovery_workspace;
 mod dns_workspace;
 mod process_learning;
 mod script_learning;
@@ -59,6 +60,12 @@ struct Metrics {
     dns_update: Option<egui::Rect>,
     dns_pickers: Vec<egui::Rect>,
     dns_editor_overflow: bool,
+    discovery_send: Vec<(dlms_learning_lab::discovery::Endpoint, egui::Rect)>,
+    discovery_toggles: Vec<(String, egui::Rect)>,
+    discovery_time: Option<egui::Rect>,
+    discovery_fields: Vec<(String, egui::Rect)>,
+    discovery_picker: Option<egui::Rect>,
+    discovery_options: Vec<(String, egui::Rect)>,
     editor_viewport: Option<egui::Rect>,
     probe: Option<egui::Rect>,
     routing_forward: Option<egui::Rect>,
@@ -254,6 +261,10 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("process-workspace")
             {
                 5000
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("discovery-workspace")
+            {
+                5500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("process-unit") {
                 5200
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit") {
@@ -357,6 +368,9 @@ impl LabApp {
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
+        if let Some(lesson) = &s.discovery_teaching {
+            discovery_workspace::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, new_attempt);
         }
@@ -456,6 +470,9 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        if let Some(lesson) = &s.discovery_teaching {
+            discovery_workspace::prepare(a, lesson, true);
+        }
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, true);
         }

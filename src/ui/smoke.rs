@@ -104,6 +104,16 @@ impl LabApp {
         self.scenarios.push(lab);
         index
     }
+    pub(super) fn add_discovery_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/discovery-workspace-preview.json"
+        ))
+        .expect("development discovery fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
     pub(super) fn add_process_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
             "../../tests/fixtures/process-workspace-preview.json"
@@ -196,6 +206,293 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            5500 => {
+                let i = self.add_discovery_fixture();
+                self.launch(i);
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            5501 => shot = Some("discovery-development-introduction".into()),
+            5502 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                    return;
+                }
+            }
+            5503 => shot = Some("discovery-development-example-initial".into()),
+            5504 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.command_insert) {
+                    return;
+                }
+            }
+            5505 => {
+                let i = self.scenarios.len() - 1;
+                let s = &self.scenarios[i];
+                let a = &self.progress.attempts[&s.id];
+                let l = a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .discovery_learning
+                    .as_ref()
+                    .unwrap();
+                assert_eq!(l.simulation, s.discovery_teaching.as_ref().unwrap().fixture);
+                assert!(!l.draft.matches(&l.simulation));
+                assert_eq!(a.state, s.initial);
+                assert!(!progress::current_solved(a, s));
+                shot = Some("discovery-development-example-draft".into());
+            }
+            5506 | 5520 | 5529 | 5532 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.editor_save) {
+                    return;
+                }
+            }
+            5507 => {
+                let i = self.scenarios.len() - 1;
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                let l = a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .discovery_learning
+                    .as_ref()
+                    .unwrap();
+                assert!(l.draft.matches(&l.simulation));
+                assert!(l.simulation.neighbors("demo-oak").unwrap().is_empty());
+            }
+            5508 | 5511 | 5521 | 5524 => {
+                let device = match self.smoke_stage {
+                    5508 => "demo-maple",
+                    5511 => "demo-oak",
+                    5521 => "birch",
+                    _ => "cedar",
+                };
+                let r = self
+                    .metrics
+                    .discovery_send
+                    .iter()
+                    .find(|(ep, _)| ep.device == device && ep.port == "uplink")
+                    .map(|(_, r)| *r);
+                if !self.click_visible_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            5509 | 5522 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.discovery_picker) {
+                    return;
+                }
+            }
+            5510 | 5523 => {
+                let name = if self.smoke_stage == 5510 {
+                    "demo-oak"
+                } else {
+                    "cedar"
+                };
+                let r = self
+                    .metrics
+                    .discovery_options
+                    .iter()
+                    .find(|(n, _)| n == name)
+                    .map(|(_, r)| *r);
+                if !self.click_visible_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            5512 | 5516 | 5525 | 5533 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            5513 => {
+                let i = self.scenarios.len() - 1;
+                let s = &self.scenarios[i];
+                let a = &self.progress.attempts[&s.id];
+                let l = a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .discovery_learning
+                    .as_ref()
+                    .unwrap();
+                assert!(
+                    l.checks(s.discovery_teaching.as_ref().unwrap())
+                        .iter()
+                        .all(|c| c.0)
+                );
+                assert_eq!(a.state, s.initial);
+                assert!(!progress::current_solved(a, s));
+                shot = Some("discovery-development-example-complete-ungraded".into());
+            }
+            5514 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.assignment_action) {
+                    return;
+                }
+            }
+            5515 => shot = Some("discovery-development-assignment".into()),
+            5517 => {
+                assert!(!self.metrics.completion);
+                shot = Some("discovery-development-incomplete-feedback".into());
+            }
+            5518 => {
+                let r = self
+                    .metrics
+                    .discovery_toggles
+                    .iter()
+                    .find(|(n, _)| n == "birch/uplink:Receive")
+                    .map(|(_, r)| *r);
+                if !self.click_visible_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            5519 => {
+                let i = self.scenarios.len() - 1;
+                let s = &self.scenarios[i];
+                let a = &self.progress.attempts[&s.id];
+                let engine::State::Discovery { simulation } = &a.state else {
+                    unreachable!()
+                };
+                assert_eq!(a.state, s.initial);
+                assert!(
+                    !a.workspace
+                        .as_ref()
+                        .unwrap()
+                        .discovery_draft
+                        .as_ref()
+                        .unwrap()
+                        .matches(simulation)
+                );
+            }
+            5526 | 5534 => {
+                let i = self.scenarios.len() - 1;
+                let s = self.scenarios[i].clone();
+                assert!(self.metrics.completion);
+                assert_eq!(self.progress.attempts[&s.id].step, 0);
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(progress::current_solved(&self.progress.attempts[&s.id], &s));
+                if self.smoke_stage == 5526 {
+                    shot = Some("discovery-development-assignment-complete".into());
+                }
+            }
+            5527 => {
+                let r = self
+                    .metrics
+                    .discovery_fields
+                    .iter()
+                    .find(|(n, _)| n == "cedar advertised lifetime")
+                    .map(|(_, r)| *r);
+                if !self.click_visible_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            5528 | 5531 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text(
+                        if self.smoke_stage == 5528 {
+                            "broken"
+                        } else {
+                            "30"
+                        }
+                        .into(),
+                    ),
+                ];
+            }
+            5530 => {
+                let i = self.scenarios.len() - 1;
+                assert!(!progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                assert!(self.notice.as_ref().is_some_and(|n| n.contains("TTL")));
+                shot = Some("discovery-development-invalid-draft".into());
+                let r = self
+                    .metrics
+                    .discovery_fields
+                    .iter()
+                    .find(|(n, _)| n == "cedar advertised lifetime")
+                    .map(|(_, r)| *r);
+                if !self.click_visible_smoke_control(ctx, r) {
+                    return;
+                }
+            }
+            5535 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.discovery_time) {
+                    return;
+                }
+            }
+            5536 => {
+                let i = self.scenarios.len() - 1;
+                assert!(!progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                shot = Some("discovery-development-expired-neighbors".into());
+            }
+            5537 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                    return;
+                }
+            }
+            5538 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                    return;
+                }
+            }
+            5539 => {
+                let i = self.scenarios.len() - 1;
+                let s = &self.scenarios[i];
+                assert_eq!(self.progress.attempts[&s.id].state, s.initial);
+                assert!(!progress::current_solved(&self.progress.attempts[&s.id], s));
+            }
+            5540 => {
+                let i = self.scenarios.len() - 1;
+                self.set_discovery_view(i, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+            }
+            5541 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                assert!(!self.metrics.help_visible);
+                shot = Some("discovery-development-challenge".into());
+            }
+            5542 => {
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.lesson_scroll_reset = true;
+            }
+            5543 | 5548 => {
+                ctx.request_repaint();
+            }
+            5544 => shot = Some("discovery-development-light-150".into()),
+            5545 | 5550 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.check.expect("configuration check"))
+                {
+                    return;
+                }
+            }
+            5546 => shot = Some("discovery-development-light-150-scrolled".into()),
+            5547 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            5549 => shot = Some("discovery-development-dark-200".into()),
+            5551 => shot = Some("discovery-development-dark-200-scrolled".into()),
+            5552 => {
+                println!(
+                    "PASS native development LLDP workspace: isolated teaching/practice, fill-only drafts, explicit apply and two-way send, full task, wrong/partial feedback, native toggle/picker/text edits, current completion and draft/expiry invalidation, exact saved reload, actual Reset, Challenge and light150/dark200 scroll. Private fixture, not authored curriculum or novice/real-network/platform acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             5200..=5455 => {
                 let offset = self.smoke_stage - 5200;
                 let number = offset / 64;
