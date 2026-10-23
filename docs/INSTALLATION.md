@@ -321,3 +321,18 @@ The archive has the same directory name plus `.tar.gz`. Linux target 223 depende
 Actual isolated upgrade from e2b0200, clean install/uninstall/reinstall, desktop-file validation, outside-checkout build/content identity and exact original-nine synthetic progress-byte retention pass. The installed executable passes all four LLDP lessons with isolated examples, native Apply/Send/Check, partial/current grading, expiry invalidation, save/reload, selected reset and Challenge. Reference drafts are populated programmatically; this is not novice or physical-input acceptance. The installed 72-capture IPv4/VLAN matrix covers wide/narrow, light/dark and 100/150/200% text; representative fields, focus, labels, columns and scrolling were reviewed. Ten quiet default-Wayland startup/readback launches pass 10/10; artificial harness pacing means these are not performance measurements. Historical unanswered-frame startup cause remains unresolved/unreproduced.
 
 Evidence: `/tmp/dlms-m44-install-06kni51t/m50-acceptance.json`, `/tmp/dlms-m50-installed-discovery.log`, `/tmp/dlms-m50-installed-alignment.log`, `/tmp/dlms-m50-packaged-quiet/results.json`. Native CI [39986036392](https://github.com/drakahari/dlms_learning_lab/actions/runs/39986036392) passes all three native runners at this exact source. CI compile/tests are not Windows/macOS desktop acceptance; macOS packaging remains gated by the recorded dispatch notice. M51's subsequent feedback-visibility/accessibility descriptions are not inside this artifact. No public release.
+
+
+## M51 verified feedback/accessibility candidate — 2026-10-23
+
+Clean source `eff98f09090d66dd0172b3ffa9ddc90aa188d4f8`, still 82 authored labs/nineteen units:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-geff98f09090d-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA-256: `00a3a02715e6653debf25329f512cf9cc99d005bdcec335185ee0ab173c73bbc`.
+Executable SHA-256: `a00ba612fa215937786dd451dbaddb2afaa23823438b87a82cd864a74f9fbb9b`.
+Linux target notices/source closure passes. Actual isolated upgrade from a741, clean install/uninstall/reinstall, desktop validation, outside-checkout identity/content/hash checks and exact synthetic old-progress bytes pass. The **installed** full four-LLDP flow passes; root reviewed fresh completion and retry screenshots with results visible after Check plus narrow light150/dark200. Reference drafts are programmatically populated; no novice/physical-device claim. Ten further quiet default-Wayland startup/readbacks pass10/10; artificial pacing is not a speed benchmark, and the historical failure remains unresolved/unreproduced.
+
+Evidence: `/tmp/dlms-m44-install-06kni51t/m51-acceptance.json`, `/tmp/dlms-m51-installed-feedback.log`, `/tmp/dlms-m51-packaged-quiet/results.json`. This focused follow-through did not repeat the entire72-capture alignment matrix or every native workspace; M50 supplies that unchanged shared-field evidence and81 M51 UI tests check existing families. New diagram descriptions are checked through the native accessibility tree, not an actual screen reader. Subsequent gated parser/storage foundation source is not in this candidate. Full curriculum, Windows/macOS desktop/signing/notice gates remain Open; no release.
