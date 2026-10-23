@@ -11,6 +11,7 @@ mod address_learning;
 mod controls;
 mod data;
 mod dns_workspace;
+mod process_learning;
 mod script_learning;
 mod scripting;
 mod service_learning;
@@ -249,6 +250,10 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arrays-library")
             {
                 4950
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("process-workspace")
+            {
+                5000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit") {
                 4500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout") {
@@ -365,6 +370,9 @@ impl LabApp {
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.process_teaching {
+            dlms_learning_lab::process_teaching::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.switching_teaching {
             dlms_learning_lab::switching_teaching::prepare(a, lesson, new_attempt);
         }
@@ -460,6 +468,9 @@ impl LabApp {
         }
         if let Some(lesson) = &s.terminal_teaching {
             dlms_learning_lab::terminal_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.process_teaching {
+            dlms_learning_lab::process_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.switching_teaching {
             dlms_learning_lab::switching_teaching::prepare(a, lesson, true);

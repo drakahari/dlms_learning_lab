@@ -59,8 +59,17 @@ fn process_map<'de, D: serde::Deserializer<'de>>(
             mut map: M,
         ) -> Result<Self::Value, M::Error> {
             let mut processes = BTreeMap::new();
-            while let Some(id) = map.next_key::<u32>()? {
-                if !bounded_id(id) || processes.len() >= 64 || processes.contains_key(&id) {
+            while let Some(key) = map.next_key::<String>()? {
+                // Internally tagged State buffers JSON object keys as strings;
+                // validate canonical IDs explicitly rather than relying on JSON's u32 key adapter.
+                let id = key
+                    .parse::<u32>()
+                    .map_err(|_| serde::de::Error::custom("Invalid process ID key"))?;
+                if key != id.to_string()
+                    || !bounded_id(id)
+                    || processes.len() >= 64
+                    || processes.contains_key(&id)
+                {
                     return Err(serde::de::Error::custom(
                         "Invalid, duplicate or too many process IDs",
                     ));
@@ -135,6 +144,9 @@ fn unsupported() -> String {
     format!("Unsupported process command or syntax. {HELP}")
 }
 impl Table {
+    pub fn prompt(&self) -> &'static str {
+        if self.user.uid == 0 { "lab #" } else { "lab $" }
+    }
     pub fn valid(&self) -> bool {
         if self.processes.is_empty()
             || self.processes.len() > 64
@@ -217,6 +229,13 @@ impl Table {
         self.processes
             .get(&id)
             .is_some_and(|p| p.phase != Phase::Exited)
+    }
+    /// Current observed metadata, including reparenting; origin fields stay pinned.
+    pub fn observed_process(&self, pid: u32) -> Option<Process> {
+        self.processes.get(&pid).map(|p| Process {
+            parent: self.reported_parent(p),
+            ..p.clone()
+        })
     }
     fn reported_parent(&self, p: &Process) -> u32 {
         if p.parent == 0 || self.live(p.parent) {
@@ -530,7 +549,9 @@ impl Requirement {
             Self::Niceness { pid, value } => {
                 initial.processes.contains_key(pid) && (-20..=19).contains(value)
             }
-            Self::Unchanged { pid, expected } => initial.processes.get(pid) == Some(expected),
+            Self::Unchanged { pid, expected } => {
+                initial.observed_process(*pid).as_ref() == Some(expected)
+            }
         }
     }
     pub fn check(&self, table: &Table) -> (bool, String) {
@@ -551,14 +572,48 @@ impl Requirement {
                     ExpectedPhase::Stopped => "stopped",
                     ExpectedPhase::Exited => "terminated",
                 };
-                (pass, format!("Process {pid} must be {name}"))
+                let feedback = if pass {
+                    format!("Process {pid} is {name}")
+                } else {
+                    match (expected, phase) {
+                        (ExpectedPhase::Stopped | ExpectedPhase::Active, Some(Phase::Exited)) => {
+                            format!(
+                                "Process {pid} has ended and cannot be resumed. Reset this attempt to restore it, then choose an action that keeps it present."
+                            )
+                        }
+                        (ExpectedPhase::Exited, Some(Phase::Stopped { .. })) => format!(
+                            "Process {pid} is still paused. A termination request can remain pending while paused; decide whether to resume it or end it immediately."
+                        ),
+                        (ExpectedPhase::Stopped, Some(Phase::Active { .. })) => format!(
+                            "Process {pid} is still running or waiting, rather than paused. Check its STAT column after your action."
+                        ),
+                        _ => format!(
+                            "Process {pid} needs to be {name}; inspect its current state with ps."
+                        ),
+                    }
+                };
+                (pass, feedback)
             }
-            Self::Niceness { pid, value } => (
-                table.live(*pid) && table.processes.get(pid).is_some_and(|p| p.nice == *value),
-                format!("Process {pid} must remain present with nice value {value}"),
-            ),
+            Self::Niceness { pid, value } => {
+                let current = table
+                    .processes
+                    .get(pid)
+                    .filter(|_| table.live(*pid))
+                    .map(|p| p.nice);
+                let pass = current == Some(*value);
+                let message = match current {
+                    Some(n) if pass => format!("Process {pid} has nice value {n}"),
+                    Some(n) => format!(
+                        "Process {pid} has nice value {n}; the task asks for {value}. A larger nice value means lower urgency."
+                    ),
+                    None => format!(
+                        "Process {pid} has ended. This task needs it present with nice value {value}; reset this attempt to try again."
+                    ),
+                };
+                (pass, message)
+            }
             Self::Unchanged { pid, expected } => (
-                table.processes.get(pid) == Some(expected),
+                table.observed_process(*pid).as_ref() == Some(expected),
                 format!("Preserve process {pid} and its settings"),
             ),
         }

@@ -1,6 +1,18 @@
 //! Application-only Fedora renderer/input check with isolated /tmp progress.
 use super::*;
 impl LabApp {
+    fn click_visible_smoke_control(
+        &mut self,
+        ctx: &egui::Context,
+        rect: Option<egui::Rect>,
+    ) -> bool {
+        let id = egui::Id::new(("native-click-phases", self.smoke_stage));
+        if ctx.data(|d| d.get_temp::<u8>(id)).unwrap_or(0) >= 2 {
+            return self.click_smoke_control(ctx, None);
+        }
+        let r = rect.expect("native control is present before click");
+        self.reveal_smoke_control(ctx, r) && self.click_smoke_control(ctx, Some(r))
+    }
     fn click_dns_control(&mut self, ctx: &egui::Context, rect: Option<egui::Rect>) -> bool {
         let r = rect.expect("DNS control is present");
         self.reveal_smoke_control(ctx, r) && self.click_smoke_control(ctx, Some(r))
@@ -92,6 +104,16 @@ impl LabApp {
         self.scenarios.push(lab);
         index
     }
+    pub(super) fn add_process_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/process-workspace-preview.json"
+        ))
+        .expect("development process fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
     pub(super) fn add_dns_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
             "../../tests/fixtures/dns-workspace-preview.json"
@@ -174,6 +196,214 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            5000 => {
+                let i = self.add_process_fixture();
+                self.launch(i);
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            5001 => {
+                assert_eq!(
+                    self.process_view(self.selected.unwrap()),
+                    teaching::View::Introduction
+                );
+                shot = Some("process-fixture-introduction".into());
+            }
+            5002 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                    return;
+                }
+            }
+            5003 | 5007 | 5013 | 5022 | 5026 | 5031 | 5035 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.terminal) {
+                    return;
+                }
+            }
+            5004 | 5023 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("ps -eo pid,ppid,user,stat,ni,comm".into()),
+                ]
+            }
+            5005 | 5009 | 5015 | 5024 | 5028 | 5033 => {
+                self.pending_events = vec![key(egui::Key::Enter, false)]
+            }
+            5006 => shot = Some("process-fixture-practice-inspection".into()),
+            5008 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("kill -STOP 610".into()),
+                ]
+            }
+            5010 => {
+                let i = self.selected.unwrap();
+                let a = &self.progress.attempts[&self.scenarios[i].id];
+                assert_eq!(a.state, self.scenarios[i].initial);
+                assert!(!progress::current_solved(a, &self.scenarios[i]));
+                assert!(matches!(
+                    a.workspace
+                        .as_ref()
+                        .unwrap()
+                        .process_learning
+                        .as_ref()
+                        .unwrap()
+                        .table
+                        .processes[&610]
+                        .phase,
+                    dlms_learning_lab::processes::Phase::Stopped { .. }
+                ));
+                shot = Some("process-fixture-practice-paused".into());
+            }
+            5011 | 5021 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.assignment_action) {
+                    return;
+                }
+            }
+            5012 => shot = Some("process-fixture-assignment".into()),
+            5014 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("kill -TERM 101".into()),
+                ]
+            }
+            5016 | 5029 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                    return;
+                }
+            }
+            5017 => {
+                assert!(!self.metrics.completion);
+                shot = Some("process-fixture-ended-instead-of-paused".into());
+            }
+            5018 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                    return;
+                }
+            }
+            5019 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                    return;
+                }
+            }
+            5020 => {
+                let i = self.selected.unwrap();
+                assert_eq!(
+                    self.progress.attempts[&self.scenarios[i].id].state,
+                    self.scenarios[i].initial
+                );
+                assert!(!self.metrics.completion);
+            }
+            5025 => shot = Some("process-fixture-assignment-inspection".into()),
+            5027 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("kill -s SIGSTOP 101".into()),
+                ]
+            }
+            5030 => {
+                let i = self.selected.unwrap();
+                assert!(self.metrics.completion);
+                assert_eq!(self.progress.attempts[&self.scenarios[i].id].step, 0);
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                shot = Some("process-fixture-complete".into());
+            }
+            5032 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("kill -CONT 101".into()),
+                ]
+            }
+            5034 => {
+                let i = self.selected.unwrap();
+                assert!(!self.metrics.completion);
+                assert!(!progress::current_solved(
+                    &self.progress.attempts[&self.scenarios[i].id],
+                    &self.scenarios[i]
+                ));
+                shot = Some("process-fixture-invalidated".into());
+            }
+            5036 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text("ps -p 101 -o pid,stat".into()),
+                ]
+            }
+            5037 => {
+                let i = self.selected.unwrap();
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert_eq!(
+                    self.progress.attempts[&self.scenarios[i].id]
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .command,
+                    "ps -p 101 -o pid,stat"
+                );
+                self.launch(i);
+                assert_eq!(self.input, "ps -p 101 -o pid,stat");
+            }
+            5038 => {
+                let i = self.selected.unwrap();
+                self.progress
+                    .attempts
+                    .get_mut(&self.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                self.help_open = false;
+                self.focus_input = false;
+                self.lesson_scroll_reset = true;
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            5039 | 5044 => {
+                let id = egui::Id::new(("process-settle", self.smoke_stage));
+                let n = ctx.data_mut(|d| {
+                    let n = d.get_temp::<u8>(id).unwrap_or(0) + 1;
+                    d.insert_temp(id, n);
+                    n
+                });
+                if n < 3 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+            }
+            5040 => {
+                assert!(self.metrics.lesson_tabs.is_empty());
+                assert!(!self.metrics.help_visible);
+                shot = Some("process-fixture-challenge-light-150".into());
+            }
+            5041 | 5046 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.check.unwrap()) {
+                    return;
+                }
+            }
+            5042 => shot = Some("process-fixture-challenge-light-150-scrolled".into()),
+            5043 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            5045 => shot = Some("process-fixture-challenge-dark-200".into()),
+            5047 => shot = Some("process-fixture-challenge-dark-200-scrolled".into()),
+            5048 => {
+                println!(
+                    "PASS native process workspace: separate introduction/practice/assignment, typed inspection and pause, ended-versus-paused feedback, real selected Reset confirmation, alternate signal/current Check, Step0 completion, edit-state invalidation, exact draft/save/resume and Challenge light150/dark200. Development fixture only; no authored process coverage or novice/physical-device acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             4950 => {
                 self.selected = None;
                 self.filter = Filter {

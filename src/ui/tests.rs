@@ -262,6 +262,12 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             .unwrap()
             .state
         {
+            State::Processes { table } => {
+                let State::Processes { table: initial } = &a.scenarios[i].initial else {
+                    panic!()
+                };
+                *table = initial.clone();
+            }
             State::Subnet { second, .. } => *second = Some("192.168.10.77".into()),
             State::Vlsm { allocations, .. } => allocations[0].cidr = "10.20.0.1/26".into(),
             State::Network { gateway, .. } => *gateway = "192.168.40.1".parse().unwrap(),
@@ -4768,4 +4774,180 @@ fn long_array_script_clicks_use_visible_viewport_and_edits_clear_current_success
         &a.progress.attempts[&id],
         &a.scenarios[i]
     ));
+}
+
+#[test]
+fn process_workspace_views_keep_tasks_tools_and_guidance_separate_at_responsive_sizes() {
+    for view in [
+        teaching::View::Introduction,
+        teaching::View::Example,
+        teaching::View::Assignment,
+    ] {
+        for (w, h, scale) in [(1200., 850., 1.), (720., 700., 1.5), (720., 700., 2.)] {
+            let (ctx, mut a) = app();
+            let i = a.add_process_fixture();
+            a.launch(i);
+            a.set_process_view(i, view);
+            a.scale = scale;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            for r in a
+                .metrics
+                .inputs
+                .iter()
+                .chain(a.metrics.check.iter())
+                .chain(a.metrics.example_action.iter())
+                .chain(a.metrics.assignment_action.iter())
+            {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "{view:?}/{scale}: {r:?}"
+                );
+            }
+            assert!(!a.metrics.help_visible);
+            a.progress
+                .attempts
+                .get_mut(&a.scenarios[i].id)
+                .unwrap()
+                .challenge = true;
+            for _ in 0..3 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            assert_eq!(a.process_view(i), teaching::View::Assignment);
+            assert!(a.metrics.lesson_tabs.is_empty());
+            assert!(!a.metrics.help_visible);
+        }
+    }
+}
+#[test]
+fn process_terminal_keyboard_check_invalidation_and_focus_remain_native() {
+    let (ctx, mut a) = app();
+    let i = a.add_process_fixture();
+    a.launch(i);
+    a.set_process_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let r = a.metrics.terminal.unwrap();
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Text("kill -s SIGSTOP 101".into()),
+            key(egui::Key::Enter, false),
+        ],
+    );
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    let id = a.scenarios[i].id.clone();
+    assert!(progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+    let r = a.metrics.terminal.unwrap();
+    click(&ctx, &mut a, r);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Text("kill -CONT 101".into()),
+            key(egui::Key::Enter, false),
+        ],
+    );
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+    let focus = a.metrics.focus.unwrap();
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![key(egui::Key::Escape, false)],
+    );
+    draw(&ctx, &mut a);
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    draw(&ctx, &mut a);
+    assert!(!ctx.memory(|m| m.has_focus(focus)));
+    assert!(ctx.memory(|m| m.focused()).is_some());
+}
+#[test]
+fn process_insert_does_not_execute_and_example_cannot_overwrite_assignment() {
+    let (ctx, mut a) = app();
+    let i = a.add_process_fixture();
+    a.launch(i);
+    let id = a.scenarios[i].id.clone();
+    let initial = a.progress.attempts[&id].state.clone();
+    a.set_process_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let r = a.metrics.insert.unwrap();
+    click(&ctx, &mut a, r);
+    let l = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .process_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.command, "ps -eo pid,ppid,user,stat,ni,comm");
+    assert!(l.transcript.is_empty());
+    assert_eq!(a.progress.attempts[&id].state, initial);
+    let r = a.metrics.terminal.unwrap();
+    click(&ctx, &mut a, r);
+    let modifiers = egui::Modifiers {
+        ctrl: true,
+        command: true,
+        ..Default::default()
+    };
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers,
+            },
+            egui::Event::Text("kill -STOP 610".into()),
+        ],
+    );
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![key(egui::Key::Enter, false)],
+    );
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .process_learning
+        .as_ref()
+        .unwrap();
+    assert!(matches!(
+        l.table.processes[&610].phase,
+        dlms_learning_lab::processes::Phase::Stopped { .. }
+    ));
+    assert_eq!(a.progress.attempts[&id].state, initial);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+    a.set_process_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts[&id].state, initial);
 }

@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Processes {
+        table: crate::processes::Table,
+    },
     AuthoritativeDns {
         server: crate::dns::Server,
     },
@@ -103,6 +106,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Processes {
+        requirements: Vec<crate::processes::Requirement>,
+    },
     AuthoritativeDns {
         requirements: Vec<crate::dns_workspace::Requirement>,
     },
@@ -215,6 +221,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Processes { table }, Goal::Processes { requirements }) => {
+            requirements.iter().map(|r| r.check(table)).collect()
+        }
         (State::AuthoritativeDns { server }, Goal::AuthoritativeDns { requirements }) => {
             requirements.iter().map(|r| r.check(server)).collect()
         }
@@ -453,6 +462,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Processes { .. } => crate::processes::HELP,
         State::AuthoritativeDns { .. } => {
             "Use the native record editor, explicit Save zone / Reload primary / Update secondary controls and in-memory lookups. Only the disclosed record subset is supported; reference actions are not Linux commands."
         }
@@ -497,6 +507,18 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::Processes { table } = s {
+        let output = table.execute(input)?;
+        let text = format!("{}{}", output.stdout, output.stderr);
+        return if output.status == 0 {
+            Ok(text)
+        } else {
+            Err(format!(
+                "{text}Simulator note: command exit status {}. A no-match search returns 1; inspect any diagnostic above.",
+                output.status
+            ))
+        };
+    }
     if let State::AuthoritativeDns { server } = s {
         return crate::dns_workspace::adapter(server, input);
     }
@@ -551,7 +573,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::AuthoritativeDns { .. }
+        State::Processes { .. }
+        | State::AuthoritativeDns { .. }
         | State::Switching { .. }
         | State::Ipv6 { .. }
         | State::Ipv4Routing { .. }
@@ -984,6 +1007,10 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Processes { table } => format!(
+            "Virtual process workspace · User: {} · Inspect with ps. Only fixed simulated PIDs exist.",
+            table.user.name
+        ),
         State::AuthoritativeDns { server } => format!(
             "{} · saved serial {} · primary {} · secondary {}",
             server.configured.origin,

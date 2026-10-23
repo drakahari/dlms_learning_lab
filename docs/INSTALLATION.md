@@ -265,3 +265,17 @@ Source346ffa06c1fff2360e19040931c1e7064eab6308,74 authored labs/seventeen units,
 Fresh isolated installation, desktop-file validation, version/content validation outside checkout, uninstall/reinstall and upgrade from46791cc all pass. Exact original-nine synthetic progress bytes survive (file-retention evidence, not a personal-profile GUI claim). Evidence `/tmp/dlms-m44-install-06kni51t/acceptance.json`; launcher `/tmp/dlms-m44-install-06kni51t/bin/dlms-learning-lab`.
 
 First packaged startup after build failed immediately before rendering: selected Wayland socket refused connections; strict diagnostic series stopped at0/1 after the first failure (three were requested). Once the display returned, installed native flow completed all4 isolated examples and reference assignments, checks and saved reload, but its capstone edit test clicked an offscreen full TextEdit rectangle. The viewport-corrected development harness and focused regression now pass full invalidation/reset/resume/Challenge and150/200% native rendering. **A new clean candidate with that corrected harness still requires the full installed retest**; do not call the old harness run a full PASS. See NATIVE_STARTUP.md/SHELL_ARRAY_LESSONS.md. Windows/macOS desktop, screen reader/novice and complete curriculum acceptance remain pending.
+
+### M45 verified corrected Fedora candidate
+
+Source017e875aeb771ed7a58d3a283dcc42464abefaf8,74/seventeen/evaluator6. `dist/dlms-learning-lab-0.1.0-g017e875aeb77-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz` SHA-256 `d2f5f9b03649f644671acaf2df97a04b00c457ed5bad0a28a8825c65d6b0c68c`; binary `7aac414856371e2a42b7cd361aafe8366fc78f7b1cbcfd8f3ff4cdb6bbf4cf3b`. Linux223-package target notices/source plus Rust/theme notices resolve; no new dependency or public release. M46 process integration follows this identity and is not claimed inside this artifact.
+
+Upgraded the isolated installation from346ffa0, validated exact binary/build/content outside checkout and retained exact original-nine synthetic data bytes. All3 **installed** native modes now pass: complete all-four array intro/example/assignment/wrong/retry/completion/invalidation/reset/resume/Challenge, array-loop Stop/repair/resume, and dark100/light150 unit-library rendering. Actual light150/dark200 captures reviewed. Evidence `/tmp/dlms-m44-install-06kni51t/m45-acceptance.json`, `/tmp/dlms-m45-installed-arrays*.log`. Reference scripts were injected; this is not novice or physical-device acceptance.
+
+Ten further quiet default-Wayland startup/readback launches pass10/10; `/tmp/dlms-m45-packaged-quiet/results.json`. Their0.965–0.966s durations include deliberate harness pacing and are not startup performance benchmarks. No lifecycle/protocol logging in these quiet runs. This supersedes the pending corrected-candidate test above; it does not establish a cure for the historical unanswered frame callback. The separate transient NoCompositor/connection-refused event and subsequent server availability remain recorded. Windows/macOS runtime, screen-reader/novice, macOS original dispatch notice/signing and full curriculum completion remain pending.
+
+From the checkout open the exact verified build:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-g017e875aeb77-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```

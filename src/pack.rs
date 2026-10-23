@@ -35,6 +35,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub terminal_teaching: Option<crate::terminal_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub process_teaching: Option<crate::process_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv4_routing_teaching: Option<crate::ipv4_routing_teaching::Lesson>,
@@ -188,6 +190,17 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
+        if let Goal::Processes { requirements } = &s.goal {
+            let State::Processes { table } = &s.initial else {
+                return Err("Process objectives require a process table".into());
+            };
+            if requirements.is_empty()
+                || requirements.len() > 64
+                || requirements.iter().any(|r| !r.valid(table))
+            {
+                return Err("Invalid or excessive process objectives".into());
+            }
+        }
         if let Goal::AuthoritativeDns { requirements } = &s.goal {
             let State::AuthoritativeDns { server } = &s.initial else {
                 return Err("DNS objectives need an authoritative DNS state".into());
@@ -230,6 +243,15 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         if let Some(lesson) = &s.ipv6_teaching {
             if !matches!(s.initial, State::Ipv6 { .. }) {
                 return Err("IPv6 teaching attached to an incompatible state".into());
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let Some(lesson) = &s.process_teaching {
+            let State::Processes { table } = &s.initial else {
+                return Err("Process teaching requires a process assignment".into());
+            };
+            if table.same_problem(&lesson.fixture) {
+                return Err("Use different process identities for the ungraded example".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
         }
@@ -332,6 +354,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Processes { table } => table.valid(),
         State::AuthoritativeDns { server } => server.validate().is_ok(),
         State::Switching { fabric } => fabric.validate().is_ok(),
         State::Ipv6 { topology } => topology.valid(),

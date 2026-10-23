@@ -1,0 +1,317 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-process-workspace",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Process investigation",
+      "title": "Development process workspace fixture",
+      "summary": "Development fixture only; not counted as authored curriculum.",
+      "objective": "Pause only your worker without ending it. Identify it from the process list and owner; preserve the controller, the other user’s worker and the service. Check its state when finished.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Understand the task",
+        "Inspect and act",
+        "Verify the result"
+      ],
+      "guide": [],
+      "hints": [
+        "Inspect the current process table and owner before choosing a target.",
+        "Pausing keeps a process present; termination does not."
+      ],
+      "sources": [
+        "https://man7.org/linux/man-pages/man7/signal.7.html"
+      ],
+      "simplifications": "Fixed in-memory table only; no host processes, shell job control, spawning, CPU measurements, signal handlers or capabilities.",
+      "initial": {
+        "kind": "Processes",
+        "table": {
+          "user": {
+            "name": "alex",
+            "uid": 1000
+          },
+          "session": 100,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "100": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "controller",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "101": {
+              "parent": 100,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "201": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 200,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "300": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 300,
+              "comm": "daemon",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Processes",
+        "requirements": [
+          {
+            "kind": "Phase",
+            "pid": 101,
+            "expected": "Stopped"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 100,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 100,
+              "comm": "controller",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 201,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 200,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 300,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 300,
+              "comm": "daemon",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ps -eo pid,ppid,user,stat,ni,comm",
+        "kill -STOP 101"
+      ],
+      "prerequisites": [],
+      "process_teaching": {
+        "prerequisite_note": "Use the terminal as in file foundations. This introduction explains processes, IDs and pausing.",
+        "concepts": [
+          {
+            "title": "A process is a running program",
+            "text": "Each program instance has its own process ID, or PID. Two instances can have the same name. Check the owner as well as the name so you do not change someone else’s work."
+          },
+          {
+            "title": "Read a snapshot before acting",
+            "text": "ps shows the current table. PID identifies a process, PPID identifies its parent, USER is its owner, STAT shows its state, NI is its nice value and COMMAND is its executable name. The first STAT letter is the state: R means running, S means waiting and T means paused. Other letters give extra details. These are virtual processes only."
+          },
+          {
+            "title": "Pause differs from ending",
+            "text": "The STOP signal pauses a process without ending it. CONT lets a paused process continue. A termination signal ends a process and it cannot then be resumed; Reset restores this exercise if you end the wrong process. The practice uses different PIDs from the assignment."
+          }
+        ],
+        "example": [
+          "ps -eo pid,ppid,user,stat,ni,comm",
+          "kill -STOP 610",
+          "ps -p 610 -o pid,user,stat,comm"
+        ],
+        "inputs": "Morgan’s archiver is running in a separate virtual process table. No assignment state changes here.",
+        "try_change": "After pausing the archiver, type kill -CONT 610, run it, then inspect its state again.",
+        "fixture": {
+          "user": {
+            "name": "morgan",
+            "uid": 1000
+          },
+          "session": 600,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "600": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 600,
+              "comm": "controller",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "610": {
+              "parent": 600,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 600,
+              "comm": "archiver",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "Phase",
+            "pid": 610,
+            "expected": "Stopped"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 600,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 600,
+              "comm": "controller",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

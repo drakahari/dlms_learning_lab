@@ -75,11 +75,13 @@ impl LabApp {
                         | State::Ipv4Routing { .. }
                         | State::Switching { .. }
                 ) && s.terminal_teaching.is_none()
+                    && s.process_teaching.is_none()
                 {
                     ui.label(&s.objective);
                 }
                 if !challenge
                     && s.terminal_teaching.is_none()
+                    && s.process_teaching.is_none()
                     && !matches!(
                         s.initial,
                         State::Ipv6 { .. } | State::Ipv4Routing { .. } | State::Switching { .. }
@@ -95,6 +97,8 @@ impl LabApp {
                     self.ipv6_learning_workspace(ui, i);
                 } else if matches!(s.initial, State::Script { .. }) {
                     self.script_learning_workspace(ui, i);
+                } else if s.process_teaching.is_some() {
+                    self.process_learning_workspace(ui, i);
                 } else if s.terminal_teaching.is_some() {
                     self.terminal_learning_workspace(ui, i);
                 } else {
@@ -133,6 +137,8 @@ impl LabApp {
                 self.routing_v4_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Ipv6 { .. }) {
                 self.ipv6_view(i) == teaching::View::Assignment
+            } else if s.process_teaching.is_some() {
+                self.process_view(i) == teaching::View::Assignment
             } else if s.terminal_teaching.is_some() {
                 self.terminal_view(i) == teaching::View::Assignment
             } else {
@@ -429,6 +435,10 @@ impl LabApp {
                         State::Filesystem { tree } => {
                             format!("Simulated terminal · {} · {}", tree.user, tree.cwd)
                         }
+                        State::Processes { table } => format!(
+                            "Simulated terminal · User: {} · virtual processes",
+                            table.user.name
+                        ),
                         _ => "Simulated terminal · administrator".into(),
                     })
                     .small()
@@ -458,10 +468,10 @@ impl LabApp {
                     });
             });
         self.metrics.output = Some(output.response.rect);
-        let prompt = if matches!(a.state, State::Filesystem { .. }) {
-            "alex $"
-        } else {
-            "lab #"
+        let prompt = match &a.state {
+            State::Processes { table } => table.prompt(),
+            State::Filesystem { .. } => "alex $",
+            _ => "lab #",
         };
         let mut run = false;
         ui.horizontal(|ui| {
@@ -521,10 +531,10 @@ impl LabApp {
             .unwrap();
         let before = a.state.clone();
         let output = engine::execute(&mut a.state, &cmd).unwrap_or_else(|e| e);
-        let prompt = if matches!(a.state, State::Filesystem { .. }) {
-            "alex $"
-        } else {
-            "lab #"
+        let prompt = match &a.state {
+            State::Processes { table } => table.prompt(),
+            State::Filesystem { .. } => "alex $",
+            _ => "lab #",
         };
         a.transcript.push(if output.is_empty() {
             format!("{prompt} {cmd}")
@@ -670,7 +680,7 @@ impl LabApp {
             });
         egui::CollapsingHeader::new("Supported commands, limits & sources").id_salt(("references",i)).show(ui,|ui|{
             ui.add(egui::Label::new(engine::help(&a.state)).wrap());ui.label(&s.simplifications);
-            if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
+            if matches!(a.state,State::Processes{..}) {ui.label("Only this activity’s virtual process table exists. No host processes are inspected or changed. show is a simulator-only snapshot; shell syntax and job control are not supported.");} else if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
             for source in &s.sources{ui.add(egui::Label::new(source).wrap());}
         });
         if matches!(a.state, State::Subnet { .. }) {

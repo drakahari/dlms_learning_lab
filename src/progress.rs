@@ -76,6 +76,14 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::Processes { table } = &a.state {
+        let State::Processes { table: initial } = &s.initial else {
+            return false;
+        };
+        if !table.same_problem(initial) {
+            return false;
+        }
+    }
     if let State::AuthoritativeDns { server } = &a.state {
         let State::AuthoritativeDns { server: initial } = &s.initial else {
             return false;
@@ -195,6 +203,26 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        if let Some(learning) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.process_learning.as_ref())
+            && (!matches!(a.state, State::Processes { .. })
+                || s.process_teaching.as_ref().is_none_or(|lesson| {
+                    !learning.table.same_problem(&lesson.fixture)
+                        || learning.example_command >= lesson.example.len()
+                }))
+        {
+            return Err("Saved process example differs from this lesson; original retained".into());
+        }
+        if let (State::Processes { table }, State::Processes { table: initial }) =
+            (&a.state, &s.initial)
+            && !table.same_problem(initial)
+        {
+            return Err(
+                "Saved process identities differ from this assignment; original retained".into(),
+            );
+        }
         if let (State::Switching { fabric }, State::Switching { fabric: initial }) =
             (&a.state, &s.initial)
             && (!fabric.same_shape(initial)
@@ -244,6 +272,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             );
         }
         validate_service_workspace(a)?;
+        validate_process_workspace(a)?;
         validate_dns_workspace(a)?;
         if let (State::AuthoritativeDns { server }, State::AuthoritativeDns { server: initial }) =
             (&a.state, &s.initial)
@@ -331,6 +360,16 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_process_workspace(a: &Attempt) -> Result<(), String> {
+    if a.workspace
+        .as_ref()
+        .is_some_and(|w| w.process_learning.is_some())
+        && !matches!(a.state, State::Processes { .. })
+    {
+        return Err("Process example metadata on a different activity; original retained".into());
+    }
+    Ok(())
+}
 fn validate_dns_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace
         .as_ref()
@@ -390,6 +429,7 @@ pub struct Saved {
 pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_process_workspace(a)?;
         validate_dns_workspace(a)?;
         validate_service_workspace(a)?;
         validate_address_workspace(a)?;

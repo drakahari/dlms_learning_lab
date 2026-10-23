@@ -18,6 +18,8 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub terminal_learning: Option<crate::terminal_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub process_learning: Option<crate::process_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_draft: Option<crate::ipv6_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ipv6_learning: Option<crate::ipv6_teaching::Learning>,
@@ -72,6 +74,7 @@ impl WorkspaceData {
                 .iter()
                 .all(|r| r.valid() && r.engine_revision < crate::shell::EVALUATOR_REVISION)
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
+            && self.process_learning.as_ref().is_none_or(|l| l.valid())
             && self.ipv6_draft.as_ref().is_none_or(|d| d.valid())
             && self.ipv6_learning.as_ref().is_none_or(|l| l.valid())
             && self.routing_v4_draft.as_ref().is_none_or(|d| d.valid())

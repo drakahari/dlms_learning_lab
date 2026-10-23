@@ -384,6 +384,10 @@ fn bounds_and_serde_reject_cycles_corrupted_identities_foreign_fields_and_large_
     let t = fixture();
     let bytes = serde_json::to_vec(&t).unwrap();
     assert_eq!(serde_json::from_slice::<Table>(&bytes).unwrap(), t);
+    assert_eq!(
+        serde_json::from_value::<Table>(serde_json::to_value(&t).unwrap()).unwrap(),
+        t
+    );
     let mut json = serde_json::to_value(&t).unwrap();
     json["host_command"] = serde_json::json!("ignored");
     assert!(serde_json::from_value::<Table>(json).is_err());
@@ -466,4 +470,30 @@ fn duplicate_and_oversized_serialized_process_tables_are_rejected_before_overwri
     assert!(serde_json::from_str::<Table>(&serde_json::to_string(&many).unwrap()).is_err());
     let bad = text.replacen("\"1\":", "\"0\":", 1);
     assert!(serde_json::from_str::<Table>(&bad).is_err());
+}
+
+#[test]
+fn preservation_checks_observed_parent_and_feedback_explains_paused_versus_ended() {
+    let mut t = fixture();
+    let preserve = Requirement::Unchanged {
+        pid: 202,
+        expected: t.observed_process(202).unwrap(),
+    };
+    assert!(preserve.valid(&t));
+    assert!(preserve.check(&t).0);
+    t.execute("kill 201").unwrap();
+    assert!(!preserve.check(&t).0);
+    let current = Requirement::Unchanged {
+        pid: 202,
+        expected: t.observed_process(202).unwrap(),
+    };
+    assert!(current.valid(&t));
+    assert!(current.check(&t).0);
+    let stopped = Requirement::Phase {
+        pid: 201,
+        expected: ExpectedPhase::Stopped,
+    };
+    let (pass, message) = stopped.check(&t);
+    assert!(!pass);
+    assert!(message.contains("has ended") && message.contains("Reset"));
 }

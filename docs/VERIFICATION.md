@@ -1,3 +1,7 @@
+# M46 current checkpoint —2026-10-23
+
+402 Rust tests, formatter/Clippy pass; independent22 process core/workspace/UI checks and7 actual development screenshots reviewed with no material issue. Native process fixture passes full teaching/practice/assignment/retry/reset/grade/invalidation/draft resume and150/200% Challenge. It is not bundled curriculum. Actual installed017e875 array/Stop/library modes pass3/3 and ten quiet default-Wayland startup/readback launches pass10/10. Exact artifact/checksums and scopes in INSTALLATION.md; no historical startup cure, novice, reader or Windows/macOS runtime acceptance is inferred. Catalog74/seventeen; full curriculum remains Open.
+
 # M45 current checkpoint —2026-10-23
 
 391 Rust tests pass, including11 pure process-model cases and a long-editor viewport/focus/edit-invalidation regression. Seven fixed owned-child Linux observations pass; no arbitrary PID or learner input accepted. Process capability remains unintegrated/untaught; no new authored count or issuer coverage. Corrected development native all-four array flow and separate native Stop/repair/resume pass; representative light/dark150/200% captures reviewed. Installed346ffa0 reached every reference assignment but old harness target failed; a clean candidate with the corrected harness still needs full installed/repeated-start acceptance. See PROCESS_SUBSET.md, SHELL_ARRAY_LESSONS.md and INSTALLATION.md. Catalog74/seventeen; full completion remains Open.
