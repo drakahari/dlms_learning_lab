@@ -336,3 +336,17 @@ Executable SHA-256: `a00ba612fa215937786dd451dbaddb2afaa23823438b87a82cd864a74f9
 Linux target notices/source closure passes. Actual isolated upgrade from a741, clean install/uninstall/reinstall, desktop validation, outside-checkout identity/content/hash checks and exact synthetic old-progress bytes pass. The **installed** full four-LLDP flow passes; root reviewed fresh completion and retry screenshots with results visible after Check plus narrow light150/dark200. Reference drafts are programmatically populated; no novice/physical-device claim. Ten further quiet default-Wayland startup/readbacks pass10/10; artificial pacing is not a speed benchmark, and the historical failure remains unresolved/unreproduced.
 
 Evidence: `/tmp/dlms-m44-install-06kni51t/m51-acceptance.json`, `/tmp/dlms-m51-installed-feedback.log`, `/tmp/dlms-m51-packaged-quiet/results.json`. This focused follow-through did not repeat the entire72-capture alignment matrix or every native workspace; M50 supplies that unchanged shared-field evidence and81 M51 UI tests check existing families. New diagram descriptions are checked through the native accessibility tree, not an actual screen reader. Subsequent gated parser/storage foundation source is not in this candidate. Full curriculum, Windows/macOS desktop/signing/notice gates remain Open; no release.
+
+### M55 persistent-mount curriculum candidate
+
+Clean source `a6a6043b377fc8bcbd8140f2e8b4b55f7c53fdbf`,86 authored assignments/twenty units, Fedora44 x86_64:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-ga6a6043b377f-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA-256:`19bf67961f6d83f6d8ac94ca75eede6077f3c070ce2175a699ef7b349df1dac5`. Binary SHA-256:`33237a165bce7cf12790f1960709abd92cf151fb27cec3e15ca4d460d849376a`.
+
+Actual isolated upgrade fromeff98f0, clean install/uninstall/reinstall, desktop-file validation, outside-checkout identity/content/hash and exact synthetic old-progress-byte preservation pass. The installed launcher runs all four storage lessons through separate examples, explicit Save/terminal/Check, wrong-state feedback, completion, reset/resume/current invalidation, Challenge and narrow light150/dark200. Ten quiet default-Wayland startup/readbacks pass10/10. Reference editor drafts are supplied by the harness; no novice/physical-device/reader acceptance is inferred. Linux target notices/source closure passes. Native CI run40009847858 tests this exact source; consult its actual status, not a predicted result.
+
+Evidence:`/tmp/dlms-m44-install-06kni51t/m55-acceptance.json`, `/tmp/dlms-m55-installed-native.log`, `/tmp/dlms-m55-packaged-quiet/results.json`. Initial72 alignment capture events completed, but actual screenshot review found the old harness sometimes pointed its wheel over the header in a short200% window, leaving fields off-screen. That run does **not** prove those field views passed. A development-only harness correction reuses viewport-aware scrolling; all72 corrected captures pass and actual200% fields/labels and VLAN values are visible and centered (`/tmp/dlms-m55-corrected-alignment.log`). Packaging/installed recapture of that correction is pending. Production control geometry did not change. Short tiled946×439 windows require scrolling at large text; text is not reduced. The historical intermittent callback cause remains unresolved. Full curriculum and external platform/notice/accessibility gates remain Open; no public release.

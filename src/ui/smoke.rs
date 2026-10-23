@@ -2865,21 +2865,9 @@ impl LabApp {
                                 .copied()
                                 .unwrap_or(self.metrics.inputs[0])
                         };
-                        let top = self
-                            .metrics
-                            .header
-                            .iter()
-                            .map(|r| r.bottom())
-                            .fold(0_f32, f32::max)
-                            + 20.;
-                        self.pending_events.extend([
-                            egui::Event::PointerMoved(ctx.content_rect().center()),
-                            egui::Event::MouseWheel {
-                                unit: egui::MouseWheelUnit::Point,
-                                delta: egui::vec2(0., -(target.top() - top).max(0.)),
-                                modifiers: Default::default(),
-                            },
-                        ]);
+                        if !self.reveal_smoke_control(ctx, target) {
+                            return;
+                        }
                     }
                     6 => shot = Some(format!("{tag}-ipv4-fields-scrolled")),
                     7 => {
@@ -2898,18 +2886,9 @@ impl LabApp {
                     8 => shot = Some(format!("{tag}-vlan")),
                     10 => shot = Some(format!("{tag}-vlan-fields-scrolled")),
                     11 => {
-                        let delta = (self.metrics.check.unwrap().bottom()
-                            - ctx.content_rect().bottom()
-                            + 40.)
-                            .max(0.);
-                        self.pending_events.extend([
-                            egui::Event::PointerMoved(ctx.content_rect().center()),
-                            egui::Event::MouseWheel {
-                                unit: egui::MouseWheelUnit::Point,
-                                delta: egui::vec2(0., -delta),
-                                modifiers: Default::default(),
-                            },
-                        ]);
+                        if !self.reveal_smoke_control(ctx, self.metrics.check.unwrap()) {
+                            return;
+                        }
                     }
                     12 => shot = Some(format!("{tag}-vlan-check-scrolled")),
                     _ => {}
