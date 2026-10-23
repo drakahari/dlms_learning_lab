@@ -329,13 +329,12 @@ fn point_to_point_mask_and_off_subnet_differences_warn_without_false_hello_rejec
 }
 #[test]
 fn router_id_missing_zero_duplicate_and_disabled_are_not_full_adjacencies() {
-    for kind in ["missing", "zero", "multicast", "duplicate", "disabled"] {
+    for kind in ["missing", "zero", "duplicate", "disabled"] {
         let mut s = line();
         let a_id = s.configuration().routers["A"].process.router_id;
         configure_process(&mut s, "B", |p| match kind {
             "missing" => p.router_id = None,
             "zero" => p.router_id = Some(Ipv4Addr::UNSPECIFIED),
-            "multicast" => p.router_id = Some(ip("224.0.0.5")),
             "duplicate" => p.router_id = a_id,
             _ => p.enabled = false,
         });
@@ -353,6 +352,35 @@ fn router_id_missing_zero_duplicate_and_disabled_are_not_full_adjacencies() {
     let snap = line().snapshot().unwrap();
     let text = serde_json::to_string(&snap).unwrap();
     assert!(!text.contains("Full") && !text.contains("LSDB"));
+}
+#[test]
+fn router_ids_are_opaque_nonzero_numbers_not_interface_host_addresses() {
+    for id in [
+        "224.0.0.5",
+        "255.255.255.255",
+        "240.0.0.1",
+        "127.0.0.1",
+        "0.0.0.1",
+    ] {
+        let mut s = line();
+        configure_process(&mut s, "B", |p| p.router_id = Some(ip(id)));
+        assert!(s.snapshot().unwrap().routers["B"].issues.is_empty(), "{id}");
+        assert!(link(&s, "A", "ab").compatible, "{id}");
+        assert_eq!(route(&s, "A", "172.16.3.0/24").cost, 14);
+        configure_process(&mut s, "C", |p| p.router_id = Some(ip(id)));
+        assert!(matches!(
+            s.snapshot().unwrap().routers["B"].issues[0],
+            RouterIssue::DuplicateRouterId { .. }
+        ));
+    }
+    for (value, expected) in [
+        (None, RouterIssue::MissingRouterId),
+        (Some(Ipv4Addr::UNSPECIFIED), RouterIssue::ZeroRouterId),
+    ] {
+        let mut s = line();
+        configure_process(&mut s, "B", |p| p.router_id = value);
+        assert_eq!(s.snapshot().unwrap().routers["B"].issues, vec![expected]);
+    }
 }
 #[test]
 fn passive_port_suppresses_peering_but_retains_local_stub_advertisement() {

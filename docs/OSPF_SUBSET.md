@@ -19,8 +19,12 @@ Each router has one area, an explicit optional router ID, a local process ID
 positive16-bit output cost, positive16-bit Hello and32-bit Dead parameters, and
 PointToPoint/Broadcast type. Costs are not inferred from bandwidth. Timers are
 parameters only: no clock, missed Hellos, convergence delay or retained history.
-Missing/zero/multicast/all-ones/duplicate enabled router IDs block affected
-routers' graph use (the explicit ID field does not require an interface address).
+Router IDs are opaque32-bit identities, never subnet host addresses; every
+nonzero value is supported, including multicast/all-ones numeric values. Missing
+ID and explicit zero are distinct non-running configuration conditions in this
+explicit-ID model, without a claim that RFC2328 declares zero an invalid address.
+Duplicate enabled IDs block affected routers' graph use. IDs need not be assigned
+to any interface.
 No automatic ID election or process restart is claimed.
 
 The snapshot reports each router/interface's direct potential peer, all modeled

@@ -496,7 +496,7 @@ impl Action {
 pub enum RouterIssue {
     Disabled,
     MissingRouterId,
-    InvalidRouterId,
+    ZeroRouterId,
     DuplicateRouterId {
         router_id: Ipv4Addr,
         routers: BTreeSet<String>,
@@ -633,10 +633,8 @@ impl State {
                 } else {
                     match c.process.router_id {
                         None => vec![RouterIssue::MissingRouterId],
-                        Some(id)
-                            if id.is_unspecified() || id.is_multicast() || id.is_broadcast() =>
-                        {
-                            vec![RouterIssue::InvalidRouterId]
+                        Some(id) if id.is_unspecified() => {
+                            vec![RouterIssue::ZeroRouterId]
                         }
                         Some(id) if ids[&id].len() > 1 => vec![RouterIssue::DuplicateRouterId {
                             router_id: id,
