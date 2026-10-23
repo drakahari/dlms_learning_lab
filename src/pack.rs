@@ -74,8 +74,17 @@ pub struct Pack {
     pub schema_version: u32,
     pub scenarios: Vec<Scenario>,
 }
+/// Developer pack-file validation; this entry point is never a learner command.
+/// Bound ordinary-file input before UTF-8 decoding or JSON allocation.
+pub fn load_file(path: &std::path::Path) -> Result<Vec<Scenario>, String> {
+    let bytes = crate::local_file::read_bounded(path, MAX_PACK_BYTES)?;
+    let text = String::from_utf8(bytes)
+        .map_err(|_| "Scenario packs must contain UTF-8 JSON".to_string())?;
+    load(&text)
+}
+pub const MAX_PACK_BYTES: usize = 2_000_000;
 pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
-    if text.len() > 2_000_000 {
+    if text.len() > MAX_PACK_BYTES {
         return Err("Pack exceeds 2 MB".into());
     }
     let p: Pack = serde_json::from_str(text).map_err(|e| e.to_string())?;
@@ -555,7 +564,7 @@ pub fn load_catalog(packs: &[&str]) -> Result<Vec<Scenario>, String> {
         scenarios: Vec::new(),
     };
     for text in packs {
-        if text.len() > 2_000_000 {
+        if text.len() > MAX_PACK_BYTES {
             return Err("Pack exceeds 2 MB".into());
         }
         let p: Pack = serde_json::from_str(text).map_err(|e| e.to_string())?;

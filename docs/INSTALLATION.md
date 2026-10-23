@@ -365,3 +365,22 @@ Archive SHA-256:`28200b9960a65a69bd2952fd4ef68466df84b4051ba985d4235852e9f402602
 Actually installed outside checkout under the ignored disk-backed `.build-artifacts/installations/m56-pf5qdors/`. Upgrade from974381f, clean uninstall/reinstall, desktop-file validation, installed identity/content/hash and exact separate synthetic original-nine progress bytes pass. The installed launcher passes the complete public7 native flow: genuine frozen33 old6 records/exact first backup/history, current7 keyboard capture repair/Run, independent example, active-child Stop without graded result, resume/retry, light150/dark200 reachable Run and backup export/review/cancel preserving exact current bytes. Root reviewed native renders. Ten quiet default-Wayland startup/readbacks pass10/10; harness pacing is not a performance measurement and does not establish the historical startup cause/cure.
 
 Evidence: `.build-artifacts/logs/m56-{candidate,installed-lifecycle,installed-native,installed-quiet}.log`, installation `acceptance.json` and `quiet-startup/results.json`, native screenshots in `.build-artifacts/native-runs/run-zt7pao1m/screenshots/workspaces/`. This focused installed pass does not recapture the whole shared72-view matrix;974381f supplied its actual installed alignment evidence and final87 UI regressions preserve those controls. Synthetic fixtures/injected input are not beginner, physical-device, screen-reader or Windows/macOS desktop acceptance. Those gates, macOS original dispatch notice/signing and most curriculum remain pending. New staged capture lessons are not inside this86-lab artifact.
+
+
+## M57 verified 90-lab Fedora candidate — 2026-10-23
+
+Clean source `7ffbfffe4b63b6fafe30aca59a3b4e551b6dc49e`,90 authored assignments/21 units:23CCNA,17LPIC-1,13LPIC-2,37Bash/Shell. Includes the four command-output/reporting lessons. This remains a milestone candidate, not full curriculum completion or a public release.
+
+```sh
+./dist/dlms-learning-lab-0.1.0-g7ffbfffe4b63-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA-256: `b0973ffe176a574fc0aad745ba287d8a83b1b5d23ed421ebf2749965512eb343`.
+Executable SHA-256: `afaea1630b0ecc6312ae76a4ec3eeffdd1974dbd214b53c047f5d67d59f0d111`.
+Linux223 dependency source/notice archives plus Rust, fonts and all28 themes resolve.
+
+Actual disk-backed isolated installation upgraded fromf4d7bc0, uninstalled/reinstalled, validated the desktop entry and verified installed build/content/hashes outside checkout. Separate synthetic original-nine progress bytes remained exact. The installed launcher passed all four newly authored lessons through introduction, independent example Run/change, full assignment, keyboard partial/repair/Run, completion, retained drafts/results, selected Reset, current-success invalidation, library filter and Challenge light150/dark200. Root reviewed installed native renders. Ten quiet default-Wayland launch/readbacks pass10/10; artificial harness pacing is not a performance benchmark, and the historical startup cause remains unresolved.
+
+Evidence: `.build-artifacts/installations/m57-97r6dbbw/{acceptance.json,quiet-startup/results.json}`, `.build-artifacts/logs/m57-{candidate,installed-lifecycle,installed-native,installed-quiet}.log`, and `.build-artifacts/native-runs/run-q408nhdp/screenshots/workspaces/`. Existing shared alignment evidence remains the actual installed974381f72-view matrix plus M57's89 native-egui regressions; this focused installed flow does not claim to recapture all workspaces. No beginner study, physical-device/screen-reader or Windows/macOS desktop acceptance is inferred.
+
+[Native CI40028251720](https://github.com/drakahari/dlms_learning_lab/actions/runs/40028251720) tests this exact source; Ubuntu has passed, Windows/macOS were still running at the last status check. CI compile/tests are separate from actual desktop acceptance; macOS original dispatch notice/signing gates remain. Later pure ACL foundations and the developer pack-file reader fix are not inside this artifact. They do not change the authored90 count or establish new practical coverage by themselves.

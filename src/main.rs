@@ -28,8 +28,7 @@ fn main() -> eframe::Result<()> {
         let result = args
             .get(2)
             .ok_or("Expected JSON path".to_string())
-            .and_then(|p| std::fs::read_to_string(p).map_err(|e| e.to_string()))
-            .and_then(|s| dlms_learning_lab::pack::load(&s));
+            .and_then(|p| dlms_learning_lab::pack::load_file(std::path::Path::new(p)));
         match result {
             Ok(s) => println!("Validated {} scenarios", s.len()),
             Err(e) => {

@@ -2,7 +2,7 @@ use crate::{engine::State, pack::Scenario};
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
-    io::{Read, Write},
+    io::Write,
     path::{Path, PathBuf},
 };
 #[derive(Clone, Serialize, Deserialize)]
@@ -204,28 +204,9 @@ pub fn load(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
     decode(&read_bounded(path, 16_000_000)?, scenarios)
 }
 pub fn read_bounded(path: &Path, limit: usize) -> Result<Vec<u8>, String> {
-    if !std::fs::symlink_metadata(path)
-        .map_err(|e| e.to_string())?
-        .file_type()
-        .is_file()
-    {
-        return Err(
-            "Choose an ordinary file; symbolic links and special files are not supported".into(),
-        );
-    }
-    let f = std::fs::File::open(path).map_err(|e| e.to_string())?;
-    if !f.metadata().map_err(|e| e.to_string())?.is_file() {
-        return Err("Choose an ordinary file".into());
-    }
-    let mut bytes = Vec::new();
-    f.take(limit as u64 + 1)
-        .read_to_end(&mut bytes)
-        .map_err(|e| e.to_string())?;
-    if bytes.len() > limit {
-        return Err("File exceeds the supported size; original retained".into());
-    }
-    Ok(bytes)
+    crate::local_file::read_bounded(path, limit)
 }
+
 pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> {
     if bytes.len() > 16_000_000 {
         return Err("Progress exceeds 16 MB; original retained".into());
