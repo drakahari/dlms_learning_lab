@@ -18,7 +18,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 6;
+pub const EVALUATOR_REVISION: u32 = 7;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -1249,16 +1249,15 @@ pub struct Vm {
     capture_request: Cell<Option<BodyId>>,
 }
 impl Vm {
+    #[cfg(test)]
+    pub(crate) fn active_capture_depth(&self) -> usize {
+        self.frames.len()
+    }
     pub fn new(source: &str, case: &Case) -> Result<Self, String> {
         if !case.valid() {
             return Err("Invalid simulation fixture".into());
         }
         let program = compile(source)?;
-        // Parser/arena foundation only. Capture execution stays gated until
-        // cooperative runtime, budgets and revision migration are ready.
-        if !program.bodies.is_empty() {
-            return Err("Command substitution is unsupported".into());
-        }
         Self::from_program(program, case)
     }
     fn from_program(program: Arc<Program>, case: &Case) -> Result<Self, String> {

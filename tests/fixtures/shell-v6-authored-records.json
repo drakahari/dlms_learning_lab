@@ -1,0 +1,5263 @@
+[
+  {
+    "id": "shell-array-intake",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Several requests",
+        "args": [
+          "Printer setup",
+          "Router check",
+          "Backup review"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Queue: 3\nNext: Printer setup\nStandby: Router check\nTask: Printer setup\nTask: Router check\nTask: Backup review\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "No requests",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Queue: 0\nNext: \nStandby: \n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "One empty request",
+        "args": [
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Queue: 1\nNext: \nStandby: \nTask: \n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Spaces, literal patterns and percent",
+        "args": [
+          "North  desk",
+          "*.log",
+          "",
+          "100%",
+          "cable\\label"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.log": "keep\n"
+        },
+        "stdout": "Queue: 5\nNext: North  desk\nStandby: *.log\nTask: North  desk\nTask: *.log\nTask: \nTask: 100%\nTask: cable\\label\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/a.log": "keep\n"
+        }
+      },
+      {
+        "name": "Longer queue",
+        "args": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Queue: 7\nNext: A\nStandby: B\nTask: A\nTask: B\nTask: C\nTask: D\nTask: E\nTask: F\nTask: G\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n",
+      "results": [
+        {
+          "stdout": "Queue: 3\nNext: Printer setup\nStandby: Router check\nTask: Printer setup\nTask: Router check\nTask: Backup review\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Queue: 0\nNext: \nStandby: \n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Queue: 1\nNext: \nStandby: \nTask: \n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Queue: 5\nNext: North  desk\nStandby: *.log\nTask: North  desk\nTask: *.log\nTask: \nTask: 100%\nTask: cable\\label\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Queue: 7\nNext: A\nStandby: B\nTask: A\nTask: B\nTask: C\nTask: D\nTask: E\nTask: F\nTask: G\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-array-priority",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Three jobs",
+        "args": [
+          "Inspect rack",
+          "Update map",
+          "Check UPS"
+        ],
+        "stdin": "",
+        "env": {
+          "REPLACEMENT": "Urgent repair"
+        },
+        "files": {},
+        "stdout": "Original: 3\nBefore: Inspect rack\nBefore: Update map\nBefore: Check UPS\nRevised: 3\nAfter: Urgent repair\nAfter: Update map\nAfter: Check UPS\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Single job",
+        "args": [
+          "Routine check"
+        ],
+        "stdin": "",
+        "env": {
+          "REPLACEMENT": "New check"
+        },
+        "files": {},
+        "stdout": "Original: 1\nBefore: Routine check\nRevised: 1\nAfter: New check\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty queue",
+        "args": [],
+        "stdin": "",
+        "env": {
+          "REPLACEMENT": "Emergency"
+        },
+        "files": {},
+        "stdout": "",
+        "stderr": "Queue required\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Empty entry and literal wildcard",
+        "args": [
+          "",
+          "*.log",
+          "100%",
+          "two  spaces"
+        ],
+        "stdin": "",
+        "env": {
+          "REPLACEMENT": "Priority *"
+        },
+        "files": {},
+        "stdout": "Original: 4\nBefore: \nBefore: *.log\nBefore: 100%\nBefore: two  spaces\nRevised: 4\nAfter: Priority *\nAfter: *.log\nAfter: 100%\nAfter: two  spaces\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Long tail",
+        "args": [
+          "A",
+          "B",
+          "C",
+          "D",
+          "E",
+          "F",
+          "G"
+        ],
+        "stdin": "",
+        "env": {
+          "REPLACEMENT": "Replacement"
+        },
+        "files": {},
+        "stdout": "Original: 7\nBefore: A\nBefore: B\nBefore: C\nBefore: D\nBefore: E\nBefore: F\nBefore: G\nRevised: 7\nAfter: Replacement\nAfter: B\nAfter: C\nAfter: D\nAfter: E\nAfter: F\nAfter: G\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+      "results": [
+        {
+          "stdout": "Original: 3\nBefore: Inspect rack\nBefore: Update map\nBefore: Check UPS\nRevised: 3\nAfter: Urgent repair\nAfter: Update map\nAfter: Check UPS\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Original: 1\nBefore: Routine check\nRevised: 1\nAfter: New check\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Queue required\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Original: 4\nBefore: \nBefore: *.log\nBefore: 100%\nBefore: two  spaces\nRevised: 4\nAfter: Priority *\nAfter: *.log\nAfter: 100%\nAfter: two  spaces\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Original: 7\nBefore: A\nBefore: B\nBefore: C\nBefore: D\nBefore: E\nBefore: F\nBefore: G\nRevised: 7\nAfter: Replacement\nAfter: B\nAfter: C\nAfter: D\nAfter: E\nAfter: F\nAfter: G\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-array-package",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Mixed package",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/core.cfg": "x\n",
+          "/work/edge.cfg": "y\n",
+          "/work/readme.txt": "z\n",
+          "/work/ignored.log": "unchanged\n"
+        },
+        "stdout": "Configurations: 2\nConfig: core.cfg\nConfig: edge.cfg\nDocuments: 1\nDoc: readme.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/core.cfg": "x\n",
+          "/work/edge.cfg": "y\n",
+          "/work/readme.txt": "z\n",
+          "/work/ignored.log": "unchanged\n"
+        }
+      },
+      {
+        "name": "Configuration only",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/solo.cfg": "x\n",
+          "/work/.hidden.txt": "private fixture\n"
+        },
+        "stdout": "Configurations: 1\nConfig: solo.cfg\nDocuments: 0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/solo.cfg": "x\n",
+          "/work/.hidden.txt": "private fixture\n"
+        }
+      },
+      {
+        "name": "Documents without configuration",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/notes.txt": "x\n"
+        },
+        "stdout": "",
+        "stderr": "Required configuration missing\n",
+        "status": 2,
+        "after": {
+          "/work/notes.txt": "x\n"
+        }
+      },
+      {
+        "name": "Empty package",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Required configuration missing\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Literal names and hidden files",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/two words.cfg": "x\n",
+          "/work/100%.cfg": "y\n",
+          "/work/star*.txt": "z\n",
+          "/work/a.cfg.bak": "skip\n",
+          "/work/.secret.cfg": "skip\n",
+          "/work/\u00e9.txt": "utf8\n"
+        },
+        "stdout": "Configurations: 2\nConfig: 100%.cfg\nConfig: two words.cfg\nDocuments: 2\nDoc: star*.txt\nDoc: \u00e9.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/two words.cfg": "x\n",
+          "/work/100%.cfg": "y\n",
+          "/work/star*.txt": "z\n",
+          "/work/a.cfg.bak": "skip\n",
+          "/work/.secret.cfg": "skip\n",
+          "/work/\u00e9.txt": "utf8\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n",
+      "results": [
+        {
+          "stdout": "Configurations: 2\nConfig: core.cfg\nConfig: edge.cfg\nDocuments: 1\nDoc: readme.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/core.cfg": "x\n",
+            "/work/edge.cfg": "y\n",
+            "/work/ignored.log": "unchanged\n",
+            "/work/readme.txt": "z\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Configurations: 1\nConfig: solo.cfg\nDocuments: 0\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/.hidden.txt": "private fixture\n",
+            "/work/solo.cfg": "x\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Required configuration missing\n",
+          "status": 2,
+          "files": {
+            "/work/notes.txt": "x\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Required configuration missing\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Configurations: 2\nConfig: 100%.cfg\nConfig: two words.cfg\nDocuments: 2\nDoc: star*.txt\nDoc: \u00e9.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/.secret.cfg": "skip\n",
+            "/work/100%.cfg": "y\n",
+            "/work/a.cfg.bak": "skip\n",
+            "/work/star*.txt": "z\n",
+            "/work/two words.cfg": "x\n",
+            "/work/\u00e9.txt": "utf8\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-array-handover",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Preview keeps old report",
+        "args": [
+          "preview",
+          "handover.txt",
+          "west.cfg",
+          "east notes.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/west.cfg": "ready\n",
+          "/work/east notes.txt": "inspect\n",
+          "/work/handover.txt": "keep this\n"
+        },
+        "stdout": "Handover\nFiles: 2\nSource: west.cfg\nready\nSource: east notes.txt\ninspect\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/west.cfg": "ready\n",
+          "/work/east notes.txt": "inspect\n",
+          "/work/handover.txt": "keep this\n"
+        }
+      },
+      {
+        "name": "Publish replaces old report",
+        "args": [
+          "save",
+          "result.txt",
+          "a.cfg",
+          "b.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.cfg": "a\n",
+          "/work/b.cfg": "b\n",
+          "/work/result.txt": "old\n",
+          "/work/unrelated.txt": "keep\n"
+        },
+        "stdout": "Saved: result.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/a.cfg": "a\n",
+          "/work/b.cfg": "b\n",
+          "/work/result.txt": "Handover\nFiles: 2\nSource: a.cfg\na\nSource: b.cfg\nb\n",
+          "/work/unrelated.txt": "keep\n"
+        }
+      },
+      {
+        "name": "Duplicates and empty source contents",
+        "args": [
+          "save",
+          "audit.txt",
+          "two words.cfg",
+          "empty.cfg",
+          "two words.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/two words.cfg": "100% *\n",
+          "/work/empty.cfg": ""
+        },
+        "stdout": "Saved: audit.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/two words.cfg": "100% *\n",
+          "/work/empty.cfg": "",
+          "/work/audit.txt": "Handover\nFiles: 3\nSource: two words.cfg\n100% *\nSource: empty.cfg\nSource: two words.cfg\n100% *\n"
+        }
+      },
+      {
+        "name": "New destination preview",
+        "args": [
+          "preview",
+          "new.txt",
+          "one.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/one.cfg": "only\n"
+        },
+        "stdout": "Handover\nFiles: 1\nSource: one.cfg\nonly\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/one.cfg": "only\n"
+        }
+      },
+      {
+        "name": "Missing late source",
+        "args": [
+          "save",
+          "result.txt",
+          "good.cfg",
+          "missing.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/good.cfg": "preserve\n",
+          "/work/result.txt": "original\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish handover\n",
+        "status": 2,
+        "after": {
+          "/work/good.cfg": "preserve\n",
+          "/work/result.txt": "original\n"
+        }
+      },
+      {
+        "name": "Destination is an input",
+        "args": [
+          "save",
+          "same.cfg",
+          "good.cfg",
+          "same.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/good.cfg": "preserve\n",
+          "/work/same.cfg": "original\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish handover\n",
+        "status": 2,
+        "after": {
+          "/work/good.cfg": "preserve\n",
+          "/work/same.cfg": "original\n"
+        }
+      },
+      {
+        "name": "Unknown mode",
+        "args": [
+          "publish",
+          "result.txt",
+          "a.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.cfg": "keep\n",
+          "/work/result.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish handover\n",
+        "status": 2,
+        "after": {
+          "/work/a.cfg": "keep\n",
+          "/work/result.txt": "old\n"
+        }
+      },
+      {
+        "name": "No sources",
+        "args": [
+          "save",
+          "result.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/result.txt": "keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish handover\n",
+        "status": 2,
+        "after": {
+          "/work/result.txt": "keep\n"
+        }
+      },
+      {
+        "name": "Empty destination",
+        "args": [
+          "save",
+          "",
+          "a.cfg"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.cfg": "keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish handover\n",
+        "status": 2,
+        "after": {
+          "/work/a.cfg": "keep\n"
+        }
+      },
+      {
+        "name": "Empty source name",
+        "args": [
+          "preview",
+          "result.txt",
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/result.txt": "keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish handover\n",
+        "status": 2,
+        "after": {
+          "/work/result.txt": "keep\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+      "results": [
+        {
+          "stdout": "Handover\nFiles: 2\nSource: west.cfg\nready\nSource: east notes.txt\ninspect\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/east notes.txt": "inspect\n",
+            "/work/handover.txt": "keep this\n",
+            "/work/west.cfg": "ready\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: result.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.cfg": "a\n",
+            "/work/b.cfg": "b\n",
+            "/work/result.txt": "Handover\nFiles: 2\nSource: a.cfg\na\nSource: b.cfg\nb\n",
+            "/work/unrelated.txt": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: audit.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/audit.txt": "Handover\nFiles: 3\nSource: two words.cfg\n100% *\nSource: empty.cfg\nSource: two words.cfg\n100% *\n",
+            "/work/empty.cfg": "",
+            "/work/two words.cfg": "100% *\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Handover\nFiles: 1\nSource: one.cfg\nonly\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/one.cfg": "only\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish handover\n",
+          "status": 2,
+          "files": {
+            "/work/good.cfg": "preserve\n",
+            "/work/result.txt": "original\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish handover\n",
+          "status": 2,
+          "files": {
+            "/work/good.cfg": "preserve\n",
+            "/work/same.cfg": "original\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish handover\n",
+          "status": 2,
+          "files": {
+            "/work/a.cfg": "keep\n",
+            "/work/result.txt": "old\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish handover\n",
+          "status": 2,
+          "files": {
+            "/work/result.txt": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish handover\n",
+          "status": 2,
+          "files": {
+            "/work/a.cfg": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish handover\n",
+          "status": 2,
+          "files": {
+            "/work/result.txt": "keep\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-streams",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Ordinary destination",
+        "args": [
+          "North desk",
+          "slip.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/slip.txt": "old slip\n",
+          "/work/keep": "leave this alone\n"
+        },
+        "stdout": "Done\n",
+        "stderr": "Queued: North desk\n",
+        "status": 0,
+        "after": {
+          "/work/slip.txt": "Destination: North desk\n",
+          "/work/keep": "leave this alone\n"
+        }
+      },
+      {
+        "name": "Spaces and percent",
+        "args": [
+          "Annex  100%",
+          "destination slip.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/destination slip.txt": "old slip\n",
+          "/work/keep": "leave this alone\n"
+        },
+        "stdout": "Done\n",
+        "stderr": "Queued: Annex  100%\n",
+        "status": 0,
+        "after": {
+          "/work/destination slip.txt": "Destination: Annex  100%\n",
+          "/work/keep": "leave this alone\n"
+        }
+      },
+      {
+        "name": "Empty label",
+        "args": [
+          "",
+          "empty.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/empty.txt": "old slip\n",
+          "/work/keep": "leave this alone\n"
+        },
+        "stdout": "Done\n",
+        "stderr": "Queued: \n",
+        "status": 0,
+        "after": {
+          "/work/empty.txt": "Destination: \n",
+          "/work/keep": "leave this alone\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "printf 'Destination: %s\\n' \"$1\" > \"$2\"\nprintf 'Queued: %s\\n' \"$1\" >&2\nprintf 'Done\\n'\n",
+      "results": [
+        {
+          "stdout": "Done\n",
+          "stderr": "Queued: North desk\n",
+          "status": 0,
+          "files": {
+            "/work/keep": "leave this alone\n",
+            "/work/slip.txt": "Destination: North desk\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Done\n",
+          "stderr": "Queued: Annex  100%\n",
+          "status": 0,
+          "files": {
+            "/work/destination slip.txt": "Destination: Annex  100%\n",
+            "/work/keep": "leave this alone\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Done\n",
+          "stderr": "Queued: \n",
+          "status": 0,
+          "files": {
+            "/work/empty.txt": "Destination: \n",
+            "/work/keep": "leave this alone\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-pipelines",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Intersect severity and component",
+        "args": [
+          "events.log",
+          "payments"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+        },
+        "stdout": "ERROR payments timeout\nERROR payments retry\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+        }
+      },
+      {
+        "name": "Component with spaces",
+        "args": [
+          "branch log",
+          "api west"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+        },
+        "stdout": "ERROR api west timeout\nERROR api west recovered\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+        }
+      },
+      {
+        "name": "No matching errors",
+        "args": [
+          "quiet.log",
+          "orders"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "after": {
+          "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+        }
+      },
+      {
+        "name": "Final line has no newline",
+        "args": [
+          "tail.log",
+          "worker"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+        },
+        "stdout": "ERROR worker stopped\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+        }
+      },
+      {
+        "name": "Literal substring is not limited to a space-delimited word",
+        "args": [
+          "audit.log",
+          "worker"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+        },
+        "stdout": "12:01 ERROR:worker retry\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "grep -F ERROR \"$1\" | grep -F \"$2\"\n",
+      "results": [
+        {
+          "stdout": "ERROR payments timeout\nERROR payments retry\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/events.log": "INFO payments start\nERROR cache miss\nERROR payments timeout\nWARN payments slow\nERROR payments retry\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "ERROR api west timeout\nERROR api west recovered\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/branch log": "ERROR api east disconnected\nWARN api west reconnect\nERROR api west timeout\nERROR api west recovered\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 1,
+          "files": {
+            "/work/quiet.log": "ERROR cache bad\nINFO orders ready\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "ERROR worker stopped\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/tail.log": "INFO worker ok\nERROR worker stopped"
+          },
+          "error": null
+        },
+        {
+          "stdout": "12:01 ERROR:worker retry\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/audit.log": "12:01 ERROR:worker retry\nWARN worker slow\nERROR other failure\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-eof",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Several complete lines",
+        "args": [],
+        "stdin": "alpha\nbeta\n",
+        "env": {},
+        "files": {},
+        "stdout": "Ticket: alpha\nTicket: beta\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Last line has no newline",
+        "args": [],
+        "stdin": "first\nlast",
+        "env": {},
+        "files": {},
+        "stdout": "Ticket: first\nTicket: last\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Blank lines are records",
+        "args": [],
+        "stdin": "one\n\ntwo\n",
+        "env": {},
+        "files": {},
+        "stdout": "Ticket: one\nTicket: \nTicket: two\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Backslashes and spaces",
+        "args": [],
+        "stdin": "  C:\\jobs  waiting  \n final  tail  ",
+        "env": {},
+        "files": {},
+        "stdout": "Ticket: C:\\jobs  waiting\nTicket: final  tail\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty input",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Unterminated whitespace is empty after trimming",
+        "args": [],
+        "stdin": "done\n \t ",
+        "env": {},
+        "files": {},
+        "stdout": "Ticket: done\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "while read -r line || [ -n \"$line\" ]; do\n    printf 'Ticket: %s\\n' \"$line\"\ndone\n",
+      "results": [
+        {
+          "stdout": "Ticket: alpha\nTicket: beta\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Ticket: first\nTicket: last\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Ticket: one\nTicket: \nTicket: two\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Ticket: C:\\jobs  waiting\nTicket: final  tail\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Ticket: done\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-batch-audit",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Multiple readable logs",
+        "args": [
+          "north.log",
+          "south.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/north.log": "INFO start\nERROR north timeout\n",
+          "/work/south.log": "ERROR south retry\n"
+        },
+        "stdout": "File: north.log\nERROR north timeout\nFile: south.log\nERROR south retry\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/north.log": "INFO start\nERROR north timeout\n",
+          "/work/south.log": "ERROR south retry\n"
+        }
+      },
+      {
+        "name": "Missing first file but later file still handled",
+        "args": [
+          "absent.log",
+          "available log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/available log": "ERROR recovered\n"
+        },
+        "stdout": "File: available log\nERROR recovered\n",
+        "stderr": "Missing: absent.log\n",
+        "status": 2,
+        "after": {
+          "/work/available log": "ERROR recovered\n"
+        }
+      },
+      {
+        "name": "Quiet file and later missing file",
+        "args": [
+          "quiet.log",
+          "lost.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/quiet.log": "INFO all clear\n",
+          "/work/keep": "untouched\n"
+        },
+        "stdout": "File: quiet.log\n",
+        "stderr": "Missing: lost.log\n",
+        "status": 2,
+        "after": {
+          "/work/quiet.log": "INFO all clear\n",
+          "/work/keep": "untouched\n"
+        }
+      },
+      {
+        "name": "Empty batch",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep": "untouched\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep": "untouched\n"
+        }
+      },
+      {
+        "name": "Readable quiet log after an incident",
+        "args": [
+          "incident.log",
+          "quiet.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/incident.log": "ERROR retry\n",
+          "/work/quiet.log": "INFO healthy\n"
+        },
+        "stdout": "File: incident.log\nERROR retry\nFile: quiet.log\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/incident.log": "ERROR retry\n",
+          "/work/quiet.log": "INFO healthy\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "failed=''\nfor path in \"$@\"; do\n    if [ -f \"$path\" ]; then\n        printf 'File: %s\\n' \"$path\"\n        grep -F ERROR \"$path\"\n    else\n        printf 'Missing: %s\\n' \"$path\" >&2\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then\n    exit 2\nfi\nexit 0\n",
+      "results": [
+        {
+          "stdout": "File: north.log\nERROR north timeout\nFile: south.log\nERROR south retry\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/north.log": "INFO start\nERROR north timeout\n",
+            "/work/south.log": "ERROR south retry\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "File: available log\nERROR recovered\n",
+          "stderr": "Missing: absent.log\n",
+          "status": 2,
+          "files": {
+            "/work/available log": "ERROR recovered\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "File: quiet.log\n",
+          "stderr": "Missing: lost.log\n",
+          "status": 2,
+          "files": {
+            "/work/keep": "untouched\n",
+            "/work/quiet.log": "INFO all clear\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep": "untouched\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "File: incident.log\nERROR retry\nFile: quiet.log\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/incident.log": "ERROR retry\n",
+            "/work/quiet.log": "INFO healthy\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-number-records",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Ordinary queue",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "Inspect\nPack\nShip\n"
+        },
+        "stdout": "1: Inspect\n2: Pack\n3: Ship\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "Inspect\nPack\nShip\n"
+        }
+      },
+      {
+        "name": "Empty records still need numbers",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "First\n\nLast\n"
+        },
+        "stdout": "1: First\n2: \n3: Last\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "First\n\nLast\n"
+        }
+      },
+      {
+        "name": "Final record without newline",
+        "args": [
+          "day two.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/day two.txt": "Check\nClose"
+        },
+        "stdout": "1: Check\n2: Close\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/day two.txt": "Check\nClose"
+        }
+      },
+      {
+        "name": "Literal labels",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+        },
+        "stdout": "1: rack  A\n2: 100% ready\n3: path\\name\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+        }
+      },
+      {
+        "name": "Empty file",
+        "args": [
+          "empty.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/empty.txt": ""
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/empty.txt": ""
+        }
+      },
+      {
+        "name": "Only blank records",
+        "args": [
+          "blank.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/blank.txt": "\n\n"
+        },
+        "stdout": "1: \n2: \n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/blank.txt": "\n\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "number=0\nwhile read -r record || [ -n \"$record\" ]; do\n    number=$((number + 1))\n    printf '%s: %s\\n' \"$number\" \"$record\"\ndone < \"$1\"\n",
+      "results": [
+        {
+          "stdout": "1: Inspect\n2: Pack\n3: Ship\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "Inspect\nPack\nShip\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "1: First\n2: \n3: Last\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "First\n\nLast\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "1: Check\n2: Close\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/day two.txt": "Check\nClose"
+          },
+          "error": null
+        },
+        {
+          "stdout": "1: rack  A\n2: 100% ready\n3: path\\name\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "rack  A\n100% ready\npath\\name\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/empty.txt": ""
+          },
+          "error": null
+        },
+        {
+          "stdout": "1: \n2: \n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/blank.txt": "\n\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-order-total",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Ordinary quantities",
+        "args": [
+          "units.txt",
+          "17"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/units.txt": "2\n5\n1\n"
+        },
+        "stdout": "Units: 8\nCost (cents): 136\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/units.txt": "2\n5\n1\n"
+        }
+      },
+      {
+        "name": "Zero quantity and final record",
+        "args": [
+          "shift two.txt",
+          "3"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/shift two.txt": "0\n9\n2"
+        },
+        "stdout": "Units: 11\nCost (cents): 33\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/shift two.txt": "0\n9\n2"
+        }
+      },
+      {
+        "name": "Empty order",
+        "args": [
+          "units.txt",
+          "19"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/units.txt": ""
+        },
+        "stdout": "Units: 0\nCost (cents): 0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/units.txt": ""
+        }
+      },
+      {
+        "name": "Free rate",
+        "args": [
+          "units.txt",
+          "0"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/units.txt": "7\n4\n"
+        },
+        "stdout": "Units: 11\nCost (cents): 0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/units.txt": "7\n4\n"
+        }
+      },
+      {
+        "name": "Single quantity",
+        "args": [
+          "units.txt",
+          "25"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/units.txt": "12"
+        },
+        "stdout": "Units: 12\nCost (cents): 300\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/units.txt": "12"
+        }
+      },
+      {
+        "name": "Maximum supplied order",
+        "args": [
+          "bulk quantities.txt",
+          "99"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+        },
+        "stdout": "Units: 63936\nCost (cents): 6329664\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "price=$2\nunits=0\nwhile read -r quantity || [ -n \"$quantity\" ]; do\n    units=$((units + quantity))\ndone < \"$1\"\ncents=$((units * price))\nprintf 'Units: %s\\nCost (cents): %s\\n' \"$units\" \"$cents\"\n",
+      "results": [
+        {
+          "stdout": "Units: 8\nCost (cents): 136\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/units.txt": "2\n5\n1\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Units: 11\nCost (cents): 33\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/shift two.txt": "0\n9\n2"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Units: 0\nCost (cents): 0\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/units.txt": ""
+          },
+          "error": null
+        },
+        {
+          "stdout": "Units: 11\nCost (cents): 0\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/units.txt": "7\n4\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Units: 12\nCost (cents): 300\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/units.txt": "12"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Units: 63936\nCost (cents): 6329664\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/bulk quantities.txt": "999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n999\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-pack-items",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Leftover items",
+        "args": [
+          "23",
+          "6"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "Full cartons: 3\nLoose items: 5\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "Exact fit",
+        "args": [
+          "24",
+          "6"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "Full cartons: 4\nLoose items: 0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "Fewer items than one carton",
+        "args": [
+          "3",
+          "8"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "Full cartons: 0\nLoose items: 3\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "No items",
+        "args": [
+          "0",
+          "4"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "Full cartons: 0\nLoose items: 0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "Unit capacity",
+        "args": [
+          "19",
+          "1"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "Full cartons: 19\nLoose items: 0\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "Zero capacity",
+        "args": [
+          "9",
+          "0"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot pack items\n",
+        "status": 2,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "Missing capacity",
+        "args": [
+          "12"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot pack items\n",
+        "status": 2,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      },
+      {
+        "name": "Extra argument",
+        "args": [
+          "12",
+          "4",
+          "unexpected"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "unchanged\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot pack items\n",
+        "status": 2,
+        "after": {
+          "/work/keep.txt": "unchanged\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ \"$#\" -ne 2 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\nitems=$1\ncapacity=$2\nif [ \"$capacity\" -eq 0 ]; then\n    printf 'Cannot pack items\\n' >&2\n    exit 2\nfi\ncartons=$((items / capacity))\nloose=$((items % capacity))\nprintf 'Full cartons: %s\\nLoose items: %s\\n' \"$cartons\" \"$loose\"\n",
+      "results": [
+        {
+          "stdout": "Full cartons: 3\nLoose items: 5\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Full cartons: 4\nLoose items: 0\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Full cartons: 0\nLoose items: 3\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Full cartons: 0\nLoose items: 0\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Full cartons: 19\nLoose items: 0\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot pack items\n",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot pack items\n",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot pack items\n",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "unchanged\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-count-capstone",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Two sources replace an old report",
+        "args": [
+          "counts.txt",
+          "alpha.txt",
+          "beta.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/alpha.txt": "A\nB\n",
+          "/work/beta.txt": "C\n",
+          "/work/counts.txt": "old\n"
+        },
+        "stdout": "Saved: counts.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/alpha.txt": "A\nB\n",
+          "/work/beta.txt": "C\n",
+          "/work/counts.txt": "Record counts\nalpha.txt: 2\nbeta.txt: 1\nTotal: 3\n"
+        }
+      },
+      {
+        "name": "Repeated source counts twice",
+        "args": [
+          "day counts.txt",
+          "blank.txt",
+          "last.txt",
+          "blank.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/blank.txt": "\n\n",
+          "/work/last.txt": "One\nTwo"
+        },
+        "stdout": "Saved: day counts.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/blank.txt": "\n\n",
+          "/work/last.txt": "One\nTwo",
+          "/work/day counts.txt": "Record counts\nblank.txt: 2\nlast.txt: 2\nblank.txt: 2\nTotal: 6\n"
+        }
+      },
+      {
+        "name": "Eight sources include empty and maximum file",
+        "args": [
+          "new report.txt",
+          "empty source.txt",
+          "sixteen records.txt",
+          "one.txt",
+          "two.txt",
+          "three.txt",
+          "literal labels.txt",
+          "tail.txt",
+          "last.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/empty source.txt": "",
+          "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+          "/work/one.txt": "\n",
+          "/work/two.txt": "A\nB\n",
+          "/work/three.txt": "A\nB\nC",
+          "/work/literal labels.txt": "100%\npath\\name\n",
+          "/work/tail.txt": "end",
+          "/work/last.txt": "done\n"
+        },
+        "stdout": "Saved: new report.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/empty source.txt": "",
+          "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+          "/work/one.txt": "\n",
+          "/work/two.txt": "A\nB\n",
+          "/work/three.txt": "A\nB\nC",
+          "/work/literal labels.txt": "100%\npath\\name\n",
+          "/work/tail.txt": "end",
+          "/work/last.txt": "done\n",
+          "/work/new report.txt": "Record counts\nempty source.txt: 0\nsixteen records.txt: 16\none.txt: 1\ntwo.txt: 2\nthree.txt: 3\nliteral labels.txt: 2\ntail.txt: 1\nlast.txt: 1\nTotal: 26\n"
+        }
+      },
+      {
+        "name": "Later missing source retains report",
+        "args": [
+          "counts.txt",
+          "ok.txt",
+          "missing.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/ok.txt": "safe\n",
+          "/work/counts.txt": "keep this\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot count files\n",
+        "status": 2,
+        "after": {
+          "/work/ok.txt": "safe\n",
+          "/work/counts.txt": "keep this\n"
+        }
+      },
+      {
+        "name": "Failure must not create report",
+        "args": [
+          "new.txt",
+          "missing.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "untouched\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot count files\n",
+        "status": 2,
+        "after": {
+          "/work/keep.txt": "untouched\n"
+        }
+      },
+      {
+        "name": "Destination is also a later input",
+        "args": [
+          "alpha.txt",
+          "beta.txt",
+          "alpha.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/alpha.txt": "keep A\n",
+          "/work/beta.txt": "keep B\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot count files\n",
+        "status": 2,
+        "after": {
+          "/work/alpha.txt": "keep A\n",
+          "/work/beta.txt": "keep B\n"
+        }
+      },
+      {
+        "name": "No input arguments",
+        "args": [
+          "existing.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/existing.txt": "keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot count files\n",
+        "status": 2,
+        "after": {
+          "/work/existing.txt": "keep\n"
+        }
+      },
+      {
+        "name": "Empty destination",
+        "args": [
+          "",
+          "ok.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/ok.txt": "keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot count files\n",
+        "status": 2,
+        "after": {
+          "/work/ok.txt": "keep\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ \"$#\" -lt 2 ] || [ -z \"$1\" ]; then\n    printf 'Cannot count files\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nfor file in \"$@\"; do\n    if [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$file\" ]; then\n        :\n    else\n        printf 'Cannot count files\\n' >&2\n        exit 2\n    fi\ndone\ntotal=0\nprintf 'Record counts\\n' > \"$destination\"\nfor file in \"$@\"; do\n    count=0\n    while read -r row || [ -n \"$row\" ]; do\n        count=$((count + 1))\n    done < \"$file\"\n    printf '%s: %s\\n' \"$file\" \"$count\" >> \"$destination\"\n    total=$((total + count))\ndone\nprintf 'Total: %s\\n' \"$total\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+      "results": [
+        {
+          "stdout": "Saved: counts.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/alpha.txt": "A\nB\n",
+            "/work/beta.txt": "C\n",
+            "/work/counts.txt": "Record counts\nalpha.txt: 2\nbeta.txt: 1\nTotal: 3\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: day counts.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/blank.txt": "\n\n",
+            "/work/day counts.txt": "Record counts\nblank.txt: 2\nlast.txt: 2\nblank.txt: 2\nTotal: 6\n",
+            "/work/last.txt": "One\nTwo"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: new report.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/empty source.txt": "",
+            "/work/last.txt": "done\n",
+            "/work/literal labels.txt": "100%\npath\\name\n",
+            "/work/new report.txt": "Record counts\nempty source.txt: 0\nsixteen records.txt: 16\none.txt: 1\ntwo.txt: 2\nthree.txt: 3\nliteral labels.txt: 2\ntail.txt: 1\nlast.txt: 1\nTotal: 26\n",
+            "/work/one.txt": "\n",
+            "/work/sixteen records.txt": "Row\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nRow\nFinal",
+            "/work/tail.txt": "end",
+            "/work/three.txt": "A\nB\nC",
+            "/work/two.txt": "A\nB\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot count files\n",
+          "status": 2,
+          "files": {
+            "/work/counts.txt": "keep this\n",
+            "/work/ok.txt": "safe\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot count files\n",
+          "status": 2,
+          "files": {
+            "/work/keep.txt": "untouched\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot count files\n",
+          "status": 2,
+          "files": {
+            "/work/alpha.txt": "keep A\n",
+            "/work/beta.txt": "keep B\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot count files\n",
+          "status": 2,
+          "files": {
+            "/work/existing.txt": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot count files\n",
+          "status": 2,
+          "files": {
+            "/work/ok.txt": "keep\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-file-manifest",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Mixed files",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/z.log": "Z\n",
+          "/work/a.log": "A\n",
+          "/work/two words.log": "space\n",
+          "/work/.private.log": "private\n",
+          "/work/notes.txt": "ignore\n",
+          "/work/manifest.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/z.log": "Z\n",
+          "/work/a.log": "A\n",
+          "/work/two words.log": "space\n",
+          "/work/.private.log": "private\n",
+          "/work/notes.txt": "ignore\n",
+          "/work/manifest.txt": "a.log\ntwo words.log\nz.log\n"
+        }
+      },
+      {
+        "name": "No matching files",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/notes.txt": "keep\n",
+          "/work/manifest.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/notes.txt": "keep\n",
+          "/work/manifest.txt": ""
+        }
+      },
+      {
+        "name": "Empty file still has a name",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/empty.log": "",
+          "/work/manifest.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/empty.log": "",
+          "/work/manifest.txt": "empty.log\n"
+        }
+      },
+      {
+        "name": "Names are data",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/100% ready.log": "percent\n",
+          "/work/rack\\west.log": "backslash\n",
+          "/work/\u00e9.log": "UTF-8\n",
+          "/work/manifest.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/100% ready.log": "percent\n",
+          "/work/rack\\west.log": "backslash\n",
+          "/work/\u00e9.log": "UTF-8\n",
+          "/work/manifest.txt": "100% ready.log\nrack\\west.log\n\u00e9.log\n"
+        }
+      },
+      {
+        "name": "Case matters",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/UPPER.LOG": "not selected\n",
+          "/work/low.log": "selected\n",
+          "/work/manifest.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/UPPER.LOG": "not selected\n",
+          "/work/low.log": "selected\n",
+          "/work/manifest.txt": "low.log\n"
+        }
+      },
+      {
+        "name": "New manifest",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/one.log": "first\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/one.log": "first\n",
+          "/work/manifest.txt": "one.log\n"
+        }
+      },
+      {
+        "name": "Only hidden logs",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/.hidden.log": "secret\n",
+          "/work/manifest.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/.hidden.log": "secret\n",
+          "/work/manifest.txt": ""
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "printf '' > manifest.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        printf '%s\\n' \"$file\" >> manifest.txt\n    fi\ndone\n",
+      "results": [
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/.private.log": "private\n",
+            "/work/a.log": "A\n",
+            "/work/manifest.txt": "a.log\ntwo words.log\nz.log\n",
+            "/work/notes.txt": "ignore\n",
+            "/work/two words.log": "space\n",
+            "/work/z.log": "Z\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/manifest.txt": "",
+            "/work/notes.txt": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/empty.log": "",
+            "/work/manifest.txt": "empty.log\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/100% ready.log": "percent\n",
+            "/work/manifest.txt": "100% ready.log\nrack\\west.log\n\u00e9.log\n",
+            "/work/rack\\west.log": "backslash\n",
+            "/work/\u00e9.log": "UTF-8\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/UPPER.LOG": "not selected\n",
+            "/work/low.log": "selected\n",
+            "/work/manifest.txt": "low.log\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/manifest.txt": "one.log\n",
+            "/work/one.log": "first\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/.hidden.log": "secret\n",
+            "/work/manifest.txt": ""
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-collect-errors",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Several log streams",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+          "/work/a.log": "ready\nERROR link\n",
+          "/work/notes.txt": "ERROR ignore\n",
+          "/work/.private.log": "ERROR hidden\n",
+          "/work/errors.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+          "/work/a.log": "ready\nERROR link\n",
+          "/work/notes.txt": "ERROR ignore\n",
+          "/work/.private.log": "ERROR hidden\n",
+          "/work/errors.txt": "ERROR link\nERROR disk\nERROR disk\n"
+        }
+      },
+      {
+        "name": "No ERROR records",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.log": "error lower\nOK\n",
+          "/work/errors.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/a.log": "error lower\nOK\n",
+          "/work/errors.txt": ""
+        }
+      },
+      {
+        "name": "No source files",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/notes.txt": "ERROR unrelated\n",
+          "/work/errors.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/notes.txt": "ERROR unrelated\n",
+          "/work/errors.txt": ""
+        }
+      },
+      {
+        "name": "Empty source",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/empty.log": "",
+          "/work/errors.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/empty.log": "",
+          "/work/errors.txt": ""
+        }
+      },
+      {
+        "name": "Final matching line lacks newline",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/last.log": "OK\nERROR final",
+          "/work/errors.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/last.log": "OK\nERROR final",
+          "/work/errors.txt": "ERROR final\n"
+        }
+      },
+      {
+        "name": "Names and record punctuation",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/two words.log": "ERROR 100% path\\west\n",
+          "/work/a.log": "NOTERROR still contains the text\n",
+          "/work/errors.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/two words.log": "ERROR 100% path\\west\n",
+          "/work/a.log": "NOTERROR still contains the text\n",
+          "/work/errors.txt": "NOTERROR still contains the text\nERROR 100% path\\west\n"
+        }
+      },
+      {
+        "name": "Create the report",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/z.log": "ERROR last\n",
+          "/work/a.log": "ERROR first\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/z.log": "ERROR last\n",
+          "/work/a.log": "ERROR first\n",
+          "/work/errors.txt": "ERROR first\nERROR last\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "printf '' > errors.txt\nfor file in *.log; do\n    if [ -f \"$file\" ]; then\n        grep -F ERROR \"$file\" >> errors.txt\n    fi\ndone\nexit 0\n",
+      "results": [
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/.private.log": "ERROR hidden\n",
+            "/work/a.log": "ready\nERROR link\n",
+            "/work/b.log": "ERROR disk\nOK\nERROR disk\n",
+            "/work/errors.txt": "ERROR link\nERROR disk\nERROR disk\n",
+            "/work/notes.txt": "ERROR ignore\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "error lower\nOK\n",
+            "/work/errors.txt": ""
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/errors.txt": "",
+            "/work/notes.txt": "ERROR unrelated\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/empty.log": "",
+            "/work/errors.txt": ""
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/errors.txt": "ERROR final\n",
+            "/work/last.log": "OK\nERROR final"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "NOTERROR still contains the text\n",
+            "/work/errors.txt": "NOTERROR still contains the text\nERROR 100% path\\west\n",
+            "/work/two words.log": "ERROR 100% path\\west\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "ERROR first\n",
+            "/work/errors.txt": "ERROR first\nERROR last\n",
+            "/work/z.log": "ERROR last\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-file-batch-capstone",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Normal handover",
+        "args": [
+          "audit.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/b.log": "OK\n",
+          "/work/a.log": "ERROR link\nERROR link\n",
+          "/work/audit.txt": "old\n",
+          "/work/other.txt": "keep\n",
+          "/work/empty.log": ""
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/b.log": "OK\n",
+          "/work/a.log": "ERROR link\nERROR link\n",
+          "/work/audit.txt": "Error audit\nFile: a.log\nERROR link\nERROR link\nFile: b.log\nFile: empty.log\nFiles: 3\n",
+          "/work/other.txt": "keep\n",
+          "/work/empty.log": ""
+        }
+      },
+      {
+        "name": "New report also ends in .log",
+        "args": [
+          "new.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/b.log": "ERROR b\n",
+          "/work/a.log": "ERROR a\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/b.log": "ERROR b\n",
+          "/work/a.log": "ERROR a\n",
+          "/work/new.log": "Error audit\nFile: a.log\nERROR a\nFile: b.log\nERROR b\nFiles: 2\n"
+        }
+      },
+      {
+        "name": "Later selected source is the destination",
+        "args": [
+          "z.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.log": "ERROR a\n",
+          "/work/z.log": "ERROR original\n",
+          "/work/keep.txt": "keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish audit\n",
+        "status": 2,
+        "after": {
+          "/work/a.log": "ERROR a\n",
+          "/work/z.log": "ERROR original\n",
+          "/work/keep.txt": "keep\n"
+        }
+      },
+      {
+        "name": "No visible logs",
+        "args": [
+          "audit.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/notes.txt": "ERROR ignore\n",
+          "/work/.hidden.log": "ERROR private\n",
+          "/work/audit.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/notes.txt": "ERROR ignore\n",
+          "/work/.hidden.log": "ERROR private\n",
+          "/work/audit.txt": "Error audit\nFiles: 0\n"
+        }
+      },
+      {
+        "name": "Spaces and literal text",
+        "args": [
+          "daily report.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/day two.log": "ERROR path\\west 100%\n",
+          "/work/a.log": "OK\nERROR start",
+          "/work/daily report.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/day two.log": "ERROR path\\west 100%\n",
+          "/work/a.log": "OK\nERROR start",
+          "/work/daily report.txt": "Error audit\nFile: a.log\nERROR start\nFile: day two.log\nERROR path\\west 100%\nFiles: 2\n"
+        }
+      },
+      {
+        "name": "Missing destination",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.log": "ERROR a\n",
+          "/work/audit.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish audit\n",
+        "status": 2,
+        "after": {
+          "/work/a.log": "ERROR a\n",
+          "/work/audit.txt": "old\n"
+        }
+      },
+      {
+        "name": "Extra argument",
+        "args": [
+          "audit.txt",
+          "extra"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.log": "ERROR a\n",
+          "/work/audit.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish audit\n",
+        "status": 2,
+        "after": {
+          "/work/a.log": "ERROR a\n",
+          "/work/audit.txt": "old\n"
+        }
+      },
+      {
+        "name": "Empty destination",
+        "args": [
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a.log": "",
+          "/work/b.log": "ready\n",
+          "/work/audit.txt": "old\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot publish audit\n",
+        "status": 2,
+        "after": {
+          "/work/a.log": "",
+          "/work/b.log": "ready\n",
+          "/work/audit.txt": "old\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ \"$#\" -ne 1 ] || [ -z \"$1\" ]; then\n    printf 'Cannot publish audit\\n' >&2\n    exit 2\nfi\ndestination=$1\npublish() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ] && [ \"$file\" = \"$destination\" ]; then\n            printf 'Cannot publish audit\\n' >&2\n            return 2\n        fi\n    done\n    printf 'Error audit\\n' > \"$destination\"\n    count=0\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            printf 'File: %s\\n' \"$file\" >> \"$destination\"\n            grep -F ERROR \"$file\" >> \"$destination\"\n            count=$((count + 1))\n        fi\n    done\n    printf 'Files: %s\\n' \"$count\" >> \"$destination\"\n}\npublish *.log\n",
+      "results": [
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "ERROR link\nERROR link\n",
+            "/work/audit.txt": "Error audit\nFile: a.log\nERROR link\nERROR link\nFile: b.log\nFile: empty.log\nFiles: 3\n",
+            "/work/b.log": "OK\n",
+            "/work/empty.log": "",
+            "/work/other.txt": "keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "ERROR a\n",
+            "/work/b.log": "ERROR b\n",
+            "/work/new.log": "Error audit\nFile: a.log\nERROR a\nFile: b.log\nERROR b\nFiles: 2\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish audit\n",
+          "status": 2,
+          "files": {
+            "/work/a.log": "ERROR a\n",
+            "/work/keep.txt": "keep\n",
+            "/work/z.log": "ERROR original\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/.hidden.log": "ERROR private\n",
+            "/work/audit.txt": "Error audit\nFiles: 0\n",
+            "/work/notes.txt": "ERROR ignore\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a.log": "OK\nERROR start",
+            "/work/daily report.txt": "Error audit\nFile: a.log\nERROR start\nFile: day two.log\nERROR path\\west 100%\nFiles: 2\n",
+            "/work/day two.log": "ERROR path\\west 100%\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish audit\n",
+          "status": 2,
+          "files": {
+            "/work/a.log": "ERROR a\n",
+            "/work/audit.txt": "old\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish audit\n",
+          "status": 2,
+          "files": {
+            "/work/a.log": "ERROR a\n",
+            "/work/audit.txt": "old\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot publish audit\n",
+          "status": 2,
+          "files": {
+            "/work/a.log": "",
+            "/work/audit.txt": "old\n",
+            "/work/b.log": "ready\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-functions",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Several labels",
+        "args": [
+          "North",
+          "South"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Label: North\nLabel: South\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Space and percent",
+        "args": [
+          "West  desk",
+          "100% ready"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Label: West  desk\nLabel: 100% ready\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty label is still an argument",
+        "args": [
+          "",
+          "Next"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Label: \nLabel: Next\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty queue",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "print_label() {\n    printf 'Label: %s\\n' \"$1\"\n}\nfor label in \"$@\"; do\n    print_label \"$label\"\ndone\n",
+      "results": [
+        {
+          "stdout": "Label: North\nLabel: South\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Label: West  desk\nLabel: 100% ready\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Label: \nLabel: Next\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-return",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "All labels accepted",
+        "args": [
+          "North",
+          "West desk"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Accepted: North\nAccepted: West desk\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Reject first but continue",
+        "args": [
+          "",
+          "Later"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Accepted: Later\n",
+        "stderr": "Rejected: empty label\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Rejection stays remembered",
+        "args": [
+          "First",
+          "",
+          "Last"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Accepted: First\nAccepted: Last\n",
+        "stderr": "Rejected: empty label\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Two rejected labels",
+        "args": [
+          "",
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Rejected: empty label\nRejected: empty label\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "No labels",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "accept_label() {\n    if [ -z \"$1\" ]; then\n        printf 'Rejected: empty label\\n' >&2\n        return 2\n    fi\n    printf 'Accepted: %s\\n' \"$1\"\n}\nfailed=''\nfor label in \"$@\"; do\n    if accept_label \"$label\"; then\n        :\n    else\n        failed=yes\n    fi\ndone\nif [ -n \"$failed\" ]; then exit 2; fi\nexit 0\n",
+      "results": [
+        {
+          "stdout": "Accepted: North\nAccepted: West desk\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Accepted: Later\n",
+          "stderr": "Rejected: empty label\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Accepted: First\nAccepted: Last\n",
+          "stderr": "Rejected: empty label\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Rejected: empty label\nRejected: empty label\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-shift",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Prefix then labels",
+        "args": [
+          "Team",
+          "North",
+          "South"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Team: North\nTeam: South\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Spaces and empty values",
+        "args": [
+          "Work 100%",
+          "West desk",
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Work 100%: West desk\nWork 100%: \n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Prefix only",
+        "args": [
+          "Group"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "No prefix",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Prefix required\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Explicit empty prefix",
+        "args": [
+          "",
+          "Later"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Prefix required\n",
+        "status": 2,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ -z \"$1\" ]; then\n    printf 'Prefix required\\n' >&2\n    exit 2\nfi\nprefix=$1\nshift\nfor label in \"$@\"; do\n    printf '%s: %s\\n' \"$prefix\" \"$label\"\ndone\n",
+      "results": [
+        {
+          "stdout": "Team: North\nTeam: South\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Work 100%: West desk\nWork 100%: \n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Prefix required\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Prefix required\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-bundle",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Replace after validating all sources",
+        "args": [
+          "bundle",
+          "north",
+          "south"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/bundle": "keep old until safe\n",
+          "/work/north": "alpha\n",
+          "/work/south": "beta\n",
+          "/work/keep": "unchanged\n"
+        },
+        "stdout": "Saved: bundle\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/bundle": "Bundle\nFile: north\nalpha\nFile: south\nbeta\n",
+          "/work/north": "alpha\n",
+          "/work/south": "beta\n",
+          "/work/keep": "unchanged\n"
+        }
+      },
+      {
+        "name": "Filename spaces and final text",
+        "args": [
+          "merged notes",
+          "west desk",
+          "empty"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/west desk": "no final line break",
+          "/work/empty": ""
+        },
+        "stdout": "Saved: merged notes\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/west desk": "no final line break",
+          "/work/empty": "",
+          "/work/merged notes": "Bundle\nFile: west desk\nno final line breakFile: empty\n"
+        }
+      },
+      {
+        "name": "Missing first source",
+        "args": [
+          "bundle",
+          "absent",
+          "later"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/bundle": "preserve\n",
+          "/work/later": "valid\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot assemble bundle\n",
+        "status": 2,
+        "after": {
+          "/work/bundle": "preserve\n",
+          "/work/later": "valid\n"
+        }
+      },
+      {
+        "name": "Missing later source",
+        "args": [
+          "bundle",
+          "first",
+          "absent"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/bundle": "preserve\n",
+          "/work/first": "valid\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot assemble bundle\n",
+        "status": 2,
+        "after": {
+          "/work/bundle": "preserve\n",
+          "/work/first": "valid\n"
+        }
+      },
+      {
+        "name": "No arguments",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep": "unchanged"
+        },
+        "stdout": "",
+        "stderr": "Cannot assemble bundle\n",
+        "status": 2,
+        "after": {
+          "/work/keep": "unchanged"
+        }
+      },
+      {
+        "name": "Destination but no sources",
+        "args": [
+          "bundle"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/bundle": "preserve\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot assemble bundle\n",
+        "status": 2,
+        "after": {
+          "/work/bundle": "preserve\n"
+        }
+      },
+      {
+        "name": "Invalid batch must not create a new destination",
+        "args": [
+          "new-bundle",
+          "first",
+          "absent"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/first": "valid\n",
+          "/work/keep": "untouched\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot assemble bundle\n",
+        "status": 2,
+        "after": {
+          "/work/first": "valid\n",
+          "/work/keep": "untouched\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "validate_sources() {\n    for source in \"$@\"; do\n        if [ -f \"$source\" ]; then\n            :\n        else\n            return 2\n        fi\n    done\n    return 0\n}\nif [ \"$#\" -lt 2 ]; then\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\ndestination=$1\nshift\nif validate_sources \"$@\"; then\n    printf 'Bundle\\n' > \"$destination\"\n    for source in \"$@\"; do\n        printf 'File: %s\\n' \"$source\" >> \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nelse\n    printf 'Cannot assemble bundle\\n' >&2\n    exit 2\nfi\n",
+      "results": [
+        {
+          "stdout": "Saved: bundle\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/bundle": "Bundle\nFile: north\nalpha\nFile: south\nbeta\n",
+            "/work/keep": "unchanged\n",
+            "/work/north": "alpha\n",
+            "/work/south": "beta\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: merged notes\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/empty": "",
+            "/work/merged notes": "Bundle\nFile: west desk\nno final line breakFile: empty\n",
+            "/work/west desk": "no final line break"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot assemble bundle\n",
+          "status": 2,
+          "files": {
+            "/work/bundle": "preserve\n",
+            "/work/later": "valid\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot assemble bundle\n",
+          "status": 2,
+          "files": {
+            "/work/bundle": "preserve\n",
+            "/work/first": "valid\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot assemble bundle\n",
+          "status": 2,
+          "files": {
+            "/work/keep": "unchanged"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot assemble bundle\n",
+          "status": 2,
+          "files": {
+            "/work/bundle": "preserve\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot assemble bundle\n",
+          "status": 2,
+          "files": {
+            "/work/first": "valid\n",
+            "/work/keep": "untouched\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-local-heading",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Several items",
+        "args": [
+          "Printer",
+          "Router"
+        ],
+        "stdin": "",
+        "env": {
+          "REPORT_TITLE": "Morning handover"
+        },
+        "files": {},
+        "stdout": "Report: Morning handover\nItem: Printer\nItem: Router\nEnd: Morning handover\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty list",
+        "args": [],
+        "stdin": "",
+        "env": {
+          "REPORT_TITLE": "No changes"
+        },
+        "files": {},
+        "stdout": "Report: No changes\nEnd: No changes\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Spaces and percent",
+        "args": [
+          "West  desk",
+          "100%",
+          ""
+        ],
+        "stdin": "",
+        "env": {
+          "REPORT_TITLE": "100% ready"
+        },
+        "files": {},
+        "stdout": "Report: 100% ready\nItem: West  desk\nItem: 100%\nItem: \nEnd: 100% ready\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Same-looking item",
+        "args": [
+          "Evening",
+          "Other"
+        ],
+        "stdin": "",
+        "env": {
+          "REPORT_TITLE": "Evening"
+        },
+        "files": {},
+        "stdout": "Report: Evening\nItem: Evening\nItem: Other\nEnd: Evening\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "print_item() {\n    local REPORT_TITLE=\"$1\"\n    printf 'Item: %s\\n' \"$REPORT_TITLE\"\n}\nprintf 'Report: %s\\n' \"$REPORT_TITLE\"\nfor item in \"$@\"; do\n    print_item \"$item\"\ndone\nprintf 'End: %s\\n' \"$REPORT_TITLE\"\n",
+      "results": [
+        {
+          "stdout": "Report: Morning handover\nItem: Printer\nItem: Router\nEnd: Morning handover\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Report: No changes\nEnd: No changes\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Report: 100% ready\nItem: West  desk\nItem: 100%\nItem: \nEnd: 100% ready\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Report: Evening\nItem: Evening\nItem: Other\nEnd: Evening\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-scope-review",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Two topics",
+        "args": [
+          "api",
+          "db",
+          "events.log"
+        ],
+        "stdin": "",
+        "env": {
+          "SUMMARY": "Morning review"
+        },
+        "files": {
+          "/work/events.log": "api ERROR\ndb OK\napi ready\n"
+        },
+        "stdout": "Topic: api\napi ERROR\napi ready\nTopic: db\ndb OK\nReview: Morning review\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/events.log": "api ERROR\ndb OK\napi ready\n"
+        }
+      },
+      {
+        "name": "One quiet topic",
+        "args": [
+          "cache",
+          "api",
+          "events.log"
+        ],
+        "stdin": "",
+        "env": {
+          "SUMMARY": "Evening"
+        },
+        "files": {
+          "/work/events.log": "api ready\nother\n"
+        },
+        "stdout": "Topic: cache\nTopic: api\napi ready\nReview: Evening\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/events.log": "api ready\nother\n"
+        }
+      },
+      {
+        "name": "Literal spaces and percent",
+        "args": [
+          "100%",
+          "desk  A",
+          "events.log"
+        ],
+        "stdin": "",
+        "env": {
+          "SUMMARY": "Percent review"
+        },
+        "files": {
+          "/work/events.log": "100% done\ndesk  A online\ndesk A skipped\n"
+        },
+        "stdout": "Topic: 100%\n100% done\nTopic: desk  A\ndesk  A online\nReview: Percent review\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/events.log": "100% done\ndesk  A online\ndesk A skipped\n"
+        }
+      },
+      {
+        "name": "Same topic twice",
+        "args": [
+          "ready",
+          "ready",
+          "events.log"
+        ],
+        "stdin": "",
+        "env": {
+          "SUMMARY": "Repeated"
+        },
+        "files": {
+          "/work/events.log": "ready now\nnot selected\n"
+        },
+        "stdout": "Topic: ready\nready now\nTopic: ready\nready now\nReview: Repeated\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/events.log": "ready now\nnot selected\n"
+        }
+      },
+      {
+        "name": "No matches",
+        "args": [
+          "blue",
+          "green",
+          "events.log"
+        ],
+        "stdin": "",
+        "env": {
+          "SUMMARY": "Quiet"
+        },
+        "files": {
+          "/work/events.log": "red\n"
+        },
+        "stdout": "Topic: blue\nTopic: green\nReview: Quiet\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/events.log": "red\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "matches() {\n    grep -F \"$needle\" \"$1\"\n}\nreview() {\n    local needle=\"$1\"\n    printf 'Topic: %s\\n' \"$needle\"\n    matches \"$2\"\n}\nneedle=$SUMMARY\nreview \"$1\" \"$3\"\nreview \"$2\" \"$3\"\nprintf 'Review: %s\\n' \"$needle\"\n",
+      "results": [
+        {
+          "stdout": "Topic: api\napi ERROR\napi ready\nTopic: db\ndb OK\nReview: Morning review\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/events.log": "api ERROR\ndb OK\napi ready\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Topic: cache\nTopic: api\napi ready\nReview: Evening\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/events.log": "api ready\nother\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Topic: 100%\n100% done\nTopic: desk  A\ndesk  A online\nReview: Percent review\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/events.log": "100% done\ndesk  A online\ndesk A skipped\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Topic: ready\nready now\nTopic: ready\nready now\nReview: Repeated\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/events.log": "ready now\nnot selected\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Topic: blue\nTopic: green\nReview: Quiet\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/events.log": "red\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-scope-capstone",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Two sources replace old review",
+        "args": [
+          "review.txt",
+          "ERROR",
+          "api.log",
+          "db.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/review.txt": "Previous\n",
+          "/work/api.log": "ERROR timeout\nOK ready\n",
+          "/work/db.log": "ERROR disk\n"
+        },
+        "stdout": "Saved: review.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/review.txt": "Review: ERROR\nFile: api.log\nERROR timeout\nFile: db.log\nERROR disk\n",
+          "/work/api.log": "ERROR timeout\nOK ready\n",
+          "/work/db.log": "ERROR disk\n"
+        }
+      },
+      {
+        "name": "Repeated quiet source keeps both headings",
+        "args": [
+          "out.txt",
+          "WARN",
+          "quiet.log",
+          "quiet.log",
+          "active.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/quiet.log": "OK ready\n",
+          "/work/active.log": "WARN fan\n"
+        },
+        "stdout": "Saved: out.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/quiet.log": "OK ready\n",
+          "/work/active.log": "WARN fan\n",
+          "/work/out.txt": "Review: WARN\nFile: quiet.log\nFile: quiet.log\nFile: active.log\nWARN fan\n"
+        }
+      },
+      {
+        "name": "Literal values and absent destination",
+        "args": [
+          "shift  A.txt",
+          "100%",
+          "desk  A.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/desk  A.log": "100% ready\n100 percent\n"
+        },
+        "stdout": "Saved: shift  A.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/desk  A.log": "100% ready\n100 percent\n",
+          "/work/shift  A.txt": "Review: 100%\nFile: desk  A.log\n100% ready\n"
+        }
+      },
+      {
+        "name": "Later missing input retains old review",
+        "args": [
+          "review.txt",
+          "ERROR",
+          "api.log",
+          "missing.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/review.txt": "Keep this\n",
+          "/work/api.log": "ERROR one\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot build review\n",
+        "status": 2,
+        "after": {
+          "/work/review.txt": "Keep this\n",
+          "/work/api.log": "ERROR one\n"
+        }
+      },
+      {
+        "name": "Missing input must not create output",
+        "args": [
+          "new.txt",
+          "ERROR",
+          "missing.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Cannot build review\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Output also supplied as an input",
+        "args": [
+          "api.log",
+          "ERROR",
+          "api.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/api.log": "ERROR preserve\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot build review\n",
+        "status": 2,
+        "after": {
+          "/work/api.log": "ERROR preserve\n"
+        }
+      },
+      {
+        "name": "No inputs",
+        "args": [
+          "out.txt",
+          "ERROR"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/out.txt": "Keep\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot build review\n",
+        "status": 2,
+        "after": {
+          "/work/out.txt": "Keep\n"
+        }
+      },
+      {
+        "name": "Empty selection text",
+        "args": [
+          "out.txt",
+          "",
+          "in.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/out.txt": "Keep\n",
+          "/work/in.log": "Anything\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot build review\n",
+        "status": 2,
+        "after": {
+          "/work/out.txt": "Keep\n",
+          "/work/in.log": "Anything\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "valid_source() {\n    local destination=\"$1\"\n    if [ \"$destination\" = \"$2\" ]; then return 1; fi\n    if [ -f \"$destination\" ]; then return 0; fi\n    return 1\n}\nif [ \"$#\" -lt 3 ] || [ -z \"$2\" ]; then\n    printf 'Cannot build review\\n' >&2\n    exit 2\nfi\ndestination=$1\nneedle=$2\nshift 2\nfor path in \"$@\"; do\n    if valid_source \"$path\" \"$destination\"; then\n        :\n    else\n        printf 'Cannot build review\\n' >&2\n        exit 2\n    fi\ndone\nprintf 'Review: %s\\n' \"$needle\" > \"$destination\"\nfor path in \"$@\"; do\n    printf 'File: %s\\n' \"$path\" >> \"$destination\"\n    grep -F \"$needle\" \"$path\" >> \"$destination\"\ndone\nprintf 'Saved: %s\\n' \"$destination\"\n",
+      "results": [
+        {
+          "stdout": "Saved: review.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/api.log": "ERROR timeout\nOK ready\n",
+            "/work/db.log": "ERROR disk\n",
+            "/work/review.txt": "Review: ERROR\nFile: api.log\nERROR timeout\nFile: db.log\nERROR disk\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: out.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/active.log": "WARN fan\n",
+            "/work/out.txt": "Review: WARN\nFile: quiet.log\nFile: quiet.log\nFile: active.log\nWARN fan\n",
+            "/work/quiet.log": "OK ready\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: shift  A.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/desk  A.log": "100% ready\n100 percent\n",
+            "/work/shift  A.txt": "Review: 100%\nFile: desk  A.log\n100% ready\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build review\n",
+          "status": 2,
+          "files": {
+            "/work/api.log": "ERROR one\n",
+            "/work/review.txt": "Keep this\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build review\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build review\n",
+          "status": 2,
+          "files": {
+            "/work/api.log": "ERROR preserve\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build review\n",
+          "status": 2,
+          "files": {
+            "/work/out.txt": "Keep\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build review\n",
+          "status": 2,
+          "files": {
+            "/work/in.log": "Anything\n",
+            "/work/out.txt": "Keep\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-cut-inventory",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Ordinary inventory",
+        "args": [
+          "inventory.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/inventory.txt": "a1:North:Mina\nb2:West:Owen\n"
+        },
+        "stdout": "a1:Mina\nb2:Owen\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inventory.txt": "a1:North:Mina\nb2:West:Owen\n"
+        }
+      },
+      {
+        "name": "Notes and empty owner",
+        "args": [
+          "inventory.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/inventory.txt": "notes only\na1:North:\n\nb2::Tess\n:Store:Empty asset\n"
+        },
+        "stdout": "a1:\nb2:Tess\n:Empty asset\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inventory.txt": "notes only\na1:North:\n\nb2::Tess\n:Store:Empty asset\n"
+        }
+      },
+      {
+        "name": "Extra and missing fields",
+        "args": [
+          "short records.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/short records.txt": "short:row\na1:North:Alex:active\n"
+        },
+        "stdout": "short\na1:Alex\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/short records.txt": "short:row\na1:North:Alex:active\n"
+        }
+      },
+      {
+        "name": "Spaces and percent",
+        "args": [
+          "inventory.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/inventory.txt": "rack  A:Store:100% ready\n rack A :Store: Mina  \n"
+        },
+        "stdout": "rack  A:100% ready\n rack A : Mina  \n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inventory.txt": "rack  A:Store:100% ready\n rack A :Store: Mina  \n"
+        }
+      },
+      {
+        "name": "Unterminated record",
+        "args": [
+          "inventory.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/inventory.txt": "last:East:Remy"
+        },
+        "stdout": "last:Remy\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inventory.txt": "last:East:Remy"
+        }
+      },
+      {
+        "name": "Empty file",
+        "args": [
+          "inventory.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/inventory.txt": ""
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/inventory.txt": ""
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "cut -s -d : -f 1,3 \"$1\"\n",
+      "results": [
+        {
+          "stdout": "a1:Mina\nb2:Owen\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/inventory.txt": "a1:North:Mina\nb2:West:Owen\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "a1:\nb2:Tess\n:Empty asset\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/inventory.txt": "notes only\na1:North:\n\nb2::Tess\n:Store:Empty asset\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "short\na1:Alex\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/short records.txt": "short:row\na1:North:Alex:active\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "rack  A:100% ready\n rack A : Mina  \n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/inventory.txt": "rack  A:Store:100% ready\n rack A :Store: Mina  \n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "last:Remy\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/inventory.txt": "last:East:Remy"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/inventory.txt": ""
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-sort-manifest",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Unsorted repeated entries",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "router\nswitch\nrouter\naccess point\n"
+        },
+        "stdout": "access point\nrouter\nswitch\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "router\nswitch\nrouter\naccess point\n"
+        }
+      },
+      {
+        "name": "Case and numeric-looking names",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "2\n10\na\nA\n2\n"
+        },
+        "stdout": "10\n2\nA\na\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "2\n10\na\nA\n2\n"
+        }
+      },
+      {
+        "name": "Spaces are part of a name",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "desk  A\ndesk A\ndesk  A\n100% ready\n"
+        },
+        "stdout": "100% ready\ndesk  A\ndesk A\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "desk  A\ndesk A\ndesk  A\n100% ready\n"
+        }
+      },
+      {
+        "name": "Final entry without newline",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": "z\na\nz"
+        },
+        "stdout": "a\nz\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": "z\na\nz"
+        }
+      },
+      {
+        "name": "Empty manifest",
+        "args": [
+          "queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/queue.txt": ""
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/queue.txt": ""
+        }
+      },
+      {
+        "name": "Unicode byte order",
+        "args": [
+          "unicode queue.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/unicode queue.txt": "\u00e9\nz\n\u00c9\n\u00e9\n"
+        },
+        "stdout": "z\n\u00c9\n\u00e9\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/unicode queue.txt": "\u00e9\nz\n\u00c9\n\u00e9\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "sort -u \"$1\"\n",
+      "results": [
+        {
+          "stdout": "access point\nrouter\nswitch\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "router\nswitch\nrouter\naccess point\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "10\n2\nA\na\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "2\n10\na\nA\n2\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "100% ready\ndesk  A\ndesk A\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "desk  A\ndesk A\ndesk  A\n100% ready\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "a\nz\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": "z\na\nz"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/queue.txt": ""
+          },
+          "error": null
+        },
+        {
+          "stdout": "z\n\u00c9\n\u00e9\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/unicode queue.txt": "\u00e9\nz\n\u00c9\n\u00e9\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-uniq-counts",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Nonadjacent locations",
+        "args": [
+          "locations.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/locations.txt": "West:pc1\nNorth:r1\nWest:pc2\nNorth:r2\nEast:a1\n"
+        },
+        "stdout": "      1 East\n      2 North\n      2 West\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/locations.txt": "West:pc1\nNorth:r1\nWest:pc2\nNorth:r2\nEast:a1\n"
+        }
+      },
+      {
+        "name": "One location",
+        "args": [
+          "locations.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/locations.txt": "Lab:a\nLab:b\nLab:c\n"
+        },
+        "stdout": "      3 Lab\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/locations.txt": "Lab:a\nLab:b\nLab:c\n"
+        }
+      },
+      {
+        "name": "Every location once",
+        "args": [
+          "locations.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/locations.txt": "Zulu:a\nAlpha:b\n"
+        },
+        "stdout": "      1 Alpha\n      1 Zulu\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/locations.txt": "Zulu:a\nAlpha:b\n"
+        }
+      },
+      {
+        "name": "Empty locations count",
+        "args": [
+          "locations.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/locations.txt": " :a\n:b\n:c\n :d\n"
+        },
+        "stdout": "      2 \n      2  \n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/locations.txt": " :a\n:b\n:c\n :d\n"
+        }
+      },
+      {
+        "name": "Spaced and case-sensitive locations",
+        "args": [
+          "desk map.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/desk map.txt": "desk  A:x\ndesk A:y\ndesk  A:z\nDesk A:q"
+        },
+        "stdout": "      1 Desk A\n      2 desk  A\n      1 desk A\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/desk map.txt": "desk  A:x\ndesk A:y\ndesk  A:z\nDesk A:q"
+        }
+      },
+      {
+        "name": "Empty inventory",
+        "args": [
+          "locations.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/locations.txt": ""
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/locations.txt": ""
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "cut -d : -f 1 \"$1\" | sort | uniq -c\n",
+      "results": [
+        {
+          "stdout": "      1 East\n      2 North\n      2 West\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/locations.txt": "West:pc1\nNorth:r1\nWest:pc2\nNorth:r2\nEast:a1\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "      3 Lab\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/locations.txt": "Lab:a\nLab:b\nLab:c\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "      1 Alpha\n      1 Zulu\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/locations.txt": "Zulu:a\nAlpha:b\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "      2 \n      2  \n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/locations.txt": " :a\n:b\n:c\n :d\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "      1 Desk A\n      2 desk  A\n      1 desk A\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/desk map.txt": "desk  A:x\ndesk A:y\ndesk  A:z\nDesk A:q"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/locations.txt": ""
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-text-capstone",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Nonadjacent duplicate IDs",
+        "args": [
+          "assets.txt",
+          "audit.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/assets.txt": "r1:North\ns1:West\nr1:South\ns2:East\n",
+          "/work/audit.txt": "Old audit\n"
+        },
+        "stdout": "Saved: audit.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/assets.txt": "r1:North\ns1:West\nr1:South\ns2:East\n",
+          "/work/audit.txt": "Duplicate asset IDs\nr1\n"
+        }
+      },
+      {
+        "name": "No duplicate IDs",
+        "args": [
+          "assets.txt",
+          "audit.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/assets.txt": "r1:North\ns1:West\nnote only\n",
+          "/work/audit.txt": "Old audit\n"
+        },
+        "stdout": "Saved: audit.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/assets.txt": "r1:North\ns1:West\nnote only\n",
+          "/work/audit.txt": "Duplicate asset IDs\n"
+        }
+      },
+      {
+        "name": "Extra argument preserves existing files",
+        "args": [
+          "assets.txt",
+          "audit.txt",
+          "extra"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/assets.txt": "a:one\na:two\n",
+          "/work/audit.txt": "Keep this\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot audit inventory\n",
+        "status": 2,
+        "after": {
+          "/work/assets.txt": "a:one\na:two\n",
+          "/work/audit.txt": "Keep this\n"
+        }
+      },
+      {
+        "name": "Spaced case-sensitive IDs",
+        "args": [
+          "source.txt",
+          "shift  A.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/source.txt": "rack  A:one\nrack A:two\nrack  A:three\n10:x\n2:y\n10:z\nnote\n"
+        },
+        "stdout": "Saved: shift  A.txt\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/source.txt": "rack  A:one\nrack A:two\nrack  A:three\n10:x\n2:y\n10:z\nnote\n",
+          "/work/shift  A.txt": "Duplicate asset IDs\n10\nrack  A\n"
+        }
+      },
+      {
+        "name": "Output cannot replace input",
+        "args": [
+          "assets.txt",
+          "assets.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/assets.txt": "a:one\na:two\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot audit inventory\n",
+        "status": 2,
+        "after": {
+          "/work/assets.txt": "a:one\na:two\n"
+        }
+      },
+      {
+        "name": "Missing source keeps old output",
+        "args": [
+          "missing.txt",
+          "audit.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/audit.txt": "Keep this\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot audit inventory\n",
+        "status": 2,
+        "after": {
+          "/work/audit.txt": "Keep this\n"
+        }
+      },
+      {
+        "name": "Missing source must not create output",
+        "args": [
+          "missing.txt",
+          "new.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Cannot audit inventory\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Empty destination",
+        "args": [
+          "assets.txt",
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/assets.txt": "a:one\na:two\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot audit inventory\n",
+        "status": 2,
+        "after": {
+          "/work/assets.txt": "a:one\na:two\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ \"$#\" -ne 2 ] || [ -z \"$2\" ] || [ \"$1\" = \"$2\" ]; then\n    printf 'Cannot audit inventory\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    :\nelse\n    printf 'Cannot audit inventory\\n' >&2\n    exit 2\nfi\nprintf 'Duplicate asset IDs\\n' > \"$2\"\ncut -s -d : -f 1 \"$1\" | sort | uniq -d >> \"$2\"\nprintf 'Saved: %s\\n' \"$2\"\n",
+      "results": [
+        {
+          "stdout": "Saved: audit.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/assets.txt": "r1:North\ns1:West\nr1:South\ns2:East\n",
+            "/work/audit.txt": "Duplicate asset IDs\nr1\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: audit.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/assets.txt": "r1:North\ns1:West\nnote only\n",
+            "/work/audit.txt": "Duplicate asset IDs\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot audit inventory\n",
+          "status": 2,
+          "files": {
+            "/work/assets.txt": "a:one\na:two\n",
+            "/work/audit.txt": "Keep this\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: shift  A.txt\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/shift  A.txt": "Duplicate asset IDs\n10\nrack  A\n",
+            "/work/source.txt": "rack  A:one\nrack A:two\nrack  A:three\n10:x\n2:y\n10:z\nnote\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot audit inventory\n",
+          "status": 2,
+          "files": {
+            "/work/assets.txt": "a:one\na:two\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot audit inventory\n",
+          "status": 2,
+          "files": {
+            "/work/audit.txt": "Keep this\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot audit inventory\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot audit inventory\n",
+          "status": 2,
+          "files": {
+            "/work/assets.txt": "a:one\na:two\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-handover",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Ordinary shift",
+        "args": [],
+        "stdin": "",
+        "env": {
+          "SITE": "North",
+          "TASK": "Audit"
+        },
+        "files": {},
+        "stdout": "Site: North\nTask: Audit\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Spaces and percent",
+        "args": [],
+        "stdin": "",
+        "env": {
+          "SITE": "West office",
+          "TASK": "Check 95% usage"
+        },
+        "files": {},
+        "stdout": "Site: West office\nTask: Check 95% usage\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty task",
+        "args": [],
+        "stdin": "",
+        "env": {
+          "SITE": "South",
+          "TASK": ""
+        },
+        "files": {},
+        "stdout": "Site: South\nTask: \n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "site=$SITE\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$TASK\"\n",
+      "results": [
+        {
+          "stdout": "Site: North\nTask: Audit\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Site: West office\nTask: Check 95% usage\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Site: South\nTask: \n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-arguments",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Simple arguments",
+        "args": [
+          "daily",
+          "/work/report"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Label: daily\nFile: /work/report\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Names with spaces",
+        "args": [
+          "night shift",
+          "/work/shift notes"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Label: night shift\nFile: /work/shift notes\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Empty label",
+        "args": [
+          "",
+          "/work/input"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Label: \nFile: /work/input\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "label=$1\nfile=$2\nprintf 'Label: %s\\nFile: %s\\n' \"$label\" \"$file\"\n",
+      "results": [
+        {
+          "stdout": "Label: daily\nFile: /work/report\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Label: night shift\nFile: /work/shift notes\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Label: \nFile: /work/input\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-input",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Plain request",
+        "args": [],
+        "stdin": "check disk\n",
+        "env": {},
+        "files": {},
+        "stdout": "Request: check disk\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Literal backslashes",
+        "args": [],
+        "stdin": "copy C:\\notes\\today\n",
+        "env": {},
+        "files": {},
+        "stdout": "Request: copy C:\\notes\\today\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Outer whitespace",
+        "args": [],
+        "stdin": "  keep  internal spaces \t\n",
+        "env": {},
+        "files": {},
+        "stdout": "Request: keep  internal spaces\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "read -r request\nprintf 'Request: %s\\n' \"$request\"\n",
+      "results": [
+        {
+          "stdout": "Request: check disk\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Request: copy C:\\notes\\today\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Request: keep  internal spaces\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-validation",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Given destination",
+        "args": [
+          "/work/archive"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Destination: /work/archive\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      {
+        "name": "Missing destination",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Destination required\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Empty argument",
+        "args": [
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "Destination required\n",
+        "status": 2,
+        "after": {}
+      },
+      {
+        "name": "Space in destination",
+        "args": [
+          "/work/night archive"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Destination: /work/night archive\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ -z \"$1\" ]; then\n    printf 'Destination required\\n' >&2\n    exit 2\nfi\nprintf 'Destination: %s\\n' \"$1\"\n",
+      "results": [
+        {
+          "stdout": "Destination: /work/archive\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Destination required\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Destination required\n",
+          "status": 2,
+          "files": {},
+          "error": null
+        },
+        {
+          "stdout": "Destination: /work/night archive\n",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-report",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Two incidents",
+        "args": [
+          "/work/app.log",
+          "/work/errors"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n",
+          "/work/errors": "ERROR disk\nERROR timeout\n"
+        }
+      },
+      {
+        "name": "Replace stale report",
+        "args": [
+          "/work/app log",
+          "/work/report file"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/app log": "ERROR one\nINFO ok\n",
+          "/work/report file": "old data\n",
+          "/work/keep": "private fixture\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/app log": "ERROR one\nINFO ok\n",
+          "/work/report file": "ERROR one\n",
+          "/work/keep": "private fixture\n"
+        }
+      },
+      {
+        "name": "No matches",
+        "args": [
+          "/work/quiet",
+          "/work/errors"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/quiet": "INFO normal\n"
+        },
+        "stdout": "",
+        "stderr": "",
+        "status": 1,
+        "after": {
+          "/work/quiet": "INFO normal\n",
+          "/work/errors": ""
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "grep -F ERROR \"$1\" > \"$2\"\n",
+      "results": [
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/app.log": "INFO start\nERROR disk\nWARN late\nERROR timeout\n",
+            "/work/errors": "ERROR disk\nERROR timeout\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/app log": "ERROR one\nINFO ok\n",
+            "/work/keep": "private fixture\n",
+            "/work/report file": "ERROR one\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 1,
+          "files": {
+            "/work/errors": "",
+            "/work/quiet": "INFO normal\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-loop",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Two files",
+        "args": [
+          "/work/a",
+          "/work/b"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/a": "alpha\n",
+          "/work/b": "beta\n"
+        },
+        "stdout": "File: /work/a\nalpha\nFile: /work/b\nbeta\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/a": "alpha\n",
+          "/work/b": "beta\n"
+        }
+      },
+      {
+        "name": "One spaced path",
+        "args": [
+          "/work/shift notes"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/shift notes": "done\n"
+        },
+        "stdout": "File: /work/shift notes\ndone\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/shift notes": "done\n"
+        }
+      },
+      {
+        "name": "No arguments",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "for file in \"$@\"; do\n    printf 'File: %s\\n' \"$file\"\n    cat \"$file\"\ndone\n",
+      "results": [
+        {
+          "stdout": "File: /work/a\nalpha\nFile: /work/b\nbeta\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/a": "alpha\n",
+            "/work/b": "beta\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "File: /work/shift notes\ndone\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/shift notes": "done\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "",
+          "status": 0,
+          "files": {},
+          "error": null
+        }
+      ]
+    }
+  },
+  {
+    "id": "shell-capstone",
+    "scenario_version": 1,
+    "cases": [
+      {
+        "name": "Incidents",
+        "args": [
+          "/work/app",
+          "/work/report"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/app": "INFO ok\nERROR disk\n"
+        },
+        "stdout": "Saved: /work/report\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/app": "INFO ok\nERROR disk\n",
+          "/work/report": "ERROR disk\n"
+        }
+      },
+      {
+        "name": "Quiet log",
+        "args": [
+          "/work/quiet",
+          "/work/report"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/quiet": "INFO ok\n",
+          "/work/report": "stale\n"
+        },
+        "stdout": "Saved: /work/report\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/quiet": "INFO ok\n",
+          "/work/report": ""
+        }
+      },
+      {
+        "name": "Missing source",
+        "args": [
+          "/work/missing",
+          "/work/report"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/report": "keep me\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot build report\n",
+        "status": 2,
+        "after": {
+          "/work/report": "keep me\n"
+        }
+      },
+      {
+        "name": "Spaces",
+        "args": [
+          "/work/app log",
+          "/work/incident report"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/app log": "ERROR one\nERROR two\n"
+        },
+        "stdout": "Saved: /work/incident report\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/app log": "ERROR one\nERROR two\n",
+          "/work/incident report": "ERROR one\nERROR two\n"
+        }
+      },
+      {
+        "name": "Missing destination",
+        "args": [
+          "/work/app"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/app": "ERROR disk\n"
+        },
+        "stdout": "",
+        "stderr": "Cannot build report\n",
+        "status": 2,
+        "after": {
+          "/work/app": "ERROR disk\n"
+        }
+      }
+    ],
+    "record": {
+      "engine_revision": 6,
+      "source": "if [ -z \"$2\" ]; then\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\nif [ -f \"$1\" ]; then\n    grep -F ERROR \"$1\" > \"$2\"\n    printf 'Saved: %s\\n' \"$2\"\nelse\n    printf 'Cannot build report\\n' >&2\n    exit 2\nfi\n",
+      "results": [
+        {
+          "stdout": "Saved: /work/report\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/app": "INFO ok\nERROR disk\n",
+            "/work/report": "ERROR disk\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: /work/report\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/quiet": "INFO ok\n",
+            "/work/report": ""
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build report\n",
+          "status": 2,
+          "files": {
+            "/work/report": "keep me\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "Saved: /work/incident report\n",
+          "stderr": "",
+          "status": 0,
+          "files": {
+            "/work/app log": "ERROR one\nERROR two\n",
+            "/work/incident report": "ERROR one\nERROR two\n"
+          },
+          "error": null
+        },
+        {
+          "stdout": "",
+          "stderr": "Cannot build report\n",
+          "status": 2,
+          "files": {
+            "/work/app": "ERROR disk\n"
+          },
+          "error": null
+        }
+      ]
+    }
+  }
+]

@@ -81,6 +81,8 @@ fn write_new(path: &Path, bytes: &[u8]) -> Result<Option<String>, String> {
     Ok(warning)
 }
 pub fn export(path: &Path, p: &Progress, scenarios: &[Scenario]) -> Result<Option<String>, String> {
+    // Validate provenance before portable serialization deliberately removes it.
+    progress::validate_provenance(p)?;
     // Validate through the same versioned reader before writing anything.
     let encoded = serde_json::to_vec(p).map_err(|e| e.to_string())?;
     let _: Progress = progress::decode(&encoded, scenarios)?;
@@ -100,7 +102,7 @@ pub fn export(path: &Path, p: &Progress, scenarios: &[Scenario]) -> Result<Optio
 fn parse(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
     let bytes = progress::read_bounded(path, LIMIT)?;
     let value: serde_json::Value = serde_json::from_slice(&bytes).map_err(|e| e.to_string())?;
-    let progress = if value.get("format").is_some() {
+    let mut progress = if value.get("format").is_some() {
         let envelope: Envelope = serde_json::from_value(value).map_err(|e| e.to_string())?;
         if envelope.format != "dlms-learning-lab-backup"
             || envelope.version != 1
@@ -112,12 +114,19 @@ fn parse(path: &Path, scenarios: &[Scenario]) -> Result<Progress, String> {
     } else {
         serde_json::from_value(value).map_err(|e| e.to_string())?
     };
+    progress::validate_provenance(&progress)?;
+    progress.migration_receipts = None;
     progress::decode(
         &serde_json::to_vec(&progress).map_err(|e| e.to_string())?,
         scenarios,
     )
 }
-fn run(source: &str, case: &shell::Case, cancel: &AtomicBool) -> Result<shell::Outcome, String> {
+fn run(
+    source: &str,
+    case: &shell::Case,
+    cancel: &AtomicBool,
+    observer: &mut impl FnMut(&shell::Vm),
+) -> Result<shell::Outcome, String> {
     match shell::Vm::new(source, case) {
         Ok(mut vm) => {
             while !vm.done() {
@@ -125,6 +134,7 @@ fn run(source: &str, case: &shell::Case, cancel: &AtomicBool) -> Result<shell::O
                     return Err("Backup check cancelled; no changes made".into());
                 }
                 vm.tick(32);
+                observer(&vm);
             }
             Ok(vm.outcome)
         }
@@ -136,6 +146,15 @@ pub fn inspect(
     scenarios: &[Scenario],
     cancel: &AtomicBool,
     checked: &AtomicUsize,
+) -> Result<Candidate, String> {
+    inspect_observing(path, scenarios, cancel, checked, &mut |_| {})
+}
+fn inspect_observing(
+    path: &Path,
+    scenarios: &[Scenario],
+    cancel: &AtomicBool,
+    checked: &AtomicUsize,
+    observer: &mut impl FnMut(&shell::Vm),
 ) -> Result<Candidate, String> {
     let mut p = parse(path, scenarios)?;
     let mut count = 0;
@@ -160,7 +179,7 @@ pub fn inspect(
         {
             let mut results = Vec::new();
             for case in cases {
-                results.push(run(source, case, cancel)?);
+                results.push(run(source, case, cancel, observer)?);
             }
             *record = Some(shell::Record {
                 engine_revision: crate::shell::EVALUATOR_REVISION,
@@ -179,7 +198,7 @@ pub fn inspect(
                 .teaching
                 .as_ref()
                 .ok_or("Example data does not belong to this lab")?;
-            l.example_result = Some(run(&l.example_source, &lesson.fixture, cancel)?);
+            l.example_result = Some(run(&l.example_source, &lesson.fixture, cancel, observer)?);
             l.example_revision = shell::EVALUATOR_REVISION;
             count += 1;
         }
@@ -197,13 +216,20 @@ pub struct Inspection {
 }
 impl Inspection {
     pub fn start(path: PathBuf, scenarios: Vec<Scenario>) -> Self {
+        Self::start_observing(path, scenarios, |_| {})
+    }
+    fn start_observing(
+        path: PathBuf,
+        scenarios: Vec<Scenario>,
+        mut observer: impl FnMut(&shell::Vm) + Send + 'static,
+    ) -> Self {
         let cancel = Arc::new(AtomicBool::new(false));
         let checked = Arc::new(AtomicUsize::new(0));
         let (tx, rx) = mpsc::channel();
         let c = cancel.clone();
         let n = checked.clone();
         thread::spawn(move || {
-            let result = inspect(&path, &scenarios, &c, &n);
+            let result = inspect_observing(&path, &scenarios, &c, &n, &mut observer);
             let _ = tx.send(result);
         });
         Self {
@@ -238,27 +264,28 @@ pub fn restore(
     candidate: &Candidate,
     scenarios: &[Scenario],
 ) -> Result<Restored, String> {
+    progress::validate_provenance(&candidate.progress)?;
     let bytes = serde_json::to_vec(&candidate.progress).map_err(|e| e.to_string())?;
     let _ = progress::decode(&bytes, scenarios)?;
-    let backup = if path.exists() {
-        let original = progress::read_bounded(path, 16_000_000)?;
-        let parent = path.parent().ok_or("Missing progress folder")?;
-        let mut chosen = None;
-        for n in 1..=10_000 {
-            let b = parent.join(format!("progress-before-restore-{n}.json"));
-            if !b.exists() {
-                if let Some(warning) = write_new(&b, &original)? {
-                    return Err(format!("{warning}. Current profile was not replaced."));
+    let mut backup = None;
+    let saved = progress::save_for_restore(path, &candidate.progress, scenarios, |original| {
+        if let Some(original) = original {
+            let parent = path.parent().ok_or("Missing progress folder")?;
+            let mut chosen = None;
+            for n in 1..=10_000 {
+                let b = parent.join(format!("progress-before-restore-{n}.json"));
+                if !b.exists() {
+                    if let Some(warning) = write_new(&b, original)? {
+                        return Err(format!("{warning}. Current profile was not replaced."));
+                    }
+                    chosen = Some(b);
+                    break;
                 }
-                chosen = Some(b);
-                break;
             }
+            backup = Some(chosen.ok_or("Too many recovery backups; move older backups first")?);
         }
-        Some(chosen.ok_or("Too many recovery backups; move older backups first")?)
-    } else {
-        None
-    };
-    let saved = progress::write_atomic(path, &bytes)?;
+        Ok(())
+    })?;
     Ok(Restored {
         safety_copy: backup,
         durability_warning: saved.durability_warning,
@@ -316,4 +343,67 @@ pub fn check_destination(target: &Path, profile: &Path) -> Result<(), String> {
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod cancellation_tests {
+    use super::*;
+    #[test]
+    fn worker_cancellation_after_child_capture_starts_never_returns_a_graded_candidate() {
+        let labs = crate::pack::bundled().unwrap();
+        let evidence: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/shell-v6-authored-records.json"
+        ))
+        .unwrap();
+        let old = &evidence[0];
+        let lab = labs
+            .iter()
+            .find(|s| s.id == old["id"].as_str().unwrap())
+            .unwrap();
+        let record: shell::Record = serde_json::from_value(old["record"].clone()).unwrap();
+        assert_eq!(record.engine_revision, 6);
+        let mut a = crate::progress::Attempt::new(lab, 1);
+        a.state = State::Script {
+            source: "value=$(while true; do :; done); printf parent-must-not-run".into(),
+            run: Some(record),
+        };
+        let mut p = Progress {
+            schema_version: 1,
+            ..Default::default()
+        };
+        p.attempts.insert(lab.id.clone(), a);
+        let dir = tempfile::tempdir().unwrap();
+        let input = dir.path().join("import.json");
+        let original = serde_json::to_vec_pretty(&p).unwrap();
+        std::fs::write(&input, &original).unwrap();
+        let (entered_tx, entered_rx) = mpsc::channel();
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let child_barrier = barrier.clone();
+        let mut stopped = false;
+        let task = Inspection::start_observing(input.clone(), labs, move |vm| {
+            if !stopped && vm.active_capture_depth() > 0 {
+                stopped = true;
+                entered_tx.send(()).unwrap();
+                child_barrier.wait();
+            }
+        });
+        entered_rx
+            .recv_timeout(std::time::Duration::from_secs(5))
+            .unwrap();
+        // This is exactly the flag set by dropping the application's preview worker.
+        task.cancel.store(true, Ordering::Relaxed);
+        barrier.wait();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        loop {
+            if let Some(result) = task.poll() {
+                assert!(result.err().unwrap().contains("cancelled"));
+                break;
+            }
+            assert!(std::time::Instant::now() < deadline);
+            thread::yield_now();
+        }
+        assert_eq!(task.checked.load(Ordering::Relaxed), 0);
+        assert_eq!(std::fs::read(input).unwrap(), original);
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 1);
+    }
 }

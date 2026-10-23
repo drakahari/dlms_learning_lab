@@ -374,9 +374,28 @@ fn all_78_existing_attempts_remain_exact_while_new_unsaved_drafts_resume_and_res
     let path = directory.path().join("progress-v1.json");
     progress::save(&path, &p).unwrap();
     let encoded = std::fs::read(&path).unwrap();
-    assert_eq!(encoded, serde_json::to_vec(&p).unwrap());
+    let stored: Progress = serde_json::from_slice(&encoded).unwrap();
+    assert_eq!(
+        serde_json::to_vec(&stored).unwrap(),
+        serde_json::to_vec(&p).unwrap()
+    );
+    let receipts = stored.migration_receipts.as_ref().unwrap();
+    assert!(receipts.workspace);
+    assert!(
+        receipts
+            .shell
+            .contains(&dlms_learning_lab::shell::EVALUATOR_REVISION)
+    );
     let mut loaded = progress::load(&path, &all).unwrap();
-    assert_eq!(serde_json::to_vec(&loaded).unwrap(), encoded);
+    assert_eq!(
+        serde_json::to_vec(&loaded).unwrap(),
+        serde_json::to_vec(&p).unwrap()
+    );
+    assert_eq!(
+        std::fs::read(&path).unwrap(),
+        encoded,
+        "loading does not rewrite"
+    );
     assert!(!progress::current_solved(&loaded.attempts[&lab.id], lab));
     let saved = &loaded.attempts[&lab.id];
     assert_eq!(

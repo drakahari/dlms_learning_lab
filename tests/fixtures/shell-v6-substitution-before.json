@@ -1,0 +1,1765 @@
+[
+  {
+    "name": "all-trailing-lf",
+    "review_category": "core",
+    "source": "value=$(printf 'alpha\\n\\nbeta\\n\\n\\n'); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "all-trailing-lf",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<alpha\n\nbeta>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "only-lf-quoted-empty",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '\\n\\n')\"",
+    "case": {
+      "name": "only-lf-quoted-empty",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "only-lf-unquoted-zero-fields",
+    "review_category": "core",
+    "source": "count() { printf '%s\\n' \"$#\"; }; count $(printf '\\n\\n')",
+    "case": {
+      "name": "only-lf-unquoted-zero-fields",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "quoted-leading-and-interior-newlines",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '\\nalpha\\nbeta\\n')\"",
+    "case": {
+      "name": "quoted-leading-and-interior-newlines",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<\nalpha\nbeta>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "cr-is-not-lf",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '%s' 'alpha\r\n\n')\"",
+    "case": {
+      "name": "cr-is-not-lf",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<alpha\r>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "quoted-whitespace-one-field",
+    "review_category": "core",
+    "source": "show() { printf '%s\\n' \"$#\"; printf '<%s>\\n' \"$@\"; }; show \"$(printf ' a\\tb\\n c\\n')\"",
+    "case": {
+      "name": "quoted-whitespace-one-field",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "1\n< a\tb\n c>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "unquoted-default-splitting",
+    "review_category": "core",
+    "source": "show() { printf '%s\\n' \"$#\"; printf '<%s>\\n' \"$@\"; }; show $(printf ' a\\tb\\n c\\n')",
+    "case": {
+      "name": "unquoted-default-splitting",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "3\n<a>\n<b>\n<c>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "prefix-suffix-and-empty",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' pre$(printf '\\n')post",
+    "case": {
+      "name": "prefix-suffix-and-empty",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<prepost>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "prefix-suffix-whitespace-fields",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' pre$(printf ' a  b ')post",
+    "case": {
+      "name": "prefix-suffix-whitespace-fields",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<pre>\n<a>\n<b>\n<post>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "quoted-glob-is-literal",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '%s' '*.txt')\"",
+    "case": {
+      "name": "quoted-glob-is-literal",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "",
+        "/work/b.txt": "",
+        "/work/note.md": ""
+      },
+      "stdout": "<*.txt>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "",
+        "/work/b.txt": "",
+        "/work/note.md": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/a.txt": "",
+        "/work/b.txt": "",
+        "/work/note.md": ""
+      },
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "unquoted-glob-is-active",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' $(printf '%s' '*.txt')",
+    "case": {
+      "name": "unquoted-glob-is-active",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "",
+        "/work/b.txt": "",
+        "/work/note.md": ""
+      },
+      "stdout": "<a.txt>\n<b.txt>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "",
+        "/work/b.txt": "",
+        "/work/note.md": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/a.txt": "",
+        "/work/b.txt": "",
+        "/work/note.md": ""
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "outer-literal-star-stays-quoted",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' '*'$(printf '%s' '.txt')",
+    "case": {
+      "name": "outer-literal-star-stays-quoted",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "",
+        "/work/b.txt": ""
+      },
+      "stdout": "<*.txt>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "",
+        "/work/b.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/a.txt": "",
+        "/work/b.txt": ""
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "quote-characters-in-output-are-data",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' $(printf '%s' \"'a b'\")",
+    "case": {
+      "name": "quote-characters-in-output-are-data",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<'a>\n<b'>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "metacharacters-in-output-are-data",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '%s' '; $(false) $label')\"",
+    "case": {
+      "name": "metacharacters-in-output-are-data",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<; $(false) $label>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "assignment-keeps-fields",
+    "review_category": "core",
+    "source": "value=$(printf ' a  b\\n'); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "assignment-keeps-fields",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "< a  b>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "assignment-last-substitution-status",
+    "review_category": "core",
+    "source": "value=$(printf 'kept\\n'; false); printf '<%s> status=%s\\n' \"$value\" \"$?\"",
+    "case": {
+      "name": "assignment-last-substitution-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<kept> status=1\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "assignment-only-final-status",
+    "review_category": "core",
+    "source": "value=$(printf 'kept\\n'; exit 7)",
+    "case": {
+      "name": "assignment-only-final-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 7,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "ordinary-command-masks-child-status",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf value; false)\"; printf 'status=%s\\n' \"$?\"",
+    "case": {
+      "name": "ordinary-command-masks-child-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<value>\nstatus=0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "multiple-assignments-last-success",
+    "review_category": "core",
+    "source": "first=$(false) second=$(true)",
+    "case": {
+      "name": "multiple-assignments-last-success",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "multiple-assignments-last-failure",
+    "review_category": "core",
+    "source": "first=$(true) second=$(false)",
+    "case": {
+      "name": "multiple-assignments-last-failure",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 1,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "multiple-substitutions-one-assignment",
+    "review_category": "core",
+    "source": "value=$(printf one; true)$(printf two; exit 9); printf '%s:%s\\n' \"$?\" \"$value\"",
+    "case": {
+      "name": "multiple-substitutions-one-assignment",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "9:onetwo\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "status-arguments-preserve-command-entry-status",
+    "review_category": "core",
+    "source": "false; printf '%s:<%s>:%s:<%s>\\n' \"$?\" \"$(printf '%s' \"$?\"; exit 7)\" \"$?\" \"$(printf '%s' \"$?\")\"",
+    "case": {
+      "name": "status-arguments-preserve-command-entry-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "1:<1>:7:<7>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "assignment-status-parameter-follows-substitution",
+    "review_category": "core",
+    "source": "false; first=$(true) second=$?; printf '%s:%s\\n' \"$?\" \"$second\"",
+    "case": {
+      "name": "assignment-status-parameter-follows-substitution",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "0:0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "sequential-assignment-visible-to-child",
+    "review_category": "core",
+    "source": "label=before; label=first value=$(printf '%s' \"$label\"); printf '%s:%s\\n' \"$label\" \"$value\"",
+    "case": {
+      "name": "sequential-assignment-visible-to-child",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "first:first\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "unquoted-empty-command-keeps-substitution-status",
+    "review_category": "core",
+    "source": "$(false)",
+    "case": {
+      "name": "unquoted-empty-command-keeps-substitution-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 1,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "captured-command-name-allowed-builtin",
+    "review_category": "decision",
+    "source": "$(printf '%s' printf) '%s\\n' value",
+    "case": {
+      "name": "captured-command-name-allowed-builtin",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "value\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "stderr-not-captured",
+    "review_category": "core",
+    "source": "value=$(printf 'out\\n'; printf 'warn\\n' >&2; false); printf '%s:<%s>\\n' \"$?\" \"$value\"",
+    "case": {
+      "name": "stderr-not-captured",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "1:<out>\n",
+      "stderr": "warn\n",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "outer-stderr-redirection-happens-after-expansion",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf out; printf warn >&2)\" 2> diagnostic.txt",
+    "case": {
+      "name": "outer-stderr-redirection-happens-after-expansion",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<out>\n",
+      "stderr": "warn",
+      "status": 0,
+      "after": {
+        "/work/diagnostic.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "earlier-stderr-redirection-binds-later-target-capture",
+    "review_category": "core",
+    "source": ": 2> errors.txt > \"$(printf warn >&2; printf out.txt)\"",
+    "case": {
+      "name": "earlier-stderr-redirection-binds-later-target-capture",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/errors.txt": "warn",
+        "/work/out.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/errors.txt": ""
+      },
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "later-stderr-redirection-does-not-bind-earlier-target-capture",
+    "review_category": "core",
+    "source": ": > \"$(printf warn >&2; printf out.txt)\" 2> errors.txt",
+    "case": {
+      "name": "later-stderr-redirection-does-not-bind-earlier-target-capture",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "warn",
+      "status": 0,
+      "after": {
+        "/work/errors.txt": "",
+        "/work/out.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "earlier-input-binds-later-target-capture-then-restores",
+    "review_category": "core",
+    "source": ": < source.txt > \"$(read -r label; printf '%s' \"$label\")\"; read -r remaining; printf '%s\\n' \"$remaining\"",
+    "case": {
+      "name": "earlier-input-binds-later-target-capture-then-restores",
+      "args": [],
+      "stdin": "parent\n",
+      "env": {},
+      "files": {
+        "/work/source.txt": "child\n"
+      },
+      "stdout": "parent\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/child": "",
+        "/work/source.txt": "child\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "child\n"
+      },
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "later-target-read-advances-command-input-not-parent",
+    "review_category": "core",
+    "source": "read -r final < source.txt > \"$(read -r head; printf out.txt)\"; printf '%s:<%s>\\n' \"$final\" \"$head\"; read -r remaining; printf '%s\\n' \"$remaining\"",
+    "case": {
+      "name": "later-target-read-advances-command-input-not-parent",
+      "args": [],
+      "stdin": "parent\n",
+      "env": {},
+      "files": {
+        "/work/source.txt": "child-first\nchild-second\n"
+      },
+      "stdout": "child-second:<>\nparent\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/out.txt": "",
+        "/work/source.txt": "child-first\nchild-second\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "child-first\nchild-second\n"
+      },
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "earlier-input-failure-skips-later-capture",
+    "review_category": "diagnostic",
+    "source": ": < missing.txt > \"$(printf side > side.txt; printf out.txt)\"",
+    "case": {
+      "name": "earlier-input-failure-skips-later-capture",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "fixture: line 1: missing.txt: No such file or directory\n",
+      "status": 1,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "shell: missing.txt: No such file\n",
+      "status": 1,
+      "files": {},
+      "error": null
+    }
+  },
+  {
+    "name": "inner-descriptor-order",
+    "review_category": "core",
+    "source": "value=$(printf 'warning\\n' >&2; printf 'captured\\n' 2>&1); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "inner-descriptor-order",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<captured>\n",
+      "stderr": "warning\n",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "variable-isolation",
+    "review_category": "core",
+    "source": "label=outer; value=$(label=inner; printf '%s' \"$label\"); printf '%s:%s\\n' \"$label\" \"$value\"",
+    "case": {
+      "name": "variable-isolation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "outer:inner\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "array-isolation",
+    "review_category": "core",
+    "source": "items=(outer tail); value=$(items=(inner other); printf '%s' \"${items[0]}\"); printf '%s:%s:%s\\n' \"${items[0]}\" \"${items[1]}\" \"$value\"",
+    "case": {
+      "name": "array-isolation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "outer:tail:inner\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "positional-isolation",
+    "review_category": "core",
+    "source": "value=$(shift; printf '%s' \"$1\"); printf '%s:%s\\n' \"$1\" \"$value\"",
+    "case": {
+      "name": "positional-isolation",
+      "args": [
+        "one",
+        "two"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "one:two\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "function-inheritance-and-definition-isolation",
+    "review_category": "core",
+    "source": "render() { printf old; }; value=$(render() { printf new; }; render); printf '%s:' \"$value\"; render",
+    "case": {
+      "name": "function-inheritance-and-definition-isolation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "new:old",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "caller-local-visible",
+    "review_category": "core",
+    "source": "render() { local label=outer; value=$(printf '%s' \"$label\"); printf '%s:%s\\n' \"$label\" \"$value\"; }; render",
+    "case": {
+      "name": "caller-local-visible",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "outer:outer\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "local-command-masks-substitution-status",
+    "review_category": "core",
+    "source": "render() { local value=$(false); printf '%s\\n' \"$?\"; }; render",
+    "case": {
+      "name": "local-command-masks-substitution-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "direct-local-inside-function-substitution",
+    "review_category": "decision",
+    "source": "render() { local label=outer; value=$(local label=inner; printf '%s' \"$label\"); printf '%s:%s\\n' \"$label\" \"$value\"; }; render",
+    "case": {
+      "name": "direct-local-inside-function-substitution",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "outer:inner\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "return-inside-inherited-function-context",
+    "review_category": "decision",
+    "source": "render() { value=$(printf kept; return 7; printf wrong); printf '%s:%s\\n' \"$?\" \"$value\"; printf parent; }; render",
+    "case": {
+      "name": "return-inside-inherited-function-context",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "7:kept\nparent",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "exit-isolates-child",
+    "review_category": "core",
+    "source": "value=$(printf kept; exit 7; printf wrong); printf '%s:%s\\n' \"$?\" \"$value\"; printf parent",
+    "case": {
+      "name": "exit-isolates-child",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "7:kept\nparent",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "nested-quotes",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '%s' \"$(printf 'a b\\n')\")\"",
+    "case": {
+      "name": "nested-quotes",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<a b>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "quoted-parentheses-inside-body",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '%s' 'a)b(c')\"",
+    "case": {
+      "name": "quoted-parentheses-inside-body",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<a)b(c>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "escaped-parenthesis-inside-body",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf '%s' a\\)b)\"",
+    "case": {
+      "name": "escaped-parenthesis-inside-body",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<a)b>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "comment-containing-close-parenthesis",
+    "review_category": "core",
+    "source": "value=$(# ) is a comment\nprintf value\n); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "comment-containing-close-parenthesis",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<value>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "finite-for-and-outer-variable-isolation",
+    "review_category": "core",
+    "source": "item=outer; value=$(for item in one two; do printf '%s\\n' \"$item\"; done); printf '%s:<%s>\\n' \"$item\" \"$value\"",
+    "case": {
+      "name": "finite-for-and-outer-variable-isolation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "outer:<one\ntwo>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "body-builtin-pipeline",
+    "review_category": "core",
+    "source": "value=$(printf input | printf captured); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "body-builtin-pipeline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<captured>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "substitution-in-outer-pipeline",
+    "review_category": "decision",
+    "source": "printf '%s\\n' \"$(printf value)\" | read -r label; printf '<%s>\\n' \"$label\"",
+    "case": {
+      "name": "substitution-in-outer-pipeline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "inherited-stdin-offset-advances-parent",
+    "review_category": "core",
+    "source": "value=$(read -r line; printf '%s' \"$line\"); read -r line; printf '%s:%s\\n' \"$value\" \"$line\"",
+    "case": {
+      "name": "inherited-stdin-offset-advances-parent",
+      "args": [],
+      "stdin": "one\ntwo\n",
+      "env": {},
+      "files": {},
+      "stdout": "one:two\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "explicit-child-input-does-not-consume-parent",
+    "review_category": "core",
+    "source": "value=$(read -r line < source.txt; printf '%s' \"$line\"); read -r line; printf '%s:%s\\n' \"$value\" \"$line\"",
+    "case": {
+      "name": "explicit-child-input-does-not-consume-parent",
+      "args": [],
+      "stdin": "parent\n",
+      "env": {},
+      "files": {
+        "/work/source.txt": "child\n"
+      },
+      "stdout": "child:parent\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/source.txt": "child\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "child\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "outer-input-not-yet-applied-to-child",
+    "review_category": "core",
+    "source": "value=$(read -r line; printf '%s' \"$line\") < source.txt; read -r line; printf '%s:%s\\n' \"$value\" \"$line\"",
+    "case": {
+      "name": "outer-input-not-yet-applied-to-child",
+      "args": [],
+      "stdin": "first\nsecond\n",
+      "env": {},
+      "files": {
+        "/work/source.txt": "redirected\n"
+      },
+      "stdout": "first:second\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/source.txt": "redirected\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "redirected\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "virtual-file-write-persists",
+    "review_category": "core",
+    "source": "value=$(printf 'made\\n' > saved.txt; printf captured); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "virtual-file-write-persists",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "<captured>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/saved.txt": "made\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "glob-before-later-substitution-side-effect",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' *.txt \"$(printf x > new.txt; printf done)\"",
+    "case": {
+      "name": "glob-before-later-substitution-side-effect",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/old.txt": ""
+      },
+      "stdout": "<new.txt>\n<old.txt>\n<done>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/new.txt": "x",
+        "/work/old.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/old.txt": ""
+      },
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "glob-after-earlier-substitution-side-effect",
+    "review_category": "core",
+    "source": "printf '<%s>\\n' \"$(printf x > new.txt; printf done)\" *.txt",
+    "case": {
+      "name": "glob-after-earlier-substitution-side-effect",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/old.txt": ""
+      },
+      "stdout": "<done>\n<new.txt>\n<old.txt>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/new.txt": "x",
+        "/work/old.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/old.txt": ""
+      },
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "dynamic-head-side-effect-once-with-function-table",
+    "review_category": "decision",
+    "source": "helper() { :; }; $(printf 'once\\n' >&2; printf printf) '%s\\n' value",
+    "case": {
+      "name": "dynamic-head-side-effect-once-with-function-table",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "value\n",
+      "stderr": "once\n",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "dynamic-function-head-side-effect-once",
+    "review_category": "decision",
+    "source": "render() { printf '%s\\n' \"$1\"; }; $(printf 'once\\n' >&2; printf render) value",
+    "case": {
+      "name": "dynamic-function-head-side-effect-once",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "value\n",
+      "stderr": "once\n",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "arithmetic-inside-body",
+    "review_category": "core",
+    "source": "value=$(printf '%s' \"$((2 + 3))\"); printf '%s\\n' \"$value\"",
+    "case": {
+      "name": "arithmetic-inside-body",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "5\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "array-assignment-propagates-child-status",
+    "review_category": "core",
+    "source": "items=(\"$(printf value; false)\"); printf '%s:%s\\n' \"$?\" \"${items[0]}\"",
+    "case": {
+      "name": "array-assignment-propagates-child-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "1:value\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "redirection-only-propagates-child-status",
+    "review_category": "core",
+    "source": "> \"$(printf saved.txt; exit 7)\"; printf '%s\\n' \"$?\"",
+    "case": {
+      "name": "redirection-only-propagates-child-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "7\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/saved.txt": ""
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "inner-reader-advances-active-while-input",
+    "review_category": "core",
+    "source": "while read -r line; do value=$(read -r next; printf '%s' \"$next\"); printf '%s:%s\\n' \"$line\" \"$value\"; done < source.txt",
+    "case": {
+      "name": "inner-reader-advances-active-while-input",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/source.txt": "one\ntwo\nthree\nfour\n"
+      },
+      "stdout": "one:two\nthree:four\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/source.txt": "one\ntwo\nthree\nfour\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "one\ntwo\nthree\nfour\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "arithmetic-containing-substitution-keeps-child-status",
+    "review_category": "decision",
+    "source": "value=$((1 + $(printf 2; exit 7))); printf '%s:%s\\n' \"$?\" \"$value\"",
+    "case": {
+      "name": "arithmetic-containing-substitution-keeps-child-status",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "7:3\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "substitution-inside-arithmetic",
+    "review_category": "decision",
+    "source": "printf '%s\\n' \"$((1 + $(printf 2)))\"",
+    "case": {
+      "name": "substitution-inside-arithmetic",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "3\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  },
+  {
+    "name": "empty-body",
+    "review_category": "decision",
+    "source": "false; value=$(); printf '%s:<%s>\\n' \"$?\" \"$value\"",
+    "case": {
+      "name": "empty-body",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "0:<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "bash-read-file-shorthand",
+    "review_category": "defer",
+    "source": "value=$(< source.txt); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "bash-read-file-shorthand",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/source.txt": "file text\n\n"
+      },
+      "stdout": "<file text>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/source.txt": "file text\n\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "file text\n\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "bash-read-file-shorthand-trailing-semicolon",
+    "review_category": "defer",
+    "source": "value=$(< source.txt;); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "bash-read-file-shorthand-trailing-semicolon",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/source.txt": "file text\n\n"
+      },
+      "stdout": "<file text>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/source.txt": "file text\n\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "file text\n\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "bash-read-file-shorthand-trailing-comment",
+    "review_category": "defer",
+    "source": "value=$(< source.txt # ) remains in the comment\n); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "bash-read-file-shorthand-trailing-comment",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/source.txt": "file text\n\n"
+      },
+      "stdout": "<file text>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/source.txt": "file text\n\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "file text\n\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "input-only-plus-error-redirect-is-ordinary-empty",
+    "review_category": "core",
+    "source": "value=$(< source.txt 2> error.txt); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "input-only-plus-error-redirect-is-ordinary-empty",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/source.txt": "file text\n"
+      },
+      "stdout": "<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/error.txt": "",
+        "/work/source.txt": "file text\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/source.txt": "file text\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "two-input-redirects-are-ordinary-empty",
+    "review_category": "core",
+    "source": "value=$(< source.txt < other.txt); printf '<%s>\\n' \"$value\"",
+    "case": {
+      "name": "two-input-redirects-are-ordinary-empty",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/source.txt": "file text\n",
+        "/work/other.txt": "other\n"
+      },
+      "stdout": "<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/other.txt": "other\n",
+        "/work/source.txt": "file text\n"
+      }
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {
+        "/work/other.txt": "other\n",
+        "/work/source.txt": "file text\n"
+      },
+      "error": "Command substitution is unsupported"
+    }
+  },
+  {
+    "name": "bash-53-current-environment-alternative",
+    "review_category": "defer",
+    "source": "label=outer; value=${ label=inner; printf '%s\\n' \"$label\"; }; printf '%s:%s\\n' \"$label\" \"$value\"",
+    "case": {
+      "name": "bash-53-current-environment-alternative",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "inner:inner\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    },
+    "native_revision6_outcome": {
+      "stdout": "",
+      "stderr": "",
+      "status": 2,
+      "files": {},
+      "error": "Unsupported parameter expansion"
+    }
+  }
+]

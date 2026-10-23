@@ -511,7 +511,23 @@ fn current_unsaved_edits_and_saved_invalid_ttl_clock_and_practice_drafts_survive
     progress::save(&path, &p).unwrap();
     let bytes = std::fs::read(&path).unwrap();
     let mut loaded = progress::load(&path, &all).unwrap();
-    assert_eq!(serde_json::to_vec(&loaded).unwrap(), bytes);
+    // Main-file provenance is intentionally absent from portable learning data.
+    assert_eq!(
+        serde_json::to_vec(&loaded).unwrap(),
+        serde_json::to_vec(&p).unwrap()
+    );
+    let receipts = loaded.migration_receipts.as_ref().unwrap();
+    assert!(receipts.workspace);
+    assert!(
+        receipts
+            .shell
+            .contains(&dlms_learning_lab::shell::EVALUATOR_REVISION)
+    );
+    assert_eq!(
+        std::fs::read(&path).unwrap(),
+        bytes,
+        "loading does not rewrite"
+    );
     let selected = &labs()[0];
     let others: Vec<_> = loaded
         .attempts

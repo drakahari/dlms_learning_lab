@@ -42,6 +42,30 @@ pub struct Progress {
     pub clock: u64,
     pub favorites: BTreeSet<String>,
     pub attempts: BTreeMap<String, Attempt>,
+    /// Main-file transition provenance, never portable learning data or credit.
+    #[serde(default, skip_serializing)]
+    pub migration_receipts: Option<MigrationReceipts>,
+}
+#[derive(Clone, Default, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct MigrationReceipts {
+    #[serde(default)]
+    pub workspace: bool,
+    #[serde(default)]
+    pub shell: Vec<u32>,
+}
+pub(crate) fn validate_provenance(p: &Progress) -> Result<(), String> {
+    if let Some(receipts) = &p.migration_receipts
+        && (receipts.shell.len() > 32
+            || receipts
+                .shell
+                .iter()
+                .any(|revision| *revision == 0 || *revision > crate::shell::EVALUATOR_REVISION)
+            || receipts.shell.windows(2).any(|pair| pair[0] >= pair[1]))
+    {
+        return Err("Invalid or future migration provenance; original retained".into());
+    }
+    Ok(())
 }
 /// Original analysis credit is visible, but never stands in for a new requirement.
 pub fn legacy_credit(a: &Attempt) -> bool {
@@ -211,6 +235,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     if p.schema_version != 1 {
         return Err("Unsupported progress version; original retained".into());
     }
+    validate_provenance(&p)?;
     if p.attempts.len() > scenarios.len()
         || p.favorites.len() > scenarios.len()
         || p.favorites
@@ -529,7 +554,11 @@ fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
 pub struct Saved {
     pub durability_warning: Option<String>,
 }
-pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
+fn validate_for_save(p: &Progress) -> Result<(), String> {
+    if p.schema_version != 1 {
+        return Err("Unsupported progress version; original retained".into());
+    }
+    validate_provenance(p)?;
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
         validate_storage_workspace(a)?;
@@ -563,55 +592,136 @@ pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
             return Err("Invalid draft data; previous progress retained".into());
         }
     }
-    let parent = path.parent().ok_or("Missing storage directory")?;
-    std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-    let encoded = serde_json::to_vec(p).map_err(|e| e.to_string())?;
+    Ok(())
+}
+#[derive(Serialize)]
+struct MainProgress<'a> {
+    #[serde(flatten)]
+    progress: &'a Progress,
+    migration_receipts: MigrationReceipts,
+}
+enum WriteMode<'a> {
+    Normal,
+    Restore(&'a [Scenario]),
+}
+pub fn save(path: &Path, p: &Progress) -> Result<Saved, String> {
+    save_with_writer(path, p, WriteMode::Normal, |_| Ok(()), write_atomic)
+}
+pub(crate) fn save_for_restore(
+    path: &Path,
+    p: &Progress,
+    scenarios: &[Scenario],
+    before_replace: impl FnOnce(Option<&[u8]>) -> Result<(), String>,
+) -> Result<Saved, String> {
+    save_with_writer(
+        path,
+        p,
+        WriteMode::Restore(scenarios),
+        before_replace,
+        write_atomic,
+    )
+}
+fn compatible_target(bytes: &[u8], mode: &WriteMode<'_>) -> Result<Progress, String> {
+    let old: Progress = serde_json::from_slice(bytes)
+        .map_err(|error| format!("Original retained; current progress is unreadable: {error}"))?;
+    validate_for_save(&old)?;
+    if let WriteMode::Restore(scenarios) = mode {
+        let _ = decode(bytes, scenarios)?;
+    }
+    Ok(old)
+}
+fn save_with_writer(
+    path: &Path,
+    p: &Progress,
+    mode: WriteMode<'_>,
+    before_replace: impl FnOnce(Option<&[u8]>) -> Result<(), String>,
+    persist: impl FnOnce(&Path, &[u8]) -> Result<Saved, String>,
+) -> Result<Saved, String> {
+    validate_for_save(p)?;
+    let original = match std::fs::symlink_metadata(path) {
+        Ok(_) => Some(read_bounded(path, 16_000_000)?),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => None,
+        Err(error) => {
+            return Err(format!(
+                "Original retained; current progress cannot be read: {error}"
+            ));
+        }
+    };
+    let old = if let Some(bytes) = &original {
+        match compatible_target(bytes, &mode) {
+            Ok(old) => Some(old),
+            Err(error) if matches!(mode, WriteMode::Normal) => return Err(error),
+            Err(_) => None, // Explicit restore protects these incompatible RAW bytes separately.
+        }
+    } else {
+        None
+    };
+    let has_workspace = |p: &Progress| {
+        p.attempts
+            .values()
+            .any(|attempt| attempt.workspace.is_some())
+    };
+    let mut receipts = old
+        .as_ref()
+        .and_then(|old| old.migration_receipts.clone())
+        .unwrap_or_default();
+    let prior_workspace = old.as_ref().is_some_and(has_workspace);
+    let shell_copy = old.is_some() && !receipts.shell.contains(&crate::shell::EVALUATOR_REVISION);
+    let workspace_copy =
+        old.is_some() && !receipts.workspace && !prior_workspace && has_workspace(p);
+    // These are pending bytes only. No caller data is stamped, even if copying/persist fails.
+    if !receipts.shell.contains(&crate::shell::EVALUATOR_REVISION) {
+        receipts.shell.push(crate::shell::EVALUATOR_REVISION);
+    }
+    receipts.workspace |= prior_workspace || workspace_copy || (old.is_none() && has_workspace(p));
+    let encoded = serde_json::to_vec(&MainProgress {
+        progress: p,
+        migration_receipts: receipts,
+    })
+    .map_err(|error| error.to_string())?;
     if encoded.len() > 16_000_000 {
         return Err("Progress exceeds 16 MB; original retained".into());
     }
-    // Read-time migration never rewrites the original. Preserve exact bytes before an upgraded write.
-    let workspace_backup = path.with_extension("before-workspace.json");
-    let evaluator_backup = path.with_extension(format!(
-        "before-shell-v{}.json",
-        crate::shell::EVALUATOR_REVISION
-    ));
-    // Inspect the on-disk version even when Reset removed the last legacy run from memory.
-    if path.exists() {
-        let original = read_bounded(path, 16_000_000)?;
-        let old: Progress = serde_json::from_slice(&original)
-            .map_err(|e| format!("Original retained; cannot back up: {e}"))?;
-        if p.attempts.values().any(|a| a.workspace.is_some())
-            && old.attempts.values().all(|a| a.workspace.is_none())
-        {
-            preserve_copy(&workspace_backup, &original)?;
+    let parent = path.parent().ok_or("Missing storage directory")?;
+    std::fs::create_dir_all(parent).map_err(|error| error.to_string())?;
+    if let Some(original) = &original {
+        if shell_copy {
+            preserve_copy(
+                &path.with_extension(format!(
+                    "before-shell-v{}.json",
+                    crate::shell::EVALUATOR_REVISION
+                )),
+                original,
+            )?;
         }
-        if old.attempts.values().any(|a| {
-            matches!(&a.state,State::Script{run:Some(r),..}if !r.current())
-                || a.workspace
-                    .as_ref()
-                    .and_then(|w| w.script_learning.as_ref())
-                    .is_some_and(|l| {
-                        l.example_result.is_some()
-                            && l.example_revision < crate::shell::EVALUATOR_REVISION
-                    })
-        }) {
-            preserve_copy(&evaluator_backup, &original)?;
+        if workspace_copy {
+            preserve_copy(&path.with_extension("before-workspace.json"), original)?;
         }
     }
-    write_atomic(path, &encoded)
+    before_replace(original.as_deref())?;
+    persist(path, &encoded)
 }
-fn validate_saved_copy(path: &Path) -> Result<(), String> {
+fn validate_saved_copy(path: &Path, original: &[u8]) -> Result<(), String> {
     let bytes = read_bounded(path, 16_000_000)?;
-    let previous:Progress=serde_json::from_slice(&bytes).map_err(|_|"Original retained; existing migration-backup filename is occupied by incompatible data")?;
-    if previous.schema_version != 1 {
-        return Err("Original retained; existing migration backup has an unknown version".into());
+    if bytes != original {
+        return Err(
+            "Original retained; existing migration backup differs from the exact current file"
+                .into(),
+        );
     }
     Ok(())
 }
 fn preserve_copy(path: &Path, bytes: &[u8]) -> Result<(), String> {
+    preserve_copy_with_race(path, bytes, || Ok(()))
+}
+fn preserve_copy_with_race(
+    path: &Path,
+    bytes: &[u8],
+    before_persist: impl FnOnce() -> Result<(), String>,
+) -> Result<(), String> {
     if let Ok(metadata) = std::fs::symlink_metadata(path) {
         if metadata.file_type().is_file() {
-            return validate_saved_copy(path);
+            return validate_saved_copy(path, bytes);
         }
         return Err("Original retained; migration backup path is not an ordinary file".into());
     }
@@ -621,10 +731,11 @@ fn preserve_copy(path: &Path, bytes: &[u8]) -> Result<(), String> {
     copy.write_all(bytes)
         .and_then(|_| copy.as_file().sync_all())
         .map_err(|e| e.to_string())?;
+    before_persist()?;
     match copy.persist_noclobber(path) {
         Ok(_) => Ok(()),
         Err(error) if error.error.kind() == std::io::ErrorKind::AlreadyExists => {
-            validate_saved_copy(path)
+            validate_saved_copy(path, bytes)
         }
         Err(error) => Err(format!(
             "Original retained; migration backup failed: {}",
@@ -699,5 +810,105 @@ mod durability_tests {
                 .contains("file was replaced")
         );
         assert_eq!(std::fs::read(&path).unwrap(), b"after");
+    }
+}
+
+#[cfg(test)]
+mod migration_writer_tests {
+    use super::*;
+    fn profile() -> Progress {
+        Progress {
+            schema_version: 1,
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn first_copy_already_exists_race_compares_exact_bytes() {
+        for same in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let path = dir.path().join("migration.json");
+            let original = serde_json::to_vec_pretty(&profile()).unwrap();
+            let occupied = if same {
+                original.clone()
+            } else {
+                serde_json::to_vec(&profile()).unwrap()
+            };
+            let result = preserve_copy_with_race(&path, &original, || {
+                std::fs::write(&path, &occupied).map_err(|e| e.to_string())
+            });
+            assert_eq!(result.is_ok(), same);
+            assert_eq!(std::fs::read(&path).unwrap(), occupied);
+        }
+    }
+    #[test]
+    fn failed_callback_and_main_write_leave_actual_target_and_caller_provenance_unchanged() {
+        for fail_callback in [false, true] {
+            let dir = tempfile::tempdir().unwrap();
+            let path = dir.path().join("progress.json");
+            let original = serde_json::to_vec_pretty(&profile()).unwrap();
+            std::fs::write(&path, &original).unwrap();
+            let candidate = profile();
+            let persisted = std::cell::Cell::new(false);
+            let result = save_with_writer(
+                &path,
+                &candidate,
+                WriteMode::Normal,
+                |raw| {
+                    assert_eq!(raw, Some(original.as_slice()));
+                    if fail_callback {
+                        Err("controlled pre-replace failure".into())
+                    } else {
+                        Ok(())
+                    }
+                },
+                |_, _| {
+                    persisted.set(true);
+                    Err("controlled failed main persist".into())
+                },
+            );
+            assert!(result.is_err());
+            assert_eq!(persisted.get(), !fail_callback);
+            assert_eq!(std::fs::read(&path).unwrap(), original);
+            assert!(candidate.migration_receipts.is_none());
+            assert_eq!(
+                std::fs::read(path.with_extension("before-shell-v7.json")).unwrap(),
+                original
+            );
+            save(&path, &candidate).unwrap();
+        }
+    }
+    #[test]
+    fn committed_sync_warning_keeps_successful_receipt_and_allows_repeat_save() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("progress.json");
+        let candidate = profile();
+        let original = serde_json::to_vec_pretty(&candidate).unwrap();
+        std::fs::write(&path, &original).unwrap();
+        let saved = save_with_writer(
+            &path,
+            &candidate,
+            WriteMode::Normal,
+            |_| Ok(()),
+            |target, encoded| {
+                write_atomic_with_sync(target, encoded, |_| {
+                    Err(std::io::Error::other("controlled sync failure"))
+                })
+            },
+        )
+        .unwrap();
+        assert!(
+            saved
+                .durability_warning
+                .unwrap()
+                .contains("file was replaced")
+        );
+        let disk: Progress = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+        assert_eq!(disk.migration_receipts.unwrap().shell, vec![7]);
+        assert!(candidate.migration_receipts.is_none());
+        save(&path, &candidate).unwrap();
+        assert_eq!(
+            std::fs::read(path.with_extension("before-shell-v7.json")).unwrap(),
+            original
+        );
     }
 }

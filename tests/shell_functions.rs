@@ -49,7 +49,7 @@ fn unsupported_function_contexts_fail_instead_of_approximating() {
         "f() { return 256; }\nf",
         "shift -1",
         "echo {a,b}",
-        "echo $(printf wrong)",
+        "echo $(( $(printf 1) ))",
         "{ printf wrong; }",
     ] {
         let r = shell::run(source, &case());
@@ -89,4 +89,16 @@ fn expanded_and_quoted_return_keep_real_redirection_behavior() {
         assert_eq!(r.files.get("/work/output").map(String::as_str), Some(""));
         assert_eq!(r.status, 0);
     }
+}
+
+#[test]
+fn captures_call_inherited_and_child_defined_functions_without_leaking_bindings() {
+    let result = shell::run(
+        "label=parent; inherited() { local label=inside; printf '%s' \"$label\"; }; value=$(inherited; child() { printf child; }; child); printf '<%s>:%s' \"$value\" \"$label\"",
+        &case(),
+    );
+    assert_eq!(result.error, None);
+    assert_eq!(result.stdout, "<insidechild>:parent");
+    let result = shell::run("value=$(child() { :; }; child); child", &case());
+    assert!(result.error.unwrap().contains("Unsupported"));
 }

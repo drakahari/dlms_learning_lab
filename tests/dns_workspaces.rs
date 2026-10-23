@@ -403,7 +403,15 @@ fn progress_roundtrip_retains_broken_drafts_examples_and_legacy_attempts_with_ho
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
     progress::save(&path, &p).unwrap();
-    assert_eq!(std::fs::read(path).unwrap(), bytes);
+    let stored: Progress = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+    assert_eq!(serde_json::to_vec(&stored).unwrap(), bytes);
+    let receipts = stored.migration_receipts.as_ref().unwrap();
+    assert!(receipts.workspace);
+    assert!(
+        receipts
+            .shell
+            .contains(&dlms_learning_lab::shell::EVALUATOR_REVISION)
+    );
     // Malformed Unicode is editable work, not a reason to lose unrelated progress.
     let mut malformed = progress::decode(&bytes, &labs).unwrap();
     malformed

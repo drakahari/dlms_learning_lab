@@ -4,7 +4,7 @@ use std::collections::BTreeMap;
 
 fn case() -> Case {
     Case {
-        name: "Parser foundation".into(),
+        name: "Substitution runtime fixture".into(),
         args: vec![],
         stdin: String::new(),
         env: BTreeMap::new(),
@@ -16,20 +16,15 @@ fn case() -> Case {
     }
 }
 #[test]
-fn public_execution_is_still_gated_before_any_parent_or_child_mutation() {
-    assert_eq!(shell::EVALUATOR_REVISION, 6);
+fn excluded_or_malformed_nested_syntax_fails_before_any_parent_mutation() {
+    assert_eq!(shell::EVALUATOR_REVISION, 7);
     for source in [
-        "printf changed > keep.txt; value=$(printf captured)",
-        "printf changed > keep.txt; value=$(while true; do :; done)",
-        "outer() { local label=visible; value=$(printf '%s' \"$label\"); }; outer",
-        ": > \"$(printf changed > side.txt; printf destination)\"",
+        "printf changed > keep.txt; value=$(printf unfinished",
+        "printf changed > keep.txt; value=$((1 + $(printf 2)))",
+        "printf changed > keep.txt; value=$(< keep.txt)",
+        "printf changed > keep.txt; value=`printf text`",
     ] {
-        assert!(
-            Vm::new(source, &case())
-                .err()
-                .unwrap()
-                .contains("Command substitution is unsupported")
-        );
+        assert!(Vm::new(source, &case()).is_err());
         let result = shell::run(source, &case());
         assert_eq!(result.files, case().files);
         assert!(result.stdout.is_empty() && result.stderr.is_empty());
@@ -44,21 +39,19 @@ struct Reference {
     case: Case,
 }
 #[test]
-fn selected_future_reference_cases_cannot_run_under_the_parser_only_milestone() {
+fn all_selected_reference_cases_execute_through_public_revision_seven() {
     let cases: Vec<Reference> =
         serde_json::from_str(include_str!("fixtures/shell-substitution-reference.json")).unwrap();
     assert_eq!(cases.len(), 62);
     for fixture in cases {
-        let result = shell::run(&fixture.source, &fixture.case);
-        assert_eq!(
-            result.error.as_deref(),
-            Some("Command substitution is unsupported"),
-            "{} must parse successfully and remain gated",
-            fixture.name
-        );
-        assert_eq!(result.status, 2, "{}", fixture.name);
-        assert_eq!(result.files, fixture.case.files, "{}", fixture.name);
-        assert!(result.stdout.is_empty(), "{}", fixture.name);
+        for slice in [1, 16, 32, 64] {
+            let result = sliced(&fixture.source, &fixture.case, slice);
+            assert!(
+                fixture.case.accepts(&result),
+                "{} / {slice}: {result:?}",
+                fixture.name
+            );
+        }
     }
 }
 #[test]
@@ -170,14 +163,11 @@ fn stop_discards_a_large_pending_preparation_without_applying_its_redirect() {
 #[test]
 fn pipeline_context_checks_do_not_speculatively_expand_a_later_stage() {
     let result = shell::run(
-        "render() { :; }; printf retained > stage.txt | render | printf '%s' \"$UNSUPPORTED[$(false)]\"",
+        "render() { :; }; printf retained > stage.txt | render | printf '%s' \"$((1 + $(printf 0)))\"",
         &case(),
     );
-    // The public whole-source capture gate still wins before any stage starts.
-    assert_eq!(
-        result.error.as_deref(),
-        Some("Command substitution is unsupported")
-    );
+    // Excluded arithmetic positions are detected in whole-source compilation.
+    assert!(result.error.as_deref().unwrap().contains("arithmetic"));
     assert_eq!(result.files, case().files);
     let result = shell::run(
         "render() { :; }; printf retained > stage.txt | render | printf '%s' \"$RANDOM\"",

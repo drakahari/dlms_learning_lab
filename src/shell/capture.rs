@@ -671,7 +671,7 @@ mod tests {
         assert!(vm.outcome.error.as_deref().unwrap().contains("depth limit"));
     }
     #[test]
-    fn internal_driver_compares_selected_reference_cases_without_opening_public_gate() {
+    fn cooperative_driver_compares_selected_reference_cases_at_all_tick_slices() {
         let cases: Vec<Reference> = serde_json::from_str(include_str!(
             "../../tests/fixtures/shell-substitution-reference.json"
         ))
