@@ -1,0 +1,4536 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-acl-source-policy",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 access control",
+      "unit": "ipv4-access-policy",
+      "title": "Let the right workstation reach the vault",
+      "summary": "Use a source-only filter without blocking independent traffic in the opposite direction.",
+      "objective": "Allow Admin to reach Vault on the listed TCP 443 and ICMP checks. Block Guest on both checks as packets leave Gateway through service. Keep the independent Vault-to-Guest TCP 443 check allowed. Build Gateway's policy and verify all five outcomes; routes and addresses are supplied.",
+      "retry_guidance": "Start with the first failed traffic check. Compare its direction, first matching rule and protocol/ports, then retry. Required allowed traffic must still pass.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Understand the traffic requirements",
+        "Edit and verify the policy"
+      ],
+      "guide": [],
+      "explanation": "A standard source permit for Admin, attached on Gateway/service out, allows both required protocols. Guest matches no permit and is denied. An explicit Guest deny followed by a permit also meets the stated flows. The independent Vault-to-Guest packet enters service, so this outbound filter does not inspect it.",
+      "hints": [
+        "A standard list can decide both TCP and ICMP cases from their source address alone.",
+        "The required boundary is Gateway/service out. A denial at another boundary does not satisfy this ticket.",
+        "Permit the approved source and leave unmatched traffic to implicit deny, or explicitly deny Guest and permit the required remaining traffic."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_data_acl/configuration/15-sy/sec-data-acl-15-sy-book/sec-access-list-ov.html",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-acl-seq-num.html"
+      ],
+      "simplifications": "Sources checked 2026-10-23. This native editor replaces each router's complete modeled ACL document; omitted sections are removed. Interface labels are supplied virtual names, not full IOS interface CLI. Only listed one-way packet metadata flows in this fixed topology are verified; request/reply cases are independent, not TCP sessions. No host execution, real packets, device CLI, IPv6, fragments, NAT, TCP flags/established, logging/counters, implicit automatic numbering or arbitrary service-policy guarantee. Empty ACL sections and unsupported syntax report limitations. This is illustrative partial CCNA v1.1 5.6 practice, not full exam coverage or endorsement; coverage remains unchanged pending review.",
+      "initial": {
+        "kind": "Ipv4Acl",
+        "network": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Admin": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "clients-wire",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "192.0.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Guest": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "clients-wire",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "192.0.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Gateway": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "clients-wire",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "vault-wire",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Vault": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "vault-wire",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "198.51.100.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "Admin": "lan",
+            "Guest": "lan",
+            "Vault": "lan"
+          },
+          "devices": {}
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Acl",
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "Admin": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "clients-wire",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "192.0.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Guest": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "clients-wire",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "192.0.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Gateway": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "clients-wire",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "vault-wire",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Vault": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "vault-wire",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "198.51.100.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "Admin": "lan",
+              "Guest": "lan",
+              "Vault": "lan"
+            },
+            "devices": {}
+          },
+          "cases": [
+            {
+              "id": "admin-web",
+              "label": "Admin to Vault TCP 443 allowed",
+              "flow": {
+                "source": {
+                  "device": "Admin",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Vault",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "admin-icmp",
+              "label": "Admin to Vault ICMP allowed",
+              "flow": {
+                "source": {
+                  "device": "Admin",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Vault",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "icmp"
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "guest-web",
+              "label": "Guest to Vault TCP 443 blocked at service out",
+              "flow": {
+                "source": {
+                  "device": "Guest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Vault",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Gateway",
+                    "interface": "service",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "guest-icmp",
+              "label": "Guest to Vault ICMP blocked at service out",
+              "flow": {
+                "source": {
+                  "device": "Guest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Vault",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "icmp"
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Gateway",
+                    "interface": "service",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "reverse-guard",
+              "label": "Vault to Guest TCP 443 allowed independently",
+              "flow": {
+                "source": {
+                  "device": "Vault",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Guest",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "acl-author {\"kind\":\"ApplyDocuments\",\"documents\":{\"schema_version\":1,\"routers\":{\"Gateway\":\"ip access-list standard vault-source\\n permit host 192.0.2.10\\nexit\\ninterface service\\n ip access-group vault-source out\\nexit\\n\"}}}"
+      ],
+      "prerequisites": [],
+      "acl_teaching": {
+        "prerequisite_note": "Know an IPv4 address and how a router joins two networks. No prior ACL experience is needed; all addresses and routes are supplied.",
+        "concepts": [
+          {
+            "title": "Allow or block a packet",
+            "text": "An access control list (ACL) is an ordered set of permit/deny rules. A standard list checks the sender's IP address only; it does not distinguish a website from other protocols. ICMP is a separate IP protocol, not a TCP/UDP port."
+          },
+          {
+            "title": "Read one small source rule",
+            "text": "In the example below, permit host 10.1.4.11 permits Ada. host means one exact address; any means every address. After the last rule of a list containing rules, an unmatched packet is denied. With no list attached, these links do not filter."
+          },
+          {
+            "title": "Attach it in the correct direction",
+            "text": "ip access-list standard NAME starts a named rule list; exit closes a section. interface service selects the supplied port, and ip access-group NAME out attaches that list to packets leaving toward SampleStore. Packets entering service are separate. Checking replaces the complete document; omitted sections are removed."
+          }
+        ],
+        "example_description": "Ada may reach SampleStore on TCP 8080 and ICMP; Bo may not. SampleStore may still send the listed TCP 8080 packet to Bo. Fill worked example, then Check example; filling alone does not run it.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Ada": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "sample-client",
+                    "up": true,
+                    "address": {
+                      "address": "10.1.4.11",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.1.4.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Bo": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "sample-client",
+                    "up": true,
+                    "address": {
+                      "address": "10.1.4.22",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.1.4.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleGate": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "sample-client",
+                    "up": true,
+                    "address": {
+                      "address": "10.1.4.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "sample-store",
+                    "up": true,
+                    "address": {
+                      "address": "10.1.9.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "SampleStore": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "sample-store",
+                    "up": true,
+                    "address": {
+                      "address": "10.1.9.30",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.1.9.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "Ada": "lan",
+            "Bo": "lan",
+            "SampleStore": "lan"
+          },
+          "devices": {}
+        },
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "Ada": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "sample-client",
+                      "up": true,
+                      "address": {
+                        "address": "10.1.4.11",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.1.4.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Bo": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "sample-client",
+                      "up": true,
+                      "address": {
+                        "address": "10.1.4.22",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.1.4.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleGate": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "sample-client",
+                      "up": true,
+                      "address": {
+                        "address": "10.1.4.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "sample-store",
+                      "up": true,
+                      "address": {
+                        "address": "10.1.9.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "SampleStore": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "sample-store",
+                      "up": true,
+                      "address": {
+                        "address": "10.1.9.30",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.1.9.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "Ada": "lan",
+              "Bo": "lan",
+              "SampleStore": "lan"
+            },
+            "devices": {}
+          },
+          "cases": [
+            {
+              "id": "ada-web",
+              "label": "Ada to SampleStore TCP 8080 allowed",
+              "flow": {
+                "source": {
+                  "device": "Ada",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "ada-icmp",
+              "label": "Ada to SampleStore ICMP allowed",
+              "flow": {
+                "source": {
+                  "device": "Ada",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "icmp"
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "bo-web",
+              "label": "Bo to SampleStore TCP 8080 blocked",
+              "flow": {
+                "source": {
+                  "device": "Bo",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleGate",
+                    "interface": "service",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "bo-icmp",
+              "label": "Bo to SampleStore ICMP blocked",
+              "flow": {
+                "source": {
+                  "device": "Bo",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "icmp"
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleGate",
+                    "interface": "service",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "reverse",
+              "label": "SampleStore to Bo TCP 8080 stays allowed",
+              "flow": {
+                "source": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Bo",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            }
+          ]
+        },
+        "example_documents": {
+          "schema_version": 1,
+          "routers": {
+            "SampleGate": "ip access-list standard sample-source\n permit host 10.1.4.11\nexit\ninterface service\n ip access-group sample-source out\nexit\n"
+          }
+        },
+        "try_change": {
+          "description": "After it passes, clear the SampleGate document and Check example. Both Bo packets become allowed because no filter is attached; Ada and the reverse packet still pass. Refill and check to repair.",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "SampleGate": ""
+            }
+          },
+          "expected": {
+            "ada-web": true,
+            "ada-icmp": true,
+            "bo-web": false,
+            "bo-icmp": false,
+            "reverse": true
+          }
+        }
+      }
+    },
+    {
+      "id": "ccna-acl-service-order",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 access control",
+      "unit": "ipv4-access-policy",
+      "title": "Repair a service exception hidden by a broad permit",
+      "summary": "Reorder an extended list while preserving protocol, source-port and return-direction guards.",
+      "objective": "Block Designer and Support TCP destination port 22 to Portal at Edge/clients in. Preserve the listed TCP 443, TCP 8443, UDP 22 and UDP 53 traffic, plus Portal's independent reverse packet. The starting broad permit hides the deny. Repair the document and verify all seven checks.",
+      "retry_guidance": "Start with the first failed traffic check. Compare its direction, first matching rule and protocol/ports, then retry. Required allowed traffic must still pass.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the traffic requirements",
+        "Edit and verify the policy"
+      ],
+      "guide": [],
+      "explanation": "The repaired sequence-10 TCP destination-22 deny runs before the broad sequence-20 IP permit. UDP 22 does not match TCP, and source port 22 is not destination port 22. The reverse packet traverses the interface in the other direction. Equivalent permits-only solutions also pass this finite task; unlisted ports are not certified by these checks.",
+      "hints": [
+        "Locate the first matching row for TCP 22; a later deny cannot undo an earlier permit.",
+        "Compare the UDP 22 check and the TCP 8443 check whose source port is 22. Protocol and source/destination position matter.",
+        "Move a precise TCP destination-22 deny before the broad permit, or use equivalent supported rules that pass every listed check."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_data_acl/configuration/15-sy/sec-data-acl-15-sy-book/sec-access-list-ov.html",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-acl-seq-num.html"
+      ],
+      "simplifications": "Sources checked 2026-10-23. This native editor replaces each router's complete modeled ACL document; omitted sections are removed. Interface labels are supplied virtual names, not full IOS interface CLI. Only listed one-way packet metadata flows in this fixed topology are verified; request/reply cases are independent, not TCP sessions. No host execution, real packets, device CLI, IPv6, fragments, NAT, TCP flags/established, logging/counters, implicit automatic numbering or arbitrary service-policy guarantee. Empty ACL sections and unsupported syntax report limitations. This is illustrative partial CCNA v1.1 5.6 practice, not full exam coverage or endorsement; coverage remains unchanged pending review.",
+      "initial": {
+        "kind": "Ipv4Acl",
+        "network": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Designer": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "office-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.1.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.20.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Support": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "office-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.1.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.20.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Edge": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "office-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "portal-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.9.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Portal": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "portal-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.9.30",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.20.9.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "Designer": "lan",
+            "Support": "lan",
+            "Portal": "lan"
+          },
+          "devices": {
+            "Edge": {
+              "policy": {
+                "schema_version": 1,
+                "lists": {
+                  "office-services": {
+                    "kind": "extended",
+                    "rules": [
+                      {
+                        "id": "seq-10",
+                        "action": "permit",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "ip"
+                          }
+                        }
+                      },
+                      {
+                        "id": "seq-30",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "10.20.9.30",
+                            "wildcard": "0.0.0.0"
+                          },
+                          "protocol": {
+                            "kind": "tcp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 22
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "attachments": {
+                "clients": {
+                  "inbound": "office-services",
+                  "outbound": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Acl",
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "Designer": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "office-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.1.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.20.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Support": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "office-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.1.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.20.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Edge": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "office-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.1.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "portal-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.9.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Portal": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "portal-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.9.30",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.20.9.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "Designer": "lan",
+              "Support": "lan",
+              "Portal": "lan"
+            },
+            "devices": {
+              "Edge": {
+                "policy": {
+                  "schema_version": 1,
+                  "lists": {
+                    "office-services": {
+                      "kind": "extended",
+                      "rules": [
+                        {
+                          "id": "seq-10",
+                          "action": "permit",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "ip"
+                            }
+                          }
+                        },
+                        {
+                          "id": "seq-30",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "10.20.9.30",
+                              "wildcard": "0.0.0.0"
+                            },
+                            "protocol": {
+                              "kind": "tcp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 22
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "attachments": {
+                  "clients": {
+                    "inbound": "office-services",
+                    "outbound": null
+                  }
+                }
+              }
+            }
+          },
+          "cases": [
+            {
+              "id": "designer-web",
+              "label": "Designer to Portal TCP 443 allowed",
+              "flow": {
+                "source": {
+                  "device": "Designer",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "support-alt",
+              "label": "Support to Portal TCP 8443 allowed",
+              "flow": {
+                "source": {
+                  "device": "Support",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 22,
+                  "destination_port": 8443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "designer-udp",
+              "label": "Designer to Portal UDP 22 allowed",
+              "flow": {
+                "source": {
+                  "device": "Designer",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "support-dns",
+              "label": "Support to Portal UDP 53 allowed",
+              "flow": {
+                "source": {
+                  "device": "Support",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 53000,
+                  "destination_port": 53
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "designer-ssh",
+              "label": "Designer to Portal TCP 22 blocked at clients in",
+              "flow": {
+                "source": {
+                  "device": "Designer",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Edge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "support-ssh",
+              "label": "Support to Portal TCP 22 blocked at clients in",
+              "flow": {
+                "source": {
+                  "device": "Support",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Edge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "portal-reverse",
+              "label": "Portal TCP 22 source to Designer 50000 allowed",
+              "flow": {
+                "source": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Designer",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 22,
+                  "destination_port": 50000
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "acl-author {\"kind\":\"ApplyDocuments\",\"documents\":{\"schema_version\":1,\"routers\":{\"Edge\":\"ip access-list extended office-services\\n 20 permit ip any any\\n 10 deny tcp any host 10.20.9.30 eq 22\\nexit\\ninterface clients\\n ip access-group office-services in\\nexit\\n\"}}}"
+      ],
+      "prerequisites": [
+        "ccna-acl-source-policy"
+      ],
+      "acl_teaching": {
+        "prerequisite_note": "Use the preceding source-policy activity first, or review its introduction. Know that a port number identifies the intended service within TCP or UDP.",
+        "concepts": [
+          {
+            "title": "Match the service as well as the sender",
+            "text": "Extended rules can check both addresses and the protocol. In deny tcp any host 172.20.8.40 eq 8080, eq 8080 follows the destination, so it tests the destination TCP port. UDP port 8080 is a different match and remains allowed here."
+          },
+          {
+            "title": "The first matching rule decides",
+            "text": "A broad permit before a specific deny lets the packet through immediately; later rules are never consulted. When every row has a sequence number, smaller numbers run first, even if their text appears lower in the document."
+          },
+          {
+            "title": "Keep the required permitted traffic",
+            "text": "Fixing a denied service is not enough if you also break the allowed checks. You may use explicit denies and a broader permit, or a permits-only list with implicit deny, when all stated outcomes still match."
+          }
+        ],
+        "example_description": "Block Maker and Helper TCP 8080 to SampleSite; keep Maker TCP 8443 and Helper UDP 8080 working. The starting broad permit shadows the deny. Fill the repaired example, then Check example.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Maker": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "maker-wire",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.2.11",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "172.20.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Helper": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "maker-wire",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.2.22",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "172.20.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleEdge": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "maker-wire",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.2.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "site-wire",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.8.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "SampleSite": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "site-wire",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.8.40",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "172.20.8.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "Maker": "lan",
+            "Helper": "lan",
+            "SampleSite": "lan"
+          },
+          "devices": {
+            "SampleEdge": {
+              "policy": {
+                "schema_version": 1,
+                "lists": {
+                  "sample-services": {
+                    "kind": "extended",
+                    "rules": [
+                      {
+                        "id": "seq-10",
+                        "action": "permit",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "ip"
+                          }
+                        }
+                      },
+                      {
+                        "id": "seq-20",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "172.20.8.40",
+                            "wildcard": "0.0.0.0"
+                          },
+                          "protocol": {
+                            "kind": "tcp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 8080
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "attachments": {
+                "clients": {
+                  "inbound": "sample-services",
+                  "outbound": null
+                }
+              }
+            }
+          }
+        },
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "Maker": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "maker-wire",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.2.11",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "172.20.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Helper": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "maker-wire",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.2.22",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "172.20.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleEdge": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "maker-wire",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.2.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "site-wire",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.8.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "SampleSite": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "site-wire",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.8.40",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "172.20.8.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "Maker": "lan",
+              "Helper": "lan",
+              "SampleSite": "lan"
+            },
+            "devices": {
+              "SampleEdge": {
+                "policy": {
+                  "schema_version": 1,
+                  "lists": {
+                    "sample-services": {
+                      "kind": "extended",
+                      "rules": [
+                        {
+                          "id": "seq-10",
+                          "action": "permit",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "ip"
+                            }
+                          }
+                        },
+                        {
+                          "id": "seq-20",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "172.20.8.40",
+                              "wildcard": "0.0.0.0"
+                            },
+                            "protocol": {
+                              "kind": "tcp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 8080
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "attachments": {
+                  "clients": {
+                    "inbound": "sample-services",
+                    "outbound": null
+                  }
+                }
+              }
+            }
+          },
+          "cases": [
+            {
+              "id": "maker-alt",
+              "label": "Maker TCP 8443 stays allowed",
+              "flow": {
+                "source": {
+                  "device": "Maker",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "helper-udp",
+              "label": "Helper UDP 8080 stays allowed",
+              "flow": {
+                "source": {
+                  "device": "Helper",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "maker-block",
+              "label": "Maker TCP 8080 is blocked",
+              "flow": {
+                "source": {
+                  "device": "Maker",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleEdge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "helper-block",
+              "label": "Helper TCP 8080 is blocked",
+              "flow": {
+                "source": {
+                  "device": "Helper",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleEdge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "example_documents": {
+          "schema_version": 1,
+          "routers": {
+            "SampleEdge": "ip access-list extended sample-services\n 5 deny tcp any host 172.20.8.40 eq 8080\n 10 permit ip any any\nexit\ninterface clients\n ip access-group sample-services in\nexit\n"
+          }
+        },
+        "try_change": {
+          "description": "After it passes, change the deny sequence from 5 to 20 and Check example. Both TCP 8080 packets become allowed because permit sequence 10 runs first; the required permitted packets still work. Refill/check to repair.",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "SampleEdge": "ip access-list extended sample-services\n 10 permit ip any any\n 20 deny tcp any host 172.20.8.40 eq 8080\nexit\ninterface clients\n ip access-group sample-services in\nexit\n"
+            }
+          },
+          "expected": {
+            "maker-alt": true,
+            "helper-udp": true,
+            "maker-block": false,
+            "helper-block": false
+          }
+        }
+      }
+    },
+    {
+      "id": "ccna-acl-direction-repair",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 access control",
+      "unit": "ipv4-access-policy",
+      "title": "Find the filter facing the wrong way",
+      "summary": "Investigate a two-router path and repair a binding without blocking reverse traffic.",
+      "objective": "Block Client's TCP 23 and UDP 69 packets as they enter Branch through clients. Keep Client's TCP 22/UDP 53 and Server's independent TCP 23/UDP 69 packets to Client allowed. The list exists but faces the wrong way. Diagnose and repair Branch's document; keep Campus's supplied routing and interfaces unchanged.",
+      "retry_guidance": "Start with the first failed traffic check. Compare its direction, first matching rule and protocol/ports, then retry. Required allowed traffic must still pass.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the traffic requirements",
+        "Edit and verify the policy"
+      ],
+      "guide": [],
+      "explanation": "Client traffic enters Branch/clients before routing to Campus. Binding the list in blocks the two unwanted client-originated packets there, while the allowed client protocols pass the final permit. Server's independent checks leave Branch/clients and remain unfiltered. Keeping both in and out would wrongly block those reverse cases.",
+      "hints": [
+        "For a Client-to-Server packet, mark the first interface it enters on Branch. Compare the required denial location with the observed path.",
+        "The reverse checks deliberately use the same destination ports. Applying the same filter in both directions breaks them.",
+        "On Branch's clients section, replace the out attachment with in. Campus needs no new policy; equivalent rules must still enforce the stated boundary."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_data_acl/configuration/15-sy/sec-data-acl-15-sy-book/sec-access-list-ov.html",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-acl-seq-num.html"
+      ],
+      "simplifications": "Sources checked 2026-10-23. This native editor replaces each router's complete modeled ACL document; omitted sections are removed. Interface labels are supplied virtual names, not full IOS interface CLI. Only listed one-way packet metadata flows in this fixed topology are verified; request/reply cases are independent, not TCP sessions. No host execution, real packets, device CLI, IPv6, fragments, NAT, TCP flags/established, logging/counters, implicit automatic numbering or arbitrary service-policy guarantee. Empty ACL sections and unsupported syntax report limitations. This is illustrative partial CCNA v1.1 5.6 practice, not full exam coverage or endorsement; coverage remains unchanged pending review.",
+      "initial": {
+        "kind": "Ipv4Acl",
+        "network": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Client": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "branch-lan",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.1.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.60.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Server": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "server-lan",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.1.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.70.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Branch": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "branch-lan",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  "transit": {
+                    "link": "branch-transit",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "10.70.1.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.60.0.2",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Campus": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "branch-transit",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "service": {
+                    "link": "server-lan",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.1.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "10.60.1.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.60.0.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "Client": "lan",
+            "Server": "lan"
+          },
+          "devices": {
+            "Branch": {
+              "policy": {
+                "schema_version": 1,
+                "lists": {
+                  "old-services": {
+                    "kind": "extended",
+                    "rules": [
+                      {
+                        "id": "row-1",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "tcp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 23
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "id": "row-2",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "udp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 69
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "id": "row-3",
+                        "action": "permit",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "ip"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "attachments": {
+                "clients": {
+                  "inbound": null,
+                  "outbound": "old-services"
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Acl",
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "Client": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "branch-lan",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.1.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.60.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Server": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "server-lan",
+                      "up": true,
+                      "address": {
+                        "address": "10.70.1.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.70.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Branch": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "branch-lan",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.1.1",
+                        "prefix": 24
+                      }
+                    },
+                    "transit": {
+                      "link": "branch-transit",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "10.70.1.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.60.0.2",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Campus": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "transit": {
+                      "link": "branch-transit",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "service": {
+                      "link": "server-lan",
+                      "up": true,
+                      "address": {
+                        "address": "10.70.1.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "10.60.1.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.60.0.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "Client": "lan",
+              "Server": "lan"
+            },
+            "devices": {
+              "Branch": {
+                "policy": {
+                  "schema_version": 1,
+                  "lists": {
+                    "old-services": {
+                      "kind": "extended",
+                      "rules": [
+                        {
+                          "id": "row-1",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "tcp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 23
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "row-2",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "udp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 69
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "row-3",
+                          "action": "permit",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "ip"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "attachments": {
+                  "clients": {
+                    "inbound": null,
+                    "outbound": "old-services"
+                  }
+                }
+              }
+            }
+          },
+          "cases": [
+            {
+              "id": "client-ssh",
+              "label": "Client to Server TCP 22 allowed",
+              "flow": {
+                "source": {
+                  "device": "Client",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Server",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "client-dns",
+              "label": "Client to Server UDP 53 allowed",
+              "flow": {
+                "source": {
+                  "device": "Client",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Server",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 53
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "client-telnet",
+              "label": "Client TCP 23 blocked at Branch clients in",
+              "flow": {
+                "source": {
+                  "device": "Client",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Server",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 23
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Branch",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "client-tftp",
+              "label": "Client UDP 69 blocked at Branch clients in",
+              "flow": {
+                "source": {
+                  "device": "Client",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Server",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 69
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Branch",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "server-tcp",
+              "label": "Server to Client TCP destination 23 allowed",
+              "flow": {
+                "source": {
+                  "device": "Server",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Client",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 23
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "server-udp",
+              "label": "Server to Client UDP destination 69 allowed",
+              "flow": {
+                "source": {
+                  "device": "Server",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Client",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 69
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "acl-author {\"kind\":\"ApplyDocuments\",\"documents\":{\"schema_version\":1,\"routers\":{\"Branch\":\"ip access-list extended old-services\\n deny tcp any any eq 23\\n deny udp any any eq 69\\n permit ip any any\\nexit\\ninterface clients\\n ip access-group old-services in\\nexit\\n\"}}}"
+      ],
+      "prerequisites": [
+        "ccna-acl-service-order"
+      ],
+      "acl_teaching": {
+        "prerequisite_note": "Review source policies and extended rule order. The supplied routes already work without filtering; this task is about where and in which direction a packet is inspected.",
+        "concepts": [
+          {
+            "title": "Read direction from the router's viewpoint",
+            "text": "clients in means a packet arriving at this router from the client link. clients out means one leaving toward the client. The same cable carries these separate directions; do not decide direction from the remote server's viewpoint."
+          },
+          {
+            "title": "Follow each one-way check",
+            "text": "PracticeClient's request enters clients; PracticeService's independently tested packet leaves clients. A correct deny list attached out can miss the request while blocking the reverse check. This simulator does not infer reply/session state."
+          },
+          {
+            "title": "Move rather than duplicate the binding",
+            "text": "In this complete-document editor, replace the out binding with in. Adding a second in line while retaining out leaves both filters active. Keep the list content unless a rule change is needed; Campus-style intermediate links are ordinary separate boundaries."
+          }
+        ],
+        "example_description": "PracticeClient TCP 2323/UDP 6969 must stop at PracticeGate/clients in. The reverse destination-2323/6969 packets and forward TCP 8443 must pass. Fill the corrected binding and Check example.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "PracticeClient": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "practice-clients",
+                    "up": true,
+                    "address": {
+                      "address": "172.23.5.11",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "172.23.5.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "UnusedPeer": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "practice-clients",
+                    "up": true,
+                    "address": {
+                      "address": "172.23.5.12",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "172.23.5.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "PracticeGate": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "practice-clients",
+                    "up": true,
+                    "address": {
+                      "address": "172.23.5.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "practice-service",
+                    "up": true,
+                    "address": {
+                      "address": "172.23.9.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "PracticeService": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "practice-service",
+                    "up": true,
+                    "address": {
+                      "address": "172.23.9.22",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "172.23.9.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "PracticeClient": "lan",
+            "UnusedPeer": "lan",
+            "PracticeService": "lan"
+          },
+          "devices": {
+            "PracticeGate": {
+              "policy": {
+                "schema_version": 1,
+                "lists": {
+                  "sample-direction": {
+                    "kind": "extended",
+                    "rules": [
+                      {
+                        "id": "row-1",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "tcp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 2323
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "id": "row-2",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "udp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 6969
+                            }
+                          }
+                        }
+                      },
+                      {
+                        "id": "row-3",
+                        "action": "permit",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "ip"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "attachments": {
+                "clients": {
+                  "inbound": null,
+                  "outbound": "sample-direction"
+                }
+              }
+            }
+          }
+        },
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "PracticeClient": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "practice-clients",
+                      "up": true,
+                      "address": {
+                        "address": "172.23.5.11",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "172.23.5.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "UnusedPeer": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "practice-clients",
+                      "up": true,
+                      "address": {
+                        "address": "172.23.5.12",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "172.23.5.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "PracticeGate": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "practice-clients",
+                      "up": true,
+                      "address": {
+                        "address": "172.23.5.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "practice-service",
+                      "up": true,
+                      "address": {
+                        "address": "172.23.9.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "PracticeService": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "practice-service",
+                      "up": true,
+                      "address": {
+                        "address": "172.23.9.22",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "172.23.9.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "PracticeClient": "lan",
+              "UnusedPeer": "lan",
+              "PracticeService": "lan"
+            },
+            "devices": {
+              "PracticeGate": {
+                "policy": {
+                  "schema_version": 1,
+                  "lists": {
+                    "sample-direction": {
+                      "kind": "extended",
+                      "rules": [
+                        {
+                          "id": "row-1",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "tcp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 2323
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "row-2",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "udp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 6969
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "id": "row-3",
+                          "action": "permit",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "ip"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "attachments": {
+                  "clients": {
+                    "inbound": null,
+                    "outbound": "sample-direction"
+                  }
+                }
+              }
+            }
+          },
+          "cases": [
+            {
+              "id": "forward-web",
+              "label": "PracticeClient TCP 8443 stays allowed",
+              "flow": {
+                "source": {
+                  "device": "PracticeClient",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "PracticeService",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "reverse-tcp",
+              "label": "PracticeService TCP destination 2323 stays allowed",
+              "flow": {
+                "source": {
+                  "device": "PracticeService",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "PracticeClient",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 2323
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "reverse-udp",
+              "label": "PracticeService UDP destination 6969 stays allowed",
+              "flow": {
+                "source": {
+                  "device": "PracticeService",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "PracticeClient",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 6969
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "forward-tcp",
+              "label": "PracticeClient TCP 2323 is blocked",
+              "flow": {
+                "source": {
+                  "device": "PracticeClient",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "PracticeService",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 2323
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "PracticeGate",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "forward-udp",
+              "label": "PracticeClient UDP 6969 is blocked",
+              "flow": {
+                "source": {
+                  "device": "PracticeClient",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "PracticeService",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 6969
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "PracticeGate",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "example_documents": {
+          "schema_version": 1,
+          "routers": {
+            "PracticeGate": "ip access-list extended sample-direction\n deny tcp any any eq 2323\n deny udp any any eq 6969\n permit ip any any\nexit\ninterface clients\n ip access-group sample-direction in\nexit\n"
+          }
+        },
+        "try_change": {
+          "description": "After it passes, replace in with out on the clients binding and Check example. Both forward blocked-service checks become allowed, and both reverse checks are denied. Refill/check to restore the required direction.",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "PracticeGate": "ip access-list extended sample-direction\n deny tcp any any eq 2323\n deny udp any any eq 6969\n permit ip any any\nexit\ninterface clients\n ip access-group sample-direction out\nexit\n"
+            }
+          },
+          "expected": {
+            "forward-web": true,
+            "reverse-tcp": false,
+            "reverse-udp": false,
+            "forward-tcp": false,
+            "forward-udp": false
+          }
+        }
+      }
+    },
+    {
+      "id": "ccna-acl-policy-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "IPv4 access control",
+      "unit": "ipv4-access-policy",
+      "title": "Handover the archive and portal policies",
+      "summary": "Repair source restrictions and ordered service rules across two routers without collateral blocking.",
+      "objective": "Complete the supplied traffic table: Staff may use Archive on TCP 443, UDP 53 and TCP 22; Visitor's TCP 443/UDP 53 to Archive must stop at Core/archive out. Preserve the allowed Portal rows, but TCP 22 from either client to Portal must stop at Edge/clients in. Keep the two independent reverse checks allowed. Repair both documents and verify all 13 outcomes; routing and addresses stay fixed.",
+      "retry_guidance": "Start with the first failed traffic check. Compare its direction, first matching rule and protocol/ports, then retry. Required allowed traffic must still pass.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Understand the traffic requirements",
+        "Edit and verify the policy"
+      ],
+      "guide": [],
+      "explanation": "Edge's corrected inbound extended list denies only TCP destination22 to Portal before its broad permit. Core's outbound Archive source list permits Staff and denies Visitor on the two required Archive checks. Portal UDP22 and Staff's Archive TCP22 distinguish the protocol/destination scopes. Independent reverse packets cross neither protected outbound/inbound direction, so they stay allowed. All current checks must pass together; fixing one router alone is partial work.",
+      "hints": [
+        "Group failed checks by their required boundary. Archive source access and Portal service access are separate policy jobs.",
+        "A source list on Core/transit in also inspects Portal-bound traffic. Compare that placement with the required archive out boundary, and inspect which client's address is permitted.",
+        "On Edge, the precise Portal TCP22 rule must precede the broad permit and attach clients in. On Core, permit Staff at archive out; explicit or implicit denials are valid if every stated flow passes."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html",
+        "https://www.cisco.com/c/en/us/td/docs/ios-xml/ios/sec_data_acl/configuration/15-sy/sec-data-acl-15-sy-book/sec-access-list-ov.html",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-acl-seq-num.html"
+      ],
+      "simplifications": "Sources checked 2026-10-23. This native editor replaces each router's complete modeled ACL document; omitted sections are removed. Interface labels are supplied virtual names, not full IOS interface CLI. Only listed one-way packet metadata flows in this fixed topology are verified; request/reply cases are independent, not TCP sessions. No host execution, real packets, device CLI, IPv6, fragments, NAT, TCP flags/established, logging/counters, implicit automatic numbering or arbitrary service-policy guarantee. Empty ACL sections and unsupported syntax report limitations. This is illustrative partial CCNA v1.1 5.6 practice, not full exam coverage or endorsement; coverage remains unchanged pending review.",
+      "initial": {
+        "kind": "Ipv4Acl",
+        "network": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Staff": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "Edge-clients",
+                    "up": true,
+                    "address": {
+                      "address": "10.80.1.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.80.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Visitor": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "Edge-clients",
+                    "up": true,
+                    "address": {
+                      "address": "10.80.1.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.80.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Archive": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "Core-store",
+                    "up": true,
+                    "address": {
+                      "address": "10.90.1.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.90.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Portal": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "Core-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.90.2.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.90.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Edge": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "Edge-clients",
+                    "up": true,
+                    "address": {
+                      "address": "10.80.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  "transit": {
+                    "link": "Edge-transit",
+                    "up": true,
+                    "address": {
+                      "address": "10.80.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "10.90.1.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.80.0.2",
+                    "distance": 1
+                  },
+                  {
+                    "destination": {
+                      "address": "10.90.2.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.80.0.2",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Core": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "Edge-transit",
+                    "up": true,
+                    "address": {
+                      "address": "10.80.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "archive": {
+                    "link": "Core-store",
+                    "up": true,
+                    "address": {
+                      "address": "10.90.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  "portal": {
+                    "link": "Core-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.90.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "10.80.1.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.80.0.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "Staff": "lan",
+            "Visitor": "lan",
+            "Archive": "lan",
+            "Portal": "lan"
+          },
+          "devices": {
+            "Edge": {
+              "policy": {
+                "schema_version": 1,
+                "lists": {
+                  "portal-services": {
+                    "kind": "extended",
+                    "rules": [
+                      {
+                        "id": "seq-10",
+                        "action": "permit",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "protocol": {
+                            "kind": "ip"
+                          }
+                        }
+                      },
+                      {
+                        "id": "seq-20",
+                        "action": "deny",
+                        "selector": {
+                          "kind": "extended",
+                          "source": {
+                            "base": "0.0.0.0",
+                            "wildcard": "255.255.255.255"
+                          },
+                          "destination": {
+                            "base": "10.90.2.20",
+                            "wildcard": "0.0.0.0"
+                          },
+                          "protocol": {
+                            "kind": "tcp",
+                            "source_port": {
+                              "kind": "any"
+                            },
+                            "destination_port": {
+                              "kind": "eq",
+                              "port": 22
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "attachments": {
+                "clients": {
+                  "inbound": null,
+                  "outbound": "portal-services"
+                }
+              }
+            },
+            "Core": {
+              "policy": {
+                "schema_version": 1,
+                "lists": {
+                  "archive-users": {
+                    "kind": "standard",
+                    "rules": [
+                      {
+                        "id": "row-1",
+                        "action": "permit",
+                        "selector": {
+                          "kind": "standard",
+                          "source": {
+                            "base": "10.80.1.20",
+                            "wildcard": "0.0.0.0"
+                          }
+                        }
+                      }
+                    ]
+                  }
+                }
+              },
+              "attachments": {
+                "transit": {
+                  "inbound": "archive-users",
+                  "outbound": null
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Acl",
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "Staff": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "Edge-clients",
+                      "up": true,
+                      "address": {
+                        "address": "10.80.1.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.80.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Visitor": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "Edge-clients",
+                      "up": true,
+                      "address": {
+                        "address": "10.80.1.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.80.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Archive": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "Core-store",
+                      "up": true,
+                      "address": {
+                        "address": "10.90.1.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.90.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Portal": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "Core-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.90.2.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.90.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Edge": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "Edge-clients",
+                      "up": true,
+                      "address": {
+                        "address": "10.80.1.1",
+                        "prefix": 24
+                      }
+                    },
+                    "transit": {
+                      "link": "Edge-transit",
+                      "up": true,
+                      "address": {
+                        "address": "10.80.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "10.90.1.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.80.0.2",
+                      "distance": 1
+                    },
+                    {
+                      "destination": {
+                        "address": "10.90.2.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.80.0.2",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Core": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "transit": {
+                      "link": "Edge-transit",
+                      "up": true,
+                      "address": {
+                        "address": "10.80.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "archive": {
+                      "link": "Core-store",
+                      "up": true,
+                      "address": {
+                        "address": "10.90.1.1",
+                        "prefix": 24
+                      }
+                    },
+                    "portal": {
+                      "link": "Core-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.90.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "10.80.1.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.80.0.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "Staff": "lan",
+              "Visitor": "lan",
+              "Archive": "lan",
+              "Portal": "lan"
+            },
+            "devices": {
+              "Edge": {
+                "policy": {
+                  "schema_version": 1,
+                  "lists": {
+                    "portal-services": {
+                      "kind": "extended",
+                      "rules": [
+                        {
+                          "id": "seq-10",
+                          "action": "permit",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "protocol": {
+                              "kind": "ip"
+                            }
+                          }
+                        },
+                        {
+                          "id": "seq-20",
+                          "action": "deny",
+                          "selector": {
+                            "kind": "extended",
+                            "source": {
+                              "base": "0.0.0.0",
+                              "wildcard": "255.255.255.255"
+                            },
+                            "destination": {
+                              "base": "10.90.2.20",
+                              "wildcard": "0.0.0.0"
+                            },
+                            "protocol": {
+                              "kind": "tcp",
+                              "source_port": {
+                                "kind": "any"
+                              },
+                              "destination_port": {
+                                "kind": "eq",
+                                "port": 22
+                              }
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "attachments": {
+                  "clients": {
+                    "inbound": null,
+                    "outbound": "portal-services"
+                  }
+                }
+              },
+              "Core": {
+                "policy": {
+                  "schema_version": 1,
+                  "lists": {
+                    "archive-users": {
+                      "kind": "standard",
+                      "rules": [
+                        {
+                          "id": "row-1",
+                          "action": "permit",
+                          "selector": {
+                            "kind": "standard",
+                            "source": {
+                              "base": "10.80.1.20",
+                              "wildcard": "0.0.0.0"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  }
+                },
+                "attachments": {
+                  "transit": {
+                    "inbound": "archive-users",
+                    "outbound": null
+                  }
+                }
+              }
+            }
+          },
+          "cases": [
+            {
+              "id": "staff-archive-web",
+              "label": "Staff to Archive TCP 443 allowed",
+              "flow": {
+                "source": {
+                  "device": "Staff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Archive",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "staff-archive-dns",
+              "label": "Staff to Archive UDP 53 allowed",
+              "flow": {
+                "source": {
+                  "device": "Staff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Archive",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 53
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "staff-archive-ssh",
+              "label": "Staff to Archive TCP 22 allowed",
+              "flow": {
+                "source": {
+                  "device": "Staff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Archive",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "visitor-portal-web",
+              "label": "Visitor to Portal TCP 443 allowed",
+              "flow": {
+                "source": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "visitor-portal-dns",
+              "label": "Visitor to Portal UDP 53 allowed",
+              "flow": {
+                "source": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 53
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "staff-portal-web",
+              "label": "Staff to Portal TCP 443 allowed",
+              "flow": {
+                "source": {
+                  "device": "Staff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "visitor-portal-udp22",
+              "label": "Visitor to Portal UDP 22 allowed",
+              "flow": {
+                "source": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "archive-return",
+              "label": "Archive TCP 443 source to Visitor 50000 allowed",
+              "flow": {
+                "source": {
+                  "device": "Archive",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 443,
+                  "destination_port": 50000
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "portal-return",
+              "label": "Portal TCP 22 source to Staff 50000 allowed",
+              "flow": {
+                "source": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Staff",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 22,
+                  "destination_port": 50000
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "visitor-archive-web",
+              "label": "Visitor TCP 443 blocked at Core archive out",
+              "flow": {
+                "source": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Archive",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Core",
+                    "interface": "archive",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "visitor-archive-dns",
+              "label": "Visitor UDP 53 blocked at Core archive out",
+              "flow": {
+                "source": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Archive",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 53
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Core",
+                    "interface": "archive",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "staff-portal-ssh",
+              "label": "Staff TCP 22 blocked at Edge clients in",
+              "flow": {
+                "source": {
+                  "device": "Staff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Edge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "visitor-portal-ssh",
+              "label": "Visitor TCP 22 blocked at Edge clients in",
+              "flow": {
+                "source": {
+                  "device": "Visitor",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Edge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "acl-author {\"kind\":\"ApplyDocuments\",\"documents\":{\"schema_version\":1,\"routers\":{\"Edge\":\"ip access-list extended portal-services\\n 5 deny tcp any host 10.90.2.20 eq 22\\n 10 permit ip any any\\nexit\\ninterface clients\\n ip access-group portal-services in\\nexit\\n\",\"Core\":\"ip access-list standard archive-users\\n permit host 10.80.1.10\\nexit\\ninterface archive\\n ip access-group archive-users out\\nexit\\n\"}}}"
+      ],
+      "prerequisites": [
+        "ccna-acl-direction-repair"
+      ],
+      "acl_teaching": {
+        "prerequisite_note": "Combine the preceding source, service-order and direction activities. Network routes are already correct and fixed; work on policy documents, not routing workarounds.",
+        "concepts": [
+          {
+            "title": "Two independent boundaries",
+            "text": "A source-only list on SampleCore/archive out protects the store. An extended list on SampleEdge/clients in rejects only the listed TCP service toward the site. A source filter on the shared transit link would also affect the site, so placement matters."
+          },
+          {
+            "title": "Preserve the other service and direction",
+            "text": "A TCP service deny must not accidentally block the same-numbered UDP check, the permitted destination, or independent reverse packets. No session is inferred: each displayed row is one explicit direction and protocol/port tuple."
+          },
+          {
+            "title": "Check the complete handover",
+            "text": "Edit both router documents before Check configuration. All drafts apply together or none does. A blank document clears that router's modeled policy, not the other router. Every required allowed and denied row must pass from the same current network."
+          }
+        ],
+        "example_description": "SampleGuest must not reach SampleStore on TCP 8080/UDP 5353, while SampleStaff TCP 8080 works. Block both clients' TCP 2323 to SampleSite, keep its TCP 8443/UDP 2323 and the listed reverse packet working. Fill both documents, then Check example.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "SampleStaff": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "SampleEdge-clients",
+                    "up": true,
+                    "address": {
+                      "address": "10.180.1.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.180.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleGuest": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "SampleEdge-clients",
+                    "up": true,
+                    "address": {
+                      "address": "10.180.1.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.180.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleStore": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "SampleCore-store",
+                    "up": true,
+                    "address": {
+                      "address": "10.190.1.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.190.1.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleSite": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "SampleCore-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.190.2.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.190.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleEdge": {
+                "forwarding": true,
+                "interfaces": {
+                  "clients": {
+                    "link": "SampleEdge-clients",
+                    "up": true,
+                    "address": {
+                      "address": "10.180.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  "transit": {
+                    "link": "SampleEdge-transit",
+                    "up": true,
+                    "address": {
+                      "address": "10.180.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "10.190.1.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.180.0.2",
+                    "distance": 1
+                  },
+                  {
+                    "destination": {
+                      "address": "10.190.2.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.180.0.2",
+                    "distance": 1
+                  }
+                ]
+              },
+              "SampleCore": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "SampleEdge-transit",
+                    "up": true,
+                    "address": {
+                      "address": "10.180.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "archive": {
+                    "link": "SampleCore-store",
+                    "up": true,
+                    "address": {
+                      "address": "10.190.1.1",
+                      "prefix": 24
+                    }
+                  },
+                  "portal": {
+                    "link": "SampleCore-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.190.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "10.180.1.0",
+                      "length": 24
+                    },
+                    "interface": "transit",
+                    "via": "10.180.0.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "SampleStaff": "lan",
+            "SampleGuest": "lan",
+            "SampleStore": "lan",
+            "SampleSite": "lan"
+          },
+          "devices": {}
+        },
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "SampleStaff": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "SampleEdge-clients",
+                      "up": true,
+                      "address": {
+                        "address": "10.180.1.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.180.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleGuest": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "SampleEdge-clients",
+                      "up": true,
+                      "address": {
+                        "address": "10.180.1.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.180.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleStore": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "SampleCore-store",
+                      "up": true,
+                      "address": {
+                        "address": "10.190.1.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.190.1.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleSite": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "SampleCore-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.190.2.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.190.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleEdge": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "clients": {
+                      "link": "SampleEdge-clients",
+                      "up": true,
+                      "address": {
+                        "address": "10.180.1.1",
+                        "prefix": 24
+                      }
+                    },
+                    "transit": {
+                      "link": "SampleEdge-transit",
+                      "up": true,
+                      "address": {
+                        "address": "10.180.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "10.190.1.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.180.0.2",
+                      "distance": 1
+                    },
+                    {
+                      "destination": {
+                        "address": "10.190.2.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.180.0.2",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "SampleCore": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "transit": {
+                      "link": "SampleEdge-transit",
+                      "up": true,
+                      "address": {
+                        "address": "10.180.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "archive": {
+                      "link": "SampleCore-store",
+                      "up": true,
+                      "address": {
+                        "address": "10.190.1.1",
+                        "prefix": 24
+                      }
+                    },
+                    "portal": {
+                      "link": "SampleCore-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.190.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "10.180.1.0",
+                        "length": 24
+                      },
+                      "interface": "transit",
+                      "via": "10.180.0.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "SampleStaff": "lan",
+              "SampleGuest": "lan",
+              "SampleStore": "lan",
+              "SampleSite": "lan"
+            },
+            "devices": {}
+          },
+          "cases": [
+            {
+              "id": "staff-store",
+              "label": "SampleStaff to SampleStore TCP 8080 allowed",
+              "flow": {
+                "source": {
+                  "device": "SampleStaff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "guest-site",
+              "label": "SampleGuest to SampleSite TCP 8443 allowed",
+              "flow": {
+                "source": {
+                  "device": "SampleGuest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "site-udp",
+              "label": "SampleGuest to SampleSite UDP 2323 allowed",
+              "flow": {
+                "source": {
+                  "device": "SampleGuest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 2323
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "reverse",
+              "label": "SampleStore to SampleGuest TCP 8080 allowed",
+              "flow": {
+                "source": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleGuest",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "guest-store-tcp",
+              "label": "SampleGuest to SampleStore TCP 8080 blocked",
+              "flow": {
+                "source": {
+                  "device": "SampleGuest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleCore",
+                    "interface": "archive",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "guest-store-udp",
+              "label": "SampleGuest to SampleStore UDP 5353 blocked",
+              "flow": {
+                "source": {
+                  "device": "SampleGuest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleStore",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 50000,
+                  "destination_port": 5353
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleCore",
+                    "interface": "archive",
+                    "direction": "outbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "staff-site-tcp",
+              "label": "SampleStaff to SampleSite TCP 2323 blocked",
+              "flow": {
+                "source": {
+                  "device": "SampleStaff",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 2323
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleEdge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            },
+            {
+              "id": "guest-site-tcp",
+              "label": "SampleGuest to SampleSite TCP 2323 blocked",
+              "flow": {
+                "source": {
+                  "device": "SampleGuest",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "SampleSite",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 2323
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "SampleEdge",
+                    "interface": "clients",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "example_documents": {
+          "schema_version": 1,
+          "routers": {
+            "SampleEdge": "ip access-list extended sample-site\n deny tcp any host 10.190.2.20 eq 2323\n permit ip any any\nexit\ninterface clients\n ip access-group sample-site in\nexit\n",
+            "SampleCore": "ip access-list standard sample-store\n permit host 10.180.1.10\nexit\ninterface archive\n ip access-group sample-store out\nexit\n"
+          }
+        },
+        "try_change": {
+          "description": "After all checks pass, clear only SampleCore's document and Check example. The two store denials stop passing because SampleGuest now reaches it; the site service policy and all allowed checks remain correct. Refill/check both documents to repair.",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "SampleCore": ""
+            }
+          },
+          "expected": {
+            "staff-store": true,
+            "guest-site": true,
+            "site-udp": true,
+            "reverse": true,
+            "guest-store-tcp": false,
+            "guest-store-udp": false,
+            "staff-site-tcp": true,
+            "guest-site-tcp": true
+          }
+        }
+      }
+    }
+  ]
+}

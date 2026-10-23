@@ -14,9 +14,12 @@ pub struct Filter {
 pub fn matches(s: &Scenario, f: &Filter, started: bool, complete: bool, favorite: bool) -> bool {
     let q = f.search.to_lowercase();
     (q.is_empty()
-        || format!("{} {} {} {}", s.title, s.summary, s.topic, s.track)
-            .to_lowercase()
-            .contains(&q))
+        || format!(
+            "{} {} {} {} {}",
+            s.title, s.summary, s.objective, s.topic, s.track
+        )
+        .to_lowercase()
+        .contains(&q))
         && (f.track.is_empty() || f.track == s.track)
         && (f.topic.is_empty() || f.topic == s.topic)
         && (f.unit.is_empty() || f.unit == s.unit)

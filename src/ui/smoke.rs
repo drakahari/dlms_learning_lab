@@ -2,6 +2,7 @@
 //! The safe development runner supplies disk-backed temporary directories.
 use super::*;
 mod acl;
+mod acl_lessons;
 mod capture_lessons;
 mod substitution;
 impl LabApp {
@@ -287,6 +288,20 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 8700..=8740 => {
+                let (advance, capture) = self.acl_lessons_layout(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 8200..=8599 => {
+                let (advance, capture) = self.acl_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ (7600..=7639 | 7660..=7666) => {
                 let (advance, capture) = self.acl_native(ctx, n);
                 if !advance {

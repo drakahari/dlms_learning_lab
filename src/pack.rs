@@ -87,6 +87,8 @@ pub fn load_file(path: &std::path::Path) -> Result<Vec<Scenario>, String> {
     load(&text)
 }
 pub const MAX_PACK_BYTES: usize = 2_000_000;
+/// Shared authoring/filter labels; difficulty is advisory, never a mastery gate.
+pub const DIFFICULTIES: [&str; 3] = ["Beginner", "Intermediate", "Advanced"];
 pub fn load(text: &str) -> Result<Vec<Scenario>, String> {
     if text.len() > MAX_PACK_BYTES {
         return Err("Pack exceeds 2 MB".into());
@@ -112,7 +114,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         }
         if s.version == 0
             || !["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"].contains(&s.track.as_str())
-            || !["Beginner", "Intermediate"].contains(&s.difficulty.as_str())
+            || !DIFFICULTIES.contains(&s.difficulty.as_str())
             || s.minutes == 0
             || s.retry_guidance.len() > 1000
             || s.minutes > 180
@@ -661,5 +663,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/discovery-v1.json"),
         include_str!("../scenarios/storage-v1.json"),
         include_str!("../scenarios/shell-capture-v1.json"),
+        include_str!("../scenarios/acl-policy-v1.json"),
     ])
 }

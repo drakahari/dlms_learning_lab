@@ -14,7 +14,7 @@ fn scenario(id: &str) -> pack::Scenario {
 fn solution(s: &pack::Scenario) -> State {
     let mut state = s.initial.clone();
     for cmd in &s.solution {
-        engine::execute(&mut state, cmd).unwrap();
+        engine::execute_for_goal(&mut state, &s.goal, cmd).unwrap();
     }
     if let (State::Script { source, run }, engine::Goal::Script { cases }) = (&mut state, &s.goal) {
         *run = Some(dlms_learning_lab::shell::Record {
@@ -347,7 +347,10 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::Discovery { simulation } = &mut a.state {
+        if let State::Ipv4Acl { network } = &mut a.state {
+            // Removing the real policies permits every forbidden flow again.
+            network.devices.clear();
+        } else if let State::Discovery { simulation } = &mut a.state {
             let mut wrong = simulation.topology().clone();
             for device in wrong.devices.values_mut() {
                 device.enabled = false;

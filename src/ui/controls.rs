@@ -66,6 +66,21 @@ pub fn label(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f32) {
         ui.add(egui::Label::new(text).wrap());
     });
 }
+/// Read-only table cells keep body text readable without reserving an input's click target.
+pub fn table_height(ui: &egui::Ui) -> f32 {
+    ui.text_style_height(&egui::TextStyle::Body).ceil() + 8.
+}
+pub fn table_text(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f32) {
+    let row_height = table_height(ui);
+    ui.allocate_ui_with_layout(
+        egui::vec2(width, row_height),
+        egui::Layout::left_to_right(egui::Align::Center),
+        |ui| {
+            ui.set_width(width);
+            ui.add(egui::Label::new(text).wrap());
+        },
+    );
+}
 pub fn topology_frame(ui: &egui::Ui) -> egui::Frame {
     egui::Frame::new()
         .fill(palette(ui).input)

@@ -8,6 +8,9 @@ fn app() -> (egui::Context, LabApp) {
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].acl_teaching.is_some() {
+        a.set_acl_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].storage_teaching.is_some() {
         a.set_storage_view(i, teaching::View::Assignment);
     }
@@ -6269,4 +6272,65 @@ fn acl_native_tab_change_focuses_the_new_editor_in_the_same_rendered_frame() {
             .values()
             .any(|s| s == "new assignment only")
     );
+}
+
+#[test]
+fn acl_authored_units_keep_full_assignments_tables_editors_and_optional_challenge_at_all_scales() {
+    for id in [
+        "ccna-acl-source-policy",
+        "ccna-acl-service-order",
+        "ccna-acl-direction-repair",
+        "ccna-acl-policy-handover",
+    ] {
+        for (width, height, scale) in [(1200., 850., 1.), (720., 560., 1.5), (960., 900., 2.)] {
+            let (ctx, mut a) = app();
+            let i = a
+                .scenarios
+                .iter()
+                .position(|s| s.id == id)
+                .expect("authored ACL lesson registered");
+            a.scale = scale;
+            a.launch(i);
+            for (view, challenge) in [
+                (teaching::View::Introduction, false),
+                (teaching::View::Example, false),
+                (teaching::View::Assignment, false),
+                (teaching::View::Assignment, true),
+            ] {
+                a.progress.attempts.get_mut(id).unwrap().challenge = challenge;
+                a.set_acl_view(i, view);
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                assert!(!a.metrics.help_visible);
+                if challenge {
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+                for r in a
+                    .metrics
+                    .acl_diagram
+                    .iter()
+                    .chain(a.metrics.acl_router.iter())
+                    .chain(a.metrics.editor_viewport.iter())
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{id} {view:?} {width}/{scale}: {r:?} vs {:?}",
+                        ctx.content_rect()
+                    );
+                }
+                if view != teaching::View::Introduction || challenge {
+                    assert!(a.metrics.editor_viewport.is_some() && a.metrics.check.is_some());
+                }
+                assert_eq!(a.progress.attempts[id].state, a.scenarios[i].initial);
+                assert!(!progress::current_solved(
+                    &a.progress.attempts[id],
+                    &a.scenarios[i]
+                ));
+            }
+        }
+    }
 }

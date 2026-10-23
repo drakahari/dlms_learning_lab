@@ -322,16 +322,16 @@ fn traffic_table(ui: &mut egui::Ui, definition: &editor::Definition) {
         let flow_width=(width-space*(if wide{2.}else{1.}))*if wide{0.30}else{0.58};
         let service_width=(width-2.*space)*0.32;
         let result_width=if wide {width-flow_width-service_width-2.*space}else{width-flow_width-space};
-        egui::Grid::new("required-acl-traffic").num_columns(if wide{3}else{2}).spacing(egui::vec2(space,4.)).striped(true).show(ui,|ui| {
-            controls::label(ui,RichText::new(if wide{"From / To"}else{"Packet"}).strong(),flow_width);
-            if wide {controls::label(ui,RichText::new("Protocol and ports").strong(),service_width);}
-            controls::label(ui,RichText::new("Required result").strong(),result_width);ui.end_row();
+        egui::Grid::new("required-acl-traffic").min_row_height(controls::table_height(ui)).num_columns(if wide{3}else{2}).spacing(egui::vec2(space,4.)).striped(true).show(ui,|ui| {
+            controls::table_text(ui,RichText::new(if wide{"From / To"}else{"Packet"}).strong(),flow_width);
+            if wide {controls::table_text(ui,RichText::new("Protocol and ports").strong(),service_width);}
+            controls::table_text(ui,RichText::new("Required result").strong(),result_width);ui.end_row();
             for case in &definition.cases {
                 let flow=format!("{} to {}",case.flow.source.device,case.flow.destination.device);
                 let service=protocol(case.flow.protocol);
-                controls::label(ui,if wide{flow}else{format!("{flow}\n{service}")},flow_width);
-                if wide {controls::label(ui,service,service_width);}
-                controls::label(ui,match &case.expectation {
+                controls::table_text(ui,if wide{flow}else{format!("{flow}\n{service}")},flow_width);
+                if wide {controls::table_text(ui,service,service_width);}
+                controls::table_text(ui,match &case.expectation {
                     editor::Expectation::Allowed{}=>"Allow".into(),
                     editor::Expectation::Denied{expected}=>format!("Block at {}/{} {}",expected.at.device,expected.at.interface,match expected.at.direction { dlms_learning_lab::acl_routing::Direction::Inbound=>"in",dlms_learning_lab::acl_routing::Direction::Outbound=>"out" }),
                 },result_width);ui.end_row();
@@ -396,11 +396,12 @@ fn configuration(
                 .selected_text(draft.selected_router.as_deref().unwrap_or("Choose router"))
                 .show_ui(ui, |ui| {
                     for router in draft.documents.routers.keys() {
-                        ui.selectable_value(
+                        let option = ui.selectable_value(
                             &mut draft.selected_router,
                             Some(router.clone()),
                             router,
                         );
+                        metrics.acl_router_items.push((router.clone(), option.rect));
                     }
                 });
             name_control(&r.response, "Selected virtual router");
@@ -568,22 +569,128 @@ fn diagram(ui: &mut egui::Ui, network: &Network, metrics: &mut Metrics) {
             return;
         }
     }
-    for (name, device) in &network.topology.devices {
-        ui.label(RichText::new(name).strong());
-        for (port, interface) in &device.interfaces {
-            ui.add(
-                egui::Label::new(format!(
-                    "{port} · link {} · {} · {}",
-                    interface.link,
-                    if interface.up { "Up" } else { "Down" },
-                    interface
-                        .address
+    let info = |name: &str| {
+        network.topology.devices[name]
+            .interfaces
+            .iter()
+            .map(|(port, i)| {
+                format!(
+                    "{port}: {}",
+                    i.address
                         .as_ref()
                         .map(|a| format!("{}/{}", a.address, a.prefix))
                         .unwrap_or_else(|| "No address".into())
-                ))
-                .wrap(),
-            );
+                )
+            })
+            .collect::<Vec<_>>()
+            .join(" · ")
+    };
+    let connected = |a: &str, b: &str| {
+        network.topology.devices[a].interfaces.values().any(|p| {
+            network.topology.devices[b]
+                .interfaces
+                .values()
+                .any(|q| p.link == q.link)
+        })
+    };
+    let hosts: Vec<_> = network.host_endpoints.keys().map(String::as_str).collect();
+    if routers.len() == 1 && hosts.len() == 3 && network.topology.devices.len() == 4 {
+        let router = routers[0].0.as_str();
+        if hosts.iter().all(|h| connected(h, router)) {
+            let addresses: Vec<_> = hosts.iter().map(|h| info(h)).collect();
+            let hub = info(router);
+            let peers: Vec<_> = hosts
+                .iter()
+                .zip(&addresses)
+                .map(|(name, address)| [*name, address.as_str(), "Endpoint"])
+                .collect();
+            let diagram=ui.scope(|ui|controls::topology_star(
+                ui,
+                [router, &hub, "Virtual router"],
+                &peers,
+                "Shared virtual segments connect these endpoints to the router; this is not a physical cabling diagram.",
+            ));
+            if diagram.inner {
+                metrics.acl_diagram = Some(diagram.response.rect);
+                return;
+            }
         }
     }
+    if routers.len() == 2 && hosts.len() == 2 && network.topology.devices.len() == 4 {
+        let first = hosts[0];
+        let last = hosts[1];
+        let r0 = routers[0].0.as_str();
+        let r1 = routers[1].0.as_str();
+        let path = [(r0, r1), (r1, r0)].into_iter().find_map(|(r, other)| {
+            (connected(first, r)
+                && !connected(first, other)
+                && connected(r, other)
+                && connected(other, last)
+                && !connected(r, last))
+            .then_some([first, r, other, last])
+        });
+        if let Some(names) = path {
+            let addresses: Vec<_> = names.iter().map(|n| info(n)).collect();
+            let cards: Vec<_> = names
+                .iter()
+                .zip(&addresses)
+                .enumerate()
+                .map(|(i, (name, address))| {
+                    [
+                        *name,
+                        address.as_str(),
+                        if i == 0 || i == 3 {
+                            "Endpoint"
+                        } else {
+                            "Virtual router"
+                        },
+                    ]
+                })
+                .collect();
+            let response = controls::topology_chain(
+                ui,
+                &cards,
+                "Supplied virtual path · Router interface labels and addresses stay fixed in this policy task.",
+            );
+            metrics.acl_diagram = Some(response.rect);
+            return;
+        }
+    }
+    ui.label(RichText::new("Supplied virtual links and addresses").strong());
+    ui.label(
+        RichText::new("Ports with the same link name share a virtual segment.")
+            .small()
+            .color(palette(ui).muted),
+    );
+    let width = ui.available_width();
+    let name_width = (width * 0.22).clamp(60., 160.).min(width / 2.);
+    let area = egui::Grid::new("acl-topology-table")
+        .min_row_height(controls::table_height(ui))
+        .num_columns(2)
+        .spacing(egui::vec2(controls::GAP, 6.))
+        .striped(true)
+        .show(ui, |ui| {
+            for (name, device) in &network.topology.devices {
+                controls::table_text(ui, RichText::new(name).strong(), name_width);
+                let rows = device
+                    .interfaces
+                    .iter()
+                    .map(|(port, i)| {
+                        format!(
+                            "{port}: {} · {} · link {}",
+                            i.address
+                                .as_ref()
+                                .map(|a| format!("{}/{}", a.address, a.prefix))
+                                .unwrap_or_else(|| "No address".into()),
+                            if i.up { "Up" } else { "Down" },
+                            i.link
+                        )
+                    })
+                    .collect::<Vec<_>>()
+                    .join("\n");
+                controls::table_text(ui, rows, (width - name_width - controls::GAP).max(1.));
+                ui.end_row();
+            }
+        });
+    metrics.acl_diagram = Some(area.response.rect);
 }

@@ -1,0 +1,223 @@
+{
+  "version": 1,
+  "scope": "Authored deterministic reference, alternate and plausible incorrect policy documents; synthetic test data only.",
+  "plans": [
+    {
+      "id": "ccna-acl-source-policy",
+      "reference": {
+        "schema_version": 1,
+        "routers": {
+          "Gateway": "ip access-list standard vault-source\n permit host 192.0.2.10\nexit\ninterface service\n ip access-group vault-source out\nexit\n"
+        }
+      },
+      "alternatives": [
+        {
+          "name": "explicit-deny-then-permit",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Gateway": "ip access-list standard visitors\n 10 deny host 192.0.2.20\n 20 permit any\nexit\ninterface service\n ip access-group visitors out\nexit\n"
+            }
+          }
+        }
+      ],
+      "negatives": [
+        {
+          "name": "wrong-required-boundary",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Gateway": "ip access-list standard vault-source\n permit host 192.0.2.10\nexit\ninterface clients\n ip access-group vault-source in\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "filter-removed",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Gateway": ""
+            }
+          }
+        }
+      ],
+      "omissions": [
+        "Remove the service attachment: both Guest checks must fail.",
+        "Reverse the host source to Guest: Admin positives must fail, with no successful denial credit from deny-all."
+      ],
+      "protected_route_attack": "Remove Guest's default route or set Gateway.forwarding false; grade must reject pinned context, never count route failure as policy denial."
+    },
+    {
+      "id": "ccna-acl-service-order",
+      "reference": {
+        "schema_version": 1,
+        "routers": {
+          "Edge": "ip access-list extended office-services\n 20 permit ip any any\n 10 deny tcp any host 10.20.9.30 eq 22\nexit\ninterface clients\n ip access-group office-services in\nexit\n"
+        }
+      },
+      "alternatives": [
+        {
+          "name": "unnumbered-permits-and-implicit-denial",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "ip access-list extended select-services\n permit tcp any any eq 443\n permit tcp any any eq 8443\n permit udp any any\nexit\ninterface clients\n ip access-group select-services in\nexit\n"
+            }
+          }
+        }
+      ],
+      "negatives": [
+        {
+          "name": "shadowed-original",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "ip access-list extended office-services\n 10 permit ip any any\n 30 deny tcp any host 10.20.9.30 eq 22\nexit\ninterface clients\n ip access-group office-services in\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "wrong-protocol",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "ip access-list extended office-services\n deny udp any host 10.20.9.30 eq 22\n permit ip any any\nexit\ninterface clients\n ip access-group office-services in\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "no-attached-policy",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": ""
+            }
+          }
+        }
+      ],
+      "omissions": [
+        "Remove the deny while retaining the broad permit: both TCP22 negatives fail.",
+        "Change destination-port22 into a source-port22 test: Support's source22 positive and both source50000 negatives expose the mistake.",
+        "Deny all protocols at numeric port22 is not supported grammar; denying all IP toward Portal breaks required positives."
+      ],
+      "protected_route_attack": "Remove Portal's default route; pinned context must reject, even if a blocked test cannot get there."
+    },
+    {
+      "id": "ccna-acl-direction-repair",
+      "reference": {
+        "schema_version": 1,
+        "routers": {
+          "Branch": "ip access-list extended old-services\n deny tcp any any eq 23\n deny udp any any eq 69\n permit ip any any\nexit\ninterface clients\n ip access-group old-services in\nexit\n"
+        }
+      },
+      "alternatives": [
+        {
+          "name": "required-forward-permits-with-implicit-denial",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Branch": "ip access-list extended client-required\n permit tcp any any eq 22\n permit udp any any eq 53\nexit\ninterface clients\n ip access-group client-required in\nexit\n"
+            }
+          }
+        }
+      ],
+      "negatives": [
+        {
+          "name": "unchanged-wrong-direction",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Branch": "ip access-list extended old-services\n deny tcp any any eq 23\n deny udp any any eq 69\n permit ip any any\nexit\ninterface clients\n ip access-group old-services out\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "duplicated-in-and-out",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Branch": "ip access-list extended old-services\n deny tcp any any eq 23\n deny udp any any eq 69\n permit ip any any\nexit\ninterface clients\n ip access-group old-services in\n ip access-group old-services out\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "remove-filter",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Branch": ""
+            }
+          }
+        }
+      ],
+      "omissions": [
+        "Leave out while adding in: forward negatives pass but both required reverse checks fail.",
+        "Attach at Campus/service out instead: forward packet may be denied, but the required Branch/clients-in boundary is not satisfied."
+      ],
+      "protected_route_attack": "Remove Branch's server network route or stop Campus/transit; grade must reject pinned network and never award ACL denial credit."
+    },
+    {
+      "id": "ccna-acl-policy-handover",
+      "reference": {
+        "schema_version": 1,
+        "routers": {
+          "Edge": "ip access-list extended portal-services\n 5 deny tcp any host 10.90.2.20 eq 22\n 10 permit ip any any\nexit\ninterface clients\n ip access-group portal-services in\nexit\n",
+          "Core": "ip access-list standard archive-users\n permit host 10.80.1.10\nexit\ninterface archive\n ip access-group archive-users out\nexit\n"
+        }
+      },
+      "alternatives": [
+        {
+          "name": "selective-edge-permits-explicit-core-deny",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "ip access-list extended edge-policy\n permit tcp any host 10.90.1.20 range 0 65535\n permit tcp any any eq 443\n permit udp any any\nexit\ninterface clients\n ip access-group edge-policy in\nexit\n",
+              "Core": "ip access-list standard store-policy\n 10 deny host 10.80.1.20\n 20 permit any\nexit\ninterface archive\n ip access-group store-policy out\nexit\n"
+            }
+          }
+        }
+      ],
+      "negatives": [
+        {
+          "name": "edge-only-repaired",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "ip access-list extended portal-services\n 5 deny tcp any host 10.90.2.20 eq 22\n 10 permit ip any any\nexit\ninterface clients\n ip access-group portal-services in\nexit\n",
+              "Core": "ip access-list standard archive-users\n permit host 10.80.1.20\nexit\ninterface transit\n ip access-group archive-users in\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "core-only-repaired",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "ip access-list extended portal-services\n 10 permit ip any any\n 20 deny tcp any host 10.90.2.20 eq 22\nexit\ninterface clients\n ip access-group portal-services out\nexit\n",
+              "Core": "ip access-list standard archive-users\n permit host 10.80.1.10\nexit\ninterface archive\n ip access-group archive-users out\nexit\n"
+            }
+          }
+        },
+        {
+          "name": "both-policy-documents-cleared",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "Edge": "",
+              "Core": ""
+            }
+          }
+        }
+      ],
+      "omissions": [
+        "Leave Edge clients out: both Portal negatives fail.",
+        "Keep broad permit ahead of Portal deny: both Portal negatives fail.",
+        "Keep Visitor as Core's permitted source: Staff positives fail and Visitor negatives fail.",
+        "Keep Core transit binding instead of archive out: denial location and Portal positives fail.",
+        "Attach a blanket deny to Archive: Staff positive checks prevent successful denial credit.",
+        "Broaden Portal deny to all IP or TCP22 to every destination: UDP22 or ArchiveTCP22 positive guards fail."
+      ],
+      "protected_route_attack": "Stop Core/archive, remove Edge's Archive route, or relocate Archive's address to a router; fixed context/endpoint ownership must reject rather than convert failed delivery into policy success."
+    }
+  ]
+}

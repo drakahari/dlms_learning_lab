@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **90 authored assignments:** 23 CCNA,17 LPIC-1,13 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **94 authored assignments:** 27 CCNA,17 LPIC-1,13 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -107,3 +107,5 @@ Original code and authored curriculum are licensed under [MIT](LICENSE), approve
 Four [counter and totals assignments](docs/SHELL_COUNTS.md) add sequential virtual-file input, stable record numbering, whole-cent costs, guarded division/remainder and a preflight multi-file count capstone. Small valid integer inputs and read-only active-source limitations are explicit; no arbitrary numeric validation or floating-point behavior is claimed.
 
 Four [access-policy assignments](docs/LINUX_ACCESS.md) continue LPIC-1 file foundations: group sharing, directory write/search versus browsing, updating another owner's existing files, and a metadata-preserving handover. The native terminal keeps the complete assignment visible with separate saved examples and optional guidance.
+
+Four native IPv4 access-policy assignments now add source filtering, ordered service rules, direction diagnosis and a two-router handover. See [ACL_LESSONS.md](docs/ACL_LESSONS.md) for exact verification and limits. Source additions are separate from the older installed Fedora candidate listed in INSTALLATION.md.

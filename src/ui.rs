@@ -41,6 +41,7 @@ struct Metrics {
     address_diagram: Option<egui::Rect>,
     acl_diagram: Option<egui::Rect>,
     acl_router: Option<egui::Rect>,
+    acl_router_items: Vec<(String, egui::Rect)>,
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
     data_export: Option<egui::Rect>,
@@ -263,8 +264,12 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-layout")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit-layout")
             {
+                8700
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit") {
+                8200
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-layout") {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
@@ -1238,7 +1243,7 @@ impl LabApp {
                                     "difficulty",
                                     "Any difficulty",
                                     &mut self.filter.difficulty,
-                                    ["Beginner", "Intermediate"].into_iter(),
+                                    pack::DIFFICULTIES.into_iter(),
                                     width,
                                 ),
                                 1 => combo(

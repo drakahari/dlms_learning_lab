@@ -86,3 +86,26 @@ fn unsupported_reader_ceiling_returns_a_diagnostic_without_overflow_or_data_chan
     );
     assert_eq!(fs::read(path).unwrap(), b"retained");
 }
+
+#[test]
+fn advisory_difficulty_labels_are_shared_with_filters_and_unknown_tags_still_fail() {
+    use dlms_learning_lab::catalog::{self, Filter};
+    let mut value: serde_json::Value =
+        serde_json::from_str(include_str!("../scenarios/starter-v1.json")).unwrap();
+    for difficulty in pack::DIFFICULTIES {
+        value["scenarios"][0]["difficulty"] = difficulty.into();
+        let labs = pack::load(&value.to_string()).unwrap();
+        let filter = Filter {
+            difficulty: difficulty.into(),
+            ..Default::default()
+        };
+        assert!(catalog::matches(&labs[0], &filter, false, false, false));
+        let mismatch = Filter {
+            difficulty: "Unknown".into(),
+            ..Default::default()
+        };
+        assert!(!catalog::matches(&labs[0], &mismatch, false, false, false));
+    }
+    value["scenarios"][0]["difficulty"] = "Expert".into();
+    assert!(pack::load(&value.to_string()).is_err());
+}

@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **90 authored assignments in21 units:23CCNA,17LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **94 authored assignments in22 units:27CCNA,17LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -101,3 +101,7 @@ Four distinct LPIC-2 assignments now teach stable supplied identity, saved versu
 Four distinct assignments teach intact captured lists, newline-preserving report evidence, helper output versus status, and a guarded preview/save batch capstone with shared ledger and isolated caller values. New examples use different data, stay ungraded and retain their own drafts/results. The approved full native editor task remains in Learn and Challenge; only guidance differs. Catalog90/twenty-one units:23CCNA/17LPIC-1/13LPIC-2/37Bash. See SHELL_CAPTURE_LESSONS.md for cases, alternatives, exact limits and validation.
 
 LPIC-1 current v5.0 objectives and105.2 were rechecked2026-10-23. Only105.2.K2 gains narrow Partial practice for supported original-source dollar-parenthesis capture. Parent105.2 and return-status K3 evidence strengthens without full coverage; mail, executable/shebang/account policy and wider shell behavior stay Open.112Partial/1Supporting/1127Open overlapping references are not completion percentages. The full inventory fingerprints retain2026-10-22. This unit does not claim full Bash/POSIX fidelity, certification preparation or learner mastery.
+
+## IPv4 access-policy unit — M62
+
+Four distinct source/service-order/direction/two-boundary assignments now add narrowly Partial current CCNA5.6 practice. Their full native tasks have31 graded packets,22 separate example packets, alternatives/negative/invalidation tests and actual Fedora input/render acceptance. Current-source catalog94/22units:27CCNA/17LPIC-1/13LPIC-2/37Bash. The overlapping matrix now has113Partial/1Supporting/1126Open; it is not a completion percentage. Arbitrary wildcard, full IOS/hardware, IPv6 ACL and wider verification gaps remain explicit. Official v1.1/5.6 and technical sources rechecked2026-10-23; futurev2.0 remains separate. See ACL_LESSONS.md. This source milestone is not yet a new installed candidate.
