@@ -54,3 +54,5 @@ pub mod dns_workspace;
 pub mod processes;
 
 pub mod process_teaching;
+
+pub mod discovery;
