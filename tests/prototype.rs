@@ -347,7 +347,13 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::Processes { table } = &mut a.state {
+        if let State::Discovery { simulation } = &mut a.state {
+            let mut wrong = simulation.topology().clone();
+            for device in wrong.devices.values_mut() {
+                device.enabled = false;
+            }
+            simulation.reconfigure(wrong).unwrap();
+        } else if let State::Processes { table } = &mut a.state {
             // Every authored process task preserves its current session controller.
             // Breaking that real requirement must still yield a resumable attempt.
             let output = table

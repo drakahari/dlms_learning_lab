@@ -534,6 +534,81 @@ fn action_notice(result: ActionResult) -> String {
     }
 }
 fn topology_cards(ui: &mut egui::Ui, t: &net::Topology) {
+    if (2..=3).contains(&t.links.len())
+        && let Some((hub, device)) = t.devices.iter().find(|(name, _)| {
+            t.links
+                .iter()
+                .all(|l| &l.a.device == *name || &l.b.device == *name)
+        })
+    {
+        let peers: Vec<_> = t
+            .links
+            .iter()
+            .map(|l| {
+                if &l.a.device == hub {
+                    &l.b.device
+                } else {
+                    &l.a.device
+                }
+            })
+            .collect();
+        let unique: std::collections::BTreeSet<_> = peers.iter().copied().collect();
+        if unique.len() == peers.len() && peers.len() + 1 == t.devices.len() {
+            let labels: Vec<_> = peers
+                .iter()
+                .map(|name| {
+                    let d = &t.devices[*name];
+                    [
+                        name.as_str(),
+                        d.system_name.as_deref().unwrap_or("Name not supplied"),
+                        if d.enabled {
+                            "LLDP enabled"
+                        } else {
+                            "LLDP disabled"
+                        },
+                    ]
+                })
+                .collect();
+            let caption = t
+                .links
+                .iter()
+                .map(|l| {
+                    format!(
+                        "{}/{} - {}/{} ({})",
+                        l.a.device,
+                        l.a.port,
+                        l.b.device,
+                        l.b.port,
+                        if l.up
+                            && t.devices[&l.a.device].ports[&l.a.port].up
+                            && t.devices[&l.b.device].ports[&l.b.port].up
+                        {
+                            "Up"
+                        } else {
+                            "Down"
+                        }
+                    )
+                })
+                .collect::<Vec<_>>()
+                .join(" · ");
+            if controls::topology_star(
+                ui,
+                [
+                    hub,
+                    device.system_name.as_deref().unwrap_or("Name not supplied"),
+                    if device.enabled {
+                        "LLDP enabled"
+                    } else {
+                        "LLDP disabled"
+                    },
+                ],
+                &labels,
+                &caption,
+            ) {
+                return;
+            }
+        }
+    }
     for l in &t.links {
         let a = &t.devices[&l.a.device];
         let b = &t.devices[&l.b.device];

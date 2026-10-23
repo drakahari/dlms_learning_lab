@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus thirty-three scripting assignments in eight units and ten Linux file/access assignments, plus six IPv6 static-network assignments and four VLAN data-plane assignments, plus six IPv4 static-routing assignments and six forward-DNS assignments, plus four Linux process assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is the original nine authored assignments plus thirty-three scripting assignments in eight units and ten Linux file/access assignments, plus six IPv6 static-network assignments and four VLAN data-plane assignments, plus six IPv4 static-routing assignments and six forward-DNS assignments, plus four Linux process assignments and four LLDP discovery assignments. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -26,7 +26,7 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 | --- | --- | --- |
 | `ccna-ipv4` | Conventional IPv4 boundaries and second host | No IPv6 or device CLI; /31 and /32 excluded |
 | `ccna-vlsm` | Host-capacity allocation, alignment, containment, overlap | No routed topology configuration |
-| `ccna-ipv6-neighbor` … `ccna-ipv6-handover` | Six native IPv6 addressing/static-route tasks with return paths and deterministic failover | No dynamic ND/RA/SLAAC, full address-type course, IOS, IPv4 routing or dynamic routing; objectives1.8/1.9/3.3 stay partial |
+| `ccna-ipv6-neighbor` … `ccna-ipv6-handover` | Six native IPv6 addressing/static-route tasks with return paths and deterministic failover | No dynamic ND/RA/SLAAC, full address-type course, IOS or dynamic routing; objectives1.8/1.9/3.3 stay partial |
 | `ccna-gateway` | Client mask/next-hop diagnosis | One topology; no IOS, ARP, multi-hop protocols or cross-OS command coverage |
 | `lpic1-file-navigation` … `lpic1-file-handover` | Six file-management tasks: paths, quoted names, copy/move, cleanup, creation mask and capstone | No globs, recursive operations, links, ownership changes or full GNU option surface |
 | `lpic1-permissions` | Alex-only file access and privacy; alternate repairs | No ACL, SELinux or full Unix filesystem |
@@ -86,3 +86,7 @@ M44 adds four distinct Bash-specific indexed-list assignments in the eighth shel
 ## Process lifecycle and priority continuation — M47
 
 Four authored LPIC-1 assignments extend Linux foundations through ownership-aware inspection, safe pause, pending termination, absolute niceness and a parent/child handover. Each has a separate editable practice table and full independent terminal task. Existing74 IDs/versions/initials/goals stay unchanged. Catalog78/eighteen units:19CCNA,17LPIC-1,9LPIC-2,33Bash. Narrow evidence is108Partial/1Supporting/1131Open of1240 overlapping references, not completion percentages. Default/inherited nice is explained, not assessed through process creation. See PROCESS_LESSONS.md and PROCESS_SUBSET.md.
+
+## LLDP discovery continuation — M50
+
+Four authored CCNA assignments teach receive direction, stale advertised inventory, selective transmit/reception and a multi-attachment recovery. Each retains a separate runnable example and a full native editing/verification task. Current CCNA v1.1 2.3 gains narrow LLDP Partial practice only; CDP/IOS/automatic scheduling/full TLVs and equipment conformance remain absent. Current official v1.1 PDF and exam overview rechecked2026-10-23. Existing78 definitions/progress unchanged. Catalog82/nineteen units:23CCNA,17LPIC-1,9LPIC-2,33Bash.109Partial/1Supporting/1130Open references remain overlapping gap/evidence bookkeeping, not percentages.

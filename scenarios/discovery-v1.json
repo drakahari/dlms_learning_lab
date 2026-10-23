@@ -1,0 +1,3219 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-lldp-receive",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "lldp-discovery",
+      "topic": "LLDP neighbor discovery",
+      "title": "Restore both discovery directions",
+      "summary": "Diagnose independent transmit and receive behavior on a live access link.",
+      "objective": "Distribution can send toward Access, but its access port does not receive. Restore two-way LLDP discovery by changing only Receive on distribution/access to enabled. Apply the setting and explicitly send from access/uplink and distribution/access. Each receiving port must then show its directly attached peer as current. Preserve every other global/port setting, both identities and the live physical link; leave the unused spare port unchanged.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply",
+        "Verify current results"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A live cable and one visible neighbor do not establish two-way discovery.",
+          "action": "Distribution can send toward Access, but its access port does not receive. Restore two-way LLDP discovery by changing only Receive on distribution/access to enabled. Apply the setting and explicitly send from access/uplink and distribution/access. Each receiving port must then show its directly attached peer as current. Preserve every other global/port setting, both identities and the live physical link; leave the unused spare port unchanged.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and apply",
+          "why": "Compare transmit/receive independently on each endpoint before changing the requested receive control.",
+          "action": "Use the topology, device selector and native global/port fields to inspect and edit the requested settings. Apply settings before sending. Send now acts on the selected local port and its applied configuration; it is not a command interpreter. Preserve the assignment constraints while choosing your own action order.",
+          "commands": []
+        },
+        {
+          "title": "Verify current results",
+          "why": "An advertisement records the sender at the receiving port; both current receiving rows are required.",
+          "action": "Inspect the neighbor row under each receiving local port. Check current work after applying drafts and explicitly sending where needed. Use the editable simulated-second field only when you intend to age records; it never schedules advertisements. Reset restores only this attempt and its separate practice.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Send from each side and compare which receiving row is missing.",
+        "The distribution port can transmit even while its Receive control is off. Repair Receive without changing Transmit or physical Up.",
+        "Apply only distribution/access Receive, then send once from each endpoint and inspect the opposite receiving port."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9600/software/release/17-18/configuration_guide/int_hw/b_1718_int_and_hw_9600_cg/configuring_lldp__lldp_med__and_wired_location_service.html",
+        "https://www.ieee802.org/1/files/public/docs2025/new-bottorff-lldp-for-lsvr-0425-v00.pdf"
+      ],
+      "simplifications": "Native in-memory LLDP subset only: locally assigned chassis/port identities on fixed point-to-point Ethernet links; no real packets, IOS CLI, CDP, forwarding, LLDP-MED or full IEEE 802.1AB conformance. Advertisements and whole-second time advances are explicit; there is no automatic periodic or configuration-change advertisement. A live transmitter disable uses the modeled graceful TTL-zero withdrawal. Current cache checks use simulator knowledge of present delivery and advertised fields. No physical-device, security-policy enforcement or complete CCNA objective claim.",
+      "explanation": "Distribution/access initially rejects Access advertisements while its own transmission can reach Access. Enabling Receive repairs that direction. Configuration alone does not create either cache row, so explicitly sending from both endpoints supplies the two current neighbor records. The spare port and the whole fixed configuration remain part of the result.",
+      "retry_guidance": "Use the first unmet current outcome to decide which local port, applied setting or cached advertisement to inspect. Unapplied drafts cannot earn current success. After correcting sender fields, refresh from that sender. Dropping a physical link or changing unrelated settings fails preservation even if a cache becomes empty.",
+      "initial": {
+        "kind": "Discovery",
+        "simulation": {
+          "topology": {
+            "devices": {
+              "access": {
+                "chassis_id": "access-chassis",
+                "system_name": "Access",
+                "enabled": true,
+                "ttl": 30,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To distribution",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "spare": {
+                    "port_id": "spare",
+                    "description": "Leave this spare port unchanged",
+                    "up": true,
+                    "transmit": false,
+                    "receive": true
+                  }
+                }
+              },
+              "distribution": {
+                "chassis_id": "distribution-chassis",
+                "system_name": "Distribution",
+                "enabled": true,
+                "ttl": 30,
+                "ports": {
+                  "access": {
+                    "port_id": "access",
+                    "description": "To access",
+                    "up": true,
+                    "transmit": true,
+                    "receive": false
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "access-wire",
+                "a": {
+                  "device": "access",
+                  "port": "uplink"
+                },
+                "b": {
+                  "device": "distribution",
+                  "port": "access"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": []
+        }
+      },
+      "goal": {
+        "kind": "Discovery",
+        "initial": {
+          "devices": {
+            "access": {
+              "chassis_id": "access-chassis",
+              "system_name": "Access",
+              "enabled": true,
+              "ttl": 30,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To distribution",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "spare": {
+                  "port_id": "spare",
+                  "description": "Leave this spare port unchanged",
+                  "up": true,
+                  "transmit": false,
+                  "receive": true
+                }
+              }
+            },
+            "distribution": {
+              "chassis_id": "distribution-chassis",
+              "system_name": "Distribution",
+              "enabled": true,
+              "ttl": 30,
+              "ports": {
+                "access": {
+                  "port_id": "access",
+                  "description": "To access",
+                  "up": true,
+                  "transmit": true,
+                  "receive": false
+                }
+              }
+            }
+          },
+          "links": [
+            {
+              "id": "access-wire",
+              "a": {
+                "device": "access",
+                "port": "uplink"
+              },
+              "b": {
+                "device": "distribution",
+                "port": "access"
+              },
+              "up": true
+            }
+          ]
+        },
+        "requirements": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "access",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "distribution",
+              "port": "access"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "distribution",
+              "port": "access"
+            },
+            "peer": {
+              "device": "access",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "access": {
+                  "chassis_id": "access-chassis",
+                  "system_name": "Access",
+                  "enabled": true,
+                  "ttl": 30,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To distribution",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "spare": {
+                      "port_id": "spare",
+                      "description": "Leave this spare port unchanged",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    }
+                  }
+                },
+                "distribution": {
+                  "chassis_id": "distribution-chassis",
+                  "system_name": "Distribution",
+                  "enabled": true,
+                  "ttl": 30,
+                  "ports": {
+                    "access": {
+                      "port_id": "access",
+                      "description": "To access",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "access-wire",
+                  "a": {
+                    "device": "access",
+                    "port": "uplink"
+                  },
+                  "b": {
+                    "device": "distribution",
+                    "port": "access"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "solution": [
+        "discovery {\"kind\":\"port_configuration\",\"local\":{\"device\":\"distribution\",\"port\":\"access\"},\"up\":true,\"transmit\":true,\"receive\":true,\"description\":\"To access\"}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"access\",\"port\":\"uplink\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"distribution\",\"port\":\"access\"}}"
+      ],
+      "prerequisites": [],
+      "discovery_teaching": {
+        "prerequisite_note": "Read named devices and ports. Earlier VLAN work helps with physical attachments; LLDP is a separate link-local discovery protocol and does not prove VLAN data delivery.",
+        "concepts": [
+          {
+            "title": "A neighbor belongs to a local port",
+            "text": "Directly connected devices use LLDP to share who they are and which port is connected (Link Layer Discovery Protocol). The receiving device keeps this information under its local port. Chassis ID identifies the sending device; port ID identifies its sending port. Names describe devices but are not these fixed identifiers. This information is not forwarded through another port."
+          },
+          {
+            "title": "One direction does not prove the other",
+            "text": "Transmit and Receive are independent controls. A port with receive disabled can still send. Both devices and both local ports must be enabled and physically up for two-way learning. A current row also requires delivery to remain possible now."
+          },
+          {
+            "title": "Apply settings, then send explicitly",
+            "text": "Applying the draft changes configuration but does not create or refresh neighbor records. Some configuration changes can remove old records. Send now transmits one advertisement from one selected local port using applied settings. Send from each side when both receiving inventories must be populated. This native simulation does not interpret IOS commands."
+          },
+          {
+            "title": "Cached time is simulated time",
+            "text": "The sender advertises a lifetime (TTL) in seconds. Advance time ages the records but never sends for you. Exactly at the expiry timestamp the row disappears. CDP and automatic LLDP scheduling are not modeled."
+          }
+        ],
+        "example_description": "The sensor and collector share one live link. The collector can transmit, but its sensor port does not receive. Enable receive on that port, apply, then send from the sensor and collector separately.",
+        "fixture": {
+          "topology": {
+            "devices": {
+              "practice-sensor": {
+                "chassis_id": "practice-sensor-chassis",
+                "system_name": "Practice-Sensor",
+                "enabled": true,
+                "ttl": 8,
+                "ports": {
+                  "link": {
+                    "port_id": "link",
+                    "description": "To practice collector",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "practice-collector": {
+                "chassis_id": "practice-collector-chassis",
+                "system_name": "Practice-Collector",
+                "enabled": true,
+                "ttl": 8,
+                "ports": {
+                  "sensor": {
+                    "port_id": "sensor",
+                    "description": "To practice sensor",
+                    "up": true,
+                    "transmit": true,
+                    "receive": false
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "sensor-wire",
+                "a": {
+                  "device": "practice-sensor",
+                  "port": "link"
+                },
+                "b": {
+                  "device": "practice-collector",
+                  "port": "sensor"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": []
+        },
+        "example_solution": [
+          {
+            "kind": "port_configuration",
+            "local": {
+              "device": "practice-collector",
+              "port": "sensor"
+            },
+            "up": true,
+            "transmit": true,
+            "receive": true,
+            "description": "To practice sensor"
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-sensor",
+              "port": "link"
+            }
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-collector",
+              "port": "sensor"
+            }
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-sensor",
+              "port": "link"
+            },
+            "peer": {
+              "device": "practice-collector",
+              "port": "sensor"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-collector",
+              "port": "sensor"
+            },
+            "peer": {
+              "device": "practice-sensor",
+              "port": "link"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "practice-sensor": {
+                  "chassis_id": "practice-sensor-chassis",
+                  "system_name": "Practice-Sensor",
+                  "enabled": true,
+                  "ttl": 8,
+                  "ports": {
+                    "link": {
+                      "port_id": "link",
+                      "description": "To practice collector",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "practice-collector": {
+                  "chassis_id": "practice-collector-chassis",
+                  "system_name": "Practice-Collector",
+                  "enabled": true,
+                  "ttl": 8,
+                  "ports": {
+                    "sensor": {
+                      "port_id": "sensor",
+                      "description": "To practice sensor",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "sensor-wire",
+                  "a": {
+                    "device": "practice-sensor",
+                    "port": "link"
+                  },
+                  "b": {
+                    "device": "practice-collector",
+                    "port": "sensor"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After both rows are current, enter 8 seconds and choose Advance time. Both rows expire exactly at that boundary. Inspect the empty caches while all repaired settings and the link remain unchanged; send again to learn a current row.",
+          "actions": [
+            {
+              "kind": "advance",
+              "seconds": 8
+            }
+          ],
+          "outcomes": [
+            {
+              "kind": "absent_neighbor",
+              "local": {
+                "device": "practice-sensor",
+                "port": "link"
+              }
+            },
+            {
+              "kind": "absent_neighbor",
+              "local": {
+                "device": "practice-collector",
+                "port": "sensor"
+              }
+            },
+            {
+              "kind": "configuration",
+              "expected": {
+                "devices": {
+                  "practice-sensor": {
+                    "chassis_id": "practice-sensor-chassis",
+                    "system_name": "Practice-Sensor",
+                    "enabled": true,
+                    "ttl": 8,
+                    "ports": {
+                      "link": {
+                        "port_id": "link",
+                        "description": "To practice collector",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "practice-collector": {
+                    "chassis_id": "practice-collector-chassis",
+                    "system_name": "Practice-Collector",
+                    "enabled": true,
+                    "ttl": 8,
+                    "ports": {
+                      "sensor": {
+                        "port_id": "sensor",
+                        "description": "To practice sensor",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  }
+                },
+                "links": [
+                  {
+                    "id": "sensor-wire",
+                    "a": {
+                      "device": "practice-sensor",
+                      "port": "link"
+                    },
+                    "b": {
+                      "device": "practice-collector",
+                      "port": "sensor"
+                    },
+                    "up": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ccna-lldp-inventory",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "lldp-discovery",
+      "topic": "LLDP neighbor discovery",
+      "title": "Refresh an advertised inventory change",
+      "summary": "Update device-wide and port-specific information without accepting stale peer caches.",
+      "objective": "Inventory currently records Atlas-Old on the archive and camera attachments. Change only Atlas system name to Atlas-Storage, its advertised lifetime from 12 to 45 seconds, and atlas/archive description to Archive uplink. Apply the edits and refresh the Atlas advertisement received by both Archive and Camera. All four receiving local ports must have current directly attached peer records. Preserve the reverse peers, atlas/camera description, spare port, all enable/up controls, fixed identities and both live links. Existing unexpired old metadata is not current inventory.",
+      "difficulty": "Beginner",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply",
+        "Verify current results"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "An existing cache can outlive the configuration it describes.",
+          "action": "Inventory currently records Atlas-Old on the archive and camera attachments. Change only Atlas system name to Atlas-Storage, its advertised lifetime from 12 to 45 seconds, and atlas/archive description to Archive uplink. Apply the edits and refresh the Atlas advertisement received by both Archive and Camera. All four receiving local ports must have current directly attached peer records. Preserve the reverse peers, atlas/camera description, spare port, all enable/up controls, fixed identities and both live links. Existing unexpired old metadata is not current inventory.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and apply",
+          "why": "Determine which fields apply to the whole device and which belong only to the archive port.",
+          "action": "Use the topology, device selector and native global/port fields to inspect and edit the requested settings. Apply settings before sending. Send now acts on the selected local port and its applied configuration; it is not a command interpreter. Preserve the assignment constraints while choosing your own action order.",
+          "commands": []
+        },
+        {
+          "title": "Verify current results",
+          "why": "The receiving peers must record the new advertised fields; a correct editor alone is partial.",
+          "action": "Inspect the neighbor row under each receiving local port. Check current work after applying drafts and explicitly sending where needed. Use the editable simulated-second field only when you intend to age records; it never schedules advertisements. Reset restores only this attempt and its separate practice.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Compare the advertised fields in the Atlas settings with the records stored under Archive and Camera.",
+        "Atlas name and TTL affect both of its links; the requested port description changes only atlas/archive.",
+        "After applying all three requested edits, send from both Atlas ports. Keep the reverse neighbor records current and preserve unrelated configuration."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9600/software/release/17-18/configuration_guide/int_hw/b_1718_int_and_hw_9600_cg/configuring_lldp__lldp_med__and_wired_location_service.html",
+        "https://www.ieee802.org/1/files/public/docs2025/new-bottorff-lldp-for-lsvr-0425-v00.pdf"
+      ],
+      "simplifications": "Native in-memory LLDP subset only: locally assigned chassis/port identities on fixed point-to-point Ethernet links; no real packets, IOS CLI, CDP, forwarding, LLDP-MED or full IEEE 802.1AB conformance. Advertisements and whole-second time advances are explicit; there is no automatic periodic or configuration-change advertisement. A live transmitter disable uses the modeled graceful TTL-zero withdrawal. Current cache checks use simulator knowledge of present delivery and advertised fields. No physical-device, security-policy enforcement or complete CCNA objective claim.",
+      "explanation": "The Atlas name and TTL are device-wide, so Archive and Camera both need a new Atlas advertisement. The description change belongs only to atlas/archive; atlas/camera stays Camera path: preserve. Old rows may have positive remaining TTL while containing historical fields. Sending from each affected Atlas port replaces that receiver\u2019s cached fields and expiry. Archive and Camera advertise their own unchanged lifetimes in the reverse direction.",
+      "retry_guidance": "Use the first unmet current outcome to decide which local port, applied setting or cached advertisement to inspect. Unapplied drafts cannot earn current success. After correcting sender fields, refresh from that sender. Dropping a physical link or changing unrelated settings fails preservation even if a cache becomes empty.",
+      "initial": {
+        "kind": "Discovery",
+        "simulation": {
+          "topology": {
+            "devices": {
+              "atlas": {
+                "chassis_id": "atlas-chassis",
+                "system_name": "Atlas-Old",
+                "enabled": true,
+                "ttl": 12,
+                "ports": {
+                  "archive": {
+                    "port_id": "archive",
+                    "description": "Old archive cable",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "camera": {
+                    "port_id": "camera",
+                    "description": "Camera path: preserve",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "spare": {
+                    "port_id": "spare",
+                    "description": "Reserve: preserve",
+                    "up": true,
+                    "transmit": false,
+                    "receive": true
+                  }
+                }
+              },
+              "archive": {
+                "chassis_id": "archive-chassis",
+                "system_name": "Archive",
+                "enabled": true,
+                "ttl": 90,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To atlas archive",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "camera": {
+                "chassis_id": "camera-chassis",
+                "system_name": "Camera",
+                "enabled": true,
+                "ttl": 90,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To atlas camera",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "archive-wire",
+                "a": {
+                  "device": "atlas",
+                  "port": "archive"
+                },
+                "b": {
+                  "device": "archive",
+                  "port": "uplink"
+                },
+                "up": true
+              },
+              {
+                "id": "camera-wire",
+                "a": {
+                  "device": "atlas",
+                  "port": "camera"
+                },
+                "b": {
+                  "device": "camera",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": [
+            {
+              "local": {
+                "device": "archive",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "atlas",
+                "port": "archive"
+              },
+              "advertisement": {
+                "chassis_id": "atlas-chassis",
+                "port_id": "archive",
+                "ttl": 12,
+                "system_name": "Atlas-Old",
+                "port_description": "Old archive cable"
+              },
+              "received_at": 0,
+              "expires_at": 12
+            },
+            {
+              "local": {
+                "device": "atlas",
+                "port": "archive"
+              },
+              "peer": {
+                "device": "archive",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "archive-chassis",
+                "port_id": "uplink",
+                "ttl": 90,
+                "system_name": "Archive",
+                "port_description": "To atlas archive"
+              },
+              "received_at": 0,
+              "expires_at": 90
+            },
+            {
+              "local": {
+                "device": "atlas",
+                "port": "camera"
+              },
+              "peer": {
+                "device": "camera",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "camera-chassis",
+                "port_id": "uplink",
+                "ttl": 90,
+                "system_name": "Camera",
+                "port_description": "To atlas camera"
+              },
+              "received_at": 0,
+              "expires_at": 90
+            },
+            {
+              "local": {
+                "device": "camera",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "atlas",
+                "port": "camera"
+              },
+              "advertisement": {
+                "chassis_id": "atlas-chassis",
+                "port_id": "camera",
+                "ttl": 12,
+                "system_name": "Atlas-Old",
+                "port_description": "Camera path: preserve"
+              },
+              "received_at": 0,
+              "expires_at": 12
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Discovery",
+        "initial": {
+          "devices": {
+            "atlas": {
+              "chassis_id": "atlas-chassis",
+              "system_name": "Atlas-Old",
+              "enabled": true,
+              "ttl": 12,
+              "ports": {
+                "archive": {
+                  "port_id": "archive",
+                  "description": "Old archive cable",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "camera": {
+                  "port_id": "camera",
+                  "description": "Camera path: preserve",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "spare": {
+                  "port_id": "spare",
+                  "description": "Reserve: preserve",
+                  "up": true,
+                  "transmit": false,
+                  "receive": true
+                }
+              }
+            },
+            "archive": {
+              "chassis_id": "archive-chassis",
+              "system_name": "Archive",
+              "enabled": true,
+              "ttl": 90,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To atlas archive",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                }
+              }
+            },
+            "camera": {
+              "chassis_id": "camera-chassis",
+              "system_name": "Camera",
+              "enabled": true,
+              "ttl": 90,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To atlas camera",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                }
+              }
+            }
+          },
+          "links": [
+            {
+              "id": "archive-wire",
+              "a": {
+                "device": "atlas",
+                "port": "archive"
+              },
+              "b": {
+                "device": "archive",
+                "port": "uplink"
+              },
+              "up": true
+            },
+            {
+              "id": "camera-wire",
+              "a": {
+                "device": "atlas",
+                "port": "camera"
+              },
+              "b": {
+                "device": "camera",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "requirements": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "atlas",
+              "port": "archive"
+            },
+            "peer": {
+              "device": "archive",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "archive",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "atlas",
+              "port": "archive"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "atlas",
+              "port": "camera"
+            },
+            "peer": {
+              "device": "camera",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "camera",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "atlas",
+              "port": "camera"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "atlas": {
+                  "chassis_id": "atlas-chassis",
+                  "system_name": "Atlas-Storage",
+                  "enabled": true,
+                  "ttl": 45,
+                  "ports": {
+                    "archive": {
+                      "port_id": "archive",
+                      "description": "Archive uplink",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "camera": {
+                      "port_id": "camera",
+                      "description": "Camera path: preserve",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "spare": {
+                      "port_id": "spare",
+                      "description": "Reserve: preserve",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    }
+                  }
+                },
+                "archive": {
+                  "chassis_id": "archive-chassis",
+                  "system_name": "Archive",
+                  "enabled": true,
+                  "ttl": 90,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To atlas archive",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "camera": {
+                  "chassis_id": "camera-chassis",
+                  "system_name": "Camera",
+                  "enabled": true,
+                  "ttl": 90,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To atlas camera",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "archive-wire",
+                  "a": {
+                    "device": "atlas",
+                    "port": "archive"
+                  },
+                  "b": {
+                    "device": "archive",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "camera-wire",
+                  "a": {
+                    "device": "atlas",
+                    "port": "camera"
+                  },
+                  "b": {
+                    "device": "camera",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "solution": [
+        "discovery {\"kind\":\"global_configuration\",\"device\":\"atlas\",\"settings\":{\"enabled\":true,\"ttl\":45,\"system_name\":\"Atlas-Storage\"}}",
+        "discovery {\"kind\":\"port_configuration\",\"local\":{\"device\":\"atlas\",\"port\":\"archive\"},\"up\":true,\"transmit\":true,\"receive\":true,\"description\":\"Archive uplink\"}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"atlas\",\"port\":\"archive\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"atlas\",\"port\":\"camera\"}}"
+      ],
+      "prerequisites": [
+        "ccna-lldp-receive"
+      ],
+      "discovery_teaching": {
+        "prerequisite_note": "Use the preceding two-way discovery workflow. This example introduces advertised system/port text, sender-controlled TTL and stale inventory; different practice identities keep the assignment separate.",
+        "concepts": [
+          {
+            "title": "Names and descriptions describe an identity",
+            "text": "System name is advertised device-wide; port description belongs to the sending port. Changing either does not replace the fixed chassis/port identity. The receive-side cache may continue to display the previous text until another advertisement arrives."
+          },
+          {
+            "title": "The sender supplies the lifetime",
+            "text": "A receiving port ages this sender using the TTL in the received advertisement, not its own device TTL. Updating the sender lifetime does not rewrite the old cached expiry. A new advertisement replaces the cached fields and refreshes the receive timestamp."
+          },
+          {
+            "title": "Current inventory requires refresh",
+            "text": "This simulator marks a still-unexpired row historical when its recorded fields differ from the current sender or delivery no longer works. That simulator-only diagnostic is not a standard LLDP wire field. Apply metadata edits before sending from every affected local port."
+          },
+          {
+            "title": "A global edit can affect several neighbors",
+            "text": "The same system name and lifetime are advertised on every transmitting port of the device. Refresh each attached receiver that the task names, and preserve unrelated port descriptions and peer settings."
+          }
+        ],
+        "example_description": "Both practice caches start populated. Rename the labeler to Practice-Current, set its advertised lifetime to 7 seconds and its link description to Practice inventory link. Apply, inspect the historical remote row, then send from the labeler to refresh it.",
+        "fixture": {
+          "topology": {
+            "devices": {
+              "practice-labeler": {
+                "chassis_id": "practice-labeler-chassis",
+                "system_name": "Practice-Old",
+                "enabled": true,
+                "ttl": 4,
+                "ports": {
+                  "link": {
+                    "port_id": "link",
+                    "description": "Old practice description",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "practice-index": {
+                "chassis_id": "practice-index-chassis",
+                "system_name": "Practice-Index",
+                "enabled": true,
+                "ttl": 20,
+                "ports": {
+                  "source": {
+                    "port_id": "source",
+                    "description": "To practice labeler",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "label-wire",
+                "a": {
+                  "device": "practice-labeler",
+                  "port": "link"
+                },
+                "b": {
+                  "device": "practice-index",
+                  "port": "source"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": [
+            {
+              "local": {
+                "device": "practice-index",
+                "port": "source"
+              },
+              "peer": {
+                "device": "practice-labeler",
+                "port": "link"
+              },
+              "advertisement": {
+                "chassis_id": "practice-labeler-chassis",
+                "port_id": "link",
+                "ttl": 4,
+                "system_name": "Practice-Old",
+                "port_description": "Old practice description"
+              },
+              "received_at": 0,
+              "expires_at": 4
+            },
+            {
+              "local": {
+                "device": "practice-labeler",
+                "port": "link"
+              },
+              "peer": {
+                "device": "practice-index",
+                "port": "source"
+              },
+              "advertisement": {
+                "chassis_id": "practice-index-chassis",
+                "port_id": "source",
+                "ttl": 20,
+                "system_name": "Practice-Index",
+                "port_description": "To practice labeler"
+              },
+              "received_at": 0,
+              "expires_at": 20
+            }
+          ]
+        },
+        "example_solution": [
+          {
+            "kind": "global_configuration",
+            "device": "practice-labeler",
+            "settings": {
+              "enabled": true,
+              "ttl": 7,
+              "system_name": "Practice-Current"
+            }
+          },
+          {
+            "kind": "port_configuration",
+            "local": {
+              "device": "practice-labeler",
+              "port": "link"
+            },
+            "up": true,
+            "transmit": true,
+            "receive": true,
+            "description": "Practice inventory link"
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-labeler",
+              "port": "link"
+            }
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-labeler",
+              "port": "link"
+            },
+            "peer": {
+              "device": "practice-index",
+              "port": "source"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-index",
+              "port": "source"
+            },
+            "peer": {
+              "device": "practice-labeler",
+              "port": "link"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "practice-labeler": {
+                  "chassis_id": "practice-labeler-chassis",
+                  "system_name": "Practice-Current",
+                  "enabled": true,
+                  "ttl": 7,
+                  "ports": {
+                    "link": {
+                      "port_id": "link",
+                      "description": "Practice inventory link",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "practice-index": {
+                  "chassis_id": "practice-index-chassis",
+                  "system_name": "Practice-Index",
+                  "enabled": true,
+                  "ttl": 20,
+                  "ports": {
+                    "source": {
+                      "port_id": "source",
+                      "description": "To practice labeler",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "label-wire",
+                  "a": {
+                    "device": "practice-labeler",
+                    "port": "link"
+                  },
+                  "b": {
+                    "device": "practice-index",
+                    "port": "source"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ],
+        "try_change": {
+          "description": "From the refreshed example enter 7 seconds and advance. The index loses the labeler record at its new expiry; the labeler still retains the index record, whose sender lifetime is 20 seconds. No configuration changes are needed.",
+          "actions": [
+            {
+              "kind": "advance",
+              "seconds": 7
+            }
+          ],
+          "outcomes": [
+            {
+              "kind": "absent_neighbor",
+              "local": {
+                "device": "practice-index",
+                "port": "source"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-labeler",
+                "port": "link"
+              },
+              "peer": {
+                "device": "practice-index",
+                "port": "source"
+              }
+            },
+            {
+              "kind": "configuration",
+              "expected": {
+                "devices": {
+                  "practice-labeler": {
+                    "chassis_id": "practice-labeler-chassis",
+                    "system_name": "Practice-Current",
+                    "enabled": true,
+                    "ttl": 7,
+                    "ports": {
+                      "link": {
+                        "port_id": "link",
+                        "description": "Practice inventory link",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "practice-index": {
+                    "chassis_id": "practice-index-chassis",
+                    "system_name": "Practice-Index",
+                    "enabled": true,
+                    "ttl": 20,
+                    "ports": {
+                      "source": {
+                        "port_id": "source",
+                        "description": "To practice labeler",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  }
+                },
+                "links": [
+                  {
+                    "id": "label-wire",
+                    "a": {
+                      "device": "practice-labeler",
+                      "port": "link"
+                    },
+                    "b": {
+                      "device": "practice-index",
+                      "port": "source"
+                    },
+                    "up": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ccna-lldp-transmit-policy",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "lldp-discovery",
+      "topic": "LLDP neighbor discovery",
+      "title": "Keep discovery inbound on the visitor link",
+      "summary": "Stop only one outbound advertisement stream while retaining reception and a healthy attachment.",
+      "objective": "The visitor attachment must stop receiving Border advertisements while Border continues to discover Visitor. Disable only Transmit on border/visitor; keep its Receive and physical Up controls enabled. Apply the change and explicitly send from visitor/uplink so border/visitor records Visitor as current. Visitor must have no cached Border neighbor. Keep Monitor and border/trusted current in both directions. Preserve all other global/port settings, both live links, identities and the spare port. Do not disable a receiver or break a link to manufacture an empty cache.",
+      "difficulty": "Beginner",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply",
+        "Verify current results"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "The requested policy is directional and local to one port.",
+          "action": "The visitor attachment must stop receiving Border advertisements while Border continues to discover Visitor. Disable only Transmit on border/visitor; keep its Receive and physical Up controls enabled. Apply the change and explicitly send from visitor/uplink so border/visitor records Visitor as current. Visitor must have no cached Border neighbor. Keep Monitor and border/trusted current in both directions. Preserve all other global/port settings, both live links, identities and the spare port. Do not disable a receiver or break a link to manufacture an empty cache.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and apply",
+          "why": "Use the Border visitor port\u2019s Transmit control; a global or physical change would also harm required discovery.",
+          "action": "Use the topology, device selector and native global/port fields to inspect and edit the requested settings. Apply settings before sending. Send now acts on the selected local port and its applied configuration; it is not a command interpreter. Preserve the assignment constraints while choosing your own action order.",
+          "commands": []
+        },
+        {
+          "title": "Verify current results",
+          "why": "An empty visitor cache is necessary but cannot replace live inbound and healthy-link outcomes.",
+          "action": "Inspect the neighbor row under each receiving local port. Check current work after applying drafts and explicitly sending where needed. Use the editable simulated-second field only when you intend to age records; it never schedules advertisements. Reset restores only this attempt and its separate practice.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Compare border/visitor Transmit and Receive; they do not need the same value.",
+        "Applying a live transmitter disable triggers this model\u2019s graceful removal at Visitor. Keep Visitor receiving and the link up.",
+        "Send from Visitor toward Border after applying the transmit-only policy; preserve and inspect both Monitor directions."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9600/software/release/17-18/configuration_guide/int_hw/b_1718_int_and_hw_9600_cg/configuring_lldp__lldp_med__and_wired_location_service.html",
+        "https://www.ieee802.org/1/files/public/docs2025/new-bottorff-lldp-for-lsvr-0425-v00.pdf"
+      ],
+      "simplifications": "Native in-memory LLDP subset only: locally assigned chassis/port identities on fixed point-to-point Ethernet links; no real packets, IOS CLI, CDP, forwarding, LLDP-MED or full IEEE 802.1AB conformance. Advertisements and whole-second time advances are explicit; there is no automatic periodic or configuration-change advertisement. A live transmitter disable uses the modeled graceful TTL-zero withdrawal. Current cache checks use simulator knowledge of present delivery and advertised fields. No physical-device, security-policy enforcement or complete CCNA objective claim.",
+      "explanation": "Disabling border/visitor Transmit removes Border\u2019s record at Visitor under this model\u2019s graceful stop behavior. It does not prevent Visitor from advertising into border/visitor while Receive remains enabled. The initial Border visitor cache is empty, so a Visitor advertisement is needed to establish retained inbound discovery. The Monitor attachment and all physical configuration must stay healthy. An empty cache caused by a broken link or disabled Visitor receiver is the wrong result.",
+      "retry_guidance": "Use the first unmet current outcome to decide which local port, applied setting or cached advertisement to inspect. Unapplied drafts cannot earn current success. After correcting sender fields, refresh from that sender. Dropping a physical link or changing unrelated settings fails preservation even if a cache becomes empty.",
+      "initial": {
+        "kind": "Discovery",
+        "simulation": {
+          "topology": {
+            "devices": {
+              "border": {
+                "chassis_id": "border-chassis",
+                "system_name": "Border",
+                "enabled": true,
+                "ttl": 40,
+                "ports": {
+                  "trusted": {
+                    "port_id": "trusted",
+                    "description": "To monitor",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "visitor": {
+                    "port_id": "visitor",
+                    "description": "To visitor",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "spare": {
+                    "port_id": "spare",
+                    "description": "Reserve: preserve",
+                    "up": true,
+                    "transmit": false,
+                    "receive": true
+                  }
+                }
+              },
+              "monitor": {
+                "chassis_id": "monitor-chassis",
+                "system_name": "Monitor",
+                "enabled": true,
+                "ttl": 40,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To border trusted",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "visitor": {
+                "chassis_id": "visitor-chassis",
+                "system_name": "Visitor",
+                "enabled": true,
+                "ttl": 40,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To border visitor",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "trusted-wire",
+                "a": {
+                  "device": "border",
+                  "port": "trusted"
+                },
+                "b": {
+                  "device": "monitor",
+                  "port": "uplink"
+                },
+                "up": true
+              },
+              {
+                "id": "visitor-wire",
+                "a": {
+                  "device": "border",
+                  "port": "visitor"
+                },
+                "b": {
+                  "device": "visitor",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": [
+            {
+              "local": {
+                "device": "border",
+                "port": "trusted"
+              },
+              "peer": {
+                "device": "monitor",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "monitor-chassis",
+                "port_id": "uplink",
+                "ttl": 40,
+                "system_name": "Monitor",
+                "port_description": "To border trusted"
+              },
+              "received_at": 0,
+              "expires_at": 40
+            },
+            {
+              "local": {
+                "device": "monitor",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "border",
+                "port": "trusted"
+              },
+              "advertisement": {
+                "chassis_id": "border-chassis",
+                "port_id": "trusted",
+                "ttl": 40,
+                "system_name": "Border",
+                "port_description": "To monitor"
+              },
+              "received_at": 0,
+              "expires_at": 40
+            },
+            {
+              "local": {
+                "device": "visitor",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "border",
+                "port": "visitor"
+              },
+              "advertisement": {
+                "chassis_id": "border-chassis",
+                "port_id": "visitor",
+                "ttl": 40,
+                "system_name": "Border",
+                "port_description": "To visitor"
+              },
+              "received_at": 0,
+              "expires_at": 40
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Discovery",
+        "initial": {
+          "devices": {
+            "border": {
+              "chassis_id": "border-chassis",
+              "system_name": "Border",
+              "enabled": true,
+              "ttl": 40,
+              "ports": {
+                "trusted": {
+                  "port_id": "trusted",
+                  "description": "To monitor",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "visitor": {
+                  "port_id": "visitor",
+                  "description": "To visitor",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "spare": {
+                  "port_id": "spare",
+                  "description": "Reserve: preserve",
+                  "up": true,
+                  "transmit": false,
+                  "receive": true
+                }
+              }
+            },
+            "monitor": {
+              "chassis_id": "monitor-chassis",
+              "system_name": "Monitor",
+              "enabled": true,
+              "ttl": 40,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To border trusted",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                }
+              }
+            },
+            "visitor": {
+              "chassis_id": "visitor-chassis",
+              "system_name": "Visitor",
+              "enabled": true,
+              "ttl": 40,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To border visitor",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                }
+              }
+            }
+          },
+          "links": [
+            {
+              "id": "trusted-wire",
+              "a": {
+                "device": "border",
+                "port": "trusted"
+              },
+              "b": {
+                "device": "monitor",
+                "port": "uplink"
+              },
+              "up": true
+            },
+            {
+              "id": "visitor-wire",
+              "a": {
+                "device": "border",
+                "port": "visitor"
+              },
+              "b": {
+                "device": "visitor",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "requirements": [
+          {
+            "kind": "absent_neighbor",
+            "local": {
+              "device": "visitor",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "border",
+              "port": "trusted"
+            },
+            "peer": {
+              "device": "monitor",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "monitor",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "border",
+              "port": "trusted"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "border",
+              "port": "visitor"
+            },
+            "peer": {
+              "device": "visitor",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "border": {
+                  "chassis_id": "border-chassis",
+                  "system_name": "Border",
+                  "enabled": true,
+                  "ttl": 40,
+                  "ports": {
+                    "trusted": {
+                      "port_id": "trusted",
+                      "description": "To monitor",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "visitor": {
+                      "port_id": "visitor",
+                      "description": "To visitor",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    },
+                    "spare": {
+                      "port_id": "spare",
+                      "description": "Reserve: preserve",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    }
+                  }
+                },
+                "monitor": {
+                  "chassis_id": "monitor-chassis",
+                  "system_name": "Monitor",
+                  "enabled": true,
+                  "ttl": 40,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To border trusted",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "visitor": {
+                  "chassis_id": "visitor-chassis",
+                  "system_name": "Visitor",
+                  "enabled": true,
+                  "ttl": 40,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To border visitor",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "trusted-wire",
+                  "a": {
+                    "device": "border",
+                    "port": "trusted"
+                  },
+                  "b": {
+                    "device": "monitor",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "visitor-wire",
+                  "a": {
+                    "device": "border",
+                    "port": "visitor"
+                  },
+                  "b": {
+                    "device": "visitor",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "solution": [
+        "discovery {\"kind\":\"port_configuration\",\"local\":{\"device\":\"border\",\"port\":\"visitor\"},\"up\":true,\"transmit\":false,\"receive\":true,\"description\":\"To visitor\"}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"visitor\",\"port\":\"uplink\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"border\",\"port\":\"trusted\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"monitor\",\"port\":\"uplink\"}}"
+      ],
+      "prerequisites": [
+        "ccna-lldp-receive"
+      ],
+      "discovery_teaching": {
+        "prerequisite_note": "Use two-way discovery and current-cache checks. This example introduces a per-port transmit-only policy and preservation of a different healthy attachment.",
+        "concepts": [
+          {
+            "title": "Transmit silence can retain reception",
+            "text": "Turning off Transmit on one port stops its advertisements without disabling Receive. The peer can still advertise toward this port. This is a discovery-information choice, not a data-traffic filter, authentication control or complete security policy."
+          },
+          {
+            "title": "A graceful stop removes the peer record",
+            "text": "On a live link, this model sends a final TTL-zero withdrawal when an enabled transmitter is disabled. The attached receiver removes that sender record. Apply the transmit change, then inspect both receiving inventories."
+          },
+          {
+            "title": "Absence is not proof of correct policy",
+            "text": "A cache can be empty because a receiver or physical link was disabled. This task also requires retained inbound discovery and the entire expected configuration, including link-up state, so those shortcuts fail."
+          },
+          {
+            "title": "Healthy work stays healthy",
+            "text": "Keep the independent audit attachment enabled, physically up and current in both directions. A global disable would affect all ports. After a manual time advance, only explicit sends refresh records."
+          }
+        ],
+        "example_description": "Stop advertisements only from practice-edge/desk. Keep that port up and receiving. Apply the transmit change, then send from the desk so the edge records the desk. Keep the auditor link current in both directions.",
+        "fixture": {
+          "topology": {
+            "devices": {
+              "practice-edge": {
+                "chassis_id": "practice-edge-chassis",
+                "system_name": "Practice-Edge",
+                "enabled": true,
+                "ttl": 10,
+                "ports": {
+                  "desk": {
+                    "port_id": "desk",
+                    "description": "To practice desk",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "audit": {
+                    "port_id": "audit",
+                    "description": "To practice auditor",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "practice-desk": {
+                "chassis_id": "practice-desk-chassis",
+                "system_name": "Practice-Desk",
+                "enabled": true,
+                "ttl": 10,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To practice edge",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "practice-auditor": {
+                "chassis_id": "practice-auditor-chassis",
+                "system_name": "Practice-Auditor",
+                "enabled": true,
+                "ttl": 10,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To practice audit",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "desk-wire",
+                "a": {
+                  "device": "practice-edge",
+                  "port": "desk"
+                },
+                "b": {
+                  "device": "practice-desk",
+                  "port": "uplink"
+                },
+                "up": true
+              },
+              {
+                "id": "audit-wire",
+                "a": {
+                  "device": "practice-edge",
+                  "port": "audit"
+                },
+                "b": {
+                  "device": "practice-auditor",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": [
+            {
+              "local": {
+                "device": "practice-auditor",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "practice-edge",
+                "port": "audit"
+              },
+              "advertisement": {
+                "chassis_id": "practice-edge-chassis",
+                "port_id": "audit",
+                "ttl": 10,
+                "system_name": "Practice-Edge",
+                "port_description": "To practice auditor"
+              },
+              "received_at": 0,
+              "expires_at": 10
+            },
+            {
+              "local": {
+                "device": "practice-desk",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "practice-edge",
+                "port": "desk"
+              },
+              "advertisement": {
+                "chassis_id": "practice-edge-chassis",
+                "port_id": "desk",
+                "ttl": 10,
+                "system_name": "Practice-Edge",
+                "port_description": "To practice desk"
+              },
+              "received_at": 0,
+              "expires_at": 10
+            },
+            {
+              "local": {
+                "device": "practice-edge",
+                "port": "audit"
+              },
+              "peer": {
+                "device": "practice-auditor",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "practice-auditor-chassis",
+                "port_id": "uplink",
+                "ttl": 10,
+                "system_name": "Practice-Auditor",
+                "port_description": "To practice audit"
+              },
+              "received_at": 0,
+              "expires_at": 10
+            }
+          ]
+        },
+        "example_solution": [
+          {
+            "kind": "port_configuration",
+            "local": {
+              "device": "practice-edge",
+              "port": "desk"
+            },
+            "up": true,
+            "transmit": false,
+            "receive": true,
+            "description": "To practice desk"
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-desk",
+              "port": "uplink"
+            }
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "absent_neighbor",
+            "local": {
+              "device": "practice-desk",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-edge",
+              "port": "desk"
+            },
+            "peer": {
+              "device": "practice-desk",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-edge",
+              "port": "audit"
+            },
+            "peer": {
+              "device": "practice-auditor",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-auditor",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "practice-edge",
+              "port": "audit"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "practice-edge": {
+                  "chassis_id": "practice-edge-chassis",
+                  "system_name": "Practice-Edge",
+                  "enabled": true,
+                  "ttl": 10,
+                  "ports": {
+                    "desk": {
+                      "port_id": "desk",
+                      "description": "To practice desk",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    },
+                    "audit": {
+                      "port_id": "audit",
+                      "description": "To practice auditor",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "practice-desk": {
+                  "chassis_id": "practice-desk-chassis",
+                  "system_name": "Practice-Desk",
+                  "enabled": true,
+                  "ttl": 10,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To practice edge",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "practice-auditor": {
+                  "chassis_id": "practice-auditor-chassis",
+                  "system_name": "Practice-Auditor",
+                  "enabled": true,
+                  "ttl": 10,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To practice audit",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "desk-wire",
+                  "a": {
+                    "device": "practice-edge",
+                    "port": "desk"
+                  },
+                  "b": {
+                    "device": "practice-desk",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "audit-wire",
+                  "a": {
+                    "device": "practice-edge",
+                    "port": "audit"
+                  },
+                  "b": {
+                    "device": "practice-auditor",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Advance one simulated second, then try Send now from the edge desk port whose Transmit is disabled. It cannot create a desk-side record. The edge still retains its received desk record and both auditor rows remain current.",
+          "actions": [
+            {
+              "kind": "advance",
+              "seconds": 1
+            },
+            {
+              "kind": "advertise",
+              "from": {
+                "device": "practice-edge",
+                "port": "desk"
+              }
+            }
+          ],
+          "outcomes": [
+            {
+              "kind": "absent_neighbor",
+              "local": {
+                "device": "practice-desk",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-edge",
+                "port": "desk"
+              },
+              "peer": {
+                "device": "practice-desk",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-edge",
+                "port": "audit"
+              },
+              "peer": {
+                "device": "practice-auditor",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-auditor",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "practice-edge",
+                "port": "audit"
+              }
+            },
+            {
+              "kind": "configuration",
+              "expected": {
+                "devices": {
+                  "practice-edge": {
+                    "chassis_id": "practice-edge-chassis",
+                    "system_name": "Practice-Edge",
+                    "enabled": true,
+                    "ttl": 10,
+                    "ports": {
+                      "desk": {
+                        "port_id": "desk",
+                        "description": "To practice desk",
+                        "up": true,
+                        "transmit": false,
+                        "receive": true
+                      },
+                      "audit": {
+                        "port_id": "audit",
+                        "description": "To practice auditor",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "practice-desk": {
+                    "chassis_id": "practice-desk-chassis",
+                    "system_name": "Practice-Desk",
+                    "enabled": true,
+                    "ttl": 10,
+                    "ports": {
+                      "uplink": {
+                        "port_id": "uplink",
+                        "description": "To practice edge",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "practice-auditor": {
+                    "chassis_id": "practice-auditor-chassis",
+                    "system_name": "Practice-Auditor",
+                    "enabled": true,
+                    "ttl": 10,
+                    "ports": {
+                      "uplink": {
+                        "port_id": "uplink",
+                        "description": "To practice audit",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  }
+                },
+                "links": [
+                  {
+                    "id": "desk-wire",
+                    "a": {
+                      "device": "practice-edge",
+                      "port": "desk"
+                    },
+                    "b": {
+                      "device": "practice-desk",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "audit-wire",
+                    "a": {
+                      "device": "practice-edge",
+                      "port": "audit"
+                    },
+                    "b": {
+                      "device": "practice-auditor",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ccna-lldp-handover",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "lldp-discovery",
+      "topic": "LLDP neighbor discovery",
+      "title": "Complete a discovery handover",
+      "summary": "Combine global recovery, a directional port repair and inventory refresh without harming healthy work.",
+      "objective": "Complete the Relay handover across three live attachments. Enable global LLDP on Finance; enable Receive on lab/uplink; rename Relay from Relay-Old to Relay-Ready. Leave every other global, lifetime, description, port and physical setting unchanged. Apply the repairs and explicitly send as needed until all six receiving local ports show their directly attached peers as current. Finance and Lab need recovery; the previously healthy Operations attachment must remain current, including its updated Relay inventory. Preserve the spare port, all chassis/port identities and all three live links.",
+      "difficulty": "Intermediate",
+      "minutes": 32,
+      "steps": [
+        "Understand the task",
+        "Investigate and apply",
+        "Verify current results"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Different missing or historical rows can have different causes on one device.",
+          "action": "Complete the Relay handover across three live attachments. Enable global LLDP on Finance; enable Receive on lab/uplink; rename Relay from Relay-Old to Relay-Ready. Leave every other global, lifetime, description, port and physical setting unchanged. Apply the repairs and explicitly send as needed until all six receiving local ports show their directly attached peers as current. Finance and Lab need recovery; the previously healthy Operations attachment must remain current, including its updated Relay inventory. Preserve the spare port, all chassis/port identities and all three live links.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and apply",
+          "why": "Distinguish Finance global enable, Lab Receive and the Relay name; do not change all ports indiscriminately.",
+          "action": "Use the topology, device selector and native global/port fields to inspect and edit the requested settings. Apply settings before sending. Send now acts on the selected local port and its applied configuration; it is not a command interpreter. Preserve the assignment constraints while choosing your own action order.",
+          "commands": []
+        },
+        {
+          "title": "Verify current results",
+          "why": "Operations was healthy before the handover but its cached old Relay name still needs refreshing after the rename.",
+          "action": "Inspect the neighbor row under each receiving local port. Check current work after applying drafts and explicitly sending where needed. Use the editable simulated-second field only when you intend to age records; it never schedules advertisements. Reset restores only this attempt and its separate practice.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Inspect all three attachments and separate global disable, receive disable and historical metadata.",
+        "Changing Relay\u2019s name affects the advertisement received by Finance, Lab and Operations; a healthy link can still have stale inventory.",
+        "Repair the three requested settings, apply, send from the affected Relay ports and peers, then inspect all six receiving local ports and preserved configuration."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/catalyst9600/software/release/17-18/configuration_guide/int_hw/b_1718_int_and_hw_9600_cg/configuring_lldp__lldp_med__and_wired_location_service.html",
+        "https://www.ieee802.org/1/files/public/docs2025/new-bottorff-lldp-for-lsvr-0425-v00.pdf"
+      ],
+      "simplifications": "Native in-memory LLDP subset only: locally assigned chassis/port identities on fixed point-to-point Ethernet links; no real packets, IOS CLI, CDP, forwarding, LLDP-MED or full IEEE 802.1AB conformance. Advertisements and whole-second time advances are explicit; there is no automatic periodic or configuration-change advertisement. A live transmitter disable uses the modeled graceful TTL-zero withdrawal. Current cache checks use simulator knowledge of present delivery and advertised fields. No physical-device, security-policy enforcement or complete CCNA objective claim.",
+      "explanation": "Finance\u2019s global disable blocks its transmit and receive paths, while Lab\u2019s Receive control blocks only the Relay-to-Lab direction. Relay\u2019s new system name must reach every attached receiver, including Operations, which was already healthy. Applying the complete repair leaves existing old-name cache rows historical until refreshed. Explicitly advertising from all endpoints is one valid verification order; other orders and extra refreshes pass when the same six current neighbor records and complete preserved configuration result.",
+      "retry_guidance": "Use the first unmet current outcome to decide which local port, applied setting or cached advertisement to inspect. Unapplied drafts cannot earn current success. After correcting sender fields, refresh from that sender. Dropping a physical link or changing unrelated settings fails preservation even if a cache becomes empty.",
+      "initial": {
+        "kind": "Discovery",
+        "simulation": {
+          "topology": {
+            "devices": {
+              "relay": {
+                "chassis_id": "relay-chassis",
+                "system_name": "Relay-Old",
+                "enabled": true,
+                "ttl": 50,
+                "ports": {
+                  "finance": {
+                    "port_id": "finance",
+                    "description": "To finance",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "lab": {
+                    "port_id": "lab",
+                    "description": "To lab",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "operations": {
+                    "port_id": "operations",
+                    "description": "To operations",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "spare": {
+                    "port_id": "spare",
+                    "description": "Reserve: preserve",
+                    "up": true,
+                    "transmit": false,
+                    "receive": true
+                  }
+                }
+              },
+              "finance": {
+                "chassis_id": "finance-chassis",
+                "system_name": "Finance",
+                "enabled": false,
+                "ttl": 50,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To relay finance",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "lab": {
+                "chassis_id": "lab-chassis",
+                "system_name": "Lab",
+                "enabled": true,
+                "ttl": 50,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To relay lab",
+                    "up": true,
+                    "transmit": true,
+                    "receive": false
+                  }
+                }
+              },
+              "operations": {
+                "chassis_id": "operations-chassis",
+                "system_name": "Operations",
+                "enabled": true,
+                "ttl": 50,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To relay operations",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "finance-wire",
+                "a": {
+                  "device": "relay",
+                  "port": "finance"
+                },
+                "b": {
+                  "device": "finance",
+                  "port": "uplink"
+                },
+                "up": true
+              },
+              {
+                "id": "lab-wire",
+                "a": {
+                  "device": "relay",
+                  "port": "lab"
+                },
+                "b": {
+                  "device": "lab",
+                  "port": "uplink"
+                },
+                "up": true
+              },
+              {
+                "id": "operations-wire",
+                "a": {
+                  "device": "relay",
+                  "port": "operations"
+                },
+                "b": {
+                  "device": "operations",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": [
+            {
+              "local": {
+                "device": "operations",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "relay",
+                "port": "operations"
+              },
+              "advertisement": {
+                "chassis_id": "relay-chassis",
+                "port_id": "operations",
+                "ttl": 50,
+                "system_name": "Relay-Old",
+                "port_description": "To operations"
+              },
+              "received_at": 0,
+              "expires_at": 50
+            },
+            {
+              "local": {
+                "device": "relay",
+                "port": "lab"
+              },
+              "peer": {
+                "device": "lab",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "lab-chassis",
+                "port_id": "uplink",
+                "ttl": 50,
+                "system_name": "Lab",
+                "port_description": "To relay lab"
+              },
+              "received_at": 0,
+              "expires_at": 50
+            },
+            {
+              "local": {
+                "device": "relay",
+                "port": "operations"
+              },
+              "peer": {
+                "device": "operations",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "operations-chassis",
+                "port_id": "uplink",
+                "ttl": 50,
+                "system_name": "Operations",
+                "port_description": "To relay operations"
+              },
+              "received_at": 0,
+              "expires_at": 50
+            }
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Discovery",
+        "initial": {
+          "devices": {
+            "relay": {
+              "chassis_id": "relay-chassis",
+              "system_name": "Relay-Old",
+              "enabled": true,
+              "ttl": 50,
+              "ports": {
+                "finance": {
+                  "port_id": "finance",
+                  "description": "To finance",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "lab": {
+                  "port_id": "lab",
+                  "description": "To lab",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "operations": {
+                  "port_id": "operations",
+                  "description": "To operations",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                },
+                "spare": {
+                  "port_id": "spare",
+                  "description": "Reserve: preserve",
+                  "up": true,
+                  "transmit": false,
+                  "receive": true
+                }
+              }
+            },
+            "finance": {
+              "chassis_id": "finance-chassis",
+              "system_name": "Finance",
+              "enabled": false,
+              "ttl": 50,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To relay finance",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                }
+              }
+            },
+            "lab": {
+              "chassis_id": "lab-chassis",
+              "system_name": "Lab",
+              "enabled": true,
+              "ttl": 50,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To relay lab",
+                  "up": true,
+                  "transmit": true,
+                  "receive": false
+                }
+              }
+            },
+            "operations": {
+              "chassis_id": "operations-chassis",
+              "system_name": "Operations",
+              "enabled": true,
+              "ttl": 50,
+              "ports": {
+                "uplink": {
+                  "port_id": "uplink",
+                  "description": "To relay operations",
+                  "up": true,
+                  "transmit": true,
+                  "receive": true
+                }
+              }
+            }
+          },
+          "links": [
+            {
+              "id": "finance-wire",
+              "a": {
+                "device": "relay",
+                "port": "finance"
+              },
+              "b": {
+                "device": "finance",
+                "port": "uplink"
+              },
+              "up": true
+            },
+            {
+              "id": "lab-wire",
+              "a": {
+                "device": "relay",
+                "port": "lab"
+              },
+              "b": {
+                "device": "lab",
+                "port": "uplink"
+              },
+              "up": true
+            },
+            {
+              "id": "operations-wire",
+              "a": {
+                "device": "relay",
+                "port": "operations"
+              },
+              "b": {
+                "device": "operations",
+                "port": "uplink"
+              },
+              "up": true
+            }
+          ]
+        },
+        "requirements": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "relay",
+              "port": "finance"
+            },
+            "peer": {
+              "device": "finance",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "finance",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "relay",
+              "port": "finance"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "relay",
+              "port": "lab"
+            },
+            "peer": {
+              "device": "lab",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "lab",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "relay",
+              "port": "lab"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "relay",
+              "port": "operations"
+            },
+            "peer": {
+              "device": "operations",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "operations",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "relay",
+              "port": "operations"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "relay": {
+                  "chassis_id": "relay-chassis",
+                  "system_name": "Relay-Ready",
+                  "enabled": true,
+                  "ttl": 50,
+                  "ports": {
+                    "finance": {
+                      "port_id": "finance",
+                      "description": "To finance",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "lab": {
+                      "port_id": "lab",
+                      "description": "To lab",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "operations": {
+                      "port_id": "operations",
+                      "description": "To operations",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "spare": {
+                      "port_id": "spare",
+                      "description": "Reserve: preserve",
+                      "up": true,
+                      "transmit": false,
+                      "receive": true
+                    }
+                  }
+                },
+                "finance": {
+                  "chassis_id": "finance-chassis",
+                  "system_name": "Finance",
+                  "enabled": true,
+                  "ttl": 50,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To relay finance",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "lab": {
+                  "chassis_id": "lab-chassis",
+                  "system_name": "Lab",
+                  "enabled": true,
+                  "ttl": 50,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To relay lab",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "operations": {
+                  "chassis_id": "operations-chassis",
+                  "system_name": "Operations",
+                  "enabled": true,
+                  "ttl": 50,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To relay operations",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "finance-wire",
+                  "a": {
+                    "device": "relay",
+                    "port": "finance"
+                  },
+                  "b": {
+                    "device": "finance",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "lab-wire",
+                  "a": {
+                    "device": "relay",
+                    "port": "lab"
+                  },
+                  "b": {
+                    "device": "lab",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "operations-wire",
+                  "a": {
+                    "device": "relay",
+                    "port": "operations"
+                  },
+                  "b": {
+                    "device": "operations",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "solution": [
+        "discovery {\"kind\":\"global_configuration\",\"device\":\"finance\",\"settings\":{\"enabled\":true,\"ttl\":50,\"system_name\":\"Finance\"}}",
+        "discovery {\"kind\":\"port_configuration\",\"local\":{\"device\":\"lab\",\"port\":\"uplink\"},\"up\":true,\"transmit\":true,\"receive\":true,\"description\":\"To relay lab\"}",
+        "discovery {\"kind\":\"global_configuration\",\"device\":\"relay\",\"settings\":{\"enabled\":true,\"ttl\":50,\"system_name\":\"Relay-Ready\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"relay\",\"port\":\"finance\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"finance\",\"port\":\"uplink\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"relay\",\"port\":\"lab\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"lab\",\"port\":\"uplink\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"relay\",\"port\":\"operations\"}}",
+        "discovery {\"kind\":\"advertise\",\"from\":{\"device\":\"operations\",\"port\":\"uplink\"}}"
+      ],
+      "prerequisites": [
+        "ccna-lldp-inventory",
+        "ccna-lldp-transmit-policy"
+      ],
+      "discovery_teaching": {
+        "prerequisite_note": "Use receive repair, advertised inventory refresh and transmit/receive preservation from the earlier LLDP assignments. This smaller example has different device identities from the full handover.",
+        "concepts": [
+          {
+            "title": "Separate a device-wide fault from a port fault",
+            "text": "Global enable gates every port on that device. Per-port Receive can still block one direction after global LLDP is enabled. Inspect both scopes and repair only the settings specified by the handover."
+          },
+          {
+            "title": "A rename affects every transmitting port",
+            "text": "Changing the hub name makes any old hub advertisement historical at each attached receiver. Refresh from every affected hub port even if a link was already working. An unchanged reverse peer advertises its own fields and can stay current."
+          },
+          {
+            "title": "A handover includes preserved work",
+            "text": "The complete result combines repaired adjacency, refreshed inventory and unchanged healthy settings. A live topology and one correct peer row do not establish every required receiving local-port record."
+          },
+          {
+            "title": "Choose the action order, verify the state",
+            "text": "You can edit related configuration in one draft and apply once or apply valid changes in stages. Send after the relevant settings are applied. Extra refreshes are allowed; a recorded command sequence is not the grading rule."
+          }
+        ],
+        "example_description": "The reader has global LLDP disabled, the builder does not receive, and the hub must be renamed Hub-Ready. Repair those distinct settings, apply them, then send from every endpoint so all four receiving ports are current.",
+        "fixture": {
+          "topology": {
+            "devices": {
+              "practice-hub": {
+                "chassis_id": "practice-hub-chassis",
+                "system_name": "Hub-Old",
+                "enabled": true,
+                "ttl": 15,
+                "ports": {
+                  "reader": {
+                    "port_id": "reader",
+                    "description": "To practice reader",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  },
+                  "builder": {
+                    "port_id": "builder",
+                    "description": "To practice builder",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "practice-reader": {
+                "chassis_id": "practice-reader-chassis",
+                "system_name": "Practice-Reader",
+                "enabled": false,
+                "ttl": 15,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To practice hub reader",
+                    "up": true,
+                    "transmit": true,
+                    "receive": true
+                  }
+                }
+              },
+              "practice-builder": {
+                "chassis_id": "practice-builder-chassis",
+                "system_name": "Practice-Builder",
+                "enabled": true,
+                "ttl": 15,
+                "ports": {
+                  "uplink": {
+                    "port_id": "uplink",
+                    "description": "To practice hub builder",
+                    "up": true,
+                    "transmit": true,
+                    "receive": false
+                  }
+                }
+              }
+            },
+            "links": [
+              {
+                "id": "reader-wire",
+                "a": {
+                  "device": "practice-hub",
+                  "port": "reader"
+                },
+                "b": {
+                  "device": "practice-reader",
+                  "port": "uplink"
+                },
+                "up": true
+              },
+              {
+                "id": "builder-wire",
+                "a": {
+                  "device": "practice-hub",
+                  "port": "builder"
+                },
+                "b": {
+                  "device": "practice-builder",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "now": 0,
+          "cache": [
+            {
+              "local": {
+                "device": "practice-hub",
+                "port": "builder"
+              },
+              "peer": {
+                "device": "practice-builder",
+                "port": "uplink"
+              },
+              "advertisement": {
+                "chassis_id": "practice-builder-chassis",
+                "port_id": "uplink",
+                "ttl": 15,
+                "system_name": "Practice-Builder",
+                "port_description": "To practice hub builder"
+              },
+              "received_at": 0,
+              "expires_at": 15
+            }
+          ]
+        },
+        "example_solution": [
+          {
+            "kind": "global_configuration",
+            "device": "practice-reader",
+            "settings": {
+              "enabled": true,
+              "ttl": 15,
+              "system_name": "Practice-Reader"
+            }
+          },
+          {
+            "kind": "port_configuration",
+            "local": {
+              "device": "practice-builder",
+              "port": "uplink"
+            },
+            "up": true,
+            "transmit": true,
+            "receive": true,
+            "description": "To practice hub builder"
+          },
+          {
+            "kind": "global_configuration",
+            "device": "practice-hub",
+            "settings": {
+              "enabled": true,
+              "ttl": 15,
+              "system_name": "Hub-Ready"
+            }
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-hub",
+              "port": "reader"
+            }
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-reader",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-hub",
+              "port": "builder"
+            }
+          },
+          {
+            "kind": "advertise",
+            "from": {
+              "device": "practice-builder",
+              "port": "uplink"
+            }
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-hub",
+              "port": "reader"
+            },
+            "peer": {
+              "device": "practice-reader",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-reader",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "practice-hub",
+              "port": "reader"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-hub",
+              "port": "builder"
+            },
+            "peer": {
+              "device": "practice-builder",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "current_neighbor",
+            "local": {
+              "device": "practice-builder",
+              "port": "uplink"
+            },
+            "peer": {
+              "device": "practice-hub",
+              "port": "builder"
+            }
+          },
+          {
+            "kind": "configuration",
+            "expected": {
+              "devices": {
+                "practice-hub": {
+                  "chassis_id": "practice-hub-chassis",
+                  "system_name": "Hub-Ready",
+                  "enabled": true,
+                  "ttl": 15,
+                  "ports": {
+                    "reader": {
+                      "port_id": "reader",
+                      "description": "To practice reader",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    },
+                    "builder": {
+                      "port_id": "builder",
+                      "description": "To practice builder",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "practice-reader": {
+                  "chassis_id": "practice-reader-chassis",
+                  "system_name": "Practice-Reader",
+                  "enabled": true,
+                  "ttl": 15,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To practice hub reader",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                },
+                "practice-builder": {
+                  "chassis_id": "practice-builder-chassis",
+                  "system_name": "Practice-Builder",
+                  "enabled": true,
+                  "ttl": 15,
+                  "ports": {
+                    "uplink": {
+                      "port_id": "uplink",
+                      "description": "To practice hub builder",
+                      "up": true,
+                      "transmit": true,
+                      "receive": true
+                    }
+                  }
+                }
+              },
+              "links": [
+                {
+                  "id": "reader-wire",
+                  "a": {
+                    "device": "practice-hub",
+                    "port": "reader"
+                  },
+                  "b": {
+                    "device": "practice-reader",
+                    "port": "uplink"
+                  },
+                  "up": true
+                },
+                {
+                  "id": "builder-wire",
+                  "a": {
+                    "device": "practice-hub",
+                    "port": "builder"
+                  },
+                  "b": {
+                    "device": "practice-builder",
+                    "port": "uplink"
+                  },
+                  "up": true
+                }
+              ]
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Rename only the practice hub to Hub-Verified, apply, then send from both hub ports. Both remote rows must match the new name while all four directly attached receiving rows and every other setting remain current.",
+          "actions": [
+            {
+              "kind": "global_configuration",
+              "device": "practice-hub",
+              "settings": {
+                "enabled": true,
+                "ttl": 15,
+                "system_name": "Hub-Verified"
+              }
+            },
+            {
+              "kind": "advertise",
+              "from": {
+                "device": "practice-hub",
+                "port": "reader"
+              }
+            },
+            {
+              "kind": "advertise",
+              "from": {
+                "device": "practice-hub",
+                "port": "builder"
+              }
+            }
+          ],
+          "outcomes": [
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-hub",
+                "port": "reader"
+              },
+              "peer": {
+                "device": "practice-reader",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-reader",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "practice-hub",
+                "port": "reader"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-hub",
+                "port": "builder"
+              },
+              "peer": {
+                "device": "practice-builder",
+                "port": "uplink"
+              }
+            },
+            {
+              "kind": "current_neighbor",
+              "local": {
+                "device": "practice-builder",
+                "port": "uplink"
+              },
+              "peer": {
+                "device": "practice-hub",
+                "port": "builder"
+              }
+            },
+            {
+              "kind": "configuration",
+              "expected": {
+                "devices": {
+                  "practice-hub": {
+                    "chassis_id": "practice-hub-chassis",
+                    "system_name": "Hub-Verified",
+                    "enabled": true,
+                    "ttl": 15,
+                    "ports": {
+                      "reader": {
+                        "port_id": "reader",
+                        "description": "To practice reader",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      },
+                      "builder": {
+                        "port_id": "builder",
+                        "description": "To practice builder",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "practice-reader": {
+                    "chassis_id": "practice-reader-chassis",
+                    "system_name": "Practice-Reader",
+                    "enabled": true,
+                    "ttl": 15,
+                    "ports": {
+                      "uplink": {
+                        "port_id": "uplink",
+                        "description": "To practice hub reader",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  },
+                  "practice-builder": {
+                    "chassis_id": "practice-builder-chassis",
+                    "system_name": "Practice-Builder",
+                    "enabled": true,
+                    "ttl": 15,
+                    "ports": {
+                      "uplink": {
+                        "port_id": "uplink",
+                        "description": "To practice hub builder",
+                        "up": true,
+                        "transmit": true,
+                        "receive": true
+                      }
+                    }
+                  }
+                },
+                "links": [
+                  {
+                    "id": "reader-wire",
+                    "a": {
+                      "device": "practice-hub",
+                      "port": "reader"
+                    },
+                    "b": {
+                      "device": "practice-reader",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  },
+                  {
+                    "id": "builder-wire",
+                    "a": {
+                      "device": "practice-hub",
+                      "port": "builder"
+                    },
+                    "b": {
+                      "device": "practice-builder",
+                      "port": "uplink"
+                    },
+                    "up": true
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

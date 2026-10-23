@@ -1,3 +1,7 @@
+# M50 current checkpoint —2026-10-23
+
+480 Rust tests, final Clippy/formatter,24 Python tooling checks,28 palettes/notices and coverage integrity pass. Four authored LLDP tasks and corrected compact native diagrams pass actual all4 Fedora flow plus independent source/content/render/coverage review. Reference drafts were populated programmatically; native Apply/Send/Check and save/reset/current invalidation are exercised. Catalog82/nineteen units;109Partial/1Supporting/1130Open references. Full curriculum remains unfinished. Exact scopes/limits in DISCOVERY_LESSONS.md; clean new installed-candidate validation is next. Previously verified78-lab e2b0200 identity/evidence remains in INSTALLATION.md. No novice, physical-input/screen-reader or Windows/macOS runtime acceptance is implied.
+
 # M49 current checkpoint —2026-10-23
 
 469 Rust tests, all-target Clippy/formatter and coverage integrity pass. New LLDP editor/teaching/integration/native tests and final actual native development-fixture workflow pass; independent28 targeted tests/source/render review pass. No authored LLDP scenario is counted yet. Catalog78/eighteen and108Partial/1Supporting/1131Open remain; full curriculum is unfinished. See DISCOVERY_WORKSPACE.md.

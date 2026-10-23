@@ -261,6 +261,9 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("process-workspace")
             {
                 5000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("discovery-unit")
+            {
+                5600
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("discovery-workspace")
             {

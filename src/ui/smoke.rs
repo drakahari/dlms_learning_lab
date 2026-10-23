@@ -206,6 +206,335 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            5600..=5919 => {
+                use dlms_learning_lab::{
+                    discovery_teaching::Learning,
+                    discovery_workspace::{Action, Draft},
+                };
+                let offset = self.smoke_stage - 5600;
+                let number = offset / 80;
+                let phase = offset % 80;
+                let indices: Vec<_> = self
+                    .scenarios
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, s)| s.unit == "lldp-discovery")
+                    .map(|(i, _)| i)
+                    .collect();
+                assert_eq!(indices.len(), 4);
+                let i = indices[number];
+                let s = self.scenarios[i].clone();
+                let id = s.id.clone();
+                let lesson = s.discovery_teaching.as_ref().unwrap();
+                match phase {
+                    0 => {
+                        self.launch(i);
+                        self.scale = 1.;
+                        self.theme_id = "dlms-dark".into();
+                        theme::apply(ctx, &self.theme_id);
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                    }
+                    1 => {
+                        assert_eq!(self.discovery_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                            return;
+                        }
+                    }
+                    3 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.command_insert) {
+                            return;
+                        }
+                    }
+                    4 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .discovery_learning
+                            .as_ref()
+                            .unwrap();
+                        assert_eq!(l.simulation, lesson.fixture);
+                        assert_eq!(a.state, s.initial);
+                        assert!(!progress::current_solved(a, &s));
+                    }
+                    5 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.editor_save) {
+                            return;
+                        }
+                    }
+                    6..=23 | 36..=53 => {
+                        let practice = phase <= 23;
+                        let slot = if practice {
+                            (phase - 6) / 3
+                        } else {
+                            (phase - 36) / 3
+                        };
+                        let action_phase = if practice {
+                            (phase - 6) % 3
+                        } else {
+                            (phase - 36) % 3
+                        };
+                        let actions: Vec<Action> = if practice {
+                            lesson.example_solution.clone()
+                        } else {
+                            s.solution
+                                .iter()
+                                .map(|x| {
+                                    dlms_learning_lab::discovery_workspace::parse_action(x).unwrap()
+                                })
+                                .collect()
+                        };
+                        let sends: Vec<_> = actions
+                            .into_iter()
+                            .filter_map(|a| match a {
+                                Action::Advertise { from } => Some(from),
+                                _ => None,
+                            })
+                            .collect();
+                        assert!(sends.len() <= 6);
+                        if let Some(from) = sends.get(slot) {
+                            if action_phase == 0 {
+                                let w = self
+                                    .progress
+                                    .attempts
+                                    .get_mut(&id)
+                                    .unwrap()
+                                    .workspace
+                                    .as_mut()
+                                    .unwrap();
+                                let d = if practice {
+                                    &mut w.discovery_learning.as_mut().unwrap().draft
+                                } else {
+                                    w.discovery_draft.as_mut().unwrap()
+                                };
+                                d.selected_device = from.device.clone();
+                                self.dirty = true;
+                            } else if action_phase == 1 {
+                                let r = self
+                                    .metrics
+                                    .discovery_send
+                                    .iter()
+                                    .find(|(ep, _)| ep == from)
+                                    .map(|(_, r)| *r);
+                                if !self.click_visible_smoke_control(ctx, r) {
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    24 | 28 | 34 | 54 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                            return;
+                        }
+                    }
+                    25 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .discovery_learning
+                            .as_ref()
+                            .unwrap();
+                        assert!(l.checks(lesson).iter().all(|c| c.0));
+                        assert_eq!(a.state, s.initial);
+                        assert!(!progress::current_solved(a, &s));
+                        shot = Some(format!("{id}-practice-complete-ungraded"));
+                    }
+                    26 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.assignment_action) {
+                            return;
+                        }
+                    }
+                    27 => shot = Some(format!("{id}-assignment")),
+                    29 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-initial-feedback"));
+                    }
+                    30 => {
+                        // Authored reference configuration populates only editable drafts.
+                        // Applied simulation/cache/events are unchanged until native controls run.
+                        let engine::State::Discovery { simulation } =
+                            &self.progress.attempts[&id].state
+                        else {
+                            unreachable!()
+                        };
+                        let mut configured = simulation.clone();
+                        for text in &s.solution {
+                            let a =
+                                dlms_learning_lab::discovery_workspace::parse_action(text).unwrap();
+                            if a.is_configuration() {
+                                a.apply(&mut configured).unwrap();
+                            }
+                        }
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .discovery_draft = Some(Draft::new(&configured));
+                        self.dirty = true;
+                    }
+                    31 => {
+                        assert_eq!(self.progress.attempts[&id].state, s.initial);
+                        shot = Some(format!("{id}-reference-draft"));
+                    }
+                    32 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.editor_save) {
+                            return;
+                        }
+                    }
+                    33 => {
+                        assert!(!progress::current_solved(&self.progress.attempts[&id], &s));
+                    }
+                    35 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-partial-after-apply"));
+                    }
+                    55 => {
+                        assert!(self.metrics.completion, "{id}");
+                        assert_eq!(self.progress.attempts[&id].step, 0);
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        assert!(progress::current_solved(&self.progress.attempts[&id], &s));
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    56 => {
+                        let engine::State::Discovery { simulation } =
+                            &self.progress.attempts[&id].state
+                        else {
+                            unreachable!()
+                        };
+                        let ttl = simulation
+                            .topology()
+                            .devices
+                            .values()
+                            .map(|d| d.ttl)
+                            .max()
+                            .unwrap();
+                        self.progress
+                            .attempts
+                            .get_mut(&id)
+                            .unwrap()
+                            .workspace
+                            .as_mut()
+                            .unwrap()
+                            .discovery_draft
+                            .as_mut()
+                            .unwrap()
+                            .advance_seconds = ttl.to_string();
+                    }
+                    57 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.discovery_time) {
+                            return;
+                        }
+                    }
+                    58 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(&self.progress.attempts[&id], &s));
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        shot = Some(format!("{id}-expired-and-invalidated"));
+                    }
+                    59 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                            return;
+                        }
+                    }
+                    60 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                            return;
+                        }
+                    }
+                    61 => {
+                        assert_eq!(self.progress.attempts[&id].state, s.initial);
+                        assert!(!progress::current_solved(&self.progress.attempts[&id], &s));
+                        assert_eq!(
+                            self.progress.attempts[&id]
+                                .workspace
+                                .as_ref()
+                                .unwrap()
+                                .discovery_learning
+                                .as_ref()
+                                .unwrap()
+                                .simulation,
+                            Learning::new(lesson).simulation
+                        );
+                    }
+                    62 => {
+                        self.set_discovery_view(i, teaching::View::Assignment);
+                        self.progress.attempts.get_mut(&id).unwrap().challenge = true;
+                    }
+                    63 => {
+                        assert!(self.metrics.lesson_tabs.is_empty());
+                        assert!(!self.metrics.help_visible);
+                        shot = Some(format!("{id}-challenge"));
+                    }
+                    _ => {}
+                }
+            }
+            5920 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "CCNA".into(),
+                    unit: "lldp-discovery".into(),
+                    ..Default::default()
+                };
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            5921 => shot = Some("discovery-unit-library-dark-100".into()),
+            5922 => {
+                let i = self
+                    .scenarios
+                    .iter()
+                    .position(|s| s.id == "ccna-lldp-handover")
+                    .unwrap();
+                self.launch(i);
+                self.set_discovery_view(i, teaching::View::Assignment);
+                self.progress
+                    .attempts
+                    .get_mut("ccna-lldp-handover")
+                    .unwrap()
+                    .challenge = true;
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+                self.lesson_scroll_reset = true;
+            }
+            5923 | 5928 => {
+                ctx.request_repaint();
+            }
+            5924 => shot = Some("discovery-unit-light-150".into()),
+            5925 | 5930 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.check.expect("LLDP Check")) {
+                    return;
+                }
+            }
+            5926 => shot = Some("discovery-unit-light-150-scrolled".into()),
+            5927 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            5929 => shot = Some("discovery-unit-dark-200".into()),
+            5931 => shot = Some("discovery-unit-dark-200-scrolled".into()),
+            5932 => {
+                println!(
+                    "PASS native four authored LLDP lessons: introductions, separate fill-only practice/config apply/explicit ads, full assignments, initial/partial feedback, authored reference drafts, native Apply and sends, current Check/Step0 completion, exact saved reload, expiry invalidation, actual selected Reset, Challenge/library and light150/dark200. Reference drafts populated programmatically; event/control path is native. Not novice, physical-network or Windows/macOS runtime acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             5500 => {
                 let i = self.add_discovery_fixture();
                 self.launch(i);

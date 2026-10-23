@@ -5110,3 +5110,149 @@ fn discovery_single_line_editing_uses_real_focus_and_invalidates_success_before_
         &a.scenarios[i]
     ));
 }
+
+#[test]
+fn shared_topology_cards_wrap_long_values_and_align_equal_rows_without_clipping_text() {
+    for width in [310., 470., 1100.] {
+        for star in [false, true] {
+            let ctx = egui::Context::default();
+            theme::apply(&ctx, "dlms-dark");
+            let long = "long-device-interface-identifier-with-no-whitespace-01234567890123";
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(width, 1800.),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| {
+                    controls::configure(ctx);
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        let hub = [
+                            long,
+                            "An optional advertised name that should wrap safely",
+                            "LLDP enabled",
+                        ];
+                        let peer = ["short/port", "Short name", "LLDP disabled"];
+                        if !star
+                            || !controls::topology_star(
+                                ui,
+                                hub,
+                                &[peer, hub, peer],
+                                "Wrapped caption about the direct physical connection",
+                            )
+                        {
+                            controls::topology_pair(
+                                ui,
+                                hub,
+                                peer,
+                                palette(ui).muted,
+                                "Wrapped caption about the direct physical connection",
+                            );
+                        }
+                    });
+                },
+            );
+            let cards: Vec<_> = output
+                .shapes
+                .iter()
+                .filter_map(|s| {
+                    if let egui::Shape::Rect(r) = &s.shape {
+                        (r.stroke.width == 1.).then_some(r.rect)
+                    } else {
+                        None
+                    }
+                })
+                .collect();
+            let count = if star && width > 400. { 4 } else { 2 };
+            assert_eq!(cards.len(), count);
+            assert!(
+                cards
+                    .iter()
+                    .all(|c| (c.height() - cards[0].height()).abs() < 0.1)
+            );
+            let mut labels = 0;
+            for s in &output.shapes {
+                if let egui::Shape::Text(t) = &s.shape {
+                    if t.galley.text().starts_with("Wrapped caption") {
+                        continue;
+                    }
+                    let r = egui::Rect::from_min_size(t.pos, t.galley.size());
+                    assert!(
+                        cards.iter().any(|c| c.shrink(3.).contains_rect(r)),
+                        "{width}: text {:?} at {r:?} outside {cards:?}",
+                        t.galley.text()
+                    );
+                    labels += 1;
+                }
+                if count == 4
+                    && let egui::Shape::LineSegment { points, .. } = &s.shape
+                {
+                    assert_eq!(points[0], cards[0].center_bottom());
+                    assert!(cards[1..].iter().any(|c| points[1] == c.center_top()));
+                }
+            }
+            assert_eq!(labels, count * 3, "all original labels remain painted");
+        }
+    }
+}
+
+#[test]
+fn authored_discovery_lessons_keep_all_tools_in_width_and_guidance_optional_at_large_text() {
+    let (_, inventory) = app();
+    let labs: Vec<_> = inventory
+        .scenarios
+        .iter()
+        .enumerate()
+        .filter(|(_, s)| s.unit == "lldp-discovery")
+        .map(|(i, _)| i)
+        .collect();
+    assert_eq!(labs.len(), 4);
+    for i in labs {
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            for (w, h, scale) in [
+                (1200., 850., 1.),
+                (720., 700., 1.5),
+                (720., 700., 2.),
+                (1920., 1080., 2.),
+            ] {
+                let (ctx, mut a) = app();
+                a.launch(i);
+                a.set_discovery_view(i, view);
+                a.scale = scale;
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                for r in a
+                    .metrics
+                    .inputs
+                    .iter()
+                    .chain(a.metrics.discovery_send.iter().map(|(_, r)| r))
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.editor_save.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{} {view:?} {w}/{scale} {r:?}",
+                        a.scenarios[i].id
+                    );
+                }
+                a.progress
+                    .attempts
+                    .get_mut(&a.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                assert!(a.metrics.lesson_tabs.is_empty() && !a.metrics.help_visible);
+                assert_eq!(a.discovery_view(i), teaching::View::Assignment);
+            }
+        }
+    }
+}

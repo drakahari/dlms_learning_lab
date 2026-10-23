@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. Seventy-eight authored assignments: the original nine, thirty-three scripting tasks, ten Linux file/access activities, four Linux process activities, six IPv6 static-network activities, six IPv4 static-routing activities, four VLAN data-plane activities and six forward-DNS activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **82 authored assignments:** 23 CCNA,17 LPIC-1,9 LPIC-2 and33 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -51,6 +51,8 @@ The **Processes and priority** unit adds four [Linux terminal assignments](docs/
 The existing subnet and VLSM labs now teach address groups, prefixes/masks, usable hosts, capacity, alignment and non-overlap before their unchanged full assignments. Learn has skippable introductions and separate editable examples; existing attempts reopen their saved assignment with Introduction available. [Teaching and validation](docs/ADDRESSING_TEACHING.md).
 
 The **CCNA** course adds six [IPv6 static-network foundations](docs/IPV6_LESSONS.md): unique workstation addressing, prefix/gateway repair, interface-scoped next hops, route specificity, backup failover and a branch capstone. A small topology and selected-device native address/route editor keep the full assignment visible. Examples have independent saved drafts; Check configuration applies and tests only virtual state. This is narrow partial IPv6/static-routing practice, not complete CCNA coverage.
+
+The **LLDP neighbors, inventory and handover** unit adds four [discovery assignments](docs/DISCOVERY_LESSONS.md): repair a receiving direction, refresh changed inventory, stop one transmitter while retaining reception, and complete a multi-link handover. Native settings, explicit simulated advertisements and current cache checks stay together. CDP, IOS and real packet handling remain outside this bounded model.
 
 The **Filename selection and safe batch reports** unit adds three [script assignments](docs/SHELL_FILE_BATCHES.md): a changing-file manifest, cross-file incident collection and a collision-safe handover. Separate examples teach selection before writing; scripted filename matching stays inside the virtual file map.
 

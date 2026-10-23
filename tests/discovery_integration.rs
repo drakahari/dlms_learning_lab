@@ -16,7 +16,7 @@ fn scenario() -> pack::Scenario {
         .remove(0)
 }
 fn catalog() -> Vec<pack::Scenario> {
-    let mut all = pack::bundled().unwrap();
+    let mut all: Vec<_> = pack::bundled().unwrap().into_iter().take(78).collect();
     all.push(scenario());
     all
 }
@@ -133,7 +133,7 @@ fn private_pack_reference_alternate_orders_and_refreshes_reach_both_current_neig
         assert!(!engine::solved(&state, &lab.goal));
     }
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 78);
+    assert_eq!(all.len(), 82);
     assert!(!all.iter().any(|s| s.id == lab.id));
     assert!(engine::help(&lab.initial).contains("no CDP"));
 }
