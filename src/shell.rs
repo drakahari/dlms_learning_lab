@@ -1,6 +1,7 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
 mod arithmetic;
 mod globbing;
+mod substitution;
 mod text_tools;
 mod values;
 use serde::{Deserialize, Serialize};
@@ -8,6 +9,8 @@ use std::{
     borrow::Cow,
     cell::Cell,
     collections::{BTreeMap, BTreeSet},
+    ops::Range,
+    sync::Arc,
 };
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
@@ -140,8 +143,29 @@ impl Record {
 }
 #[derive(Clone, Debug)]
 struct Part {
-    text: String,
+    value: PartValue,
     quote: Quote,
+}
+#[derive(Clone, Debug)]
+enum PartValue {
+    Text(String),
+    Substitution(BodyId),
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+struct BodyId(usize);
+impl Part {
+    fn text(&self) -> Option<&str> {
+        match &self.value {
+            PartValue::Text(text) => Some(text),
+            PartValue::Substitution(_) => None,
+        }
+    }
+    fn text_mut(&mut self) -> Result<&mut String, String> {
+        match &mut self.value {
+            PartValue::Text(text) => Ok(text),
+            PartValue::Substitution(_) => Err("Command substitution is unsupported".into()),
+        }
+    }
 }
 #[derive(Clone, Copy, Debug, PartialEq)]
 enum Quote {
@@ -154,12 +178,15 @@ struct Word(Vec<Part>);
 impl Word {
     fn assignment(&self) -> bool {
         self.0.first().is_some_and(|p| {
-            p.quote == Quote::Bare && p.text.split_once('=').is_some_and(|(n, _)| name(n))
+            p.quote == Quote::Bare
+                && p.text()
+                    .and_then(|s| s.split_once('='))
+                    .is_some_and(|(n, _)| name(n))
         })
     }
     fn literal(&self) -> Option<&str> {
         if self.0.len() == 1 && self.0[0].quote == Quote::Bare {
-            Some(&self.0[0].text)
+            self.0[0].text()
         } else {
             None
         }
@@ -316,7 +343,11 @@ fn reserved_function_name(n: &str) -> bool {
     ]
     .contains(&n)
 }
-fn lex(source: &str) -> Result<Vec<Token>, String> {
+fn lex_unit(
+    source: &str,
+    compiler: &mut Compiler,
+    subst_depth: usize,
+) -> Result<Vec<Token>, String> {
     if source.len() > MAX_SOURCE {
         return Err("Script exceeds 16 KiB".into());
     }
@@ -331,16 +362,22 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
     fn flush(parts: &mut Vec<Part>, bare: &mut String) {
         if !bare.is_empty() {
             parts.push(Part {
-                text: std::mem::take(bare),
+                value: PartValue::Text(std::mem::take(bare)),
                 quote: Quote::Bare,
             })
         }
     }
-    fn word(tokens: &mut Vec<Token>, parts: &mut Vec<Part>, bare: &mut String) {
+    fn word(
+        tokens: &mut Vec<Token>,
+        parts: &mut Vec<Part>,
+        bare: &mut String,
+        compiler: &mut Compiler,
+    ) -> Result<(), String> {
         flush(parts, bare);
         if !parts.is_empty() {
-            tokens.push(Token::Word(Word(std::mem::take(parts))))
+            compiler.token(tokens, Token::Word(Word(std::mem::take(parts))))?;
         }
+        Ok(())
     }
     while i < cs.len() {
         let c = cs[i];
@@ -356,7 +393,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             );
         }
         if c == ' ' || c == '\t' {
-            word(&mut tokens, &mut parts, &mut bare);
+            word(&mut tokens, &mut parts, &mut bare, compiler)?;
             i += 1;
             continue;
         }
@@ -369,10 +406,36 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             };
             i += 1;
             let mut text = String::new();
+            let quote_start = parts.len();
             let mut closed = false;
             while i < cs.len() {
                 if quote == Quote::Double && cs[i..].starts_with(&['$', '(', '(']) {
-                    let end = arithmetic::end(&cs, i)?;
+                    let end = substitution::arithmetic_end(&cs, i)?;
+                    text.extend(cs[i..end].iter());
+                    i = end;
+                    continue;
+                }
+                if quote == Quote::Double
+                    && let Some(body_start) = substitution::body_start(&cs, i)
+                {
+                    if !text.is_empty() {
+                        parts.push(Part {
+                            value: PartValue::Text(std::mem::take(&mut text)),
+                            quote,
+                        });
+                    }
+                    let end = substitution::end(&cs, i, subst_depth + 1)?;
+                    let body: String = cs[body_start..end - 1].iter().collect();
+                    let body = compiler.body(&body, subst_depth + 1)?;
+                    parts.push(Part {
+                        value: PartValue::Substitution(body),
+                        quote,
+                    });
+                    i = end;
+                    continue;
+                }
+                if quote == Quote::Double && cs[i..].starts_with(&['$', '{']) {
+                    let end = substitution::parameter_end(&cs, i)?;
                     text.extend(cs[i..end].iter());
                     i = end;
                     continue;
@@ -399,12 +462,12 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
                         // Escaped expanding characters become literal parts.
                         if !text.is_empty() {
                             parts.push(Part {
-                                text: std::mem::take(&mut text),
+                                value: PartValue::Text(std::mem::take(&mut text)),
                                 quote,
                             });
                         }
                         parts.push(Part {
-                            text: x.to_string(),
+                            value: PartValue::Text(x.to_string()),
                             quote: Quote::Single,
                         });
                         i += 1;
@@ -418,7 +481,12 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             if !closed {
                 return Err("Close the quoted string before running".into());
             }
-            parts.push(Part { text, quote });
+            if !text.is_empty() || parts.len() == quote_start {
+                parts.push(Part {
+                    value: PartValue::Text(text),
+                    quote,
+                });
+            }
             continue;
         }
         if c == '\\' {
@@ -429,7 +497,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             if cs[i] != '\n' {
                 flush(&mut parts, &mut bare);
                 parts.push(Part {
-                    text: cs[i].to_string(),
+                    value: PartValue::Text(cs[i].to_string()),
                     quote: Quote::Single,
                 });
             }
@@ -443,22 +511,27 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             ));
         }
         if c == '$' && cs[i..].starts_with(&['$', '(', '(']) {
-            let end = arithmetic::end(&cs, i)?;
+            let end = substitution::arithmetic_end(&cs, i)?;
             bare.extend(cs[i..end].iter());
             i = end;
             continue;
         }
+        if let Some(body_start) = substitution::body_start(&cs, i) {
+            flush(&mut parts, &mut bare);
+            let end = substitution::end(&cs, i, subst_depth + 1)?;
+            let body: String = cs[body_start..end - 1].iter().collect();
+            let body = compiler.body(&body, subst_depth + 1)?;
+            parts.push(Part {
+                value: PartValue::Substitution(body),
+                quote: Quote::Bare,
+            });
+            i = end;
+            continue;
+        }
         if c == '$' && cs.get(i + 1) == Some(&'{') {
-            bare.push(c);
-            i += 1;
-            while i < cs.len() {
-                bare.push(cs[i]);
-                let end = cs[i] == '}';
-                i += 1;
-                if end {
-                    break;
-                }
-            }
+            let end = substitution::parameter_end(&cs, i)?;
+            bare.extend(cs[i..end].iter());
+            i = end;
             continue;
         }
         if c == '(' && bare.ends_with('$') {
@@ -472,11 +545,11 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
                 && cs.get(i + 1) == Some(&'>'))
         {
             let adjacent_array = c == '(' && (!bare.is_empty() || !parts.is_empty());
-            word(&mut tokens, &mut parts, &mut bare);
+            word(&mut tokens, &mut parts, &mut bare, compiler)?;
             let array_opener = adjacent_array
                 && matches!(tokens.last(), Some(Token::Word(w)) if w.literal().is_some_and(|s| s.ends_with('=')));
             if c == '\n' {
-                tokens.push(Token::Op("\n".into()));
+                compiler.token(&mut tokens, Token::Op("\n".into()))?;
                 i += 1;
                 continue;
             }
@@ -515,7 +588,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
             {
                 return Err(format!("Unsupported operator: {op}"));
             }
-            tokens.push(Token::Op(op));
+            compiler.token(&mut tokens, Token::Op(op))?;
             continue;
         }
         if c == '~' {
@@ -526,7 +599,7 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
         bare.push(c);
         i += 1;
     }
-    word(&mut tokens, &mut parts, &mut bare);
+    word(&mut tokens, &mut parts, &mut bare, compiler)?;
     if tokens.len() > 4096 {
         return Err("Script exceeds 4096 tokens".into());
     }
@@ -534,9 +607,10 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
         if let Token::Word(w) = token {
             for p in &w.0 {
                 if p.quote == Quote::Bare
-                    && values::bracket_glob(&p.text)?
-                    && p.text != "["
-                    && p.text != "]"
+                    && let Some(text) = p.text()
+                    && values::bracket_glob(text)?
+                    && text != "["
+                    && text != "]"
                 {
                     return Err("Bracket globbing is unsupported; quote literal brackets".into());
                 }
@@ -565,13 +639,109 @@ enum Code {
     Define(String, usize, usize),
     FunctionEnd,
 }
-struct Parser {
+/// One immutable instruction arena keeps parent/child function targets stable.
+#[derive(Debug)]
+struct Program {
+    code: Vec<Code>,
+    main: Range<usize>,
+    bodies: Vec<Range<usize>>,
+}
+struct Unit {
+    code: Vec<Code>,
+    syntax_depth: usize,
+}
+#[derive(Default)]
+struct Compiler {
+    tokens: usize,
+    sites: usize,
+    bodies: Vec<Unit>,
+}
+impl Compiler {
+    fn token(&mut self, tokens: &mut Vec<Token>, token: Token) -> Result<(), String> {
+        if self.tokens >= 4096 {
+            return Err("Script exceeds 4096 tokens across all command-substitution bodies".into());
+        }
+        self.tokens += 1;
+        tokens.push(token);
+        Ok(())
+    }
+    fn body(&mut self, source: &str, depth: usize) -> Result<BodyId, String> {
+        if depth > substitution::MAX_DEPTH {
+            return Err("Command substitution depth limit exceeded (8)".into());
+        }
+        if self.sites >= substitution::MAX_SITES {
+            return Err("Command substitution site limit exceeded (128)".into());
+        }
+        self.sites += 1;
+        let unit = parse_unit(source, self, depth)?;
+        // Bash treats this exact AST shape as file-content capture, even with
+        // trailing comments/terminators. Two redirects are an ordinary command.
+        if matches!(unit.code.as_slice(), [Code::Pipe(commands)]
+            if matches!(commands.as_slice(), [Command { words, redirects }]
+                if words.is_empty() && matches!(redirects.as_slice(), [(op, Some(_))] if op == "<")))
+        {
+            return Err("Unsupported Bash input-only command substitution; use the documented virtual file command".into());
+        }
+        let id = BodyId(self.bodies.len());
+        self.bodies.push(unit);
+        Ok(id)
+    }
+    fn finish(self, main: Unit) -> Arc<Program> {
+        let main_end = main.code.len();
+        let mut program = Program {
+            code: main.code,
+            main: 0..main_end,
+            bodies: Vec::new(),
+        };
+        for body in self.bodies {
+            let start = program.code.len();
+            for mut instruction in body.code {
+                match &mut instruction {
+                    Code::Jump(pc)
+                    | Code::JumpIf(_, pc)
+                    | Code::For(_, _, pc)
+                    | Code::Next(pc)
+                    | Code::WhileStart(_, pc) => *pc += start,
+                    Code::Define(_, entry, end) => {
+                        *entry += start;
+                        *end += start;
+                    }
+                    _ => {}
+                }
+                program.code.push(instruction);
+            }
+            program.bodies.push(start..program.code.len());
+        }
+        Arc::new(program)
+    }
+}
+struct Parser<'a> {
     tokens: Vec<Token>,
     pos: usize,
     code: Vec<Code>,
     depth: usize,
+    syntax_depth: usize,
+    body_depths: &'a [usize],
 }
-impl Parser {
+impl Parser<'_> {
+    fn note_word(&mut self, word: &Word) -> Result<(), String> {
+        for part in &word.0 {
+            if let PartValue::Substitution(BodyId(id)) = &part.value {
+                let child = self
+                    .body_depths
+                    .get(*id)
+                    .ok_or("Invalid compiled substitution body")?;
+                let total = self.depth + child;
+                if total > 24 {
+                    return Err(
+                        "Syntax nesting exceeds 24 levels across command substitutions".into(),
+                    );
+                }
+                self.syntax_depth = self.syntax_depth.max(total);
+            }
+        }
+        Ok(())
+    }
     fn is(&self, s: &str) -> bool {
         match self.tokens.get(self.pos) {
             Some(Token::Word(w)) => w.literal() == Some(s),
@@ -606,6 +776,7 @@ impl Parser {
         if self.depth > 24 {
             return Err("Syntax nesting exceeds 24 levels".into());
         }
+        self.syntax_depth = self.syntax_depth.max(self.depth);
         while self.eat("\n") {}
         while self.pos < self.tokens.len() && !stops.iter().any(|s| self.is(s)) {
             self.compound()?;
@@ -655,7 +826,7 @@ impl Parser {
             let mut words = Vec::new();
             loop {
                 match self.tokens.get(self.pos) {
-                    Some(Token::Word(word)) => {words.push(word.clone());self.pos+=1;}
+                    Some(Token::Word(word)) => { let word = word.clone(); self.note_word(&word)?; words.push(word); self.pos+=1;}
                     Some(Token::Op(op)) if op == "\n" => self.pos+=1,
                     Some(Token::Op(op)) if op == ")" => {self.pos+=1;break;}
                     None => return Err("Close the compound array assignment with )".into()),
@@ -749,6 +920,7 @@ impl Parser {
                     return Err("Loop input redirection needs a file path".into());
                 };
                 let word = word.clone();
+                self.note_word(&word)?;
                 self.pos += 1;
                 Some(word)
             } else {
@@ -779,7 +951,9 @@ impl Parser {
             self.expect("in")?;
             let mut words = Vec::new();
             while let Some(Token::Word(w)) = self.tokens.get(self.pos) {
-                words.push(w.clone());
+                let word = w.clone();
+                self.note_word(&word)?;
+                words.push(word);
                 self.pos += 1;
             }
             if !self.eat(";") && !self.eat("\n") {
@@ -828,7 +1002,9 @@ impl Parser {
         loop {
             match self.tokens.get(self.pos) {
                 Some(Token::Word(w)) => {
-                    words.push(w.clone());
+                    let word = w.clone();
+                    self.note_word(&word)?;
+                    words.push(word);
                     self.pos += 1;
                 }
                 Some(Token::Op(op)) if op.contains('>') || op == "<" => {
@@ -840,8 +1016,10 @@ impl Parser {
                         let Some(Token::Word(w)) = self.tokens.get(self.pos) else {
                             return Err("Redirection needs a file path".into());
                         };
+                        let word = w.clone();
+                        self.note_word(&word)?;
                         self.pos += 1;
-                        Some(w.clone())
+                        Some(word)
                     };
                     redirects.push((op, w));
                 }
@@ -857,26 +1035,47 @@ impl Parser {
         Ok(Command { words, redirects })
     }
 }
-fn compile(source: &str) -> Result<Vec<Code>, String> {
-    fn classified(message: String) -> String {
-        if message.to_ascii_lowercase().contains("unsupported")
-            || message.contains("exceeds")
-            || message.contains("limit")
-            || message.starts_with("Syntax error:")
-        {
-            message
-        } else {
-            format!("Syntax error: {message}")
-        }
+fn classified(message: String) -> String {
+    if message.to_ascii_lowercase().contains("unsupported")
+        || message.contains("exceeds")
+        || message.contains("limit")
+        || message.starts_with("Syntax error:")
+    {
+        message
+    } else {
+        format!("Syntax error: {message}")
     }
-    let mut p = Parser {
-        tokens: lex(source).map_err(classified)?,
+}
+fn parse_unit(source: &str, compiler: &mut Compiler, subst_depth: usize) -> Result<Unit, String> {
+    let tokens = lex_unit(source, compiler, subst_depth)?;
+    let body_depths: Vec<_> = compiler.bodies.iter().map(|b| b.syntax_depth).collect();
+    let mut parser = Parser {
+        tokens,
         pos: 0,
         code: Vec::new(),
         depth: 0,
+        syntax_depth: 0,
+        body_depths: &body_depths,
     };
-    p.list(&[]).map_err(classified)?;
-    Ok(p.code)
+    parser.list(&[])?;
+    Ok(Unit {
+        code: parser.code,
+        syntax_depth: parser.syntax_depth,
+    })
+}
+fn compile(source: &str) -> Result<Arc<Program>, String> {
+    let mut compiler = Compiler::default();
+    let main = parse_unit(source, &mut compiler, 0).map_err(classified)?;
+    Ok(compiler.finish(main))
+}
+/// The separate terminal remains literal-only; parsed child programs never run.
+fn lex(source: &str) -> Result<Vec<Token>, String> {
+    let mut compiler = Compiler::default();
+    let tokens = lex_unit(source, &mut compiler, 0)?;
+    if !compiler.bodies.is_empty() {
+        return Err("Command substitution is unsupported in this terminal".into());
+    }
+    Ok(tokens)
 }
 fn path(s: &str) -> Result<String, String> {
     let s = if s.starts_with('/') {
@@ -934,7 +1133,7 @@ struct CallFrame {
     locals: BTreeMap<String, Option<Value>>,
 }
 pub struct Vm {
-    code: Vec<Code>,
+    program: Arc<Program>,
     pc: usize,
     steps: usize,
     expansion_work: Cell<usize>,
@@ -956,8 +1155,14 @@ impl Vm {
         if !case.valid() {
             return Err("Invalid simulation fixture".into());
         }
+        let program = compile(source)?;
+        // Parser/arena foundation only. Capture execution stays gated until
+        // cooperative runtime, budgets and revision migration are ready.
+        if !program.bodies.is_empty() {
+            return Err("Command substitution is unsupported".into());
+        }
         Ok(Self {
-            code: compile(source)?,
+            program,
             pc: 0,
             steps: 0,
             expansion_work: Cell::new(0),
@@ -1101,8 +1306,8 @@ impl Vm {
         if w.0.len() == 1
             && w.0[0].quote == Quote::Double
             && let Some(key) = w.0[0]
-                .text
-                .strip_prefix("${")
+                .text()
+                .and_then(|s| s.strip_prefix("${"))
                 .and_then(|s| s.strip_suffix('}'))
             && !key.contains(['{', '}'])
             && let Some(ArrayRef::All(base)) = values::array_ref(key)?
@@ -1113,7 +1318,7 @@ impl Vm {
             self.charge_expansion(bytes + std::mem::size_of_val(elements))?;
             return Ok(elements.to_vec());
         }
-        if w.0.len() == 1 && w.0[0].quote == Quote::Double && w.0[0].text == "$@" {
+        if w.0.len() == 1 && w.0[0].quote == Quote::Double && w.0[0].text() == Some("$@") {
             let bytes = expansion_fields_size(&self.args)?;
             self.charge_expansion(bytes)?;
             return Ok(self.args.clone());
@@ -1132,11 +1337,12 @@ impl Vm {
             Ok(())
         };
         for p in &w.0 {
+            let source = p.text().ok_or("Command substitution is unsupported")?;
             let text = if p.quote == Quote::Single {
-                self.charge_expansion(p.text.len())?;
-                p.text.clone()
+                self.charge_expansion(source.len())?;
+                source.to_string()
             } else {
-                self.expand_text(&p.text)?
+                self.expand_text(source)?
             };
             self.charge_expansion(text.len())?;
             if split && p.quote == Quote::Bare {
@@ -1244,7 +1450,7 @@ impl Vm {
             if self.done {
                 return;
             }
-            if self.pc >= self.code.len() {
+            if self.pc >= self.program.main.end {
                 self.done = true;
                 return;
             }
@@ -1253,7 +1459,7 @@ impl Vm {
                 return;
             }
             self.steps += 1;
-            let code = self.code[self.pc].clone();
+            let code = self.program.code[self.pc].clone();
             self.pc += 1;
             let r = (|| -> Result<(), String> {
                 match code {
@@ -1755,10 +1961,10 @@ impl Vm {
         if assignments && !cmd.words.is_empty() {
             for w in &cmd.words {
                 let mut w = w.clone();
-                let (n, rest) = w.0[0].text.split_once('=').unwrap();
+                let (n, rest) = w.0[0].text().unwrap().split_once('=').unwrap();
                 let n = n.to_string();
                 variable_target(&n)?;
-                w.0[0].text = rest.to_string();
+                *w.0[0].text_mut()? = rest.to_string();
                 let value = self.expand(&w, false)?.join("");
                 self.assign_scalar(n, value)?;
                 self.limits()?;
@@ -2123,9 +2329,9 @@ pub fn literal_command(source: &str) -> Result<Vec<String>, String> {
     }
     lex(source)?.into_iter().map(|token| match token {
         Token::Word(w) => {
-            if w.0.iter().any(|p| p.quote == Quote::Bare && p.text.contains(['*', '?'])) { return Err("Filename expansion is unsupported in this terminal; use a literal quoted path. Script labs have a separate supported subset.".into()); }
-            if w.0.iter().any(|p| p.quote != Quote::Single && p.text.contains('$')) { return Err("Variable expansion is unsupported in this terminal; use a literal quoted path.".into()); }
-            Ok(w.0.into_iter().map(|p| p.text).collect())
+            if w.0.iter().any(|p| p.quote == Quote::Bare && p.text().is_some_and(|s| s.contains(['*', '?']))) { return Err("Filename expansion is unsupported in this terminal; use a literal quoted path. Script labs have a separate supported subset.".into()); }
+            if w.0.iter().any(|p| p.quote != Quote::Single && p.text().is_none_or(|s| s.contains('$'))) { return Err("Variable expansion is unsupported in this terminal; use a literal quoted path.".into()); }
+            Ok(w.0.into_iter().map(|p| match p.value { PartValue::Text(text) => text, PartValue::Substitution(_) => unreachable!("terminal substitution gate") }).collect())
         },
         Token::Op(_) => Err("Shell operators are unsupported in this terminal. Enter one supported command at a time.".into()),
     }).collect()
