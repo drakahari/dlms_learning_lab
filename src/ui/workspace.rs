@@ -58,7 +58,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::Ipv4Acl { .. }) {
+            if matches!(s.initial, State::Accounts { .. }) {
+                self.accounts_workspace(ui, i);
+            } else if matches!(s.initial, State::Ipv4Acl { .. }) {
                 self.acl_workspace(ui, i);
             } else if matches!(s.initial, State::PersistentMounts { .. }) {
                 self.storage_workspace(ui, i);
@@ -131,7 +133,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::Ipv4Acl { .. }) {
+            let show_help = if matches!(s.initial, State::Accounts { .. }) {
+                self.accounts_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::Ipv4Acl { .. }) {
                 self.acl_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::PersistentMounts { .. }) {
                 self.storage_view(i) == teaching::View::Assignment
@@ -176,6 +180,8 @@ impl LabApp {
                 if self.help_open {
                     if matches!(s.initial, State::Ipv4Acl { .. }) {
                         ui.push_id(("acl-help", &s.id, challenge), |ui| self.acl_help(ui, i));
+                    } else if matches!(s.initial, State::Accounts { .. }) {
+                        ui.push_id(("accounts-help", &s.id, challenge), |ui| self.help(ui, i));
                     } else {
                         self.help(ui, i);
                     }
@@ -439,6 +445,12 @@ impl LabApp {
     }
     pub(super) fn terminal(&mut self, ui: &mut egui::Ui, i: usize) {
         let a = &self.progress.attempts[&self.scenarios[i].id];
+        let accounts = matches!(a.state, State::Accounts { .. });
+        let command_limit = if accounts {
+            dlms_learning_lab::accounts_teaching::MAX_COMMAND_BYTES
+        } else {
+            4096
+        };
         let height =
             (ui.ctx().input(|input| input.content_rect().bottom()) - ui.cursor().top() - 190.)
                 .clamp(140., 260.);
@@ -456,12 +468,15 @@ impl LabApp {
                             "Simulated terminal · User: {} · virtual processes",
                             table.user.name
                         ),
+                        State::Accounts { .. } => {
+                            "Simulated terminal · Virtual administrator".into()
+                        }
                         _ => "Simulated terminal · administrator".into(),
                     })
                     .small()
                     .color(palette(ui).muted),
                 );
-                egui::ScrollArea::both()
+                let scroll = egui::ScrollArea::both()
                     .id_salt(("terminal", i))
                     .max_height(height)
                     .min_scrolled_height(height)
@@ -476,30 +491,47 @@ impl LabApp {
                             );
                         }
                         for line in &a.transcript {
-                            ui.add(
-                                egui::Label::new(RichText::new(line).monospace())
-                                    .extend()
-                                    .selectable(true),
-                            );
+                            let label =
+                                egui::Label::new(RichText::new(line).monospace()).selectable(true);
+                            // Account diagnostics are prose as well as tabular output.
+                            // Soft wrapping keeps the whole explanation readable.
+                            let row = ui.add(if accounts {
+                                label.wrap()
+                            } else {
+                                label.extend()
+                            });
+                            if accounts {
+                                self.metrics.accounts_latest_output = Some(row.rect);
+                            }
                         }
                     });
+                if accounts {
+                    self.metrics.accounts_output_scroll =
+                        Some((scroll.state.offset.y, scroll.inner_rect));
+                }
             });
         self.metrics.output = Some(output.response.rect);
         let prompt = match &a.state {
             State::Processes { table } => table.prompt(),
             State::Filesystem { .. } => "alex $",
+            State::Accounts { .. } => "Virtual administrator #",
             _ => "lab #",
         };
         let mut run = false;
-        ui.horizontal(|ui| {
+        if accounts {
             ui.label(RichText::new(prompt).monospace().color(palette(ui).accent));
+        }
+        ui.horizontal(|ui| {
+            if !accounts {
+                ui.label(RichText::new(prompt).monospace().color(palette(ui).accent));
+            }
             let width = (ui.available_width() - 90.).max(40.);
             let r = ui.add_sized(
                 [width, controls::height(ui)],
                 controls::singleline(ui, &mut self.input)
-                    .id_salt("command")
+                    .id_salt(("assignment-command", &self.scenarios[i].id))
                     .hint_text("Command · Enter to run")
-                    .char_limit(4096),
+                    .char_limit(command_limit),
             );
             name_control(
                 &r,
@@ -507,16 +539,22 @@ impl LabApp {
             );
             self.metrics.terminal = Some(r.rect);
             self.metrics.focus = Some(r.id);
-            if self.focus_input {
+            if self.focus_input
+                && (!accounts
+                    || !ui
+                        .input(|input| input.pointer.any_pressed() || input.pointer.any_released()))
+            {
                 r.request_focus();
                 if self.scroll_command {
                     r.scroll_to_me(Some(egui::Align::Center));
                     self.scroll_command = false;
                 }
                 self.focus_input = false;
+            } else if accounts && self.focus_input {
+                ui.ctx().request_repaint();
             }
             if r.changed() {
-                bound(&mut self.input, 4096);
+                bound(&mut self.input, command_limit);
                 self.progress
                     .attempts
                     .get_mut(&self.scenarios[i].id)
@@ -528,9 +566,11 @@ impl LabApp {
                 self.dirty = true;
             }
             run = r.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
-            run |= ui
-                .add_sized([78., controls::height(ui)], button("Run"))
-                .clicked();
+            let r = ui.add_sized([78., controls::height(ui)], button("Run"));
+            if accounts {
+                self.metrics.accounts_run = Some(r.rect);
+            }
+            run |= r.clicked();
         });
         if run {
             self.submit(i);
@@ -552,6 +592,7 @@ impl LabApp {
         let prompt = match &a.state {
             State::Processes { table } => table.prompt(),
             State::Filesystem { .. } => "alex $",
+            State::Accounts { .. } => "Virtual administrator #",
             _ => "lab #",
         };
         a.transcript.push(if output.is_empty() {
@@ -699,7 +740,7 @@ impl LabApp {
             });
         egui::CollapsingHeader::new("Supported commands, limits & sources").id_salt(("references",i)).show(ui,|ui|{
             ui.add(egui::Label::new(engine::help(&a.state)).wrap());ui.label(&s.simplifications);
-            if matches!(a.state,State::Discovery{..}) {ui.label("Native controls act only on the virtual LLDP topology. Manual advertisements and the simulated clock are teaching controls; no IOS/Linux CLI, CDP or real network is modeled.");} else if matches!(a.state,State::Processes{..}) {ui.label("Only this activity’s virtual process table exists. No host processes are inspected or changed. show is a simulator-only snapshot; shell syntax and job control are not supported.");} else if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
+            if matches!(a.state,State::Discovery{..}) {ui.label("Native controls act only on the virtual LLDP topology. Manual advertisements and the simulated clock are teaching controls; no IOS/Linux CLI, CDP or real network is modeled.");} else if matches!(a.state,State::Processes{..}) {ui.label("Only this activity’s virtual process table exists. No host processes are inspected or changed. show is a simulator-only snapshot; shell syntax and job control are not supported.");} else if matches!(a.state,State::Accounts{..}) {ui.label("Virtual administration uses only this activity’s account/group records and virtual files. Expiry is metadata only; no host accounts, credentials, authentication, PAM, login or sessions are modeled.");} else if !matches!(a.state,State::Filesystem{..}) { ui.label("All commands act only on this simulation. test-access, config set, dns set, dns serial, named-checkzone’s teaching form, and ip addr set are simulator helpers, not complete real Linux commands."); }
             for source in &s.sources{ui.add(egui::Label::new(source).wrap());}
         });
         if matches!(a.state, State::Subnet { .. }) {

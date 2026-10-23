@@ -6,10 +6,411 @@ fn app() -> (egui::Context, LabApp) {
     a.smoke = false;
     (ctx, a)
 }
+fn accounts_fixture_app(view: teaching::View) -> (egui::Context, LabApp, usize) {
+    let (ctx, mut a) = app();
+    let i = a.add_accounts_fixture();
+    a.launch(i);
+    a.set_accounts_view(i, view);
+    (ctx, a, i)
+}
+fn accounts_ui_click(
+    ctx: &egui::Context,
+    a: &mut LabApp,
+    target: fn(&Metrics) -> Option<egui::Rect>,
+) {
+    for _ in 0..20 {
+        let r = target(&a.metrics).expect("account control present");
+        let viewport = a
+            .metrics
+            .main_viewport
+            .unwrap()
+            .intersect(ctx.content_rect());
+        if r.top() >= viewport.top() && r.bottom() <= viewport.bottom() {
+            click(ctx, a, r);
+            return;
+        }
+        let delta = if r.bottom() > viewport.bottom() {
+            viewport.bottom() - r.bottom()
+        } else {
+            viewport.top() - r.top()
+        };
+        frame(
+            ctx,
+            a,
+            1200.,
+            850.,
+            vec![
+                egui::Event::PointerMoved(egui::pos2(viewport.left() + 1., viewport.center().y)),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., delta),
+                    modifiers: Default::default(),
+                },
+            ],
+        );
+        for _ in 0..10 {
+            frame(ctx, a, 1200., 850., vec![]);
+        }
+    }
+    panic!("Account control did not become visible");
+}
+fn accounts_ui_command(ctx: &egui::Context, a: &mut LabApp, text: &str) {
+    a.focus_input = true;
+    draw(ctx, a);
+    frame(
+        ctx,
+        a,
+        1200.,
+        850.,
+        vec![acl_ctrl(egui::Key::A), egui::Event::Text(text.into())],
+    );
+    frame(ctx, a, 1200., 850., vec![key(egui::Key::Enter, false)]);
+    draw(ctx, a);
+}
+#[test]
+fn accounts_native_intro_practice_insert_execute_try_repair_and_assignment_are_isolated() {
+    let (ctx, mut a, i) = accounts_fixture_app(teaching::View::Introduction);
+    let s = a.scenarios[i].clone();
+    let lesson = s.accounts_teaching.as_ref().unwrap();
+    draw(&ctx, &mut a);
+    assert!(a.metrics.terminal.is_none());
+    assert_eq!(a.metrics.lesson_tabs.len(), 3);
+    accounts_ui_click(&ctx, &mut a, |m| m.example_action);
+    assert_eq!(a.accounts_view(i), teaching::View::Example);
+    let input_id = a.metrics.focus.unwrap();
+    accounts_ui_click(&ctx, &mut a, |m| m.insert);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .accounts_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.command, lesson.example[0]);
+    assert_eq!(l.simulation, lesson.fixture);
+    assert!(l.transcript.is_empty());
+    assert_eq!(a.progress.attempts[&s.id].state, s.initial);
+    assert_eq!(ctx.memory(|m| m.focused()), Some(input_id));
+    for c in &lesson.example {
+        accounts_ui_command(&ctx, &mut a, c);
+    }
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .accounts_learning
+        .as_ref()
+        .unwrap();
+    assert!(l.checked);
+    assert!(l.checks(lesson).iter().all(|c| c.0));
+    assert!(!a.metrics.completion);
+    assert_eq!(a.progress.attempts[&s.id].state, s.initial);
+    for c in &lesson.try_actions {
+        accounts_ui_command(&ctx, &mut a, c);
+    }
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .accounts_learning
+        .as_ref()
+        .unwrap();
+    assert!(l.checks(lesson).iter().any(|c| !c.0));
+    for c in &lesson.repair {
+        accounts_ui_command(&ctx, &mut a, c);
+    }
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    assert!(
+        a.progress.attempts[&s.id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .accounts_learning
+            .as_ref()
+            .unwrap()
+            .checks(lesson)
+            .iter()
+            .all(|c| c.0)
+    );
+    accounts_ui_click(&ctx, &mut a, |m| m.example_reset);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .accounts_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.simulation, lesson.fixture);
+    assert!(l.command.is_empty() && l.transcript.is_empty() && !l.checked);
+    assert_eq!(a.progress.attempts[&s.id].state, s.initial);
+    a.set_accounts_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert_ne!(a.metrics.focus, Some(input_id));
+    assert!(a.input.is_empty());
+    assert!(!a.metrics.completion);
+    assert_eq!(a.progress.attempts[&s.id].state, s.initial);
+}
+#[test]
+fn accounts_native_alternate_partial_wrong_repair_and_modes_use_current_outcomes() {
+    let (ctx, mut a, i) = accounts_fixture_app(teaching::View::Assignment);
+    let s = a.scenarios[i].clone();
+    draw(&ctx, &mut a);
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    assert!(!a.metrics.completion);
+    accounts_ui_command(&ctx, &mut a, "usermod -g review mira");
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    assert!(!a.metrics.completion);
+    for c in [
+        "groupadd --gid 2200 reports",
+        "usermod -G reports,audit,reports mira",
+        "id mira",
+    ] {
+        accounts_ui_command(&ctx, &mut a, c);
+    }
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    assert!(a.metrics.completion);
+    a.progress.attempts.get_mut(&s.id).unwrap().challenge = true;
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    assert!(a.metrics.lesson_tabs.is_empty());
+    assert!(!a.metrics.help_visible);
+    accounts_ui_command(&ctx, &mut a, "usermod -G reports mira");
+    assert!(!a.metrics.completion);
+    accounts_ui_command(&ctx, &mut a, "usermod -G audit,reports mira");
+    assert!(a.metrics.completion);
+    let before = a.progress.attempts[&s.id].state.clone();
+    accounts_ui_command(&ctx, &mut a, "userdel root");
+    assert_eq!(a.progress.attempts[&s.id].state, before);
+    assert!(a.metrics.completion);
+    accounts_ui_command(&ctx, &mut a, "usermod -G");
+    assert_eq!(a.progress.attempts[&s.id].state, before);
+    let diagnostic = a.progress.attempts[&s.id].transcript.last().unwrap();
+    assert!(diagnostic.len() > "Virtual administrator # usermod -G".len() + 10);
+    assert!(a.metrics.completion);
+    a.progress.attempts.get_mut(&s.id).unwrap().challenge = false;
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+}
+#[test]
+fn accounts_native_input_limits_focus_and_undo_are_separate_between_contexts_and_labs() {
+    let (ctx, mut a, i) = accounts_fixture_app(teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    let assignment_id = a.metrics.focus.unwrap();
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("é".repeat(1100))],
+    );
+    draw(&ctx, &mut a);
+    assert_eq!(a.input.len(), 2048);
+    assert!(a.input.is_char_boundary(a.input.len()));
+    let id = a.scenarios[i].id.clone();
+    assert_eq!(
+        a.progress.attempts[&id].workspace.as_ref().unwrap().command,
+        a.input
+    );
+    a.set_accounts_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let example_id = a.metrics.focus.unwrap();
+    assert_ne!(example_id, assignment_id);
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("id tess".into())],
+    );
+    draw(&ctx, &mut a);
+    frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+    assert_ne!(ctx.memory(|m| m.focused()), Some(example_id));
+    a.set_accounts_view(i, teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    assert_eq!(a.metrics.focus, Some(assignment_id));
+    assert_eq!(a.input.len(), 2048);
+    let old = a
+        .scenarios
+        .iter()
+        .position(|s| matches!(s.initial, State::Filesystem { .. }))
+        .unwrap();
+    open_assignment(&mut a, old);
+    draw(&ctx, &mut a);
+    assert_ne!(a.metrics.focus, Some(assignment_id));
+    assert_ne!(a.metrics.focus, Some(example_id));
+    assert!(a.input.is_empty());
+    frame(&ctx, &mut a, 1200., 850., vec![acl_ctrl(egui::Key::Z)]);
+    draw(&ctx, &mut a);
+    assert!(a.input.is_empty());
+    a.launch(i);
+    a.set_accounts_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .accounts_learning
+            .as_ref()
+            .unwrap()
+            .command,
+        "id tess"
+    );
+}
+#[test]
+fn accounts_native_exact_resume_and_reset_only_selected_activity() {
+    let (ctx, mut a, i) = accounts_fixture_app(teaching::View::Assignment);
+    let s = a.scenarios[i].clone();
+    solve(&mut a, i);
+    draw(&ctx, &mut a);
+    accounts_ui_click(&ctx, &mut a, |m| m.check);
+    assert!(a.metrics.completion);
+    a.input = "usermod -G ".into();
+    a.progress
+        .attempts
+        .get_mut(&s.id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .command = a.input.clone();
+    let l = a
+        .progress
+        .attempts
+        .get_mut(&s.id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .accounts_learning
+        .as_mut()
+        .unwrap();
+    l.command = "getent group ".into();
+    let old = a
+        .scenarios
+        .iter()
+        .find(|s| matches!(s.initial, State::Filesystem { .. }))
+        .unwrap()
+        .clone();
+    a.progress
+        .attempts
+        .insert(old.id.clone(), Attempt::new(&old, 5));
+    a.progress.favorites.insert(s.id.clone());
+    let other = serde_json::to_vec(&a.progress.attempts[&old.id]).unwrap();
+    let mut expected = serde_json::to_value(&a.progress.attempts[&s.id]).unwrap();
+    let bytes = serde_json::to_vec(&a.progress).unwrap();
+    a.progress = progress::decode(&bytes, &a.scenarios).unwrap();
+    assert_eq!(
+        serde_json::to_value(&a.progress.attempts[&s.id]).unwrap(),
+        expected
+    );
+    a.launch(i);
+    expected["visited"] = serde_json::json!(a.progress.clock);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        serde_json::to_value(&a.progress.attempts[&s.id]).unwrap(),
+        expected
+    );
+    assert_eq!(a.input, "usermod -G ");
+    assert!(a.metrics.completion);
+    a.reset_attempt(i);
+    draw(&ctx, &mut a);
+    assert_eq!(a.accounts_view(i), teaching::View::Introduction);
+    assert_eq!(a.progress.attempts[&s.id].state, s.initial);
+    assert!(!a.metrics.completion);
+    assert!(a.input.is_empty());
+    assert_eq!(
+        serde_json::to_vec(&a.progress.attempts[&old.id]).unwrap(),
+        other
+    );
+    assert!(a.progress.favorites.contains(&s.id));
+}
+#[test]
+fn accounts_native_reflows_at_all_scales_with_optional_challenge_help() {
+    for (width, height) in [(1200., 850.), (720., 560.)] {
+        for scale in [1., 1.5, 2.] {
+            for (view, challenge) in [
+                (teaching::View::Introduction, false),
+                (teaching::View::Example, false),
+                (teaching::View::Assignment, false),
+                (teaching::View::Assignment, true),
+            ] {
+                let (ctx, mut a, i) = accounts_fixture_app(view);
+                a.scale = scale;
+                let id = a.scenarios[i].id.clone();
+                a.progress.attempts.get_mut(&id).unwrap().challenge = challenge;
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                for rect in a
+                    .metrics
+                    .lesson_tabs
+                    .iter()
+                    .chain(a.metrics.terminal.iter())
+                    .chain(a.metrics.output.iter())
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.accounts_run.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                {
+                    assert!(
+                        rect.left() >= 0. && rect.right() <= ctx.content_rect().right() + 1.,
+                        "{width}/{scale} {view:?} challenge={challenge}: {rect:?}"
+                    );
+                }
+                assert!(!a.metrics.help_visible);
+                assert!(!a.metrics.guide);
+                if challenge {
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                    assert!(a.metrics.terminal.is_some());
+                }
+            }
+        }
+    }
+}
+#[test]
+fn accounts_native_long_transcripts_follow_the_latest_error_in_both_terminals() {
+    for view in [teaching::View::Assignment, teaching::View::Example] {
+        let (ctx, mut a, i) = accounts_fixture_app(view);
+        for _ in 0..10 {
+            accounts_ui_command(&ctx, &mut a, "getent passwd");
+        }
+        let (offset, _) = a.metrics.accounts_output_scroll.unwrap();
+        assert!(offset > 0., "long output must scroll in {view:?}");
+        accounts_ui_command(&ctx, &mut a, "usermod -G");
+        let (offset, viewport) = a.metrics.accounts_output_scroll.unwrap();
+        let latest = a.metrics.accounts_latest_output.unwrap();
+        assert!(
+            offset > 0. && viewport.expand(1.).contains_rect(latest),
+            "latest error is outside {view:?} viewport: offset={offset} viewport={viewport:?} row={latest:?}"
+        );
+        let attempt = &a.progress.attempts[&a.scenarios[i].id];
+        let transcript = if view == teaching::View::Assignment {
+            &attempt.transcript
+        } else {
+            &attempt
+                .workspace
+                .as_ref()
+                .unwrap()
+                .accounts_learning
+                .as_ref()
+                .unwrap()
+                .transcript
+        };
+        assert!(transcript.last().unwrap().contains("usermod -G"));
+        assert!(transcript.last().unwrap().lines().count() > 1);
+        assert_eq!(attempt.state, a.scenarios[i].initial);
+    }
+}
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
     if a.scenarios[i].acl_teaching.is_some() {
         a.set_acl_view(i, teaching::View::Assignment);
+    }
+    if a.scenarios[i].accounts_teaching.is_some() {
+        a.set_accounts_view(i, teaching::View::Assignment);
     }
     if a.scenarios[i].storage_teaching.is_some() {
         a.set_storage_view(i, teaching::View::Assignment);

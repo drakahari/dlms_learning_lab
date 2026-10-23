@@ -7,6 +7,7 @@ use dlms_learning_lab::{
 };
 use dlms_learning_lab::{course, script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
+mod accounts_workspace;
 mod acl_workspace;
 mod address_learning;
 mod controls;
@@ -59,6 +60,9 @@ struct Metrics {
     inputs: Vec<egui::Rect>,
     vlan_fields: Vec<(egui::Id, egui::Rect)>,
     terminal: Option<egui::Rect>,
+    accounts_run: Option<egui::Rect>,
+    accounts_output_scroll: Option<(f32, egui::Rect)>,
+    accounts_latest_output: Option<egui::Rect>,
     output: Option<egui::Rect>,
     insert: Option<egui::Rect>,
     check: Option<egui::Rect>,
@@ -269,6 +273,13 @@ impl LabApp {
                 8700
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit") {
                 8200
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("accounts-workspace")
+            {
+                7800
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("accounts-output")
+            {
+                7900
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-layout") {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {

@@ -1,6 +1,7 @@
 //! Application-only Fedora renderer/input checks with isolated private progress.
 //! The safe development runner supplies disk-backed temporary directories.
 use super::*;
+mod accounts;
 mod acl;
 mod acl_lessons;
 mod capture_lessons;
@@ -173,6 +174,16 @@ impl LabApp {
         self.scenarios.push(lab);
         index
     }
+    pub(super) fn add_accounts_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/accounts-workspace-preview.json"
+        ))
+        .expect("development accounts fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
     pub(super) fn add_acl_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
             "../../tests/fixtures/acl-workspace-preview.json"
@@ -297,6 +308,20 @@ impl LabApp {
             }
             n @ 8200..=8599 => {
                 let (advance, capture) = self.acl_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 7900..=7991 => {
+                let (advance, capture) = self.accounts_output_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 7800..=7838 => {
+                let (advance, capture) = self.accounts_native(ctx, n);
                 if !advance {
                     return;
                 }
