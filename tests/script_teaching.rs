@@ -38,6 +38,10 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("*.note", "*.missing"),
         ("TODO", "LATER"),
         ("target=practice.txt", "target=blue.note"),
+        ("books=('Field guide' '' '*.txt')", "books=()"),
+        ("stops='Workshop'", "stops=('Workshop')"),
+        ("*.csv", "*.json"),
+        ("\"$1\" = preview", "\"$1\" = save"),
     ];
     assert_eq!(
         edits.len(),

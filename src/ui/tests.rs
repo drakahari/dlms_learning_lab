@@ -4591,3 +4591,116 @@ fn synthetic_native_profiles_are_private_distinct_and_cleaned_without_touching_n
     drop(second);
     assert!(!second_dir.exists());
 }
+
+#[test]
+fn array_lessons_keep_native_tools_in_width_and_challenge_guidance_optional() {
+    for i in 70..74 {
+        for view in [
+            teaching::View::Introduction,
+            teaching::View::Example,
+            teaching::View::Assignment,
+        ] {
+            for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.5), (720., 700., 2.)] {
+                let (ctx, mut a) = app();
+                open_assignment(&mut a, i);
+                a.set_script_view(i, view);
+                a.scale = scale;
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                for r in a
+                    .metrics
+                    .inputs
+                    .iter()
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{i} {view:?} {w}/{scale}: {r:?}"
+                    );
+                }
+                if view != teaching::View::Introduction {
+                    assert!(a.metrics.editor_viewport.unwrap().height() >= 175.);
+                }
+                assert!(!a.metrics.help_visible);
+                a.progress
+                    .attempts
+                    .get_mut(&a.scenarios[i].id)
+                    .unwrap()
+                    .challenge = true;
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, w, h, vec![]);
+                }
+                assert!(a.metrics.lesson_tabs.is_empty());
+                assert_eq!(a.script_view(i), teaching::View::Assignment);
+                assert!(!a.metrics.help_visible);
+            }
+        }
+    }
+}
+
+#[test]
+fn array_editors_support_keyboard_run_and_release_focus_for_navigation() {
+    for i in 70..74 {
+        let (ctx, mut a) = app();
+        open_assignment(&mut a, i);
+        a.set_script_view(i, teaching::View::Assignment);
+        draw(&ctx, &mut a);
+        let editor = a.metrics.focus.unwrap();
+        assert!(ctx.memory(|m| m.has_focus(editor)));
+        let source = a.scenarios[i].solution[0].clone();
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![
+                egui::Event::Key {
+                    key: egui::Key::A,
+                    physical_key: None,
+                    pressed: true,
+                    repeat: false,
+                    modifiers: egui::Modifiers {
+                        command: true,
+                        ..egui::Modifiers::CTRL
+                    },
+                },
+                egui::Event::Text(source),
+            ],
+        );
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![egui::Event::Key {
+                key: egui::Key::Enter,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::CTRL,
+            }],
+        );
+        for _ in 0..40 {
+            draw(&ctx, &mut a);
+            if a.script_job.is_none() {
+                break;
+            }
+        }
+        assert!(a.metrics.completion, "{}", a.scenarios[i].id);
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![key(egui::Key::Escape, false)],
+        );
+        draw(&ctx, &mut a);
+        frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
+        draw(&ctx, &mut a);
+        assert!(!ctx.memory(|m| m.has_focus(editor)));
+        assert!(ctx.memory(|m| m.focused()).is_some());
+    }
+}

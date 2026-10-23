@@ -1,3 +1,7 @@
+# M44 current unit checkpoint —2026-10-23
+
+Catalog74/seventeen:19CCNA,13LPIC-1,9LPIC-2,33Bash.379 Rust tests,657 disposable Bash reference cases, Clippy/formatter,24 Python tooling tests,28 palettes and coverage integrity pass. Four indexed-list lessons have six focused content tests plus two native-egui tests; independent review corrected a real grading gap. Exact scopes in SHELL_ARRAY_LESSONS.md. Native first introduction rendered/reviewed; subsequent Wayland/X0 connection refusal blocks the corrected full native flow and installed-current rendering. No full native/novice/reader/platform acceptance is inferred. Full product/curriculum checklist remains Open.
+
 # Current verification checkpoint — M43,2026-10-23
 
 371 Rust tests,624 controlled disposable Bash5.3.9 fixtures, all-target Clippy/formatter and24 Python tooling tests pass. New14 array tests cover success/failure/unsupported forms, whole-value scope, quote provenance, shared budgets and Stop; prior exact-byte migration/legacy credit/export/reset tests pass for evaluator6. No learner script was executed by Bash. Native controls are unchanged from M42; startup/alignment and installed-candidate evidence remain in NATIVE_STARTUP.md and INSTALLATION.md. No array curriculum is counted yet:70 labs,16units; completion remains Open. Independent read-only review findings were corrected and retained as regressions.

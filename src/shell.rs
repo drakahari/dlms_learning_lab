@@ -11,6 +11,7 @@ use std::{
 };
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
+pub const MAX_CASES: usize = 12;
 pub const EVALUATOR_REVISION: u32 = 6;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
@@ -124,7 +125,7 @@ impl Record {
     pub fn valid(&self) -> bool {
         self.engine_revision <= EVALUATOR_REVISION
             && self.source.len() <= MAX_SOURCE
-            && self.results.len() <= 8
+            && self.results.len() <= MAX_CASES
             && self.results.iter().all(|r| {
                 (0..=255).contains(&r.status)
                     && r.stdout.len() + r.stderr.len() <= MAX_OUTPUT

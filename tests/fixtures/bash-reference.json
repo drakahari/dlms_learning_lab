@@ -12391,5 +12391,727 @@
       "status": 0,
       "after": {}
     }
+  },
+  {
+    "name": "array lesson shell-array-intake/Several requests",
+    "source": "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n",
+    "case": {
+      "name": "Several requests",
+      "args": [
+        "Printer setup",
+        "Router check",
+        "Backup review"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Queue: 3\nNext: Printer setup\nStandby: Router check\nTask: Printer setup\nTask: Router check\nTask: Backup review\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-intake/No requests",
+    "source": "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n",
+    "case": {
+      "name": "No requests",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Queue: 0\nNext: \nStandby: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-intake/One empty request",
+    "source": "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n",
+    "case": {
+      "name": "One empty request",
+      "args": [
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Queue: 1\nNext: \nStandby: \nTask: \n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-intake/Spaces, literal patterns and percent",
+    "source": "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n",
+    "case": {
+      "name": "Spaces, literal patterns and percent",
+      "args": [
+        "North  desk",
+        "*.log",
+        "",
+        "100%",
+        "cable\\label"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.log": "keep\n"
+      },
+      "stdout": "Queue: 5\nNext: North  desk\nStandby: *.log\nTask: North  desk\nTask: *.log\nTask: \nTask: 100%\nTask: cable\\label\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.log": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-intake/Longer queue",
+    "source": "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n",
+    "case": {
+      "name": "Longer queue",
+      "args": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Queue: 7\nNext: A\nStandby: B\nTask: A\nTask: B\nTask: C\nTask: D\nTask: E\nTask: F\nTask: G\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array example shell-array-intake",
+    "source": "books=('Field guide' '' '*.txt')\nprintf 'Books: %s\\nFirst: <%s>\\n' \"${#books[@]}\" \"${books[0]}\"\nfor book in \"${books[@]}\"; do printf 'Book: <%s>\\n' \"$book\"; done\n",
+    "case": {
+      "name": "Three book entries",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "not selected\n"
+      },
+      "stdout": "Books: 3\nFirst: <Field guide>\nBook: <Field guide>\nBook: <>\nBook: <*.txt>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "not selected\n"
+      }
+    }
+  },
+  {
+    "name": "array experiment shell-array-intake",
+    "source": "books=()\nprintf 'Books: %s\\nFirst: <%s>\\n' \"${#books[@]}\" \"${books[0]}\"\nfor book in \"${books[@]}\"; do printf 'Book: <%s>\\n' \"$book\"; done\n",
+    "case": {
+      "name": "Three book entries",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "not selected\n"
+      },
+      "stdout": "Books: 3\nFirst: <Field guide>\nBook: <Field guide>\nBook: <>\nBook: <*.txt>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "not selected\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-priority/Three jobs",
+    "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+    "case": {
+      "name": "Three jobs",
+      "args": [
+        "Inspect rack",
+        "Update map",
+        "Check UPS"
+      ],
+      "stdin": "",
+      "env": {
+        "REPLACEMENT": "Urgent repair"
+      },
+      "files": {},
+      "stdout": "Original: 3\nBefore: Inspect rack\nBefore: Update map\nBefore: Check UPS\nRevised: 3\nAfter: Urgent repair\nAfter: Update map\nAfter: Check UPS\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-priority/Single job",
+    "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+    "case": {
+      "name": "Single job",
+      "args": [
+        "Routine check"
+      ],
+      "stdin": "",
+      "env": {
+        "REPLACEMENT": "New check"
+      },
+      "files": {},
+      "stdout": "Original: 1\nBefore: Routine check\nRevised: 1\nAfter: New check\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-priority/Empty queue",
+    "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+    "case": {
+      "name": "Empty queue",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "REPLACEMENT": "Emergency"
+      },
+      "files": {},
+      "stdout": "",
+      "stderr": "Queue required\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-priority/Empty entry and literal wildcard",
+    "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+    "case": {
+      "name": "Empty entry and literal wildcard",
+      "args": [
+        "",
+        "*.log",
+        "100%",
+        "two  spaces"
+      ],
+      "stdin": "",
+      "env": {
+        "REPLACEMENT": "Priority *"
+      },
+      "files": {},
+      "stdout": "Original: 4\nBefore: \nBefore: *.log\nBefore: 100%\nBefore: two  spaces\nRevised: 4\nAfter: Priority *\nAfter: *.log\nAfter: 100%\nAfter: two  spaces\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-priority/Long tail",
+    "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+    "case": {
+      "name": "Long tail",
+      "args": [
+        "A",
+        "B",
+        "C",
+        "D",
+        "E",
+        "F",
+        "G"
+      ],
+      "stdin": "",
+      "env": {
+        "REPLACEMENT": "Replacement"
+      },
+      "files": {},
+      "stdout": "Original: 7\nBefore: A\nBefore: B\nBefore: C\nBefore: D\nBefore: E\nBefore: F\nBefore: G\nRevised: 7\nAfter: Replacement\nAfter: B\nAfter: C\nAfter: D\nAfter: E\nAfter: F\nAfter: G\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array example shell-array-priority",
+    "source": "stops=('Depot' 'East gate' 'North gate')\noriginal=(\"${stops[@]}\")\nstops='Workshop'\nprintf 'Original: <%s>\\n' \"${original[@]}\"\nprintf 'Updated: <%s>\\n' \"${stops[@]}\"\n",
+    "case": {
+      "name": "Route snapshot",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Original: <Depot>\nOriginal: <East gate>\nOriginal: <North gate>\nUpdated: <Workshop>\nUpdated: <East gate>\nUpdated: <North gate>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array experiment shell-array-priority",
+    "source": "stops=('Depot' 'East gate' 'North gate')\noriginal=(\"${stops[@]}\")\nstops=('Workshop')\nprintf 'Original: <%s>\\n' \"${original[@]}\"\nprintf 'Updated: <%s>\\n' \"${stops[@]}\"\n",
+    "case": {
+      "name": "Route snapshot",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "Original: <Depot>\nOriginal: <East gate>\nOriginal: <North gate>\nUpdated: <Workshop>\nUpdated: <East gate>\nUpdated: <North gate>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-package/Mixed package",
+    "source": "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n",
+    "case": {
+      "name": "Mixed package",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/core.cfg": "x\n",
+        "/work/edge.cfg": "y\n",
+        "/work/readme.txt": "z\n",
+        "/work/ignored.log": "unchanged\n"
+      },
+      "stdout": "Configurations: 2\nConfig: core.cfg\nConfig: edge.cfg\nDocuments: 1\nDoc: readme.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/core.cfg": "x\n",
+        "/work/edge.cfg": "y\n",
+        "/work/readme.txt": "z\n",
+        "/work/ignored.log": "unchanged\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-package/Configuration only",
+    "source": "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n",
+    "case": {
+      "name": "Configuration only",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/solo.cfg": "x\n",
+        "/work/.hidden.txt": "private fixture\n"
+      },
+      "stdout": "Configurations: 1\nConfig: solo.cfg\nDocuments: 0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/solo.cfg": "x\n",
+        "/work/.hidden.txt": "private fixture\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-package/Documents without configuration",
+    "source": "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n",
+    "case": {
+      "name": "Documents without configuration",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "x\n"
+      },
+      "stdout": "",
+      "stderr": "Required configuration missing\n",
+      "status": 2,
+      "after": {
+        "/work/notes.txt": "x\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-package/Empty package",
+    "source": "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n",
+    "case": {
+      "name": "Empty package",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {},
+      "stdout": "",
+      "stderr": "Required configuration missing\n",
+      "status": 2,
+      "after": {}
+    }
+  },
+  {
+    "name": "array lesson shell-array-package/Literal names and hidden files",
+    "source": "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n",
+    "case": {
+      "name": "Literal names and hidden files",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/two words.cfg": "x\n",
+        "/work/100%.cfg": "y\n",
+        "/work/star*.txt": "z\n",
+        "/work/a.cfg.bak": "skip\n",
+        "/work/.secret.cfg": "skip\n",
+        "/work/é.txt": "utf8\n"
+      },
+      "stdout": "Configurations: 2\nConfig: 100%.cfg\nConfig: two words.cfg\nDocuments: 2\nDoc: star*.txt\nDoc: é.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/two words.cfg": "x\n",
+        "/work/100%.cfg": "y\n",
+        "/work/star*.txt": "z\n",
+        "/work/a.cfg.bak": "skip\n",
+        "/work/.secret.cfg": "skip\n",
+        "/work/é.txt": "utf8\n"
+      }
+    }
+  },
+  {
+    "name": "array example shell-array-package",
+    "source": "tables=(*.csv)\nif [ -f \"${tables[0]}\" ]; then :; else tables=(); fi\nprintf 'Tables: %s\\n' \"${#tables[@]}\"\nfor table in \"${tables[@]}\"; do printf 'Table: %s\\n' \"$table\"; done\n",
+    "case": {
+      "name": "Two data tables",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/sales.csv": "a\n",
+        "/work/two words.csv": "b\n",
+        "/work/ignored.txt": "keep\n"
+      },
+      "stdout": "Tables: 2\nTable: sales.csv\nTable: two words.csv\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/sales.csv": "a\n",
+        "/work/two words.csv": "b\n",
+        "/work/ignored.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array experiment shell-array-package",
+    "source": "tables=(*.json)\nif [ -f \"${tables[0]}\" ]; then :; else tables=(); fi\nprintf 'Tables: %s\\n' \"${#tables[@]}\"\nfor table in \"${tables[@]}\"; do printf 'Table: %s\\n' \"$table\"; done\n",
+    "case": {
+      "name": "Two data tables",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/sales.csv": "a\n",
+        "/work/two words.csv": "b\n",
+        "/work/ignored.txt": "keep\n"
+      },
+      "stdout": "Tables: 2\nTable: sales.csv\nTable: two words.csv\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/sales.csv": "a\n",
+        "/work/two words.csv": "b\n",
+        "/work/ignored.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Preview keeps old report",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Preview keeps old report",
+      "args": [
+        "preview",
+        "handover.txt",
+        "west.cfg",
+        "east notes.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/west.cfg": "ready\n",
+        "/work/east notes.txt": "inspect\n",
+        "/work/handover.txt": "keep this\n"
+      },
+      "stdout": "Handover\nFiles: 2\nSource: west.cfg\nready\nSource: east notes.txt\ninspect\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/west.cfg": "ready\n",
+        "/work/east notes.txt": "inspect\n",
+        "/work/handover.txt": "keep this\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Publish replaces old report",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Publish replaces old report",
+      "args": [
+        "save",
+        "result.txt",
+        "a.cfg",
+        "b.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.cfg": "a\n",
+        "/work/b.cfg": "b\n",
+        "/work/result.txt": "old\n",
+        "/work/unrelated.txt": "keep\n"
+      },
+      "stdout": "Saved: result.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.cfg": "a\n",
+        "/work/b.cfg": "b\n",
+        "/work/result.txt": "Handover\nFiles: 2\nSource: a.cfg\na\nSource: b.cfg\nb\n",
+        "/work/unrelated.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Duplicates and empty source contents",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Duplicates and empty source contents",
+      "args": [
+        "save",
+        "audit.txt",
+        "two words.cfg",
+        "empty.cfg",
+        "two words.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/two words.cfg": "100% *\n",
+        "/work/empty.cfg": ""
+      },
+      "stdout": "Saved: audit.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/two words.cfg": "100% *\n",
+        "/work/empty.cfg": "",
+        "/work/audit.txt": "Handover\nFiles: 3\nSource: two words.cfg\n100% *\nSource: empty.cfg\nSource: two words.cfg\n100% *\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/New destination preview",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "New destination preview",
+      "args": [
+        "preview",
+        "new.txt",
+        "one.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/one.cfg": "only\n"
+      },
+      "stdout": "Handover\nFiles: 1\nSource: one.cfg\nonly\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/one.cfg": "only\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Missing late source",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Missing late source",
+      "args": [
+        "save",
+        "result.txt",
+        "good.cfg",
+        "missing.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/good.cfg": "preserve\n",
+        "/work/result.txt": "original\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish handover\n",
+      "status": 2,
+      "after": {
+        "/work/good.cfg": "preserve\n",
+        "/work/result.txt": "original\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Destination is an input",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Destination is an input",
+      "args": [
+        "save",
+        "same.cfg",
+        "good.cfg",
+        "same.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/good.cfg": "preserve\n",
+        "/work/same.cfg": "original\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish handover\n",
+      "status": 2,
+      "after": {
+        "/work/good.cfg": "preserve\n",
+        "/work/same.cfg": "original\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Unknown mode",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Unknown mode",
+      "args": [
+        "publish",
+        "result.txt",
+        "a.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.cfg": "keep\n",
+        "/work/result.txt": "old\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish handover\n",
+      "status": 2,
+      "after": {
+        "/work/a.cfg": "keep\n",
+        "/work/result.txt": "old\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/No sources",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "No sources",
+      "args": [
+        "save",
+        "result.txt"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/result.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish handover\n",
+      "status": 2,
+      "after": {
+        "/work/result.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Empty destination",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Empty destination",
+      "args": [
+        "save",
+        "",
+        "a.cfg"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.cfg": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish handover\n",
+      "status": 2,
+      "after": {
+        "/work/a.cfg": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array lesson shell-array-handover/Empty source name",
+    "source": "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n",
+    "case": {
+      "name": "Empty source name",
+      "args": [
+        "preview",
+        "result.txt",
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/result.txt": "keep\n"
+      },
+      "stdout": "",
+      "stderr": "Cannot publish handover\n",
+      "status": 2,
+      "after": {
+        "/work/result.txt": "keep\n"
+      }
+    }
+  },
+  {
+    "name": "array example shell-array-handover",
+    "source": "labels=('Cable check' 'Map update')\nshow() {\n    printf 'Checklist: %s\\n' \"${#labels[@]}\"\n    for label in \"${labels[@]}\"; do printf 'Check: %s\\n' \"$label\"; done\n}\nif [ \"$1\" = preview ]; then\n    show\nelse\n    printf 'Checklist: %s\\n' \"${#labels[@]}\" > checklist.txt\n    for label in \"${labels[@]}\"; do printf 'Check: %s\\n' \"$label\" >> checklist.txt; done\n    printf 'Checklist saved\\n'\nfi\n",
+    "case": {
+      "name": "Preview a checklist",
+      "args": [
+        "preview"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/checklist.txt": "earlier note\n"
+      },
+      "stdout": "Checklist: 2\nCheck: Cable check\nCheck: Map update\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/checklist.txt": "earlier note\n"
+      }
+    }
+  },
+  {
+    "name": "array experiment shell-array-handover",
+    "source": "labels=('Cable check' 'Map update')\nshow() {\n    printf 'Checklist: %s\\n' \"${#labels[@]}\"\n    for label in \"${labels[@]}\"; do printf 'Check: %s\\n' \"$label\"; done\n}\nif [ \"$1\" = save ]; then\n    show\nelse\n    printf 'Checklist: %s\\n' \"${#labels[@]}\" > checklist.txt\n    for label in \"${labels[@]}\"; do printf 'Check: %s\\n' \"$label\" >> checklist.txt; done\n    printf 'Checklist saved\\n'\nfi\n",
+    "case": {
+      "name": "Preview a checklist",
+      "args": [
+        "preview"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/checklist.txt": "earlier note\n"
+      },
+      "stdout": "Checklist: 2\nCheck: Cable check\nCheck: Map update\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/checklist.txt": "earlier note\n"
+      }
+    }
   }
 ]

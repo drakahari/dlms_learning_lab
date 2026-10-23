@@ -1,6 +1,6 @@
 # Implementation continuation checkpoint
 
-2026-10-23, after M43 typed-array capability, M42 startup investigation and M40 installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
+2026-10-23, after M44 four array lessons, M43 typed-array capability, M42 startup investigation and M40 installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
 
 ## Delivered and pushed
 
@@ -20,9 +20,13 @@ M42 investigated the historical Wayland stall without a speculative fix:105 scop
 
 ## Next independent implementation
 
-M43 implemented the bounded indexed-array contract in SHELL_ARRAYS.md with evaluator6,371 Rust tests/624 controlled Bash comparisons/Clippy/24 Python tooling checks and independent read-only review. Earlier evaluator results remain separate credit/history with exact before-shell-v6 backup. No new dependency or runtime host execution. Catalog and coverage unchanged. Next author a reviewed practical array unit with separate runnable examples and meaningful assignments, multi-case alternatives/wrong/partial/hardcoded/invalidation/reset/resume tests and actual native editor flows. Other planned shell expansion/status/debugging/safe-automation gaps remain Open.
+M43 capability8bf90ce is committed/pushed. M44 adds four practical array lessons:74/seventeen (19CCNA,13LPIC-1,9LPIC-2,33Bash),379 Rust/657 disposable Bash/Clippy/24 Python/palettes/coverage checks pass with independent code/content review.10 capstone cases close empty-name grading gaps; shared MAX_CASES12 remains bounded/backward-compatible. Existing70 scenario definitions/progress unchanged. See SHELL_ARRAY_LESSONS.md.
 
-Continue CCNA/LPIC-1/LPIC-2 capability/content batches against CURRICULUM.csv and SKILL_COVERAGE.csv; the new DNS unit only strengthens narrow forward-record/reload slices.1240 overlapping references currently97Partial/1143Open, not a completion percentage. Most networking control protocols, Linux boot/kernel/storage/service families and advanced shell capabilities/content remain absent. Never mark the completion checklist satisfied merely from lab/test counts. Native accessibility/live feedback and actual reader/physical-device/novice work remain unverified.
+Complete new-array native acceptance when the session display returns: first introduction rendered/captured/readable, but subsequent wayland-1 socket ECONNREFUSED/X0 ECONNREFUSED prevent further native launches. No desktop/security/theme settings changed. Run DLMS_SMOKE_STAGE=arrays with --ui-smoke for all-four intro/example/assignment/keyboard/wrong/retry/resume/reset/Challenge/large-text screenshots. This harness transition was corrected after its first capture, so no full-flow PASS is claimed yet. Verify the actual current packaged binary too, not just development. Build/test/install/CLI/notices can proceed independently.
+
+Continue other networking/Linux/shell capabilities and distinct reviewed curriculum against the explicit map; command substitution/associative data/status/debugging/recovery and most certification families remain Open. No new dependency or architectural choice is presently required.
+
+Continue CCNA/LPIC-1/LPIC-2 capability/content batches against CURRICULUM.csv and SKILL_COVERAGE.csv; the new DNS unit only strengthens narrow forward-record/reload slices.1240 overlapping references remain97Partial/1143Open, not a completion percentage. Most networking control protocols, Linux boot/kernel/storage/service families and advanced shell capabilities/content remain absent. Never mark the completion checklist satisfied merely from lab/test counts. Native accessibility/live feedback and actual reader/physical-device/novice work remain unverified.
 
 ## Concrete external/platform gates
 

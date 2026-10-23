@@ -1,0 +1,870 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-array-intake",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-arrays",
+      "topic": "Bash indexed arrays",
+      "title": "Keep an exact dispatch queue",
+      "summary": "Capture a changing list without losing spaces, empty entries or order.",
+      "objective": "Each script argument is one dispatch request, including an intentionally empty request. Print Queue: COUNT, Next: FIRST and Standby: SECOND, each on its own line. A missing first or second request prints a blank value after the colon and space. Then print Task: VALUE for every request in original order. Keep spaces, percent signs, literal wildcard characters and empty requests unchanged. With no arguments print only the three summary lines. Return 0, print no errors and change no files.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Each script argument is one dispatch request, including an intentionally empty request. Print Queue: COUNT, Next: FIRST and Standby: SECOND, each on its own line. A missing first or second request prints a blank value after the colon and space. Then print Task: VALUE for every request in original order. Keep spaces, percent signs, literal wildcard characters and empty requests unchanged. With no arguments print only the three summary lines. Return 0, print no errors and change no files.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Spaces, empty values and changing list sizes expose mistakes that one easy example misses.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare these with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A list keeps each value separate so you can revisit it without losing its boundaries.",
+          "action": "Write or repair the complete script, Run it, and use the per-test feedback to investigate differences. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "A quoted \"$@\" provides separate arguments. queue=(\"$@\") preserves those boundaries in a Bash array.",
+        "${#queue[@]} counts elements; ${queue[0]} is the first and ${queue[1]} the second. A missing constant index expands to empty.",
+        "Use sole quoted \"${queue[@]}\" in the loop. Joining with $queue or unquoted expansion loses information."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html"
+      ],
+      "simplifications": "Bash-specific dense indexed arrays, not portable POSIX sh. Supported: standalone name=(words), canonical constant element reads, ${#name[@]} and sole quoted \"${name[@]}\". Ordinary scalar assignment updates element 0 and retains the tail. No indexed writes, computed indices, +=, associative/sparse arrays, unset or declaration attributes. Only declared flat /work text files exist; no host commands or files. Equivalent supported programs are accepted by behavior, even if they do not use arrays.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Capture the supplied requests, summarize them, then print the whole queue.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Several requests",
+            "args": [
+              "Printer setup",
+              "Router check",
+              "Backup review"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Queue: 3\nNext: Printer setup\nStandby: Router check\nTask: Printer setup\nTask: Router check\nTask: Backup review\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "No requests",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Queue: 0\nNext: \nStandby: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "One empty request",
+            "args": [
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Queue: 1\nNext: \nStandby: \nTask: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Spaces, literal patterns and percent",
+            "args": [
+              "North  desk",
+              "*.log",
+              "",
+              "100%",
+              "cable\\label"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.log": "keep\n"
+            },
+            "stdout": "Queue: 5\nNext: North  desk\nStandby: *.log\nTask: North  desk\nTask: *.log\nTask: \nTask: 100%\nTask: cable\\label\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/a.log": "keep\n"
+            }
+          },
+          {
+            "name": "Longer queue",
+            "args": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "G"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "Queue: 7\nNext: A\nStandby: B\nTask: A\nTask: B\nTask: C\nTask: D\nTask: E\nTask: F\nTask: G\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "queue=(\"$@\")\nprintf 'Queue: %s\\nNext: %s\\nStandby: %s\\n' \"${#queue[@]}\" \"${queue[0]}\" \"${queue[1]}\"\nfor job in \"${queue[@]}\"; do\n    printf 'Task: %s\\n' \"$job\"\ndone\n"
+      ],
+      "prerequisites": [
+        "shell-functions",
+        "shell-file-manifest"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use quoted arguments, printf and for loops from earlier units. This lesson introduces Bash arrays; they are not portable sh syntax.",
+        "concepts": [
+          {
+            "title": "A variable can hold a list",
+            "text": "An array stores separate values under one name. books=('Field guide' '' '*.txt') stores three values: a title, an empty value and literal text. These are elements, or entries in the list. The first entry has index 0, the second index 1."
+          },
+          {
+            "title": "Read one entry, count entries, or revisit all",
+            "text": "${books[0]} reads one entry. ${#books[@]} counts entries, including empty ones. Sole quoted \"${books[@]}\" gives each entry separately to a command or loop. The double quotes preserve spaces and protect wildcard text from filename matching."
+          },
+          {
+            "title": "Capture supplied values without inventing them",
+            "text": "The practice example creates books itself; the lab does not supply it. The assignment supplies script arguments, not a variable named queue. Create your own queue with queue=(\"$@\"). An empty list queue=() differs from queue=(''), which contains one empty value."
+          }
+        ],
+        "example": "books=('Field guide' '' '*.txt')\nprintf 'Books: %s\\nFirst: <%s>\\n' \"${#books[@]}\" \"${books[0]}\"\nfor book in \"${books[@]}\"; do printf 'Book: <%s>\\n' \"$book\"; done\n",
+        "inputs": "No arguments or supplied variables. The example creates books; a.txt exists only to show that quoted wildcard text stays literal.",
+        "try_change": "Add a fourth title, then replace the list with books=() and rerun. Compare the count and the number of Book lines.",
+        "fixture": {
+          "name": "Three book entries",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/a.txt": "not selected\n"
+          },
+          "stdout": "Books: 3\nFirst: <Field guide>\nBook: <Field guide>\nBook: <>\nBook: <*.txt>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/a.txt": "not selected\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-array-priority",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-arrays",
+      "topic": "Bash indexed arrays",
+      "title": "Repair a queue that loses its tail",
+      "summary": "Change the next job while retaining the waiting jobs and an audit copy.",
+      "objective": "Repair the queue update. Script arguments are the original jobs; REPLACEMENT is a nonempty next-job label supplied by the lab. With no jobs print only Queue required plus a newline to standard error and return 2. Otherwise keep an independent original copy, replace only the first job with REPLACEMENT, and retain every later job unchanged. Print Original: COUNT, then Before: VALUE for each original job, followed by Revised: COUNT and After: VALUE for every revised job. All lines end with a newline. Preserve empty entries, spaces and literal wildcard text. Return 0 on success and change no files.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Repair the queue update. Script arguments are the original jobs; REPLACEMENT is a nonempty next-job label supplied by the lab. With no jobs print only Queue required plus a newline to standard error and return 2. Otherwise keep an independent original copy, replace only the first job with REPLACEMENT, and retain every later job unchanged. Print Original: COUNT, then Before: VALUE for each original job, followed by Revised: COUNT and After: VALUE for every revised job. All lines end with a newline. Preserve empty entries, spaces and literal wildcard text. Return 0 on success and change no files.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Spaces, empty values and changing list sizes expose mistakes that one easy example misses.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare these with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A list keeps each value separate so you can revisit it without losing its boundaries.",
+          "action": "Write or repair the complete script, Run it, and use the per-test feedback to investigate differences. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Compare the revised count with the original count. Does the starter replace one entry or the entire list?",
+        "before=(\"${queue[@]}\") makes an independent copy. A whole-list assignment queue=(...) replaces every entry.",
+        "For this dense-array subset, ordinary queue=\"$REPLACEMENT\" updates entry 0 and retains all later entries."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html"
+      ],
+      "simplifications": "Bash-specific dense indexed arrays, not portable POSIX sh. Supported: standalone name=(words), canonical constant element reads, ${#name[@]} and sole quoted \"${name[@]}\". Ordinary scalar assignment updates element 0 and retains the tail. No indexed writes, computed indices, +=, associative/sparse arrays, unset or declaration attributes. Only declared flat /work text files exist; no host commands or files. Equivalent supported programs are accepted by behavior, even if they do not use arrays.",
+      "initial": {
+        "kind": "Script",
+        "source": "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=(\"$REPLACEMENT\")\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Three jobs",
+            "args": [
+              "Inspect rack",
+              "Update map",
+              "Check UPS"
+            ],
+            "stdin": "",
+            "env": {
+              "REPLACEMENT": "Urgent repair"
+            },
+            "files": {},
+            "stdout": "Original: 3\nBefore: Inspect rack\nBefore: Update map\nBefore: Check UPS\nRevised: 3\nAfter: Urgent repair\nAfter: Update map\nAfter: Check UPS\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Single job",
+            "args": [
+              "Routine check"
+            ],
+            "stdin": "",
+            "env": {
+              "REPLACEMENT": "New check"
+            },
+            "files": {},
+            "stdout": "Original: 1\nBefore: Routine check\nRevised: 1\nAfter: New check\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Empty queue",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "REPLACEMENT": "Emergency"
+            },
+            "files": {},
+            "stdout": "",
+            "stderr": "Queue required\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Empty entry and literal wildcard",
+            "args": [
+              "",
+              "*.log",
+              "100%",
+              "two  spaces"
+            ],
+            "stdin": "",
+            "env": {
+              "REPLACEMENT": "Priority *"
+            },
+            "files": {},
+            "stdout": "Original: 4\nBefore: \nBefore: *.log\nBefore: 100%\nBefore: two  spaces\nRevised: 4\nAfter: Priority *\nAfter: *.log\nAfter: 100%\nAfter: two  spaces\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          },
+          {
+            "name": "Long tail",
+            "args": [
+              "A",
+              "B",
+              "C",
+              "D",
+              "E",
+              "F",
+              "G"
+            ],
+            "stdin": "",
+            "env": {
+              "REPLACEMENT": "Replacement"
+            },
+            "files": {},
+            "stdout": "Original: 7\nBefore: A\nBefore: B\nBefore: C\nBefore: D\nBefore: E\nBefore: F\nBefore: G\nRevised: 7\nAfter: Replacement\nAfter: B\nAfter: C\nAfter: D\nAfter: E\nAfter: F\nAfter: G\n",
+            "stderr": "",
+            "status": 0,
+            "after": {}
+          }
+        ]
+      },
+      "solution": [
+        "queue=(\"$@\")\nbefore=(\"${queue[@]}\")\nif [ \"${#queue[@]}\" -eq 0 ]; then\n    printf 'Queue required\\n' >&2\n    exit 2\nfi\nqueue=\"$REPLACEMENT\"\nprintf 'Original: %s\\n' \"${#before[@]}\"\nfor job in \"${before[@]}\"; do printf 'Before: %s\\n' \"$job\"; done\nprintf 'Revised: %s\\n' \"${#queue[@]}\"\nfor job in \"${queue[@]}\"; do printf 'After: %s\\n' \"$job\"; done\n"
+      ],
+      "prerequisites": [
+        "shell-array-intake",
+        "shell-local-heading"
+      ],
+      "teaching": {
+        "prerequisite_note": "First complete Keep an exact dispatch queue. You will compare whole-list replacement with changing the first entry.",
+        "concepts": [
+          {
+            "title": "A copy stays available",
+            "text": "original=(\"${stops[@]}\") copies every current value, including empty entries. Later changes to stops leave original intact. Each entry is copied separately, so changing one list does not change the other."
+          },
+          {
+            "title": "One entry differs from the whole list",
+            "text": "For an existing Bash indexed array, stops='Workshop' changes entry 0 and keeps later entries. stops=('Workshop') replaces the entire list with one entry. An ordinary $stops read also reads entry 0; it does not mean every entry."
+          },
+          {
+            "title": "Investigate the lost work",
+            "text": "The example creates both lists itself. In the assignment only REPLACEMENT and the arguments are supplied. The starter already records an original copy; run it and find why jobs disappear. One empty job is still a job, so test the count rather than whether its first text is empty."
+          }
+        ],
+        "example": "stops=('Depot' 'East gate' 'North gate')\noriginal=(\"${stops[@]}\")\nstops='Workshop'\nprintf 'Original: <%s>\\n' \"${original[@]}\"\nprintf 'Updated: <%s>\\n' \"${stops[@]}\"\n",
+        "inputs": "No supplied variables or arguments. The example creates a route list and a separate original copy.",
+        "try_change": "Change stops='Workshop' to stops=('Workshop') and run. Explain why the two later stops disappear; then restore it.",
+        "fixture": {
+          "name": "Route snapshot",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Original: <Depot>\nOriginal: <East gate>\nOriginal: <North gate>\nUpdated: <Workshop>\nUpdated: <East gate>\nUpdated: <North gate>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      }
+    },
+    {
+      "id": "shell-array-package",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-arrays",
+      "topic": "Bash indexed arrays",
+      "title": "Inspect a package before handover",
+      "summary": "Keep separate configuration and documentation lists, with honest empty-selection handling.",
+      "objective": "Inspect the supplied virtual files. Select visible filenames ending in .cfg as configurations and .txt as documents, each in C-locale filename order. Hidden filenames and other endings are excluded. At least one configuration is required: otherwise print only Required configuration missing plus a newline to standard error, return 2 and print nothing to standard output. On success print Configurations: COUNT and one Config: NAME line per configuration, then Documents: COUNT and one Doc: NAME line per document. Zero documents is valid and prints only Documents: 0 for that group. Preserve filenames literally, change no files, print no success errors and return 0.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Inspect the supplied virtual files. Select visible filenames ending in .cfg as configurations and .txt as documents, each in C-locale filename order. Hidden filenames and other endings are excluded. At least one configuration is required: otherwise print only Required configuration missing plus a newline to standard error, return 2 and print nothing to standard output. On success print Configurations: COUNT and one Config: NAME line per configuration, then Documents: COUNT and one Doc: NAME line per document. Zero documents is valid and prints only Documents: 0 for that group. Preserve filenames literally, change no files, print no success errors and return 0.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Spaces, empty values and changing list sizes expose mistakes that one easy example misses.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare these with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A list keeps each value separate so you can revisit it without losing its boundaries.",
+          "action": "Write or repair the complete script, Run it, and use the per-test feedback to investigate differences. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Capture each filename pattern separately so you can count and revisit its matches.",
+        "A pattern with no matches stays literal in this subset. Check whether the first selected name is an existing file; use an empty array for a missing optional group.",
+        "Use quoted whole-list expansion in each loop. Print the required-group error before any success output."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html"
+      ],
+      "simplifications": "Bash-specific dense indexed arrays, not portable POSIX sh. Supported: standalone name=(words), canonical constant element reads, ${#name[@]} and sole quoted \"${name[@]}\". Ordinary scalar assignment updates element 0 and retains the tail. No indexed writes, computed indices, +=, associative/sparse arrays, unset or declaration attributes. Only declared flat /work text files exist; no host commands or files. Equivalent supported programs are accepted by behavior, even if they do not use arrays.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Discover two lists, check the required group, then print the complete inventory.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Mixed package",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/core.cfg": "x\n",
+              "/work/edge.cfg": "y\n",
+              "/work/readme.txt": "z\n",
+              "/work/ignored.log": "unchanged\n"
+            },
+            "stdout": "Configurations: 2\nConfig: core.cfg\nConfig: edge.cfg\nDocuments: 1\nDoc: readme.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/core.cfg": "x\n",
+              "/work/edge.cfg": "y\n",
+              "/work/readme.txt": "z\n",
+              "/work/ignored.log": "unchanged\n"
+            }
+          },
+          {
+            "name": "Configuration only",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/solo.cfg": "x\n",
+              "/work/.hidden.txt": "private fixture\n"
+            },
+            "stdout": "Configurations: 1\nConfig: solo.cfg\nDocuments: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/solo.cfg": "x\n",
+              "/work/.hidden.txt": "private fixture\n"
+            }
+          },
+          {
+            "name": "Documents without configuration",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/notes.txt": "x\n"
+            },
+            "stdout": "",
+            "stderr": "Required configuration missing\n",
+            "status": 2,
+            "after": {
+              "/work/notes.txt": "x\n"
+            }
+          },
+          {
+            "name": "Empty package",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {},
+            "stdout": "",
+            "stderr": "Required configuration missing\n",
+            "status": 2,
+            "after": {}
+          },
+          {
+            "name": "Literal names and hidden files",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/two words.cfg": "x\n",
+              "/work/100%.cfg": "y\n",
+              "/work/star*.txt": "z\n",
+              "/work/a.cfg.bak": "skip\n",
+              "/work/.secret.cfg": "skip\n",
+              "/work/é.txt": "utf8\n"
+            },
+            "stdout": "Configurations: 2\nConfig: 100%.cfg\nConfig: two words.cfg\nDocuments: 2\nDoc: star*.txt\nDoc: é.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/two words.cfg": "x\n",
+              "/work/100%.cfg": "y\n",
+              "/work/star*.txt": "z\n",
+              "/work/a.cfg.bak": "skip\n",
+              "/work/.secret.cfg": "skip\n",
+              "/work/é.txt": "utf8\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "configs=(*.cfg)\ndocuments=(*.txt)\nif [ -f \"${configs[0]}\" ]; then :; else\n    printf 'Required configuration missing\\n' >&2\n    exit 2\nfi\nif [ -f \"${documents[0]}\" ]; then :; else documents=(); fi\nprintf 'Configurations: %s\\n' \"${#configs[@]}\"\nfor file in \"${configs[@]}\"; do printf 'Config: %s\\n' \"$file\"; done\nprintf 'Documents: %s\\n' \"${#documents[@]}\"\nfor file in \"${documents[@]}\"; do printf 'Doc: %s\\n' \"$file\"; done\n"
+      ],
+      "prerequisites": [
+        "shell-array-intake",
+        "shell-file-manifest"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use filename matching and test -f from Filename selection, plus array counts and whole-list expansion.",
+        "concepts": [
+          {
+            "title": "Keep groups separate",
+            "text": "tables=(*.csv) selects matching virtual filenames and saves them as distinct entries in C-byte order. A filename containing spaces stays one entry. Use a second array for a different group rather than joining both lists into one string."
+          },
+          {
+            "title": "A missing match is not a file",
+            "text": "With no matches, *.csv remains the literal text *.csv. It would misleadingly count as one entry. Test -f on the first saved name; when no file exists there, tables=() records an actually empty selection. Hidden files need an explicit leading dot and are excluded here."
+          },
+          {
+            "title": "Count saved entries, then inspect each",
+            "text": "The example counts CSV tables and prints their names, without changing files. The assignment supplies files, not array variables. Create separate lists yourself; validate the required group before printing the successful inventory. This is a flat virtual file exercise, not recursive filesystem discovery."
+          }
+        ],
+        "example": "tables=(*.csv)\nif [ -f \"${tables[0]}\" ]; then :; else tables=(); fi\nprintf 'Tables: %s\\n' \"${#tables[@]}\"\nfor table in \"${tables[@]}\"; do printf 'Table: %s\\n' \"$table\"; done\n",
+        "inputs": "Virtual files sales.csv, two words.csv and ignored.txt. No arguments or supplied variables.",
+        "try_change": "Change *.csv to *.json and rerun. Keep the empty-selection check and compare the count.",
+        "fixture": {
+          "name": "Two data tables",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/sales.csv": "a\n",
+            "/work/two words.csv": "b\n",
+            "/work/ignored.txt": "keep\n"
+          },
+          "stdout": "Tables: 2\nTable: sales.csv\nTable: two words.csv\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/sales.csv": "a\n",
+            "/work/two words.csv": "b\n",
+            "/work/ignored.txt": "keep\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-array-handover",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-arrays",
+      "topic": "Bash indexed arrays",
+      "title": "Preview and publish a safe handover",
+      "summary": "Validate a whole batch before choosing console preview or saved output.",
+      "objective": "Build a handover tool. Arguments are MODE, DESTINATION, then one or more source filenames in order. MODE must be preview or save; DESTINATION must be nonempty. Every source must be a nonempty existing filename, different from DESTINATION. On any invalid input print only Cannot publish handover plus a newline to standard error, return 2 and change no files. Validate the complete list before producing output.\n\nThe report is Handover, then Files: COUNT, each followed by a newline. For each source, append Source: NAME plus a newline and its exact file contents, retaining duplicates and empty source files. In preview mode print this report to standard output and leave all files unchanged. In save mode replace DESTINATION with the report and print only Saved: DESTINATION plus a newline. Return 0 with no success errors; preserve every other file. Supplied filenames are single filenames without folder parts or leading hyphens; nonempty source contents end with a newline.",
+      "difficulty": "Intermediate",
+      "minutes": 40,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your editor draft stays saved.",
+          "action": "Build a handover tool. Arguments are MODE, DESTINATION, then one or more source filenames in order. MODE must be preview or save; DESTINATION must be nonempty. Every source must be a nonempty existing filename, different from DESTINATION. On any invalid input print only Cannot publish handover plus a newline to standard error, return 2 and change no files. Validate the complete list before producing output.\n\nThe report is Handover, then Files: COUNT, each followed by a newline. For each source, append Source: NAME plus a newline and its exact file contents, retaining duplicates and empty source files. In preview mode print this report to standard output and leave all files unchanged. In save mode replace DESTINATION with the report and print only Saved: DESTINATION plus a newline. Return 0 with no success errors; preserve every other file. Supplied filenames are canonical relative names without leading hyphens; nonempty source contents end with a newline.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Spaces, empty values and changing list sizes expose mistakes that one easy example misses.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare these with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A list keeps each value separate so you can revisit it without losing its boundaries.",
+          "action": "Write or repair the complete script, Run it, and use the per-test feedback to investigate differences. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Validate argument count before shift. Capture source arguments with a quoted array assignment so names with spaces and duplicate names survive.",
+        "Do all mode, destination, source-existence and collision checks before printing headers or opening the output file.",
+        "Preview prints the report. Save uses > once and >> for later pieces. Function-call redirection remains unsupported: redirect the individual printing commands."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html"
+      ],
+      "simplifications": "Bash-specific dense indexed arrays, not portable POSIX sh. Supported: standalone name=(words), canonical constant element reads, ${#name[@]} and sole quoted \"${name[@]}\". Ordinary scalar assignment updates element 0 and retains the tail. No indexed writes, computed indices, +=, associative/sparse arrays, unset or declaration attributes. Only declared flat /work text files exist; no host commands or files. Equivalent supported programs are accepted by behavior, even if they do not use arrays.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Validate arguments and every source before any output or file change.\n# Keep the saved source list available for preview or publication.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview keeps old report",
+            "args": [
+              "preview",
+              "handover.txt",
+              "west.cfg",
+              "east notes.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/west.cfg": "ready\n",
+              "/work/east notes.txt": "inspect\n",
+              "/work/handover.txt": "keep this\n"
+            },
+            "stdout": "Handover\nFiles: 2\nSource: west.cfg\nready\nSource: east notes.txt\ninspect\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/west.cfg": "ready\n",
+              "/work/east notes.txt": "inspect\n",
+              "/work/handover.txt": "keep this\n"
+            }
+          },
+          {
+            "name": "Publish replaces old report",
+            "args": [
+              "save",
+              "result.txt",
+              "a.cfg",
+              "b.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.cfg": "a\n",
+              "/work/b.cfg": "b\n",
+              "/work/result.txt": "old\n",
+              "/work/unrelated.txt": "keep\n"
+            },
+            "stdout": "Saved: result.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/a.cfg": "a\n",
+              "/work/b.cfg": "b\n",
+              "/work/result.txt": "Handover\nFiles: 2\nSource: a.cfg\na\nSource: b.cfg\nb\n",
+              "/work/unrelated.txt": "keep\n"
+            }
+          },
+          {
+            "name": "Duplicates and empty source contents",
+            "args": [
+              "save",
+              "audit.txt",
+              "two words.cfg",
+              "empty.cfg",
+              "two words.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/two words.cfg": "100% *\n",
+              "/work/empty.cfg": ""
+            },
+            "stdout": "Saved: audit.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/two words.cfg": "100% *\n",
+              "/work/empty.cfg": "",
+              "/work/audit.txt": "Handover\nFiles: 3\nSource: two words.cfg\n100% *\nSource: empty.cfg\nSource: two words.cfg\n100% *\n"
+            }
+          },
+          {
+            "name": "New destination preview",
+            "args": [
+              "preview",
+              "new.txt",
+              "one.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/one.cfg": "only\n"
+            },
+            "stdout": "Handover\nFiles: 1\nSource: one.cfg\nonly\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.cfg": "only\n"
+            }
+          },
+          {
+            "name": "Missing late source",
+            "args": [
+              "save",
+              "result.txt",
+              "good.cfg",
+              "missing.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/good.cfg": "preserve\n",
+              "/work/result.txt": "original\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish handover\n",
+            "status": 2,
+            "after": {
+              "/work/good.cfg": "preserve\n",
+              "/work/result.txt": "original\n"
+            }
+          },
+          {
+            "name": "Destination is an input",
+            "args": [
+              "save",
+              "same.cfg",
+              "good.cfg",
+              "same.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/good.cfg": "preserve\n",
+              "/work/same.cfg": "original\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish handover\n",
+            "status": 2,
+            "after": {
+              "/work/good.cfg": "preserve\n",
+              "/work/same.cfg": "original\n"
+            }
+          },
+          {
+            "name": "Unknown mode",
+            "args": [
+              "publish",
+              "result.txt",
+              "a.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.cfg": "keep\n",
+              "/work/result.txt": "old\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish handover\n",
+            "status": 2,
+            "after": {
+              "/work/a.cfg": "keep\n",
+              "/work/result.txt": "old\n"
+            }
+          },
+          {
+            "name": "No sources",
+            "args": [
+              "save",
+              "result.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/result.txt": "keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish handover\n",
+            "status": 2,
+            "after": {
+              "/work/result.txt": "keep\n"
+            }
+          },
+          {
+            "name": "Empty destination",
+            "args": [
+              "save",
+              "",
+              "a.cfg"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/a.cfg": "keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish handover\n",
+            "status": 2,
+            "after": {
+              "/work/a.cfg": "keep\n"
+            }
+          },
+          {
+            "name": "Empty source name",
+            "args": [
+              "preview",
+              "result.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/result.txt": "keep\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot publish handover\n",
+            "status": 2,
+            "after": {
+              "/work/result.txt": "keep\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if [ \"$#\" -lt 3 ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\nsources=(\"$@\")\nif [ \"$mode\" = preview ] || [ \"$mode\" = save ]; then :; else\n    printf 'Cannot publish handover\\n' >&2; exit 2\nfi\nif [ -z \"$destination\" ]; then printf 'Cannot publish handover\\n' >&2; exit 2; fi\nfor file in \"${sources[@]}\"; do\n    if [ -z \"$file\" ] || [ \"$file\" = \"$destination\" ]; then\n        printf 'Cannot publish handover\\n' >&2; exit 2\n    fi\n    if [ -f \"$file\" ]; then :; else printf 'Cannot publish handover\\n' >&2; exit 2; fi\ndone\nreport() {\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\"\n        cat \"$file\"\n    done\n}\nif [ \"$mode\" = preview ]; then\n    report\nelse\n    printf 'Handover\\nFiles: %s\\n' \"${#sources[@]}\" > \"$destination\"\n    for file in \"${sources[@]}\"; do\n        printf 'Source: %s\\n' \"$file\" >> \"$destination\"\n        cat \"$file\" >> \"$destination\"\n    done\n    printf 'Saved: %s\\n' \"$destination\"\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-array-priority",
+        "shell-array-package",
+        "shell-scope-capstone"
+      ],
+      "teaching": {
+        "prerequisite_note": "Combine argument validation, arrays, functions, status and safe redirection from earlier units. This is an independent practical capstone.",
+        "concepts": [
+          {
+            "title": "Separate a plan from its destination",
+            "text": "A preview should show the proposed report without changing files. Validate the entire input list before either previewing or opening an output file; > replaces a file immediately, even if a later check fails."
+          },
+          {
+            "title": "Reuse an intact list",
+            "text": "After saving mode and destination, shift removes those control arguments. Capture the remaining arguments as separate source entries. Reuse that list for validation, a correct count, and report generation. Duplicates still count as separate requested entries."
+          },
+          {
+            "title": "Choose where the same information goes",
+            "text": "The example previews or saves a two-item checklist with different values from the assignment. Array variables and labels are created by the script. Only its mode argument is supplied. The simulator supports redirection on individual commands, not report > file on a function call; keep that limitation explicit."
+          }
+        ],
+        "example": "labels=('Cable check' 'Map update')\nshow() {\n    printf 'Checklist: %s\\n' \"${#labels[@]}\"\n    for label in \"${labels[@]}\"; do printf 'Check: %s\\n' \"$label\"; done\n}\nif [ \"$1\" = preview ]; then\n    show\nelse\n    printf 'Checklist: %s\\n' \"${#labels[@]}\" > checklist.txt\n    for label in \"${labels[@]}\"; do printf 'Check: %s\\n' \"$label\" >> checklist.txt; done\n    printf 'Checklist saved\\n'\nfi\n",
+        "inputs": "One argument: preview. Virtual checklist.txt starts with an earlier note. The example creates labels itself.",
+        "try_change": "Change the condition to compare $1 with save, then run with the supplied preview argument. Inspect checklist.txt and the console output; restore the original comparison afterward.",
+        "fixture": {
+          "name": "Preview a checklist",
+          "args": [
+            "preview"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/checklist.txt": "earlier note\n"
+          },
+          "stdout": "Checklist: 2\nCheck: Cable check\nCheck: Map update\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/checklist.txt": "earlier note\n"
+          }
+        }
+      }
+    }
+  ]
+}

@@ -269,10 +269,7 @@ fn stale_secondary_equal_or_older_serial_cannot_earn_current_completion() {
 #[test]
 fn all_new_drafts_and_examples_resume_reset_without_rewriting_prior_sixty_four_attempts() {
     let all = pack::bundled().unwrap();
-    let previous = all
-        .iter()
-        .filter(|s| s.unit != "dns-forward")
-        .collect::<Vec<_>>();
+    let previous = all.iter().take(64).collect::<Vec<_>>();
     assert_eq!(previous.len(), 64);
     let mut p = Progress {
         schema_version: 1,

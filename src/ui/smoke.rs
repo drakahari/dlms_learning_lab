@@ -174,6 +174,260 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            4800..=4895 => {
+                let offset = self.smoke_stage - 4800;
+                let i = 70 + offset / 24;
+                let phase = offset % 24;
+                let id = self.scenarios[i].id.clone();
+                match phase {
+                    0 => {
+                        self.launch(i);
+                        self.scale = 1.;
+                        self.theme_id = "dlms-dark".into();
+                        theme::apply(ctx, &self.theme_id);
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                        assert_eq!(self.script_view(i), teaching::View::Introduction);
+                    }
+                    1 => shot = Some(format!("{id}-introduction")),
+                    2 => {
+                        if self.script_view(i) == teaching::View::Example {
+                            assert!(self.click_smoke_control(ctx, None));
+                        } else {
+                            let r = self.metrics.example_action.unwrap();
+                            if !self.reveal_smoke_control(ctx, r)
+                                || !self.click_smoke_control(ctx, Some(r))
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    3 => {
+                        assert_eq!(self.script_view(i), teaching::View::Example);
+                        shot = Some(format!("{id}-practice-before-run"));
+                    }
+                    4 => {
+                        let r = self.metrics.check.unwrap();
+                        if !self.reveal_smoke_control(ctx, r)
+                            || !self.click_smoke_control(ctx, Some(r))
+                        {
+                            return;
+                        }
+                    }
+                    5 => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
+                        let a = &self.progress.attempts[&id];
+                        let example = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .script_learning
+                            .as_ref()
+                            .unwrap()
+                            .example_result
+                            .as_ref()
+                            .unwrap();
+                        assert!(
+                            self.scenarios[i]
+                                .teaching
+                                .as_ref()
+                                .unwrap()
+                                .fixture
+                                .accepts(example)
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!progress::current_solved(a, &self.scenarios[i]));
+                        shot = Some(format!("{id}-practice-result"));
+                    }
+                    6 => {
+                        if self.script_view(i) == teaching::View::Assignment {
+                            assert!(self.click_smoke_control(ctx, None));
+                        } else {
+                            let r = self.metrics.assignment_action.unwrap();
+                            if !self.reveal_smoke_control(ctx, r)
+                                || !self.click_smoke_control(ctx, Some(r))
+                            {
+                                return;
+                            }
+                        }
+                    }
+                    7 => {
+                        assert_eq!(self.script_view(i), teaching::View::Assignment);
+                        assert!(!self.metrics.help_visible);
+                        shot = Some(format!("{id}-assignment"));
+                    }
+                    8 => {
+                        let r = self.metrics.inputs[0];
+                        if !self.reveal_smoke_control(ctx, r)
+                            || !self.click_smoke_control(ctx, Some(r))
+                        {
+                            return;
+                        }
+                    }
+                    9 => {
+                        self.pending_events = vec![
+                            key(egui::Key::A, true),
+                            egui::Event::Text("printf wrong".into()),
+                        ]
+                    }
+                    10 | 14 => self.pending_events = vec![key(egui::Key::Enter, true)],
+                    11 => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-wrong-output-feedback"));
+                    }
+                    12 => {
+                        let r = self.metrics.inputs[0];
+                        if !self.reveal_smoke_control(ctx, r)
+                            || !self.click_smoke_control(ctx, Some(r))
+                        {
+                            return;
+                        }
+                    }
+                    13 => {
+                        self.pending_events = vec![
+                            key(egui::Key::A, true),
+                            egui::Event::Text(self.scenarios[i].solution[0].clone()),
+                        ]
+                    }
+                    15 => {
+                        if self.script_job.is_some() {
+                            return;
+                        }
+                        assert!(self.metrics.completion, "{id}");
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        assert!(progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    16 => {
+                        let r = self.metrics.inputs[0];
+                        if !self.reveal_smoke_control(ctx, r)
+                            || !self.click_smoke_control(ctx, Some(r))
+                        {
+                            return;
+                        }
+                    }
+                    17 => {
+                        self.pending_events = vec![
+                            key(egui::Key::A, true),
+                            egui::Event::Text("printf changed".into()),
+                        ]
+                    }
+                    18 => {
+                        assert!(!self.metrics.completion);
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        let a = &self.progress.attempts[&id];
+                        assert!(!progress::current_solved(a, &self.scenarios[i]));
+                        assert!(
+                            a.workspace
+                                .as_ref()
+                                .unwrap()
+                                .script_learning
+                                .as_ref()
+                                .unwrap()
+                                .example_result
+                                .is_some()
+                        );
+                        shot = Some(format!("{id}-invalidated"));
+                    }
+                    19 => {
+                        self.progress.attempts.get_mut(&id).unwrap().challenge = true;
+                        self.help_open = false;
+                        self.lesson_scroll_reset = true;
+                    }
+                    20 => {
+                        assert!(self.metrics.lesson_tabs.is_empty());
+                        assert!(!self.metrics.help_visible);
+                        shot = Some(format!("{id}-challenge"));
+                    }
+                    21 => self.reset_attempt(i),
+                    22 => {
+                        assert_eq!(self.progress.attempts[&id].state, self.scenarios[i].initial);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                    }
+                    _ => {}
+                }
+            }
+            4896 => {
+                self.launch(70);
+                self.progress
+                    .attempts
+                    .get_mut("shell-array-intake")
+                    .unwrap()
+                    .challenge = false;
+                self.set_script_view(70, teaching::View::Introduction);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 1.5;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 800.)));
+            }
+            4897 | 4901 | 4905 => {
+                let key = egui::Id::new(("array-layout-settle", self.smoke_stage));
+                let n = ctx.data_mut(|d| {
+                    let n = d.get_temp::<u8>(key).unwrap_or(0) + 1;
+                    d.insert_temp(key, n);
+                    n
+                });
+                if n < 3 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+            }
+            4898 => shot = Some("array-introduction-light-150".into()),
+            4899 => {
+                let r = self.metrics.example_action.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
+                shot = Some("array-introduction-light-150-scrolled".into());
+            }
+            4900 => {
+                self.set_script_view(70, teaching::View::Example);
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.scale = 2.;
+            }
+            4902 => shot = Some("array-practice-dark-200".into()),
+            4903 => {
+                let r = self.metrics.check.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
+                shot = Some("array-practice-dark-200-scrolled".into());
+            }
+            4904 => {
+                self.set_script_view(73, teaching::View::Assignment);
+                self.launch_assignment_fixture(73);
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            4906 => shot = Some("array-capstone-light-200".into()),
+            4907 => {
+                let r = self.metrics.check.unwrap();
+                if !self.reveal_smoke_control(ctx, r) {
+                    return;
+                }
+                shot = Some("array-capstone-light-200-scrolled".into());
+            }
+            4908 => {
+                println!(
+                    "PASS native array unit: four fresh introductions, isolated examples/Run, full assignments, keyboard wrong output and reference repair, complete behavioral cases, saved reload, edit invalidation, selected reset, Challenge and light150/dark200 scrolling. Inputs used authored reference scripts; not novice, physical-device or Windows/macOS acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             4700 => {
                 assert!(!self.metrics.header.is_empty());
                 shot = Some("startup-library".into());

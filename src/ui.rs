@@ -242,6 +242,8 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup") {
                 4700
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("arrays") {
+                4800
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit") {
                 4500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout") {

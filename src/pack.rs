@@ -283,7 +283,10 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 .map_err(|e| format!("{}: unreachable solution: {e}", s.id))?;
         }
         if let (State::Script { source, run }, Goal::Script { cases }) = (&mut state, &s.goal) {
-            if cases.len() < 3 || cases.len() > 8 || cases.iter().any(|c| !c.valid()) {
+            if cases.len() < 3
+                || cases.len() > crate::shell::MAX_CASES
+                || cases.iter().any(|c| !c.valid())
+            {
                 return Err(format!("{}: invalid script cases", s.id));
             }
             *run = Some(crate::shell::Record {
@@ -492,5 +495,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/shell-file-batches-v1.json"),
         include_str!("../scenarios/ipv4-static-v1.json"),
         include_str!("../scenarios/dns-forward-v1.json"),
+        include_str!("../scenarios/shell-arrays-v1.json"),
     ])
 }
