@@ -69,3 +69,5 @@ pub mod storage_teaching;
 pub mod acl;
 
 pub mod acl_routing;
+
+pub mod acl_editor;
