@@ -1,0 +1,744 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-ospf-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Derived OSPFv2 P2P compatibility",
+      "unit": "",
+      "title": "Development OSPF compatibility workspace",
+      "summary": "Private backend/native development fixture only; not new curriculum or objective credit.",
+      "objective": "Repair Branch\u2013Core current P2P compatibility and verify a remote SPF candidate from Branch to198.51.100.0/24. Preserve all interface addresses and availability, every router ID, and the existing Core\u2013Edge OSPF port settings. Process numbers are local; alternate matching Hello values and positive costs are valid where these requirements permit. No observed Full adjacency or packet forwarding is claimed.",
+      "retry_guidance": "Inspect the local and peer area, Hello and Dead values, then enabled/up/passive settings. A local connected prefix does not substitute for the requested remote candidate.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the bounded model",
+        "Edit native settings",
+        "Apply and check current outcomes"
+      ],
+      "guide": [],
+      "explanation": "Matching P2P parameters permit reciprocal graph edges in this model. Remote cost adds the source output costs and destination stub cost; the default Branch\u2013Core\u2013Edge candidate costs10+5+3=18. The physical and healthy-link guards preserve unrelated context. Alternative settings pass when they satisfy the same explicit requirements.",
+      "hints": [
+        "Branch\u2013Core currently has different Hello values. The process numbers do not have to match.",
+        "A passive LAN remains advertised, but passive P2P does not create a compatible peer.",
+        "Preserve the healthy Core\u2013Edge settings and physical addresses/up flags while repairing the faulty attachment."
+      ],
+      "sources": [
+        "https://www.rfc-editor.org/rfc/rfc2328.html",
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Unbundled development fixture only. Derived current P2P compatibility and directed positive-cost SPF candidates; no real packets, IOS CLI, host commands, neighbor FSM/Full state, LSA exchange, flooding, broadcast DR/BDR, history timers, convergence delay or packet forwarding. ospf+JSON is a pack-only typed data adapter, never learner CLI. Checked2026-10-23; no lesson-count or coverage promotion.",
+      "prerequisites": [],
+      "initial": {
+        "kind": "Ospf",
+        "simulation": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Branch": {
+                "forwarding": true,
+                "interfaces": {
+                  "branch-core": {
+                    "link": "branch-core-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "lan": {
+                    "link": "branch-lan-link",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Core": {
+                "forwarding": true,
+                "interfaces": {
+                  "branch-core": {
+                    "link": "branch-core-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "core-edge": {
+                    "link": "core-edge-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.5",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Edge": {
+                "forwarding": true,
+                "interfaces": {
+                  "core-edge": {
+                    "link": "core-edge-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "lan": {
+                    "link": "edge-lan-link",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Branch": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 1,
+                  "router_id": "1.1.1.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "branch-core": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 10,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "lan": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Core": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "2.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "branch-core": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 10,
+                    "hello_seconds": 20,
+                    "dead_seconds": 40
+                  },
+                  "core-edge": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Edge": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 100,
+                  "router_id": "3.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "core-edge": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "lan": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ospf",
+        "initial": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Branch": {
+                "forwarding": true,
+                "interfaces": {
+                  "branch-core": {
+                    "link": "branch-core-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "lan": {
+                    "link": "branch-lan-link",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Core": {
+                "forwarding": true,
+                "interfaces": {
+                  "branch-core": {
+                    "link": "branch-core-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "core-edge": {
+                    "link": "core-edge-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.5",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Edge": {
+                "forwarding": true,
+                "interfaces": {
+                  "core-edge": {
+                    "link": "core-edge-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.60.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "lan": {
+                    "link": "edge-lan-link",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Branch": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 1,
+                  "router_id": "1.1.1.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "branch-core": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 10,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "lan": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Core": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "2.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "branch-core": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 10,
+                    "hello_seconds": 20,
+                    "dead_seconds": 40
+                  },
+                  "core-edge": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Edge": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 100,
+                  "router_id": "3.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "core-edge": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "lan": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Branch",
+              "interface": "branch-core"
+            },
+            "peer": {
+              "router": "Core",
+              "interface": "branch-core"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Core",
+              "interface": "core-edge"
+            },
+            "peer": {
+              "router": "Edge",
+              "interface": "core-edge"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Branch",
+            "destination": {
+              "address": "198.51.100.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Branch": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "branch-core": {
+                      "link": "branch-core-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.0.1",
+                        "prefix": 30
+                      }
+                    },
+                    "lan": {
+                      "link": "branch-lan-link",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Core": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "branch-core": {
+                      "link": "branch-core-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "core-edge": {
+                      "link": "core-edge-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.0.5",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Edge": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "core-edge": {
+                      "link": "core-edge-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.60.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "lan": {
+                      "link": "edge-lan-link",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Core",
+              "interface": "core-edge"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Edge",
+              "interface": "core-edge"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 7,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "RouterId",
+            "router": "Branch",
+            "expected": "1.1.1.1"
+          },
+          {
+            "kind": "RouterId",
+            "router": "Core",
+            "expected": "2.2.2.2"
+          },
+          {
+            "kind": "RouterId",
+            "router": "Edge",
+            "expected": "3.3.3.3"
+          }
+        ]
+      },
+      "solution": [
+        "ospf {\"kind\":\"SetPort\",\"endpoint\":{\"router\":\"Core\",\"interface\":\"branch-core\"},\"configuration\":{\"enabled\":true,\"passive\":false,\"network_type\":\"PointToPoint\",\"cost\":10,\"hello_seconds\":10,\"dead_seconds\":40}}"
+      ],
+      "ospf_teaching": {
+        "prerequisite_note": "Before editing, understand IPv4 prefixes, local interface addresses and outgoing route costs. This native model derives current compatibility and routes; it does not run OSPF packets or report an observed Full adjacency.",
+        "concepts": [
+          {
+            "title": "Current P2P compatibility",
+            "text": "Both enabled, up P2P endpoints need usable numbering, distinct explicit router IDs, the same area, and matching Hello and Dead parameters. Parameters are compared without sending packets or waiting for protocol timers. P2P mask differences are warnings rather than Hello blockers."
+          },
+          {
+            "title": "Local process IDs and opaque router IDs",
+            "text": "Process IDs are local labels and may differ between routers. A router ID is an opaque unique32-bit number, written with dots; it need not be assigned to an interface or be an ordinary host address. This model distinguishes an omitted ID from explicit zero and treats both as non-running."
+          },
+          {
+            "title": "Advertised passive networks and costs",
+            "text": "A passive interface can advertise its attached prefix while forming no peer on that interface. A remote SPF candidate adds outgoing interface costs along the path and the advertising destination interface cost. Multiple equal-cost first-hop choices remain a set; they are not one invented packet path."
+          }
+        ],
+        "example_description": "PracticeLeft uses Hello5 while PracticeRight uses Hello10. Keep the existing addresses, up flags and costs, match the P2P Hello parameter, and verify a current remote candidate for172.20.1.0/24. The default cost is4+6=10: PracticeLeft uplink plus PracticeRight passive LAN. These fixture names and values are separate from the assignment.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "PracticeLeft": {
+                "forwarding": true,
+                "interfaces": {
+                  "uplink": {
+                    "link": "practice-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.90.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "PracticeRight": {
+                "forwarding": true,
+                "interfaces": {
+                  "uplink": {
+                    "link": "practice-link",
+                    "up": true,
+                    "address": {
+                      "address": "10.90.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "lan": {
+                    "link": "practice-lan",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.1.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "PracticeLeft": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 9,
+                  "router_id": "224.0.0.9",
+                  "area": 0
+                },
+                "interfaces": {
+                  "uplink": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 4,
+                    "hello_seconds": 5,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "PracticeRight": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 11,
+                  "router_id": "255.255.255.255",
+                  "area": 0
+                },
+                "interfaces": {
+                  "uplink": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "lan": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 6,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "PracticeLeft",
+              "interface": "uplink"
+            },
+            "peer": {
+              "router": "PracticeRight",
+              "interface": "uplink"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "PracticeLeft",
+            "destination": {
+              "address": "172.20.1.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "PracticeLeft": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "uplink": {
+                      "link": "practice-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.90.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "PracticeRight": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "uplink": {
+                      "link": "practice-link",
+                      "up": true,
+                      "address": {
+                        "address": "10.90.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "lan": {
+                      "link": "practice-lan",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.1.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "PracticeLeft",
+                "interface": "uplink"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 4,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            "explanation": "Set PracticeLeft/uplink Hello to10 to match PracticeRight. Retain its cost4, Dead40, P2P type and enabled active setting. This inserts desired settings into the practice draft; apply/check is separate."
+          }
+        ],
+        "try_change": {
+          "description": "Change only PracticeLeft/uplink Dead from40 to80, apply, and inspect the two lost compatibility/remote-route checks. Restore40 to repair the example.",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "PracticeLeft",
+                "interface": "uplink"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 4,
+                "hello_seconds": 10,
+                "dead_seconds": 80
+              }
+            }
+          ],
+          "expected": [
+            false,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SetPort",
+            "endpoint": {
+              "router": "PracticeLeft",
+              "interface": "uplink"
+            },
+            "configuration": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

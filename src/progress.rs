@@ -100,6 +100,33 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::Ospf { simulation } = &a.state {
+        let (
+            State::Ospf {
+                simulation: authored,
+            },
+            crate::engine::Goal::Ospf {
+                initial,
+                requirements,
+            },
+        ) = (&s.initial, &s.goal)
+        else {
+            return false;
+        };
+        if authored != initial || !crate::ospf_workspace::same_context(initial, simulation) {
+            return false;
+        }
+        if a.workspace
+            .as_ref()
+            .and_then(|w| w.ospf_draft.as_ref())
+            .is_some_and(|d| !d.matches(simulation))
+        {
+            return false;
+        }
+        return crate::ospf_workspace::checks(initial, simulation, requirements)
+            .iter()
+            .all(|c| c.0);
+    }
     if let State::Ipv4Acl { network } = &a.state {
         let crate::engine::Goal::Ipv4Acl { definition } = &s.goal else {
             return false;
@@ -276,6 +303,28 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err("Incompatible saved attempt; original retained".into());
         }
         validate_accounts_workspace(a)?;
+        validate_ospf_workspace(a)?;
+        if let State::Ospf { simulation } = &a.state {
+            let State::Ospf {
+                simulation: initial,
+            } = &s.initial
+            else {
+                return Err("OSPF state belongs to a different activity; original retained".into());
+            };
+            if !crate::ospf_workspace::same_context(initial, simulation) {
+                return Err("Saved OSPF topology/roles/host context differs from this activity; original retained".into());
+            }
+            if let Some(l) = a.workspace.as_ref().and_then(|w| w.ospf_learning.as_ref())
+                && s.ospf_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            {
+                return Err(
+                    "Saved OSPF practice context differs from this lesson; original retained"
+                        .into(),
+                );
+            }
+        }
         if let State::Accounts { simulation } = &a.state {
             let State::Accounts {
                 simulation: initial,
@@ -517,6 +566,34 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_ospf_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else {
+        return Ok(());
+    };
+    match &a.state {
+        State::Ospf { simulation } => {
+            if w.ospf_draft
+                .as_ref()
+                .is_some_and(|d| !d.same_shape(simulation))
+                || w.ospf_learning.as_ref().is_some_and(|l| {
+                    !l.valid()
+                        || l.simulation
+                            .topology()
+                            .devices
+                            .keys()
+                            .any(|id| simulation.topology().devices.contains_key(id))
+                })
+            {
+                return Err("Invalid OSPF draft/example identities; original retained".into());
+            }
+        }
+        _ if w.ospf_draft.is_some() || w.ospf_learning.is_some() => {
+            return Err("OSPF metadata on another activity; original retained".into());
+        }
+        _ => {}
+    }
+    Ok(())
+}
 fn validate_acl_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else {
         return Ok(());
@@ -663,6 +740,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_acl_workspace(a)?;
         validate_accounts_workspace(a)?;
+        validate_ospf_workspace(a)?;
         validate_storage_workspace(a)?;
         validate_discovery_workspace(a)?;
         validate_process_workspace(a)?;

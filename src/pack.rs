@@ -39,6 +39,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub accounts_teaching: Option<crate::accounts_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub ospf_teaching: Option<crate::ospf_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discovery_teaching: Option<crate::discovery_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub storage_teaching: Option<crate::storage_teaching::Lesson>,
@@ -217,6 +219,29 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("DNS example must use a different zone from the assignment".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let State::Ospf { simulation } = &s.initial {
+            let Goal::Ospf {
+                initial,
+                requirements,
+            } = &s.goal
+            else {
+                return Err("OSPF settings need matching fixed-context objectives".into());
+            };
+            if simulation != initial
+                || !crate::ospf_workspace::valid_requirements(initial, requirements)
+            {
+                return Err("OSPF objectives must pin the initial graph and bounded meaningful positive outcomes".into());
+            }
+            let lesson = s.ospf_teaching.as_ref().ok_or(
+                "OSPF activities need prerequisite teaching and a separate native practice fixture",
+            )?;
+            lesson.validate()?;
+            if !lesson.separate_from(initial) {
+                return Err("OSPF practice must use separate topology names, link identities, addresses and router IDs".into());
+            }
+        } else if s.ospf_teaching.is_some() || matches!(s.goal, Goal::Ospf { .. }) {
+            return Err("OSPF objectives/teaching attached to another activity".into());
         }
         if let State::Ipv4Acl { network } = &s.initial {
             let Goal::Ipv4Acl { definition } = &s.goal else {
@@ -490,6 +515,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Ospf { simulation } => simulation.valid(),
         State::Ipv4Acl { network } => crate::acl_workspace::valid_network(network).is_ok(),
         State::Accounts { simulation } => simulation.valid(),
         State::PersistentMounts { storage } => storage.validate().is_ok(),

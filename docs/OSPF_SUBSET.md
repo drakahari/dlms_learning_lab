@@ -2,8 +2,9 @@
 
 Contract fixed before implementation, checked2026-10-23. Original MIT Rust code;
 no copied protocol implementation, new dependency, host commands or packets.
-This is foundation-only: no engine, terminal, persistence, UI, lessons, credit or
-coverage promotion. Existing IPv4 routing and subnet modules remain unchanged.
+The core itself adds no engine, terminal, persistence, UI, lessons, credit or
+coverage promotion. The separately reviewed native adapter is documented in
+OSPF_WORKSPACE.md; existing IPv4 routing and subnet modules remain unchanged.
 
 `ospf::State` reuses `ipv4_routing::Topology`, `Assignment` and `Prefix` and holds
 complete typed configuration for every forwarding device and its interfaces.
@@ -64,17 +65,20 @@ The largest simple router path has11 edges plus one stub cost, at most786420,
 well below24-bit OSPF infinity; arithmetic still uses checked addition. Per-source
 first-hop sets are bounded by8 directly attached P2P interfaces; output is bounded
 by12 router views and at most96 distinct candidate prefixes/view. Snapshot data
-is derived afresh and has no decoder/authority for saved completion. State
-decoding uses the bounded `State::from_json` entry point; generic serde decoding
-of a State is deliberately absent. Typed actions use `Action::from_json` then
+is derived afresh and has no decoder/authority for saved completion.
+`State::from_json` caps raw input at256KiB. The native adapter adds a validated
+custom State serde decoder with early structural/name limits and no static-route
+retention. Generic serde cannot measure a raw nested source span: outer pack and
+profile byte ceilings still apply to whitespace/escape padding. Typed actions
+use `Action::from_json` then
 `State::apply`; this is data interchange, not a command interpreter.
 
 API: `State::new/from_json/valid/valid_against`, borrowed `topology` and
 `configuration`, atomic `reconfigure/apply`, and fresh `snapshot`. A Snapshot has
 router views with router issues, endpoint compatibility conditions, directed
 distances, local connected networks and remote candidate routes. `RouterView`
-provides exact-prefix `route` and longest-prefix `lookup`. No typed lesson grader
-or goal/record integration is introduced by this foundation.
+provides exact-prefix `route` and longest-prefix `lookup`. The separately reviewed native adapter supplies current typed requirements;
+no snapshot is an authority for saved success.
 
 Not implemented: actual Hello/DBD/LSR/LSU/LSAck exchange, neighbor or interface
 FSMs (including Down/Init/2-Way/ExStart/Exchange/Loading/Full), LSAs/LSDB/flooding,

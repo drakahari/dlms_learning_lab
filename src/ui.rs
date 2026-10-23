@@ -452,6 +452,10 @@ impl LabApp {
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.ospf_teaching {
+            dlms_learning_lab::ospf_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated OSPF lesson");
+        }
         if let Some(lesson) = &s.accounts_teaching {
             dlms_learning_lab::accounts_teaching::prepare(a, lesson, new_attempt);
         }
@@ -563,6 +567,10 @@ impl LabApp {
         }
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.ospf_teaching {
+            dlms_learning_lab::ospf_teaching::prepare(a, lesson, true)
+                .expect("validated OSPF lesson");
         }
         if let Some(lesson) = &s.accounts_teaching {
             dlms_learning_lab::accounts_teaching::prepare(a, lesson, true);

@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Ospf {
+        simulation: crate::ospf::State,
+    },
     Ipv4Acl {
         network: crate::acl_routing::Network,
     },
@@ -118,6 +121,11 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Ospf {
+        initial: crate::ospf::State,
+        #[serde(deserialize_with = "crate::ospf_workspace::requirements")]
+        requirements: Vec<crate::ospf_workspace::Requirement>,
+    },
     Ipv4Acl {
         definition: crate::acl_editor::Definition,
     },
@@ -249,6 +257,13 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (
+            State::Ospf { simulation },
+            Goal::Ospf {
+                initial,
+                requirements,
+            },
+        ) => crate::ospf_workspace::checks(initial, simulation, requirements),
         (State::Ipv4Acl { network }, Goal::Ipv4Acl { definition }) => {
             crate::acl_workspace::checks(network, definition, &crate::acl_editor::Drafts::default())
         }
@@ -526,6 +541,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 pub fn help(s: &State) -> &'static str {
     match s {
         State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
+        State::Ospf { .. } => crate::ospf_workspace::HELP,
         State::Accounts { .. } => crate::accounts_teaching::HELP,
         State::PersistentMounts { .. } => crate::storage_workspace::HELP,
         State::Discovery { .. } => {
@@ -577,6 +593,22 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::Ospf { simulation } = s {
+        let Goal::Ospf {
+            initial,
+            requirements,
+        } = goal
+        else {
+            return Err("OSPF changes require a matching immutable goal context".into());
+        };
+        if !crate::ospf_workspace::valid_requirements(initial, requirements) {
+            return Err("Invalid authored OSPF requirements; state retained".into());
+        }
+        if matches!(input.trim(), "help" | "show") {
+            return execute(s, input);
+        }
+        return crate::ospf_workspace::execute(initial, simulation, input);
+    }
     if let State::Accounts { simulation } = s {
         let Goal::Accounts {
             initial,
@@ -596,6 +628,9 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::Ospf { .. }) {
+        return match input.trim() { "help" => Ok(crate::ospf_workspace::HELP.into()), "show" => Ok(describe(s)), _ => Err("OSPF mutations require immutable goal context; use native typed settings, not IOS commands".into()) };
+    }
     if let State::Ipv4Acl { network } = s {
         return crate::acl_workspace::adapter(network, input);
     }
@@ -685,7 +720,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Ipv4Acl { .. }
+        State::Ospf { .. }
+        | State::Ipv4Acl { .. }
         | State::Accounts { .. }
         | State::PersistentMounts { .. }
         | State::Discovery { .. }
@@ -1123,6 +1159,10 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Ospf { simulation } => format!(
+            "OSPFv2 derived P2P compatibility · {} virtual routers · no observed Full adjacency or packet forwarding",
+            simulation.configuration().routers.len()
+        ),
         State::Ipv4Acl { network } => format!(
             "Virtual ACL configuration · {} devices · explicit service-flow tests only; no real packets or full IOS CLI",
             network.topology.devices.len()

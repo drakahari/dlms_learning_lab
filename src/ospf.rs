@@ -1,8 +1,8 @@
 //! Pure bounded OSPFv2 compatibility/SPF snapshots, not a protocol FSM or packet engine.
-use crate::ipv4_routing::{Assignment, Prefix, Topology};
+use crate::ipv4_routing::{Assignment, Device, Interface, Prefix, Topology};
 use serde::{
     Deserialize, Deserializer, Serialize,
-    de::{Error as _, MapAccess, Visitor},
+    de::{Error as _, MapAccess, SeqAccess, Visitor},
 };
 use std::{
     collections::{BTreeMap, BTreeSet},
@@ -75,6 +75,43 @@ impl<'de> Deserialize<'de> for Name {
 fn text32<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<String, D::Error> {
     Ok(Name::deserialize(d)?.0)
 }
+fn ipv4<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<Ipv4Addr, D::Error> {
+    struct Address;
+    impl Visitor<'_> for Address {
+        type Value = Ipv4Addr;
+        fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            f.write_str("bounded dotted-decimal32-bit value")
+        }
+        fn visit_str<E: serde::de::Error>(self, s: &str) -> std::result::Result<Ipv4Addr, E> {
+            if s.len() > 15 {
+                return Err(E::custom("OSPF dotted-decimal value exceeds15bytes"));
+            }
+            s.parse()
+                .map_err(|_| E::custom("Invalid OSPF dotted-decimal value"))
+        }
+    }
+    d.deserialize_str(Address)
+}
+fn optional_id<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<Option<Ipv4Addr>, D::Error> {
+    #[derive(Deserialize)]
+    struct Value(#[serde(deserialize_with = "ipv4")] Ipv4Addr);
+    Ok(Option::<Value>::deserialize(d)?.map(|v| v.0))
+}
+fn optional_assignment<'de, D: Deserializer<'de>>(
+    d: D,
+) -> std::result::Result<Option<Assignment>, D::Error> {
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Value {
+        #[serde(deserialize_with = "ipv4")]
+        address: Ipv4Addr,
+        prefix: u8,
+    }
+    Ok(Option::<Value>::deserialize(d)?.map(|v| Assignment {
+        address: v.address,
+        prefix: v.prefix,
+    }))
+}
 fn map<'de, D: Deserializer<'de>, V: Deserialize<'de>, const N: usize>(
     d: D,
 ) -> std::result::Result<BTreeMap<String, V>, D::Error> {
@@ -140,6 +177,7 @@ pub enum NetworkType {
 pub struct ProcessConfig {
     pub enabled: bool,
     pub process_id: u16,
+    #[serde(default, deserialize_with = "optional_id")]
     pub router_id: Option<Ipv4Addr>,
     pub area: u32,
 }
@@ -186,8 +224,116 @@ pub struct State {
 #[serde(deny_unknown_fields)]
 struct Data {
     schema_version: u8,
+    #[serde(deserialize_with = "deserialize_topology")]
     topology: Topology,
     configuration: Configuration,
+}
+// Nested serde ingress has structural limits; its caller owns the raw byte cap.
+// State::from_json additionally enforces the dedicated256KiB raw input ceiling.
+impl<'de> Deserialize<'de> for State {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> std::result::Result<Self, D::Error> {
+        let data = Data::deserialize(d)
+            .map_err(|_| D::Error::custom("Invalid bounded OSPF state fields"))?;
+        if data.schema_version != 1 {
+            return Err(D::Error::custom("Unsupported OSPF state schema"));
+        }
+        Self::new(data.topology, data.configuration)
+            .map_err(|_| D::Error::custom("Invalid bounded OSPF state"))
+    }
+}
+pub fn deserialize_topology<'de, D: Deserializer<'de>>(
+    d: D,
+) -> std::result::Result<Topology, D::Error> {
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Port {
+        #[serde(deserialize_with = "text32")]
+        link: String,
+        up: bool,
+        #[serde(default, deserialize_with = "optional_assignment")]
+        address: Option<Assignment>,
+    }
+    fn input_ports<'de, D: Deserializer<'de>>(
+        d: D,
+    ) -> std::result::Result<BTreeMap<String, Port>, D::Error> {
+        map::<D, Port, MAX_PORTS>(d)
+    }
+    fn empty_routes<'de, D: Deserializer<'de>>(
+        d: D,
+    ) -> std::result::Result<Vec<crate::ipv4_routing::Route>, D::Error> {
+        struct Empty;
+        impl<'de> Visitor<'de> for Empty {
+            type Value = Vec<crate::ipv4_routing::Route>;
+            fn expecting(&self, f: &mut fmt::Formatter) -> fmt::Result {
+                f.write_str("no static routes in the OSPF foundation")
+            }
+            fn visit_seq<A: SeqAccess<'de>>(
+                self,
+                mut a: A,
+            ) -> std::result::Result<Self::Value, A::Error> {
+                if a.next_element::<serde::de::IgnoredAny>()?.is_some() {
+                    return Err(A::Error::custom(
+                        "Static routes are unsupported in this OSPF foundation",
+                    ));
+                }
+                Ok(vec![])
+            }
+        }
+        d.deserialize_seq(Empty)
+    }
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Node {
+        forwarding: bool,
+        #[serde(deserialize_with = "input_ports")]
+        interfaces: BTreeMap<String, Port>,
+        #[serde(deserialize_with = "empty_routes")]
+        routes: Vec<crate::ipv4_routing::Route>,
+    }
+    fn input_devices<'de, D: Deserializer<'de>>(
+        d: D,
+    ) -> std::result::Result<BTreeMap<String, Node>, D::Error> {
+        map::<D, Node, MAX_DEVICES>(d)
+    }
+    #[derive(Deserialize)]
+    #[serde(deny_unknown_fields)]
+    struct Input {
+        #[serde(deserialize_with = "input_devices")]
+        devices: BTreeMap<String, Node>,
+    }
+    let input = Input::deserialize(d)
+        .map_err(|_| D::Error::custom("Invalid bounded OSPF topology fields"))?;
+    let topology = Topology {
+        devices: input
+            .devices
+            .into_iter()
+            .map(|(id, n)| {
+                (
+                    id,
+                    Device {
+                        forwarding: n.forwarding,
+                        routes: n.routes,
+                        interfaces: n
+                            .interfaces
+                            .into_iter()
+                            .map(|(id, p)| {
+                                (
+                                    id,
+                                    Interface {
+                                        link: p.link,
+                                        up: p.up,
+                                        address: p.address,
+                                    },
+                                )
+                            })
+                            .collect(),
+                    },
+                )
+            })
+            .collect(),
+    };
+    topology_valid(&topology).map_err(|_| D::Error::custom("Invalid bounded OSPF topology"))?;
+    Ok(topology)
 }
 
 fn topology_valid(topology: &Topology) -> Result<()> {
@@ -277,6 +423,10 @@ fn config_valid(topology: &Topology, configuration: &Configuration) -> Result<()
     Ok(())
 }
 impl State {
+    pub fn validate_parts(topology: &Topology, configuration: &Configuration) -> Result<()> {
+        topology_valid(topology)?;
+        config_valid(topology, configuration)
+    }
     pub fn new(topology: Topology, configuration: Configuration) -> Result<Self> {
         topology_valid(&topology)?;
         config_valid(&topology, &configuration)?;
@@ -290,16 +440,12 @@ impl State {
         if text.len() > MAX_STATE_BYTES {
             return Err(fault(FaultKind::Limit, "OSPF state JSON exceeds256KiB"));
         }
-        let data: Data = serde_json::from_str(text).map_err(|_| {
+        serde_json::from_str(text).map_err(|_| {
             fault(
                 FaultKind::Invalid,
                 "Malformed OSPF state, unknown fields, duplicate names or decode bounds",
             )
-        })?;
-        if data.schema_version != 1 {
-            return Err(fault(FaultKind::Invalid, "Unsupported OSPF state schema"));
-        }
-        Self::new(data.topology, data.configuration)
+        })
     }
     pub fn valid(&self) -> bool {
         self.schema_version == 1
@@ -336,7 +482,19 @@ impl State {
         config_valid(&self.topology, &self.configuration)
     }
     pub fn apply(&mut self, action: &Action) -> Result<()> {
+        self.apply_internal(action, None)
+    }
+    pub fn apply_against(&mut self, initial: &State, action: &Action) -> Result<()> {
+        self.apply_internal(action, Some(initial))
+    }
+    fn apply_internal(&mut self, action: &Action, initial: Option<&State>) -> Result<()> {
         self.validate()?;
+        if initial.is_some_and(|i| !self.valid_against(i)) {
+            return Err(fault(
+                FaultKind::Context,
+                "OSPF state differs from the authored graph or roles",
+            ));
+        }
         match action {
             Action::SetProcess { router, process } => {
                 if !name(router) || !self.configuration.routers.contains_key(router) {
@@ -437,6 +595,12 @@ impl State {
             }
         }
         candidate.validate()?;
+        if initial.is_some_and(|i| !candidate.valid_against(i)) {
+            return Err(fault(
+                FaultKind::Context,
+                "OSPF candidate differs from the authored graph or roles",
+            ));
+        }
         *self = candidate;
         Ok(())
     }
@@ -471,6 +635,7 @@ pub enum Action {
     },
     SetAddress {
         endpoint: Endpoint,
+        #[serde(default, deserialize_with = "optional_assignment")]
         address: Option<Assignment>,
     },
     SetUp {
@@ -534,9 +699,12 @@ pub struct LinkView {
     pub compatible: bool,
     pub conditions: Vec<Condition>,
 }
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 pub struct NextHop {
+    #[serde(deserialize_with = "text32")]
     pub interface: String,
+    #[serde(deserialize_with = "ipv4")]
     pub via: Ipv4Addr,
     pub peer: Endpoint,
 }
