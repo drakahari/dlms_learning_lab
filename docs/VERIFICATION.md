@@ -1,3 +1,7 @@
+# M45 current checkpoint —2026-10-23
+
+391 Rust tests pass, including11 pure process-model cases and a long-editor viewport/focus/edit-invalidation regression. Seven fixed owned-child Linux observations pass; no arbitrary PID or learner input accepted. Process capability remains unintegrated/untaught; no new authored count or issuer coverage. Corrected development native all-four array flow and separate native Stop/repair/resume pass; representative light/dark150/200% captures reviewed. Installed346ffa0 reached every reference assignment but old harness target failed; a clean candidate with the corrected harness still needs full installed/repeated-start acceptance. See PROCESS_SUBSET.md, SHELL_ARRAY_LESSONS.md and INSTALLATION.md. Catalog74/seventeen; full completion remains Open.
+
 # M44 current unit checkpoint —2026-10-23
 
 Catalog74/seventeen:19CCNA,13LPIC-1,9LPIC-2,33Bash.379 Rust tests,657 disposable Bash reference cases, Clippy/formatter,24 Python tooling tests,28 palettes and coverage integrity pass. Four indexed-list lessons have six focused content tests plus two native-egui tests; independent review corrected a real grading gap. Exact scopes in SHELL_ARRAY_LESSONS.md. Native first introduction rendered/reviewed; subsequent Wayland/X0 connection refusal blocks the corrected full native flow and installed-current rendering. No full native/novice/reader/platform acceptance is inferred. Full product/curriculum checklist remains Open.

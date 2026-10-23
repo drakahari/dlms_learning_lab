@@ -1,6 +1,6 @@
 # Implementation continuation checkpoint
 
-2026-10-23, after M44 four array lessons, M43 typed-array capability, M42 startup investigation and M40 installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
+2026-10-23, after M45 process foundation and array native follow-through. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
 
 ## Delivered and pushed
 
@@ -22,7 +22,9 @@ M42 investigated the historical Wayland stall without a speculative fix:105 scop
 
 M43 capability8bf90ce is committed/pushed. M44 adds four practical array lessons:74/seventeen (19CCNA,13LPIC-1,9LPIC-2,33Bash),379 Rust/657 disposable Bash/Clippy/24 Python/palettes/coverage checks pass with independent code/content review.10 capstone cases close empty-name grading gaps; shared MAX_CASES12 remains bounded/backward-compatible. Existing70 scenario definitions/progress unchanged. See SHELL_ARRAY_LESSONS.md.
 
-Complete new-array native acceptance when the session display returns: first introduction rendered/captured/readable, but subsequent wayland-1 socket ECONNREFUSED/X0 ECONNREFUSED prevent further native launches. No desktop/security/theme settings changed. Run DLMS_SMOKE_STAGE=arrays with --ui-smoke for all-four intro/example/assignment/keyboard/wrong/retry/resume/reset/Challenge/large-text screenshots. This harness transition was corrected after its first capture, so no full-flow PASS is claimed yet. Verify the actual current packaged binary too, not just development. Build/test/install/CLI/notices can proceed independently.
+The display returned. Corrected dev all-four array workflow and separate array-loop Stop pass; desktop and light150/dark200 captures are reviewed. Long-editor harness clicks now target the visible viewport; focused edit/invalidation regression passes. Exact installed346ffa0 reached every reference assignment but failed its old capstone click target. Build a clean current candidate, repeat installed full arrays/Stop/library and quiet native startups; do not substitute dev PASS for installed acceptance. The prior connection-refused failure is distinct from the still-unresolved historical frame-callback stall. No desktop/security/theme settings changed. M44 source346ffa0 was successfully pushed after owner restored GitHub authentication.
+
+M45 pure process model is implemented/reviewed/tested (11 focused Rust cases,7 fixed owned-child Linux observations). No State/Goal/native workspace/progress integration or new process labs counted.391 current all-target Rust tests and Clippy/formatter pass; previous657 Bash/24 tooling/28 palette checks remain valid. See PROCESS_SUBSET.md for exact command/state/permission/resource/decoder boundaries. Next integrate identity-pinned process State/Goal, separate terminal teaching/examples and current grading, then author substantive LPIC-1 process/priority tasks. No new dependency presently needed.
 
 Continue other networking/Linux/shell capabilities and distinct reviewed curriculum against the explicit map; command substitution/associative data/status/debugging/recovery and most certification families remain Open. No new dependency or architectural choice is presently required.
 
@@ -34,3 +36,5 @@ Continue CCNA/LPIC-1/LPIC-2 capability/content batches against CURRICULUM.csv an
 - Actual Windows/macOS installation, opening, reopening, upgrades/uninstall and assistive-technology acceptance require supported desktop environments not available here. Signing/notarization credentials are unavailable; do not create credentials or bypass OS checks.
 - Intermittent default-Wayland pre-capture startup remains unresolved despite passing flows/explicit app ID. XWayland is the verified application-local fallback; do not change compositor/security/theme settings or claim the app-ID correction conclusively cured it. Investigate within app/toolkit boundaries.
 - No public release/deployment authorization. Preserve all third-party notices and local-only progress/backups/screenshots. Continue useful independent work; these gates do not make unfinished curriculum implemented.
+
+M45 additional native library capture passes for the new unit at dark desktop100% and light narrow150%, including clean card/action alignment and scrolling. Native header text retains its top padding at both scales. This is render evidence, not a novice study.

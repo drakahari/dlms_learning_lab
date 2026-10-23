@@ -4704,3 +4704,68 @@ fn array_editors_support_keyboard_run_and_release_focus_for_navigation() {
         assert!(ctx.memory(|m| m.focused()).is_some());
     }
 }
+
+#[test]
+fn long_array_script_clicks_use_visible_viewport_and_edits_clear_current_success() {
+    let (ctx, mut a) = app();
+    let i = 73;
+    open_assignment(&mut a, i);
+    a.set_script_view(i, teaching::View::Assignment);
+    let s = &a.scenarios[i];
+    let id = s.id.clone();
+    let source = s.solution[0].clone();
+    let engine::Goal::Script { cases } = &s.goal else {
+        panic!()
+    };
+    a.progress.attempts.get_mut(&id).unwrap().state = State::Script {
+        source: source.clone(),
+        run: Some(shell::Record {
+            engine_revision: shell::EVALUATOR_REVISION,
+            source: source.clone(),
+            results: cases.iter().map(|c| shell::run(&source, c)).collect(),
+        }),
+    };
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    let editor = a.metrics.focus.unwrap();
+    ctx.memory_mut(|m| m.surrender_focus(editor));
+    let viewport = a.metrics.editor_viewport.unwrap();
+    assert!(
+        a.metrics.inputs[0].height() > viewport.height(),
+        "the full text rectangle extends outside its scroll viewport"
+    );
+    click(&ctx, &mut a, viewport.shrink(4.));
+    assert!(ctx.memory(|m| m.has_focus(editor)));
+    let modifiers = egui::Modifiers {
+        ctrl: true,
+        command: true,
+        ..Default::default()
+    };
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers,
+            },
+            egui::Event::Text("printf changed".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    let State::Script { source, run } = &a.progress.attempts[&id].state else {
+        panic!()
+    };
+    assert_eq!(source, "printf changed");
+    assert!(run.is_none());
+    assert!(!a.metrics.completion);
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&id],
+        &a.scenarios[i]
+    ));
+}

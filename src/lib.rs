@@ -50,3 +50,5 @@ pub mod service_teaching;
 pub mod dns;
 pub mod dns_teaching;
 pub mod dns_workspace;
+
+pub mod processes;

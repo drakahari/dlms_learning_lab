@@ -174,6 +174,120 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            4950 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "Bash/Shell".into(),
+                    unit: "shell-arrays".into(),
+                    ..Default::default()
+                };
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            4951 => shot = Some("array-unit-library-dark-100".into()),
+            4952 => {
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            4953 => {
+                let key = egui::Id::new("array-library-settle");
+                let n = ctx.data_mut(|d| {
+                    let n = d.get_temp::<u8>(key).unwrap_or(0) + 1;
+                    d.insert_temp(key, n);
+                    n
+                });
+                if n < 3 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+            }
+            4954 => shot = Some("array-unit-library-light-150".into()),
+            4955 => {
+                self.pending_events = vec![
+                    egui::Event::PointerMoved(ctx.content_rect().center()),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., -650.),
+                        modifiers: Default::default(),
+                    },
+                ]
+            }
+            4956 => shot = Some("array-unit-library-light-150-scrolled".into()),
+            4957 => {
+                println!(
+                    "PASS native array library: fourth-track unit filter, full card metadata, dark desktop/light150 narrow scrolling. Render evidence, not novice or physical-device acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
+            4920 => {
+                self.launch_assignment_fixture(70);
+                self.set_script_view(70, teaching::View::Assignment);
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+            }
+            4921 | 4927 => {
+                let r = self.metrics.editor_viewport.unwrap().shrink(4.);
+                if !self.reveal_smoke_control(ctx, r) || !self.click_smoke_control(ctx, Some(r)) {
+                    return;
+                }
+            }
+            4922 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text(
+                        "queue=(one two); while true; do queue=(\"${queue[@]}\"); done".into(),
+                    ),
+                ]
+            }
+            4923 | 4929 => self.pending_events = vec![key(egui::Key::Enter, true)],
+            4924 => {
+                assert!(self.script_job.is_some());
+                self.pending_events = click(self.metrics.stop.unwrap());
+            }
+            4925 => {
+                assert!(self.script_job.is_none());
+                assert!(!self.metrics.completion);
+                let engine::State::Script { run, .. } =
+                    &self.progress.attempts["shell-array-intake"].state
+                else {
+                    panic!()
+                };
+                assert!(run.is_none());
+            }
+            4926 => shot = Some("array-native-loop-stopped".into()),
+            4928 => {
+                self.pending_events = vec![
+                    key(egui::Key::A, true),
+                    egui::Event::Text(self.scenarios[70].solution[0].clone()),
+                ]
+            }
+            4930 => {
+                if self.script_job.is_some() {
+                    return;
+                }
+                assert!(self.metrics.completion);
+                self.save();
+                self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                assert!(progress::current_solved(
+                    &self.progress.attempts["shell-array-intake"],
+                    &self.scenarios[70]
+                ));
+            }
+            4931 => shot = Some("array-native-after-stop-repaired".into()),
+            4932 => {
+                println!(
+                    "PASS native array Stop: loop execution remained responsive; Stop discarded the grading run; visible-editor keyboard repair, current Run and exact saved reload pass. Synthetic reference inputs only; no host script execution."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             4800..=4895 => {
                 let offset = self.smoke_stage - 4800;
                 let i = 70 + offset / 24;
@@ -258,7 +372,7 @@ impl LabApp {
                         shot = Some(format!("{id}-assignment"));
                     }
                     8 => {
-                        let r = self.metrics.inputs[0];
+                        let r = self.metrics.editor_viewport.unwrap().shrink(4.);
                         if !self.reveal_smoke_control(ctx, r)
                             || !self.click_smoke_control(ctx, Some(r))
                         {
@@ -280,7 +394,7 @@ impl LabApp {
                         shot = Some(format!("{id}-wrong-output-feedback"));
                     }
                     12 => {
-                        let r = self.metrics.inputs[0];
+                        let r = self.metrics.editor_viewport.unwrap().shrink(4.);
                         if !self.reveal_smoke_control(ctx, r)
                             || !self.click_smoke_control(ctx, Some(r))
                         {
@@ -307,7 +421,7 @@ impl LabApp {
                         shot = Some(format!("{id}-complete"));
                     }
                     16 => {
-                        let r = self.metrics.inputs[0];
+                        let r = self.metrics.editor_viewport.unwrap().shrink(4.);
                         if !self.reveal_smoke_control(ctx, r)
                             || !self.click_smoke_control(ctx, Some(r))
                         {
@@ -315,6 +429,10 @@ impl LabApp {
                         }
                     }
                     17 => {
+                        assert!(
+                            ctx.memory(|m| m.has_focus(self.metrics.focus.unwrap())),
+                            "{id}: visible editor must have keyboard focus"
+                        );
                         self.pending_events = vec![
                             key(egui::Key::A, true),
                             egui::Event::Text("printf changed".into()),
