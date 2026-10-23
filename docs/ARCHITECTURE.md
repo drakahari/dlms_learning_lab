@@ -48,6 +48,8 @@ The envelope and scenario versions remain 1. Existing optional service journal f
 
 ## Native review
 
+All single-line controls use `ui/controls.rs` for font-derived sizing and native text/cursor alignment; related buttons/selectors and label cells share metrics. VLAN forms reserve real grid columns and reflow without changing saved drafts. Multiline code editors retain top alignment. See [CONTROL_LAYOUT.md](CONTROL_LAYOUT.md) for geometry, reflow and before/after evidence; native text scaling supports100–200% at the listed presets.
+
 Shared controls receive contextual names through the already enabled AccessKit integration without changing widget roles, values, IDs or keyboard actions. Real emitted-tree regressions cover the library, appearance samples, backup filename, terminals, configuration/script editors and allocation rows. See [ACCESSIBILITY.md](ACCESSIBILITY.md) for scope and the remaining specialized-network, platform-bridge and screen-reader acceptance work.
 
 `./target/debug/dlms-learning-lab --ui-smoke` runs the **normal** app with fresh isolated progress under `/tmp/dlms-workspaces-smoke`, injects egui input and captures application framebuffers to ignored `screenshots/workspaces/`. It captures all nine Learn/Challenge screens, actual IPv4 field/check/host invalidation, service-file save and modeled verification, terminal Enter/query invalidation, real resizing, 150% text, optional filters and a synthetic large catalog. Screenshot acknowledgements keep captures synchronized. This is native renderer/event testing, not physical-device or screen-reader acceptance.

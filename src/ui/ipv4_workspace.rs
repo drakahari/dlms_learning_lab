@@ -145,7 +145,7 @@ impl Assignment {
                         field_label(ui, label, label_width);
                         submitted |= self.field(ui, i, label, field_width, metrics);
                         ui.allocate_ui_with_layout(
-                            egui::vec2(feedback_width, CONTROL),
+                            egui::vec2(feedback_width, controls::height(ui)),
                             egui::Layout::left_to_right(egui::Align::Center),
                             |ui| {
                                 if self.checked
@@ -184,12 +184,15 @@ impl Assignment {
             ui.horizontal(|ui| {
                 let offset = metrics.inputs[0].left() - ui.cursor().left();
                 ui.add_space(offset.max(0.));
-                ui.add_sized([field_width, CONTROL], primary(ui, "Check configuration"))
+                ui.add_sized(
+                    [field_width, controls::height(ui)],
+                    primary(ui, "Check configuration"),
+                )
             })
             .inner
         } else {
             ui.add_sized(
-                [220_f32.min(ui.available_width()), CONTROL],
+                [220_f32.min(ui.available_width()), controls::height(ui)],
                 primary(ui, "Check configuration"),
             )
         };
@@ -217,8 +220,8 @@ impl Assignment {
             self.exercise.second.get_or_insert_with(String::new)
         };
         let r = ui.add_sized(
-            [width, CONTROL],
-            egui::TextEdit::singleline(value)
+            [width, controls::height(ui)],
+            controls::singleline(ui, value)
                 .id_salt(("assignment-address", i))
                 .font(egui::TextStyle::Monospace)
                 .hint_text("IPv4 address")
@@ -337,24 +340,9 @@ impl Assignment {
     }
 }
 fn field_label(ui: &mut egui::Ui, label: &str, width: f32) {
-    ui.allocate_ui_with_layout(
-        egui::vec2(width, CONTROL),
-        egui::Layout::left_to_right(egui::Align::Center),
-        |ui| {
-            ui.set_min_width(width);
-            ui.add(egui::Label::new(label).wrap());
-        },
-    );
+    controls::label(ui, label, width);
 }
 fn topology(ui: &mut egui::Ui, e: &Exercise, checked: bool) {
-    let (rect, _) =
-        ui.allocate_exact_size(egui::vec2(ui.available_width(), 86.), egui::Sense::hover());
-    let width = (rect.width() * 0.42).clamp(120., 270.);
-    let left = egui::Rect::from_min_size(rect.min + egui::vec2(0., 4.), egui::vec2(width, 60.));
-    let right = egui::Rect::from_min_size(
-        egui::pos2(rect.right() - width, rect.top() + 4.),
-        egui::vec2(width, 60.),
-    );
     let entered = e.second.as_deref().unwrap_or("");
     let display = if entered.trim().is_empty() {
         "Address to assign".into()
@@ -369,47 +357,19 @@ fn topology(ui: &mut egui::Ui, e: &Exercise, checked: bool) {
     } else {
         "Needs correction"
     };
-    let painter = ui.painter();
-    painter.line_segment(
-        [left.right_center(), right.left_center()],
-        egui::Stroke::new(2_f32, palette(ui).accent),
-    );
-    for (r, text, color) in [
-        (left, format!("Workstation 1\n{}", e.ip), palette(ui).muted),
-        (
-            right,
-            format!("Workstation 2\n{display}\n{status}"),
-            if checked {
-                if valid {
-                    palette(ui).success
-                } else {
-                    palette(ui).error
-                }
+    controls::topology_pair(
+        ui,
+        ["Workstation 1", &e.ip.to_string(), ""],
+        ["Workstation 2", &display, status],
+        if checked {
+            if valid {
+                palette(ui).success
             } else {
-                palette(ui).muted
-            },
-        ),
-    ] {
-        painter.rect(
-            r,
-            6.,
-            palette(ui).background,
-            egui::Stroke::new(1_f32, color),
-            egui::StrokeKind::Inside,
-        );
-        painter.with_clip_rect(r.shrink(3.)).text(
-            r.center(),
-            egui::Align2::CENTER_CENTER,
-            text,
-            egui::FontId::proportional(14.),
-            palette(ui).text,
-        );
-    }
-    painter.text(
-        egui::pos2(rect.center().x, rect.bottom() - 7.),
-        egui::Align2::CENTER_CENTER,
-        format!("Same local network · /{}", e.prefix),
-        egui::FontId::proportional(13.),
-        palette(ui).muted,
+                palette(ui).error
+            }
+        } else {
+            palette(ui).muted
+        },
+        &format!("Same local network · /{}", e.prefix),
     );
 }

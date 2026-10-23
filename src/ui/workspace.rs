@@ -159,7 +159,7 @@ impl LabApp {
     pub(super) fn check_terminal_work(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = &self.scenarios[i];
         let r = ui.add_sized(
-            [220_f32.min(ui.available_width()), CONTROL],
+            [220_f32.min(ui.available_width()), controls::height(ui)],
             primary(ui, "Check work"),
         );
         self.metrics.check = Some(r.rect);
@@ -456,8 +456,8 @@ impl LabApp {
             ui.label(RichText::new(prompt).monospace().color(palette(ui).accent));
             let width = (ui.available_width() - 90.).max(40.);
             let r = ui.add_sized(
-                [width, CONTROL],
-                egui::TextEdit::singleline(&mut self.input)
+                [width, controls::height(ui)],
+                controls::singleline(ui, &mut self.input)
                     .id_salt("command")
                     .hint_text("Command · Enter to run")
                     .char_limit(4096),
@@ -489,7 +489,9 @@ impl LabApp {
                 self.dirty = true;
             }
             run = r.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
-            run |= ui.add_sized([78., CONTROL], button("Run")).clicked();
+            run |= ui
+                .add_sized([78., controls::height(ui)], button("Run"))
+                .clicked();
         });
         if run {
             self.submit(i);
@@ -747,14 +749,7 @@ pub(super) fn bound(text: &mut String, limit: usize) {
     }
 }
 fn row_label(ui: &mut egui::Ui, label: &str, width: f32) {
-    ui.allocate_ui_with_layout(
-        egui::vec2(width, CONTROL),
-        egui::Layout::left_to_right(egui::Align::Center),
-        |ui| {
-            ui.set_min_width(width);
-            ui.add(egui::Label::new(label).wrap());
-        },
-    );
+    controls::label(ui, label, width);
 }
 pub(super) fn editor_row(
     ui: &mut egui::Ui,
@@ -771,8 +766,8 @@ pub(super) fn editor_row(
     ui.horizontal(|ui| {
         row_label(ui, label, label_width);
         let r = ui.add_sized(
-            [width, CONTROL],
-            egui::TextEdit::singleline(draft).id_salt(id).char_limit(64),
+            [width, controls::height(ui)],
+            controls::singleline(ui, draft).id_salt(id).char_limit(64),
         );
         name_control(&r, accessible_name);
         metrics.inputs.push(r.rect);
@@ -880,8 +875,8 @@ pub(super) fn allocation_fields(
                     label_width,
                 );
                 let r = ui.add_sized(
-                    [width, CONTROL],
-                    egui::TextEdit::singleline(&mut allocation.cidr)
+                    [width, controls::height(ui)],
+                    controls::singleline(ui, &mut allocation.cidr)
                         .id_salt(("allocation", index))
                         .hint_text("Network/prefix")
                         .char_limit(64),
@@ -908,7 +903,7 @@ pub(super) fn allocation_fields(
                 }
                 if wide {
                     ui.allocate_ui_with_layout(
-                        egui::vec2(feedback_width, CONTROL),
+                        egui::vec2(feedback_width, controls::height(ui)),
                         egui::Layout::left_to_right(egui::Align::Center),
                         |ui| {
                             if checked && let Some(issue) = &issues[index] {

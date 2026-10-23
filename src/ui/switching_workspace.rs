@@ -120,7 +120,7 @@ impl LabApp {
                     self.dirty = true;
                 }
                 let r = ui.add_sized(
-                    [240_f32.min(ui.available_width()), CONTROL],
+                    [240_f32.min(ui.available_width()), controls::height(ui)],
                     primary(ui, "Apply and test example").wrap(),
                 );
                 self.metrics.check = Some(r.rect);
@@ -189,7 +189,7 @@ impl LabApp {
                         .checked = false;
                 }
                 let r = ui.add_sized(
-                    [240_f32.min(ui.available_width()), CONTROL],
+                    [240_f32.min(ui.available_width()), controls::height(ui)],
                     primary(ui, "Check configuration").wrap(),
                 );
                 self.metrics.check = Some(r.rect);
@@ -350,131 +350,186 @@ fn configuration_editor(
         focus,
     );
     ui.label(RichText::new("Lists use commas, for example 30,40. Access connects a workstation to one VLAN; a trunk carries several VLANs between switches.").small().color(palette(ui).muted));
-    for (port, p) in &mut switch.ports {
-        let jack = Jack::Switch {
-            switch: name.clone(),
-            port: port.clone(),
-        };
-        let peer = fabric.cables.iter().find_map(|c| {
-            if c.a == jack {
-                Some(&c.b)
-            } else if c.b == jack {
-                Some(&c.a)
-            } else {
-                None
+    let wide = ui.available_width() >= 850.;
+    let columns = [
+        220.,
+        56.,
+        112.,
+        128.,
+        (ui.available_width() - 220. - 56. - 112. - 128. - 4. * controls::GAP).max(170.),
+    ];
+    egui::Grid::new(("vlan-port-settings", index, practice, &name))
+        .num_columns(if wide { 5 } else { 2 })
+        .spacing([controls::GAP, 8.])
+        .min_row_height(controls::height(ui))
+        .show(ui, |ui| {
+            if wide {
+                for (label, width) in [
+                    "Port / connected device",
+                    "State",
+                    "Mode",
+                    "VLAN / native",
+                    "Allowed VLANs",
+                ]
+                .into_iter()
+                .zip(columns)
+                {
+                    controls::label(ui, RichText::new(label).strong(), width);
+                }
+                ui.end_row();
             }
-        });
-        let connection = match peer {
-            Some(Jack::Host { host }) => format!("{} ({host})", fabric.hosts[host].label),
-            Some(Jack::Switch { switch, port }) => format!("{switch}/{port}"),
-            None => "No cable".into(),
-        };
-        ui.add_space(6.);
-        if ui.available_width() >= 1000. {
-            ui.horizontal(|ui| {
-                ui.add_sized(
-                    [240., CONTROL],
-                    egui::Label::new(RichText::new(format!("{port} to {connection}")).strong())
-                        .wrap(),
+            for (port, p) in &mut switch.ports {
+                let jack = Jack::Switch {
+                    switch: name.clone(),
+                    port: port.clone(),
+                };
+                let peer = fabric.cables.iter().find_map(|c| {
+                    if c.a == jack {
+                        Some(&c.b)
+                    } else if c.b == jack {
+                        Some(&c.a)
+                    } else {
+                        None
+                    }
+                });
+                let connection = match peer {
+                    Some(Jack::Host { host }) => format!("{} ({host})", fabric.hosts[host].label),
+                    Some(Jack::Switch { switch, port }) => format!("{switch}/{port}"),
+                    None => "No cable".into(),
+                };
+                let scope = format!(
+                    "{} switch {name}, port {port}",
+                    if practice {
+                        "Ungraded practice"
+                    } else {
+                        "Assignment"
+                    }
                 );
-                ui.checkbox(&mut p.up, "Up");
-                egui::ComboBox::from_id_salt(("port-mode", index, practice, &name, port))
-                    .width(100.)
-                    .selected_text(if p.trunk { "Trunk" } else { "Access" })
-                    .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut p.trunk, false, "Access");
-                        ui.selectable_value(&mut p.trunk, true, "Trunk");
-                    });
-                if p.trunk {
-                    ui.label("Native");
-                    compact_field(
+                let port_width = if wide {
+                    columns[0]
+                } else {
+                    (ui.available_width() * 0.38).clamp(100., 180.)
+                };
+                controls::label(
+                    ui,
+                    RichText::new(if wide {
+                        format!("{port}\n{connection}")
+                    } else {
+                        port.to_string()
+                    })
+                    .strong(),
+                    port_width,
+                );
+                if !wide {
+                    let width = (ui.available_width() - 8.).min(380.);
+                    controls::label(ui, &connection, width);
+                    ui.end_row();
+                }
+                if !wide {
+                    controls::label(ui, "State", port_width);
+                }
+                let up = controls::cell(ui, columns[1], |ui| ui.checkbox(&mut p.up, "Up"));
+                name_control(&up.inner, format!("{scope} — port up"));
+                if !wide {
+                    ui.end_row();
+                    controls::label(ui, "Mode", port_width);
+                }
+                let mode = controls::cell(ui, columns[2], |ui| {
+                    egui::ComboBox::from_id_salt(("port-mode", index, practice, &name, port))
+                        .width(columns[2])
+                        .truncate()
+                        .selected_text(if p.trunk { "Trunk" } else { "Access" })
+                        .show_ui(ui, |ui| {
+                            ui.selectable_value(&mut p.trunk, false, "Access");
+                            ui.selectable_value(&mut p.trunk, true, "Trunk");
+                        })
+                        .response
+                });
+                name_control(&mode.inner, format!("{scope} — port mode"));
+                if !wide {
+                    ui.end_row();
+                    controls::label(
                         ui,
-                        &mut p.native,
-                        4,
-                        70.,
-                        (index, practice, &name, port, "native"),
-                        metrics,
-                        focus,
+                        if p.trunk {
+                            "Native VLAN"
+                        } else {
+                            "Access VLAN"
+                        },
+                        port_width,
                     );
-                    ui.label("Allowed");
+                }
+                let vlan_label = format!(
+                    "{scope} — {} VLAN",
+                    if p.trunk { "native" } else { "access" }
+                );
+                compact_field(
+                    ui,
+                    if p.trunk {
+                        &mut p.native
+                    } else {
+                        &mut p.access
+                    },
+                    (&vlan_label, 4, columns[3]),
+                    (
+                        index,
+                        practice,
+                        &name,
+                        port,
+                        if p.trunk { "native" } else { "access" },
+                    ),
+                    metrics,
+                    focus,
+                );
+                if !wide {
+                    ui.end_row();
+                    if p.trunk {
+                        controls::label(ui, "Allowed VLANs", port_width);
+                    }
+                }
+                if p.trunk {
                     compact_field(
                         ui,
                         &mut p.allowed,
-                        384,
-                        220.,
+                        (
+                            &format!("{scope} — allowed VLANs"),
+                            384,
+                            if wide {
+                                columns[4]
+                            } else {
+                                (ui.available_width() - 8.).min(380.)
+                            },
+                        ),
                         (index, practice, &name, port, "allowed"),
                         metrics,
                         focus,
                     );
-                } else {
-                    ui.label("VLAN");
-                    compact_field(
-                        ui,
-                        &mut p.access,
-                        4,
-                        70.,
-                        (index, practice, &name, port, "access"),
-                        metrics,
-                        focus,
-                    );
+                } else if wide {
+                    controls::label(ui, "— Access port", if wide { columns[4] } else { 160. });
                 }
-            });
-            continue;
-        }
-        ui.horizontal_wrapped(|ui| {
-            ui.label(RichText::new(format!("{port} to {connection}")).strong());
-            ui.checkbox(&mut p.up, "Port up");
-            ui.selectable_value(&mut p.trunk, false, "Access");
-            ui.selectable_value(&mut p.trunk, true, "Trunk");
+                if wide || p.trunk {
+                    ui.end_row();
+                }
+            }
         });
-        if p.trunk {
-            super::ipv6_workspace::field(
-                ui,
-                "Native VLAN",
-                &mut p.native,
-                4,
-                (index, practice, &name, port, "native"),
-                metrics,
-                focus,
-            );
-            super::ipv6_workspace::field(
-                ui,
-                "Allowed VLANs",
-                &mut p.allowed,
-                384,
-                (index, practice, &name, port, "allowed"),
-                metrics,
-                focus,
-            );
-        } else {
-            super::ipv6_workspace::field(
-                ui,
-                "Access VLAN",
-                &mut p.access,
-                4,
-                (index, practice, &name, port, "access"),
-                metrics,
-                focus,
-            );
-        }
-    }
 }
 fn compact_field(
     ui: &mut egui::Ui,
     value: &mut String,
-    limit: usize,
-    width: f32,
+    spec: (&str, usize, f32),
     id: impl std::hash::Hash,
     metrics: &mut Metrics,
     focus: &mut bool,
 ) {
+    let (label, limit, width) = spec;
     let r = ui.add_sized(
-        [width, CONTROL],
-        egui::TextEdit::singleline(value)
+        [width, controls::height(ui)],
+        controls::singleline(ui, value)
             .id_salt(id)
             .char_limit(limit),
     );
+    name_control(&r, label);
     metrics.inputs.push(r.rect);
+    metrics.vlan_fields.push((r.id, r.rect));
     metrics.focus.get_or_insert(r.id);
     if *focus && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released()) {
         r.request_focus();

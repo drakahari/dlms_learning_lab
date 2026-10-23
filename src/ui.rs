@@ -8,6 +8,7 @@ use dlms_learning_lab::{
 use dlms_learning_lab::{course, script_teaching as teaching, shell, theme};
 use eframe::egui::{self, RichText};
 mod address_learning;
+mod controls;
 mod data;
 mod script_learning;
 mod scripting;
@@ -22,7 +23,6 @@ mod switching_workspace;
 #[cfg(test)]
 mod tests;
 mod workspace;
-const CONTROL: f32 = 36.;
 #[derive(Default)]
 struct Metrics {
     header: Vec<egui::Rect>,
@@ -44,6 +44,7 @@ struct Metrics {
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
     inputs: Vec<egui::Rect>,
+    vlan_fields: Vec<(egui::Id, egui::Rect)>,
     terminal: Option<egui::Rect>,
     output: Option<egui::Rect>,
     insert: Option<egui::Rect>,
@@ -125,7 +126,7 @@ impl LabApp {
         let mut style = (*ctx.style()).clone();
         style.spacing.item_spacing = egui::vec2(12., 8.);
         style.spacing.button_padding = egui::vec2(14., 8.);
-        style.spacing.interact_size.y = CONTROL;
+
         style.spacing.combo_width = 160.;
         style.spacing.scroll.floating = false;
         for (kind, size) in [
@@ -219,7 +220,10 @@ impl LabApp {
             address_example: None,
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("alignment")
+            {
+                3100
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("service-teaching")
             {
                 3000
@@ -474,7 +478,7 @@ impl LabApp {
             .width(84.)
             .selected_text(format!("{:.0}%", self.scale * 100.))
             .show_ui(ui, |ui| {
-                for scale in [1., 1.15, 1.25, 1.5] {
+                for scale in [1., 1.15, 1.25, 1.5, 2.] {
                     ui.selectable_value(&mut self.scale, scale, format!("{:.0}%", scale * 100.));
                 }
             });
@@ -729,8 +733,8 @@ impl LabApp {
             }
         });
         let search = ui.add_sized(
-            [ui.available_width(), CONTROL],
-            egui::TextEdit::singleline(&mut self.filter.search)
+            [ui.available_width(), controls::height(ui)],
+            controls::singleline(ui, &mut self.filter.search)
                 .hint_text("Search titles, goals or topics…")
                 .char_limit(200),
         );
@@ -749,7 +753,7 @@ impl LabApp {
             let unit_width = 220_f32.min(ui.available_width());
             let r = ui
                 .allocate_ui_with_layout(
-                    egui::vec2(unit_width, CONTROL),
+                    egui::vec2(unit_width, controls::height(ui)),
                     egui::Layout::left_to_right(egui::Align::Center),
                     |ui| {
                         ui.set_width(unit_width);
@@ -990,7 +994,7 @@ impl LabApp {
                                         "Continue"
                                     },
                                 )
-                                .min_size(egui::vec2(108., CONTROL)),
+                                .min_size(egui::vec2(108., controls::height(ui))),
                             );
                             name_control(
                                 &start,
@@ -1012,7 +1016,7 @@ impl LabApp {
                             let fav = ui.add_enabled(
                                 !self.synthetic,
                                 button(if favorite { "Favorited" } else { "Favorite" })
-                                    .min_size(egui::vec2(108., CONTROL)),
+                                    .min_size(egui::vec2(108., controls::height(ui))),
                             );
                             name_control(
                                 &fav,
@@ -1087,7 +1091,7 @@ impl LabApp {
             .show(ui, |ui| {
                 for index in 0..4 {
                     ui.allocate_ui_with_layout(
-                        egui::vec2(width, CONTROL),
+                        egui::vec2(width, controls::height(ui)),
                         egui::Layout::left_to_right(egui::Align::Center),
                         |ui| {
                             let response = match index {
@@ -1132,7 +1136,10 @@ impl LabApp {
                                         .response
                                 }
                                 _ => {
-                                    let r = ui.add_sized([width, CONTROL], button("Clear filters"));
+                                    let r = ui.add_sized(
+                                        [width, controls::height(ui)],
+                                        button("Clear filters"),
+                                    );
                                     if r.clicked() {
                                         self.filter = Filter::default();
                                         self.page = 0;
@@ -1165,6 +1172,7 @@ impl LabApp {
     fn render(&mut self, ctx: &egui::Context) {
         self.metrics = Metrics::default();
         ctx.set_zoom_factor(self.scale);
+        controls::configure(ctx);
         self.advance_scripts(ctx);
         let previous = (self.theme_id.clone(), self.scale);
         self.header(ctx);
@@ -1246,13 +1254,10 @@ fn card(ui: &egui::Ui) -> egui::Frame {
         .corner_radius(10.)
 }
 fn button(text: &str) -> egui::Button<'_> {
-    egui::Button::new(text)
-        .min_size(egui::vec2(0., CONTROL))
-        .corner_radius(6.)
+    egui::Button::new(text).corner_radius(6.)
 }
 fn primary<'a>(ui: &egui::Ui, text: &'a str) -> egui::Button<'a> {
     egui::Button::new(RichText::new(text).color(palette(ui).on_accent))
-        .min_size(egui::vec2(0., CONTROL))
         .corner_radius(6.)
         .fill(palette(ui).accent)
         .stroke(egui::Stroke::new(1_f32, palette(ui).border))
@@ -1267,7 +1272,7 @@ fn combo<'a>(
 ) -> egui::Response {
     let response = ui
         .allocate_ui_with_layout(
-            egui::vec2(width, CONTROL),
+            egui::vec2(width, controls::height(ui)),
             egui::Layout::left_to_right(egui::Align::Center),
             |ui| {
                 ui.set_width(width);

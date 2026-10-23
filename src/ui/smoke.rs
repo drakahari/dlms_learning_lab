@@ -93,6 +93,114 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            3100..=3270 => {
+                let case = (self.smoke_stage - 3100) / 14;
+                let step = (self.smoke_stage - 3100) % 14;
+                if case == 12 {
+                    println!(
+                        "PASS native alignment captures: IPv4 blank/populated feedback and VLAN settings at100/150/200%, wide/narrow and light/dark. Synthetic drafts only; rendering captures require visual review."
+                    );
+                    ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    return;
+                }
+                let scale = [1., 1.5, 2.][case % 3];
+                let light = case % 6 >= 3;
+                let narrow = case >= 6;
+                let phase = std::env::var("DLMS_LAYOUT_PHASE").unwrap_or_else(|_| "after".into());
+                let tag = format!(
+                    "alignment-{phase}-{}-{}-{}",
+                    if narrow { "narrow" } else { "wide" },
+                    if light { "light" } else { "dark" },
+                    (scale * 100.) as u32
+                );
+                match step {
+                    0 => {
+                        self.scale = scale;
+                        self.theme_id = if light { "dlms-light" } else { "dlms-dark" }.into();
+                        theme::apply(ctx, &self.theme_id);
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(!narrow));
+                        if narrow {
+                            ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
+                                1100., 820.,
+                            )));
+                        }
+                        self.launch_assignment_fixture(0);
+                        self.ipv4_view =
+                            Some(ipv4_workspace::Assignment::new(&self.scenarios[0].initial));
+                    }
+                    1 => shot = Some(format!("{tag}-ipv4-empty")),
+                    2 => {
+                        let v = self.ipv4_view.as_mut().unwrap();
+                        v.exercise.answers = [
+                            "192.168.10.77".into(),
+                            "malformed address".into(),
+                            "192.168.10.65".into(),
+                            "".into(),
+                        ];
+                        v.exercise.second = Some("192.168.10.77".into());
+                    }
+                    3 => self.pending_events.push(key(egui::Key::Enter, false)),
+                    4 => shot = Some(format!("{tag}-ipv4-feedback")),
+                    5 | 9 => {
+                        let target = if step == 5 {
+                            self.metrics.inputs[0]
+                        } else {
+                            self.metrics
+                                .inputs
+                                .get(1)
+                                .copied()
+                                .unwrap_or(self.metrics.inputs[0])
+                        };
+                        let top = self
+                            .metrics
+                            .header
+                            .iter()
+                            .map(|r| r.bottom())
+                            .fold(0_f32, f32::max)
+                            + 20.;
+                        self.pending_events.extend([
+                            egui::Event::PointerMoved(ctx.content_rect().center()),
+                            egui::Event::MouseWheel {
+                                unit: egui::MouseWheelUnit::Point,
+                                delta: egui::vec2(0., -(target.top() - top).max(0.)),
+                                modifiers: Default::default(),
+                            },
+                        ]);
+                    }
+                    6 => shot = Some(format!("{tag}-ipv4-fields-scrolled")),
+                    7 => {
+                        let i = self
+                            .scenarios
+                            .iter()
+                            .position(|s| matches!(s.initial, engine::State::Switching { .. }))
+                            .unwrap();
+                        self.launch_assignment_fixture(i);
+                        self.progress
+                            .attempts
+                            .get_mut(&self.scenarios[i].id)
+                            .unwrap()
+                            .challenge = true;
+                    }
+                    8 => shot = Some(format!("{tag}-vlan")),
+                    10 => shot = Some(format!("{tag}-vlan-fields-scrolled")),
+                    11 => {
+                        let delta = (self.metrics.check.unwrap().bottom()
+                            - ctx.content_rect().bottom()
+                            + 40.)
+                            .max(0.);
+                        self.pending_events.extend([
+                            egui::Event::PointerMoved(ctx.content_rect().center()),
+                            egui::Event::MouseWheel {
+                                unit: egui::MouseWheelUnit::Point,
+                                delta: egui::vec2(0., -delta),
+                                modifiers: Default::default(),
+                            },
+                        ]);
+                    }
+                    12 => shot = Some(format!("{tag}-vlan-check-scrolled")),
+                    _ => {}
+                }
+            }
             3000 => {
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 self.launch(6);

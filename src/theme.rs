@@ -222,7 +222,7 @@ impl Preferences {
         }
         let mut p: Self = serde_json::from_slice(&std::fs::read(path).map_err(|e| e.to_string())?)
             .map_err(|e| e.to_string())?;
-        if p.version != 1 || ![1., 1.15, 1.25, 1.5].contains(&p.text_scale) {
+        if p.version != 1 || ![1., 1.15, 1.25, 1.5, 2.].contains(&p.text_scale) {
             return Err("Unsupported appearance settings; original retained".into());
         }
         p.theme = find(&p.theme).id.clone();
@@ -231,7 +231,7 @@ impl Preferences {
     pub fn save(&self, path: &Path) -> Result<(), String> {
         if self.version != 1
             || find(&self.theme).id != self.theme
-            || ![1., 1.15, 1.25, 1.5].contains(&self.text_scale)
+            || ![1., 1.15, 1.25, 1.5, 2.].contains(&self.text_scale)
         {
             return Err("Invalid appearance selection".into());
         }

@@ -122,7 +122,7 @@ impl LabApp {
                     self.dirty = true;
                 }
                 let r = ui.add_sized(
-                    [240_f32.min(ui.available_width()), CONTROL],
+                    [240_f32.min(ui.available_width()), controls::height(ui)],
                     primary(ui, "Apply and test example").wrap(),
                 );
                 self.metrics.check = Some(r.rect);
@@ -205,7 +205,7 @@ impl LabApp {
                         .checked = false;
                 }
                 let r = ui.add_sized(
-                    [240_f32.min(ui.available_width()), CONTROL],
+                    [240_f32.min(ui.available_width()), controls::height(ui)],
                     primary(ui, "Check configuration").wrap(),
                 );
                 self.metrics.check = Some(r.rect);
@@ -438,31 +438,27 @@ fn device_cards(ui: &mut egui::Ui, topology: &Topology, draft: &Draft, vertical:
         },
         |ui| {
             for (name, device) in &draft.devices {
-                egui::Frame::new()
-                    .fill(palette(ui).input)
-                    .inner_margin(8.)
-                    .corner_radius(6.)
-                    .show(ui, |ui| {
-                        ui.set_width((card_width - 16.).min(ui.available_width()));
-                        ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
-                            ui.label(RichText::new(name).strong());
-                            for (port, iface) in &device.interfaces {
-                                let link = &topology.devices[name].interfaces[port].link;
-                                ui.add(
-                                    egui::Label::new(format!(
-                                        "{port} · {link} · {}\n{}",
-                                        if iface.up { "Up" } else { "Down" },
-                                        if iface.address.is_empty() {
-                                            "No assigned address"
-                                        } else {
-                                            &iface.address
-                                        }
-                                    ))
-                                    .wrap(),
-                                );
-                            }
-                        });
+                controls::topology_frame(ui).show(ui, |ui| {
+                    ui.set_width((card_width - 24.).min(ui.available_width()));
+                    ui.with_layout(egui::Layout::top_down(egui::Align::Min), |ui| {
+                        ui.label(RichText::new(name).strong());
+                        for (port, iface) in &device.interfaces {
+                            let link = &topology.devices[name].interfaces[port].link;
+                            ui.add(
+                                egui::Label::new(format!(
+                                    "{port} · {link} · {}\n{}",
+                                    if iface.up { "Up" } else { "Down" },
+                                    if iface.address.is_empty() {
+                                        "No assigned address"
+                                    } else {
+                                        &iface.address
+                                    }
+                                ))
+                                .wrap(),
+                            );
+                        }
                     });
+                });
             }
         },
     );
@@ -481,7 +477,7 @@ fn device_controls(
         ui.label("Configure device");
         let width = 220_f32.min(ui.available_width());
         ui.allocate_ui_with_layout(
-            egui::vec2(width, CONTROL),
+            egui::vec2(width, controls::height(ui)),
             egui::Layout::left_to_right(egui::Align::Center),
             |ui| {
                 ui.set_width(width);
@@ -516,7 +512,7 @@ fn device_controls(
         let before_focus = *focus;
         for (port, iface) in &mut device.interfaces {
             ui.horizontal_wrapped(|ui| {
-                ui.label(RichText::new(port).strong());
+                controls::label(ui, RichText::new(port).strong(), 165.);
                 ui.checkbox(&mut iface.up, "Interface up");
             });
             field(
@@ -560,7 +556,7 @@ pub(super) fn field(
     ui.horizontal(|ui| {
         let label_width = (ui.available_width() * 0.4).clamp(90., 165.);
         ui.allocate_ui_with_layout(
-            egui::vec2(label_width, CONTROL),
+            egui::vec2(label_width, controls::height(ui)),
             egui::Layout::left_to_right(egui::Align::Center),
             |ui| {
                 ui.set_width(label_width);
@@ -572,9 +568,9 @@ pub(super) fn field(
                 (ui.available_width() - 8.).min(380.).min(
                     (ui.ctx().content_rect().right() - ui.next_widget_position().x - 32.).max(30.),
                 ),
-                CONTROL,
+                controls::height(ui),
             ],
-            egui::TextEdit::singleline(value)
+            controls::singleline(ui, value)
                 .id_salt(id)
                 .char_limit(limit),
         );
@@ -643,8 +639,8 @@ fn routes(
                 );
                 ui.label("Distance");
                 let r = ui.add_sized(
-                    [60., CONTROL],
-                    egui::TextEdit::singleline(&mut route.distance)
+                    [60., controls::height(ui)],
+                    controls::singleline(ui, &mut route.distance)
                         .id_salt(("routing-v4-distance", index, practice, name, n))
                         .char_limit(3),
                 );
@@ -715,8 +711,8 @@ fn route_table(
                     (&mut route.next_hop, 160., "via"),
                 ] {
                     let r = ui.add_sized(
-                        [width, CONTROL],
-                        egui::TextEdit::singleline(value)
+                        [width, controls::height(ui)],
+                        controls::singleline(ui, value)
                             .id_salt((index, practice, name, n, salt))
                             .char_limit(32),
                     );
@@ -756,13 +752,16 @@ fn route_table(
                     metrics,
                 );
                 let r = ui.add_sized(
-                    [64., CONTROL],
-                    egui::TextEdit::singleline(&mut route.distance)
+                    [64., controls::height(ui)],
+                    controls::singleline(ui, &mut route.distance)
                         .id_salt(("routing-v4-distance", index, practice, name, n))
                         .char_limit(3),
                 );
                 metrics.inputs.push(r.rect);
-                if ui.add_sized([80., CONTROL], button("Remove")).clicked() {
+                if ui
+                    .add_sized([80., controls::height(ui)], button("Remove"))
+                    .clicked()
+                {
                     remove = Some(n);
                 }
                 ui.end_row();

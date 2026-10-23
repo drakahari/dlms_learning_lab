@@ -120,7 +120,7 @@ impl LabApp {
         ui.horizontal_wrapped(|ui| {
             ui.label("Inspect inputs");
             let picker_width = 230_f32.min(ui.available_width());
-            ui.allocate_ui_with_layout(egui::vec2(picker_width, CONTROL), egui::Layout::left_to_right(egui::Align::Center), |ui| {
+            ui.allocate_ui_with_layout(egui::vec2(picker_width, controls::height(ui)), egui::Layout::left_to_right(egui::Align::Center), |ui| {
                 let picker=egui::ComboBox::from_id_salt("script-case")
                     .width(picker_width)
                     .truncate()
@@ -457,7 +457,7 @@ impl LabApp {
                         ui.label("Readable workspace text");
                         ui.label(RichText::new("Secondary instructions").color(palette(ui).muted));
                         let mut text="Select this editor text".to_string();
-                        let response=ui.add(egui::TextEdit::singleline(&mut text).id(egui::Id::new("theme-preview-text")));
+                        let response=ui.add(controls::singleline(ui, &mut text).id(egui::Id::new("theme-preview-text")));
                         name_control(&response,"Theme sample editor — appearance example only");
                         if self.smoke {response.request_focus();if let Some(mut state)=egui::text_edit::TextEditState::load(ctx,response.id){state.cursor.set_char_range(Some(egui::text::CCursorRange::two(egui::text::CCursor::new(0),egui::text::CCursor::new(11))));state.store(ctx,response.id);}}
                         ui.horizontal_wrapped(|ui|{

@@ -3578,3 +3578,317 @@ fn native_accessibility_backup_filename_has_a_name_and_retains_the_proposed_valu
     assert_eq!(filename.value(), Some("dlms-learning-backup.json"));
     assert!(!filename.is_disabled());
 }
+
+#[test]
+fn shared_singleline_centers_real_galleys_and_placeholders_at_font_metric_heights() {
+    for body_size in [16., 24., 32.] {
+        for text in [
+            "",
+            "192.168.10.77",
+            "a very long value that scrolls within this bounded single-line field",
+        ] {
+            let (ctx, _) = app();
+            ctx.style_mut(|s| {
+                s.text_styles
+                    .insert(egui::TextStyle::Body, egui::FontId::proportional(body_size));
+            });
+            let mut value = text.to_owned();
+            let mut geometry = None;
+            let output = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(800., 600.),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| {
+                    controls::configure(ctx);
+                    egui::CentralPanel::default().show(ctx, |ui| {
+                        ui.horizontal(|ui| {
+                            let h = controls::height(ui);
+                            let field = controls::singleline(ui, &mut value)
+                                .hint_text("IPv4 address")
+                                .desired_width(240.)
+                                .show(ui);
+                            let button = ui.add(button("Check"));
+                            let combo = egui::ComboBox::from_id_salt("alignment-test")
+                                .selected_text("Selected")
+                                .show_ui(ui, |_| {})
+                                .response;
+                            assert!((field.response.rect.height() - h).abs() < 1.);
+                            assert!((button.rect.height() - h).abs() < 1.);
+                            assert!((combo.rect.height() - h).abs() < 1.);
+                            assert!(
+                                (field.response.rect.center().y - button.rect.center().y).abs()
+                                    < 1.
+                            );
+                            assert!(
+                                (field.response.rect.center().y - combo.rect.center().y).abs() < 1.
+                            );
+                            let galley =
+                                egui::Rect::from_min_size(field.galley_pos, field.galley.size());
+                            assert!(
+                                (galley.center().y - field.response.rect.center().y).abs() < 1.
+                            );
+                            assert!(field.text_clip_rect.left() >= field.response.rect.left());
+                            assert!(field.text_clip_rect.right() <= field.response.rect.right());
+                            geometry = Some(field.response.rect);
+                        });
+                    });
+                },
+            );
+            fn find_hint(s: &egui::Shape) -> Option<egui::Rect> {
+                match s {
+                    egui::Shape::Text(t) if t.galley.job.text == "IPv4 address" => {
+                        Some(egui::Rect::from_min_size(t.pos, t.galley.size()))
+                    }
+                    egui::Shape::Vec(v) => v.iter().find_map(find_hint),
+                    _ => None,
+                }
+            }
+            if text.is_empty() {
+                let hint = output
+                    .shapes
+                    .iter()
+                    .find_map(|s| find_hint(&s.shape))
+                    .expect("real painted placeholder");
+                assert!((hint.center().y - geometry.unwrap().center().y).abs() < 1.);
+            }
+            assert_eq!(value, text);
+        }
+    }
+}
+
+#[test]
+fn all_authored_assignment_controls_fit_at_two_hundred_percent_and_vlandrafts_survive_reflow() {
+    let (_, inventory) = app();
+    for i in 0..inventory.scenarios.len() {
+        for (w, h) in [(1920., 1080.), (720., 700.)] {
+            let (ctx, mut a) = app();
+            open_assignment(&mut a, i);
+            a.scale = 2.;
+            a.progress
+                .attempts
+                .get_mut(&a.scenarios[i].id)
+                .unwrap()
+                .challenge = true;
+            for _ in 0..4 {
+                frame(&ctx, &mut a, w, h, vec![]);
+            }
+            for r in a
+                .metrics
+                .inputs
+                .iter()
+                .chain(a.metrics.terminal.iter())
+                .chain(a.metrics.check.iter())
+                .chain(a.metrics.editor_save.iter())
+            {
+                assert!(
+                    r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                    "lab{i} {w}/200%: {r:?} vs {:?}",
+                    ctx.content_rect()
+                );
+            }
+        }
+    }
+    let (ctx, mut a) = app();
+    let i = a
+        .scenarios
+        .iter()
+        .position(|s| matches!(s.initial, State::Switching { .. }))
+        .unwrap();
+    open_assignment(&mut a, i);
+    a.progress
+        .attempts
+        .get_mut(&a.scenarios[i].id)
+        .unwrap()
+        .challenge = true;
+    for _ in 0..4 {
+        frame(&ctx, &mut a, 1920., 1080., vec![]);
+    }
+    let id = a.metrics.vlan_fields[0].0;
+    ctx.memory_mut(|m| m.request_focus(id));
+    frame(
+        &ctx,
+        &mut a,
+        1920.,
+        1080.,
+        vec![
+            egui::Event::Key {
+                key: egui::Key::A,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers {
+                    ctrl: true,
+                    command: true,
+                    ..Default::default()
+                },
+            },
+            egui::Event::Text("30".into()),
+        ],
+    );
+    for _ in 0..4 {
+        frame(&ctx, &mut a, 720., 700., vec![]);
+    }
+    assert_eq!(
+        a.metrics.vlan_fields[0].0, id,
+        "same actual focused editor across wide/stacked grid"
+    );
+    assert!(ctx.memory(|m| m.has_focus(id)));
+    let draft = a.progress.attempts[&a.scenarios[i].id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .switching_draft
+        .as_ref()
+        .unwrap();
+    assert_eq!(
+        draft.switches[&draft.selected_switch]
+            .ports
+            .values()
+            .next()
+            .unwrap()
+            .access,
+        "30"
+    );
+    frame(
+        &ctx,
+        &mut a,
+        720.,
+        700.,
+        vec![egui::Event::Key {
+            key: egui::Key::Z,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers {
+                ctrl: true,
+                command: true,
+                ..Default::default()
+            },
+        }],
+    );
+    let draft = a.progress.attempts[&a.scenarios[i].id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .switching_draft
+        .as_ref()
+        .unwrap();
+    assert_eq!(
+        draft.switches[&draft.selected_switch]
+            .ports
+            .values()
+            .next()
+            .unwrap()
+            .access,
+        "20"
+    );
+}
+
+#[test]
+fn two_hundred_percent_appearance_selection_round_trips_without_changing_progress() {
+    let temp = tempfile::tempdir().unwrap();
+    let p = temp.path().join("preferences-v1.json");
+    let prefs = theme::Preferences {
+        version: 1,
+        theme: "dlms-light".into(),
+        text_scale: 2.,
+    };
+    prefs.save(&p).unwrap();
+    assert_eq!(theme::Preferences::load(&p).unwrap().text_scale, 2.);
+}
+
+#[test]
+fn shared_native_field_clicks_select_and_edit_the_character_under_the_cursor() {
+    fn edit_frame(
+        ctx: &egui::Context,
+        value: &mut String,
+        events: Vec<egui::Event>,
+    ) -> egui::text_edit::TextEditOutput {
+        let mut output = None;
+        let modifiers = events
+            .iter()
+            .find_map(|e| {
+                if let egui::Event::Key { modifiers, .. } = e {
+                    Some(*modifiers)
+                } else {
+                    None
+                }
+            })
+            .unwrap_or_default();
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(800., 600.),
+                )),
+                events,
+                modifiers,
+                ..Default::default()
+            },
+            |ctx| {
+                controls::configure(ctx);
+                egui::CentralPanel::default().show(ctx, |ui| {
+                    output = Some(
+                        controls::singleline(ui, value)
+                            .id(egui::Id::new("aligned-hit-editor"))
+                            .desired_width(240.)
+                            .show(ui),
+                    );
+                });
+            },
+        );
+        output.unwrap()
+    }
+    for size in [16., 32.] {
+        let (ctx, _) = app();
+        ctx.style_mut(|s| {
+            s.text_styles
+                .insert(egui::TextStyle::Body, egui::FontId::proportional(size));
+        });
+        let mut value = "ABCD".to_owned();
+        let o = edit_frame(&ctx, &mut value, vec![]);
+        let cursor = o.galley.pos_from_cursor(egui::text::CCursor::new(2));
+        let point = egui::pos2(
+            o.galley_pos.x + cursor.center().x,
+            o.response.rect.center().y,
+        );
+        for pressed in [true, false] {
+            let o = edit_frame(
+                &ctx,
+                &mut value,
+                vec![
+                    egui::Event::PointerMoved(point),
+                    egui::Event::PointerButton {
+                        pos: point,
+                        button: egui::PointerButton::Primary,
+                        pressed,
+                        modifiers: Default::default(),
+                    },
+                ],
+            );
+            assert_eq!(o.cursor_range.unwrap().primary.index, 2);
+        }
+        let o = edit_frame(
+            &ctx,
+            &mut value,
+            vec![egui::Event::Key {
+                key: egui::Key::ArrowRight,
+                physical_key: None,
+                pressed: true,
+                repeat: false,
+                modifiers: egui::Modifiers::SHIFT,
+            }],
+        );
+        let selection = o.cursor_range.unwrap();
+        assert_eq!(
+            selection.primary.index.abs_diff(selection.secondary.index),
+            1
+        );
+        edit_frame(&ctx, &mut value, vec![egui::Event::Text("X".into())]);
+        assert_eq!(value, "ABXD");
+    }
+}

@@ -95,7 +95,7 @@ impl LabApp {
                         .clamp(100., 500.)
                         .min(ui.available_width());
                     ui.allocate_ui_with_layout(
-                        egui::vec2(width, CONTROL),
+                        egui::vec2(width, controls::height(ui)),
                         egui::Layout::left_to_right(egui::Align::Center),
                         |ui| {
                             ui.set_width(width);
@@ -212,8 +212,8 @@ impl LabApp {
         ui.horizontal(|ui| {
             ui.label(RichText::new("alex $").monospace());
             let r = ui.add_sized(
-                [(ui.available_width() - 90.).max(40.), CONTROL],
-                egui::TextEdit::singleline(&mut l.command)
+                [(ui.available_width() - 90.).max(40.), controls::height(ui)],
+                controls::singleline(ui, &mut l.command)
                     .id_salt(("practice-command", i))
                     .hint_text("Command · Enter to run")
                     .char_limit(4096),
@@ -237,7 +237,9 @@ impl LabApp {
                 self.dirty = true;
             }
             run = r.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
-            run |= ui.add_sized([78., CONTROL], button("Run")).clicked();
+            run |= ui
+                .add_sized([78., controls::height(ui)], button("Run"))
+                .clicked();
         });
         if run {
             l.execute();

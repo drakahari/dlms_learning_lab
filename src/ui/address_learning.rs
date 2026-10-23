@@ -216,7 +216,7 @@ impl LabApp {
                 &mut self.focus_input,
             );
             let r = ui.add_sized(
-                [220_f32.min(ui.available_width()), CONTROL],
+                [220_f32.min(ui.available_width()), controls::height(ui)],
                 primary(ui, "Check example"),
             );
             self.metrics.check = Some(r.rect);
