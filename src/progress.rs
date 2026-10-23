@@ -120,6 +120,23 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
             .unwrap_or(&empty);
         return crate::acl_editor::grade(definition, network, documents).is_ok_and(|r| r.complete);
     }
+    if let State::Accounts { simulation } = &a.state {
+        let (
+            State::Accounts {
+                simulation: initial,
+            },
+            crate::engine::Goal::Accounts {
+                initial: goal_initial,
+                ..
+            },
+        ) = (&s.initial, &s.goal)
+        else {
+            return false;
+        };
+        if initial != goal_initial || !simulation.valid_against(initial) {
+            return false;
+        }
+    }
     if let State::PersistentMounts { storage } = &a.state {
         let State::PersistentMounts { storage: initial } = &s.initial else {
             return false;
@@ -257,6 +274,28 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             || a.transcript.len() > 120
         {
             return Err("Incompatible saved attempt; original retained".into());
+        }
+        validate_accounts_workspace(a)?;
+        if let State::Accounts { simulation } = &a.state {
+            let State::Accounts {
+                simulation: initial,
+            } = &s.initial
+            else {
+                unreachable!()
+            };
+            if !simulation.valid_against(initial) {
+                return Err("Saved account identities/protected context differ from this assignment; original retained".into());
+            }
+        }
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.accounts_learning.as_ref())
+            && s.accounts_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        {
+            return Err("Saved account example differs from this lesson; original retained".into());
         }
         if let Some(learning) = a
             .workspace
@@ -526,6 +565,29 @@ fn validate_storage_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_accounts_workspace(a: &Attempt) -> Result<(), String> {
+    if let Some(l) = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.accounts_learning.as_ref())
+    {
+        let State::Accounts { simulation } = &a.state else {
+            return Err("Account example metadata on another activity; original retained".into());
+        };
+        // Only immutable context markers can be compared here. Learners may
+        // legitimately create coincident names/IDs in the two independent
+        // namespaces; authored initial disjointness is validated by the pack.
+        if !l.valid()
+            || l.simulation.policy().fixture == simulation.policy().fixture
+            || l.simulation.policy().today == simulation.policy().today
+        {
+            return Err(
+                "Invalid or assignment-context account example metadata; original retained".into(),
+            );
+        }
+    }
+    Ok(())
+}
 fn validate_process_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace
         .as_ref()
@@ -600,6 +662,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
         validate_acl_workspace(a)?;
+        validate_accounts_workspace(a)?;
         validate_storage_workspace(a)?;
         validate_discovery_workspace(a)?;
         validate_process_workspace(a)?;

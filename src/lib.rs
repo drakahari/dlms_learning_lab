@@ -73,4 +73,6 @@ pub mod acl_routing;
 pub mod acl_teaching;
 pub mod acl_workspace;
 
+pub mod accounts_teaching;
+
 mod local_file;

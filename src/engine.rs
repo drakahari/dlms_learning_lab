@@ -29,6 +29,9 @@ pub enum State {
     Ipv4Acl {
         network: crate::acl_routing::Network,
     },
+    Accounts {
+        simulation: crate::accounts::State,
+    },
     PersistentMounts {
         storage: crate::storage::State,
     },
@@ -117,6 +120,11 @@ pub enum State {
 pub enum Goal {
     Ipv4Acl {
         definition: crate::acl_editor::Definition,
+    },
+    Accounts {
+        initial: crate::accounts::State,
+        #[serde(deserialize_with = "crate::accounts_teaching::requirements")]
+        requirements: Vec<crate::accounts::Requirement>,
     },
     PersistentMounts {
         initial: crate::storage::Inventory,
@@ -244,6 +252,13 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
         (State::Ipv4Acl { network }, Goal::Ipv4Acl { definition }) => {
             crate::acl_workspace::checks(network, definition, &crate::acl_editor::Drafts::default())
         }
+        (
+            State::Accounts { simulation },
+            Goal::Accounts {
+                initial,
+                requirements,
+            },
+        ) => crate::accounts::checks(initial, simulation, requirements),
         (
             State::PersistentMounts { storage },
             Goal::PersistentMounts {
@@ -511,6 +526,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 pub fn help(s: &State) -> &'static str {
     match s {
         State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
+        State::Accounts { .. } => crate::accounts_teaching::HELP,
         State::PersistentMounts { .. } => crate::storage_workspace::HELP,
         State::Discovery { .. } => {
             "Use the native discovery settings and explicit Send advertisement / Advance time controls. These model LLDP events, not router commands or real packets. Timers are manual; no CDP or automatic scheduling is simulated."
@@ -558,10 +574,44 @@ pub fn help(s: &State) -> &'static str {
         }
     }
 }
+/// Preserve the exact legacy path for other kinds. Account mutations must retain
+/// compatibility with the immutable authored initial state before publication.
+pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::Accounts { simulation } = s {
+        let Goal::Accounts {
+            initial,
+            requirements,
+        } = goal
+        else {
+            return Err("Account changes require a matching accounts goal context".into());
+        };
+        if !crate::accounts::valid_requirements(initial, requirements) {
+            return Err("Invalid authored account requirements; previous state retained".into());
+        }
+        return crate::accounts_teaching::output_text(
+            crate::accounts_teaching::execute_in_context(initial, simulation, input)?,
+        );
+    }
+    execute(s, input)
+}
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     if let State::Ipv4Acl { network } = s {
         return crate::acl_workspace::adapter(network, input);
+    }
+    if let State::Accounts { simulation } = s {
+        if input.len() > crate::accounts_teaching::MAX_COMMAND_BYTES {
+            return Err("Account command exceeds2,048 bytes".into());
+        }
+        if input.trim() == "help" {
+            return Ok(crate::accounts_teaching::HELP.into());
+        }
+        return match crate::accounts::parse(input).map_err(|e| e.to_string())? {
+            crate::accounts::Request::Query(query) => crate::accounts_teaching::output_text(
+                simulation.query(&query).map_err(|e| e.to_string())?,
+            ),
+            _ => Err("Account changes require this assignment's immutable goal context".into()),
+        };
     }
     if let State::PersistentMounts { storage } = s {
         return crate::storage_workspace::adapter(storage, input);
@@ -636,6 +686,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     }
     match s {
         State::Ipv4Acl { .. }
+        | State::Accounts { .. }
         | State::PersistentMounts { .. }
         | State::Discovery { .. }
         | State::Processes { .. }
@@ -1075,6 +1126,11 @@ pub fn describe(s: &State) -> String {
         State::Ipv4Acl { network } => format!(
             "Virtual ACL configuration · {} devices · explicit service-flow tests only; no real packets or full IOS CLI",
             network.topology.devices.len()
+        ),
+        State::Accounts { simulation } => format!(
+            "Virtual administrator · {} account records · {} groups · no host accounts or authentication",
+            simulation.configuration().users.len(),
+            simulation.configuration().groups.len()
         ),
         State::PersistentMounts { storage } => format!(
             "Virtual storage · {} volumes · {} live mounts · saved configuration and live state are separate",

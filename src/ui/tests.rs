@@ -299,6 +299,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
             State::Ipv4Acl { .. }
+            | State::Accounts { .. }
             | State::Discovery { .. }
             | State::AuthoritativeDns { .. }
             | State::Switching { .. }

@@ -547,7 +547,8 @@ impl LabApp {
             .get_mut(&self.scenarios[i].id)
             .unwrap();
         let before = a.state.clone();
-        let output = engine::execute(&mut a.state, &cmd).unwrap_or_else(|e| e);
+        let output = engine::execute_for_goal(&mut a.state, &self.scenarios[i].goal, &cmd)
+            .unwrap_or_else(|e| e);
         let prompt = match &a.state {
             State::Processes { table } => table.prompt(),
             State::Filesystem { .. } => "alex $",

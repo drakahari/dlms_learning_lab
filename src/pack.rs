@@ -37,6 +37,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub process_teaching: Option<crate::process_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub accounts_teaching: Option<crate::accounts_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discovery_teaching: Option<crate::discovery_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub storage_teaching: Option<crate::storage_teaching::Lesson>,
@@ -237,6 +239,30 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         } else if s.acl_teaching.is_some() || matches!(s.goal, Goal::Ipv4Acl { .. }) {
             return Err("ACL teaching or objectives attached to another activity".into());
         }
+        if let State::Accounts { simulation } = &s.initial {
+            let Goal::Accounts {
+                initial,
+                requirements,
+            } = &s.goal
+            else {
+                return Err("Account activities require matching typed account goals".into());
+            };
+            let Some(lesson) = &s.accounts_teaching else {
+                return Err("Account activities require validated prerequisite teaching and separate practice".into());
+            };
+            if initial != simulation || !crate::accounts::valid_requirements(initial, requirements)
+            {
+                return Err(
+                    "Account goals must pin the authored initial state and valid outcomes".into(),
+                );
+            }
+            lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+            if !lesson.separate_from(simulation) {
+                return Err("Use different nonroot user/group identities and a different supplied date in the ungraded account example".into());
+            }
+        } else if s.accounts_teaching.is_some() || matches!(s.goal, Goal::Accounts { .. }) {
+            return Err("Account teaching/goals attached to another activity".into());
+        }
         if let State::PersistentMounts { storage } = &s.initial {
             let Some(lesson) = &s.storage_teaching else {
                 return Err("Persistent mount activities require validated introduction and separate practice".into());
@@ -409,7 +435,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         }
         let mut state = s.initial.clone();
         for cmd in &s.solution {
-            engine::execute(&mut state, cmd)
+            engine::execute_for_goal(&mut state, &s.goal, cmd)
                 .map_err(|e| format!("{}: unreachable solution: {e}", s.id))?;
         }
         if let (State::Script { source, run }, Goal::Script { cases }) = (&mut state, &s.goal) {
@@ -463,6 +489,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
         State::Ipv4Acl { network } => crate::acl_workspace::valid_network(network).is_ok(),
+        State::Accounts { simulation } => simulation.valid(),
         State::PersistentMounts { storage } => storage.validate().is_ok(),
         State::Discovery { simulation } => simulation.validate().is_ok(),
         State::Processes { table } => table.valid(),

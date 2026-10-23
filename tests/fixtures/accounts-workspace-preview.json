@@ -1,0 +1,1440 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-accounts-workspace",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Bounded account administration",
+      "title": "Private account context and practice fixture",
+      "summary": "Development integration fixture only; not authored curriculum or a catalog count.",
+      "objective": "Repair Mira\u2019s account: use review as the primary group and retain only audit and the new reports group as supplementary membership. Create reports with GID2200. Preserve numeric user identities, the other account, service records and all content/modes. Old-primary-group entries in Mira\u2019s home must follow the primary change; outside ownership and different-group home evidence must stay unchanged. No password or login behavior is required.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied records",
+        "Repair membership and primary group",
+        "Verify retained evidence"
+      ],
+      "guide": [],
+      "hints": [
+        "Inspect id and getent before choosing a complete supplementary list.",
+        "Changing the primary group affects old-group home entries, not outside files."
+      ],
+      "sources": [
+        "https://raw.githubusercontent.com/shadow-maint/shadow/4.20.3/man/usermod.8.xml"
+      ],
+      "simplifications": "Private in-memory virtual-administrator fixture. Exact supplied identities/date and regular files only; no host accounts, passwords, login, PAM, sessions or active processes. Expiry is metadata only.",
+      "initial": {
+        "kind": "Accounts",
+        "simulation": {
+          "policy": {
+            "fixture": "accounts-assignment",
+            "today": 20749,
+            "protected_users": [
+              "root",
+              "archive-daemon"
+            ],
+            "protected_groups": [
+              "root",
+              "archive"
+            ],
+            "protected_entries": [
+              "/",
+              "/root",
+              "/etc",
+              "/home",
+              "/srv",
+              "/archive",
+              "/srv/archive-daemon"
+            ],
+            "skeletons": [
+              "/etc/skel"
+            ],
+            "shells": [
+              "/bin/bash",
+              "/usr/sbin/nologin"
+            ]
+          },
+          "configuration": {
+            "users": {
+              "root": {
+                "uid": 0,
+                "primary_gid": 0,
+                "supplementary": [],
+                "home": "/root",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "archive-daemon": {
+                "uid": 500,
+                "primary_gid": 2300,
+                "supplementary": [],
+                "home": "/srv/archive-daemon",
+                "shell": "/usr/sbin/nologin",
+                "comment": "",
+                "expires": null
+              },
+              "mira": {
+                "uid": 1101,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2001
+                ],
+                "home": "/home/mira",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "bryn": {
+                "uid": 1102,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2000
+                ],
+                "home": "/home/bryn",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              }
+            },
+            "groups": {
+              "root": {
+                "gid": 0
+              },
+              "staff": {
+                "gid": 1000
+              },
+              "review": {
+                "gid": 2000
+              },
+              "audit": {
+                "gid": 2001
+              },
+              "archive": {
+                "gid": 2300
+              }
+            },
+            "entries": {
+              "/": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/root": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/archive": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/archive-daemon": {
+                "uid": 500,
+                "gid": 2300,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/mira": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/bryn": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "Assignment supplied profile\n"
+                }
+              },
+              "/home/mira/brief.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "mira original brief\n"
+                }
+              },
+              "/home/mira/shared.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "bryn entry with old home GID\n"
+                }
+              },
+              "/home/mira/audit.txt": {
+                "uid": 1101,
+                "gid": 2001,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Audit evidence retained\n"
+                }
+              },
+              "/home/bryn/evidence.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "bryn private evidence\n"
+                }
+              },
+              "/archive/keep.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 288,
+                "data": {
+                  "kind": "text",
+                  "contents": "Outside home ownership stays unchanged\n"
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Accounts",
+        "initial": {
+          "policy": {
+            "fixture": "accounts-assignment",
+            "today": 20749,
+            "protected_users": [
+              "root",
+              "archive-daemon"
+            ],
+            "protected_groups": [
+              "root",
+              "archive"
+            ],
+            "protected_entries": [
+              "/",
+              "/root",
+              "/etc",
+              "/home",
+              "/srv",
+              "/archive",
+              "/srv/archive-daemon"
+            ],
+            "skeletons": [
+              "/etc/skel"
+            ],
+            "shells": [
+              "/bin/bash",
+              "/usr/sbin/nologin"
+            ]
+          },
+          "configuration": {
+            "users": {
+              "root": {
+                "uid": 0,
+                "primary_gid": 0,
+                "supplementary": [],
+                "home": "/root",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "archive-daemon": {
+                "uid": 500,
+                "primary_gid": 2300,
+                "supplementary": [],
+                "home": "/srv/archive-daemon",
+                "shell": "/usr/sbin/nologin",
+                "comment": "",
+                "expires": null
+              },
+              "mira": {
+                "uid": 1101,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2001
+                ],
+                "home": "/home/mira",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "bryn": {
+                "uid": 1102,
+                "primary_gid": 1000,
+                "supplementary": [
+                  2000
+                ],
+                "home": "/home/bryn",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              }
+            },
+            "groups": {
+              "root": {
+                "gid": 0
+              },
+              "staff": {
+                "gid": 1000
+              },
+              "review": {
+                "gid": 2000
+              },
+              "audit": {
+                "gid": 2001
+              },
+              "archive": {
+                "gid": 2300
+              }
+            },
+            "entries": {
+              "/": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/root": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/archive": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/archive-daemon": {
+                "uid": 500,
+                "gid": 2300,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/mira": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/bryn": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "Assignment supplied profile\n"
+                }
+              },
+              "/home/mira/brief.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "mira original brief\n"
+                }
+              },
+              "/home/mira/shared.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "bryn entry with old home GID\n"
+                }
+              },
+              "/home/mira/audit.txt": {
+                "uid": 1101,
+                "gid": 2001,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Audit evidence retained\n"
+                }
+              },
+              "/home/bryn/evidence.txt": {
+                "uid": 1102,
+                "gid": 1000,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "bryn private evidence\n"
+                }
+              },
+              "/archive/keep.txt": {
+                "uid": 1101,
+                "gid": 1000,
+                "mode": 288,
+                "data": {
+                  "kind": "text",
+                  "contents": "Outside home ownership stays unchanged\n"
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Group",
+            "name": "reports",
+            "expected": {
+              "gid": 2200
+            }
+          },
+          {
+            "kind": "User",
+            "name": "mira",
+            "expected": {
+              "uid": 1101,
+              "primary_gid": 2000,
+              "supplementary": [
+                2001,
+                2200
+              ],
+              "home": "/home/mira",
+              "shell": "/bin/bash",
+              "comment": "",
+              "expires": null
+            }
+          },
+          {
+            "kind": "Entry",
+            "path": "/archive/keep.txt",
+            "expected": {
+              "uid": 1101,
+              "gid": 1000,
+              "mode": 288,
+              "data": {
+                "kind": "text",
+                "contents": "Outside home ownership stays unchanged\n"
+              }
+            }
+          },
+          {
+            "kind": "Configuration",
+            "expected": {
+              "users": {
+                "root": {
+                  "uid": 0,
+                  "primary_gid": 0,
+                  "supplementary": [],
+                  "home": "/root",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "archive-daemon": {
+                  "uid": 500,
+                  "primary_gid": 2300,
+                  "supplementary": [],
+                  "home": "/srv/archive-daemon",
+                  "shell": "/usr/sbin/nologin",
+                  "comment": "",
+                  "expires": null
+                },
+                "mira": {
+                  "uid": 1101,
+                  "primary_gid": 2000,
+                  "supplementary": [
+                    2001,
+                    2200
+                  ],
+                  "home": "/home/mira",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "bryn": {
+                  "uid": 1102,
+                  "primary_gid": 1000,
+                  "supplementary": [
+                    2000
+                  ],
+                  "home": "/home/bryn",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                }
+              },
+              "groups": {
+                "root": {
+                  "gid": 0
+                },
+                "staff": {
+                  "gid": 1000
+                },
+                "review": {
+                  "gid": 2000
+                },
+                "audit": {
+                  "gid": 2001
+                },
+                "archive": {
+                  "gid": 2300
+                },
+                "reports": {
+                  "gid": 2200
+                }
+              },
+              "entries": {
+                "/": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/root": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/archive": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/archive-daemon": {
+                  "uid": 500,
+                  "gid": 2300,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/mira": {
+                  "uid": 1101,
+                  "gid": 2000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/bryn": {
+                  "uid": 1102,
+                  "gid": 1000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Assignment supplied profile\n"
+                  }
+                },
+                "/home/mira/brief.txt": {
+                  "uid": 1101,
+                  "gid": 2000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "mira original brief\n"
+                  }
+                },
+                "/home/mira/shared.txt": {
+                  "uid": 1102,
+                  "gid": 2000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "bryn entry with old home GID\n"
+                  }
+                },
+                "/home/mira/audit.txt": {
+                  "uid": 1101,
+                  "gid": 2001,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Audit evidence retained\n"
+                  }
+                },
+                "/home/bryn/evidence.txt": {
+                  "uid": 1102,
+                  "gid": 1000,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "bryn private evidence\n"
+                  }
+                },
+                "/archive/keep.txt": {
+                  "uid": 1101,
+                  "gid": 1000,
+                  "mode": 288,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Outside home ownership stays unchanged\n"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "groupadd -g 2200 reports",
+        "usermod -G audit,reports mira",
+        "usermod -g review mira"
+      ],
+      "accounts_teaching": {
+        "prerequisite_note": "Practice after the file and access foundations. This fixture is virtual administrator work only; it creates no host users or credentials.",
+        "concepts": [
+          {
+            "title": "Virtual administrator and stable identities",
+            "text": "This terminal changes only supplied in-memory records. UID and GID are numeric identities; adding or renaming a record does not renumber other identities. No passwords, authentication or active sessions are simulated."
+          },
+          {
+            "title": "Create only the supplied group identity",
+            "text": "Use groupadd -g GID NAME to create one missing simulated group with its explicit supplied numeric identity. Inspect getent group first. Existing group names or GIDs cannot be replaced by this command; it does not create a user or move existing file ownership."
+          },
+          {
+            "title": "Primary and supplementary membership",
+            "text": "A user has one primary GID in its passwd record. Supplementary membership is separate and appears in group member lists. id shows both. A primary group need not list the user in its group member field."
+          },
+          {
+            "title": "Append versus replacement",
+            "text": "usermod -aG appends supplementary membership. usermod -G replaces it with the complete supplied list. Inspect standing access first so replacement does not erase a required group."
+          },
+          {
+            "title": "Primary group and retained files",
+            "text": "usermod -g changes the primary GID and the old-GID entries inside an owned home, including entries owned by a different UID. It leaves different-GID home entries and files outside that home unchanged."
+          }
+        ],
+        "example": [
+          "id tess",
+          "usermod -aG sample-review tess",
+          "usermod -g sample-review tess"
+        ],
+        "example_commands": [
+          {
+            "command": "id tess",
+            "explanation": "Inspect the supplied UID, primary group and supplementary groups before changing anything.",
+            "simulator_only": false
+          },
+          {
+            "command": "usermod -aG sample-review tess",
+            "explanation": "Append sample-review without removing standing sample-audit membership.",
+            "simulator_only": false
+          },
+          {
+            "command": "usermod -g sample-review tess",
+            "explanation": "Change the primary group. Old-primary-group entries inside the owned home also change group; outside entries stay unchanged.",
+            "simulator_only": false
+          }
+        ],
+        "inputs": "Use Tess and Omar, the sample groups and the supplied example date. These identities and files are separate from Mira and Bryn in the assignment. Enter one literal command at a time.",
+        "try_change": "After the example, replace Tess supplementary membership with only sample-review. Inspect the lost sample-audit membership, then append sample-audit to repair it.",
+        "fixture": {
+          "policy": {
+            "fixture": "accounts-example",
+            "today": 20523,
+            "protected_users": [
+              "root",
+              "sample-keeper"
+            ],
+            "protected_groups": [
+              "root",
+              "sample-archive"
+            ],
+            "protected_entries": [
+              "/",
+              "/root",
+              "/etc",
+              "/home",
+              "/srv",
+              "/archive",
+              "/srv/sample-keeper"
+            ],
+            "skeletons": [
+              "/etc/skel"
+            ],
+            "shells": [
+              "/bin/bash",
+              "/usr/sbin/nologin"
+            ]
+          },
+          "configuration": {
+            "users": {
+              "root": {
+                "uid": 0,
+                "primary_gid": 0,
+                "supplementary": [],
+                "home": "/root",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "sample-keeper": {
+                "uid": 600,
+                "primary_gid": 4300,
+                "supplementary": [],
+                "home": "/srv/sample-keeper",
+                "shell": "/usr/sbin/nologin",
+                "comment": "",
+                "expires": null
+              },
+              "tess": {
+                "uid": 2101,
+                "primary_gid": 3000,
+                "supplementary": [
+                  4001
+                ],
+                "home": "/home/tess",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              },
+              "omar": {
+                "uid": 2102,
+                "primary_gid": 3000,
+                "supplementary": [
+                  4000
+                ],
+                "home": "/home/omar",
+                "shell": "/bin/bash",
+                "comment": "",
+                "expires": null
+              }
+            },
+            "groups": {
+              "root": {
+                "gid": 0
+              },
+              "sample-staff": {
+                "gid": 3000
+              },
+              "sample-review": {
+                "gid": 4000
+              },
+              "sample-audit": {
+                "gid": 4001
+              },
+              "sample-archive": {
+                "gid": 4300
+              }
+            },
+            "entries": {
+              "/": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/root": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/archive": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/srv/sample-keeper": {
+                "uid": 600,
+                "gid": 4300,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/tess": {
+                "uid": 2101,
+                "gid": 3000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/home/omar": {
+                "uid": 2102,
+                "gid": 3000,
+                "mode": 448,
+                "data": {
+                  "kind": "directory"
+                }
+              },
+              "/etc/skel/.profile": {
+                "uid": 0,
+                "gid": 0,
+                "mode": 420,
+                "data": {
+                  "kind": "text",
+                  "contents": "Example supplied profile\n"
+                }
+              },
+              "/home/tess/brief.txt": {
+                "uid": 2101,
+                "gid": 3000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "tess original brief\n"
+                }
+              },
+              "/home/tess/shared.txt": {
+                "uid": 2102,
+                "gid": 3000,
+                "mode": 416,
+                "data": {
+                  "kind": "text",
+                  "contents": "omar entry with old home GID\n"
+                }
+              },
+              "/home/tess/audit.txt": {
+                "uid": 2101,
+                "gid": 4001,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "Audit evidence retained\n"
+                }
+              },
+              "/home/omar/evidence.txt": {
+                "uid": 2102,
+                "gid": 3000,
+                "mode": 384,
+                "data": {
+                  "kind": "text",
+                  "contents": "omar private evidence\n"
+                }
+              },
+              "/archive/keep.txt": {
+                "uid": 2101,
+                "gid": 3000,
+                "mode": 288,
+                "data": {
+                  "kind": "text",
+                  "contents": "Outside home ownership stays unchanged\n"
+                }
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "User",
+            "name": "tess",
+            "expected": {
+              "uid": 2101,
+              "primary_gid": 4000,
+              "supplementary": [
+                4000,
+                4001
+              ],
+              "home": "/home/tess",
+              "shell": "/bin/bash",
+              "comment": "",
+              "expires": null
+            }
+          },
+          {
+            "kind": "Configuration",
+            "expected": {
+              "users": {
+                "root": {
+                  "uid": 0,
+                  "primary_gid": 0,
+                  "supplementary": [],
+                  "home": "/root",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "sample-keeper": {
+                  "uid": 600,
+                  "primary_gid": 4300,
+                  "supplementary": [],
+                  "home": "/srv/sample-keeper",
+                  "shell": "/usr/sbin/nologin",
+                  "comment": "",
+                  "expires": null
+                },
+                "tess": {
+                  "uid": 2101,
+                  "primary_gid": 4000,
+                  "supplementary": [
+                    4000,
+                    4001
+                  ],
+                  "home": "/home/tess",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "omar": {
+                  "uid": 2102,
+                  "primary_gid": 3000,
+                  "supplementary": [
+                    4000
+                  ],
+                  "home": "/home/omar",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                }
+              },
+              "groups": {
+                "root": {
+                  "gid": 0
+                },
+                "sample-staff": {
+                  "gid": 3000
+                },
+                "sample-review": {
+                  "gid": 4000
+                },
+                "sample-audit": {
+                  "gid": 4001
+                },
+                "sample-archive": {
+                  "gid": 4300
+                }
+              },
+              "entries": {
+                "/": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/root": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/archive": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/sample-keeper": {
+                  "uid": 600,
+                  "gid": 4300,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/tess": {
+                  "uid": 2101,
+                  "gid": 4000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/omar": {
+                  "uid": 2102,
+                  "gid": 3000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Example supplied profile\n"
+                  }
+                },
+                "/home/tess/brief.txt": {
+                  "uid": 2101,
+                  "gid": 4000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "tess original brief\n"
+                  }
+                },
+                "/home/tess/shared.txt": {
+                  "uid": 2102,
+                  "gid": 4000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "omar entry with old home GID\n"
+                  }
+                },
+                "/home/tess/audit.txt": {
+                  "uid": 2101,
+                  "gid": 4001,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Audit evidence retained\n"
+                  }
+                },
+                "/home/omar/evidence.txt": {
+                  "uid": 2102,
+                  "gid": 3000,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "omar private evidence\n"
+                  }
+                },
+                "/archive/keep.txt": {
+                  "uid": 2101,
+                  "gid": 3000,
+                  "mode": 288,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Outside home ownership stays unchanged\n"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "try_actions": [
+          "usermod -G sample-review tess"
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Configuration",
+            "expected": {
+              "users": {
+                "root": {
+                  "uid": 0,
+                  "primary_gid": 0,
+                  "supplementary": [],
+                  "home": "/root",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "sample-keeper": {
+                  "uid": 600,
+                  "primary_gid": 4300,
+                  "supplementary": [],
+                  "home": "/srv/sample-keeper",
+                  "shell": "/usr/sbin/nologin",
+                  "comment": "",
+                  "expires": null
+                },
+                "tess": {
+                  "uid": 2101,
+                  "primary_gid": 4000,
+                  "supplementary": [
+                    4000
+                  ],
+                  "home": "/home/tess",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                },
+                "omar": {
+                  "uid": 2102,
+                  "primary_gid": 3000,
+                  "supplementary": [
+                    4000
+                  ],
+                  "home": "/home/omar",
+                  "shell": "/bin/bash",
+                  "comment": "",
+                  "expires": null
+                }
+              },
+              "groups": {
+                "root": {
+                  "gid": 0
+                },
+                "sample-staff": {
+                  "gid": 3000
+                },
+                "sample-review": {
+                  "gid": 4000
+                },
+                "sample-audit": {
+                  "gid": 4001
+                },
+                "sample-archive": {
+                  "gid": 4300
+                }
+              },
+              "entries": {
+                "/": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/root": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/archive": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/srv/sample-keeper": {
+                  "uid": 600,
+                  "gid": 4300,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/tess": {
+                  "uid": 2101,
+                  "gid": 4000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/home/omar": {
+                  "uid": 2102,
+                  "gid": 3000,
+                  "mode": 448,
+                  "data": {
+                    "kind": "directory"
+                  }
+                },
+                "/etc/skel/.profile": {
+                  "uid": 0,
+                  "gid": 0,
+                  "mode": 420,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Example supplied profile\n"
+                  }
+                },
+                "/home/tess/brief.txt": {
+                  "uid": 2101,
+                  "gid": 4000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "tess original brief\n"
+                  }
+                },
+                "/home/tess/shared.txt": {
+                  "uid": 2102,
+                  "gid": 4000,
+                  "mode": 416,
+                  "data": {
+                    "kind": "text",
+                    "contents": "omar entry with old home GID\n"
+                  }
+                },
+                "/home/tess/audit.txt": {
+                  "uid": 2101,
+                  "gid": 4001,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Audit evidence retained\n"
+                  }
+                },
+                "/home/omar/evidence.txt": {
+                  "uid": 2102,
+                  "gid": 3000,
+                  "mode": 384,
+                  "data": {
+                    "kind": "text",
+                    "contents": "omar private evidence\n"
+                  }
+                },
+                "/archive/keep.txt": {
+                  "uid": 2101,
+                  "gid": 3000,
+                  "mode": 288,
+                  "data": {
+                    "kind": "text",
+                    "contents": "Outside home ownership stays unchanged\n"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "repair": [
+          "usermod -aG sample-audit tess"
+        ]
+      }
+    }
+  ]
+}
