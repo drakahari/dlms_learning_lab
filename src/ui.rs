@@ -260,8 +260,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("substitution")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("capture-lessons")
             {
+                7200
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("substitution") {
                 7000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup") {
                 4700

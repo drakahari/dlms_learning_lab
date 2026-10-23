@@ -42,6 +42,10 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("stops='Workshop'", "stops=('Workshop')"),
         ("*.csv", "*.json"),
         ("\"$1\" = preview", "\"$1\" = save"),
+        ("loans.txt", "returns.txt"),
+        (r"%s\n\n%s\n\n", r"%s\n\n\n%s\n\n"),
+        ("return 4", "return 0"),
+        ("note=$(make_note)", "make_note; note='direct call'"),
     ];
     assert_eq!(
         edits.len(),

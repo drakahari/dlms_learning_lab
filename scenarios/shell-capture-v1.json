@@ -1,0 +1,1247 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-capture-preview",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-capture",
+      "topic": "Command substitution",
+      "title": "Preview requested and available work",
+      "summary": "Prepare two independent lists as intact text in a comparison card.",
+      "objective": "Two arguments name existing requested-work and available-work files; REVIEWER is supplied. Print Reviewer: NAME, then Requested: <VALUE>, then Available: <VALUE>, with a line break after each. Each VALUE contains that file's lines in the ordering used by sort -u, with repeated lines listed once. Remove line breaks at the end of the command result. Keep spaces, line breaks inside, percent signs, backslashes and wildcard-looking text literal. Empty files give <>. Return 0, print no error output and leave every file unchanged. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Virtual files reset before each test; your script draft stays saved.",
+          "action": "Two arguments name existing requested-work and available-work files; REVIEWER is supplied. Print Reviewer: NAME, then Requested: <VALUE>, then Available: <VALUE>, with a line break after each. Each VALUE contains that file's lines in the ordering used by sort -u, with repeated lines listed once. Remove line breaks at the end of the command result. Keep spaces, line breaks inside, percent signs, backslashes and wildcard-looking text literal. Empty files give <>. Return 0, print no error output and leave every file unchanged. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Different inputs expose lost text, wrong decisions and unintended file changes.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A complete solution must handle every case, not only one easy example.",
+          "action": "Write or repair the full script, Run it, inspect the first differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "A filename and the output of a command reading that file are different values. Use $(...) to capture sort output.",
+        "Prepare the two files independently with sort -u. Do not overwrite the requested value when preparing availability.",
+        "Double-quote both stored values in printf so spaces, line breaks and wildcard-looking text remain data."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Execution-Environment.html"
+      ],
+      "simplifications": "Bounded native simulation with declared flat /work text files; never host commands/files. GNU Bash 5.3.9 reference checked 2026-10-23. Supported original-source $() only: no backticks, process substitution, input-only file shorthand, capture inside arithmetic, custom IFS or full-shell conformance. Equivalent supported programs are accepted by output/status/final files, even without command substitution. Valid supplied filenames are canonical single basenames without aliases, slash components or leading hyphens; file-map keys are canonical /work/NAME paths. Explicit invalid empty-name cases are handled before path lookup.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Prepare the contents of both files, then print the comparison card.\nrequested=$1\navailable=$2\nprintf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" \"$requested\" \"$available\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Two short already-ordered lists",
+            "args": [
+              "requests.txt",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REVIEWER": "Nora"
+            },
+            "files": {
+              "/work/requests.txt": "Cable\n",
+              "/work/ready.txt": "Router\n"
+            },
+            "stdout": "Reviewer: Nora\nRequested: <Cable>\nAvailable: <Router>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/requests.txt": "Cable\n",
+              "/work/ready.txt": "Router\n"
+            }
+          },
+          {
+            "name": "Sort and remove repeats independently",
+            "args": [
+              "requests.txt",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REVIEWER": "Ari"
+            },
+            "files": {
+              "/work/requests.txt": "Router\nCable\nRouter\n",
+              "/work/ready.txt": "Switch\nCable\nSwitch\n"
+            },
+            "stdout": "Reviewer: Ari\nRequested: <Cable\nRouter>\nAvailable: <Cable\nSwitch>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/requests.txt": "Router\nCable\nRouter\n",
+              "/work/ready.txt": "Switch\nCable\nSwitch\n"
+            }
+          },
+          {
+            "name": "One empty list",
+            "args": [
+              "requests.txt",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REVIEWER": "Nora"
+            },
+            "files": {
+              "/work/requests.txt": "",
+              "/work/ready.txt": "Power check\nMap check\n"
+            },
+            "stdout": "Reviewer: Nora\nRequested: <>\nAvailable: <Map check\nPower check>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/requests.txt": "",
+              "/work/ready.txt": "Power check\nMap check\n"
+            }
+          },
+          {
+            "name": "Both lists empty",
+            "args": [
+              "requests.txt",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REVIEWER": "No requests"
+            },
+            "files": {
+              "/work/requests.txt": "",
+              "/work/ready.txt": ""
+            },
+            "stdout": "Reviewer: No requests\nRequested: <>\nAvailable: <>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/requests.txt": "",
+              "/work/ready.txt": ""
+            }
+          },
+          {
+            "name": "Spaced names and literal values",
+            "args": [
+              "day requests.txt",
+              "day ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REVIEWER": "North  desk"
+            },
+            "files": {
+              "/work/day requests.txt": "Rack  B\n*.txt\n100% ready\npath\\name\n",
+              "/work/day ready.txt": "Sécurité\nTab\tlabel\n",
+              "/work/match.txt": "untouched\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "Reviewer: North  desk\nRequested: <*.txt\n100% ready\nRack  B\npath\\name>\nAvailable: <Sécurité\nTab\tlabel>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/day requests.txt": "Rack  B\n*.txt\n100% ready\npath\\name\n",
+              "/work/day ready.txt": "Sécurité\nTab\tlabel\n",
+              "/work/match.txt": "untouched\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Unterminated final records and changed reviewer",
+            "args": [
+              "requests.txt",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REVIEWER": "Evening team"
+            },
+            "files": {
+              "/work/requests.txt": "Zeta\nAlpha",
+              "/work/ready.txt": "Alpha\nBeta\n"
+            },
+            "stdout": "Reviewer: Evening team\nRequested: <Alpha\nZeta>\nAvailable: <Alpha\nBeta>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/requests.txt": "Zeta\nAlpha",
+              "/work/ready.txt": "Alpha\nBeta\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "requested=$(sort -u \"$1\")\navailable=$(sort -u \"$2\")\nprintf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" \"$requested\" \"$available\"\n"
+      ],
+      "prerequisites": [
+        "shell-sort-manifest",
+        "shell-arguments"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use quoted arguments and sort -u from the text lessons. A command can print a value that the next part of a script needs.",
+        "concepts": [
+          {
+            "title": "Turn printed output into a value",
+            "text": "Command substitution, written $(command), runs a command and gives you its normal printed output as a value. labels=$(sort -u loans.txt) creates labels from that output. The file name is an input to sort; it is not the value stored in labels."
+          },
+          {
+            "title": "Keep the value together",
+            "text": "Use double quotes when printing the stored value: printf '<%s>\\n' \"$labels\". Otherwise spaces and line breaks can divide it into arguments, and wildcard text such as *.txt can select virtual filenames. The quoted value stays text."
+          },
+          {
+            "title": "Understand the end of the output",
+            "text": "Capture removes line breaks at the end of command output. It keeps spaces and line breaks inside the value. sort normally finishes its last row with a line break; the closing > therefore follows the last captured row. Later lessons explore several final line breaks and command status."
+          }
+        ],
+        "example": "labels=$(sort -u loans.txt)\nprintf 'Loan labels: <%s>\\n' \"$labels\"\n",
+        "inputs": "No arguments or supplied variables. loans.txt and returns.txt are separate museum lists. The example creates labels. Each practice Run starts with these sample files.",
+        "try_change": "Change loans.txt to returns.txt in the capture and Run. Compare the displayed list; both files should stay unchanged.",
+        "fixture": {
+          "name": "Museum loan labels",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/loans.txt": "Map set\nAudio guide\nMap set\n",
+            "/work/returns.txt": "Stool\nMap set\n"
+          },
+          "stdout": "Loan labels: <Audio guide\nMap set>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/loans.txt": "Map set\nAudio guide\nMap set\n",
+            "/work/returns.txt": "Stool\nMap set\n"
+          }
+        }
+      },
+      "retry_guidance": "If you see filenames, you stored the arguments instead of command output. If a one-row case works but longer or literal-text cases fail, inspect quoting and which file each command reads.",
+      "explanation": "Capture turns each sort result into text, removing ending line breaks. Quoted printing preserves the remaining multiline value. The two stored values come from different inputs. The task is graded by complete output and unchanged files, not by variable names or one required source form."
+    },
+    {
+      "id": "shell-capture-evidence",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-capture",
+      "topic": "Command substitution",
+      "title": "Keep the evidence intact in a report",
+      "summary": "Normalize only the ending line breaks while preserving the note and protecting existing work.",
+      "objective": "Argument 1 names a note file; argument 2 is the report destination; REPORT_TITLE is supplied. Replace only the destination with Report: TITLE, Evidence: <VALUE>, and End report, with a line break after each. VALUE is the original note with all line breaks at its end removed; preserve every other character, including spaces, tabs and backslashes, and keep line breaks at the start and inside. Shell-looking text stays literal. Empty/all-line-break notes give <>. Print Saved: DEST plus a line break; return 0 with no error output. First reject an empty destination or one equal to the source with Invalid destination on error output and status 2. Next reject a missing source with Missing note: NAME and status 2. Every failure prints no normal output and leaves every file unchanged. Preserve all source/unrelated files on success. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 27,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Virtual files reset before each test; your script draft stays saved.",
+          "action": "Argument 1 names a note file; argument 2 is the report destination; REPORT_TITLE is supplied. Replace only the destination with Report: TITLE, Evidence: <VALUE>, and End report, with a line break after each. VALUE is the original note with all line breaks at its end removed; preserve every other character, including spaces, tabs and backslashes, and keep line breaks at the start and inside. Shell-looking text stays literal. Empty/all-line-break notes give <>. Print Saved: DEST plus a line break; return 0 with no error output. First reject an empty destination or one equal to the source with Invalid destination on error output and status 2. Next reject a missing source with Missing note: NAME and status 2. Every failure prints no normal output and leaves every file unchanged. Preserve all source/unrelated files on success. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Different inputs expose lost text, wrong decisions and unintended file changes.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A complete solution must handle every case, not only one easy example.",
+          "action": "Write or repair the full script, Run it, inspect the first differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Check the destination first, then source existence, before opening the report with >.",
+        "note=$(cat \"$source\") removes all ending line breaks. It keeps spaces, tabs, carriage returns and line breaks before the end.",
+        "Print the report with %s values and explicit report line breaks. Use double quotes around the captured value, including when it is empty."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Execution-Environment.html"
+      ],
+      "simplifications": "Bounded native simulation with declared flat /work text files; never host commands/files. GNU Bash 5.3.9 reference checked 2026-10-23. Supported original-source $() only: no backticks, process substitution, input-only file shorthand, capture inside arithmetic, custom IFS or full-shell conformance. Equivalent supported programs are accepted by output/status/final files, even without command substitution. Valid supplied filenames are canonical single basenames without aliases, slash components or leading hyphens; file-map keys are canonical /work/NAME paths. Explicit invalid empty-name cases are handled before path lookup.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Validate both names and the source before replacing the report.\n# Read the note, preserve its text, and write the stated report.\ncat \"$1\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary note",
+            "args": [
+              "note.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Door inspection"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "previous report\n",
+              "/work/note.txt": "Door latched\n"
+            },
+            "stdout": "Saved: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "Report: Door inspection\nEvidence: <Door latched>\nEnd report\n",
+              "/work/note.txt": "Door latched\n"
+            }
+          },
+          {
+            "name": "Several final line breaks and preserved spaces",
+            "args": [
+              "note.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Late  check"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "previous report\n",
+              "/work/note.txt": "  100% ready  \n\n\n"
+            },
+            "stdout": "Saved: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "Report: Late  check\nEvidence: <  100% ready  >\nEnd report\n",
+              "/work/note.txt": "  100% ready  \n\n\n"
+            }
+          },
+          {
+            "name": "Line breaks inside and carriage return",
+            "args": [
+              "day note.txt",
+              "archive report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Archive"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/archive report.txt": "previous report\n",
+              "/work/day note.txt": "\nFirst\n\nLast\r\n\n"
+            },
+            "stdout": "Saved: archive report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/archive report.txt": "Report: Archive\nEvidence: <\nFirst\n\nLast\r>\nEnd report\n",
+              "/work/day note.txt": "\nFirst\n\nLast\r\n\n"
+            }
+          },
+          {
+            "name": "Literal shell-looking text and no final line break",
+            "args": [
+              "note.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Literal evidence"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/match.txt": "do not select\n",
+              "/work/note.txt": "cost=$5; $(printf fake) *.txt path\\name\tfin"
+            },
+            "stdout": "Saved: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/match.txt": "do not select\n",
+              "/work/note.txt": "cost=$5; $(printf fake) *.txt path\\name\tfin",
+              "/work/report.txt": "Report: Literal evidence\nEvidence: <cost=$5; $(printf fake) *.txt path\\name\tfin>\nEnd report\n"
+            }
+          },
+          {
+            "name": "Empty note",
+            "args": [
+              "note.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Nothing reported"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "previous report\n",
+              "/work/note.txt": ""
+            },
+            "stdout": "Saved: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "Report: Nothing reported\nEvidence: <>\nEnd report\n",
+              "/work/note.txt": ""
+            }
+          },
+          {
+            "name": "Only line breaks",
+            "args": [
+              "note.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Blank source"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "previous report\n",
+              "/work/note.txt": "\n\n\n"
+            },
+            "stdout": "Saved: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "Report: Blank source\nEvidence: <>\nEnd report\n",
+              "/work/note.txt": "\n\n\n"
+            }
+          },
+          {
+            "name": "Missing source keeps previous report",
+            "args": [
+              "note.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Door inspection"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "previous report\n"
+            },
+            "stdout": "",
+            "stderr": "Missing note: note.txt\n",
+            "status": 2,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/report.txt": "previous report\n"
+            }
+          },
+          {
+            "name": "Output is the source",
+            "args": [
+              "note.txt",
+              "note.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Door inspection"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/note.txt": "Source must survive\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid destination\n",
+            "status": 2,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/note.txt": "Source must survive\n"
+            }
+          },
+          {
+            "name": "Empty destination preserves everything",
+            "args": [
+              "note.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Door inspection"
+            },
+            "files": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/note.txt": "Keep note\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid destination\n",
+            "status": 2,
+            "after": {
+              "/work/sentinel.txt": "unrelated original\n",
+              "/work/note.txt": "Keep note\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nif [ -f \"$source\" ]; then\n    :\nelse\n    printf 'Missing note: %s\\n' \"$source\" >&2\n    exit 2\nfi\nevidence=$(cat \"$source\")\nprintf 'Report: %s\\nEvidence: <%s>\\nEnd report\\n' \"$REPORT_TITLE\" \"$evidence\" > \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n"
+      ],
+      "prerequisites": [
+        "shell-capture-preview",
+        "shell-capstone"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use capture from the comparison card and validation/redirection from the report lessons. This task preserves the note itself, rather than sorting its lines.",
+        "concepts": [
+          {
+            "title": "Remove ending line breaks, keep the evidence",
+            "text": "$(cat \"$source\") reads command output into a value. Capture removes every line break at the end. It keeps line breaks at the start and inside, spaces, tabs and other text. An empty or all-line-break note becomes an empty value."
+          },
+          {
+            "title": "Quoting preserves what remains",
+            "text": "Double quotes preserve the captured value, including an empty value. They cannot bring back ending line breaks that capture removed. Characters such as *, %, backslashes and $(...) printed by cat are data; the output is not executed again."
+          },
+          {
+            "title": "Print the report deliberately",
+            "text": "Use %s for text values and explicit \\n for the report's own line breaks. printf 'Evidence: <%s>\\n' \"$note\" places > immediately after the remaining evidence. The optional input comparison makes invisible spaces and line breaks visible."
+          },
+          {
+            "title": "Recognize invisible characters",
+            "text": "Here a line break means the newline character written \\n in scripts and feedback. A tab is written \\t. A carriage return, written \\r, is another character and stays in captured text. These differences can appear in the input and output comparison."
+          },
+          {
+            "title": "Check before replacing a file",
+            "text": "Validate the destination and source before using >. A missing source must preserve an existing report. The task lists the exact checks and error messages; opening an output file too early can destroy useful work."
+          }
+        ],
+        "example": "note=$(printf '%s\\n\\n%s\\n\\n' 'Gallery  A' '100% ready')\nprintf 'Note: <%s>\\n' \"$note\"\n",
+        "inputs": "No arguments, files or supplied variables. printf creates the display note; note is created by the example. The two ending line breaks are removed by capture, while the blank line inside stays.",
+        "try_change": "In the first printf, change '%s\\n\\n%s\\n\\n' to '%s\\n\\n\\n%s\\n\\n' and Run. The added line break is inside the captured value and should remain visible.",
+        "fixture": {
+          "name": "A small display note",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Note: <Gallery  A\n\n100% ready>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "If only trailing-blank-line cases fail, distinguish the command result from its captured value. If spaces or literal patterns change, inspect quoting. A rejected input must preserve the previous report byte for byte.",
+      "explanation": "Command capture removes ending LF line-break bytes only. Quoting preserves the remaining value, including leading/interior breaks, edge spaces, tabs and a final CR character. It does not execute shell-looking data. Preflight protects useful source/report files before any output redirection."
+    },
+    {
+      "id": "shell-capture-decision",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-capture",
+      "topic": "Command substitution",
+      "title": "Investigate findings without losing their status",
+      "summary": "Keep a helper's value, diagnostics and decision status separate.",
+      "objective": "One argument names an inspection source. The supplied inspect_source helper prints Inspecting: NAME on error output, returns 0 and prints all lines containing literal BLOCK: when matches exist, returns 1 for no matches, or explicitly checks a missing source and prints Missing source: NAME with return 2. For an existing source print Source: NAME, Decision: hold or ready, then Findings: <VALUE>, each followed by a line break. A match means hold/status 1; no matches (including an empty file) means ready/status 0 and <>. VALUE is the complete matching-line output with line breaks at its end removed, preserving remaining text. A missing source has only the two helper error-output lines, status 2 and no normal report. Leave every file unchanged. The helper is editable; equivalent supported behavior passes. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Virtual files reset before each test; your script draft stays saved.",
+          "action": "One argument names an inspection source. The supplied inspect_source helper prints Inspecting: NAME on error output, returns 0 and prints all lines containing literal BLOCK: when matches exist, returns 1 for no matches, or explicitly checks a missing source and prints Missing source: NAME with return 2. For an existing source print Source: NAME, Decision: hold or ready, then Findings: <VALUE>, each followed by a line break. A match means hold/status 1; no matches (including an empty file) means ready/status 0 and <>. VALUE is the complete matching-line output with line breaks at its end removed, preserving remaining text. A missing source has only the two helper error-output lines, status 2 and no normal report. Leave every file unchanged. The helper is editable; equivalent supported behavior passes. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Different inputs expose lost text, wrong decisions and unintended file changes.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A complete solution must handle every case, not only one easy example.",
+          "action": "Write or repair the full script, Run it, inspect the first differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Capture normal findings, then save $? immediately before another command replaces it. An assignment used as an if condition is another supported approach.",
+        "The helper uses 0 for a match,1 for no match,2 for its explicit missing-source guard. Map those to the requested decision and final status.",
+        "Do not mix >&2 diagnostics into Findings. Handle missing input before printing Source or a normal decision report."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Execution-Environment.html"
+      ],
+      "simplifications": "Bounded native simulation with declared flat /work text files; never host commands/files. GNU Bash 5.3.9 reference checked 2026-10-23. Supported original-source $() only: no backticks, process substitution, input-only file shorthand, capture inside arithmetic, custom IFS or full-shell conformance. Equivalent supported programs are accepted by output/status/final files, even without command substitution. Valid supplied filenames are canonical single basenames without aliases, slash components or leading hyphens; file-map keys are canonical /work/NAME paths. Explicit invalid empty-name cases are handled before path lookup.",
+      "initial": {
+        "kind": "Script",
+        "source": "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nfindings=$(inspect_source \"$1\")\nprintf 'Source: %s\\n' \"$1\"\nif [ \"$?\" -eq 0 ]; then\n    printf 'Decision: hold\\nFindings: <%s>\\n' \"$findings\"\n    exit 1\nfi\nprintf 'Decision: ready\\nFindings: <>\\n'\nexit 0\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "One hold finding",
+            "args": [
+              "inspection.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/inspection.txt": "Ready\nBLOCK: damaged seal\n"
+            },
+            "stdout": "Source: inspection.txt\nDecision: hold\nFindings: <BLOCK: damaged seal>\n",
+            "stderr": "Inspecting: inspection.txt\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/inspection.txt": "Ready\nBLOCK: damaged seal\n"
+            }
+          },
+          {
+            "name": "No blocking findings",
+            "args": [
+              "inspection.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/inspection.txt": "Ready\nCheck complete\n"
+            },
+            "stdout": "Source: inspection.txt\nDecision: ready\nFindings: <>\n",
+            "stderr": "Inspecting: inspection.txt\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/inspection.txt": "Ready\nCheck complete\n"
+            }
+          },
+          {
+            "name": "Empty existing source",
+            "args": [
+              "inspection.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/inspection.txt": ""
+            },
+            "stdout": "Source: inspection.txt\nDecision: ready\nFindings: <>\n",
+            "stderr": "Inspecting: inspection.txt\n",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/inspection.txt": ""
+            }
+          },
+          {
+            "name": "Multiple findings with an unfinished last line",
+            "args": [
+              "daily inspection.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/daily inspection.txt": "BLOCK: rack  B\nReady\nBLOCK: 100% path\\name *.txt"
+            },
+            "stdout": "Source: daily inspection.txt\nDecision: hold\nFindings: <BLOCK: rack  B\nBLOCK: 100% path\\name *.txt>\n",
+            "stderr": "Inspecting: daily inspection.txt\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/daily inspection.txt": "BLOCK: rack  B\nReady\nBLOCK: 100% path\\name *.txt"
+            }
+          },
+          {
+            "name": "Literal occurrence inside a longer record",
+            "args": [
+              "changed.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/changed.txt": "Text before BLOCK: literal $() after\n"
+            },
+            "stdout": "Source: changed.txt\nDecision: hold\nFindings: <Text before BLOCK: literal $() after>\n",
+            "stderr": "Inspecting: changed.txt\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n",
+              "/work/changed.txt": "Text before BLOCK: literal $() after\n"
+            }
+          },
+          {
+            "name": "Missing is an ordinary helper result",
+            "args": [
+              "absent.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n"
+            },
+            "stdout": "",
+            "stderr": "Inspecting: absent.txt\nMissing source: absent.txt\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "original\n",
+              "/work/match.txt": "not report data\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nfindings=$(inspect_source \"$1\")\nscan_status=$?\nif [ \"$scan_status\" -eq 2 ]; then exit 2; fi\nprintf 'Source: %s\\n' \"$1\"\nif [ \"$scan_status\" -eq 0 ]; then\n    printf 'Decision: hold\\nFindings: <%s>\\n' \"$findings\"\n    exit 1\nfi\nprintf 'Decision: ready\\nFindings: <>\\n'\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-capture-evidence",
+        "shell-return",
+        "shell-streams"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use helper functions, return and separate error output. A captured value and the command's status answer different questions.",
+        "concepts": [
+          {
+            "title": "Capture output and check status separately",
+            "text": "An assignment such as reply=$(suggest_route) stores normal output. Its status is the captured command's status. Save it immediately with route_status=$?, or put the assignment in an if condition. A later printf has its own status and replaces $?; the stored reply does not tell you that status."
+          },
+          {
+            "title": "A nonzero result can carry useful information",
+            "text": "The practice helper returns 4 and still prints a useful route. The assignment helper returns 0 for matching BLOCK: lines, 1 for no matches and 2 for its explicit missing-source check. Those are ordinary supported helper results, not simulator failures. Unsupported commands, limits and Stop are different: they leave the run ungraded."
+          },
+          {
+            "title": "Normal output and diagnostics stay separate",
+            "text": "Capture collects normal output only. A helper's >&2 messages still appear in the error-output view. Keep those diagnostics separate from the Findings value. In this assignment, a hold is a useful report with status 1; a missing source has diagnostics and status 2, with no normal report."
+          },
+          {
+            "title": "Make a decision before reporting it",
+            "text": "The starter prints Source before inspecting $?, so it inspects printf's status instead of the helper's. A successful helper is not automatically a ready decision: this helper uses 0 to mean that blocking text was found. Follow the stated mapping rather than guessing from an empty or nonempty value."
+          }
+        ],
+        "example": "suggest_route() {\n    printf 'Map: north  gate\\n'\n    printf 'Advice: manual check\\n' >&2\n    return 4\n}\nreply=$(suggest_route)\nroute_status=$?\nprintf 'Reply: <%s>\\nStatus: %s\\n' \"$reply\" \"$route_status\"\n",
+        "inputs": "No arguments, files or supplied variables. The example defines a small helper, captures its reply, and creates route_status. The outer printf succeeds even when the helper returned 4.",
+        "try_change": "Change return 4 to return 0 in suggest_route and Run. The text and diagnostic should stay the same while the displayed helper status changes.",
+        "fixture": {
+          "name": "A travel advisory",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {},
+          "stdout": "Reply: <Map: north  gate>\nStatus: 4\n",
+          "stderr": "Advice: manual check\n",
+          "status": 0,
+          "after": {}
+        }
+      },
+      "retry_guidance": "If clear sources are held, check whether you saved the helper status before printf. If a missing source becomes ready, distinguish status 2 from the ordinary no-match status 1.",
+      "explanation": "The assignment-only command gets the captured helper's status. A later printf replaces $?, so the decision needs a saved status or immediate condition. The helper explicitly checks a missing source and returns 2; it does not rely on recovering a simulator failure. Nonzero hold/no-match statuses are useful results, while unsupported/limit/Stopped outcomes remain ungraded."
+    },
+    {
+      "id": "shell-capture-handover",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-capture",
+      "topic": "Command substitution",
+      "title": "Preview or publish a batch investigation safely",
+      "summary": "Combine intact captured output, reliable status, isolated variables and shared inspection files.",
+      "objective": "Arguments are mode (preview or save), destination, then one or more source files; REPORT_TITLE is supplied. Build a report headed Review: TITLE and Decision: ready or hold. For each source argument, print Source: NAME followed by all lines containing literal BLOCK:, in argument order. Finish every report line with a line break. Any match means hold/status 1; otherwise ready/status 0. Keep the original title, literal text and repeated source arguments.\n\nAppend Checked: NAME and a line break to scan-ledger.txt for each source, keeping its existing text. Preview prints the report and preserves the destination; it still updates the ledger. Save replaces only the destination and prints Saved: DEST then Decision: VALUE, each on its own line. Leave every other file unchanged.\n\nCheck everything before any changes. Fewer than three arguments, unknown mode or empty destination gives Usage: preview|save DEST SOURCE... on error output. Next, destination scan-ledger.txt gives Unsafe destination. Then check sources in order: empty name gives Empty source name; destination collision gives Unsafe destination; scan-ledger.txt as source gives Unsafe source; missing source gives Missing source: NAME. Every guard failure prints only the stated message on error output, ends it with a line break, returns 2 and leaves all files unchanged. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Virtual files reset before each test; your script draft stays saved.",
+          "action": "Arguments are mode (preview or save), destination, then one or more source files; REPORT_TITLE is supplied. Build a report headed Review: TITLE and Decision: ready or hold. For each source argument, print Source: NAME followed by all lines containing literal BLOCK:, in argument order. Finish every report line with a line break. Any match means hold/status 1; otherwise ready/status 0. Keep the original title, literal text and repeated source arguments.\n\nAppend Checked: NAME and a line break to scan-ledger.txt for each source, keeping its existing text. Preview prints the report and preserves the destination; it still updates the ledger. Save replaces only the destination and prints Saved: DEST then Decision: VALUE, each on its own line. Leave every other file unchanged.\n\nCheck everything before any changes. Fewer than three arguments, unknown mode or empty destination gives Usage: preview|save DEST SOURCE... on error output. Next, destination scan-ledger.txt gives Unsafe destination. Then check sources in order: empty name gives Empty source name; destination collision gives Unsafe destination; scan-ledger.txt as source gives Unsafe source; missing source gives Missing source: NAME. Every guard failure prints only the stated message on error output, ends it with a line break, returns 2 and leaves all files unchanged. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Different inputs expose lost text, wrong decisions and unintended file changes.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A complete solution must handle every case, not only one easy example.",
+          "action": "Write or repair the full script, Run it, inspect the first differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "The helper changes REPORT_TITLE and appends to the ledger. Check every source and collision before invoking it.",
+        "Call the existing helper inside capture, then save its result status immediately. The child's variable assignment stays inside, while its virtual file writes remain visible.",
+        "Use the original parent title and the helper's whole-batch status. Preview preserves only the destination; the specified ledger append still happens. Keep repeated arguments in order."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Word-Splitting.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/grep/manual/html_node/Exit-Status.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Execution-Environment.html"
+      ],
+      "simplifications": "Bounded native simulation with declared flat /work text files; never host commands/files. GNU Bash 5.3.9 reference checked 2026-10-23. Supported original-source $() only: no backticks, process substitution, input-only file shorthand, capture inside arithmetic, custom IFS or full-shell conformance. Equivalent supported programs are accepted by output/status/final files, even without command substitution. Valid supplied filenames are canonical single basenames without aliases, slash components or leading hyphens; file-map keys are canonical /work/NAME paths. Explicit invalid empty-name cases are handled before path lookup. This capstone uses finite line records without edge spaces/tabs and an empty or LF-terminated existing ledger; the evidence lesson separately covers arbitrary edge whitespace. No mutable-file-descriptor or atomic multi-file transaction claim.",
+      "initial": {
+        "kind": "Script",
+        "source": "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\n\n# Validate the whole batch before calling this helper.\n# Then create the requested preview or saved report using the original title.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Clear preview preserves an existing destination",
+            "args": [
+              "preview",
+              "review.txt",
+              "first.txt",
+              "second.txt",
+              "first.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "previous report\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/first.txt": "Ready\n",
+              "/work/second.txt": "Complete\n"
+            },
+            "stdout": "Review: Dispatch review\nDecision: ready\nSource: first.txt\nSource: second.txt\nSource: first.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "previous report\n",
+              "/work/scan-ledger.txt": "Previous: archived\nChecked: first.txt\nChecked: second.txt\nChecked: first.txt\n",
+              "/work/first.txt": "Ready\n",
+              "/work/second.txt": "Complete\n"
+            }
+          },
+          {
+            "name": "Save a clear review to a new file",
+            "args": [
+              "save",
+              "new review.txt",
+              "empty.txt",
+              "late.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Evening  review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/empty.txt": "",
+              "/work/late.txt": "Ready without final newline"
+            },
+            "stdout": "Saved: new review.txt\nDecision: ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/empty.txt": "",
+              "/work/late.txt": "Ready without final newline",
+              "/work/scan-ledger.txt": "Checked: empty.txt\nChecked: late.txt\n",
+              "/work/new review.txt": "Review: Evening  review\nDecision: ready\nSource: empty.txt\nSource: late.txt\n"
+            }
+          },
+          {
+            "name": "Early hold survives a clear last source",
+            "args": [
+              "preview",
+              "review.txt",
+              "north note.txt",
+              "south.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Sécurité * $()"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/match.txt": "untouched\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/north note.txt": "BLOCK: 100% *.txt path\\name\n",
+              "/work/south.txt": "Clear\nAll fine\n"
+            },
+            "stdout": "Review: Sécurité * $()\nDecision: hold\nSource: north note.txt\nBLOCK: 100% *.txt path\\name\nSource: south.txt\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/match.txt": "untouched\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\nChecked: north note.txt\nChecked: south.txt\n",
+              "/work/north note.txt": "BLOCK: 100% *.txt path\\name\n",
+              "/work/south.txt": "Clear\nAll fine\n"
+            }
+          },
+          {
+            "name": "Save hold replaces only the report and appends the ledger",
+            "args": [
+              "save",
+              "review.txt",
+              "blocked.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Earlier: noon\n",
+              "/work/blocked.txt": "BLOCK: first\nBLOCK: second\n"
+            },
+            "stdout": "Saved: review.txt\nDecision: hold\n",
+            "stderr": "",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "Review: Dispatch review\nDecision: hold\nSource: blocked.txt\nBLOCK: first\nBLOCK: second\n",
+              "/work/scan-ledger.txt": "Earlier: noon\nChecked: blocked.txt\n",
+              "/work/blocked.txt": "BLOCK: first\nBLOCK: second\n"
+            }
+          },
+          {
+            "name": "An empty later source name is rejected before file lookup",
+            "args": [
+              "save",
+              "review.txt",
+              "good.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/good.txt": "Clear\n"
+            },
+            "stdout": "",
+            "stderr": "Empty source name\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/good.txt": "Clear\n"
+            }
+          },
+          {
+            "name": "No sources leaves report and ledger untouched",
+            "args": [
+              "save",
+              "review.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: preview|save DEST SOURCE...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n"
+            }
+          },
+          {
+            "name": "Late missing source leaves all previous work untouched",
+            "args": [
+              "save",
+              "review.txt",
+              "good.txt",
+              "absent.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/good.txt": "BLOCK: old concern\n"
+            },
+            "stdout": "",
+            "stderr": "Missing source: absent.txt\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/good.txt": "BLOCK: old concern\n"
+            }
+          },
+          {
+            "name": "Destination collides with a later source",
+            "args": [
+              "save",
+              "second.txt",
+              "first.txt",
+              "second.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/first.txt": "Ready\n",
+              "/work/second.txt": "Must remain\n"
+            },
+            "stdout": "",
+            "stderr": "Unsafe destination\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/first.txt": "Ready\n",
+              "/work/second.txt": "Must remain\n"
+            }
+          },
+          {
+            "name": "Ledger cannot be inspected as a source",
+            "args": [
+              "preview",
+              "review.txt",
+              "safe.txt",
+              "scan-ledger.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/safe.txt": "Clear\n"
+            },
+            "stdout": "",
+            "stderr": "Unsafe source\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/safe.txt": "Clear\n"
+            }
+          },
+          {
+            "name": "Unknown mode is rejected before inspection",
+            "args": [
+              "publish",
+              "review.txt",
+              "absent.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: preview|save DEST SOURCE...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/review.txt": "old\n",
+              "/work/scan-ledger.txt": "Previous: archived\n"
+            }
+          },
+          {
+            "name": "Empty destination is rejected before inspection",
+            "args": [
+              "save",
+              "",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/ready.txt": "Ready\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: preview|save DEST SOURCE...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/ready.txt": "Ready\n"
+            }
+          },
+          {
+            "name": "Destination cannot replace the inspection ledger",
+            "args": [
+              "save",
+              "scan-ledger.txt",
+              "ready.txt"
+            ],
+            "stdin": "",
+            "env": {
+              "REPORT_TITLE": "Dispatch review"
+            },
+            "files": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/ready.txt": "Ready\n"
+            },
+            "stdout": "",
+            "stderr": "Unsafe destination\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "unrelated\n",
+              "/work/scan-ledger.txt": "Previous: archived\n",
+              "/work/ready.txt": "Ready\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nbody=$(review_batch \"$@\")\nresult=$?\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = preview ]; then\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\" > \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n"
+      ],
+      "prerequisites": [
+        "shell-capture-evidence",
+        "shell-capture-decision",
+        "shell-scope-capstone"
+      ],
+      "teaching": {
+        "prerequisite_note": "Combine the first three capture tasks with safe batches and function scope. No arrays or arithmetic are required.",
+        "concepts": [
+          {
+            "title": "A called helper runs inside the capture",
+            "text": "A function defined earlier is available inside $(helper arguments). Capture uses an isolated shell environment: the helper sees the caller's values, but its ordinary variable changes stay inside that capture. The parent still sees its original title afterward. This differs from calling an ordinary function directly, whose non-local assignments can change caller variables."
+          },
+          {
+            "title": "Files are still shared",
+            "text": "An isolated variable environment does not isolate virtual files. The practice helper changes title inside the capture and appends to museum-ledger.txt. The outside title stays original, but the file view shows the new ledger line. Capturing a command is not a way to undo its file writes."
+          },
+          {
+            "title": "Validate the whole batch before a helper with effects",
+            "text": "The assignment helper appends to scan-ledger.txt. Check every source and collision first, including a late missing source, before calling it. Preview preserves the destination, but it deliberately updates this inspection ledger. Failed validation must leave both report and ledger unchanged."
+          },
+          {
+            "title": "Keep the caller title and the batch decision",
+            "text": "Capture the helper body, save its status before printing, and use the original supplied REPORT_TITLE in the wrapper. The helper returns 1 if any source contains BLOCK:, even if the last source is clear. Repeated source arguments remain separate inspections in the original order."
+          }
+        ],
+        "example": "title='Exhibit review'\nmake_note() {\n    title='Working title'\n    printf 'Visited: optics\\n' >> museum-ledger.txt\n    printf 'Display: ready\\n'\n}\nnote=$(make_note)\nprintf 'Note: <%s>\\nOutside: %s\\n' \"$note\" \"$title\"\n",
+        "inputs": "No arguments or supplied variables. The example creates title and note, defines make_note, and starts with a separate museum ledger. Every practice Run resets that sample file; assignment files/results are independent.",
+        "try_change": "Replace note=$(make_note) with make_note; note='direct call' and Run. Compare the outside title and normal output; the ledger effect still happens.",
+        "fixture": {
+          "name": "A separate museum check",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/museum-ledger.txt": "Earlier: maps\n"
+          },
+          "stdout": "Note: <Display: ready>\nOutside: Exhibit review\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/museum-ledger.txt": "Earlier: maps\nVisited: optics\n"
+          }
+        }
+      },
+      "retry_guidance": "If the title becomes Working scan, distinguish a direct helper call from an isolated capture. If preview changes the report, inspect the publication branch. If a late missing source changes the ledger, finish all validation before inspection.",
+      "explanation": "A called function is inherited by the capture, with a child function-call frame. Its ordinary variable changes do not replace the parent's values. Its writes still affect shared virtual files, so capture is not a filesystem rollback. Full-batch preflight precedes those writes; final files, report text and whole-batch status are checked independently. Any supported equivalent, including a direct reconstruction with no capture, can pass."
+    }
+  ]
+}

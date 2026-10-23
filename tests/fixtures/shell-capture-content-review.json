@@ -1,0 +1,192 @@
+[
+  {
+    "id": "shell-capture-preview",
+    "alternates": [
+      "printf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" \"$(sort -u \"$1\")\" \"$(sort -u \"$2\")\"\n",
+      "prepare_card() {\n    local first=\"$(sort -u \"$1\")\" second=\"$(sort -u \"$2\")\"\n    printf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" \"$first\" \"$second\"\n}\nprepare_card \"$1\" \"$2\"\n"
+    ],
+    "wrong": [
+      {
+        "name": "unquoted values",
+        "source": "requested=$(sort -u \"$1\")\navailable=$(sort -u \"$2\")\nprintf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" $requested $available\n",
+        "misconception": "Captured spaces, line breaks and wildcard characters become arguments instead of intact text."
+      },
+      {
+        "name": "same source twice",
+        "source": "requested=$(sort -u \"$1\")\navailable=$(sort -u \"$1\")\nprintf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" \"$requested\" \"$available\"\n",
+        "misconception": "The second value mistakenly reuses the requested source instead of the independent availability feed."
+      },
+      {
+        "name": "duplicates retained",
+        "source": "requested=$(sort \"$1\")\navailable=$(sort \"$2\")\nprintf 'Reviewer: %s\\nRequested: <%s>\\nAvailable: <%s>\\n' \"$REVIEWER\" \"$requested\" \"$available\"\n",
+        "misconception": "Ordering alone does not remove repeated entries from each comparison list."
+      }
+    ],
+    "partial": "unquoted values",
+    "try_change": {
+      "source": "labels=$(sort -u returns.txt)\nprintf 'Loan labels: <%s>\\n' \"$labels\"\n",
+      "expected": {
+        "name": "Museum return labels",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/loans.txt": "Map set\nAudio guide\nMap set\n",
+          "/work/returns.txt": "Stool\nMap set\n"
+        },
+        "stdout": "Loan labels: <Map set\nStool>\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/loans.txt": "Map set\nAudio guide\nMap set\n",
+          "/work/returns.txt": "Stool\nMap set\n"
+        }
+      },
+      "repair": "labels=$(sort -u loans.txt)\nprintf 'Loan labels: <%s>\\n' \"$labels\"\n"
+    }
+  },
+  {
+    "id": "shell-capture-evidence",
+    "alternates": [
+      "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nif [ -f \"$source\" ]; then\n    :\nelse\n    printf 'Missing note: %s\\n' \"$source\" >&2\n    exit 2\nfi\nprintf 'Report: %s\\nEvidence: <%s>\\nEnd report\\n' \"$REPORT_TITLE\" \"$(cat \"$source\")\" > \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+      "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nif [ -f \"$source\" ]; then\n    :\nelse\n    printf 'Missing note: %s\\n' \"$source\" >&2\n    exit 2\nfi\npublish_note() {\n    local note=\"$(cat \"$1\")\"\n    printf 'Report: %s\\n' \"$REPORT_TITLE\" > \"$2\"\n    printf 'Evidence: <%s>\\nEnd report\\n' \"$note\" >> \"$2\"\n}\npublish_note \"$source\" \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n"
+    ],
+    "wrong": [
+      {
+        "name": "raw ending line breaks",
+        "source": "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nif [ -f \"$source\" ]; then\n    :\nelse\n    printf 'Missing note: %s\\n' \"$source\" >&2\n    exit 2\nfi\nprintf 'Report: %s\\nEvidence: <' \"$REPORT_TITLE\" > \"$destination\"\ncat \"$source\" >> \"$destination\"\nprintf '>\\nEnd report\\n' >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+        "misconception": "Direct cat output retains all ending line breaks instead of the stated normalized captured value."
+      },
+      {
+        "name": "unquoted evidence",
+        "source": "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nif [ -f \"$source\" ]; then\n    :\nelse\n    printf 'Missing note: %s\\n' \"$source\" >&2\n    exit 2\nfi\nevidence=$(cat \"$source\")\nprintf 'Report: %s\\nEvidence: <%s>\\nEnd report\\n' \"$REPORT_TITLE\" $evidence > \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+        "misconception": "An unquoted multiline or empty evidence value loses its argument boundaries."
+      },
+      {
+        "name": "append old report",
+        "source": "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nif [ -f \"$source\" ]; then\n    :\nelse\n    printf 'Missing note: %s\\n' \"$source\" >&2\n    exit 2\nfi\nevidence=$(cat \"$source\")\nprintf 'Report: %s\\nEvidence: <%s>\\nEnd report\\n' \"$REPORT_TITLE\" \"$evidence\" >> \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+        "misconception": "The destination must be replaced on success, while an earlier report must survive failure."
+      },
+      {
+        "name": "missing guard omitted",
+        "source": "source=$1\ndestination=$2\nif [ -z \"$destination\" ] || [ \"$destination\" = \"$source\" ]; then\n    printf 'Invalid destination\\n' >&2\n    exit 2\nfi\nevidence=$(cat \"$source\")\nprintf 'Report: %s\\nEvidence: <%s>\\nEnd report\\n' \"$REPORT_TITLE\" \"$evidence\" > \"$destination\"\nprintf 'Saved: %s\\n' \"$destination\"\n",
+        "misconception": "A failed note read must not be treated as an empty successful report or overwrite existing work."
+      }
+    ],
+    "partial": "raw ending line breaks",
+    "try_change": {
+      "source": "note=$(printf '%s\\n\\n\\n%s\\n\\n' 'Gallery  A' '100% ready')\nprintf 'Note: <%s>\\n' \"$note\"\n",
+      "expected": {
+        "name": "An extra line break inside the note",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Note: <Gallery  A\n\n\n100% ready>\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      },
+      "repair": "note=$(printf '%s\\n\\n%s\\n\\n' 'Gallery  A' '100% ready')\nprintf 'Note: <%s>\\n' \"$note\"\n"
+    }
+  },
+  {
+    "id": "shell-capture-decision",
+    "alternates": [
+      "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nif findings=$(inspect_source \"$1\"); then\n    printf 'Source: %s\\nDecision: hold\\nFindings: <%s>\\n' \"$1\" \"$findings\"\n    exit 1\nelse\n    scan_status=$?\n    if [ \"$scan_status\" -eq 2 ]; then exit 2; fi\n    printf 'Source: %s\\nDecision: ready\\nFindings: <>\\n' \"$1\"\n    exit 0\nfi\n",
+      "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nmake_decision() {\n    local findings\n    local result\n    findings=$(inspect_source \"$1\")\n    result=$?\n    if [ \"$result\" -eq 2 ]; then return 2; fi\n    if [ \"$result\" -eq 1 ]; then\n        printf 'Source: %s\\nDecision: ready\\nFindings: <>\\n' \"$1\"\n        return 0\n    fi\n    printf 'Source: %s\\nDecision: hold\\nFindings: <%s>\\n' \"$1\" \"$findings\"\n    return 1\n}\nmake_decision \"$1\"\n"
+    ],
+    "wrong": [
+      {
+        "name": "status after printing",
+        "source": "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nfindings=$(inspect_source \"$1\")\nprintf 'Source: %s\\n' \"$1\"\nif [ \"$?\" -eq 0 ]; then\n    printf 'Decision: hold\\nFindings: <%s>\\n' \"$findings\"\n    exit 1\nfi\nprintf 'Decision: ready\\nFindings: <>\\n'\nexit 0\n",
+        "misconception": "The normal Source printf overwrites the helper status before the decision uses it."
+      },
+      {
+        "name": "missing treated as clear",
+        "source": "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nfindings=$(inspect_source \"$1\")\nscan_status=$?\nif [ \"$scan_status\" -eq 2 ]; then scan_status=1; fi\nprintf 'Source: %s\\n' \"$1\"\nif [ \"$scan_status\" -eq 0 ]; then\n    printf 'Decision: hold\\nFindings: <%s>\\n' \"$findings\"\n    exit 1\nfi\nprintf 'Decision: ready\\nFindings: <>\\n'\nexit 0\n",
+        "misconception": "The explicit missing-source result is different from a valid source with no matches."
+      },
+      {
+        "name": "hold returns success",
+        "source": "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\" >&2\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nfindings=$(inspect_source \"$1\")\nscan_status=$?\nif [ \"$scan_status\" -eq 2 ]; then exit 2; fi\nprintf 'Source: %s\\n' \"$1\"\nif [ \"$scan_status\" -eq 0 ]; then\n    printf 'Decision: hold\\nFindings: <%s>\\n' \"$findings\"\n    exit 0\nfi\nprintf 'Decision: ready\\nFindings: <>\\n'\nexit 0\n",
+        "misconception": "A correctly printed hold report still needs its requested nonzero final status."
+      },
+      {
+        "name": "diagnostic captured as data",
+        "source": "inspect_source() {\n    printf 'Inspecting: %s\\n' \"$1\"\n    if [ -f \"$1\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$1\" >&2\n        return 2\n    fi\n    grep -F 'BLOCK:' \"$1\"\n}\nfindings=$(inspect_source \"$1\")\nscan_status=$?\nif [ \"$scan_status\" -eq 2 ]; then exit 2; fi\nprintf 'Source: %s\\n' \"$1\"\nif [ \"$scan_status\" -eq 0 ]; then\n    printf 'Decision: hold\\nFindings: <%s>\\n' \"$findings\"\n    exit 1\nfi\nprintf 'Decision: ready\\nFindings: <>\\n'\nexit 0\n",
+        "misconception": "The inspection diagnostic belongs to error output, not the captured findings value."
+      }
+    ],
+    "partial": "status after printing",
+    "try_change": {
+      "source": "suggest_route() {\n    printf 'Map: north  gate\\n'\n    printf 'Advice: manual check\\n' >&2\n    return 0\n}\nreply=$(suggest_route)\nroute_status=$?\nprintf 'Reply: <%s>\\nStatus: %s\\n' \"$reply\" \"$route_status\"\n",
+      "expected": {
+        "name": "A successful travel response",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "Reply: <Map: north  gate>\nStatus: 0\n",
+        "stderr": "Advice: manual check\n",
+        "status": 0,
+        "after": {}
+      },
+      "repair": "suggest_route() {\n    printf 'Map: north  gate\\n'\n    printf 'Advice: manual check\\n' >&2\n    return 4\n}\nreply=$(suggest_route)\nroute_status=$?\nprintf 'Reply: <%s>\\nStatus: %s\\n' \"$reply\" \"$route_status\"\n"
+    }
+  },
+  {
+    "id": "shell-capture-handover",
+    "alternates": [
+      "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nif body=$(review_batch \"$@\"); then\n    decision=ready\n    result=0\nelse\n    result=$?\n    decision=hold\nfi\nif [ \"$mode\" = save ]; then\n    printf 'Review: %s\\nDecision: %s\\n' \"$REPORT_TITLE\" \"$decision\" > \"$destination\"\n    printf '%s\\n' \"$body\" >> \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n' \"$REPORT_TITLE\" \"$decision\"\n    printf '%s\\n' \"$body\"\nfi\nexit \"$result\"\n",
+      "if [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nledger=''\nif [ -f scan-ledger.txt ]; then\n    while read -r row || [ -n \"$row\" ]; do\n        ledger=\"$ledger$row\n\"\n    done < scan-ledger.txt\nfi\nbody=''\nresult=0\nfor source in \"$@\"; do\n    ledger=\"${ledger}Checked: $source\n\"\n    body=\"${body}Source: $source\n\"\n    while read -r row || [ -n \"$row\" ]; do\n        if printf '%s\\n' \"$row\" | grep -F 'BLOCK:' > scan-ledger.txt; then\n            body=\"$body$row\n\"\n            result=1\n        fi\n    done < \"$source\"\ndone\nprintf '%s' \"$ledger\" > scan-ledger.txt\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = preview ]; then\n    printf 'Review: %s\\nDecision: %s\\n' \"$REPORT_TITLE\" \"$decision\"\n    printf '%s' \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n' \"$REPORT_TITLE\" \"$decision\" > \"$destination\"\n    printf '%s' \"$body\" >> \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n"
+    ],
+    "wrong": [
+      {
+        "name": "preview publishes anyway",
+        "source": "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nbody=$(review_batch \"$@\")\nresult=$?\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = never ]; then\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\" > \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n",
+        "misconception": "A preview can update the specified inspection ledger but must preserve the report destination."
+      },
+      {
+        "name": "ledger omitted",
+        "source": "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        :\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nbody=$(review_batch \"$@\")\nresult=$?\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = preview ]; then\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\" > \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n",
+        "misconception": "Capturing output does not erase the required shared virtual-file inspection record."
+      },
+      {
+        "name": "last source wins",
+        "source": "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        blocked=0\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nbody=$(review_batch \"$@\")\nresult=$?\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = preview ]; then\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\" > \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n",
+        "misconception": "A clear final source must not undo an earlier blocking finding in the same batch."
+      },
+      {
+        "name": "preflight first source only",
+        "source": "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$1\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nbody=$(review_batch \"$@\")\nresult=$?\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = preview ]; then\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' \"$REPORT_TITLE\" \"$decision\" \"$body\" > \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n",
+        "misconception": "A late missing/colliding source must be rejected before any inspection ledger or report write."
+      },
+      {
+        "name": "parent title replaced",
+        "source": "review_batch() {\n    REPORT_TITLE='Working scan'\n    blocked=0\n    for source in \"$@\"; do\n        printf 'Checked: %s\\n' \"$source\" >> scan-ledger.txt\n        printf 'Source: %s\\n' \"$source\"\n        if grep -F 'BLOCK:' \"$source\"; then blocked=1; fi\n    done\n    return \"$blocked\"\n}\nif [ \"$#\" -lt 3 ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nmode=$1\ndestination=$2\nshift 2\nif [ \"$mode\" != preview ] && [ \"$mode\" != save ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ -z \"$destination\" ]; then\n    printf 'Usage: preview|save DEST SOURCE...\\n' >&2\n    exit 2\nfi\nif [ \"$destination\" = scan-ledger.txt ]; then\n    printf 'Unsafe destination\\n' >&2\n    exit 2\nfi\nfor source in \"$@\"; do\n    if [ -z \"$source\" ]; then\n        printf 'Empty source name\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = \"$destination\" ]; then\n        printf 'Unsafe destination\\n' >&2\n        exit 2\n    fi\n    if [ \"$source\" = scan-ledger.txt ]; then\n        printf 'Unsafe source\\n' >&2\n        exit 2\n    fi\n    if [ -f \"$source\" ]; then\n        :\n    else\n        printf 'Missing source: %s\\n' \"$source\" >&2\n        exit 2\n    fi\ndone\nbody=$(review_batch \"$@\")\nresult=$?\nif [ \"$result\" -eq 0 ]; then decision=ready; else decision=hold; fi\nif [ \"$mode\" = preview ]; then\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' 'Working scan' \"$decision\" \"$body\"\nelse\n    printf 'Review: %s\\nDecision: %s\\n%s\\n' 'Working scan' \"$decision\" \"$body\" > \"$destination\"\n    printf 'Saved: %s\\nDecision: %s\\n' \"$destination\" \"$decision\"\nfi\nexit \"$result\"\n",
+        "misconception": "The report must retain the caller title rather than the helper's temporary setting."
+      }
+    ],
+    "partial": "preview publishes anyway",
+    "try_change": {
+      "source": "title='Exhibit review'\nmake_note() {\n    title='Working title'\n    printf 'Visited: optics\\n' >> museum-ledger.txt\n    printf 'Display: ready\\n'\n}\nmake_note; note='direct call'\nprintf 'Note: <%s>\\nOutside: %s\\n' \"$note\" \"$title\"\n",
+      "expected": {
+        "name": "An ordinary helper call",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/museum-ledger.txt": "Earlier: maps\n"
+        },
+        "stdout": "Display: ready\nNote: <direct call>\nOutside: Working title\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/museum-ledger.txt": "Earlier: maps\nVisited: optics\n"
+        }
+      },
+      "repair": "title='Exhibit review'\nmake_note() {\n    title='Working title'\n    printf 'Visited: optics\\n' >> museum-ledger.txt\n    printf 'Display: ready\\n'\n}\nnote=$(make_note)\nprintf 'Note: <%s>\\nOutside: %s\\n' \"$note\" \"$title\"\n"
+    }
+  }
+]

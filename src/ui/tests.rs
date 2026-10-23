@@ -5784,3 +5784,150 @@ fn backup_chooser_reserves_native_footer_for_recovery_files_and_long_paths() {
         }
     }
 }
+
+fn capture_lesson_indexes(a: &LabApp) -> Vec<usize> {
+    [
+        "shell-capture-preview",
+        "shell-capture-evidence",
+        "shell-capture-decision",
+        "shell-capture-handover",
+    ]
+    .iter()
+    .map(|id| {
+        a.scenarios
+            .iter()
+            .position(|s| &s.id == id)
+            .expect("authored capture lesson bundled in the normal app")
+    })
+    .collect()
+}
+#[test]
+fn capture_lessons_keep_full_tasks_and_separate_examples_at_large_text_without_exposing_challenge_help()
+ {
+    for ordinal in 0..4 {
+        for (width, height, scale) in [(1920., 1080., 1.), (1200., 850., 1.5), (960., 900., 2.)] {
+            let (ctx, mut a) = app();
+            let indexes = capture_lesson_indexes(&a);
+            let i = indexes[ordinal];
+            a.scale = scale;
+            a.launch(i);
+            let id = a.scenarios[i].id.clone();
+            for view in [
+                teaching::View::Introduction,
+                teaching::View::Example,
+                teaching::View::Assignment,
+            ] {
+                a.set_script_view(i, view);
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                assert_eq!(a.script_view(i), view);
+                assert!(!a.metrics.help_visible);
+                assert_eq!(a.progress.attempts[&id].state, a.scenarios[i].initial);
+                assert!(!progress::current_solved(
+                    &a.progress.attempts[&id],
+                    &a.scenarios[i]
+                ));
+                for rect in a
+                    .metrics
+                    .lesson_tabs
+                    .iter()
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                    .chain(a.metrics.editor_viewport.iter())
+                {
+                    assert!(
+                        rect.left() >= 0. && rect.right() <= ctx.content_rect().right() + 1.,
+                        "{id} {view:?} {width}/{scale}: {rect:?}"
+                    );
+                }
+            }
+            a.progress.attempts.get_mut(&id).unwrap().challenge = true;
+            for _ in 0..3 {
+                frame(&ctx, &mut a, width, height, vec![]);
+            }
+            assert_eq!(a.script_view(i), teaching::View::Assignment);
+            assert!(a.metrics.lesson_tabs.is_empty());
+            assert!(!a.metrics.help_visible);
+            assert!(a.metrics.editor_viewport.is_some() && a.metrics.check.is_some());
+        }
+    }
+}
+#[test]
+fn status_feedback_accepts_meaningful_nonzero_results_and_explains_a_wrong_zero() {
+    let (ctx, mut a) = app();
+    let indexes = capture_lesson_indexes(&a);
+    let i = indexes[2];
+    a.launch(i);
+    a.set_script_view(i, teaching::View::Assignment);
+    let s = a.scenarios[i].clone();
+    let engine::Goal::Script { cases } = &s.goal else {
+        panic!()
+    };
+    assert_eq!(cases[0].status, 1);
+    let source = s.solution[0].replace("exit 1", "exit 0");
+    let results: Vec<_> = cases.iter().map(|c| shell::run(&source, c)).collect();
+    assert_eq!(results[0].error, None);
+    assert_eq!(results[0].stdout, cases[0].stdout);
+    assert_eq!(results[0].stderr, cases[0].stderr);
+    assert_eq!(results[0].status, 0);
+    a.progress.attempts.get_mut(&s.id).unwrap().state = State::Script {
+        source: source.clone(),
+        run: Some(shell::Record {
+            engine_revision: shell::EVALUATOR_REVISION,
+            source,
+            results,
+        }),
+    };
+    let mut text = String::new();
+    for _ in 0..3 {
+        let output = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1920., 1440.),
+                )),
+                ..Default::default()
+            },
+            |ctx| a.render(ctx),
+        );
+        fn collect(s: &egui::Shape, text: &mut String) {
+            match s {
+                egui::Shape::Text(t) => {
+                    text.push_str(t.galley.text());
+                    text.push('\n');
+                }
+                egui::Shape::Vec(v) => {
+                    for s in v {
+                        collect(s, text)
+                    }
+                }
+                _ => {}
+            }
+        }
+        for s in output.shapes {
+            collect(&s.shape, &mut text);
+        }
+    }
+    assert!(!a.metrics.completion);
+    assert!(
+        text.contains("Expected exit status: 1 · Actual: 0"),
+        "{text}"
+    );
+    assert!(text.contains("a nonzero status can be the correct result"));
+    assert!(!text.contains("A successful task uses 0"));
+    let results = cases
+        .iter()
+        .map(|c| shell::run(&s.solution[0], c))
+        .collect();
+    a.progress.attempts.get_mut(&s.id).unwrap().state = State::Script {
+        source: s.solution[0].clone(),
+        run: Some(shell::Record {
+            engine_revision: shell::EVALUATOR_REVISION,
+            source: s.solution[0].clone(),
+            results,
+        }),
+    };
+    assert!(progress::current_solved(&a.progress.attempts[&s.id], &s));
+}

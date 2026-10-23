@@ -1,6 +1,7 @@
 //! Application-only Fedora renderer/input checks with isolated private progress.
 //! The safe development runner supplies disk-backed temporary directories.
 use super::*;
+mod capture_lessons;
 mod substitution;
 impl LabApp {
     fn storage_reference_action(
@@ -275,6 +276,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 7200..=7599 => {
+                let (advance, capture) = self.capture_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 7000..=7040 => {
                 let (advance, capture) = self.substitution_native(ctx, n);
                 if !advance {

@@ -67,14 +67,14 @@ fn four_distinct_assignments_belong_to_the_normal_twentieth_unit() {
     let labs = labs();
     assert_eq!(labs.len(), 4);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 86);
+    assert_eq!(all.len(), 90);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [23, 17, 13, 33]
+        [23, 17, 13, 37]
     );
     let units = dlms_learning_lab::course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 20);
+    assert_eq!(units.len(), 21);
     let unit = units.iter().find(|u| u.id == "persistent-mounts").unwrap();
     assert_eq!(
         unit.labs,
@@ -337,7 +337,7 @@ fn all_prior_attempts_and_new_assignment_example_drafts_resume_without_fabricate
         schema_version: 1,
         ..Default::default()
     };
-    for s in all.iter().take(82) {
+    for s in all.iter().filter(|s| s.unit != "persistent-mounts") {
         p.attempts.insert(s.id.clone(), Attempt::new(s, 1));
     }
     let old = serde_json::to_value(&p.attempts).unwrap();
@@ -362,8 +362,8 @@ fn all_prior_attempts_and_new_assignment_example_drafts_resume_without_fabricate
     }
     let encoded = serde_json::to_vec(&p).unwrap();
     let loaded = progress::decode(&encoded, &all).unwrap();
-    assert_eq!(loaded.attempts.len(), 86);
-    for s in all.iter().take(82) {
+    assert_eq!(loaded.attempts.len(), 90);
+    for s in all.iter().filter(|s| s.unit != "persistent-mounts") {
         assert_eq!(
             serde_json::to_value(&loaded.attempts[&s.id]).unwrap(),
             old[&s.id]

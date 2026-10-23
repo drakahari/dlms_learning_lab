@@ -431,7 +431,7 @@ impl LabApp {
                         if !self.scenarios[i].retry_guidance.is_empty() { ui.label(&self.scenarios[i].retry_guidance); }
                         if c.stdout != r.stdout { if self.scenarios[i].retry_guidance.is_empty() { ui.label(teaching::output_advice(&c.stdout,&r.stdout)); } output_diff(ui,"Standard output", &c.stdout, &r.stdout); }
                         if c.stderr != r.stderr { ui.label("Standard error is the separate channel for problem messages; >&2 sends text there."); output_diff(ui,"Standard error", &c.stderr, &r.stderr); }
-                        if c.status != r.status { ui.label(format!("Expected exit status: {} · Actual: {}. A successful task uses 0; an input problem uses the assignment’s stated nonzero status.", c.status, r.status)); }
+                        if c.status != r.status { ui.label(format!("Expected exit status: {} · Actual: {}. Match the status stated for these inputs; a nonzero status can be the correct result of an investigation.", c.status, r.status)); }
                         if c.after != r.files { ui.label("The virtual files differ. Check the destination path, filter and whether > replaced or >> appended text. Inspect the files below."); }
                     }
                 } else { ui.label("Type your script in the editor, then choose Run script. Output and feedback appear here."); }
