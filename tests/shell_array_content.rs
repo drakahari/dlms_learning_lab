@@ -130,7 +130,7 @@ fn prior_seventy_attempts_and_new_example_assignment_drafts_resume_and_reset_ind
         schema_version: 1,
         ..Default::default()
     };
-    for s in labs.iter().filter(|s| s.unit != "shell-arrays") {
+    for s in labs.iter().take(70) {
         p.attempts.insert(s.id.clone(), Attempt::new(s, 1));
     }
     let original = serde_json::to_vec(&p).unwrap();

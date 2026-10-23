@@ -17,6 +17,9 @@ fn open_assignment(a: &mut LabApp, i: usize) {
     if a.scenarios[i].service_teaching.is_some() {
         a.set_service_view(i, teaching::View::Assignment);
     }
+    if a.scenarios[i].process_teaching.is_some() {
+        a.set_process_view(i, teaching::View::Assignment);
+    }
 }
 fn frame(ctx: &egui::Context, a: &mut LabApp, w: f32, h: f32, events: Vec<egui::Event>) {
     let modifiers = events

@@ -196,6 +196,258 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            5200..=5455 => {
+                let offset = self.smoke_stage - 5200;
+                let number = offset / 64;
+                let phase = offset % 64;
+                let indices: Vec<_> = self
+                    .scenarios
+                    .iter()
+                    .enumerate()
+                    .filter(|(_, s)| s.unit == "linux-processes")
+                    .map(|(i, _)| i)
+                    .collect();
+                assert_eq!(indices.len(), 4);
+                let i = indices[number];
+                let id = self.scenarios[i].id.clone();
+                match phase {
+                    0 => {
+                        self.launch(i);
+                        self.scale = 1.;
+                        self.theme_id = "dlms-dark".into();
+                        theme::apply(ctx, &self.theme_id);
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
+                    }
+                    1 => {
+                        assert_eq!(self.process_view(i), teaching::View::Introduction);
+                        shot = Some(format!("{id}-introduction"));
+                    }
+                    2 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                            return;
+                        }
+                    }
+                    3..=17 | 21..=29 | 36..=50 => {
+                        let (slot, action, commands) = if phase <= 17 {
+                            (
+                                (phase - 3) / 3,
+                                (phase - 3) % 3,
+                                self.scenarios[i]
+                                    .process_teaching
+                                    .as_ref()
+                                    .unwrap()
+                                    .example
+                                    .clone(),
+                            )
+                        } else if phase <= 29 {
+                            let rows: serde_json::Value = serde_json::from_str(include_str!(
+                                "../../tests/fixtures/process-content-review.json"
+                            ))
+                            .unwrap();
+                            let row = rows
+                                .as_array()
+                                .unwrap()
+                                .iter()
+                                .find(|r| r["id"] == id)
+                                .unwrap();
+                            let commands = row["incorrect"]
+                                .as_array()
+                                .unwrap()
+                                .iter()
+                                .map(|s| s.as_str().unwrap().to_string())
+                                .collect::<Vec<_>>();
+                            ((phase - 21) / 3, (phase - 21) % 3, commands)
+                        } else {
+                            (
+                                (phase - 36) / 3,
+                                (phase - 36) % 3,
+                                self.scenarios[i].solution.clone(),
+                            )
+                        };
+                        if slot < commands.len() {
+                            match action {
+                                0 => {
+                                    if !self.click_visible_smoke_control(ctx, self.metrics.terminal)
+                                    {
+                                        return;
+                                    }
+                                }
+                                1 => {
+                                    self.pending_events = vec![
+                                        key(egui::Key::A, true),
+                                        egui::Event::Text(commands[slot].clone()),
+                                    ]
+                                }
+                                _ => self.pending_events = vec![key(egui::Key::Enter, false)],
+                            }
+                        }
+                    }
+                    18 => {
+                        let a = &self.progress.attempts[&id];
+                        let l = a
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .process_learning
+                            .as_ref()
+                            .unwrap();
+                        assert!(
+                            self.scenarios[i]
+                                .process_teaching
+                                .as_ref()
+                                .unwrap()
+                                .outcomes
+                                .iter()
+                                .all(|r| r.check(&l.table).0)
+                        );
+                        assert_eq!(a.state, self.scenarios[i].initial);
+                        assert!(!progress::current_solved(a, &self.scenarios[i]));
+                        shot = Some(format!("{id}-practice-result"));
+                    }
+                    19 | 35 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.assignment_action) {
+                            return;
+                        }
+                    }
+                    20 => {
+                        assert!(!self.metrics.help_visible);
+                        shot = Some(format!("{id}-assignment"));
+                    }
+                    30 | 51 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                            return;
+                        }
+                    }
+                    31 => {
+                        assert!(!self.metrics.completion);
+                        shot = Some(format!("{id}-wrong-feedback"));
+                    }
+                    32 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                            return;
+                        }
+                    }
+                    33 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                            return;
+                        }
+                    }
+                    34 => {
+                        assert_eq!(self.progress.attempts[&id].state, self.scenarios[i].initial);
+                        assert!(!self.metrics.completion);
+                    }
+                    52 => {
+                        assert!(self.metrics.completion, "{id}");
+                        assert_eq!(self.progress.attempts[&id].step, 0);
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        assert!(progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                        shot = Some(format!("{id}-complete"));
+                    }
+                    53 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.terminal) {
+                            return;
+                        }
+                    }
+                    54 => {
+                        let command = match number {
+                            0 => "kill -TERM 1510",
+                            1 => "renice 5 -p 1600",
+                            2 => "kill -STOP 1710",
+                            _ => "kill -STOP 1911",
+                        };
+                        self.pending_events =
+                            vec![key(egui::Key::A, true), egui::Event::Text(command.into())];
+                    }
+                    55 => self.pending_events = vec![key(egui::Key::Enter, false)],
+                    56 => {
+                        assert!(!self.metrics.completion);
+                        assert!(!progress::current_solved(
+                            &self.progress.attempts[&id],
+                            &self.scenarios[i]
+                        ));
+                        self.save();
+                        self.progress = progress::load(&self.path, &self.scenarios).unwrap();
+                        shot = Some(format!("{id}-invalidated"));
+                    }
+                    57 => {
+                        self.progress.attempts.get_mut(&id).unwrap().challenge = true;
+                        self.help_open = false;
+                        self.lesson_scroll_reset = true;
+                    }
+                    58 => {
+                        assert!(self.metrics.lesson_tabs.is_empty());
+                        assert!(!self.metrics.help_visible);
+                        shot = Some(format!("{id}-challenge"));
+                    }
+                    _ => {}
+                }
+            }
+            5456 => {
+                self.selected = None;
+                self.filter = Filter {
+                    track: "LPIC-1".into(),
+                    unit: "linux-processes".into(),
+                    ..Default::default()
+                };
+                self.scale = 1.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+            }
+            5457 => shot = Some("process-unit-library-dark-100".into()),
+            5458 => {
+                let i = self
+                    .scenarios
+                    .iter()
+                    .position(|s| s.id == "lpic1-process-priority")
+                    .unwrap();
+                self.launch(i);
+                self.set_process_view(i, teaching::View::Assignment);
+                self.scale = 1.5;
+                self.theme_id = "dlms-light".into();
+                theme::apply(ctx, &self.theme_id);
+                self.focus_input = false;
+                self.lesson_scroll_reset = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 840.)));
+            }
+            5459 | 5464 => {
+                let id = egui::Id::new(("process-unit-settle", self.smoke_stage));
+                let n = ctx.data_mut(|d| {
+                    let n = d.get_temp::<u8>(id).unwrap_or(0) + 1;
+                    d.insert_temp(id, n);
+                    n
+                });
+                if n < 3 {
+                    self.started = Instant::now();
+                    ctx.request_repaint();
+                    return;
+                }
+            }
+            5460 => shot = Some("process-unit-light-150".into()),
+            5461 | 5466 => {
+                if !self.reveal_smoke_control(ctx, self.metrics.check.unwrap()) {
+                    return;
+                }
+            }
+            5462 => shot = Some("process-unit-light-150-scrolled".into()),
+            5463 => {
+                self.scale = 2.;
+                self.theme_id = "dlms-dark".into();
+                theme::apply(ctx, &self.theme_id);
+                self.lesson_scroll_reset = true;
+            }
+            5465 => shot = Some("process-unit-dark-200".into()),
+            5467 => shot = Some("process-unit-dark-200-scrolled".into()),
+            5468 => {
+                println!(
+                    "PASS native authored process unit: all4 introductions, typed separate examples, full assignments, plausible wrong/partial feedback, actual selected Reset confirmation, reference repair/current Check, Step0 completion, latent-termination/phase/preservation invalidation, exact saved reload, Challenge and native library/light150/dark200. Authored reference inputs injected; not novice, physical-process or Windows/macOS acceptance."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             5000 => {
                 let i = self.add_process_fixture();
                 self.launch(i);

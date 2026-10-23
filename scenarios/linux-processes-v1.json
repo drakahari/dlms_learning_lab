@@ -1,0 +1,1947 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-process-pause",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-processes",
+      "topic": "Processes and priority",
+      "title": "Pause the right importer",
+      "summary": "Identify your program among matching names, then pause it without ending it.",
+      "objective": "The operator needs to inspect alex\u2019s importer without losing the program instance. Identify it from the process list, then pause only that importer. Keep it present at its original nice value 0 and leave every other process and setting unchanged, including blair\u2019s importer and the reporting service. Verify the paused state. You are acting as alex; no host processes are involved. Do not leave an ending request waiting; this importer must remain available to continue later.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A process name alone may identify several different instances. You are acting as alex inside this fixed virtual process table.",
+          "action": "The operator needs to inspect alex\u2019s importer without losing the program instance. Identify it from the process list, then pause only that importer. Keep it present at its original nice value 0 and leave every other process and setting unchanged, including blair\u2019s importer and the reporting service. Verify the paused state. You are acting as alex; no host processes are involved. Do not leave an ending request waiting; this importer must remain available to continue later.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Inspect owner, parent and current state before changing a process. There is no host process access.",
+          "action": "Use the process table to identify the intended instances, then choose supported commands that meet the complete assignment.",
+          "commands": [
+            {
+              "command": "ps -eo pid,ppid,user,stat,ni,comm",
+              "explanation": "Show the virtual process IDs, parents, owners, state, niceness and executable names.",
+              "simulator_only": false
+            },
+            {
+              "command": "pgrep -u alex -x importer",
+              "explanation": "Find full-name matches belonging to alex; use ps to inspect the resulting PID.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify the result",
+          "why": "A successful request often prints nothing; the resulting state determines whether the assignment is complete.",
+          "action": "Inspect the current table again and choose Check work. If you ended a process that should stay present, Reset restores this attempt for another try.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Compare both COMMAND and USER. Two users have an importer with the same executable name.",
+        "T means paused. In this exercise TERM can end a running process or leave an ending request waiting while paused; neither is the requested safe pause.",
+        "Send STOP to the PID owned by alex. CONT resumes it; if it has already ended, Reset this attempt first."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/signal.7.html",
+        "https://man7.org/linux/man-pages/man2/kill.2.html",
+        "https://man7.org/linux/man-pages/man1/ps.1.html",
+        "https://man7.org/linux/man-pages/man1/pgrep.1.html",
+        "https://man7.org/linux/man-pages/man1/renice.1.html"
+      ],
+      "simplifications": "A fixed in-memory Linux process table, not the host. Workers use the modeled default signal behavior; no real programs, CPU timing, signal handlers, capabilities, job control, spawning, process groups or arbitrary regex. Positive-PID signals and explicit ps columns only. pgrep -x patterns allow ordinary names without regex characters; -u takes a modeled username. renice uses absolute values; ordinary-user priority limits are fixed. Exited entries are hidden from queries and children are adopted by synthetic init without a zombie/wait stage. Commands belong to this process terminal, not the separate script interpreter. Simulator notes label nonzero status; show is a simulator-only snapshot helper.",
+      "explanation": "The importer owned by alex is 1510; blair\u2019s 2510 is a different instance. STOP leaves 1510 present with first state letter T, so it can be inspected and later continued. Ending it would fail the assignment even though it disappeared. Other process settings must remain unchanged. The preserved importer also keeps nice 0 and has no ending request waiting.",
+      "retry_guidance": "Use the first unmet outcome to decide what to inspect next. Paused processes can continue; ended processes need this attempt\u2019s Reset before they can be practiced again. A larger nice value lowers urgency; ordinary users cannot undo that increase in this exercise.",
+      "initial": {
+        "kind": "Processes",
+        "table": {
+          "user": {
+            "name": "alex",
+            "uid": 1000
+          },
+          "session": 1500,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1500": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1500,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1510": {
+              "parent": 1500,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1500,
+              "comm": "importer",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "2500": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2500,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "2510": {
+              "parent": 2500,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2500,
+              "comm": "importer",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "500": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Processes",
+        "requirements": [
+          {
+            "kind": "Phase",
+            "pid": 1510,
+            "expected": "Stopped"
+          },
+          {
+            "kind": "Niceness",
+            "pid": 1510,
+            "value": 0
+          },
+          {
+            "kind": "NoPendingTermination",
+            "pid": 1510
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1500,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1500,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2500,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2500,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2510,
+            "expected": {
+              "parent": 2500,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2500,
+              "comm": "importer",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 500,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ps -eo pid,ppid,user,stat,ni,comm",
+        "pgrep -u alex -x importer",
+        "kill -STOP 1510",
+        "ps -eo pid,ppid,user,stat,ni,comm"
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "lpic1-team-brief"
+      ],
+      "process_teaching": {
+        "prerequisite_note": "Use the terminal and owner information from file foundations/access policy. This lesson introduces processes, IDs and pausing.",
+        "concepts": [
+          {
+            "title": "A process is one program instance",
+            "text": "A running program has a process ID, or PID. Several instances can share the same name, so check the owner as well as the name. This terminal acts as the user shown above it; every displayed process is simulated."
+          },
+          {
+            "title": "Read a snapshot before acting",
+            "text": "ps shows a snapshot. PID identifies a process, PPID identifies its parent, USER is its owner, NI is its nice value (a priority preference taught later) and COMMAND is its executable name. Read the first STAT letter: R is running, S is waiting and T is paused. Other letters give extra details."
+          },
+          {
+            "title": "Find a name without ignoring its owner",
+            "text": "pgrep -u morgan -x archiver lists PIDs matching Morgan and the full archiver name. A name alone can still match several instances. This subset accepts ordinary names without special pattern characters; inspect the returned PID with ps before acting."
+          },
+          {
+            "title": "kill sends a request; it does not always end a program",
+            "text": "Despite its name, kill sends a signal. STOP pauses a process while keeping it present; CONT continues it. A successful request often prints nothing, so inspect ps afterward. The example pauses Morgan\u2019s archiver with different PIDs from the assignment. TERM can leave an ending request waiting while a program is paused, so do not send it when the goal is a pause."
+          }
+        ],
+        "example": [
+          "ps -eo pid,ppid,user,stat,ni,comm",
+          "pgrep -u morgan -x archiver",
+          "kill -STOP 6010",
+          "ps -p 6010 -o pid,user,stat,comm"
+        ],
+        "inputs": "Morgan\u2019s archiver is running in a separate virtual process table. Your assignment table is untouched.",
+        "try_change": "After pausing the archiver, type kill -CONT 6010 and run it, then inspect its state again. It should be present with R as its first state letter.",
+        "fixture": {
+          "user": {
+            "name": "morgan",
+            "uid": 1000
+          },
+          "session": 6000,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6000": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "6010": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "archiver",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "6020": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "preview",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "Phase",
+            "pid": 6010,
+            "expected": "Stopped"
+          },
+          {
+            "kind": "NoPendingTermination",
+            "pid": 6010
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6000,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 6020,
+            "expected": {
+              "parent": 6000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 6000,
+              "comm": "preview",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-process-pending",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-processes",
+      "topic": "Processes and priority",
+      "title": "End the paused archiver",
+      "summary": "Diagnose an archiver that still appears paused after receiving TERM.",
+      "objective": "alex\u2019s archiver was paused with STOP, then received TERM. It still appears with T in STAT because the ending request is waiting. Finish ending only that archiver and verify that it is no longer listed. Keep the controller, collector, blair\u2019s archiver and all other process settings unchanged. You may use any supported signal that achieves the required result.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A process name alone may identify several different instances. You are acting as alex inside this fixed virtual process table.",
+          "action": "alex\u2019s archiver was paused with STOP, then received TERM. It still appears with T in STAT because the ending request is waiting. Finish ending only that archiver and verify that it is no longer listed. Keep the controller, collector, blair\u2019s archiver and all other process settings unchanged. You may use any supported signal that achieves the required result.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Inspect owner, parent and current state before changing a process. There is no host process access.",
+          "action": "Use the process table to identify the intended instances, then choose supported commands that meet the complete assignment.",
+          "commands": [
+            {
+              "command": "ps -eo pid,ppid,user,stat,ni,comm",
+              "explanation": "Show the virtual process IDs, parents, owners, state, niceness and executable names.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify the result",
+          "why": "A successful request often prints nothing; the resulting state determines whether the assignment is complete.",
+          "action": "Inspect the current table again and choose Check work. If you ended a process that should stay present, Reset restores this attempt for another try.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "T means the worker is still paused, even after a normal ending request was sent.",
+        "CONT can let the pending TERM take effect. KILL also ends a stopped worker immediately in this model.",
+        "Check the owner before choosing the archiver. Repeating TERM alone leaves the same paused state."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/signal.7.html",
+        "https://man7.org/linux/man-pages/man2/kill.2.html",
+        "https://man7.org/linux/man-pages/man1/ps.1.html",
+        "https://man7.org/linux/man-pages/man1/pgrep.1.html",
+        "https://man7.org/linux/man-pages/man1/renice.1.html"
+      ],
+      "simplifications": "A fixed in-memory Linux process table, not the host. Workers use the modeled default signal behavior; no real programs, CPU timing, signal handlers, capabilities, job control, spawning, process groups or arbitrary regex. Positive-PID signals and explicit ps columns only. pgrep -x patterns allow ordinary names without regex characters; -u takes a modeled username. renice uses absolute values; ordinary-user priority limits are fixed. Exited entries are hidden from queries and children are adopted by synthetic init without a zombie/wait stage. Commands belong to this process terminal, not the separate script interpreter. Simulator notes label nonzero status; show is a simulator-only snapshot helper.",
+      "explanation": "alex\u2019s 1610 still holds a pending TERM while paused. Continuing it delivers that request and ends it; KILL is another supported way to reach the required state. blair\u2019s 2610 must stay present. The final table excludes 1610, while a direct query of that PID has no matches.",
+      "retry_guidance": "Use the first unmet outcome to decide what to inspect next. Paused processes can continue; ended processes need this attempt\u2019s Reset before they can be practiced again. A larger nice value lowers urgency; ordinary users cannot undo that increase in this exercise.",
+      "initial": {
+        "kind": "Processes",
+        "table": {
+          "user": {
+            "name": "alex",
+            "uid": 1000
+          },
+          "session": 1600,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1600": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1600,
+              "comm": "controller",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1610": {
+              "parent": 1600,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1600,
+              "comm": "archiver",
+              "nice": 0,
+              "phase": {
+                "kind": "Stopped",
+                "resume": "Sleeping",
+                "pending_termination": true
+              }
+            },
+            "1620": {
+              "parent": 1600,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1600,
+              "comm": "collector",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "2600": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2600,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "2610": {
+              "parent": 2600,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2600,
+              "comm": "archiver",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "500": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Processes",
+        "requirements": [
+          {
+            "kind": "Phase",
+            "pid": 1610,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1600,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1600,
+              "comm": "controller",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1620,
+            "expected": {
+              "parent": 1600,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1600,
+              "comm": "collector",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2600,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2600,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2610,
+            "expected": {
+              "parent": 2600,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2600,
+              "comm": "archiver",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 500,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ps -eo pid,ppid,user,stat,ni,comm",
+        "kill -CONT 1610",
+        "ps -eo pid,ppid,user,stat,ni,comm"
+      ],
+      "prerequisites": [
+        "lpic1-process-pause"
+      ],
+      "process_teaching": {
+        "prerequisite_note": "First practice pausing a process and reading its state. This lesson explains why an ending request can wait while a process is paused.",
+        "concepts": [
+          {
+            "title": "Paused work cannot act on an ordinary ending request yet",
+            "text": "TERM asks a program to end; in this exercise workers use its normal ending behavior. When a worker is paused, that request remains pending until it can run again. Sending TERM repeatedly does not itself continue the worker."
+          },
+          {
+            "title": "Continue a pending request, or end immediately",
+            "text": "CONT lets a paused worker run again, including receiving a pending TERM. KILL ends the modeled worker even while paused. Real applications may handle or ignore TERM; KILL cannot be handled. This fixed model excludes uninterruptible waits and custom handlers."
+          },
+          {
+            "title": "An absent result is useful verification",
+            "text": "After the worker ends it disappears from ps and pgrep. A query selecting only its old PID can return no rows and status 1. That is an expected no-match result, not unsupported syntax. The simulator explicitly labels nonzero status rather than pretending the command printed that note."
+          }
+        ],
+        "example": [
+          "kill -STOP 7010",
+          "kill -TERM 7010",
+          "ps -p 7010 -o pid,stat,comm",
+          "kill -CONT 7010",
+          "ps -eo pid,ppid,user,stat,ni,comm"
+        ],
+        "inputs": "Morgan\u2019s packer begins running in its own practice table. The example first pauses it and queues TERM before continuing it.",
+        "try_change": "Reset this example only, pause 7010, then try kill -KILL 7010 instead. Inspect it afterward: no matching process is expected.",
+        "fixture": {
+          "user": {
+            "name": "morgan",
+            "uid": 1000
+          },
+          "session": 7000,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "7000": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 7000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "7010": {
+              "parent": 7000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 7000,
+              "comm": "packer",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "7020": {
+              "parent": 7000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 7000,
+              "comm": "preview",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "Phase",
+            "pid": 7010,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 7000,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 7000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 7020,
+            "expected": {
+              "parent": 7000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 7000,
+              "comm": "preview",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-process-priority",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-processes",
+      "topic": "Processes and priority",
+      "title": "Let the batch copy yield",
+      "summary": "Lower your batch process\u2019s urgency while keeping it active and preserving interactive work.",
+      "objective": "Set alex\u2019s existing batch-copy process to absolute nice value 10. Keep it active: do not pause or end it. Leave alex\u2019s live-view, blair\u2019s batch-copy, the session controllers and the reporting service unchanged. Identify the intended PID from the table, then verify its NI and state. This exercise models scheduling preferences, not actual performance or CPU percentages.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A process name alone may identify several different instances. You are acting as alex inside this fixed virtual process table.",
+          "action": "Set alex\u2019s existing batch-copy process to absolute nice value 10. Keep it active: do not pause or end it. Leave alex\u2019s live-view, blair\u2019s batch-copy, the session controllers and the reporting service unchanged. Identify the intended PID from the table, then verify its NI and state. This exercise models scheduling preferences, not actual performance or CPU percentages.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Inspect owner, parent and current state before changing a process. There is no host process access.",
+          "action": "Use the process table to identify the intended instances, then choose supported commands that meet the complete assignment.",
+          "commands": [
+            {
+              "command": "ps -eo pid,ppid,user,stat,ni,comm",
+              "explanation": "Show the virtual process IDs, parents, owners, state, niceness and executable names.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify the result",
+          "why": "A successful request often prints nothing; the resulting state determines whether the assignment is complete.",
+          "action": "Inspect the current table again and choose Check work. If you ended a process that should stay present, Reset restores this attempt for another try.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Increasing a nice value lowers urgency. This is different from STOP, which pauses a process.",
+        "Use an absolute value of 10 on alex\u2019s batch-copy PID and inspect NI afterward.",
+        "If you set a value above 10, an ordinary user cannot lower it again here. Reset this attempt and set the requested value directly."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/signal.7.html",
+        "https://man7.org/linux/man-pages/man2/kill.2.html",
+        "https://man7.org/linux/man-pages/man1/ps.1.html",
+        "https://man7.org/linux/man-pages/man1/pgrep.1.html",
+        "https://man7.org/linux/man-pages/man1/renice.1.html"
+      ],
+      "simplifications": "A fixed in-memory Linux process table, not the host. Workers use the modeled default signal behavior; no real programs, CPU timing, signal handlers, capabilities, job control, spawning, process groups or arbitrary regex. Positive-PID signals and explicit ps columns only. pgrep -x patterns allow ordinary names without regex characters; -u takes a modeled username. renice uses absolute values; ordinary-user priority limits are fixed. Exited entries are hidden from queries and children are adopted by synthetic init without a zombie/wait stage. Commands belong to this process terminal, not the separate script interpreter. Simulator notes label nonzero status; show is a simulator-only snapshot helper.",
+      "explanation": "alex\u2019s batch-copy is 1710. Its NI changes from 0 to 10 while its first state letter stays R. Positive niceness may add N to STAT. live-view 1720 and blair\u2019s 2710 retain their previous values. Pausing 1710 would leave the nice-value criterion true but fail continued activity.",
+      "retry_guidance": "Use the first unmet outcome to decide what to inspect next. Paused processes can continue; ended processes need this attempt\u2019s Reset before they can be practiced again. A larger nice value lowers urgency; ordinary users cannot undo that increase in this exercise.",
+      "initial": {
+        "kind": "Processes",
+        "table": {
+          "user": {
+            "name": "alex",
+            "uid": 1000
+          },
+          "session": 1700,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1700": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1700,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1710": {
+              "parent": 1700,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1700,
+              "comm": "batch-copy",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "1720": {
+              "parent": 1700,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1700,
+              "comm": "live-view",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "2700": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2700,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "2710": {
+              "parent": 2700,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2700,
+              "comm": "batch-copy",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "500": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Processes",
+        "requirements": [
+          {
+            "kind": "Niceness",
+            "pid": 1710,
+            "value": 10
+          },
+          {
+            "kind": "Phase",
+            "pid": 1710,
+            "expected": "Active"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1700,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1700,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1720,
+            "expected": {
+              "parent": 1700,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1700,
+              "comm": "live-view",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2700,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2700,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2710,
+            "expected": {
+              "parent": 2700,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2700,
+              "comm": "batch-copy",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 500,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ps -eo pid,ppid,user,stat,ni,comm",
+        "renice --priority 10 -p 1710",
+        "ps -eo pid,ppid,user,stat,ni,comm"
+      ],
+      "prerequisites": [
+        "lpic1-process-pause"
+      ],
+      "process_teaching": {
+        "prerequisite_note": "Use ps and process ownership from the previous tasks. This lesson introduces the nice value and changing an existing process\u2019s priority preference.",
+        "concepts": [
+          {
+            "title": "A larger nice value means lower urgency",
+            "text": "A nice value is a scheduling preference. Raising it makes a process more willing to yield CPU time; it does not pause or end the process. A new program inherits its parent\u2019s value: an ordinary unmodified shell commonly has nice 0. This activity supplies the starting values instead of launching programs."
+          },
+          {
+            "title": "Set an absolute value on the intended process",
+            "text": "Use renice --priority with the requested absolute value and -p with the intended PID. The example sets nice to 5; it does not add 5. Read NI before and after. Choose the intended owner and executable, rather than every program with a similar name. N can appear after the first STAT letter when nice is positive."
+          },
+          {
+            "title": "Keep the permission boundary clear",
+            "text": "Here alex or Morgan can raise their own process\u2019s nice value but cannot lower it again under the fixed ordinary-user limits. Reset this example or attempt if you overshoot. Real resource limits/capabilities may differ. The model verifies values and continued presence; it does not measure real CPU speed."
+          }
+        ],
+        "example": [
+          "ps -eo pid,ppid,user,stat,ni,comm",
+          "renice --priority 5 -p 8010",
+          "ps -p 8010 -o pid,user,stat,ni,comm"
+        ],
+        "inputs": "Morgan\u2019s catalogue process starts at nice 0 in a separate table. A different preview process should stay unchanged.",
+        "try_change": "Reset this example only and use an absolute value 12 instead of 5. Inspect NI and confirm the process remains present. Trying to lower it back afterward is denied under this exercise\u2019s limits.",
+        "fixture": {
+          "user": {
+            "name": "morgan",
+            "uid": 1000
+          },
+          "session": 8000,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "8000": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 8000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "8010": {
+              "parent": 8000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 8000,
+              "comm": "catalogue",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "8020": {
+              "parent": 8000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 8000,
+              "comm": "preview",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "Niceness",
+            "pid": 8010,
+            "value": 5
+          },
+          {
+            "kind": "Phase",
+            "pid": 8010,
+            "expected": "Active"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 8000,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 8000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 8020,
+            "expected": {
+              "parent": 8000,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 8000,
+              "comm": "preview",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-process-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-processes",
+      "topic": "Processes and priority",
+      "title": "Complete a safe process handover",
+      "summary": "Retire an abandoned family, restore paused work and lower indexing urgency without disturbing healthy programs.",
+      "objective": "Investigate alex\u2019s process table before making changes. End old-run and its worker, while preserving live-run and its worker. Continue alex\u2019s paused proofreader without changing its nice value 0. Set alex\u2019s indexer to absolute nice 15 and keep it active. Preserve blair\u2019s family, the reporting service, init and every other process setting.\n\nUse parent IDs to distinguish the workers. Ending a controller alone does not end its child; record the intended PIDs before changing the family. Verify the complete handover with the current table. Supported action order and signal alternatives are accepted.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Investigate and act",
+        "Verify the result"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A process name alone may identify several different instances. You are acting as alex inside this fixed virtual process table.",
+          "action": "Investigate alex\u2019s process table before making changes. End old-run and its worker, while preserving live-run and its worker. Continue alex\u2019s paused proofreader without changing its nice value 0. Set alex\u2019s indexer to absolute nice 15 and keep it active. Preserve blair\u2019s family, the reporting service, init and every other process setting.\n\nUse parent IDs to distinguish the workers. Ending a controller alone does not end its child; record the intended PIDs before changing the family. Verify the complete handover with the current table. Supported action order and signal alternatives are accepted.",
+          "commands": []
+        },
+        {
+          "title": "Investigate and act",
+          "why": "Inspect owner, parent and current state before changing a process. There is no host process access.",
+          "action": "Use the process table to identify the intended instances, then choose supported commands that meet the complete assignment.",
+          "commands": [
+            {
+              "command": "ps -eo pid,ppid,user,stat,ni,comm",
+              "explanation": "Show the virtual process IDs, parents, owners, state, niceness and executable names.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Verify the result",
+          "why": "A successful request often prints nothing; the resulting state determines whether the assignment is complete.",
+          "action": "Inspect the current table again and choose Check work. If you ended a process that should stay present, Reset restores this attempt for another try.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Match each worker\u2019s PPID to its controller before making changes. The same executable name is used by healthy and abandoned work.",
+        "A child remains present when its parent ends. Continue the proofreader instead of terminating it; raise the indexer\u2019s nice value instead of stopping it.",
+        "The old family needs both processes ended. You can act on child then parent, or use their recorded PIDs in another supported order; leave the live family untouched."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://man7.org/linux/man-pages/man7/signal.7.html",
+        "https://man7.org/linux/man-pages/man2/kill.2.html",
+        "https://man7.org/linux/man-pages/man1/ps.1.html",
+        "https://man7.org/linux/man-pages/man1/pgrep.1.html",
+        "https://man7.org/linux/man-pages/man1/renice.1.html"
+      ],
+      "simplifications": "A fixed in-memory Linux process table, not the host. Workers use the modeled default signal behavior; no real programs, CPU timing, signal handlers, capabilities, job control, spawning, process groups or arbitrary regex. Positive-PID signals and explicit ps columns only. pgrep -x patterns allow ordinary names without regex characters; -u takes a modeled username. renice uses absolute values; ordinary-user priority limits are fixed. Exited entries are hidden from queries and children are adopted by synthetic init without a zombie/wait stage. Commands belong to this process terminal, not the separate script interpreter. Simulator notes label nonzero status; show is a simulator-only snapshot helper.",
+      "explanation": "old-run 1810 owns worker 1811; both must end. live-run 1910 and worker 1911 remain unchanged. proofreader 1920 continues, and indexer 1930 stays active at NI 15. If 1810 ends first,1811 reports PPID 1 but still needs its own ending request. Numeric or named signal forms and either recorded-PID order reach the same required state.",
+      "retry_guidance": "Use the first unmet outcome to decide what to inspect next. Paused processes can continue; ended processes need this attempt\u2019s Reset before they can be practiced again. A larger nice value lowers urgency; ordinary users cannot undo that increase in this exercise.",
+      "initial": {
+        "kind": "Processes",
+        "table": {
+          "user": {
+            "name": "alex",
+            "uid": 1000
+          },
+          "session": 1910,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1810": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1810,
+              "comm": "old-run",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1811": {
+              "parent": 1810,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1810,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "1910": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1910,
+              "comm": "live-run",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "1911": {
+              "parent": 1910,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1910,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "1920": {
+              "parent": 1910,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1910,
+              "comm": "proofreader",
+              "nice": 0,
+              "phase": {
+                "kind": "Stopped",
+                "resume": "Sleeping",
+                "pending_termination": false
+              }
+            },
+            "1930": {
+              "parent": 1910,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1910,
+              "comm": "indexer",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "2800": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2800,
+              "comm": "other-run",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "2811": {
+              "parent": 2800,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2800,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "500": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Processes",
+        "requirements": [
+          {
+            "kind": "Phase",
+            "pid": 1810,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Phase",
+            "pid": 1811,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Phase",
+            "pid": 1920,
+            "expected": "Active"
+          },
+          {
+            "kind": "Niceness",
+            "pid": 1920,
+            "value": 0
+          },
+          {
+            "kind": "Niceness",
+            "pid": 1930,
+            "value": 15
+          },
+          {
+            "kind": "Phase",
+            "pid": 1930,
+            "expected": "Active"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1910,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1910,
+              "comm": "live-run",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1911,
+            "expected": {
+              "parent": 1910,
+              "owner": {
+                "name": "alex",
+                "uid": 1000
+              },
+              "session": 1910,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2800,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2800,
+              "comm": "other-run",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 2811,
+            "expected": {
+              "parent": 2800,
+              "owner": {
+                "name": "blair",
+                "uid": 1001
+              },
+              "session": 2800,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 500,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 500,
+              "comm": "reportd",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ps -eo pid,ppid,user,stat,ni,comm",
+        "kill -TERM 1811 1810",
+        "kill -CONT 1920",
+        "renice --priority 15 -p 1930",
+        "ps -eo pid,ppid,user,stat,ni,comm"
+      ],
+      "prerequisites": [
+        "lpic1-process-pending",
+        "lpic1-process-priority"
+      ],
+      "process_teaching": {
+        "prerequisite_note": "Combine process selection, pause/continue, termination and niceness from this unit. This capstone adds reasoning about parents and children.",
+        "concepts": [
+          {
+            "title": "A parent and its child are separate processes",
+            "text": "PPID points to the parent. Ending a parent does not automatically end its child. In this fixed model, a child whose parent ends is adopted by init and reports PPID 1; real systems may also have subreapers or a temporary zombie/wait stage, which are not modeled here."
+          },
+          {
+            "title": "Identify the whole family before changing it",
+            "text": "Two workers can have the same name and owner but belong to different controllers. Record the PIDs belonging to the old controller before ending it, because the child\u2019s displayed parent can change afterward. A name-only selection is not enough for this assignment."
+          },
+          {
+            "title": "Plan a complete handover",
+            "text": "The example ends an old parent and worker while preserving a live family, using different values from the assignment. Then apply the unit\u2019s other skills independently: restore paused work and set the requested nice value without disturbing unrelated processes. Check all outcomes, not only the first repair."
+          }
+        ],
+        "example": [
+          "ps -eo pid,ppid,user,stat,ni,comm",
+          "kill -TERM 9010",
+          "ps -eo pid,ppid,user,stat,comm",
+          "kill -TERM 9011",
+          "ps -eo pid,ppid,user,stat,ni,comm"
+        ],
+        "inputs": "Morgan has old-job and live-job families in a separate practice table. Both have a worker; the parent relationship tells them apart.",
+        "try_change": "Reset this example only and end 9011 before 9010 instead. The final result matches, but the worker is never shown adopted by init between those actions.",
+        "fixture": {
+          "user": {
+            "name": "morgan",
+            "uid": 1000
+          },
+          "session": 9000,
+          "processes": {
+            "1": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "9000": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "9010": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9010,
+              "comm": "old-job",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "9011": {
+              "parent": 9010,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9010,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "9020": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9020,
+              "comm": "live-job",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            },
+            "9021": {
+              "parent": 9020,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9020,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            },
+            "950": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 950,
+              "comm": "monitor",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        },
+        "outcomes": [
+          {
+            "kind": "Phase",
+            "pid": 9010,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Phase",
+            "pid": 9011,
+            "expected": "Exited"
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 1,
+            "expected": {
+              "parent": 0,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 1,
+              "comm": "init",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 9000,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9000,
+              "comm": "session",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 9020,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9020,
+              "comm": "live-job",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 9021,
+            "expected": {
+              "parent": 9020,
+              "owner": {
+                "name": "morgan",
+                "uid": 1000
+              },
+              "session": 9020,
+              "comm": "worker",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Running"
+              }
+            }
+          },
+          {
+            "kind": "Unchanged",
+            "pid": 950,
+            "expected": {
+              "parent": 1,
+              "owner": {
+                "name": "root",
+                "uid": 0
+              },
+              "session": 950,
+              "comm": "monitor",
+              "nice": 0,
+              "phase": {
+                "kind": "Active",
+                "activity": "Sleeping"
+              }
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

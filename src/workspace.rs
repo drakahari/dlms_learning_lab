@@ -315,6 +315,25 @@ pub fn edit_mount(s: &mut State, device: &str) -> Result<(), String> {
 }
 /// Explain failed checks using the current model, rather than prescribing one command sequence.
 pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
+    if let (State::Processes { table }, engine::Goal::Processes { requirements }) = (s, g) {
+        // Several objectives can depend on one live process. Explain the first
+        // failing prerequisite once rather than repeating three reset messages.
+        let mut explained = std::collections::BTreeSet::new();
+        return requirements
+            .iter()
+            .filter_map(|requirement| {
+                use crate::processes::Requirement;
+                let pid = match requirement {
+                    Requirement::Phase { pid, .. }
+                    | Requirement::Niceness { pid, .. }
+                    | Requirement::NoPendingTermination { pid }
+                    | Requirement::Unchanged { pid, .. } => *pid,
+                };
+                let (pass, message) = requirement.check(table);
+                (!pass && explained.insert(pid)).then_some(message)
+            })
+            .collect();
+    }
     let checks = engine::checks(s, g);
     checks.iter().enumerate().filter(|(_,c)|!c.0).map(|(i,(_,label))| match s {
         State::Filesystem{tree}=>if let engine::Goal::Filesystem{requirements}=g {

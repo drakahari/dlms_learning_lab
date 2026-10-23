@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. Seventy-four authored assignments: the original nine, thirty-three scripting tasks, ten Linux file/access activities, six IPv6 static-network activities, six IPv4 static-routing activities, four VLAN data-plane activities and six forward-DNS activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. Seventy-eight authored assignments: the original nine, thirty-three scripting tasks, ten Linux file/access activities, four Linux process activities, six IPv6 static-network activities, six IPv4 static-routing activities, four VLAN data-plane activities and six forward-DNS activities. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -45,6 +45,8 @@ The accepted native workspace design remains the basis of all labs. The header a
 The original **Bring the service back** task now explains background services, saved configuration versus the current run, and startup at boot before independent diagnosis. A separate editor/terminal example keeps its own state and history; inserting a command never executes it. [Service teaching](docs/SERVICE_TEACHING.md).
 
 The **LPIC-1** course now starts with six [file-management foundations](docs/LINUX_FILES.md): navigation, quoted names, copy versus move, precise cleanup, creation defaults and a handover capstone. Introductions and isolated editable terminal practice teach the commands before full state-graded assignments. Existing permission/log labs remain available.
+
+The **Processes and priority** unit adds four [Linux terminal assignments](docs/PROCESS_LESSONS.md): choose the right owner before pausing, finish pending termination, change an existing batch process’s priority, and repair a process-family handover. Teaching and practice use a separate table; all processes and signals stay virtual.
 
 The existing subnet and VLSM labs now teach address groups, prefixes/masks, usable hosts, capacity, alignment and non-overlap before their unchanged full assignments. Learn has skippable introductions and separate editable examples; existing attempts reopen their saved assignment with Introduction available. [Teaching and validation](docs/ADDRESSING_TEACHING.md).
 

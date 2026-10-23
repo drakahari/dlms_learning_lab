@@ -254,6 +254,8 @@ impl LabApp {
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("process-workspace")
             {
                 5000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("process-unit") {
+                5200
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit") {
                 4500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout") {

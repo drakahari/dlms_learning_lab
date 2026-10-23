@@ -519,5 +519,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/ipv4-static-v1.json"),
         include_str!("../scenarios/dns-forward-v1.json"),
         include_str!("../scenarios/shell-arrays-v1.json"),
+        include_str!("../scenarios/linux-processes-v1.json"),
     ])
 }

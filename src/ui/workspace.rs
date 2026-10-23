@@ -43,7 +43,7 @@ impl LabApp {
             }
         });
         if self.reset_pending {
-            ui.label("Reset this lab’s answers, simulation, drafts, transcript and numerical practice? Other labs and favorites stay saved.");
+            ui.label("Start this lab again? This clears its answers, completion, simulation changes, drafts, practice and command history. Other labs and favorites stay saved.");
             ui.horizontal_wrapped(|ui| {
                 let r = ui.add(button("Confirm reset"));
                 self.metrics.confirm_reset = Some(r.rect);

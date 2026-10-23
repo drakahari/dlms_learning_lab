@@ -538,6 +538,7 @@ pub enum ExpectedPhase {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Requirement {
+    NoPendingTermination { pid: u32 },
     Phase { pid: u32, expected: ExpectedPhase },
     Niceness { pid: u32, value: i8 },
     Unchanged { pid: u32, expected: Process },
@@ -545,6 +546,7 @@ pub enum Requirement {
 impl Requirement {
     pub fn valid(&self, initial: &Table) -> bool {
         match self {
+            Self::NoPendingTermination { pid } => initial.processes.contains_key(pid),
             Self::Phase { pid, .. } => initial.processes.contains_key(pid),
             Self::Niceness { pid, value } => {
                 initial.processes.contains_key(pid) && (-20..=19).contains(value)
@@ -559,6 +561,28 @@ impl Requirement {
             return (false, "The process table is invalid".into());
         }
         match self {
+            Self::NoPendingTermination { pid } => {
+                let pass = table.processes.get(pid).is_some_and(|p| {
+                    matches!(
+                        p.phase,
+                        Phase::Active { .. }
+                            | Phase::Stopped {
+                                pending_termination: false,
+                                ..
+                            }
+                    )
+                });
+                (
+                    pass,
+                    if pass {
+                        format!("Process {pid} has no ending request waiting")
+                    } else {
+                        format!(
+                            "Process {pid} has ended or has an ending request waiting, so continuing it cannot keep it available. Reset this attempt to practice pausing it safely."
+                        )
+                    },
+                )
+            }
             Self::Phase { pid, expected } => {
                 let phase = table.processes.get(pid).map(|p| &p.phase);
                 let pass = matches!(
@@ -603,6 +627,9 @@ impl Requirement {
                 let pass = current == Some(*value);
                 let message = match current {
                     Some(n) if pass => format!("Process {pid} has nice value {n}"),
+                    Some(n) if n > *value && table.user.uid != 0 => format!(
+                        "Process {pid} has nice value {n}; the task asks for {value}. Under this exercise’s ordinary-user limits you cannot lower it again; Reset this attempt before choosing the requested value."
+                    ),
                     Some(n) => format!(
                         "Process {pid} has nice value {n}; the task asks for {value}. A larger nice value means lower urgency."
                     ),

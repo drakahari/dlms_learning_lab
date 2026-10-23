@@ -347,7 +347,14 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::AuthoritativeDns { server } = &mut a.state {
+        if let State::Processes { table } = &mut a.state {
+            // Every authored process task preserves its current session controller.
+            // Breaking that real requirement must still yield a resumable attempt.
+            let output = table
+                .execute(&format!("renice 19 -p {}", table.session))
+                .unwrap();
+            assert_eq!(output.status, 0);
+        } else if let State::AuthoritativeDns { server } = &mut a.state {
             server.configured.records.clear();
         } else if let State::Switching { fabric } = &mut a.state {
             for s in fabric.switches.values_mut() {
