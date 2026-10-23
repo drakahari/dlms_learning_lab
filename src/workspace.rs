@@ -10,6 +10,10 @@ use serde::{Deserialize, Serialize};
 pub struct WorkspaceData {
     pub version: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub acl_draft: Option<crate::acl_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub acl_learning: Option<crate::acl_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub script_learning: Option<crate::script_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub script_history: Option<crate::shell::Record>,
@@ -69,6 +73,8 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.acl_draft.as_ref().is_none_or(|d| d.valid())
+            && self.acl_learning.as_ref().is_none_or(|l| l.valid())
             && self.switching_draft.as_ref().is_none_or(|d| d.valid())
             && self.switching_learning.as_ref().is_none_or(|l| l.valid())
             && self.script_learning.as_ref().is_none_or(|l| l.valid())
@@ -155,6 +161,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::Ipv4Acl { network } = &a.state
+        && w.acl_draft.is_none()
+    {
+        w.acl_draft = crate::acl_workspace::Draft::new(network).ok();
+    }
     if let State::PersistentMounts { storage } = &a.state
         && w.storage_draft.is_none()
     {

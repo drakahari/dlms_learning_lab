@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Ipv4Acl {
+        network: crate::acl_routing::Network,
+    },
     PersistentMounts {
         storage: crate::storage::State,
     },
@@ -112,6 +115,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Ipv4Acl {
+        definition: crate::acl_editor::Definition,
+    },
     PersistentMounts {
         initial: crate::storage::Inventory,
         requirements: Vec<crate::storage_workspace::Requirement>,
@@ -235,6 +241,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Ipv4Acl { network }, Goal::Ipv4Acl { definition }) => {
+            crate::acl_workspace::checks(network, definition, &crate::acl_editor::Drafts::default())
+        }
         (
             State::PersistentMounts { storage },
             Goal::PersistentMounts {
@@ -501,6 +510,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
         State::PersistentMounts { .. } => crate::storage_workspace::HELP,
         State::Discovery { .. } => {
             "Use the native discovery settings and explicit Send advertisement / Advance time controls. These model LLDP events, not router commands or real packets. Timers are manual; no CDP or automatic scheduling is simulated."
@@ -550,6 +560,9 @@ pub fn help(s: &State) -> &'static str {
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if let State::Ipv4Acl { network } = s {
+        return crate::acl_workspace::adapter(network, input);
+    }
     if let State::PersistentMounts { storage } = s {
         return crate::storage_workspace::adapter(storage, input);
     }
@@ -622,7 +635,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::PersistentMounts { .. }
+        State::Ipv4Acl { .. }
+        | State::PersistentMounts { .. }
         | State::Discovery { .. }
         | State::Processes { .. }
         | State::AuthoritativeDns { .. }
@@ -1058,6 +1072,10 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Ipv4Acl { network } => format!(
+            "Virtual ACL configuration · {} devices · explicit service-flow tests only; no real packets or full IOS CLI",
+            network.topology.devices.len()
+        ),
         State::PersistentMounts { storage } => format!(
             "Virtual storage · {} volumes · {} live mounts · saved configuration and live state are separate",
             storage.inventory().volumes().len(),

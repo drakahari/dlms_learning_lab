@@ -1,0 +1,544 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-acl-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Virtual IPv4 access policy",
+      "unit": "",
+      "title": "Development ACL configuration fixture",
+      "summary": "Unbundled backend/native development fixture, not new curriculum or objective coverage.",
+      "objective": "Allow OfficePC to reach Portal on TCP port 443 and UDP port 53. Block TCP port 22 as it enters Gateway through office. Edit Gateway’s configuration, keep the supplied network unchanged, and check your work. Either an explicit deny rule or the implicit deny is valid.",
+      "retry_guidance": "Check the first matching rule, protocol and destination port, then the selected virtual interface direction. Required allowed traffic must still work.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the task",
+        "Edit the complete virtual router document",
+        "Check allowed and denied service flows"
+      ],
+      "guide": [],
+      "explanation": "A populated inbound ACL can allow the required TCP/UDP services while blocking SSH. The first matching rule decides each stated flow; omitted matches use implicit deny. The no-ACL baseline proves routing still works independently of filtering.",
+      "hints": [
+        "A populated list has implicit deny; an unattached interface does not filter in this exercise.",
+        "The packet arrives at Gateway through office. Use the inbound direction at that virtual label.",
+        "Destination-port matching comes after the destination address; source-port matching is a separate position."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/sec-vpn/b-security-vpn/m_sec-create-ip-apply-0.html",
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Unbundled development fixture only. Bounded native configuration documents and typed packet metadata; no real IOS session, hardware ports, host commands, real packets, TCP connection state, NAT, IPv6 or arbitrary service verification. Internal acl-author action data is authoring-only and never learner Cisco/Linux syntax. Checked sources2026-10-23; no coverage promotion. Only the stated virtual topology and service flows are verified, not arbitrary hosts or ports. office/service are virtual interface labels; the editor is not full IOS CLI.",
+      "initial": {
+        "kind": "Ipv4Acl",
+        "network": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "OfficePC": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "office-wire",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "192.0.2.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "Gateway": {
+                "forwarding": true,
+                "interfaces": {
+                  "office": {
+                    "link": "office-wire",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "service-wire",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Portal": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "service-wire",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "198.51.100.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "OfficePC": "lan",
+            "Portal": "lan"
+          },
+          "devices": {}
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Acl",
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "OfficePC": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "office-wire",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "192.0.2.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "Gateway": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "office": {
+                      "link": "office-wire",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "service-wire",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Portal": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "service-wire",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "198.51.100.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "OfficePC": "lan",
+              "Portal": "lan"
+            },
+            "devices": {}
+          },
+          "cases": [
+            {
+              "id": "main-web",
+              "label": "TCP 443 remains allowed",
+              "flow": {
+                "source": {
+                  "device": "OfficePC",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 443
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "main-dns",
+              "label": "UDP 53 remains allowed",
+              "flow": {
+                "source": {
+                  "device": "OfficePC",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "udp",
+                  "source_port": 53000,
+                  "destination_port": 53
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "main-blocked",
+              "label": "TCP 22 is denied at the virtual office input",
+              "flow": {
+                "source": {
+                  "device": "OfficePC",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "Portal",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 22
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "Gateway",
+                    "interface": "office",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "acl-author {\"kind\":\"ApplyDocuments\",\"documents\":{\"schema_version\":1,\"routers\":{\"Gateway\":\"ip access-list extended services\\n 20 permit udp any any eq 53\\n 10 permit tcp any any eq 443\\nexit\\ninterface office\\n ip access-group services in\\nexit\\n\"}}}"
+      ],
+      "prerequisites": [],
+      "acl_teaching": {
+        "prerequisite_note": "Assumes IPv4 host addresses and the purpose of TCP/UDP ports. This introduction explains rule order, wildcard address matching and where an ACL is applied. You may skip it or reopen it later.",
+        "concepts": [
+          {
+            "title": "Allow the listed service flows",
+            "text": "A rule permits or denies matching packets. TCP 443 and UDP 53 name the virtual HTTPS and DNS flows in this task; no real service is contacted. Rules run in order and the first match wins. A populated ACL denies unmatched packets, while an interface with no ACL does not filter here."
+          },
+          {
+            "title": "Match addresses and ports explicitly",
+            "text": "any matches all addresses. host ADDRESS matches one address. In ADDRESS WILDCARD, a zero bit must match and a one bit is ignored; a wildcard is not a prefix mask. TCP and UDP rows can match destination ports with eq NUMBER; source-port conditions are a different position."
+          },
+          {
+            "title": "Apply a policy at a virtual boundary",
+            "text": "interface office selects the supplied virtual diagram label, not a physical IOS port inventory. ip access-group NAME in checks incoming transit traffic before routing. Edit the complete router document; applying replaces its ACLs and bindings. Omitted sections clear them. This bounded native editor is not a full IOS command session."
+          }
+        ],
+        "example_description": "In this isolated example, DemoPC 203.0.113.10 needs TCP 8080 on DemoService 10.20.0.20, while TCP 23 must be blocked at DemoGateway/office input. Fill worked example edits only this example draft; apply/check explicitly. Assignment values and work are separate.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "DemoPC": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "demo-office",
+                    "up": true,
+                    "address": {
+                      "address": "203.0.113.10",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "203.0.113.1",
+                    "distance": 1
+                  }
+                ]
+              },
+              "DemoGateway": {
+                "forwarding": true,
+                "interfaces": {
+                  "office": {
+                    "link": "demo-office",
+                    "up": true,
+                    "address": {
+                      "address": "203.0.113.1",
+                      "prefix": 24
+                    }
+                  },
+                  "service": {
+                    "link": "demo-service",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.0.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "DemoService": {
+                "forwarding": false,
+                "interfaces": {
+                  "lan": {
+                    "link": "demo-service",
+                    "up": true,
+                    "address": {
+                      "address": "10.20.0.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": [
+                  {
+                    "destination": {
+                      "address": "0.0.0.0",
+                      "length": 0
+                    },
+                    "interface": "lan",
+                    "via": "10.20.0.1",
+                    "distance": 1
+                  }
+                ]
+              }
+            }
+          },
+          "host_endpoints": {
+            "DemoPC": "lan",
+            "DemoService": "lan"
+          },
+          "devices": {}
+        },
+        "definition": {
+          "schema_version": 1,
+          "initial": {
+            "schema_version": 1,
+            "topology": {
+              "devices": {
+                "DemoPC": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "demo-office",
+                      "up": true,
+                      "address": {
+                        "address": "203.0.113.10",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "203.0.113.1",
+                      "distance": 1
+                    }
+                  ]
+                },
+                "DemoGateway": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "office": {
+                      "link": "demo-office",
+                      "up": true,
+                      "address": {
+                        "address": "203.0.113.1",
+                        "prefix": 24
+                      }
+                    },
+                    "service": {
+                      "link": "demo-service",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.0.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "DemoService": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "lan": {
+                      "link": "demo-service",
+                      "up": true,
+                      "address": {
+                        "address": "10.20.0.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": [
+                    {
+                      "destination": {
+                        "address": "0.0.0.0",
+                        "length": 0
+                      },
+                      "interface": "lan",
+                      "via": "10.20.0.1",
+                      "distance": 1
+                    }
+                  ]
+                }
+              }
+            },
+            "host_endpoints": {
+              "DemoPC": "lan",
+              "DemoService": "lan"
+            },
+            "devices": {}
+          },
+          "cases": [
+            {
+              "id": "demo-web",
+              "label": "TCP 8080 remains allowed",
+              "flow": {
+                "source": {
+                  "device": "DemoPC",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "DemoService",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 8080
+                }
+              },
+              "expectation": {
+                "kind": "allowed"
+              }
+            },
+            {
+              "id": "demo-blocked",
+              "label": "TCP 23 is denied at the virtual office input",
+              "flow": {
+                "source": {
+                  "device": "DemoPC",
+                  "interface": "lan"
+                },
+                "destination": {
+                  "device": "DemoService",
+                  "interface": "lan"
+                },
+                "protocol": {
+                  "kind": "tcp",
+                  "source_port": 50000,
+                  "destination_port": 23
+                }
+              },
+              "expectation": {
+                "kind": "denied",
+                "expected": {
+                  "at": {
+                    "device": "DemoGateway",
+                    "interface": "office",
+                    "direction": "inbound"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "example_documents": {
+          "schema_version": 1,
+          "routers": {
+            "DemoGateway": "ip access-list extended demo\n permit tcp any any eq 8080\nexit\ninterface office\n ip access-group demo in\nexit\n"
+          }
+        },
+        "try_change": {
+          "description": "After the example passes, clear the DemoGateway document and apply/check. TCP 8080 remains allowed, but TCP 23 also becomes allowed because there is no attached ACL. Refill the worked example and apply/check to repair it.",
+          "documents": {
+            "schema_version": 1,
+            "routers": {
+              "DemoGateway": ""
+            }
+          },
+          "expected": {
+            "demo-web": true,
+            "demo-blocked": false
+          }
+        }
+      }
+    }
+  ]
+}

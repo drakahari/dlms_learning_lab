@@ -100,6 +100,26 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::Ipv4Acl { network } = &a.state {
+        let crate::engine::Goal::Ipv4Acl { definition } = &s.goal else {
+            return false;
+        };
+        if a.workspace
+            .as_ref()
+            .and_then(|w| w.acl_draft.as_ref())
+            .is_some_and(|d| !d.same_shape(network))
+        {
+            return false;
+        }
+        let empty = crate::acl_editor::Drafts::default();
+        let documents = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.acl_draft.as_ref())
+            .map(|d| &d.documents)
+            .unwrap_or(&empty);
+        return crate::acl_editor::grade(definition, network, documents).is_ok_and(|r| r.complete);
+    }
     if let State::PersistentMounts { storage } = &a.state {
         let State::PersistentMounts { storage: initial } = &s.initial else {
             return false;
@@ -306,6 +326,24 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
                 "Saved addressing assignment inputs differ from this lab; original retained".into(),
             );
         }
+        validate_acl_workspace(a)?;
+        if let State::Ipv4Acl { network } = &a.state {
+            let State::Ipv4Acl { network: initial } = &s.initial else {
+                unreachable!()
+            };
+            if !crate::acl_workspace::same_assignment(network, initial) {
+                return Err("Saved ACL topology or host-role context differs from this assignment; original retained".into());
+            }
+            if let Some(learning) = a.workspace.as_ref().and_then(|w| w.acl_learning.as_ref())
+                && s.acl_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !learning.same_problem(lesson))
+            {
+                return Err(
+                    "Saved ACL practice context differs from this lesson; original retained".into(),
+                );
+            }
+        }
         validate_storage_workspace(a)?;
         if let (State::PersistentMounts { storage }, State::PersistentMounts { storage: initial }) =
             (&a.state, &s.initial)
@@ -440,6 +478,25 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_acl_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else {
+        return Ok(());
+    };
+    match &a.state {
+        State::Ipv4Acl { network } => {
+            if w.acl_draft.as_ref().is_some_and(|d| !d.same_shape(network))
+                || w.acl_learning.as_ref().is_some_and(|l| !l.valid())
+            {
+                return Err("Invalid ACL draft/example metadata; original retained".into());
+            }
+        }
+        _ if w.acl_draft.is_some() || w.acl_learning.is_some() => {
+            return Err("ACL metadata on another activity; original retained".into());
+        }
+        _ => {}
+    }
+    Ok(())
+}
 fn validate_discovery_workspace(a: &Attempt) -> Result<(), String> {
     if let Some(w) = &a.workspace {
         match &a.state {
@@ -542,6 +599,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     validate_provenance(p)?;
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_acl_workspace(a)?;
         validate_storage_workspace(a)?;
         validate_discovery_workspace(a)?;
         validate_process_workspace(a)?;

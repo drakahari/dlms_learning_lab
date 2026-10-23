@@ -41,6 +41,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub storage_teaching: Option<crate::storage_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub acl_teaching: Option<crate::acl_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv6_teaching: Option<crate::ipv6_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ipv4_routing_teaching: Option<crate::ipv4_routing_teaching::Lesson>,
@@ -130,13 +132,22 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
         ]
         .iter()
         .any(|v| v.trim().is_empty() || v.len() > 4000)
-            || [&s.steps, &s.hints, &s.sources, &s.solution]
-                .iter()
-                .any(|v| {
-                    v.is_empty()
-                        || v.len() > 50
-                        || v.iter().any(|v| v.trim().is_empty() || v.len() > 4000)
-                })
+            || [&s.steps, &s.hints, &s.sources].iter().any(|v| {
+                v.is_empty()
+                    || v.len() > 50
+                    || v.iter().any(|v| v.trim().is_empty() || v.len() > 4000)
+            })
+            || s.solution.is_empty()
+            || s.solution.len() > 50
+            || s.solution.iter().any(|v| {
+                v.trim().is_empty()
+                    || v.len()
+                        > if matches!(s.initial, State::Ipv4Acl { .. }) {
+                            crate::acl_editor::MAX_JSON + 64
+                        } else {
+                            4000
+                        }
+            })
             || s.sources.iter().any(|v| !v.starts_with("https://"))
         {
             return Err(format!("{}: missing or oversized authoring fields", s.id));
@@ -202,6 +213,29 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("DNS example must use a different zone from the assignment".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let State::Ipv4Acl { network } = &s.initial {
+            let Goal::Ipv4Acl { definition } = &s.goal else {
+                return Err("ACL state requires a matching fixed flow definition".into());
+            };
+            if network != &definition.initial {
+                return Err(
+                    "Initial ACL state must exactly equal the definition's initial network".into(),
+                );
+            }
+            definition.validate().map_err(|e| e.to_string())?;
+            let lesson = s.acl_teaching.as_ref().ok_or(
+                "ACL activities require introduction and a separate bounded practice fixture",
+            )?;
+            lesson.validate()?;
+            if !lesson.distinct_from(network) {
+                return Err(
+                    "Use distinct example topology identities and address values for ACL practice"
+                        .into(),
+                );
+            }
+        } else if s.acl_teaching.is_some() || matches!(s.goal, Goal::Ipv4Acl { .. }) {
+            return Err("ACL teaching or objectives attached to another activity".into());
         }
         if let State::PersistentMounts { storage } = &s.initial {
             let Some(lesson) = &s.storage_teaching else {
@@ -428,6 +462,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Ipv4Acl { network } => crate::acl_workspace::valid_network(network).is_ok(),
         State::PersistentMounts { storage } => storage.validate().is_ok(),
         State::Discovery { simulation } => simulation.validate().is_ok(),
         State::Processes { table } => table.valid(),
