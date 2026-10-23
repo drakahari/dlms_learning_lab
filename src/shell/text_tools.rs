@@ -184,6 +184,13 @@ fn parse_ranges(list: &str) -> Result<Vec<(usize, usize)>, String> {
     Ok(merged)
 }
 impl Invocation {
+    pub(super) fn temporary_text_bytes(&self) -> usize {
+        match &self.tool {
+            Tool::Uniq { count: true, .. } => 8, // At most8192 lines: seven count columns plus space.
+            Tool::Cut { delimiter, .. } => delimiter.len_utf8(),
+            _ => 0,
+        }
+    }
     pub fn execute(&self, text: &str, max_output: usize) -> Result<String, String> {
         let mut lines = Vec::new();
         for line in text.split_terminator('\n') {

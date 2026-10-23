@@ -26,11 +26,20 @@ fn case() -> Case {
 fn limited(source: &str, c: &Case, kind: &str) -> Outcome {
     let r = shell::run(source, c);
     assert_eq!(r.status, 2);
-    assert!(
-        r.error.as_ref().is_some_and(|e| e.contains(kind)),
-        "{source:.120}: {:?}",
-        r.error
-    );
+    // Reviewed v7 groundwork: aggregate live memory may reject a pending
+    // expansion before its older per-expansion ceiling. Both remain failures.
+    let expected = if kind == "Expansion memory limit" {
+        matches!(
+            r.error.as_deref(),
+            Some(
+                "Expansion memory limit reached (256 KiB of expanded text)"
+                    | "Virtual memory/file limit exceeded"
+            )
+        )
+    } else {
+        r.error.as_ref().is_some_and(|e| e.contains(kind))
+    };
+    assert!(expected, "{source:.120}: {:?}", r.error);
     r
 }
 #[test]
@@ -61,9 +70,18 @@ fn multipart_fields_and_all_direct_consumers_fail_before_retaining_oversized_tex
         "Expansion memory limit",
     );
     assert_eq!(r.files, c.files);
-    let small = shell::run(&format!("test -n {}", "\"$blob\"''".repeat(31)), &c);
+    // Actual v6 accepted29/30/31; their frozen inputs/results and original
+    // test hash are in shell-v6-resource-before-substitution.json. With all
+    // pending values charged,30 crosses the copy peak while29 still fits.
+    let small = shell::run(&format!("test -n {}", "\"$blob\"''".repeat(29)), &c);
     assert_eq!(small.error, None);
     assert_eq!(small.status, 0);
+    let boundary = limited(
+        &format!("test -n {}", "\"$blob\"''".repeat(30)),
+        &c,
+        "Expansion memory limit",
+    );
+    assert_eq!(boundary.files, c.files);
 }
 #[test]
 fn expanded_field_count_and_aggregate_command_bytes_are_bounded_before_execution() {

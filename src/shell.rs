@@ -1,6 +1,8 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
 mod arithmetic;
+mod execution;
 mod globbing;
+mod preparation;
 mod substitution;
 mod text_tools;
 mod values;
@@ -255,7 +257,7 @@ fn variable_target(n: &str) -> Result<(), String> {
     }
     if unmodeled_variable(n) {
         return Err(format!(
-            "Unsupported special-variable name or reserved namespace {n}; use an ordinary variable name within this subset"
+            "Unsupported special-variable name or reserved namespace {n:.80}; use an ordinary variable name within this subset"
         ));
     }
     Ok(())
@@ -1078,22 +1080,21 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
     Ok(tokens)
 }
 fn path(s: &str) -> Result<String, String> {
-    let s = if s.starts_with('/') {
-        s.to_string()
+    let suffix = if let Some(suffix) = s.strip_prefix("/work/") {
+        suffix
+    } else if s.starts_with('/') {
+        return Err("Only ordinary virtual paths under /work are supported".into());
+    } else {
+        s
+    };
+    if suffix.contains(['/', '\0']) || matches!(suffix, "" | "." | "..") || suffix.len() > 250 {
+        return Err("Only ordinary virtual paths under /work are supported".into());
+    }
+    Ok(if s.starts_with('/') {
+        s.to_owned()
     } else {
         format!("/work/{s}")
-    };
-    if !s.starts_with("/work/")
-        || s[6..].contains('/')
-        || matches!(&s[6..], "." | "..")
-        || s.len() > 256
-        || s.contains('\0')
-        || s.ends_with('/')
-    {
-        Err("Only ordinary virtual paths under /work are supported".into())
-    } else {
-        Ok(s)
-    }
+    })
 }
 #[derive(Clone)]
 enum Dest {
@@ -1117,6 +1118,44 @@ fn expansion_fields_size(fields: &[String]) -> Result<usize, String> {
 }
 fn strings_bytes(values: &[String]) -> usize {
     values.iter().map(String::len).sum::<usize>() + std::mem::size_of_val(values)
+}
+fn decimal_bytes(value: i64) -> usize {
+    value.unsigned_abs().checked_ilog10().unwrap_or(0) as usize + 1 + usize::from(value < 0)
+}
+fn word_bytes(word: &Word) -> usize {
+    word.0.iter().map(part_bytes).sum()
+}
+fn part_bytes(part: &Part) -> usize {
+    std::mem::size_of::<Part>() + part.text().map_or(0, str::len)
+}
+fn command_bytes(command: &Command) -> usize {
+    command.words.iter().map(word_bytes).sum::<usize>()
+        + command
+            .redirects
+            .iter()
+            .map(|(op, word)| op.len() + word.as_ref().map_or(0, word_bytes))
+            .sum::<usize>()
+}
+struct Scratch<'a> {
+    counter: &'a Cell<usize>,
+    bytes: usize,
+}
+struct Expanded<'a> {
+    text: String,
+    memory: Scratch<'a>,
+}
+impl Scratch<'_> {
+    fn grow(&mut self, vm: &Vm, bytes: usize) -> Result<(), String> {
+        vm.reserve_memory(bytes)?;
+        self.counter.set(self.counter.get() + bytes);
+        self.bytes += bytes;
+        Ok(())
+    }
+}
+impl Drop for Scratch<'_> {
+    fn drop(&mut self) {
+        self.counter.set(self.counter.get() - self.bytes);
+    }
 }
 type LocalDeclaration = (String, Option<String>);
 struct InputFrame {
@@ -1148,7 +1187,10 @@ pub struct Vm {
     calls: Vec<CallFrame>,
     pub outcome: Outcome,
     done: bool,
-    pipeline_bytes: usize,
+    pending_bytes: Cell<usize>,
+    scratch_bytes: Cell<usize>,
+    ordinary_inputs: Vec<String>,
+    pending: Option<execution::Pending>,
 }
 impl Vm {
     pub fn new(source: &str, case: &Case) -> Result<Self, String> {
@@ -1187,7 +1229,10 @@ impl Vm {
                 error: None,
             },
             done: false,
-            pipeline_bytes: 0,
+            pending_bytes: Cell::new(0),
+            scratch_bytes: Cell::new(0),
+            ordinary_inputs: Vec::new(),
+            pending: None,
         })
     }
     pub fn done(&self) -> bool {
@@ -1197,6 +1242,9 @@ impl Vm {
         self.fail("Stopped: this run was not graded".into())
     }
     fn fail(&mut self, message: String) {
+        self.pending = None;
+        self.pending_bytes.set(0);
+        self.ordinary_inputs.clear();
         self.outcome.error = Some(diagnostic(message));
         self.outcome.status = 2;
         self.done = true;
@@ -1209,30 +1257,83 @@ impl Vm {
         self.expansion_work.set(next);
         Ok(())
     }
-    fn append_expansion(&self, output: &mut String, text: &str) -> Result<(), String> {
+    fn append_expansion(
+        &self,
+        output: &mut String,
+        memory: &mut Scratch<'_>,
+        text: &str,
+    ) -> Result<(), String> {
         bounded_expansion_bytes(output.len(), text.len())?;
         self.charge_expansion(text.len())?;
+        memory.grow(self, text.len())?;
         output.push_str(text);
         Ok(())
     }
-    fn variable(&self, key: &str) -> Result<String, String> {
+    fn scratch(&self, bytes: usize) -> Result<Scratch<'_>, String> {
+        self.reserve_memory(bytes)?;
+        self.scratch_bytes.set(self.scratch_bytes.get() + bytes);
+        Ok(Scratch {
+            counter: &self.scratch_bytes,
+            bytes,
+        })
+    }
+    fn virtual_path(&self, value: &str) -> Result<Expanded<'_>, String> {
+        let bytes = if value.starts_with('/') {
+            value.len()
+        } else {
+            value.len().saturating_add(6)
+        };
+        let memory = self.scratch(bytes.min(256))?;
+        Ok(Expanded {
+            text: path(value)?,
+            memory,
+        })
+    }
+    fn rebase_pending(&self, old: usize, new: usize) -> Result<(), String> {
+        let remaining = self
+            .pending_bytes
+            .get()
+            .checked_sub(old)
+            .ok_or("Invalid pending memory ownership")?;
+        self.pending_bytes.set(remaining);
+        if let Err(error) = self.reserve_memory(new) {
+            self.pending_bytes.set(remaining + old);
+            return Err(error);
+        }
+        self.pending_bytes.set(remaining + new);
+        Ok(())
+    }
+    fn release_pending(&self, bytes: usize) -> Result<(), String> {
+        self.rebase_pending(bytes, 0)
+    }
+    fn variable_view(&self, key: &str) -> Result<Cow<'_, str>, String> {
         if let Some(parameter) = values::array_ref(key)? {
             let value: Cow<'_, str> = match parameter {
                 ArrayRef::Element(base,index) => Cow::Borrowed(self.env.get(base).and_then(|v|v.elements().get(index as usize)).map_or("",String::as_str)),
-                ArrayRef::Count(base) => Cow::Owned(self.env.get(base).map_or(0,|v|v.elements().len()).to_string()),
+                ArrayRef::Count(base) => {
+                    let count = self.env.get(base).map_or(0, |v| v.elements().len());
+                    self.reserve_memory(decimal_bytes(count as i64))?;
+                    Cow::Owned(count.to_string())
+                },
                 ArrayRef::All(_) => return Err("Unsupported mixed or unquoted array expansion; use sole quoted \"${name[@]}\" as one complete word".into()),
             };
             bounded_expansion_bytes(0, value.len())?;
             self.charge_expansion(value.len())?;
-            return Ok(value.into_owned());
+            return Ok(value);
         }
         if unmodeled_variable(key) {
-            return Err(format!("Unsupported special variable: {key}"));
+            return Err(format!("Unsupported special variable: {key:.80}"));
         }
         let value: Cow<'_, str> = match key {
-            "?" => Cow::Owned(self.outcome.status.to_string()),
+            "?" => {
+                self.reserve_memory(decimal_bytes(i64::from(self.outcome.status)))?;
+                Cow::Owned(self.outcome.status.to_string())
+            }
             "IFS" => Cow::Borrowed(" \t\n"),
-            "#" => Cow::Owned(self.args.len().to_string()),
+            "#" => {
+                self.reserve_memory(decimal_bytes(self.args.len() as i64))?;
+                Cow::Owned(self.args.len().to_string())
+            }
             "@" | "*" | "0" => {
                 return Err("Only sole quoted \"$@\", $1…$9, $# and $? are supported".into());
             }
@@ -1246,66 +1347,87 @@ impl Vm {
         };
         bounded_expansion_bytes(0, value.len())?;
         self.charge_expansion(value.len())?;
+        Ok(value)
+    }
+    fn variable(&self, key: &str) -> Result<String, String> {
+        let value = self.variable_view(key)?;
+        self.reserve_memory(value.len())?;
         Ok(value.into_owned())
     }
-    fn expand_text(&self, s: &str) -> Result<String, String> {
+    fn expand_text(&self, s: &str) -> Result<Expanded<'_>, String> {
         self.charge_expansion(s.len())?;
+        let _characters = self.scratch(s.chars().count() * std::mem::size_of::<char>())?;
         let cs: Vec<char> = s.chars().collect();
         let mut i = 0;
         let mut result = String::new();
+        let mut memory = self.scratch(0)?;
         while i < cs.len() {
             if cs[i] != '$' {
                 let mut bytes = [0; 4];
-                self.append_expansion(&mut result, cs[i].encode_utf8(&mut bytes))?;
+                self.append_expansion(&mut result, &mut memory, cs[i].encode_utf8(&mut bytes))?;
                 i += 1;
                 continue;
             }
             if cs[i..].starts_with(&['$', '(', '(']) {
                 let end = arithmetic::end(&cs, i)?;
+                let _expression_memory =
+                    self.scratch(cs[i + 3..end - 2].iter().map(|c| c.len_utf8()).sum())?;
                 let expression = cs[i + 3..end - 2].iter().collect::<String>();
                 let expanded = self.expand_text(&expression)?;
-                let number = arithmetic::evaluate(&expanded, |name| self.variable(name))?;
-                self.append_expansion(&mut result, &number.to_string())?;
+                let number = arithmetic::evaluate(&expanded.text, |name| self.variable(name))?;
+                let _number_memory = self.scratch(decimal_bytes(number))?;
+                self.append_expansion(&mut result, &mut memory, &number.to_string())?;
                 i = end;
                 continue;
             }
             i += 1;
             if i == cs.len() {
-                self.append_expansion(&mut result, "$")?;
+                self.append_expansion(&mut result, &mut memory, "$")?;
                 break;
             }
-            let key = if cs[i] == '{' {
+            let start;
+            let end;
+            if cs[i] == '{' {
                 i += 1;
-                let start = i;
+                start = i;
                 while i < cs.len() && cs[i] != '}' {
                     i += 1;
                 }
                 if i == cs.len() {
                     return Err("Close ${parameter}".into());
                 }
-                let key = cs[start..i].iter().collect::<String>();
+                end = i;
                 i += 1;
-                key
             } else if cs[i].is_ascii_alphabetic() || cs[i] == '_' {
-                let start = i;
+                start = i;
                 i += 1;
                 while i < cs.len() && (cs[i].is_ascii_alphanumeric() || cs[i] == '_') {
                     i += 1;
                 }
-                cs[start..i].iter().collect()
+                end = i;
             } else {
-                let key = cs[i].to_string();
+                start = i;
                 i += 1;
-                key
-            };
-            self.append_expansion(&mut result, &self.variable(&key)?)?;
+                end = i;
+            }
+            let _key_memory = self.scratch(cs[start..end].iter().map(|c| c.len_utf8()).sum())?;
+            let key = cs[start..end].iter().collect::<String>();
+            let value = self.variable_view(&key)?;
+            let _value_memory = self.scratch(if matches!(value, Cow::Owned(_)) {
+                value.len()
+            } else {
+                0
+            })?;
+            self.append_expansion(&mut result, &mut memory, &value)?;
         }
-        Ok(result)
+        Ok(Expanded {
+            text: result,
+            memory,
+        })
     }
-    fn expand(&self, w: &Word, split: bool) -> Result<Vec<String>, String> {
-        if w.0.len() == 1
-            && w.0[0].quote == Quote::Double
-            && let Some(key) = w.0[0]
+    fn sole_fields(&self, part: &Part) -> Result<Option<Vec<String>>, String> {
+        if part.quote == Quote::Double
+            && let Some(key) = part
                 .text()
                 .and_then(|s| s.strip_prefix("${"))
                 .and_then(|s| s.strip_suffix('}'))
@@ -1316,35 +1438,41 @@ impl Vm {
             let bytes = expansion_fields_size(elements)?;
             bounded_expansion_bytes(bytes, std::mem::size_of_val(elements))?;
             self.charge_expansion(bytes + std::mem::size_of_val(elements))?;
-            return Ok(elements.to_vec());
+            self.reserve_memory(strings_bytes(elements))?;
+            return Ok(Some(elements.to_vec()));
         }
-        if w.0.len() == 1 && w.0[0].quote == Quote::Double && w.0[0].text() == Some("$@") {
+        if part.quote == Quote::Double && part.text() == Some("$@") {
             let bytes = expansion_fields_size(&self.args)?;
             self.charge_expansion(bytes)?;
-            return Ok(self.args.clone());
+            self.reserve_memory(strings_bytes(&self.args))?;
+            return Ok(Some(self.args.clone()));
         }
+        Ok(None)
+    }
+    fn split_word(&self, w: &Word, split: bool) -> Result<Vec<String>, String> {
+        let mut memory =
+            self.scratch(std::mem::size_of::<String>() + std::mem::size_of::<Vec<bool>>())?;
         let mut fields = vec![String::new()];
         let mut unquoted = vec![Vec::new()];
         let mut pattern_possible = false;
         let mut retained = 0;
         let mut keep = false;
         let mut pending = false;
-        let next_field = |fields: &mut Vec<String>| -> Result<(), String> {
-            if fields.len() >= 128 {
-                return Err("Argument limit exceeded (128 expanded fields)".into());
-            }
-            fields.push(String::new());
-            Ok(())
-        };
-        for p in &w.0 {
-            let source = p.text().ok_or("Command substitution is unsupported")?;
-            let text = if p.quote == Quote::Single {
-                self.charge_expansion(source.len())?;
-                source.to_string()
-            } else {
-                self.expand_text(source)?
+        let next_field =
+            |fields: &mut Vec<String>, memory: &mut Scratch<'_>| -> Result<(), String> {
+                if fields.len() >= 128 {
+                    return Err("Argument limit exceeded (128 expanded fields)".into());
+                }
+                memory.grow(
+                    self,
+                    std::mem::size_of::<String>() + std::mem::size_of::<Vec<bool>>(),
+                )?;
+                fields.push(String::new());
+                Ok(())
             };
-            self.charge_expansion(text.len())?;
+        for p in &w.0 {
+            // Prepared text is data: it is never parameter-expanded or re-lexed here.
+            let text = p.text().ok_or("Unprepared substitution node")?;
             if split && p.quote == Quote::Bare {
                 pattern_possible |= text.contains(['*', '?', '[']);
                 for c in text.chars() {
@@ -1352,11 +1480,12 @@ impl Vm {
                         pending = true;
                     } else {
                         if pending && (!fields.last().unwrap().is_empty() || keep) {
-                            next_field(&mut fields)?;
+                            next_field(&mut fields, &mut memory)?;
                             unquoted.push(Vec::new());
                             keep = false;
                         }
                         retained = bounded_expansion_bytes(retained, c.len_utf8())?;
+                        memory.grow(self, c.len_utf8() * 2)?;
                         fields.last_mut().unwrap().push(c);
                         let flags = unquoted.last_mut().unwrap();
                         flags.resize(flags.len() + c.len_utf8(), true);
@@ -1365,11 +1494,12 @@ impl Vm {
                 }
             } else {
                 if pending && (!fields.last().unwrap().is_empty() || keep) {
-                    next_field(&mut fields)?;
+                    next_field(&mut fields, &mut memory)?;
                     unquoted.push(Vec::new());
                 }
                 retained = bounded_expansion_bytes(retained, text.len())?;
-                fields.last_mut().unwrap().push_str(&text);
+                memory.grow(self, text.len() * 2)?;
+                fields.last_mut().unwrap().push_str(text);
                 let flags = unquoted.last_mut().unwrap();
                 flags.resize(flags.len() + text.len(), false);
                 keep = true;
@@ -1384,6 +1514,7 @@ impl Vm {
             return Ok(fields);
         }
         let mut expanded = Vec::new();
+        let mut expanded_memory = self.scratch(0)?;
         let mut bytes = 0;
         let mut push = |value: Cow<'_, str>| -> Result<(), String> {
             if expanded.len() >= 128 {
@@ -1391,6 +1522,7 @@ impl Vm {
             }
             bytes = bounded_expansion_bytes(bytes, value.len())?;
             self.charge_expansion(value.len())?;
+            expanded_memory.grow(self, value.len() + std::mem::size_of::<String>())?;
             expanded.push(value.into_owned());
             Ok(())
         };
@@ -1432,23 +1564,35 @@ impl Vm {
         }
         Ok(expanded)
     }
-    fn words(&self, words: &[Word]) -> Result<Vec<String>, String> {
-        let mut out = Vec::new();
-        let mut retained = 0;
-        for w in words {
-            let fields = self.expand(w, true)?;
-            if out.len() + fields.len() > 128 {
-                return Err("Argument limit exceeded (128 arguments)".into());
-            }
-            retained = bounded_expansion_bytes(retained, expansion_fields_size(&fields)?)?;
-            out.extend(fields);
-        }
-        Ok(out)
-    }
     pub fn tick(&mut self, budget: usize) {
-        for _ in 0..budget.min(64) {
+        let mut instructions = 0;
+        let mut preparations = 0;
+        while instructions < budget.min(64) {
             if self.done {
                 return;
+            }
+            if let Some(mut pending) = self.pending.take() {
+                // Preparation yields independently of semantic instructions;
+                // it cannot hide an entire large word list in one tick.
+                if preparations == 32 {
+                    self.pending = Some(pending);
+                    return;
+                }
+                preparations += 1;
+                match pending.advance(self).and_then(|complete| {
+                    self.pending_bytes
+                        .set(if complete { 0 } else { pending.bytes() });
+                    self.limits()?;
+                    Ok(complete)
+                }) {
+                    Ok(false) => self.pending = Some(pending),
+                    Ok(true) => {}
+                    Err(error) => {
+                        self.fail(error);
+                        return;
+                    }
+                }
+                continue;
             }
             if self.pc >= self.program.main.end {
                 self.done = true;
@@ -1459,40 +1603,38 @@ impl Vm {
                 return;
             }
             self.steps += 1;
-            let code = self.program.code[self.pc].clone();
+            instructions += 1;
+            let code = &self.program.code[self.pc];
+            let bytes = match code {
+                Code::Pipe(commands) => commands.iter().map(command_bytes).sum(),
+                Code::ArrayAssign(key, words) | Code::For(key, words, _) => {
+                    key.len() + words.iter().map(word_bytes).sum::<usize>()
+                }
+                Code::WhileStart(Some(word), _) => word_bytes(word),
+                Code::Define(key, _, _) => key.len(),
+                _ => 0,
+            };
+            if let Err(error) = self.reserve_memory(bytes) {
+                self.fail(error);
+                return;
+            }
+            let code = code.clone();
             self.pc += 1;
             let r = (|| -> Result<(), String> {
                 match code {
                     Code::ArrayAssign(key, words) => {
-                        // Expand all words using the prior binding before publishing a new list.
-                        let elements = self.words(&words)?;
-                        self.store_value(key, Value::Indexed(elements))?;
-                        self.outcome.status = 0;
+                        self.pending = Some(execution::Pending::Array(
+                            key,
+                            preparation::Words::new(words.into_iter().map(|w| (w, true)).collect()),
+                        ));
                     }
                     Code::Status(s) => self.outcome.status = s,
                     Code::WhileStart(word, end) => {
                         if let Some(word) = word {
-                            let fields = self.expand(&word, true)?;
-                            if fields.len() != 1 {
-                                return Err(
-                                    "Ambiguous loop input redirection: quote a single file path"
-                                        .into(),
-                                );
-                            }
-                            let file = path(&fields[0])?;
-                            if let Some(text) = self.outcome.files.get(&file).cloned() {
-                                let input = std::mem::replace(&mut self.input, text);
-                                let pos = std::mem::replace(&mut self.input_pos, 0);
-                                self.inputs.push(InputFrame { input, pos, file });
-                                self.while_status.push((0, true));
-                            } else {
-                                self.outcome.status = 1;
-                                self.emit(
-                                    &Dest::Err,
-                                    &format!("shell: {}: No such file\n", fields[0]),
-                                )?;
-                                self.pc = end;
-                            }
+                            self.pending = Some(execution::Pending::While(
+                                end,
+                                preparation::Words::new(vec![(word, true)]),
+                            ));
                         } else {
                             self.while_status.push((0, false));
                         }
@@ -1519,9 +1661,9 @@ impl Vm {
                     }
                     Code::FunctionEnd => self.leave_function()?,
                     Code::Pipe(cmds) => {
-                        if cmds.len() != 1 || !self.enter_function(&cmds[0])? {
-                            self.pipeline(&cmds)?;
-                        }
+                        self.pending = Some(execution::Pending::Pipeline(Box::new(
+                            execution::Pipeline::new(cmds),
+                        )));
                     }
                     Code::Jump(t) => self.pc = t,
                     Code::JumpIf(success, t) => {
@@ -1530,16 +1672,11 @@ impl Vm {
                         }
                     }
                     Code::For(n, words, end) => {
-                        let values = self.words(&words)?;
-                        if values.is_empty() {
-                            self.pc = end;
-                            self.outcome.status = 0;
-                        } else {
-                            self.charge_expansion(values[0].len())?;
-                            self.assign_scalar(n.clone(), values[0].clone())?;
-                            self.reserve_memory(n.len() + strings_bytes(&values))?;
-                            self.loops.push((n, values, 1));
-                        }
+                        self.pending = Some(execution::Pending::For(
+                            n,
+                            end,
+                            preparation::Words::new(words.into_iter().map(|w| (w, true)).collect()),
+                        ));
                     }
                     Code::Next(start) => {
                         let copy_bytes = self
@@ -1559,6 +1696,9 @@ impl Vm {
                             self.loops.pop();
                         }
                     }
+                }
+                if let Some(pending) = &self.pending {
+                    self.pending_bytes.set(pending.bytes());
                 }
                 self.limits()
             })();
@@ -1589,20 +1729,12 @@ impl Vm {
         }
         Ok(())
     }
-    fn enter_function(&mut self, cmd: &Command) -> Result<bool, String> {
-        if cmd.words.first().and_then(Word::literal) == Some("local") {
-            return Ok(false);
-        }
-        if self.functions.is_empty() || cmd.words.first().is_some_and(Word::assignment) {
-            return Ok(false);
-        }
-        let Some(start) = self
-            .command_head(cmd)?
-            .and_then(|n| self.functions.get(&n).copied())
-        else {
-            return Ok(false);
-        };
-        let mut args = self.words(&cmd.words)?;
+    fn enter_function(
+        &mut self,
+        cmd: &Command,
+        mut args: Vec<String>,
+        start: usize,
+    ) -> Result<(), String> {
         if !cmd.redirects.is_empty() {
             return Err("Unsupported redirection on a function call; redirect individual commands inside its body".into());
         }
@@ -1621,7 +1753,7 @@ impl Vm {
             locals: BTreeMap::new(),
         });
         self.pc = start;
-        Ok(true)
+        Ok(())
     }
     fn restore_input(&mut self) -> Result<(), String> {
         let saved = self.inputs.pop().ok_or("Invalid loop input state")?;
@@ -1632,6 +1764,8 @@ impl Vm {
     fn writable_file(&self, file: &str) -> Result<(), String> {
         if self.inputs.iter().any(|f| f.file == file) {
             Err("Unsupported write to an active loop input; finish reading the source before changing it".into())
+        } else if self.ordinary_inputs.iter().any(|source| source == file) {
+            Err("Unsupported write to an active input source; finish reading it before changing the file".into())
         } else {
             Ok(())
         }
@@ -1684,7 +1818,10 @@ impl Vm {
                 .iter()
                 .map(|(n, v, _)| n.len() + strings_bytes(v))
                 .sum::<usize>()
-            + self.pipeline_bytes
+            + self.functions.keys().map(String::len).sum::<usize>()
+            + strings_bytes(&self.ordinary_inputs)
+            + self.pending_bytes.get()
+            + self.scratch_bytes.get()
     }
     fn preflight_value(&self, key: &str, bytes: usize) -> Result<(), String> {
         variable_target(key)?;
@@ -1772,7 +1909,14 @@ impl Vm {
             Dest::File(_)
                 if self
                     .memory_bytes()
-                    .checked_add(text.len())
+                    .checked_add(
+                        text.len()
+                            + if let Dest::File(file) = dest {
+                                file.len()
+                            } else {
+                                0
+                            },
+                    )
                     .is_none_or(|n| n > MAX_TEXT) =>
             {
                 return Err("Virtual memory/file limit exceeded".into());
@@ -1791,266 +1935,35 @@ impl Vm {
         }
         self.limits()
     }
-    fn command_head(&self, cmd: &Command) -> Result<Option<String>, String> {
-        if cmd.words.first().is_some_and(Word::assignment) {
-            return Ok(None);
-        }
-        for word in &cmd.words {
-            if let Some(head) = self.words(std::slice::from_ref(word))?.first() {
-                return Ok(Some(head.clone()));
-            }
-        }
-        Ok(None)
-    }
-    fn pipeline(&mut self, cmds: &[Command]) -> Result<(), String> {
-        if cmds.len() == 1 {
-            let output = self.command(&cmds[0])?;
-            return self.emit(&Dest::Out, &output);
-        }
-        let snapshot_bytes = self
-            .env
-            .iter()
-            .map(|(n, v)| n.len() + v.bytes())
-            .sum::<usize>()
-            + self.args.iter().map(String::len).sum::<usize>()
-            + self.args.len() * std::mem::size_of::<String>()
-            + self.input.len();
-        if self
-            .memory_bytes()
-            .checked_add(snapshot_bytes)
-            .is_none_or(|n| n > MAX_TEXT)
-        {
-            return Err(
-                "Virtual memory/file limit exceeded while retaining pipeline variables".into(),
-            );
-        }
-        if cmds.len() > 1 {
-            for cmd in cmds {
-                if self.command_head(cmd)?.as_ref().is_some_and(|s| {
-                    self.functions.contains_key(s) || s == "return" || s == "local"
-                }) {
-                    return Err("Unsupported function call, return or local declaration in a pipeline; use separate commands".into());
-                }
-            }
-        }
-        self.charge_expansion(snapshot_bytes)?;
-        self.pipeline_bytes += snapshot_bytes;
-        let saved_env = self.env.clone();
-        let saved_args = self.args.clone();
-        let saved_status = self.outcome.status;
-        let saved_input = self.input.clone();
-        let saved_pos = self.input_pos;
-        let mut consumed = 0;
-        let mut pipe = String::new();
-        for (i, cmd) in cmds.iter().enumerate() {
-            if cmds.len() > 1 {
-                self.charge_expansion(snapshot_bytes + if i == 0 { 0 } else { pipe.len() })?;
-                self.outcome.status = saved_status;
-                self.env = saved_env.clone();
-                self.args = saved_args.clone();
-                self.input = if i == 0 {
-                    saved_input[saved_pos..].to_string()
-                } else {
-                    pipe.clone()
-                };
-                self.input_pos = 0;
-            }
-            let output = self.command(cmd)?;
-            if i == 0 && cmds.len() > 1 {
-                consumed = self.input_pos;
-            }
-            pipe = output;
-            if self.done && cmds.len() > 1 {
-                self.done = false;
-            }
-            if i + 1 == cmds.len() {
-                self.emit(&Dest::Out, &pipe)?;
-            }
-        }
-        if cmds.len() > 1 {
-            self.env = saved_env;
-            self.args = saved_args;
-            self.input = saved_input;
-            self.input_pos = saved_pos + consumed;
-        }
-        self.pipeline_bytes -= snapshot_bytes;
-        Ok(())
-    }
-    fn local_declarations(&self, cmd: &Command) -> Result<Option<Vec<LocalDeclaration>>, String> {
-        if cmd.words.first().and_then(Word::literal) != Some("local") {
-            return Ok(None);
-        }
-        if self.calls.is_empty() {
-            return Err(
-                "Unsupported local outside a function; local variables belong to a function call"
-                    .into(),
-            );
-        }
-        if cmd.words.len() == 1 {
-            return Err("Unsupported local listing; supply a variable name or NAME=value".into());
-        }
-        // Bash declaration assignments suppress splitting; all arguments expand before mutation.
-        let mut declarations = Vec::new();
-        for word in &cmd.words[1..] {
-            let assignment = word.assignment();
-            let values = if assignment {
-                self.expand(word, false)?
-            } else {
-                self.expand(word, true)?
-            };
-            for value in values {
-                let (key, new_value) = value
-                    .split_once('=')
-                    .map_or((value.as_str(), None), |(key, value)| {
-                        (key, Some(value.to_string()))
-                    });
-                variable_target(key)?;
-                if !name(key) {
-                    return Err("Unsupported local argument; use a valid variable name or NAME=value, without options or attributes".into());
-                }
-                declarations.push((key.to_string(), new_value));
-                if declarations.len() > 128
-                    || declarations
-                        .iter()
-                        .map(|(k, v)| k.len() + v.as_ref().map_or(0, String::len))
-                        .sum::<usize>()
-                        > MAX_TEXT
-                {
-                    return Err("Local declaration argument limit exceeded".into());
-                }
-            }
-        }
-        if declarations.is_empty() {
-            return Err("Unsupported local listing; supply a valid variable argument".into());
-        }
-        Ok(Some(declarations))
-    }
     fn apply_local_declarations(
         &mut self,
         declarations: Vec<LocalDeclaration>,
     ) -> Result<(), String> {
         for (key, new_value) in declarations {
-            let locals = &mut self.calls.last_mut().unwrap().locals;
-            if !locals.contains_key(&key) {
+            self.release_pending(std::mem::size_of::<LocalDeclaration>())?;
+            if !self.calls.last().unwrap().locals.contains_key(&key) {
+                self.reserve_memory(key.len())?;
                 let previous = self.env.remove(&key);
                 let array = matches!(&previous, Some(Value::Indexed(_)));
-                locals.insert(key.clone(), previous);
+                self.calls
+                    .last_mut()
+                    .unwrap()
+                    .locals
+                    .insert(key.clone(), previous);
                 if array {
+                    self.reserve_memory(key.len())?;
                     self.env.insert(key.clone(), Value::Indexed(Vec::new()));
                 }
             }
             if let Some(value) = new_value {
+                self.release_pending(key.len() + value.len())?;
                 self.assign_scalar(key, value)?;
+            } else {
+                self.release_pending(key.len())?;
             }
             self.limits()?;
         }
         Ok(())
-    }
-    fn command(&mut self, cmd: &Command) -> Result<String, String> {
-        // Command/declaration argument expansion precedes redirection. Assignment-only
-        // values remain sequential and follow the Bash no-command ordering below.
-        let assignments = cmd.words.iter().all(Word::assignment);
-        let declarations = self.local_declarations(cmd)?;
-        let args = if declarations.is_none() && !assignments {
-            Some(self.words(&cmd.words)?)
-        } else {
-            None
-        };
-        // With no command name, Bash applies assignments sequentially before
-        // redirection; even a later missing input retains those assignments.
-        if assignments && !cmd.words.is_empty() {
-            for w in &cmd.words {
-                let mut w = w.clone();
-                let (n, rest) = w.0[0].text().unwrap().split_once('=').unwrap();
-                let n = n.to_string();
-                variable_target(&n)?;
-                *w.0[0].text_mut()? = rest.to_string();
-                let value = self.expand(&w, false)?.join("");
-                self.assign_scalar(n, value)?;
-                self.limits()?;
-            }
-        }
-        let mut stdout = Dest::Out;
-        let mut stderr = Dest::Err;
-        let mut input = None;
-        for (op, w) in &cmd.redirects {
-            if op == ">&2" || op == "1>&2" {
-                stdout = stderr.clone();
-                continue;
-            }
-            if op == "2>&1" {
-                stderr = stdout.clone();
-                continue;
-            }
-            let fields = self.expand(w.as_ref().unwrap(), true)?;
-            if fields.len() != 1 {
-                return Err("Ambiguous redirection: quote a single file path".into());
-            }
-            let p = path(&fields[0])?;
-            if op == "<" {
-                let Some(text) = self.outcome.files.get(&p) else {
-                    self.outcome.status = 1;
-                    let e = format!("shell: {}: No such file\n", fields[0]);
-                    self.emit(&stderr, &e)?;
-                    return Ok(String::new());
-                };
-                input = Some(text.clone());
-            } else {
-                self.writable_file(&p)?;
-                if !self.outcome.files.contains_key(&p) && self.outcome.files.len() >= 64 {
-                    return Err("Virtual file limit exceeded".into());
-                }
-                if !op.ends_with(">>") {
-                    self.outcome.files.insert(p.clone(), String::new());
-                }
-                let d = Dest::File(p);
-                if op.starts_with('2') {
-                    stderr = d
-                } else {
-                    stdout = d
-                }
-            }
-        }
-        let old_input = self.input.clone();
-        let old_pos = self.input_pos;
-        let redirected = input.is_some();
-        if let Some(s) = input {
-            self.input = s;
-            self.input_pos = 0;
-        }
-        let input_depth = self.inputs.len();
-        let (out, err, status) = if let Some(declarations) = declarations {
-            self.apply_local_declarations(declarations)?;
-            (String::new(), String::new(), 0)
-        } else if assignments && !cmd.words.is_empty() {
-            (String::new(), String::new(), 0)
-        } else {
-            let args = args.unwrap_or_default();
-            if args
-                .first()
-                .is_some_and(|a| a.split_once('=').is_some_and(|(n, _)| name(n)))
-            {
-                return Err("Assignments before a command are unsupported; put the assignment on its own line".into());
-            }
-            self.builtin(&args)?
-        };
-        if redirected && self.inputs.len() == input_depth {
-            self.input = old_input;
-            self.input_pos = old_pos;
-        }
-        self.outcome.status = status;
-        let mut pipe = String::new();
-        if matches!(stdout, Dest::Out) {
-            pipe.push_str(&out);
-        } else {
-            self.emit(&stdout, &out)?;
-        }
-        if matches!(stderr, Dest::Out) {
-            pipe.push_str(&err);
-        } else {
-            self.emit(&stderr, &err)?;
-        }
-        Ok(pipe)
     }
     fn builtin(&mut self, a: &[String]) -> Result<(String, String, i32), String> {
         let empty = String::new();
@@ -2069,7 +1982,7 @@ impl Vm {
                 if args.is_empty() || args[0].starts_with('-') {
                     return usage();
                 }
-                Ok(ok(format_printf(&args[0], &args[1..])?))
+                Ok(ok(format_printf(&args[0], &args[1..], |bytes| self.reserve_memory(bytes))?))
             }
             "echo" => {
                 if args.first().is_some_and(|s| s.starts_with('-'))
@@ -2077,65 +1990,57 @@ impl Vm {
                 {
                     return usage();
                 }
-                Ok(ok(format!("{}\n", args.join(" "))))
+                self.reserve_memory(args.iter().map(String::len).sum::<usize>() + args.len())?;
+                let mut output = args.join(" ");
+                output.push('\n');
+                Ok(ok(output))
             }
             "cat" if args.len() == 1 => {
                 if args[0].starts_with('-') {
                     return usage();
                 }
-                let p = path(&args[0])?;
-                Ok(match self.outcome.files.get(&p) {
-                    Some(s) => ok(s.clone()),
-                    None => (
-                        empty,
-                        format!("cat: {}: No such file or directory\n", args[0]),
-                        1,
-                    ),
+                let p = self.virtual_path(&args[0])?;
+                Ok(match self.outcome.files.get(&p.text) {
+                    Some(s) => { self.reserve_memory(s.len())?; ok(s.clone()) },
+                    None => {
+                        self.reserve_memory(args[0].len() + "cat: : No such file or directory\n".len())?;
+                        (empty, format!("cat: {}: No such file or directory\n", args[0]), 1)
+                    },
                 })
             }
             "grep" if (args.len() == 2 || args.len() == 3) && args[0] == "-F" => {
                 if args[1].starts_with('-') {
                     return Err("Unsupported grep pattern starting with -; option parsing with -e/-- is not yet implemented".into());
                 }
-                let text = if args.len() == 3 {
-                    if args[2].starts_with('-') {
-                        return usage();
-                    }
-                    let p = path(&args[2])?;
-                    match self.outcome.files.get(&p) {
-                        Some(s) => s.clone(),
+                let stdin = args.len() != 3;
+                let text = if let Some(file) = args.get(2) {
+                    if file.starts_with('-') { return usage(); }
+                    let p = self.virtual_path(file)?;
+                    match self.outcome.files.get(&p.text) {
+                        Some(text) => text.as_str(),
                         None => {
-                            return Ok((
-                                empty,
-                                format!("grep: {}: No such file or directory\n", args[2]),
-                                2,
-                            ));
-                        }
+                            self.reserve_memory(file.len() + "grep: : No such file or directory\n".len())?;
+                            return Ok((empty, format!("grep: {file}: No such file or directory\n"), 2));
+                        },
                     }
-                } else {
-                    let t = self.input[self.input_pos..].to_string();
-                    self.input_pos = self.input.len();
-                    t
-                };
-                if args[1].contains('\n') {
-                    return Err("Multi-line grep patterns are unsupported".into());
+                } else { &self.input[self.input_pos..] };
+                if args[1].contains('\n') { return Err("Multi-line grep patterns are unsupported".into()); }
+                let mut output = String::new();
+                for line in text.split_inclusive('\n').filter(|line| line.contains(&args[1])) {
+                    let extra = usize::from(!line.ends_with('\n'));
+                    self.reserve_memory(output.len() + line.len() + extra)?;
+                    if output.len() + line.len() + extra > MAX_OUTPUT { return Err("Command output exceeds 32 KiB".into()); }
+                    output.push_str(line);
+                    if extra != 0 { output.push('\n'); }
                 }
-                let output = text
-                    .split_inclusive('\n')
-                    .filter(|l| l.contains(&args[1]))
-                    .map(|l| {
-                        if l.ends_with('\n') {
-                            l.to_string()
-                        } else {
-                            format!("{l}\n")
-                        }
-                    })
-                    .collect::<String>();
+                if stdin { self.input_pos = self.input.len(); }
                 let status = i32::from(output.is_empty());
                 Ok((output, empty, status))
             }
             "sort" | "uniq" | "cut" => {
+                self.reserve_memory(args.iter().map(String::len).sum())?;
                 let invocation = text_tools::parse(cmd, args)?;
+                let invocation_memory = self.scratch(invocation.file.as_ref().map_or(0, String::len) + invocation.temporary_text_bytes())?;
                 // These utilities model only the C locale. LC_ALL overrides the
                 // individual category variables and LANG, as in real tools.
                 let locale = self.scalar("LC_ALL").filter(|s| !s.is_empty());
@@ -2151,8 +2056,9 @@ impl Vm {
                 }
                 let file = invocation.file.as_deref().filter(|s| *s != "-");
                 let text = if let Some(file) = file {
-                    let p = path(file)?;
-                    let Some(text) = self.outcome.files.get(&p) else {
+                    let p = self.virtual_path(file)?;
+                    let Some(text) = self.outcome.files.get(&p.text) else {
+                        self.reserve_memory(file.len() + 60)?;
                         let message = if cmd == "sort" {
                             format!("sort: cannot read: {file}: No such file or directory\n")
                         } else {
@@ -2164,7 +2070,9 @@ impl Vm {
                 } else {
                     &self.input[self.input_pos..]
                 };
-                let output = invocation.execute(text, MAX_OUTPUT)?;
+                let available = MAX_TEXT.saturating_sub(self.memory_bytes()).min(MAX_OUTPUT);
+                let output = invocation.execute(text, available)?;
+                drop(invocation_memory);
                 if file.is_none() { self.input_pos = self.input.len(); }
                 Ok(ok(output))
             }
@@ -2176,6 +2084,7 @@ impl Vm {
                 } else {
                     (rest, 1, rest.len())
                 };
+                self.reserve_memory(args[1].len() + line.trim_matches([' ', '\t']).len())?;
                 self.assign_scalar(args[1].clone(), line.trim_matches([' ', '\t']).into())?;
                 self.input_pos += used;
                 Ok((empty.clone(), empty, status))
@@ -2194,7 +2103,7 @@ impl Vm {
                     [s] => !s.is_empty(),
                     [op, s] if op == "-n" => !s.is_empty(),
                     [op, s] if op == "-z" => s.is_empty(),
-                    [op, s] if op == "-f" => self.outcome.files.contains_key(&path(s)?),
+                    [op, s] if op == "-f" => self.outcome.files.contains_key(&self.virtual_path(s)?.text),
                     [l, op, r] => match op.as_str() {
                         "=" => l == r,
                         "!=" => l != r,
@@ -2258,12 +2167,16 @@ impl Vm {
                 Ok((empty.clone(), empty, status))
             }
             _ => Err(format!(
-                "Unsupported command: {cmd}. Only documented in-process commands are available; nothing was sent to the host."
+                "Unsupported command: {cmd:.80}. Only documented in-process commands are available; nothing was sent to the host."
             )),
         }
     }
 }
-fn format_printf(format: &str, args: &[String]) -> Result<String, String> {
+fn format_printf(
+    format: &str,
+    args: &[String],
+    reserve: impl Fn(usize) -> Result<(), String>,
+) -> Result<String, String> {
     let mut out = String::new();
     let mut index = 0;
     loop {
@@ -2273,10 +2186,18 @@ fn format_printf(format: &str, args: &[String]) -> Result<String, String> {
             match c {
                 '%' => match chars.next() {
                     Some('s') => {
-                        out.push_str(args.get(index).map(String::as_str).unwrap_or(""));
+                        let text = args.get(index).map(String::as_str).unwrap_or("");
+                        if out.len() + text.len() > MAX_OUTPUT {
+                            return Err("printf output exceeds 32 KiB".into());
+                        }
+                        reserve(out.len() + text.len())?;
+                        out.push_str(text);
                         index += 1;
                     }
-                    Some('%') => out.push('%'),
+                    Some('%') => {
+                        reserve(out.len() + 1)?;
+                        out.push('%');
+                    }
                     _ => {
                         return Err(
                             "printf supports %s and %% only; put data in a %s argument".into()
@@ -2284,12 +2205,24 @@ fn format_printf(format: &str, args: &[String]) -> Result<String, String> {
                     }
                 },
                 '\\' => match chars.next() {
-                    Some('n') => out.push('\n'),
-                    Some('t') => out.push('\t'),
-                    Some('\\') => out.push('\\'),
+                    Some('n') => {
+                        reserve(out.len() + 1)?;
+                        out.push('\n');
+                    }
+                    Some('t') => {
+                        reserve(out.len() + 1)?;
+                        out.push('\t');
+                    }
+                    Some('\\') => {
+                        reserve(out.len() + 1)?;
+                        out.push('\\');
+                    }
                     _ => return Err("printf supports \\n, \\t and \\\\ escapes only".into()),
                 },
-                _ => out.push(c),
+                _ => {
+                    reserve(out.len() + c.len_utf8())?;
+                    out.push(c);
+                }
             }
             if out.len() > MAX_OUTPUT {
                 return Err("printf output exceeds 32 KiB".into());

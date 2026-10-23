@@ -239,8 +239,11 @@ mod tests {
         // containing a typed substitution is never called; no capture executes.
         vm.program = compile("unused() { value=$(printf child); }; printf main").unwrap();
         assert_eq!(vm.program.bodies.len(), 1);
-        for _ in 0..10 {
+        for _ in 0..100 {
             vm.tick(1);
+            if vm.done() {
+                break;
+            }
         }
         assert!(vm.done());
         assert_eq!(vm.outcome.stdout, "main");
