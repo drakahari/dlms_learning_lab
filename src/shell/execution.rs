@@ -21,8 +21,9 @@ struct CommandTask {
     redirect: usize,
     stdout: Dest,
     stderr: Dest,
-    saved_input: Option<(String, usize, usize)>,
+    saved_input: Option<(String, usize, usize, usize)>,
     input_guard_base: Option<usize>,
+    last_status: Option<i32>,
 }
 impl CommandTask {
     fn bytes(&self) -> usize {
@@ -41,7 +42,7 @@ impl CommandTask {
             + self
                 .saved_input
                 .as_ref()
-                .map_or(0, |(input, _, _)| input.len())
+                .map_or(0, |(input, _, _, _)| input.len())
             + match &self.phase {
                 CommandPhase::Arguments(words) | CommandPhase::Locals(words) => words.bytes(),
                 CommandPhase::Assignment(key, words) | CommandPhase::Target(key, words) => {
@@ -60,7 +61,7 @@ impl CommandTask {
                 })
                 .sum::<usize>()
     }
-    fn new(command: Command) -> Self {
+    fn new(command: Command, stdout: Dest, stderr: Dest) -> Self {
         Self {
             command,
             phase: CommandPhase::Begin,
@@ -68,10 +69,11 @@ impl CommandTask {
             declarations: None,
             assignment: 0,
             redirect: 0,
-            stdout: Dest::Out,
-            stderr: Dest::Err,
+            stdout,
+            stderr,
             saved_input: None,
             input_guard_base: None,
+            last_status: None,
         }
     }
     fn next_assignment(&mut self, vm: &Vm) -> Result<(), String> {
@@ -94,11 +96,12 @@ impl CommandTask {
         if let Some(base) = self.input_guard_base.take() {
             vm.ordinary_inputs.truncate(base);
         }
-        if let Some((input, pos, depth)) = self.saved_input.take() {
+        if let Some((input, pos, depth, id)) = self.saved_input.take() {
             vm.release_pending(input.len())?;
             if vm.inputs.len() == depth {
                 vm.input = input;
                 vm.input_pos = pos;
+                vm.input_id = id;
             }
         }
         Ok(())
@@ -148,6 +151,7 @@ impl CommandTask {
             }
             CommandPhase::Arguments(mut words) => {
                 if let Some(args) = words.advance(vm)? {
+                    self.last_status = words.last_status().or(self.last_status);
                     let head = args.first();
                     if pipeline
                         && head.is_some_and(|head| {
@@ -182,6 +186,7 @@ impl CommandTask {
             }
             CommandPhase::Assignment(key, mut words) => {
                 if let Some(mut values) = words.advance(vm)? {
+                    self.last_status = words.last_status().or(self.last_status);
                     let owned = strings_bytes(&values) + key.len();
                     let value = values.pop().unwrap_or_default();
                     debug_assert!(values.is_empty());
@@ -225,6 +230,7 @@ impl CommandTask {
             }
             CommandPhase::Target(op, mut words) => {
                 if let Some(fields) = words.advance(vm)? {
+                    self.last_status = words.last_status().or(self.last_status);
                     if fields.len() != 1 {
                         return Err("Ambiguous redirection: quote a single file path".into());
                     }
@@ -245,11 +251,13 @@ impl CommandTask {
                         // A later child must inherit precisely this cursor/binding.
                         vm.reserve_memory(text.len())?;
                         let text = text.clone();
+                        let id = vm.input_id;
+                        vm.input_id = vm.fresh_input_id()?;
                         let old = std::mem::replace(&mut vm.input, text);
                         let pos = std::mem::replace(&mut vm.input_pos, 0);
                         if self.saved_input.is_none() {
                             vm.rebase_pending(0, old.len())?;
-                            self.saved_input = Some((old, pos, vm.inputs.len()));
+                            self.saved_input = Some((old, pos, vm.inputs.len(), id));
                         }
                         if let Some(base) = self.input_guard_base {
                             vm.release_pending(file.len())?;
@@ -284,8 +292,8 @@ impl CommandTask {
                 let (out, err, status) = if let Some(declarations) = self.declarations.take() {
                     vm.apply_local_declarations(declarations)?;
                     (String::new(), String::new(), 0)
-                } else if self.command.words.iter().all(Word::assignment) {
-                    (String::new(), String::new(), 0)
+                } else if self.command.words.iter().all(Word::assignment) || self.args.is_empty() {
+                    (String::new(), String::new(), self.last_status.unwrap_or(0))
                 } else {
                     if self
                         .args
@@ -299,19 +307,9 @@ impl CommandTask {
                 vm.rebase_pending(0, out.len() + err.len())?;
                 self.restore_input(vm)?;
                 vm.outcome.status = status;
-                let mut output = if matches!(self.stdout, Dest::Out) {
-                    out
-                } else {
-                    vm.emit(&self.stdout, &out)?;
-                    String::new()
-                };
-                if matches!(self.stderr, Dest::Out) {
-                    vm.reserve_memory(err.len())?;
-                    output.push_str(&err);
-                } else {
-                    vm.emit(&self.stderr, &err)?;
-                }
-                return Ok(Some(output));
+                vm.emit(&self.stdout, &out)?;
+                vm.emit(&self.stderr, &err)?;
+                return Ok(Some(String::new()));
             }
         }
         Ok(None)
@@ -365,6 +363,7 @@ struct Snapshot {
     input: String,
     pos: usize,
     bytes: usize,
+    input_id: usize,
 }
 pub(super) struct Pipeline {
     commands: std::vec::IntoIter<Command>,
@@ -375,6 +374,8 @@ pub(super) struct Pipeline {
     stages: usize,
     consumed: usize,
     pipe: String,
+    destination: Option<Dest>,
+    buffer: Option<capture::BufferId>,
 }
 impl Pipeline {
     fn bytes(&self) -> usize {
@@ -386,6 +387,7 @@ impl Pipeline {
             + self.active.as_ref().map_or(0, CommandTask::bytes)
             + self.snapshot.as_ref().map_or(0, |snapshot| snapshot.bytes)
             + self.pipe.len()
+            + self.destination.as_ref().map_or(0, capture::dest_bytes)
     }
     pub(super) fn new(commands: Vec<Command>) -> Self {
         Self {
@@ -397,11 +399,16 @@ impl Pipeline {
             stages: 0,
             consumed: 0,
             pipe: String::new(),
+            destination: None,
+            buffer: None,
         }
     }
     pub(super) fn advance(&mut self, vm: &mut Vm) -> Result<bool, String> {
         if !self.started {
             self.started = true;
+            vm.reserve_memory(capture::dest_bytes(&vm.base_stdout))?;
+            self.destination = Some(vm.base_stdout.clone());
+            vm.rebase_pending(0, self.destination.as_ref().map_or(0, capture::dest_bytes))?;
             if self.multiple {
                 let bytes = vm
                     .env
@@ -428,19 +435,26 @@ impl Pipeline {
                     input: vm.input.clone(),
                     pos: vm.input_pos,
                     bytes,
+                    input_id: vm.input_id,
                 });
             }
             return Ok(false);
         }
         if let Some(command) = &mut self.active {
-            if let Some(output) = command.advance(vm, self.multiple)? {
+            if command.advance(vm, self.multiple)?.is_some() {
                 self.active = None;
                 if self.stages == 1 && self.multiple {
                     self.consumed = vm.input_pos;
                 }
-                self.pipe = output;
+                self.pipe = vm.take_buffer(
+                    self.buffer
+                        .take()
+                        .ok_or("Missing pipeline output binding")?,
+                )?;
+                vm.pending_bytes.set(self.bytes());
+                vm.pending_output_bytes.set(self.pipe.len());
                 if self.multiple {
-                    vm.done = false; // exit terminates this isolated pipeline stage.
+                    vm.scope_exit = None; // exit terminates this isolated pipeline stage.
                 }
             }
             return Ok(false);
@@ -472,18 +486,38 @@ impl Pipeline {
                     std::mem::take(&mut self.pipe)
                 };
                 vm.input_pos = 0;
+                vm.input_id = vm.fresh_input_id()?;
             }
             self.stages += 1;
-            self.active = Some(CommandTask::new(command));
+            let buffer = vm.new_buffer()?;
+            vm.reserve_memory(capture::dest_bytes(&vm.base_stderr))?;
+            self.active = Some(CommandTask::new(
+                command,
+                Dest::Buffer(buffer),
+                vm.base_stderr.clone(),
+            ));
+            self.buffer = Some(buffer);
             return Ok(false);
         }
-        vm.emit(&Dest::Out, &self.pipe)?;
+        vm.pending_output_bytes.set(
+            vm.pending_output_bytes
+                .get()
+                .checked_sub(self.pipe.len())
+                .ok_or("Invalid output ownership")?,
+        );
+        vm.emit(
+            self.destination
+                .as_ref()
+                .ok_or("Missing pipeline destination")?,
+            &self.pipe,
+        )?;
         if let Some(saved) = self.snapshot.take() {
             vm.release_pending(saved.bytes)?;
             vm.env = saved.env;
             vm.args = saved.args;
             vm.input = saved.input;
             vm.input_pos = saved.pos + self.consumed;
+            vm.input_id = saved.input_id;
         }
         Ok(true)
     }
@@ -496,6 +530,49 @@ pub(super) enum Pending {
     While(usize, Words),
 }
 impl Pending {
+    pub(super) fn capture_stderr(&self, vm: &Vm) -> Result<Dest, String> {
+        let dest = if let Self::Pipeline(pipeline) = self {
+            &pipeline
+                .active
+                .as_ref()
+                .ok_or("Missing capture command")?
+                .stderr
+        } else {
+            &vm.base_stderr
+        };
+        vm.reserve_memory(capture::dest_bytes(dest))?;
+        Ok(dest.clone())
+    }
+    pub(super) fn resume_capture(
+        &mut self,
+        vm: &Vm,
+        value: String,
+        status: i32,
+    ) -> Result<(), String> {
+        let words = match self {
+            Self::Array(_, words) | Self::For(_, _, words) | Self::While(_, words) => words,
+            Self::Pipeline(pipeline) => match &mut pipeline
+                .active
+                .as_mut()
+                .ok_or("Missing capture command")?
+                .phase
+            {
+                CommandPhase::Arguments(words)
+                | CommandPhase::Locals(words)
+                | CommandPhase::Assignment(_, words)
+                | CommandPhase::Target(_, words) => words,
+                _ => return Err("Invalid capture command phase".into()),
+            },
+        };
+        words.resume(vm, value, status)
+    }
+    pub(super) fn output_bytes(&self) -> usize {
+        if let Self::Pipeline(pipeline) = self {
+            pipeline.pipe.len()
+        } else {
+            0
+        }
+    }
     pub(super) fn bytes(&self) -> usize {
         match self {
             Self::Pipeline(pipeline) => pipeline.bytes(),
@@ -512,7 +589,7 @@ impl Pending {
                 };
                 vm.release_pending(key.len() + strings_bytes(&elements))?;
                 vm.store_value(std::mem::take(key), Value::Indexed(elements))?;
-                vm.outcome.status = 0;
+                vm.outcome.status = words.last_status().unwrap_or(0);
                 Ok(true)
             }
             Self::For(key, end, words) => {
@@ -545,10 +622,17 @@ impl Pending {
                 if let Some(text) = vm.outcome.files.get(&file) {
                     vm.reserve_memory(text.len())?;
                     let text = text.clone();
+                    let id = vm.input_id;
+                    vm.input_id = vm.fresh_input_id()?;
                     let input = std::mem::replace(&mut vm.input, text);
                     let pos = std::mem::replace(&mut vm.input_pos, 0);
                     vm.release_pending(file.len())?;
-                    vm.inputs.push(InputFrame { input, pos, file });
+                    vm.inputs.push(InputFrame {
+                        input,
+                        pos,
+                        file,
+                        id,
+                    });
                     vm.while_status.push((0, true));
                 } else {
                     vm.outcome.status = 1;
@@ -626,7 +710,7 @@ mod tests {
         let Code::Pipe(commands) = &program.code[0] else {
             panic!("expected pipe")
         };
-        let mut command = CommandTask::new(commands[0].clone());
+        let mut command = CommandTask::new(commands[0].clone(), Dest::Out, Dest::Err);
         for _ in 0..100 {
             vm.pending_bytes.set(command.bytes());
             assert!(command.advance(&mut vm, false).unwrap().is_none());

@@ -20,6 +20,8 @@ pub(super) struct Words {
     ready: Option<Vec<String>>,
     retained: usize,
     splitting: bool,
+    waiting: Option<Quote>,
+    last_status: Option<i32>,
 }
 impl Words {
     pub(super) fn new(words: Vec<(Word, bool)>) -> Self {
@@ -38,7 +40,25 @@ impl Words {
             ready: None,
             retained: 0,
             splitting: false,
+            waiting: None,
+            last_status: None,
         }
+    }
+    pub(super) fn last_status(&self) -> Option<i32> {
+        self.last_status
+    }
+    pub(super) fn resume(&mut self, vm: &Vm, value: String, status: i32) -> Result<(), String> {
+        let quote = self.waiting.take().ok_or("Missing capture continuation")?;
+        let word = self.source.front_mut().ok_or("Missing capture word")?;
+        self.retained = bounded_expansion_bytes(self.retained, value.len())?;
+        vm.charge_expansion(value.len())?;
+        vm.rebase_pending(0, value.len() + std::mem::size_of::<Part>())?;
+        word.text.push(Part {
+            value: PartValue::Text(value),
+            quote,
+        });
+        self.last_status = Some(status);
+        Ok(())
     }
     pub(super) fn bytes(&self) -> usize {
         self.source
@@ -72,6 +92,9 @@ impl Words {
         Ok(result)
     }
     fn advance_inner(&mut self, vm: &Vm) -> Result<Option<Vec<String>>, String> {
+        if self.waiting.is_some() {
+            return Err("Capture continuation was not resumed".into());
+        }
         if !self.splitting {
             if let Some(word) = self.source.front_mut() {
                 if std::mem::take(&mut word.sole)
@@ -84,6 +107,14 @@ impl Words {
                     return Ok(None);
                 }
                 if let Some(part) = word.parts.next() {
+                    if let PartValue::Substitution(body) = &part.value {
+                        if vm.capture_request.get().is_some() {
+                            return Err("Conflicting capture request".into());
+                        }
+                        self.waiting = Some(part.quote);
+                        vm.capture_request.set(Some(*body));
+                        return Ok(None);
+                    }
                     let source = part.text().ok_or("Command substitution is unsupported")?;
                     let Expanded {
                         mut text,

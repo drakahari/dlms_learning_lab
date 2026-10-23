@@ -238,6 +238,8 @@ mod tests {
         // Private test injection audits the main boundary only. The function
         // containing a typed substitution is never called; no capture executes.
         vm.program = compile("unused() { value=$(printf child); }; printf main").unwrap();
+        vm.range = vm.program.main.clone();
+        vm.program_bytes = vm.program.text_bytes();
         assert_eq!(vm.program.bodies.len(), 1);
         for _ in 0..100 {
             vm.tick(1);

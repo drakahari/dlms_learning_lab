@@ -1,0 +1,164 @@
+{
+  "native_unsupported_observations": [
+    {
+      "name": "direct-local-inside-function-substitution",
+      "review_category": "decision",
+      "source": "render() { local label=outer; value=$(local label=inner; printf '%s' \"$label\"); printf '%s:%s\\n' \"$label\" \"$value\"; }; render",
+      "case": {
+        "name": "direct-local-inside-function-substitution",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "outer:inner\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    },
+    {
+      "name": "return-inside-inherited-function-context",
+      "review_category": "decision",
+      "source": "render() { value=$(printf kept; return 7; printf wrong); printf '%s:%s\\n' \"$?\" \"$value\"; printf parent; }; render",
+      "case": {
+        "name": "return-inside-inherited-function-context",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "7:kept\nparent",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    },
+    {
+      "name": "arithmetic-containing-substitution-keeps-child-status",
+      "review_category": "decision",
+      "source": "value=$((1 + $(printf 2; exit 7))); printf '%s:%s\\n' \"$?\" \"$value\"",
+      "case": {
+        "name": "arithmetic-containing-substitution-keeps-child-status",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "7:3\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    },
+    {
+      "name": "substitution-inside-arithmetic",
+      "review_category": "decision",
+      "source": "printf '%s\\n' \"$((1 + $(printf 2)))\"",
+      "case": {
+        "name": "substitution-inside-arithmetic",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "3\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    },
+    {
+      "name": "bash-read-file-shorthand",
+      "review_category": "defer",
+      "source": "value=$(< source.txt); printf '<%s>\\n' \"$value\"",
+      "case": {
+        "name": "bash-read-file-shorthand",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/source.txt": "file text\n\n"
+        },
+        "stdout": "<file text>\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/source.txt": "file text\n\n"
+        }
+      }
+    },
+    {
+      "name": "bash-read-file-shorthand-trailing-semicolon",
+      "review_category": "defer",
+      "source": "value=$(< source.txt;); printf '<%s>\\n' \"$value\"",
+      "case": {
+        "name": "bash-read-file-shorthand-trailing-semicolon",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/source.txt": "file text\n\n"
+        },
+        "stdout": "<file text>\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/source.txt": "file text\n\n"
+        }
+      }
+    },
+    {
+      "name": "bash-read-file-shorthand-trailing-comment",
+      "review_category": "defer",
+      "source": "value=$(< source.txt # ) remains in the comment\n); printf '<%s>\\n' \"$value\"",
+      "case": {
+        "name": "bash-read-file-shorthand-trailing-comment",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/source.txt": "file text\n\n"
+        },
+        "stdout": "<file text>\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/source.txt": "file text\n\n"
+        }
+      }
+    },
+    {
+      "name": "bash-53-current-environment-alternative",
+      "review_category": "defer",
+      "source": "label=outer; value=${ label=inner; printf '%s\\n' \"$label\"; }; printf '%s:%s\\n' \"$label\" \"$value\"",
+      "case": {
+        "name": "bash-53-current-environment-alternative",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "inner:inner\n",
+        "stderr": "",
+        "status": 0,
+        "after": {}
+      }
+    }
+  ],
+  "supported_diagnostic_observations": [
+    {
+      "name": "earlier-input-failure-skips-later-capture",
+      "review_category": "diagnostic",
+      "source": ": < missing.txt > \"$(printf side > side.txt; printf out.txt)\"",
+      "case": {
+        "name": "earlier-input-failure-skips-later-capture",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {},
+        "stdout": "",
+        "stderr": "fixture: line 1: missing.txt: No such file or directory\n",
+        "status": 1,
+        "after": {}
+      }
+    }
+  ],
+  "diagnostic_comparison": "Native missing-input wording is simulator-specific. Compare stdout empty/status1/no later file effects; stderr must explain missing.txt. Do not require Bash prefix/line text.",
+  "host_execution": "Only fixed constants inside run_controlled_reference.py are run; this JSON is review data, not a source-input interface."
+}

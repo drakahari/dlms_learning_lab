@@ -1,5 +1,6 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
 mod arithmetic;
+mod capture;
 mod execution;
 mod globbing;
 mod preparation;
@@ -389,6 +390,9 @@ fn lex_unit(
             }
             continue;
         }
+        if matches!(c, '<' | '>') && cs.get(i + 1) == Some(&'(') {
+            return Err("Unsupported process substitution".into());
+        }
         if c == '\r' {
             return Err(
                 "Use LF script line breaks; carriage returns outside quotes are unsupported".into(),
@@ -647,6 +651,44 @@ struct Program {
     code: Vec<Code>,
     main: Range<usize>,
     bodies: Vec<Range<usize>>,
+}
+impl Program {
+    fn text_bytes(&self) -> usize {
+        let words = |words: &[Word]| {
+            words
+                .iter()
+                .flat_map(|word| &word.0)
+                .map(|part| part.text().map_or(0, str::len))
+                .sum::<usize>()
+        };
+        self.code
+            .iter()
+            .map(|code| match code {
+                Code::Pipe(commands) => commands
+                    .iter()
+                    .map(|command| {
+                        words(&command.words)
+                            + command
+                                .redirects
+                                .iter()
+                                .map(|(op, word)| {
+                                    op.len()
+                                        + word
+                                            .as_ref()
+                                            .map_or(0, |word| words(std::slice::from_ref(word)))
+                                })
+                                .sum::<usize>()
+                    })
+                    .sum(),
+                Code::ArrayAssign(key, values) | Code::For(key, values, _) => {
+                    key.len() + words(values)
+                }
+                Code::Define(key, _, _) => key.len(),
+                Code::WhileStart(Some(word), _) => words(std::slice::from_ref(word)),
+                _ => 0,
+            })
+            .sum()
+    }
 }
 struct Unit {
     code: Vec<Code>,
@@ -1101,6 +1143,7 @@ enum Dest {
     Out,
     Err,
     File(String),
+    Buffer(capture::BufferId),
 }
 fn bounded_expansion_bytes(current: usize, additional: usize) -> Result<usize, String> {
     current
@@ -1162,6 +1205,7 @@ struct InputFrame {
     input: String,
     pos: usize,
     file: String,
+    id: usize,
 }
 struct CallFrame {
     pc: usize,
@@ -1173,13 +1217,18 @@ struct CallFrame {
 }
 pub struct Vm {
     program: Arc<Program>,
+    program_bytes: usize,
     pc: usize,
+    range: Range<usize>,
+    frame_executed: bool,
     steps: usize,
     expansion_work: Cell<usize>,
     env: BTreeMap<String, Value>,
     args: Vec<String>,
     input: String,
     input_pos: usize,
+    input_id: usize,
+    next_input_id: usize,
     loops: Vec<(String, Vec<String>, usize)>,
     while_status: Vec<(i32, bool)>,
     inputs: Vec<InputFrame>,
@@ -1188,9 +1237,16 @@ pub struct Vm {
     pub outcome: Outcome,
     done: bool,
     pending_bytes: Cell<usize>,
+    pending_output_bytes: Cell<usize>,
     scratch_bytes: Cell<usize>,
     ordinary_inputs: Vec<String>,
     pending: Option<execution::Pending>,
+    base_stdout: Dest,
+    base_stderr: Dest,
+    frames: Vec<capture::Suspended>,
+    buffers: Vec<Option<String>>,
+    scope_exit: Option<i32>,
+    capture_request: Cell<Option<BodyId>>,
 }
 impl Vm {
     pub fn new(source: &str, case: &Case) -> Result<Self, String> {
@@ -1203,9 +1259,17 @@ impl Vm {
         if !program.bodies.is_empty() {
             return Err("Command substitution is unsupported".into());
         }
+        Self::from_program(program, case)
+    }
+    fn from_program(program: Arc<Program>, case: &Case) -> Result<Self, String> {
+        let range = program.main.clone();
+        let program_bytes = program.text_bytes();
         Ok(Self {
             program,
-            pc: 0,
+            program_bytes,
+            pc: range.start,
+            range,
+            frame_executed: false,
             steps: 0,
             expansion_work: Cell::new(0),
             env: case
@@ -1216,6 +1280,8 @@ impl Vm {
             args: case.args.clone(),
             input: case.stdin.clone(),
             input_pos: 0,
+            input_id: 0,
+            next_input_id: 1,
             loops: Vec::new(),
             while_status: Vec::new(),
             inputs: Vec::new(),
@@ -1230,9 +1296,16 @@ impl Vm {
             },
             done: false,
             pending_bytes: Cell::new(0),
+            pending_output_bytes: Cell::new(0),
             scratch_bytes: Cell::new(0),
             ordinary_inputs: Vec::new(),
             pending: None,
+            base_stdout: Dest::Out,
+            base_stderr: Dest::Err,
+            frames: Vec::new(),
+            buffers: Vec::new(),
+            scope_exit: None,
+            capture_request: Cell::new(None),
         })
     }
     pub fn done(&self) -> bool {
@@ -1244,6 +1317,21 @@ impl Vm {
     fn fail(&mut self, message: String) {
         self.pending = None;
         self.pending_bytes.set(0);
+        self.pending_output_bytes.set(0);
+        self.frames.clear();
+        self.buffers.clear();
+        self.calls.clear();
+        self.loops.clear();
+        self.while_status.clear();
+        self.inputs.clear();
+        self.functions.clear();
+        self.env.clear();
+        self.args.clear();
+        self.input.clear();
+        self.base_stdout = Dest::Out;
+        self.base_stderr = Dest::Err;
+        self.scope_exit = None;
+        self.capture_request.set(None);
         self.ordinary_inputs.clear();
         self.outcome.error = Some(diagnostic(message));
         self.outcome.status = 2;
@@ -1571,7 +1659,7 @@ impl Vm {
             if self.done {
                 return;
             }
-            if let Some(mut pending) = self.pending.take() {
+            if let Some(pending) = self.pending.take() {
                 // Preparation yields independently of semantic instructions;
                 // it cannot hide an entire large word list in one tick.
                 if preparations == 32 {
@@ -1579,14 +1667,8 @@ impl Vm {
                     return;
                 }
                 preparations += 1;
-                match pending.advance(self).and_then(|complete| {
-                    self.pending_bytes
-                        .set(if complete { 0 } else { pending.bytes() });
-                    self.limits()?;
-                    Ok(complete)
-                }) {
-                    Ok(false) => self.pending = Some(pending),
-                    Ok(true) => {}
+                match self.advance_pending(pending) {
+                    Ok(next) => self.pending = next,
                     Err(error) => {
                         self.fail(error);
                         return;
@@ -1594,8 +1676,23 @@ impl Vm {
                 }
                 continue;
             }
-            if self.pc >= self.program.main.end {
-                self.done = true;
+            if self.scope_exit.is_some() || (self.calls.is_empty() && self.pc == self.range.end) {
+                if self.frames.is_empty() {
+                    self.done = true;
+                    return;
+                }
+                if preparations == 32 {
+                    return;
+                }
+                preparations += 1;
+                if let Err(error) = self.finish_capture() {
+                    self.fail(error);
+                    return;
+                }
+                continue;
+            }
+            if self.pc >= self.program.code.len() {
+                self.fail("Invalid execution boundary".into());
                 return;
             }
             if self.steps >= MAX_STEPS {
@@ -1603,6 +1700,7 @@ impl Vm {
                 return;
             }
             self.steps += 1;
+            self.frame_executed = true;
             instructions += 1;
             let code = &self.program.code[self.pc];
             let bytes = match code {
@@ -1652,7 +1750,8 @@ impl Vm {
                         }
                     }
                     Code::Define(n, start, end) => {
-                        if self.functions.len() >= 64 && !self.functions.contains_key(&n) {
+                        let names = self.live_function_names();
+                        if names.len() >= 64 && !names.contains(n.as_str()) {
                             return Err("Function definition limit exceeded (64)".into());
                         }
                         self.functions.insert(n, start);
@@ -1699,6 +1798,7 @@ impl Vm {
                 }
                 if let Some(pending) = &self.pending {
                     self.pending_bytes.set(pending.bytes());
+                    self.pending_output_bytes.set(pending.output_bytes());
                 }
                 self.limits()
             })();
@@ -1738,7 +1838,14 @@ impl Vm {
         if !cmd.redirects.is_empty() {
             return Err("Unsupported redirection on a function call; redirect individual commands inside its body".into());
         }
-        if self.calls.len() >= 32 {
+        if self.calls.len()
+            + self
+                .frames
+                .iter()
+                .map(|frame| frame.calls.len())
+                .sum::<usize>()
+            >= 32
+        {
             return Err("Function call depth limit exceeded (32)".into());
         }
         self.reserve_memory(strings_bytes(&args[1..]))?;
@@ -1759,10 +1866,16 @@ impl Vm {
         let saved = self.inputs.pop().ok_or("Invalid loop input state")?;
         self.input = saved.input;
         self.input_pos = saved.pos;
+        self.input_id = saved.id;
         Ok(())
     }
     fn writable_file(&self, file: &str) -> Result<(), String> {
-        if self.inputs.iter().any(|f| f.file == file) {
+        if self.inputs.iter().any(|f| f.file == file)
+            || self
+                .frames
+                .iter()
+                .any(|frame| frame.inputs.iter().any(|input| input.file == file))
+        {
             Err("Unsupported write to an active loop input; finish reading the source before changing it".into())
         } else if self.ordinary_inputs.iter().any(|source| source == file) {
             Err("Unsupported write to an active input source; finish reading it before changing the file".into())
@@ -1785,43 +1898,41 @@ impl Vm {
         }
     }
     fn memory_bytes(&self) -> usize {
-        self.env
-            .iter()
-            .map(|(n, v)| n.len() + v.bytes())
-            .sum::<usize>()
+        capture::context_bytes(
+            &self.env,
+            &self.args,
+            &self.loops,
+            &self.inputs,
+            &self.functions,
+            &self.calls,
+        ) + self.input.len()
+            + self.outcome.stdout.len()
+            + self.outcome.stderr.len()
             + self
                 .outcome
                 .files
                 .iter()
-                .map(|(n, v)| n.len() + v.len())
+                .map(|(key, value)| key.len() + value.len())
                 .sum::<usize>()
-            + self.input.len()
-            + self
-                .inputs
-                .iter()
-                .map(|f| f.input.len() + f.file.len())
-                .sum::<usize>()
-            + self
-                .calls
-                .iter()
-                .flat_map(|f| &f.locals)
-                .map(|(n, v)| n.len() + v.as_ref().map_or(0, Value::bytes))
-                .sum::<usize>()
-            + strings_bytes(&self.args)
-            + self
-                .calls
-                .iter()
-                .map(|f| strings_bytes(&f.args))
-                .sum::<usize>()
-            + self
-                .loops
-                .iter()
-                .map(|(n, v, _)| n.len() + strings_bytes(v))
-                .sum::<usize>()
-            + self.functions.keys().map(String::len).sum::<usize>()
             + strings_bytes(&self.ordinary_inputs)
             + self.pending_bytes.get()
             + self.scratch_bytes.get()
+            + self
+                .frames
+                .iter()
+                .map(capture::Suspended::bytes)
+                .sum::<usize>()
+            + self.buffer_bytes()
+            + capture::dest_bytes(&self.base_stdout)
+            + capture::dest_bytes(&self.base_stderr)
+            + self.program_bytes
+    }
+    fn fresh_input_id(&mut self) -> Result<usize, String> {
+        let id = self.next_input_id;
+        self.next_input_id = id
+            .checked_add(1)
+            .ok_or("Input binding identity limit exceeded")?;
+        Ok(id)
     }
     fn preflight_value(&self, key: &str, bytes: usize) -> Result<(), String> {
         variable_target(key)?;
@@ -1842,16 +1953,44 @@ impl Vm {
         if next.is_none_or(|n| n > MAX_TEXT) {
             return Err("Virtual memory/file limit exceeded".into());
         }
-        let visible: BTreeSet<_> = self
-            .env
-            .keys()
-            .chain(self.calls.iter().flat_map(|f| f.locals.keys()))
-            .map(String::as_str)
-            .collect();
+        let visible = self.live_variable_names();
         if !visible.contains(key) && visible.len() >= 256 {
             return Err("Variable limit exceeded (256 names)".into());
         }
         Ok(())
+    }
+    fn live_variable_names(&self) -> BTreeSet<&str> {
+        self.env
+            .keys()
+            .map(String::as_str)
+            .chain(
+                self.calls
+                    .iter()
+                    .flat_map(|call| call.locals.keys().map(String::as_str)),
+            )
+            .chain(
+                self.frames
+                    .iter()
+                    .flat_map(|frame| frame.env.keys().map(String::as_str)),
+            )
+            .chain(self.frames.iter().flat_map(|frame| {
+                frame
+                    .calls
+                    .iter()
+                    .flat_map(|call| call.locals.keys().map(String::as_str))
+            }))
+            .collect()
+    }
+    fn live_function_names(&self) -> BTreeSet<&str> {
+        self.functions
+            .keys()
+            .map(String::as_str)
+            .chain(
+                self.frames
+                    .iter()
+                    .flat_map(|frame| frame.functions.keys().map(String::as_str)),
+            )
+            .collect()
     }
     fn store_value(&mut self, key: String, value: Value) -> Result<(), String> {
         if value.elements().len() > 128 {
@@ -1879,15 +2018,14 @@ impl Vm {
         Ok(())
     }
     fn limits(&self) -> Result<(), String> {
-        let visible: BTreeSet<_> = self
-            .env
-            .keys()
-            .chain(self.calls.iter().flat_map(|f| f.locals.keys()))
-            .collect();
-        if visible.len() > 256 || self.outcome.files.len() > 64 || self.memory_bytes() > MAX_TEXT {
+        if self.live_variable_names().len() > 256
+            || self.live_function_names().len() > 64
+            || self.outcome.files.len() > 64
+            || self.memory_bytes() > MAX_TEXT
+        {
             return Err("Virtual memory/file limit exceeded".into());
         }
-        if self.outcome.stdout.len() + self.outcome.stderr.len() > MAX_OUTPUT {
+        if self.output_bytes() > MAX_OUTPUT {
             return Err("Output limit reached (32 KiB)".into());
         }
         Ok(())
@@ -1900,9 +2038,8 @@ impl Vm {
             return Err("Command output exceeds 32 KiB".into());
         }
         match dest {
-            Dest::Out | Dest::Err
-                if self.outcome.stdout.len() + self.outcome.stderr.len() + text.len()
-                    > MAX_OUTPUT =>
+            Dest::Out | Dest::Err | Dest::Buffer(_)
+                if self.output_bytes() + text.len() > MAX_OUTPUT =>
             {
                 return Err("Output limit reached (32 KiB)".into());
             }
@@ -1921,6 +2058,14 @@ impl Vm {
             {
                 return Err("Virtual memory/file limit exceeded".into());
             }
+            Dest::Out | Dest::Err | Dest::Buffer(_)
+                if self
+                    .memory_bytes()
+                    .checked_add(text.len())
+                    .is_none_or(|n| n > MAX_TEXT) =>
+            {
+                return Err("Virtual memory/file limit exceeded".into());
+            }
             _ => {}
         }
         match dest {
@@ -1931,6 +2076,12 @@ impl Vm {
                 .files
                 .entry(p.clone())
                 .or_default()
+                .push_str(text),
+            Dest::Buffer(id) => self
+                .buffers
+                .get_mut(id.0)
+                .and_then(Option::as_mut)
+                .ok_or("Invalid output binding")?
                 .push_str(text),
         }
         self.limits()
@@ -2163,7 +2314,7 @@ impl Vm {
                         .parse::<u8>()
                         .map_err(|_| "exit supports status 0…255")? as i32
                 };
-                self.done = true;
+                self.scope_exit = Some(status);
                 Ok((empty.clone(), empty, status))
             }
             _ => Err(format!(
