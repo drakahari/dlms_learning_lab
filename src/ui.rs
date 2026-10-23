@@ -43,7 +43,9 @@ struct Metrics {
     data_export: Option<egui::Rect>,
     data_restore: Option<egui::Rect>,
     data_file_action: Option<egui::Rect>,
+    data_file_viewport: Option<egui::Rect>,
     data_filename: Option<egui::Rect>,
+    data_filename_id: Option<egui::Id>,
     data_confirm: Option<egui::Rect>,
     data_cancel: Option<egui::Rect>,
     course_start: Option<egui::Rect>,
@@ -257,7 +259,11 @@ impl LabApp {
             address_worked: Default::default(),
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup") {
+            smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("substitution")
+            {
+                7000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup") {
                 4700
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("storage-workspace")

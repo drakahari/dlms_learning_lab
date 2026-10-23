@@ -1,5 +1,7 @@
-//! Application-only Fedora renderer/input check with isolated /tmp progress.
+//! Application-only Fedora renderer/input checks with isolated private progress.
+//! The safe development runner supplies disk-backed temporary directories.
 use super::*;
+mod substitution;
 impl LabApp {
     fn storage_reference_action(
         &mut self,
@@ -237,7 +239,10 @@ impl LabApp {
         }
     }
     pub(super) fn smoke_tick(&mut self, ctx: &egui::Context) {
-        if self.capture_pending || self.started.elapsed().as_millis() < 350 {
+        // Stop probes use consecutive frames so cancellation is checked during
+        // execution rather than after the finite instruction budget finishes.
+        let immediate_stop = matches!(self.smoke_stage, 7012 | 7013);
+        if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;
         }
         let key = |key, command| egui::Event::Key {
@@ -270,6 +275,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 7000..=7040 => {
+                let (advance, capture) = self.substitution_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             6400..=6799 => {
                 use dlms_learning_lab::storage_workspace::Draft;
                 let ordinal = (self.smoke_stage - 6400) / 100;

@@ -5710,3 +5710,77 @@ fn storage_editor_keyboard_changes_preserve_applied_state_and_keep_separate_undo
     frame(&ctx, &mut a, 1200., 850., vec![key(egui::Key::Tab, false)]);
     assert_ne!(ctx.memory(|m| m.focused()), before);
 }
+
+#[test]
+fn backup_chooser_reserves_native_footer_for_recovery_files_and_long_paths() {
+    for scale in [1., 1.5, 2.] {
+        for (width, height) in [(1920., 1080.), (960., 900.)] {
+            let temp = tempfile::tempdir().unwrap();
+            let folder = temp
+                .path()
+                .join("a-long-local-recovery-folder-with-many-existing-safety-copies");
+            std::fs::create_dir(&folder).unwrap();
+            for n in 0..24 {
+                std::fs::write(
+                    folder.join(format!("progress-before-restore-{n}.json")),
+                    b"{}",
+                )
+                .unwrap();
+            }
+            let (ctx, mut a) = app();
+            a.smoke = true;
+            a.path = folder.join("progress.json");
+            a.scale = scale;
+            // Settle the application's scale before opening a new floating area;
+            // egui rescales existing window memory when the zoom changes.
+            for _ in 0..8 {
+                frame(&ctx, &mut a, width, height, vec![]);
+            }
+            a.settings_open = true;
+            a.settings_data = true;
+            for _ in 0..8 {
+                frame(&ctx, &mut a, width, height, vec![]);
+            }
+            let r = a.metrics.data_restore.unwrap();
+            frame(
+                &ctx,
+                &mut a,
+                width,
+                height,
+                vec![egui::Event::PointerMoved(r.center())],
+            );
+            for pressed in [true, false] {
+                frame(
+                    &ctx,
+                    &mut a,
+                    width,
+                    height,
+                    vec![
+                        egui::Event::PointerMoved(r.center()),
+                        egui::Event::PointerButton {
+                            pos: r.center(),
+                            button: egui::PointerButton::Primary,
+                            pressed,
+                            modifiers: Default::default(),
+                        },
+                    ],
+                );
+            }
+            for _ in 0..8 {
+                frame(&ctx, &mut a, width, height, vec![]);
+            }
+            let clip = a.metrics.data_file_viewport.unwrap_or_else(|| panic!("chooser did not open at {width}x{height}/{scale}, restore={r:?}, viewport={:?}, settings={}: {}", ctx.content_rect(), a.settings_open, a.data_tools.restore_diagnostic())).intersect(ctx.content_rect()).expand(1.);
+            for control in [
+                a.metrics.data_filename.unwrap(),
+                a.metrics.data_file_action.unwrap(),
+            ] {
+                assert!(
+                    clip.contains_rect(control),
+                    "{width}x{height} at {scale}: {control:?} outside {clip:?}"
+                );
+            }
+            assert!(a.data_tools.modal_open());
+            assert!(a.progress.attempts.is_empty());
+        }
+    }
+}

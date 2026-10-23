@@ -15,13 +15,21 @@ enum Mode {
     Restore,
 }
 impl Tools {
-    #[cfg(test)]
     pub(super) fn restore_diagnostic(&self) -> String {
         format!(
-            "message: {:?}; review still open: {}",
+            "message: {:?}; review still open: {}; checked: {:?}; chooser: {:?}",
             self.message,
-            self.candidate.is_some()
+            self.candidate.is_some(),
+            self.inspection
+                .as_ref()
+                .map(|job| job.checked.load(std::sync::atomic::Ordering::Relaxed)),
+            self.browser
+                .as_ref()
+                .map(|b| (&b.name, &b.folder, &b.error))
         )
+    }
+    pub(super) fn restore_filename(&self) -> Option<&str> {
+        self.browser.as_ref().map(|browser| browser.name.as_str())
     }
     pub(super) fn modal_open(&self) -> bool {
         self.browser.is_some() || self.inspection.is_some() || self.candidate.is_some()
@@ -170,7 +178,12 @@ impl LabApp {
     ui.horizontal_wrapped(|ui|{if ui.button("Up a folder").clicked(){navigate=browser.folder.parent().map(Path::to_path_buf);}
     if ui.button("Documents").clicked(){navigate=Some(self.backup_folder());}});
     ui.add(egui::Label::new(browser.folder.to_string_lossy()).wrap());
-    egui::ScrollArea::vertical().id_salt("backup-files").max_height((ctx.content_rect().height()*0.40).clamp(100.,360.)).show(ui,|ui|{
+    // Reserve the two footer controls inside the actual chooser viewport.
+    // A long folder path or extra recovery files must not hide Check backup.
+    let footer=2.*controls::height(ui)+3.*ui.spacing().item_spacing.y;
+    let row=ui.text_style_height(&egui::TextStyle::Body);
+    let file_height=(ui.clip_rect().bottom()-ui.cursor().top()-footer).clamp(row,row*12.);
+    egui::ScrollArea::vertical().id_salt("backup-files").min_scrolled_height(0.).max_height(file_height).show(ui,|ui|{
      for (path,dir) in &browser.entries{let name=path.file_name().unwrap_or_default().to_string_lossy();let label=format!("{} {name}",if *dir{"Folder:"}else{"File:"});if ui.add(egui::Button::selectable(!*dir&&browser.name==name,label).wrap()).clicked(){if *dir{navigate=Some(path.clone());}else{browser.name=name.into_owned();}}}
      ui.label("Up to 1,000 entries shown. Symbolic links are excluded.");
     });
@@ -178,11 +191,11 @@ impl LabApp {
         ui.label("Filename");
         let field=ui.add(controls::singleline(ui, &mut browser.name).char_limit(240).desired_width((ui.available_width()-12.).max(40.)));
         name_control(&field,"Progress backup filename");
-        self.metrics.data_filename=Some(field.rect);
+        self.metrics.data_filename=Some(field.rect);self.metrics.data_filename_id=Some(field.id);
     });
     if let Some(e)=&browser.error{ui.colored_label(palette(ui).error,e);}
     let action=ui.add(primary(ui,match browser.mode{Mode::Export=>"Save backup",Mode::Restore=>"Check backup"}));
-    self.metrics.data_file_action=Some(action.rect);chosen=action.clicked();
+    self.metrics.data_file_action=Some(action.rect);self.metrics.data_file_viewport=Some(ui.clip_rect());chosen=action.clicked();
    });
             if let Some(folder) = navigate {
                 browser.folder = folder;

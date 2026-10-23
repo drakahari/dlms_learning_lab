@@ -442,7 +442,10 @@ impl LabApp {
     pub(super) fn appearance_preview(&mut self, ctx: &egui::Context) {
         if self.settings_open || self.theme_preview {
             let mut open = true;
-            egui::Window::new("Settings").open(&mut open).default_width(500.).resizable(true).show(ctx,|ui|{
+            egui::Window::new("Settings").open(&mut open).default_width(500.)
+                .max_width((ctx.content_rect().width()-2.*f32::from(controls::PAD_X)).max(0.))
+                .max_height((ctx.content_rect().height()-2.*f32::from(controls::PAD_Y)).max(0.))
+                .resizable(true).vscroll(true).show(ctx,|ui|{
                 ui.horizontal_wrapped(|ui| { ui.selectable_value(&mut self.settings_data,false,"Appearance");ui.selectable_value(&mut self.settings_data,true,"Your data"); });
                 if self.settings_data { egui::ScrollArea::vertical().id_salt("data-settings-scroll").max_height(ctx.content_rect().height()*0.65).show(ui,|ui|self.data_settings(ui)); } else {
                 ui.heading("Appearance");
