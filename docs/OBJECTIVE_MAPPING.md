@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are113 narrowly evidenced Partial practice rows, one Supporting explanation row and1126 Open rows; no full-objective completion is asserted. The catalog contains94 authored assignments/twenty-two units.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are124 narrowly evidenced Partial practice rows, one Supporting explanation row and1115 Open rows; no full-objective completion is asserted. The catalog contains98 authored assignments/twenty-three units.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -19,9 +19,9 @@ Every coverage row pins its source fingerprint. A changed description, weight, b
 Development-only reproduction, after fetching the public documents to temporary files and extracting Cisco PDF text with `pdftotext -layout`:
 
 ```sh
-python3 tools/objective_inventory.py --ccna-text /tmp/dlms-objectives-ccna.txt --lpic1-html /tmp/dlms-objectives-lpic1.html --lpic2-html /tmp/dlms-objectives-lpic2.html --checked 2026-10-22 --check docs/OBJECTIVE_SOURCES.json
-python3 tools/verify_coverage.py
-python3 -m unittest discover -s tools/tests -p test_coverage.py -v
+python3 tools/objective_inventory.py --ccna-text .build-artifacts/sources/objectives-ccna.txt --lpic1-html .build-artifacts/sources/objectives-lpic1.html --lpic2-html .build-artifacts/sources/objectives-lpic2.html --checked 2026-10-22 --check docs/OBJECTIVE_SOURCES.json
+python3 tools/dev.py tool verify_coverage.py
+python3 tools/dev.py python-tests
 ```
 
 The inventory tool reads supplied local source copies only. It performs no network requests or subprocess execution. Offline validation checks exhaustive current references, source fingerprints, parent/kind/position/URL, explicit gaps, existing authored IDs and contained test-evidence paths. It rejects missing/duplicate references, inherited evidence on Open rows and unsupported completion labels. CI checks the committed ledger without downloading objectives. Learners need neither these tools nor internet access.
@@ -54,3 +54,6 @@ M55 adds four persistent-mount assignments with native file editing and simulate
 M57 adds four meaningful scripting assignments after accepted evaluator7. Only LPIC-1 v5.0 105.2.K2 gains narrow Partial practice: quoted original-source dollar-parenthesis capture, trailing-LF behavior, inherited helper status and child-variable/shared-file differences within the documented subset.105.2 parent andK3 strengthen with fresh behavior evidence; mail, shebang execution, script ownership and unsupported language remain absent. The current official LPI105.2 page/version was rechecked2026-10-23; full inventory fingerprints retain2026-10-22. Evidence is SHELL_CAPTURE_LESSONS.md and the actual content/UI/native flows. Catalog90/21units and112Partial/1Supporting/1127Open do not imply full-objective completion.
 
 M62 adds four distinct native IPv4 access-policy assignments and only narrow current CCNA5.6 Partial evidence: host/any source matching, ordered service/protocol/port conditions, ingress/egress diagnosis and two cooperating boundaries with required allowed-flow guards.31 assignment and22 separate example packets are actual modeled outcomes, not renamed labs. Arbitrary wildcard lessons, IPv6 ACLs, flags/fragments/NAT/logging/counters/full IOS and physical conformance remain unclaimed. Native Fedora task/partial/alternate/mode/reset/resume and light/dark large-text views were reviewed. Full source inventory fingerprints retain2026-10-22; this batch current Cisco technical/objective review is2026-10-23. See ACL_LESSONS.md.
+
+
+M65 adds four local-account lifecycle assignments after access foundations. Rechecked current LPIC-1 v5.0/107.1 on2026-10-23; only eleven previously Open local-record/tool slices gain narrow Partial evidence, while the parent/membership slices strengthen.124Partial/1Supporting/1115Open overlapping references. The shadow view is a fixed synthetic projection and expiry is stored metadata, not authentication/password practice. chage, passwd, special-purpose account policy and complete utility/NSS behavior stay Open. See ACCOUNT_LESSONS.md for commands, tests, native evidence and limitations.

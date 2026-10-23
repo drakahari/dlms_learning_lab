@@ -1,0 +1,260 @@
+{
+  "version": 1,
+  "plans": [
+    {
+      "id": "lpic1-account-onboarding",
+      "alternatives": [
+        [
+          "groupadd --gid 2400 field",
+          "useradd --no-user-group --uid 1200 --gid 2400 --groups audit --home-dir /home/nola --shell /bin/bash --create-home --skel /etc/skel-field nola"
+        ],
+        [
+          "groupadd -g 2400 field",
+          "useradd -N -u 1200 -g 2400 -d /home/nola -s /bin/bash -m -k /etc/skel-field nola",
+          "usermod -aG audit nola"
+        ],
+        [
+          "groupadd -g 2400 field",
+          "useradd -m -k /etc/skel-field -s /bin/bash -d /home/nola -G audit -g field -u 1200 -N nola"
+        ]
+      ],
+      "negatives": [
+        {
+          "name": "record-only",
+          "commands": [
+            "groupadd -g 2400 field",
+            "useradd -N -u 1200 -g field -G audit -d /home/nola -s /bin/bash -M nola"
+          ]
+        },
+        {
+          "name": "wrong-template",
+          "commands": [
+            "groupadd -g 2400 field",
+            "useradd -N -u 1200 -g field -G audit -d /home/nola -s /bin/bash -m nola"
+          ]
+        },
+        {
+          "name": "wrong-extra-group",
+          "commands": [
+            "groupadd -g 2400 field",
+            "useradd -N -u 1200 -g field -G legacy -d /home/nola -s /bin/bash -m -k /etc/skel-field nola"
+          ]
+        },
+        {
+          "name": "wrong-uid",
+          "commands": [
+            "groupadd -g 2400 field",
+            "useradd -N -u 1201 -g field -G audit -d /home/nola -s /bin/bash -m -k /etc/skel-field nola"
+          ]
+        },
+        {
+          "name": "partial-group-only",
+          "commands": [
+            "groupadd -g 2400 field"
+          ]
+        },
+        {
+          "name": "wrong-home-path",
+          "commands": [
+            "groupadd -g 2400 field",
+            "useradd -N -u 1200 -g field -G audit -d /home/wrong -s /bin/bash -m -k /etc/skel-field nola"
+          ]
+        }
+      ],
+      "break_command": "chown teal:staff /home/nola/welcome.txt",
+      "repair_command": "chown nola:field /home/nola/welcome.txt"
+    },
+    {
+      "id": "lpic1-account-membership",
+      "alternatives": [
+        [
+          "usermod -g review pax",
+          "groupadd -g 2500 reports",
+          "usermod -G audit pax",
+          "usermod -aG reports pax"
+        ],
+        [
+          "groupadd --gid 2500 reports",
+          "usermod --groups reports,audit,audit pax",
+          "usermod --gid 2100 pax"
+        ],
+        [
+          "groupadd -g 2500 reports",
+          "usermod -G 2500,2001,2500 pax",
+          "usermod -g 2100 pax"
+        ]
+      ],
+      "negatives": [
+        {
+          "name": "append-keeps-unwanted-legacy",
+          "commands": [
+            "groupadd -g 2500 reports",
+            "usermod -aG reports pax",
+            "usermod -g review pax"
+          ]
+        },
+        {
+          "name": "replacement-drops-audit",
+          "commands": [
+            "groupadd -g 2500 reports",
+            "usermod -G reports pax",
+            "usermod -g review pax"
+          ]
+        },
+        {
+          "name": "missing-primary",
+          "commands": [
+            "groupadd -g 2500 reports",
+            "usermod -G audit,reports pax"
+          ]
+        },
+        {
+          "name": "partial-new-group",
+          "commands": [
+            "groupadd -g 2500 reports"
+          ]
+        },
+        {
+          "name": "wrong-user",
+          "commands": [
+            "groupadd -g 2500 reports",
+            "usermod -G audit,reports teal",
+            "usermod -g review teal"
+          ]
+        }
+      ],
+      "break_command": "usermod -G reports pax",
+      "repair_command": "usermod -aG audit pax"
+    },
+    {
+      "id": "lpic1-account-retirement",
+      "alternatives": [
+        [
+          "userdel -r reed",
+          "groupdel retired",
+          "chown 1102:2100 /srv/shared/delivery.txt"
+        ],
+        [
+          "userdel --remove reed",
+          "chown teal:review /srv/shared/delivery.txt",
+          "groupdel retired"
+        ]
+      ],
+      "negatives": [
+        {
+          "name": "record-only-home-left",
+          "commands": [
+            "chown teal:review /srv/shared/delivery.txt",
+            "userdel reed",
+            "groupdel retired"
+          ]
+        },
+        {
+          "name": "transfer-omitted",
+          "commands": [
+            "userdel -r reed",
+            "groupdel retired"
+          ]
+        },
+        {
+          "name": "group-left",
+          "commands": [
+            "chown teal:review /srv/shared/delivery.txt",
+            "userdel -r reed"
+          ]
+        },
+        {
+          "name": "evidence-reassigned",
+          "commands": [
+            "chown teal:review /srv/shared/delivery.txt",
+            "userdel -r reed",
+            "groupdel retired",
+            "chown teal:audit /srv/shared/evidence.log"
+          ]
+        }
+      ],
+      "break_command": "chown pax:staff /srv/shared/delivery.txt",
+      "repair_command": "chown teal:review /srv/shared/delivery.txt"
+    },
+    {
+      "id": "lpic1-account-team-handover",
+      "alternatives": [
+        [
+          "groupmod --new-name dispatch staging",
+          "useradd -N -u 1500 -g dispatch -G audit -d /home/lumi -s /bin/bash -m -k /etc/skel-dispatch lumi",
+          "chown 1500:2700 /srv/shared/route.txt",
+          "groupdel temps",
+          "userdel -r rowan",
+          "usermod -e 20787 lumi"
+        ],
+        [
+          "groupmod -n dispatch staging",
+          "useradd -N -u 1500 -g dispatch -d /home/lumi -s /bin/bash -m -k /etc/skel-dispatch lumi",
+          "usermod -aG audit lumi",
+          "userdel -r rowan",
+          "chown lumi:dispatch /srv/shared/route.txt",
+          "usermod -e 2026-11-30 lumi",
+          "groupdel temps"
+        ]
+      ],
+      "negatives": [
+        {
+          "name": "missing-expiry",
+          "commands": [
+            "groupmod -n dispatch staging",
+            "useradd -N -u 1500 -g dispatch -G audit -d /home/lumi -s /bin/bash -m -k /etc/skel-dispatch lumi",
+            "chown lumi:dispatch /srv/shared/route.txt",
+            "userdel -r rowan",
+            "groupdel temps"
+          ]
+        },
+        {
+          "name": "retirement-home-left",
+          "commands": [
+            "groupmod -n dispatch staging",
+            "useradd -N -u 1500 -g dispatch -G audit -d /home/lumi -s /bin/bash -m -k /etc/skel-dispatch lumi",
+            "usermod -e 2026-11-30 lumi",
+            "chown lumi:dispatch /srv/shared/route.txt",
+            "userdel rowan",
+            "groupdel temps"
+          ]
+        },
+        {
+          "name": "obsolete-group-left",
+          "commands": [
+            "groupmod -n dispatch staging",
+            "useradd -N -u 1500 -g dispatch -G audit -d /home/lumi -s /bin/bash -m -k /etc/skel-dispatch lumi",
+            "usermod -e 2026-11-30 lumi",
+            "chown lumi:dispatch /srv/shared/route.txt",
+            "userdel -r rowan"
+          ]
+        },
+        {
+          "name": "wrong-home-template",
+          "commands": [
+            "groupmod -n dispatch staging",
+            "useradd -N -u 1500 -g dispatch -G audit -d /home/lumi -s /bin/bash -m lumi",
+            "usermod -e 2026-11-30 lumi",
+            "chown lumi:dispatch /srv/shared/route.txt",
+            "userdel -r rowan",
+            "groupdel temps"
+          ]
+        },
+        {
+          "name": "archive-ownership-destroyed",
+          "commands": [
+            "groupmod -n dispatch staging",
+            "useradd -N -u 1500 -g dispatch -G audit -d /home/lumi -s /bin/bash -m -k /etc/skel-dispatch lumi",
+            "usermod -e 2026-11-30 lumi",
+            "chown lumi:dispatch /srv/shared/route.txt",
+            "userdel -r rowan",
+            "groupdel temps",
+            "chown lumi:audit /srv/shared/archive.txt"
+          ]
+        }
+      ],
+      "break_command": "usermod -e '' lumi",
+      "repair_command": "usermod -e 2026-11-30 lumi"
+    }
+  ]
+}

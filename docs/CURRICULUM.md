@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **94 authored assignments in22 units:27CCNA,17LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **98 authored assignments in23 units:27CCNA,21LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -105,3 +105,8 @@ LPIC-1 current v5.0 objectives and105.2 were rechecked2026-10-23. Only105.2.K2 g
 ## IPv4 access-policy unit — M62
 
 Four distinct source/service-order/direction/two-boundary assignments now add narrowly Partial current CCNA5.6 practice. Their full native tasks have31 graded packets,22 separate example packets, alternatives/negative/invalidation tests and actual Fedora input/render acceptance. Current-source catalog94/22units:27CCNA/17LPIC-1/13LPIC-2/37Bash. The overlapping matrix now has113Partial/1Supporting/1126Open; it is not a completion percentage. Arbitrary wildcard, full IOS/hardware, IPv6 ACL and wider verification gaps remain explicit. Official v1.1/5.6 and technical sources rechecked2026-10-23; futurev2.0 remains separate. See ACL_LESSONS.md. This source milestone is not yet a new installed candidate.
+
+
+## Local accounts and handover — M65
+
+Four reviewed [local-record lifecycle assignments](ACCOUNT_LESSONS.md) follow the access-policy unit. They teach explicit account/home creation, exact membership repair and owned-home GID effects, precise retirement with orphan numeric evidence, and a stable-GID/expiry-metadata handover. Different runnable examples remain separate from full assignments; alternate supported commands and negative/current-state checks pass. Catalog98/23units:27CCNA/21LPIC-1/13LPIC-2/37Bash. Current LPI v5.0/107.1 was rechecked2026-10-23. Only explicit local-record/tool slices are Partial; passwords, chage, special-purpose policy, PAM/login, full NSS and complete options remain absent.

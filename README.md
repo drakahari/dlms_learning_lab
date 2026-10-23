@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **94 authored assignments:** 27 CCNA,17 LPIC-1,13 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **98 authored assignments:** 27 CCNA,21 LPIC-1,13 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -94,7 +94,7 @@ Optional versioned `workspace` data stores unfinished commands, editor drafts an
 
 Progress, backups, screenshots and recordings remain local and excluded from the public tree. No learner input is passed to an OS shell, process, host filesystem command or network operation. The compatibility fixtures and native captures use synthetic data.
 
-Development checks also include `python3 tools/verify_palettes.py` and, after `cargo build --locked --example shell_probe`, `python3 tools/bash_reference.py`. The latter executes only checked-in controlled fixtures in temporary directories.
+Development checks also include `python3 tools/dev.py tool verify_palettes.py` and, after `python3 tools/dev.py build --locked --offline --example shell_probe`, `python3 tools/dev.py tool bash_reference.py`. The latter executes only checked-in controlled fixtures in private disk-backed temporary directories under the shared guard.
 
 See [architecture and authoring](docs/ARCHITECTURE.md), [content sources and simplifications](docs/CONTENT.md), and [verification and limits](docs/VERIFICATION.md).
 
@@ -109,3 +109,5 @@ Four [counter and totals assignments](docs/SHELL_COUNTS.md) add sequential virtu
 Four [access-policy assignments](docs/LINUX_ACCESS.md) continue LPIC-1 file foundations: group sharing, directory write/search versus browsing, updating another owner's existing files, and a metadata-preserving handover. The native terminal keeps the complete assignment visible with separate saved examples and optional guidance.
 
 Four native IPv4 access-policy assignments now add source filtering, ordered service rules, direction diagnosis and a two-router handover. See [ACL_LESSONS.md](docs/ACL_LESSONS.md) for exact verification and limits. Source additions are separate from the older installed Fedora candidate listed in INSTALLATION.md.
+
+Four [local-account assignments](docs/ACCOUNT_LESSONS.md) add explicit onboarding/template homes, exact membership repair, evidence-preserving retirement and a stable-GID team handover. Native simulated administrator terminals retain independent examples, current-state checks and supported alternate command sequences. No host accounts, passwords, authentication or login sessions are touched.

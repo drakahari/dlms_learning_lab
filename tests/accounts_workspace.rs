@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 94);
+    assert_eq!(all.len(), 98);
     assert!(!all.iter().any(|x| x.id == s.id));
     assert_eq!(shell::EVALUATOR_REVISION, 7);
     assert!(!engine::solved(&s.initial, &s.goal));
@@ -398,7 +398,17 @@ fn all_ninety_attempts_shell7_records_and_selected_reset_survive_exact_roundtrip
 }
 #[test]
 fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
-    for s in pack::bundled().unwrap() {
+    let old = pack::bundled()
+        .unwrap()
+        .into_iter()
+        .filter(|s| !matches!(s.initial, State::Accounts { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        old.len(),
+        94,
+        "all pre-account assignments remain exercised"
+    );
+    for s in old {
         let mut raw = s.initial.clone();
         let mut contextual = s.initial.clone();
         for command in &s.solution {

@@ -57,7 +57,7 @@ fn fixture_is_reachable_but_unbundled_and_teaching_is_required() {
     assert!(!engine::solved(&s.initial, &s.goal));
     assert!(progress::current_solved(&solved(&s), &s));
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 94);
+    assert_eq!(all.len(), 98);
     assert!(all.iter().all(|s| s.id != "test-storage-workspace"));
     let mut value: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/storage-workspace-preview.json")).unwrap();

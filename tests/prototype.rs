@@ -350,6 +350,13 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
         if let State::Ipv4Acl { network } = &mut a.state {
             // Removing the real policies permits every forbidden flow again.
             network.devices.clear();
+        } else if matches!(a.state, State::Accounts { .. }) {
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                "chown root:root /srv/shared/outside.txt",
+            )
+            .unwrap();
         } else if let State::Discovery { simulation } = &mut a.state {
             let mut wrong = simulation.topology().clone();
             for device in wrong.devices.values_mut() {

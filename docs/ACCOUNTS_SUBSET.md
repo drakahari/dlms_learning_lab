@@ -1,6 +1,6 @@
 # Account records, memberships and virtual ownership — foundation
 
-Pure capability accepted after independent source review and main-checkout verification, checked2026-10-23. No authored account lessons, bundle registration or coverage promotion yet; engine/progress integration is documented in ACCOUNTS_BACKEND.md. `accounts` is an original in-process Rust module; no host account, filesystem, process, command, credential or clock API is called. Strings such as `/etc/passwd` refer only to derived simulated records.
+Pure capability accepted after independent source review and main-checkout verification, checked2026-10-23. Four authored account lessons and narrow partial coverage are now integrated; see ACCOUNT_LESSONS.md and ACCOUNTS_BACKEND.md for exact scope and verification. `accounts` is an original in-process Rust module; no host account, filesystem, process, command, credential or clock API is called. Strings such as `/etc/passwd` refer only to derived simulated records.
 
 ## Why a separate model
 

@@ -268,7 +268,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit-layout")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("accounts-unit")
+            {
+                9000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit-layout")
             {
                 8700
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit") {

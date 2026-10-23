@@ -333,7 +333,16 @@ impl LabApp {
     }
 }
 fn account_checks(ui: &mut egui::Ui, checks: &[(bool, String)]) {
+    let mut shown = std::collections::BTreeSet::new();
     for (passed, message) in checks {
+        // Preservation checks may report the same failing field as its direct
+        // objective. Keep that explanation once; scoring still checks both.
+        let detail = message
+            .strip_prefix("First remaining difference: ")
+            .unwrap_or(message);
+        if !*passed && !shown.insert(detail) {
+            continue;
+        }
         ui.add(
             egui::Label::new(
                 RichText::new(format!(

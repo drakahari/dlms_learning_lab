@@ -6735,3 +6735,60 @@ fn acl_authored_units_keep_full_assignments_tables_editors_and_optional_challeng
         }
     }
 }
+
+#[test]
+fn accounts_authored_unit_keeps_full_terminal_tasks_and_separate_guidance_at_all_scales() {
+    for id in [
+        "lpic1-account-onboarding",
+        "lpic1-account-membership",
+        "lpic1-account-retirement",
+        "lpic1-account-team-handover",
+    ] {
+        for (width, height, scale) in [(1200., 850., 1.), (720., 560., 1.5), (960., 900., 2.)] {
+            let (ctx, mut a) = app();
+            let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
+            a.scale = scale;
+            a.launch(i);
+            for (view, challenge) in [
+                (teaching::View::Introduction, false),
+                (teaching::View::Example, false),
+                (teaching::View::Assignment, false),
+                (teaching::View::Assignment, true),
+            ] {
+                a.progress.attempts.get_mut(id).unwrap().challenge = challenge;
+                a.set_accounts_view(i, view);
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                assert!(!a.metrics.help_visible && !a.metrics.guide);
+                if challenge {
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+                for r in a
+                    .metrics
+                    .terminal
+                    .iter()
+                    .chain(a.metrics.output.iter())
+                    .chain(a.metrics.check.iter())
+                    .chain(a.metrics.accounts_run.iter())
+                    .chain(a.metrics.example_action.iter())
+                    .chain(a.metrics.assignment_action.iter())
+                {
+                    assert!(
+                        r.left() >= 0. && r.right() <= ctx.content_rect().right() + 1.,
+                        "{id} {view:?} {width}/{scale}: {r:?} vs {:?}",
+                        ctx.content_rect()
+                    );
+                }
+                if view != teaching::View::Introduction || challenge {
+                    assert!(a.metrics.terminal.is_some() && a.metrics.check.is_some());
+                }
+                assert_eq!(a.progress.attempts[id].state, a.scenarios[i].initial);
+                assert!(!progress::current_solved(
+                    &a.progress.attempts[id],
+                    &a.scenarios[i]
+                ));
+            }
+        }
+    }
+}
