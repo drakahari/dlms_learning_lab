@@ -117,3 +117,13 @@ Full local inventories and any future proposed cleanup paths live under `.build-
 original evaluator baselines, worktrees, unreviewed curriculum, installed acceptance
 fixtures and uncertain artifacts. Approval of an exact cleanup list is required
 before removal; neither broad wildcard deletion nor `cargo clean` is authorized.
+
+## Actual Linux candidate lifecycle
+
+Use the fixed guarded tool with exact existing candidate directories and expected catalog counts:
+
+```sh
+python3 tools/dev.py tool installed_acceptance.py --candidate dist/EXACT-NEW-CANDIDATE --previous dist/EXACT-PREVIOUS-CANDIDATE --labs 98 --units 23
+```
+
+It verifies build-manifest/binary identity, installs only into a new private project-disk directory, upgrades an actually identified older executable, checks installed content/desktop metadata, uninstalls/reinstalls, and retains exact separate synthetic original-nine progress bytes. Resolved candidate/install roots cannot escape the project or use RAM filesystems. Leftover desktop entries and dangling application/launcher links fail acceptance. Fixed commands have nonblocking32KiB streaming capture and bounded timeout/pipe teardown under the parent's shared lock, memory observer and owned process group. Descendants never detach from that group; failed runs return to its cleanup. Per-command logs and acceptance.json remain under ignored .build-artifacts/installations. No personal progress, desktop theme, host service or learner script is accessed. This proves installer file retention on this host; native GUI/reopening/startup and other operating systems require separate checks.

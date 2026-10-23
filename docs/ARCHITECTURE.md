@@ -6,7 +6,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | --- | --- |
 | `engine.rs` | Typed simulation state, constrained command parser, live grading for current activity types |
 | `filesystem.rs`, `terminal_teaching.rs` | Bounded ordinary-user virtual file tree and separate persisted ungraded terminal practice |
-| `dns.rs`, `dns_workspace.rs`, `dns_teaching.rs`, `ui/dns_workspace.rs` | Bounded authoritative RRsets/aliases, separate configured/primary/secondary copies, typed readiness/serial decisions, current outcomes, native record editing/lookups and isolated saved practice; reviewed authored content pending |
+| `dns.rs`, `dns_workspace.rs`, `dns_teaching.rs`, `ui/dns_workspace.rs` | Bounded authoritative RRsets/aliases, separate configured/primary/secondary copies, typed readiness/serial decisions, current outcomes, native record editing/lookups and isolated saved practice; six authored forward-zone/recovery assignments |
 | `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; six authored route/recovery tasks |
 | `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
@@ -144,3 +144,6 @@ M49 adds `discovery_workspace` (identity-pinned native drafts, bounded typed ref
 The private `local_file` module is application-owned local-file input, shared by progress/backup and developer pack validation. It bounds ordinary files before decoding and rejects static links/special files; its compatibility wrapper keeps progress callers unchanged. Simulation command dispatch never receives or invokes this host-file API. The VM still has only virtual files; OS files belong to explicitly selected application data/content operations. These checks are not a claim of protection against a hostile host filesystem race.
 
 Authoring difficulty labels are the shared `pack::DIFFICULTIES`: Beginner, Intermediate and Advanced. The same list drives the optional native library filter. Ratings describe assignment complexity, not an experience prerequisite or mastery/certification claim; existing lab IDs, versions and saved progress do not change when a new supported rating is added. Unknown labels remain invalid.
+
+
+Pure OSPF compatibility/SPF and virtual multi-unit manager foundations are documented in OSPF_SUBSET.md and UNIT_MANAGER_SUBSET.md. These modules add no playable lab or issuer coverage by themselves. Their native/backend adapters remain under independent review; the existing IPv4/static/single-service activities and progress stay unchanged.
