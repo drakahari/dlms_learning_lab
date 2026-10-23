@@ -1,6 +1,6 @@
 # Implementation continuation checkpoint
 
-2026-10-23, after M40 implementation and its installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
+2026-10-23, after M42 startup investigation and M40 installed-candidate verification. This is an unfinished full-application build, not a release-ready declaration or a request to restart product planning. Owner approvals remain: native workspace, Introduction → Try example → Assignment, MIT original code/content, autonomous reviewed milestones. No routine per-batch approval is needed. Work only in this repository.
 
 ## Delivered and pushed
 
@@ -15,6 +15,8 @@
 Full native source and installed all-six DNS flows pass; earlier shared-layout/subnet/service flows include typed mistakes, keyboard/Undo/reset/resume and representative native150/200% light/dark review. M40 inputs explicitly used authored reference drafts; this is not novice acceptance. Every new DNS task has isolated practice plus alternate/negative/preservation tests. See DNS_LESSONS.md, DNS_WORKSPACE.md, CONTROL_LAYOUT.md and IMPLEMENTATION_LEDGER.md for exact scopes.
 
 Current candidate code identity46791cc; clean Fedora install, upgrade from34937f6c4ce8, uninstall/reinstall, desktop validation and exact synthetic data-byte retention pass. Installed native DNS flow outside checkout closes PASS. Native CI39912625664 succeeded on Linux/Windows/macOS; available Fedora/Ubuntu/Windows artifacts/hashes are in INSTALLATION.md. No Windows/macOS desktop acceptance. The follow-up documentation commit does not change candidate code identity. Launch from checkout: `env -u WAYLAND_DISPLAY ./target/debug/dlms-learning-lab`.
+
+M42 investigated the historical Wayland stall without a speculative fix:105 scoped development launches and12 actual packaged46791cc Wayland layout launches passed, including quiet runs. Cause remains unresolved/unreproduced. Opt-in lifecycle/repeat-start diagnostics, private temporary smoke profiles and current100/150/200% alignment checks are in NATIVE_STARTUP.md.357 Rust tests now exist;68 current UI tests and five new diagnostic-tool tests pass, with unchanged core baseline. No new lab/coverage/evaluator change.
 
 ## Next independent implementation
 

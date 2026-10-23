@@ -84,6 +84,8 @@ pub struct LabApp {
     units: Vec<course::Unit>,
     progress: Progress,
     path: PathBuf,
+    // Keep the securely allocated synthetic profile alive only for this app instance.
+    _smoke_profile: Option<tempfile::TempDir>,
     filter: Filter,
     selected: Option<usize>,
     input: String,
@@ -150,8 +152,18 @@ impl LabApp {
         ctx.set_style(style);
         let scenarios = pack::bundled().expect("Bundled pack validates");
         let units = course::bundled(&scenarios).expect("Bundled units validate");
-        let path = if smoke {
-            std::env::temp_dir().join("dlms-workspaces-smoke/progress-v1.json")
+        let smoke_profile = smoke.then(|| {
+            let mut builder = tempfile::Builder::new();
+            builder.prefix("dlms-native-smoke-");
+            #[cfg(unix)]
+            {
+                use std::os::unix::fs::PermissionsExt;
+                builder.permissions(std::fs::Permissions::from_mode(0o700));
+            }
+            builder.tempdir().expect("Create private synthetic profile")
+        });
+        let path = if let Some(profile) = &smoke_profile {
+            profile.path().join("progress-v1.json")
         } else {
             progress::default_path()
                 .unwrap_or_else(|_| PathBuf::from("local-data/progress-v1.json"))
@@ -191,6 +203,7 @@ impl LabApp {
             units,
             progress,
             path,
+            _smoke_profile: smoke_profile,
             filter: Filter::default(),
             selected: None,
             input: String::new(),
@@ -227,8 +240,9 @@ impl LabApp {
             address_worked: Default::default(),
             smoke,
             started: Instant::now(),
-            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit")
-            {
+            smoke_stage: if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("startup") {
+                4700
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-unit") {
                 4500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-layout") {
                 4250
@@ -1345,11 +1359,13 @@ impl eframe::App for LabApp {
         }
     }
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
+        crate::startup_trace::frame(ctx, false);
         if self.smoke {
             self.capture_events(ctx);
         }
         self.render(ctx);
         self.save();
+        crate::startup_trace::frame(ctx, true);
         if self.smoke {
             self.smoke_tick(ctx);
             ctx.request_repaint_after(std::time::Duration::from_millis(50));

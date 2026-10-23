@@ -174,6 +174,16 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            4700 => {
+                assert!(!self.metrics.header.is_empty());
+                shot = Some("startup-library".into());
+            }
+            4701 => {
+                println!(
+                    "PASS native startup: application initialized, library rendered, screenshot read back and event loop advanced. Isolated test profile; no platform/novice acceptance implied."
+                );
+                ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+            }
             4500..=4622 => {
                 let case = (self.smoke_stage - 4500) / 20;
                 let phase = (self.smoke_stage - 4500) % 20;

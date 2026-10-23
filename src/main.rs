@@ -3,8 +3,10 @@
     all(target_os = "windows", not(debug_assertions)),
     windows_subsystem = "windows"
 )]
+mod startup_trace;
 mod ui;
 fn main() -> eframe::Result<()> {
+    startup_trace::mark("main");
     let args: Vec<String> = std::env::args().collect();
     if args.get(1).is_some_and(|s| s == "--version" || s == "-V") {
         println!("{}", dlms_learning_lab::build_identity());
@@ -54,15 +56,19 @@ fn main() -> eframe::Result<()> {
             .with_min_inner_size([720., 560.]),
         ..Default::default()
     };
+    startup_trace::mark("enter-run-native");
     eframe::run_native(
         "DLMS Learning Lab",
         options,
         Box::new(move |cc| {
-            Ok(Box::new(ui::LabApp::new(
+            startup_trace::mark("creation-context-ready");
+            let app = ui::LabApp::new(
                 cc,
                 args.contains(&"--ui-smoke".into()),
                 args.contains(&"--developer".into()),
-            )))
+            );
+            startup_trace::mark("application-ready");
+            Ok(Box::new(app))
         }),
     )
 }

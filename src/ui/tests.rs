@@ -4566,3 +4566,28 @@ fn authored_dns_lessons_keep_complete_tasks_and_tools_in_both_modes_at_scaled_si
         assert_eq!(a.dns_view(i), teaching::View::Introduction);
     }
 }
+
+#[test]
+fn synthetic_native_profiles_are_private_distinct_and_cleaned_without_touching_normal_data() {
+    let (_ctx, first) = app();
+    let (_ctx, second) = app();
+    let first_dir = first.path.parent().unwrap().to_path_buf();
+    let second_dir = second.path.parent().unwrap().to_path_buf();
+    assert_ne!(first_dir, second_dir);
+    assert!(first._smoke_profile.is_some());
+    assert!(second._smoke_profile.is_some());
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        assert_eq!(
+            std::fs::metadata(&first_dir).unwrap().permissions().mode() & 0o077,
+            0
+        );
+    }
+    std::fs::write(&first.path, b"synthetic fixture").unwrap();
+    drop(first);
+    assert!(!first_dir.exists());
+    assert!(second_dir.exists());
+    drop(second);
+    assert!(!second_dir.exists());
+}
