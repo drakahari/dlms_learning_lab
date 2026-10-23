@@ -121,7 +121,7 @@ impl LabApp {
             ui.label("Inspect inputs");
             let picker_width = 230_f32.min(ui.available_width());
             ui.allocate_ui_with_layout(egui::vec2(picker_width, CONTROL), egui::Layout::left_to_right(egui::Align::Center), |ui| {
-                egui::ComboBox::from_id_salt("script-case")
+                let picker=egui::ComboBox::from_id_salt("script-case")
                     .width(picker_width)
                     .truncate()
                     .selected_text(&cases[selected].name)
@@ -130,6 +130,7 @@ impl LabApp {
                             ui.selectable_value(&mut selected, n, &c.name);
                         }
                     });
+                name_control(&picker.response,"Inspect script test inputs");
             });
             ui.label(
                 RichText::new(format!(
@@ -302,6 +303,7 @@ impl LabApp {
             });
         self.metrics.editor_viewport = Some(area.inner_rect);
         let response = area.inner;
+        name_control(&response, "Assignment script source");
         self.metrics.inputs.push(response.rect);
         self.metrics.focus = Some(id);
         if self.focus_input && ui.is_enabled() {
@@ -456,6 +458,7 @@ impl LabApp {
                         ui.label(RichText::new("Secondary instructions").color(palette(ui).muted));
                         let mut text="Select this editor text".to_string();
                         let response=ui.add(egui::TextEdit::singleline(&mut text).id(egui::Id::new("theme-preview-text")));
+                        name_control(&response,"Theme sample editor — appearance example only");
                         if self.smoke {response.request_focus();if let Some(mut state)=egui::text_edit::TextEditState::load(ctx,response.id){state.cursor.set_char_range(Some(egui::text::CCursorRange::two(egui::text::CCursor::new(0),egui::text::CCursor::new(11))));state.store(ctx,response.id);}}
                         ui.horizontal_wrapped(|ui|{
                             ui.add(primary(ui,"Primary action"));

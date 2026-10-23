@@ -3321,3 +3321,260 @@ fn service_example_and_assignment_editor_terminal_undo_histories_are_isolated() 
         );
     }
 }
+
+fn accessibility_tree(
+    ctx: &egui::Context,
+    a: &mut LabApp,
+    w: f32,
+    h: f32,
+) -> egui::accesskit::TreeUpdate {
+    ctx.enable_accesskit();
+    let mut result = None;
+    for _ in 0..3 {
+        result = ctx
+            .run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(w / a.scale, h / a.scale),
+                    )),
+                    ..Default::default()
+                },
+                |ctx| a.render(ctx),
+            )
+            .platform_output
+            .accesskit_update;
+    }
+    result.expect("native accessibility tree enabled")
+}
+fn accessible_named<'a>(
+    tree: &'a egui::accesskit::TreeUpdate,
+    name: &str,
+) -> &'a egui::accesskit::Node {
+    &tree
+        .nodes
+        .iter()
+        .find(|(_, node)| node.label() == Some(name))
+        .unwrap_or_else(|| {
+            panic!(
+                "Missing native name {name}; names: {:?}",
+                tree.nodes
+                    .iter()
+                    .filter_map(|(_, n)| n.label())
+                    .collect::<Vec<_>>()
+            )
+        })
+        .1
+}
+#[test]
+fn native_accessibility_shared_assignments_expose_names_without_losing_values_or_roles() {
+    use egui::accesskit::Role;
+    let (_, inventory) = app();
+    let labs: Vec<_> = inventory
+        .scenarios
+        .iter()
+        .enumerate()
+        .filter(|(i, s)| {
+            *i < 9 || matches!(s.initial, State::Script { .. } | State::Filesystem { .. })
+        })
+        .map(|(i, _)| i)
+        .collect();
+    for i in labs {
+        for (w, h, scale) in [(1200., 850., 1.), (720., 560., 1.5)] {
+            let (ctx, mut a) = app();
+            a.launch(i);
+            a.scale = scale;
+            let id = a.scenarios[i].id.clone();
+            a.progress.attempts.get_mut(&id).unwrap().challenge = true;
+            if let State::Script { source, .. } =
+                &mut a.progress.attempts.get_mut(&id).unwrap().state
+            {
+                *source = "printf '%s\\n' 'Editable source'\n".into();
+            }
+            let tree = accessibility_tree(&ctx, &mut a, w, h);
+            let mut count = 0;
+            for (_, node) in &tree.nodes {
+                if matches!(
+                    node.role(),
+                    Role::TextInput | Role::MultilineTextInput | Role::ComboBox
+                ) {
+                    assert!(
+                        node.label().is_some_and(|s| !s.trim().is_empty()),
+                        "lab{i} {w}/{scale}: unnamed {:?},value={:?},placeholder={:?}",
+                        node.role(),
+                        node.value(),
+                        node.placeholder()
+                    );
+                    if matches!(node.role(), Role::TextInput | Role::MultilineTextInput) {
+                        count += 1;
+                    }
+                }
+            }
+            assert!(count > 0, "lab{i} fields absent");
+            let size = accessible_named(&tree, "Text size");
+            assert_eq!(size.role(), Role::ComboBox);
+            assert_eq!(
+                size.value(),
+                Some(if scale == 1. { "100%" } else { "150%" })
+            );
+            if matches!(a.scenarios[i].initial, State::Script { .. }) {
+                let source = accessible_named(&tree, "Assignment script source");
+                assert_eq!(source.role(), Role::MultilineTextInput);
+                assert_eq!(source.value(), Some("printf '%s\\n' 'Editable source'\n"));
+                assert_eq!(
+                    accessible_named(&tree, "Inspect script test inputs").role(),
+                    Role::ComboBox
+                );
+            }
+            if i == 1 {
+                for (name, hosts) in [("design", 60), ("support", 28), ("lab", 12)] {
+                    assert_eq!(
+                        accessible_named(
+                            &tree,
+                            &format!("{name} — network/prefix for {hosts} required hosts")
+                        )
+                        .role(),
+                        Role::TextInput
+                    );
+                }
+            }
+        }
+    }
+}
+#[test]
+fn native_accessibility_examples_name_their_scope_and_preserve_editor_and_terminal_values() {
+    use egui::accesskit::Role;
+    for i in [1, 6, 9, 24] {
+        let (ctx, mut a) = app();
+        a.launch(i);
+        match i {
+            1 => a.set_address_view(i, teaching::View::Example),
+            6 => a.set_service_view(i, teaching::View::Example),
+            9 => a.set_script_view(i, teaching::View::Example),
+            24 => a.set_terminal_view(i, teaching::View::Example),
+            _ => unreachable!(),
+        }
+        let id = a.scenarios[i].id.clone();
+        let w = a
+            .progress
+            .attempts
+            .get_mut(&id)
+            .unwrap()
+            .workspace
+            .as_mut()
+            .unwrap();
+        if let Some(l) = &mut w.service_learning {
+            l.port_draft = "9091".into();
+            l.command = "systemctl status atlas".into();
+        }
+        if let Some(l) = &mut w.script_learning {
+            l.example_source = "printf '%s\\n' 'Example source'\n".into();
+        }
+        if let Some(l) = &mut w.terminal_learning {
+            l.command = "pwd".into();
+        }
+        let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+        let checks = match i {
+            1 => vec![("staff — network/prefix for 30 required hosts", "")],
+            6 => vec![
+                (
+                    "Practice example service configuration port — ungraded",
+                    "9091",
+                ),
+                (
+                    "Service practice terminal command — ungraded",
+                    "systemctl status atlas",
+                ),
+            ],
+            9 => vec![(
+                "Practice example script source — ungraded",
+                "printf '%s\\n' 'Example source'\n",
+            )],
+            24 => vec![("Practice example terminal command — ungraded", "pwd")],
+            _ => unreachable!(),
+        };
+        for (name, value) in checks {
+            let n = accessible_named(&tree, name);
+            assert_eq!(
+                n.role(),
+                if i == 9 {
+                    Role::MultilineTextInput
+                } else {
+                    Role::TextInput
+                }
+            );
+            assert_eq!(n.value(), Some(value));
+        }
+        for (_, n) in &tree.nodes {
+            if n.role() == Role::ComboBox {
+                assert!(
+                    n.label().is_some(),
+                    "example{i} unnamed picker {:?}",
+                    n.value()
+                );
+            }
+        }
+    }
+}
+#[test]
+fn native_accessibility_library_and_appearance_keep_filter_values_card_context_and_disabled_states()
+{
+    use egui::accesskit::Role;
+    let (ctx, mut a) = app();
+    let mut tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+    assert!(tree.nodes.iter().any(|(_, n)| n.role() == Role::Button
+        && n.label().is_some_and(|s| s.starts_with("Start lab: "))));
+    assert!(tree.nodes.iter().any(|(_, n)| n.role() == Role::Button
+        && n.label().is_some_and(|s| s.starts_with("Add favorite: "))));
+    a.filter.search = "repair".into();
+    a.filter.topic = "Services".into();
+    a.filter.unit = "linux-service-recovery".into();
+    a.filter.track = "LPIC-2".into();
+    a.filter.difficulty = "Beginner".into();
+    a.filter.status = "Complete".into();
+    a.filter.max_minutes = 8;
+    a.extra_filters = true;
+    a.scale = 1.5;
+    tree = accessibility_tree(&ctx, &mut a, 960., 740.);
+    for (name, value) in [
+        ("Search labs by title, goal or topic", "repair"),
+        ("Topic filter", "Services"),
+        ("Difficulty filter", "Beginner"),
+        ("Completion status filter", "Complete"),
+        ("Estimated time filter", "Up to 8 min"),
+    ] {
+        let n = accessible_named(&tree, name);
+        assert_eq!(n.value(), Some(value));
+    }
+    assert_eq!(
+        accessible_named(&tree, "Course unit filter").role(),
+        Role::ComboBox
+    );
+    assert_eq!(
+        accessible_named(&tree, "Application theme").role(),
+        Role::ComboBox
+    );
+    a.theme_preview = true;
+    tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+    assert_eq!(
+        accessible_named(&tree, "Theme sample editor — appearance example only").value(),
+        Some("Select this editor text")
+    );
+    assert!(accessible_named(&tree, "Unavailable (disabled)").is_disabled());
+}
+#[test]
+fn native_accessibility_backup_filename_has_a_name_and_retains_the_proposed_value() {
+    let (ctx, mut a) = app();
+    let dir = tempfile::tempdir().unwrap();
+    a.path = dir.path().join("progress.json");
+    a.settings_open = true;
+    a.settings_data = true;
+    draw(&ctx, &mut a);
+    let r = a.metrics.data_export.unwrap();
+    click(&ctx, &mut a, r);
+    let tree = accessibility_tree(&ctx, &mut a, 1200., 850.);
+    let filename = accessible_named(&tree, "Progress backup filename");
+    assert_eq!(filename.role(), egui::accesskit::Role::TextInput);
+    assert_eq!(filename.value(), Some("dlms-learning-backup.json"));
+    assert!(!filename.is_disabled());
+}

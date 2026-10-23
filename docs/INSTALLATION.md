@@ -228,3 +228,16 @@ Fedora binary SHA-256 `3864fddf50e1bf61ae789bf652f57313b89c9b8db985f8e223edfe7ac
 ### Native identity follow-up (M34)
 
 The native Wayland ID now explicitly matches `org.dlms.LearningLab.desktop`; custom learner-data paths stay unchanged. Fresh full default-Wayland service and addressing walkthroughs pass at desktop/narrow150% sizes. The baseline startup probe passed too, so this does not prove the historical intermittent stall was fixed. See NATIVE_STARTUP.md for the evidence and remaining investigation. Do not change compositor/security settings as a workaround. macOS notice provenance was rechecked at the upstream repository and remains unresolved; no license text was guessed and the packaging gate remains intact.
+
+### M33 native CI and M34 installed Fedora follow-up
+
+[Native CI39864315623](https://github.com/drakahari/dlms_learning_lab/actions/runs/39864315623), source `77e341ab703ce4e598c103c66f2d3caef5975da4`, passed all three native runners. Downloaded Ubuntu/Windows sidecars match their archives. These builds include service teaching; CI does not establish Windows/macOS desktop acceptance.
+
+| Build | Archive | SHA-256 |
+| --- | --- | --- |
+| Fedora44, M33 | dlms-learning-lab-0.1.0-g77e341ab703c-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | 27594de5dd4927b129ccd4b247016e11a55a66eb26d36d2af04e2a2f46bcf429 |
+| Ubuntu24.04, M33 | dlms-learning-lab-0.1.0-g77e341ab703c-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz | 402b928c6a08bde479464ca2d4b818b52fd791c1ce8f5969a0b1f9f3bfdb7bdc |
+| Windows, M33 | dlms-learning-lab-0.1.0-g77e341ab703c-x86_64-pc-windows-msvc-windows-candidate.zip | e05f1c63205d09b3a7fa71e818ab954308bea9e2adc4104f64ba69b80d1626b3 |
+| Fedora44, M34 | dlms-learning-lab-0.1.0-g34937f6c4ce8-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz | d84352b0798d69154cfa975e3641f305e4862ab96d9d88d8e6e4634cb7f18510 |
+
+M34 source `34937f6c4ce8df9c0040e2e11cd945abd116bdcd`, binary SHA-256 `e06df7e519573c73361e9fc0954f9dc8700bf9365a55ed2903b63a25309d7ba7`, was built from clean committed source and upgraded in the isolated `/tmp` installation. Outside-checkout64/fifteen validation, desktop-file validation and exact synthetic-progress sentinel retention pass. A full installed default-Wayland native flow passes the original nine, all28 theme sample captures and seven introductory scripting tasks, including input/Run/Stop, current invalidation, Challenge and resized150% light/dark. The earlier90-second run reached the final capture but timed out before the closing check; the120-second rerun completed and is the accepted evidence. Sentinel retention is a file-preservation check; parsed migration has separate backend/UI tests. No claim that every freshly captured palette was manually re-reviewed or that historical startup stalls are conclusively fixed. No public release; macOS notices and actual Windows/macOS desktop acceptance remain open.

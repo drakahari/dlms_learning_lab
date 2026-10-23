@@ -177,6 +177,7 @@ impl LabApp {
     ui.horizontal(|ui| {
         ui.label("Filename");
         let field=ui.add(egui::TextEdit::singleline(&mut browser.name).char_limit(240).desired_width((ui.available_width()-12.).max(40.)));
+        name_control(&field,"Progress backup filename");
         self.metrics.data_filename=Some(field.rect);
     });
     if let Some(e)=&browser.error{ui.colored_label(palette(ui).error,e);}

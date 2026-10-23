@@ -141,6 +141,7 @@ impl LabApp {
         if workspace::editor_row(
             ui,
             "Port",
+            "Practice example service configuration port — ungraded",
             &mut l.port_draft,
             "example-service-port",
             &mut self.metrics,
@@ -181,7 +182,7 @@ impl LabApp {
                 egui::Layout::left_to_right(egui::Align::Center),
                 |ui| {
                     ui.set_width(width);
-                    egui::ComboBox::from_id_salt("service-example-command")
+                    let picker = egui::ComboBox::from_id_salt("service-example-command")
                         .width(width)
                         .truncate()
                         .selected_text(&lesson.commands[l.command_index].command)
@@ -190,6 +191,7 @@ impl LabApp {
                                 ui.selectable_value(&mut l.command_index, n, &c.command);
                             }
                         });
+                    name_control(&picker.response, "Service practice command to insert");
                 },
             );
             let r = ui.add(button("Insert command"));
@@ -242,6 +244,7 @@ impl LabApp {
                     .hint_text("Command · Enter to run")
                     .char_limit(4096),
             );
+            name_control(&r, "Service practice terminal command — ungraded");
             self.metrics.terminal = Some(r.rect);
             self.metrics.focus = Some(r.id);
             if self.focus_input

@@ -99,23 +99,25 @@ impl LabApp {
                         egui::Layout::left_to_right(egui::Align::Center),
                         |ui| {
                             ui.set_width(width);
-                            egui::ComboBox::from_id_salt(("practice-example-command", i))
-                                .width(width)
-                                .truncate()
-                                .selected_text(format!(
-                                    "{}. {}",
-                                    learning.example_command + 1,
-                                    lesson.example[learning.example_command]
-                                ))
-                                .show_ui(ui, |ui| {
-                                    for (index, command) in lesson.example.iter().enumerate() {
-                                        ui.selectable_value(
-                                            &mut learning.example_command,
-                                            index,
-                                            format!("{}. {command}", index + 1),
-                                        );
-                                    }
-                                });
+                            let picker =
+                                egui::ComboBox::from_id_salt(("practice-example-command", i))
+                                    .width(width)
+                                    .truncate()
+                                    .selected_text(format!(
+                                        "{}. {}",
+                                        learning.example_command + 1,
+                                        lesson.example[learning.example_command]
+                                    ))
+                                    .show_ui(ui, |ui| {
+                                        for (index, command) in lesson.example.iter().enumerate() {
+                                            ui.selectable_value(
+                                                &mut learning.example_command,
+                                                index,
+                                                format!("{}. {command}", index + 1),
+                                            );
+                                        }
+                                    });
+                            name_control(&picker.response, "Practice example command to insert");
                         },
                     );
                     let r = ui.add(button("Insert command"));
@@ -216,6 +218,7 @@ impl LabApp {
                     .hint_text("Command · Enter to run")
                     .char_limit(4096),
             );
+            name_control(&r, "Practice example terminal command — ungraded");
             self.metrics.terminal = Some(r.rect);
             self.metrics.inputs.push(r.rect);
             self.metrics.focus = Some(r.id);

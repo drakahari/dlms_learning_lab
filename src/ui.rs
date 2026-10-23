@@ -478,6 +478,7 @@ impl LabApp {
                     ui.selectable_value(&mut self.scale, scale, format!("{:.0}%", scale * 100.));
                 }
             });
+        name_control(&r.response, "Text size");
         self.metrics.header.push(r.response.rect);
     }
     fn theme_picker(&mut self, ui: &mut egui::Ui) {
@@ -506,6 +507,7 @@ impl LabApp {
                     );
                 }
             });
+        name_control(&r.response, "Application theme");
         self.metrics.header.push(r.response.rect);
     }
     fn header(&mut self, ctx: &egui::Context) {
@@ -726,15 +728,14 @@ impl LabApp {
                 self.page = 0;
             }
         });
-        if ui
-            .add_sized(
-                [ui.available_width(), CONTROL],
-                egui::TextEdit::singleline(&mut self.filter.search)
-                    .hint_text("Search titles, goals or topics…")
-                    .char_limit(200),
-            )
-            .changed()
-        {
+        let search = ui.add_sized(
+            [ui.available_width(), CONTROL],
+            egui::TextEdit::singleline(&mut self.filter.search)
+                .hint_text("Search titles, goals or topics…")
+                .char_limit(200),
+        );
+        name_control(&search, "Search labs by title, goal or topic");
+        if search.changed() {
             self.page = 0;
         }
         self.course_entry(ui);
@@ -775,6 +776,7 @@ impl LabApp {
                     },
                 )
                 .inner;
+            name_control(&r.response, "Course unit filter");
             self.metrics.filters.push(r.response.rect);
             if previous != self.filter.unit {
                 self.filter.topic.clear();
@@ -990,6 +992,20 @@ impl LabApp {
                                 )
                                 .min_size(egui::vec2(108., CONTROL)),
                             );
+                            name_control(
+                                &start,
+                                format!(
+                                    "{}: {}",
+                                    if self.synthetic {
+                                        "Preview only"
+                                    } else if a.is_none() {
+                                        "Start lab"
+                                    } else {
+                                        "Continue lab"
+                                    },
+                                    s.title
+                                ),
+                            );
                             if start.clicked() {
                                 launch = Some(*i);
                             }
@@ -997,6 +1013,18 @@ impl LabApp {
                                 !self.synthetic,
                                 button(if favorite { "Favorited" } else { "Favorite" })
                                     .min_size(egui::vec2(108., CONTROL)),
+                            );
+                            name_control(
+                                &fav,
+                                format!(
+                                    "{}: {}",
+                                    if favorite {
+                                        "Remove favorite"
+                                    } else {
+                                        "Add favorite"
+                                    },
+                                    s.title
+                                ),
                             );
                             if fav.clicked() {
                                 if favorite {
@@ -1112,6 +1140,9 @@ impl LabApp {
                                     r
                                 }
                             };
+                            if index == 2 {
+                                name_control(&response, "Estimated time filter");
+                            }
                             self.metrics.filters.push(response.rect);
                         },
                     );
@@ -1234,29 +1265,40 @@ fn combo<'a>(
     options: impl Iterator<Item = &'a str>,
     width: f32,
 ) -> egui::Response {
-    ui.allocate_ui_with_layout(
-        egui::vec2(width, CONTROL),
-        egui::Layout::left_to_right(egui::Align::Center),
-        |ui| {
-            ui.set_width(width);
-            egui::ComboBox::from_id_salt(id)
-                .width(width)
-                .truncate()
-                .selected_text(if value.is_empty() {
-                    any.to_owned()
-                } else {
-                    value.clone()
-                })
-                .show_ui(ui, |ui| {
-                    ui.selectable_value(value, String::new(), any);
-                    for option in options {
-                        ui.selectable_value(value, option.to_owned(), option);
-                    }
-                })
-                .response
+    let response = ui
+        .allocate_ui_with_layout(
+            egui::vec2(width, CONTROL),
+            egui::Layout::left_to_right(egui::Align::Center),
+            |ui| {
+                ui.set_width(width);
+                egui::ComboBox::from_id_salt(id)
+                    .width(width)
+                    .truncate()
+                    .selected_text(if value.is_empty() {
+                        any.to_owned()
+                    } else {
+                        value.clone()
+                    })
+                    .show_ui(ui, |ui| {
+                        ui.selectable_value(value, String::new(), any);
+                        for option in options {
+                            ui.selectable_value(value, option.to_owned(), option);
+                        }
+                    })
+                    .response
+            },
+        )
+        .inner;
+    name_control(
+        &response,
+        match id {
+            "topic" => "Topic filter",
+            "difficulty" => "Difficulty filter",
+            "status" => "Completion status filter",
+            _ => "Catalog filter",
         },
-    )
-    .inner
+    );
+    response
 }
 impl eframe::App for LabApp {
     fn raw_input_hook(&mut self, _: &egui::Context, input: &mut egui::RawInput) {
@@ -1286,6 +1328,12 @@ impl eframe::App for LabApp {
     }
 }
 
+/// Add a contextual native name without replacing the widget's role, value or state.
+fn name_control(response: &egui::Response, label: impl Into<String>) {
+    response
+        .ctx
+        .accesskit_node_builder(response.id, |node| node.set_label(label.into()));
+}
 fn palette(ui: &egui::Ui) -> theme::Roles {
     theme::roles(ui.ctx())
 }

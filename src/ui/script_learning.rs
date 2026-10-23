@@ -186,6 +186,7 @@ impl LabApp {
                         .char_limit(shell::MAX_SOURCE),
                 )
             });
+        name_control(&area.inner, "Practice example script source — ungraded");
         self.metrics.editor_viewport = Some(area.inner_rect);
         let r = area.inner;
         self.metrics.inputs.push(r.rect);

@@ -263,7 +263,15 @@ impl LabApp {
                         .color(palette(ui).accent),
                 );
                 let draft = w.service_port.get_or_insert_with(|| port.clone());
-                if editor_row(ui, "Port", draft, "service-port", &mut self.metrics, false) {
+                if editor_row(
+                    ui,
+                    "Port",
+                    "Assignment service configuration port",
+                    draft,
+                    "service-port",
+                    &mut self.metrics,
+                    false,
+                ) {
                     self.notice = None;
                     self.dirty = true;
                 }
@@ -288,6 +296,7 @@ impl LabApp {
                 if editor_row(
                     ui,
                     "IPv4 address",
+                    "DNS A record IPv4 address",
                     draft,
                     "dns-address",
                     &mut self.metrics,
@@ -301,6 +310,7 @@ impl LabApp {
                 if editor_row(
                     ui,
                     "Zone serial",
+                    "DNS zone serial",
                     draft,
                     "dns-serial",
                     &mut self.metrics,
@@ -325,6 +335,7 @@ impl LabApp {
                 if editor_row(
                     ui,
                     "Device",
+                    "Filesystem persistent device",
                     draft,
                     "mount-device",
                     &mut self.metrics,
@@ -450,6 +461,10 @@ impl LabApp {
                     .id_salt("command")
                     .hint_text("Command · Enter to run")
                     .char_limit(4096),
+            );
+            name_control(
+                &r,
+                format!("{} — assignment terminal command", self.scenarios[i].title),
             );
             self.metrics.terminal = Some(r.rect);
             self.metrics.focus = Some(r.id);
@@ -744,6 +759,7 @@ fn row_label(ui: &mut egui::Ui, label: &str, width: f32) {
 pub(super) fn editor_row(
     ui: &mut egui::Ui,
     label: &str,
+    accessible_name: &str,
     draft: &mut String,
     id: &str,
     metrics: &mut Metrics,
@@ -758,6 +774,7 @@ pub(super) fn editor_row(
             [width, CONTROL],
             egui::TextEdit::singleline(draft).id_salt(id).char_limit(64),
         );
+        name_control(&r, accessible_name);
         metrics.inputs.push(r.rect);
         if focus {
             r.request_focus();
@@ -868,6 +885,13 @@ pub(super) fn allocation_fields(
                         .id_salt(("allocation", index))
                         .hint_text("Network/prefix")
                         .char_limit(64),
+                );
+                name_control(
+                    &r,
+                    format!(
+                        "{} — network/prefix for {} required hosts",
+                        allocation.name, allocation.hosts
+                    ),
                 );
                 metrics.inputs.push(r.rect);
                 if first {
