@@ -120,6 +120,9 @@ fn mac_port_field_edit_invalidates_success_and_practice_undo_keeps_assignment_dr
     app.checked = true;
     draw(&ctx, &mut app);
     assert!(app.metrics.completion);
+    assert!(app.metrics.vlan_fields.is_empty());
+    accounts_ui_click(&ctx, &mut app, |m| m.mac_settings);
+    draw(&ctx, &mut app);
     let (id, rect) = app.metrics.vlan_fields[0];
     click(&ctx, &mut app, rect);
     assert!(ctx.memory(|m| m.has_focus(id)));
@@ -157,6 +160,8 @@ fn mac_port_field_edit_invalidates_success_and_practice_undo_keeps_assignment_dr
 #[test]
 fn mac_focused_edits_and_send_are_disabled_behind_reset_or_settings() {
     let (ctx, mut app, i) = mac_app(teaching::View::Assignment);
+    draw(&ctx, &mut app);
+    accounts_ui_click(&ctx, &mut app, |m| m.mac_settings);
     draw(&ctx, &mut app);
     let name = app.scenarios[i].id.clone();
     let field = app.metrics.vlan_fields[0].0;
@@ -330,4 +335,189 @@ fn mac_practice_selected_action_has_one_caption_and_adjacent_insert_with_persist
         "{picker:?} {insert:?}"
     );
     assert!(insert.left() > picker.right());
+}
+
+#[test]
+fn mac_preservation_only_tasks_start_with_send_and_table_and_optional_configuration() {
+    let (ctx, mut a, _i) = mac_app(teaching::View::Assignment);
+    let text = mac_rendered_text(&ctx, &mut a);
+    assert!(a.metrics.vlan_fields.is_empty(), "{text}");
+    assert!(a.metrics.mac_settings.is_some() && a.metrics.mac_lifetime.is_some());
+    assert!(a.metrics.mac_send.is_some());
+    assert!(
+        a.metrics.mac_time.is_none(),
+        "Quiet probes do not require a real wait"
+    );
+    assert!(!text.contains("Entry lifetime (seconds; 0 disables expiry)"));
+    assert!(text.contains("Learned MAC entries · applied state"));
+    accounts_ui_click(&ctx, &mut a, |m| m.mac_settings);
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.vlan_fields.is_empty());
+}
+
+#[test]
+fn mac_lifetime_policy_is_compact_and_repair_controls_stay_visible_after_solving() {
+    use dlms_learning_lab::{mac_learning as net, mac_learning_workspace as work};
+    let (ctx, mut a, i) = mac_app(teaching::View::Assignment);
+    let engine::Goal::MacLearning { requirements, .. } = &mut a.scenarios[i].goal else {
+        unreachable!()
+    };
+    requirements.push(work::Requirement::Outcome {
+        outcome: net::Requirement::Aging {
+            minimum: 90,
+            maximum: 120,
+        },
+    });
+    let text = mac_rendered_text(&ctx, &mut a);
+    assert!(
+        text.contains("Entry lifetime (seconds; 0 disables expiry)"),
+        "{text}"
+    );
+    assert!(a.metrics.vlan_fields.is_empty() && a.metrics.mac_time.is_none());
+    let engine::Goal::MacLearning {
+        initial,
+        requirements,
+    } = &mut a.scenarios[i].goal
+    else {
+        unreachable!()
+    };
+    let mut settings = initial.fabric().switches["s1"].ports["a"].clone();
+    settings.up = false;
+    requirements.push(work::Requirement::Port {
+        switch: "s1".into(),
+        port: "a".into(),
+        settings,
+    });
+    mac_rendered_text(&ctx, &mut a);
+    assert!(!a.metrics.vlan_fields.is_empty());
+    // Applying the requested policy does not change which controls the task needs.
+    let id = a.scenarios[i].id.clone();
+    let attempt = a.progress.attempts.get_mut(&id).unwrap();
+    let State::MacLearning { simulation } = &mut attempt.state else {
+        unreachable!()
+    };
+    let mut draft = dlms_learning_lab::mac_learning_workspace::Draft::new(simulation).unwrap();
+    draft
+        .configuration
+        .switches
+        .get_mut("s1")
+        .unwrap()
+        .ports
+        .get_mut("a")
+        .unwrap()
+        .up = false;
+    draft.aging = "100".into();
+    draft.apply(simulation).unwrap();
+    attempt.workspace.as_mut().unwrap().mac_draft = Some(draft);
+    mac_rendered_text(&ctx, &mut a);
+    assert!(!a.metrics.vlan_fields.is_empty());
+    assert!(a.metrics.mac_aging.is_some());
+    accounts_ui_click(&ctx, &mut a, |m| m.mac_aging);
+    let text = mac_rendered_text(&ctx, &mut a);
+    assert!(
+        text.contains("Entry lifetime (seconds; 0 disables expiry)"),
+        "{text}"
+    );
+}
+
+#[test]
+fn mac_pending_optional_settings_reopen_after_exact_resume_without_moving_field_ids() {
+    let (ctx, mut a, i) = mac_app(teaching::View::Assignment);
+    let id = a.scenarios[i].id.clone();
+    draw(&ctx, &mut a);
+    accounts_ui_click(&ctx, &mut a, |m| m.mac_settings);
+    draw(&ctx, &mut a);
+    let field = a.metrics.vlan_fields[0].0;
+    accounts_ui_click(&ctx, &mut a, |m| m.mac_lifetime);
+    let w = a
+        .progress
+        .attempts
+        .get_mut(&id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap();
+    let d = w.mac_draft.as_mut().unwrap();
+    d.configuration.switches.get_mut("s1").unwrap().vlans = "bad".into();
+    d.aging = "oops".into();
+    let raw = serde_json::to_vec(&a.progress).unwrap();
+    let saved = progress::decode(&raw, &a.scenarios).unwrap();
+    assert_eq!(
+        serde_json::to_value(&saved).unwrap(),
+        serde_json::to_value(&a.progress).unwrap()
+    );
+    let (fresh, mut reopened, j) = mac_app(teaching::View::Assignment);
+    assert_eq!(i, j);
+    reopened.progress = saved;
+    reopened.launch(j);
+    let text = mac_rendered_text(&fresh, &mut reopened);
+    assert!(!reopened.metrics.vlan_fields.is_empty(), "{text}");
+    assert_eq!(reopened.metrics.vlan_fields[0].0, field);
+    assert!(reopened.metrics.mac_aging.is_some());
+    accounts_ui_click(&fresh, &mut reopened, |m| m.mac_aging);
+    let text = mac_rendered_text(&fresh, &mut reopened);
+    assert!(
+        text.contains("Entry lifetime (seconds; 0 disables expiry)"),
+        "{text}"
+    );
+    assert!(text.contains("Pending settings"));
+    assert!(!progress::current_solved(
+        &reopened.progress.attempts[&id],
+        &reopened.scenarios[j]
+    ));
+    // Repeated frames retain raw work and the same field identity, rather than relocating on edits.
+    let before = serde_json::to_value(&reopened.progress.attempts[&id]).unwrap();
+    mac_rendered_text(&fresh, &mut reopened);
+    assert_eq!(reopened.metrics.vlan_fields[0].0, field);
+    assert_eq!(
+        serde_json::to_value(&reopened.progress.attempts[&id]).unwrap(),
+        before
+    );
+}
+
+#[test]
+fn mac_optional_port_typing_keeps_focus_identity_and_undo_in_the_same_section() {
+    let (ctx, mut a, i) = mac_app(teaching::View::Assignment);
+    draw(&ctx, &mut a);
+    accounts_ui_click(&ctx, &mut a, |m| m.mac_settings);
+    draw(&ctx, &mut a);
+    let id = a.scenarios[i].id.clone();
+    let before = a.progress.attempts[&id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .mac_draft
+        .clone();
+    let (field, rect) = a.metrics.vlan_fields[0];
+    click(&ctx, &mut a, rect);
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![acl_ctrl(egui::Key::A), egui::Event::Text("9999".into())],
+    );
+    draw(&ctx, &mut a);
+    assert_eq!(a.metrics.vlan_fields[0].0, field);
+    assert!(ctx.memory(|m| m.has_focus(field)));
+    assert_ne!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .mac_draft,
+        before
+    );
+    frame(&ctx, &mut a, 1200., 850., vec![acl_ctrl(egui::Key::Z)]);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        a.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .mac_draft,
+        before
+    );
+    assert_eq!(a.metrics.vlan_fields[0].0, field);
 }

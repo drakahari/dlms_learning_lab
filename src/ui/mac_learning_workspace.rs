@@ -163,8 +163,7 @@ impl LabApp {
                 });
                 ui.label("Insert fills the matching native controls only. Use the labeled action button to perform it.");
                 ui.label(format!("Try a change: {}", l.try_change));
-                let config = config_needed(&l.outcomes);
-                let tools = tools_needed(&l.outcomes);
+                let config = config_needed(&l.outcomes, &l.fixture);
                 let before = learning.draft.clone();
                 let changed = mac_controls(
                     ui,
@@ -173,7 +172,6 @@ impl LabApp {
                     &mut learning.simulation,
                     &mut learning.draft,
                     config,
-                    tools,
                     &mut self.metrics,
                     &mut self.focus_input,
                     &mut self.notice,
@@ -228,7 +226,11 @@ impl LabApp {
                 else {
                     return;
                 };
-                let engine::Goal::MacLearning { requirements, .. } = &scenario.goal else {
+                let engine::Goal::MacLearning {
+                    initial,
+                    requirements,
+                } = &scenario.goal
+                else {
                     return;
                 };
                 let mut draft = self.progress.attempts[&scenario.id]
@@ -245,8 +247,7 @@ impl LabApp {
                     false,
                     &mut simulation,
                     &mut draft,
-                    config_needed(requirements),
-                    tools_needed(requirements),
+                    config_needed(requirements, initial),
                     &mut self.metrics,
                     &mut self.focus_input,
                     &mut self.notice,
@@ -290,31 +291,54 @@ impl LabApp {
         }
     }
 }
-fn config_needed(reqs: &[work::Requirement]) -> bool {
-    reqs.iter().any(|r| {
-        matches!(
-            r,
-            work::Requirement::Port { .. }
-                | work::Requirement::ActiveVlans { .. }
-                | work::Requirement::Outcome {
-                    outcome: net::Requirement::Aging { .. }
-                }
-        )
-    })
+/// Presentation comes from the authored problem, never from changing current state.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+struct ConfigNeeds {
+    ports: bool,
+    lifetime: bool,
 }
-fn tools_needed(reqs: &[work::Requirement]) -> bool {
-    reqs.iter().any(|r| {
-        matches!(
-            r,
-            work::Requirement::Outcome {
-                outcome: net::Requirement::Aging { .. }
-                    | net::Requirement::Frame {
-                        after_seconds: 1..,
-                        ..
-                    }
+fn config_needed(reqs: &[work::Requirement], initial: &net::State) -> ConfigNeeds {
+    let mut needs = ConfigNeeds::default();
+    for r in reqs {
+        match r {
+            work::Requirement::Port {
+                switch,
+                port,
+                settings,
+            } => {
+                needs.ports |= initial
+                    .fabric()
+                    .switches
+                    .get(switch)
+                    .and_then(|s| s.ports.get(port))
+                    != Some(settings);
             }
-        )
-    })
+            work::Requirement::ActiveVlans { switch, vlans } => {
+                needs.ports |= initial
+                    .fabric()
+                    .switches
+                    .get(switch)
+                    .is_none_or(|s| &s.vlans != vlans);
+            }
+            work::Requirement::Outcome {
+                outcome: net::Requirement::Aging { minimum, maximum },
+            } => {
+                needs.lifetime |= !(*minimum..=*maximum).contains(&initial.aging_seconds());
+            }
+            _ => {}
+        }
+    }
+    needs
+}
+/// Reopen unapplied work even in a new UI context; keep IDs stable while typing.
+fn settings_header(
+    text: &str,
+    salt: (&'static str, usize, bool),
+    pending: bool,
+) -> egui::CollapsingHeader {
+    egui::CollapsingHeader::new(text)
+        .id_salt(salt)
+        .open(pending.then_some(true))
 }
 fn mac_feedback(ui: &mut egui::Ui, checks: &[(bool, String)], complete: &str, id: (usize, bool)) {
     let passed = checks.iter().filter(|c| c.0).count();
@@ -350,8 +374,7 @@ fn mac_controls(
     practice: bool,
     s: &mut net::State,
     d: &mut work::Draft,
-    show_config: bool,
-    show_tools: bool,
+    needs: ConfigNeeds,
     metrics: &mut Metrics,
     focus: &mut bool,
     notice: &mut Option<String>,
@@ -359,45 +382,59 @@ fn mac_controls(
     let mut changed = false;
     let before = d.clone();
     topology(ui, s, &d.configuration.selected_switch);
-    let config = |ui: &mut egui::Ui,
-                  d: &mut work::Draft,
-                  s: &net::State,
-                  metrics: &mut Metrics,
-                  focus: &mut bool| {
-        super::switching_workspace::configuration_editor(
-            ui,
-            i,
-            practice,
-            s.fabric(),
-            &mut d.configuration,
-            metrics,
-            focus,
-            "Pending settings · Apply settings before checking work",
-        );
-        super::ipv6_workspace::field(
-            ui,
-            "Entry lifetime (seconds; 0 disables expiry)",
-            &mut d.aging,
-            4,
-            ("mac-aging", i, practice),
-            metrics,
-            focus,
-        );
-    };
-    let config_open = if show_config {
-        config(ui, d, s, metrics, focus);
+    let ports_pending = !d.configuration.matches(s.fabric());
+    let lifetime_pending =
+        !work::decimal(&d.aging, 3600).is_ok_and(|n| n == u64::from(s.aging_seconds()));
+    let ports =
+        |ui: &mut egui::Ui, d: &mut work::Draft, metrics: &mut Metrics, focus: &mut bool| {
+            super::switching_workspace::configuration_editor(
+                ui,
+                i,
+                practice,
+                s.fabric(),
+                &mut d.configuration,
+                metrics,
+                focus,
+                "Pending settings · Apply settings before checking work",
+            );
+        };
+    let config_open = if needs.ports {
+        ports(ui, d, metrics, focus);
         true
     } else {
-        egui::CollapsingHeader::new("Port settings and entry lifetime")
-            .id_salt(("mac-settings", i, practice))
-            .show(ui, |ui| config(ui, d, s, metrics, focus))
-            .body_returned
-            .is_some()
+        let salt = ("mac-settings", i, practice);
+        let response = settings_header("Optional port and VLAN settings", salt, ports_pending)
+            .show(ui, |ui| ports(ui, d, metrics, focus));
+        metrics.mac_settings = Some(response.header_response.rect);
+        response.body_returned.is_some()
+    };
+    let lifetime =
+        |ui: &mut egui::Ui, d: &mut work::Draft, metrics: &mut Metrics, focus: &mut bool| {
+            super::ipv6_workspace::field(
+                ui,
+                "Entry lifetime (seconds; 0 disables expiry)",
+                &mut d.aging,
+                4,
+                ("mac-aging", i, practice),
+                metrics,
+                focus,
+            );
+            metrics.mac_aging = metrics.inputs.last().copied();
+        };
+    let lifetime_open = if needs.lifetime {
+        lifetime(ui, d, metrics, focus);
+        true
+    } else {
+        let salt = ("mac-lifetime-settings", i, practice);
+        let response = settings_header("Optional entry lifetime", salt, lifetime_pending)
+            .show(ui, |ui| lifetime(ui, d, metrics, focus));
+        metrics.mac_lifetime = Some(response.header_response.rect);
+        response.body_returned.is_some()
     };
     if !d.matches(s) {
         ui.label("Pending settings · Apply changes before sending frames with them.");
     }
-    if show_config || !d.matches(s) {
+    if config_open || lifetime_open || !d.matches(s) {
         let r = ui.add(button("Apply settings"));
         metrics.editor_save = Some(r.rect);
         if r.clicked() {
@@ -521,7 +558,7 @@ fn mac_controls(
     if !s.entries().iter().any(|e| &e.switch == selected) {
         ui.label("No learned entries on this switch. Send a frame from a workstation to learn its source.");
     }
-    let tools=egui::CollapsingHeader::new("Time and selective clear tools").id_salt(("mac-tools",i,practice)).default_open(show_tools).show(ui,|ui|{
+    let tools=egui::CollapsingHeader::new("Time and selective clear tools").id_salt(("mac-tools",i,practice)).show(ui,|ui|{
         ui.label("Time advances only when requested. Clear removes dynamic entries; it does not change ports or cables.");
         super::ipv6_workspace::field(ui,"Advance seconds (0–86400)",&mut d.advance_seconds,20,("mac-advance",i,practice),metrics,focus);
         metrics.mac_time=metrics.inputs.last().copied();

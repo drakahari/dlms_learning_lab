@@ -16,6 +16,7 @@ enum Control {
     Send,
     Check,
     Tools,
+    Settings,
     Time,
     Advance,
     Port,
@@ -132,6 +133,7 @@ fn plan(s: &Scenario) -> Vec<Step> {
         p.extend([
             Step::Theme(theme, scale, size),
             Step::Scale(scale),
+            Step::Click(Control::Settings),
             Step::Click(Control::Port),
             Step::Type("20".into()),
             Step::Wait,
@@ -149,6 +151,7 @@ fn plan(s: &Scenario) -> Vec<Step> {
         ]);
         send(&mut p, "a", "02:00:00:00:00:03");
         check(&mut p, "pass", complete);
+        p.push(Step::Click(Control::Settings));
     }
     p.extend([
         Step::Readback,
@@ -222,6 +225,7 @@ impl LabApp {
             Control::Send => self.metrics.mac_send,
             Control::Check => self.metrics.check,
             Control::Tools => self.metrics.mac_tools,
+            Control::Settings => self.metrics.mac_settings,
             Control::Time => self.metrics.mac_time,
             Control::Advance => self.metrics.mac_advance,
             Control::Port => self.metrics.vlan_fields.first().map(|(_, r)| *r),
