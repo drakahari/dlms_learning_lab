@@ -860,3 +860,28 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   no requirement or grade is weakened. Render-only layout measurement separately
   reentered a Context lock; its one-file correction is distinct from the old
   unanswered Wayland callback and awaits actual verification.
+
+
+### M86 integrated Ethernet teaching and capability follow-through
+
+- Normal catalog113/27:35CCNA,21LPIC-1,17LPIC-2,40Bash. Four substantive Ethernet
+  assignments add narrow current1.13/a–d evidence, not full-objective coverage.
+  Main889 models/integrations pass across83 targets. Whole UI run159pass/2fail
+  exposes two old109 current-catalog assertions; correction and scoped rerun are
+  recorded separately. Genuine historical fixtures remain unchanged.
+- Corrected native capstone exact-plan suffix passes15 captures; render-only
+  matrix passes24 fullscreen/windowed100/150/200 light/dark views. First-three
+  full flows are accepted separately. Earlier failed full runs remain; complete
+  installed-candidate all-four acceptance is still required. See MAC_LESSONS.md.
+- Shared label widths, actual popup content bounds and capture Context discipline
+  preserve full tasks and meaningful tools. One missing-glyph prose fix changes
+  no grade/state/action. Legacy-three teaching claims are corrected rather than
+  silently treating older seeds as meeting the newer introduction pattern.
+- Typed exact DirectoryEntries grading is integrated after8new+56affected checks.
+  Three Find lessons remain source-only, unregistered. PTR and Find capabilities
+  alone gain no authored curriculum credit. Packaging/platform acceptance and
+  the substantial remaining curriculum stay open.
+- Follow-through:26/26 native-plan checks now pass, including both failures.
+  All-target Clippy/fmt,112 Python guards, coverage and palette provenance pass.
+  The original failed full UI run is retained;159 unaffected plus the corrected
+  two give161 distinct UI checks, without counting overlapping reruns as new.

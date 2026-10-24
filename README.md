@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **109 authored assignments:** 31 CCNA,21 LPIC-1,17 LPIC-2 and40 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **113 authored assignments:** 35 CCNA,21 LPIC-1,17 LPIC-2 and40 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -35,6 +35,15 @@ Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two te
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 
 ## This milestone
+
+Four [Ethernet learning and recovery assignments](docs/MAC_LESSONS.md) now follow
+VLAN foundations: build directed paths, repair an older table, reason about
+source refresh/expiry and hand over two groups across three switches. Each has
+an introduction, separate runnable practice and a full native assignment.
+Model checks and native component flows pass; the exact next installed-candidate
+all-four run is still a delivery gate. The last packaged Fedora candidate has109
+labs; its identity and verified Windows candidate are in INSTALLATION.md.
+
 
 The [OSPF settings and route-cost unit](docs/OSPF_LESSONS.md) adds four native
 configuration assignments: repair router identities/process enablement, match

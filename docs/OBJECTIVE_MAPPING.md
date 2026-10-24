@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are128 narrowly evidenced Partial practice rows, one Supporting explanation row and1111 Open rows; no full-objective completion is asserted. The catalog contains109 authored assignments/twenty-six units.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are133 narrowly evidenced Partial practice rows, one Supporting explanation row and1106 Open rows; no full-objective completion is asserted. The catalog contains113 authored assignments/twenty-seven units.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -62,10 +62,10 @@ M65 adds four local-account lifecycle assignments after access foundations. Rech
 M70 strengthens only the already Partial LPIC-2v4.5 202.1/K1/T4 rows with four actual service-definition, preparation/ordering, optional-failure and target-handover assignments. Current and separate next-session outcomes, preserved context and alternate solutions are tested. No new row is promoted; SysV/LSB/full boot and unimplemented exact terms remain Open. The original official fingerprints are unchanged; scoped sources checked2026-10-23. See UNIT_MANAGER_LESSONS.md.
 
 
-M76 adds a tested MAC-learning library foundation only. Current CCNA1.13 and
-its four lettered entries remain Open because native instruction and practice
-are not accepted yet. The gap descriptions now distinguish the implemented
-source/VLAN/table/aging model from the absent learner workspace and curriculum.
+At M76, the tested MAC-learning library foundation alone left current CCNA1.13
+and its four lettered entries Open because native instruction and practice were
+not yet accepted. Those gap descriptions distinguished the implemented source/
+VLAN/table/aging model from the then-absent learner workspace and curriculum.
 No status, authored-ID, objective-source fingerprint or count changes. Primary
 Cisco v1.1/MAC references rechecked2026-10-24; full inventory remains2026-10-22.
 See MAC_LEARNING_SUBSET.md.
@@ -74,8 +74,20 @@ See MAC_LEARNING_SUBSET.md.
 M77 strengthens only the already Partial LPIC-1 105.2/K3 evidence with three distinct case-dispatch assignments. State-based tests cover31 deterministic cases, alternate supported scripts, partial/wrong/hardcoded attempts, independent examples and exact original106 progress preservation. Actual native Fedora flows cover all three tasks, Challenge and current-result invalidation. No objective/source fingerprint is promoted:128Partial/1Supporting/1111Open remain overlapping references, not percentages. See SHELL_CASE_LESSONS.md for limits and actual verification.
 
 
-M78 adds a verified native MAC workspace and isolated practice foundation, using
-a private unbundled developer fixture. CCNA1.13/a–d remain Open until the authored
-unit is accepted. Only the gap descriptions change; no status/fingerprint/ID
+At M78, the verified native MAC workspace and isolated practice foundation used
+a private unbundled developer fixture. CCNA1.13/a–d remained Open pending the
+authored unit. Only the gap descriptions change; no status/fingerprint/ID
 promotion or lab count. Actual native review caught and corrected inherited
 Apply/Check wording before content authoring. See MAC_LEARNING_SUBSET.md.
+
+
+The accepted authored Ethernet unit strengthens current CCNA v1.1 1.13 and its
+four lettered rows to narrowly Partial practice, with explicit per-row source/
+aging, frame, flooding and table evidence. Four distinct full tasks have separate
+practice, alternate/negative/current-state tests and native component acceptance.
+Actual fullscreen/windowed and large-text renders are reviewed; the exact next
+installed candidate still requires its full four-task run. No future-v2.0,
+STP/ARP/real packet/IOS/equipment or security guarantee is inherited. Source
+fingerprints remain unchanged; scoped sources checked2026-10-24. See MAC_LESSONS.md.
+The overlapping totals133Partial/1Supporting/1106Open are bookkeeping, not a
+completion percentage. Find/PTR library foundations gain no authored credit yet.

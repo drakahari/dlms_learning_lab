@@ -1,157 +1,127 @@
 # Implementation continuation checkpoint
 
-Updated2026-10-24 during the authorized continuation. The application is NOT complete.
+Updated2026-10-24 during authorized continuation. **The application is not complete.**
 Ordinary implementation remains authorized; no public release is authorized.
+Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference runs.
 
-## Current normal source and verified curriculum
+## Current source and actual coverage
 
-- Main integrates tested evaluator8, the pure MAC-learning foundation and the
-  accepted three-lesson case-dispatch unit. The unit source commit is853b572;
-  main integration is8e9b6f6, reporting5a968c7. Both are pushed. Maincee0432
-  is a formatting-only follow-up to the capture-lock correction; full-tree format passes.
-  Main now also integrates accepted native MAC workspace ea7c6b1 and guarded
-  two-process reopen verification b9786fa. These do not add bundled scenarios.
-- **Last accepted delivered batch:109 authored labs /26 units:31CCNA,21LPIC-1,17LPIC-2,40Bash/Shell.**
-  Main source fe6a52d now registers four reviewed MAC assignments:113/27,
- 35CCNA/21LPIC-1/17LPIC-2/40Bash. Their857-model integration gate passes in
-  the isolated merged branch; actual all-four native teaching acceptance is
-  pending. The last installed candidate remains109; do not relabel it.
-  All prior106 scenario identities/goals remain, as do28 themes. No numeric variants
-  or synthetic navigation fixtures are counted. Cases are bundled in normal mode.
-- M77 normal109 regression passed818 model/integration plus122 UI checks
-  (940 distinct) in its exclusive worktree. Final metadata-only changes pass the
-  eight content checks; capture-lock fix passes focused plan/Clippy/build and
-  actual native all-three flow. Pure MAC core independently passes18 checks.
-  Combined main passes836 model/integration checks across78 targets, including the18 MAC checks. The122 UI checks are unchanged from the accepted109 branch; do not add overlapping repetitions to totals.
-- Actual native M77 R2 passes45 captures in `.build-artifacts/native-runs/run-8ja5d440`.
-  Logm77-case-lessons-native-r2.log; exact source/binary/screenshot/memory receipt
-  under `.build-artifacts/reviews/shell-case-content/native-acceptance-r2/`.
-  Root reviewed introductions, substantial assignments, specific wrong/partial
-  output/file feedback and actual light150%/dark200% typing/Run results.
-  Save/readback, unfinished drafts, separate examples, current invalidation,
-  conditional alternatives, Challenge, favorites and selected Reset pass.
-  Short1268×632 tiled windows require scrolling. Native R1 deadlocked in new
-  capture-only zoom geometry; nested context read was moved outside its data lock.
-  Failed R1 is retained. This is separate from the historical Wayland-startup stall.
-- Narrow LPIC105.2/K3 evidence strengthens without promotion. Coverage remains
-  **128Partial/1Supporting/1111Open** across1240 overlapping issuer references,
-  not a completion percentage. Complete certification and advanced shell coverage
-  remain open. See COMPLETION.md, OBJECTIVE_MAPPING.md and SKILL_COVERAGE.csv.
+- Normal catalog: **113 authored labs /27 units:35CCNA,21LPIC-1,17LPIC-2,40Bash/Shell**.
+  The four Ethernet-learning assignments follow VLAN foundations, before static
+  routing. All original109 identities/versions/initial states/goals remain;
+ 28 themes and original-nine progress are preserved. No numeric variants or
+  synthetic navigation fixtures count as authored curriculum.
+- Main integrates evaluator8/case-dispatch, native MAC workspace/content,
+  strict cold-reopen tool, bounded virtual find, PTR/reverse-name capability and
+  exact typed DirectoryEntries grading. Source foundations alone are not labs.
+  No authored find or reverse-DNS unit is registered yet.
+- CCNA1.13/a–d now have narrowly Partial authored evidence. Current totals are
+ **133Partial/1Supporting/1106Open across1240 overlapping references**, not a
+  completion percentage. Most certification and advanced shell work remains
+  unfinished. Source versions/fingerprints stay unchanged; future blueprints
+  remain separate. See COMPLETION.md and OBJECTIVE_MAPPING.md.
+- Expanded units have separate introductions/examples/assignments. Three legacy
+  seeds (gateway, DNS, storage) still lack the newer teaching metadata; a
+  source-only audit is underway. Do not claim every unit meets that standard.
 
-## Actual executable and installer identities
+## Current integration gates and native evidence
 
-The ordinary main development target has since been rebuilt by integration tests;
-its identity must be checked before quoting a new development build. Use the
-separately identified installed candidate below for the last packaged acceptance.
-Do not relabel that artifact to newer source commits. Existing candidates remain.
+- Main97c617f combined model/integration gate passes **889 checks across83 targets**
+  (m86-main-combined-models-r1.log). Whole UI gate finishes159pass/2fail: both
+  failures are native-plan assertions still expecting109 rather than113.
+  Current-only expectations are corrected; frozen102/106/109 and genuine6/7
+  fixtures remain unchanged. The26-check native-plan rerun passes, including both
+  failures. All-target Clippy/fmt,112 Python guards, coverage and palette
+  provenance pass. Do not relabel the original failed full run as a pass.
+- MAC unit:9 authored content checks, two alternate plans per task, plausible
+  wrong/partial attempts, current invalidation and original109 retention pass.
+  Thirty focused UI/control checks pass before main integration. Actual native
+  first-three full flows pass in run-v518tg9y; that full run fails in the capstone
+  popup controller and is retained. Corrected exact capstone suffix passes15
+  captures in run-f5mi3zoe, including all37 current requirements, separate practice,
+  wrong/partial/alternate/reset/resume/Challenge and actual200% editing.
+- Actual render-only MAC matrix passes24 views in run-_5ducto6: all four at100%
+  fullscreen/windowed, capstone150%Light/200%Dark in both. Root reviewed real
+ 2560×1440 and1268×632 output, centered values/cursors and reserved/stacked port
+  columns. Shared label-width rules preserve previous IPv6/VLAN geometry.
+  A missing arrow glyph is replaced with English in one objective prose string;
+  state, goal predicates and actions do not change.
+- No single successful all-four normal MAC run is fabricated from components.
+  The next exact installed candidate must run the complete mac-lessons stage.
+  Component receipt9362182b… and final source-gate receiptd67832d2… are retained
+  under ignored .build-artifacts/reviews/mac-learning-content/.
+- Native controller popup scrolling now uses content intersected with paint clip,
+  asserts selected values and rejects offscreen clicks. Two capture-only Context
+  re-entry bugs were fixed and actual capture-phase regression added. These are
+  separate from the historical unanswered Wayland EGL callback stall.
+- Strict two-process cold reopen R4 passes both real processes and final navigation
+  with nine screenshots, exact15755-byte writer/reader observations, unfinished
+  assignment/separate example drafts, favorite, theme/scale and migration receipts.
+  Evidence tmp/native-reopen-m79-worktree-r4 manifest63a655f3… is preserved.
+  Repeat against the next actual installed ELF, not only development output.
+- Actual rebuilt MAIN GNU reference R2 passes152 legacy comparisons and32 find
+  observations:31 matched path/status/error outcomes and one explicitly unsupported
+  readable/nonsearchable-directory boundary. Evidence
+  tmp/filesystem-find-reference-d2vakr7o manifest67ee7757…; first failed run retained.
+  It exposed excessive maxdepth range and Btrfs directory-link-count assumptions;
+  corrected bounds reject2147483648/4294967295 and preserve both negative inputs.
+  Exact152-fixture bytes are unchanged. No learner-host execution is introduced.
+- DirectoryEntries grading passes8 new and56 affected checks before integration.
+  Exact immediate names include hidden entries and detect renamed unwanted copies
+  inside the declared folder. This is not global information-flow proof. Internal
+  tagged serde still buffers within the existing2MiB pack bound; no whole-pack
+  streaming claim. Find/PTR gains no authored coverage merely from core tests.
 
-New clean109/26 Fedora candidate source5a968c7:
-`dist/dlms-learning-lab-0.1.0-g5a968c735523-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+## Last packaged acceptance and exact launch
+
+The development target changes during test builds; never relabel an old hash.
+Last fully accepted Fedora package remains **109/26**, source5a968c735523574ffffcb9ab4804409846f29993:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-g5a968c735523-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
 ArchiveSHA2563031a439608f47d2a1d5f09bdcb9d4b1ae722cb573344ff6cc9c6f195f42246e;
 binarySHA256202c7b993f7517e697a7203e42a8cb511ff2c4c5591ecb2b1ee2dee5d70552cd.
 All223 applicable Linux notices/source packages resolve. Actual install/identified102
-upgrade/clean uninstall-reinstall/outside-checkout identity/content/desktop and exact
-synthetic original-nine progress retention pass; receipt/logm77-installed-lifecycle-r1.
-Installed prefix `.build-artifacts/installations/verified-5a968c735523-mzx5b592`.
-Root actual installed all-three scripting native flow passes45 captures (run-k9iyd4_w),
-shared alignment passes72 views (run-795xb4yi), and quiet Wayland starts pass10/10.
-Logs m77-installed-{case-lessons,alignment,quiet}-r1. Runtime receipt
-SHAdef749e0234e805e8e3b01ac98e77b1e5d47a37f1eb0255ef3c66a00f894b702. This candidate is not application completion.
-The older102 installed acceptance remains in INSTALLATION.md and earlier artifacts.
+upgrade/uninstall-reinstall/outside-checkout checks and exact synthetic original-nine
+progress retention pass. Installed prefix is
+.build-artifacts/installations/verified-5a968c735523-mzx5b592.
+Installed scripting45 captures, IPv4/VLAN72 alignment views, service72 captures and
+quiet Wayland10/10 launches pass; logs m77-installed-*-r1. This does not establish
+complete curriculum or diagnose the historical startup stall.
 
-## Next serial implementation actions
+Windows CI40111561758 atc41352a passes tests/Clippy/candidate. Its unsigned109/26
+ZIP is underdist/native-ci-c41352a/windows; archiveSHA256
+eda9eafb71f484d900159edbf035c84953e045dabbb5ec789dd519cc579f4b73.
+PE, all25 embedded scenario/unit source packs and notices were verified without
+executing it on Fedora. Ubuntu/macOS fixture failures in that run are corrected
+in maina0cdb48; production containment is unchanged. Fresh clean-source full CI
+is still required. Windows/macOS actual desktop acceptance remains pending.
 
-1. Commit/push accurate installed109 evidence and the CI timeout correction.
-   Installed scripting, alignment, service and quiet-start runs have finished:
-   three case lessons45 captures, IPv4/VLAN72 views, four service assignments72
-   captures and quiet Wayland10/10 starts. Candidate source remains5a968c7.
-   CI40101440051 atcee0432: Ubuntu passes; Windows/macOS hit the30-minute
-   job limit in Rust tests/release compile respectively. Exact annotations confirm
-   timeouts. The proposed60-minute limit retains every check and two workers;
-   run40111060414 failed only a line-wrap omission in merged probe selection;
-   formatting-onlyfec8cfe corrects it. Subsequent40111561758 passes Windows,
-   whose109-lab candidate is downloaded and archive/PE/embedded-content hashes
-   verified underdist/native-ci-c41352a/windows. Ubuntu/macOS expose synthetic
-   reopen-test temp-path assumptions; tests-only fixture corrections are pending,
-   production containment stays strict. Rerun after the next coherent push. CI is not other-platform desktop acceptance.
-2. Native MAC workspace aac951f is integrated through ea7c6b1. Main combined
-   model/integration suite passes846 checks across79 targets; seven targeted
-   MAC UI/plan checks and all-target Clippy pass. Accepted final native R2 has17
-   captures inrun-xrywx5uv, including separate practice, explicit Apply, current
-   grading, real150/200% edits, reset/readback and Challenge.
-   A subsequent focused refinement hides irrelevant port configuration, exposes
-   task-required lifetime settings, preserves pending drafts and uses plain host
-   lists. Its44 scoped checks, Clippy/fmt/build and actual17-capture native run
-   run-cfeb22ku pass. Root reviewed real compact/light/dark/validation renders.
-   Refinement0feec1a is now integrated through ece2c66 and pushed.
-   No additional authored lab is counted for that private fixture.
-3. Four distinct MAC lessons are source proposals: first learning/forwarding,
-   stale-location repair, source-refresh/expiry, and three-switch handover.
-   Their nine content checks now pass, along with Clippy/fmt, in unregistered
-   content11c5e94. Initial test failures exposed harness-only prerequisite loading
-   and stale native-input-draft assumptions; corrected helpers retain all model,
-   expected-outcome and negative predicates. Metadata-only teaching corrections
-   leave simulation semantics identical. Retain old109 IDs and genuine6/7 history.
-   Normal registration9d83f06 is integrated through fe6a52d. Its857 models and
-   Clippy/fmt pass. Main then passes869 model/integration checks with the PTR
-   extension;17 content follow-through checks pass after metadata and course-order
-   refinements. The unit now follows VLAN foundations, before static routing.
-   Actual native R1 passes first-three full tasks and capstone practice/partial,
-   then correctly fails capstone completion because the controller missed the
-   last source in a clipped six-row dropdown. Evidence is run-885ru_28 and
-   m83-mac-lessons-native-r1.log. Fix real popup scrolling/selected-value assertions,
-   preserve all37 capstone requirements, and rerun. Render review also requests
-   shared label columns and a clear Frame-not-sent action-error prefix.
-   R2 retains first-three passes but its stricter popup controller fails in the
-   capstone example: bare ui.clip_rect spans the whole window horizontally, so
-   the generated wheel point misses the narrow popup. Keep actual popup content
-   bounds, add a real ComboBox regression, and use a focused capstone run before
-   final full-candidate checks. R2 evidence is run-v518tg9y. Do not claim a full
-   four-lab native pass. Four-lab delivered count and coverage promotion remain pending.
-   The added render-only mac-layout probe separately hit a nested Context read
-   inside a data write lock before captures; one-file precomputed-PPP fix and a
-   real phase1 regression are source-ready, not yet tested. This is measurement
-   code, distinct from the historical Wayland callback stall.
-4. Guarded cold-reopen harness is integrated in b9786fa. It executes ordinary
-   profile lock/load/preferences/save in two real native processes using only a
-   marked private project-disk profile. Current97 Python guards and13 targeted
-   Rust checks, Clippy/fmt/build pass. No personal profile is opened.
-   Native R1 failed its post-launch card controller; corrected without changing
-   product behavior. R2 exposed raw-versus-portable serialization of migration
-   receipts; strict pre-exit raw bytes, full JSON and loaded receipt comparisons
-   were added rather than ignoring keys. R3 writer and real reader pass all exact
-   cold-load comparisons, retaining unfinished assignment/example drafts, favorite,
-   theme/scale and receipts. Later reader Back control fails a fractional clipping
-   assertion at150% (0.0208 logical points); eight captures and all raw snapshots
-   remain in tmp/native-reopen-m79-worktree-r3. That run was not accepted.
-   Corrected controller-only geometry b8c0175 allows one physical pixel of edge
-   rounding while requiring the click center inside the actual viewport; four
-   scale/offscreen regressions retain bounded failure. Seventeen targeted checks,
-   Clippy/fmt/build pass. Actual strict R4 now PASSES both processes and final
-   navigation, nine retained screenshots; root reviewed real library, separate
-   example and current completion. Manifest63a655f3071b4dd4ec439dd2ef2d68a717cd3edac1a4103896ccab7a5c133f48
-   in tmp/native-reopen-m79-worktree-r4 pins all evidence. Writer/reader observations
-   are byte-identical. Repeat against the next installed candidate; existing5a
-   candidate predates this guarded verification entry point.
-5. Continue remaining Linux/network/shell gaps after the tested MAC batch.
-   Reverse DNS/PTR capability is being tested separately in main, with12 new
-   pure/editor/progress checks plus existing DNS/lib checks passing. No reverse
-   DNS authored unit or coverage is claimed. Bounded find core is integrated in
-   697754e after42 scoped checks/Clippy/fmt; fixed GNU comparison source is separate,
-   with110 Python guards passing, including13 new boundary tests. All152 existing
-   controlled reference commands are preserved. Build the actual MAIN probe and
-   execute the reviewed fixed comparison under the shared guard after integration.
-   Actual GNU R1 caught an excessive depth bound and Btrfs directory-link-count
-   comparison assumptions. Corrections3ff64de and strict CI-fixture fix a0cdb48
-   pass112Python/12find/17reopen checks/Clippy/fmt. Actual rebuilt MAIN GNU R2 now
-   passes152 legacy comparisons and32 find observations:31 matched path/status/
-   error comparisons plus one explicit unsupported boundary. Evidence
-   filesystem-find-reference-d2vakr7o, manifest67ee7757bf94488875a42adf9f4c9550f86c5929d1063a1b4b29700047303ed4.
-   All earlier failures and exact152-fixture bytes remain. DirectoryEntries typed
-   exact inventory grading is being prepared source-only before three distinct
-   search/investigation lessons; no new find authored lab is counted. Candidate packaging, pure capabilities
-   and source proposals do not complete curriculum. Windows/macOS desktop, physical-device/accessibility and novice
-   acceptance remain explicitly pending.
+## Next serial actions, without another planning restart
+
+1. Completed: current-only native-plan rerun26/26, Clippy/fmt,112 Python,
+   coverage and palette provenance. Combined model and UI runs observe minimum
+   available memory21.08GiB, peak PSIavg10 at0.18% and no OOM counter increase;
+   two jobs/two test threads remain mandatory, not a safety guarantee.
+2. Commit/push reviewed integrated MAC reporting/control follow-through and launch
+   fresh60-minute native CI. No release publication. The last pushed source is
+   c41352a; newer coherent source commits need pushing together.
+3. Build a clean MAIN113/27 Fedora candidate. Verify its actual installed lifecycle
+   upgrading the accepted109, exact protected progress, full four MAC flows,
+   quiet10/10, shared IPv4/VLAN alignment and strict real two-process cold reopen.
+   Review actual screenshots and record source/binary/archive hashes. Keep older
+   packages and all failed evidence. A new package is a milestone, not completion.
+4. Source-only helper is preparing three unregistered Find assignments: exact
+   evidence handover, partial-search permission repair, private review handover
+   capstone. Review teaching, two alternatives each and scoped safety goals before
+   gates/registration. Owner-read/search repair must accept500 or700; no forced
+   unrequested write bit. Keep the old catalog/order/progress intact.
+5. Finish independent legacy-three teaching audit and scoped implementation with
+   real separate examples, correct saved/live semantics and progress tests.
+   Then continue remaining Linux/network/shell curriculum, extending capabilities
+   before authoring dependent tasks. Do not stop at a candidate or test count.
 
 ## Build safety and preserved evidence
 

@@ -465,7 +465,7 @@ impl LabApp {
         let ordinal = (stage - 7200) / 100;
         let phase = (stage - 7200) % 100;
         let id = CASE_LESSON_IDS[ordinal];
-        assert_eq!(self.scenarios.len(), 109);
+        assert_eq!(self.scenarios.len(), 113);
         assert!(self.units.iter().any(|u| u.id == "shell-case-dispatch"
             && u.labs.iter().map(String::as_str).eq(CASE_LESSON_IDS)));
         let i = self
@@ -848,9 +848,9 @@ mod case_lesson_plan_tests {
     #[test]
     fn three_case_lessons_are_normal_and_have_bounded_native_keyboard_plans() {
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 109);
+        assert_eq!(all.len(), 113);
         let units = course::bundled(&all).unwrap();
-        assert_eq!(units.len(), 26);
+        assert_eq!(units.len(), 27);
         let rows: serde_json::Value = serde_json::from_str(include_str!(
             "../../../tests/fixtures/shell-case-content-review.json"
         ))

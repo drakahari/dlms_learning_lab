@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **109 authored assignments in26 units:31CCNA,21LPIC-1,17LPIC-2 and40Bash/Shell**. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **113 authored assignments in27 units:35CCNA,21LPIC-1,17LPIC-2 and40Bash/Shell**. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -120,3 +120,20 @@ M70 adds four [service definition/dependency/handover assignments](UNIT_MANAGER_
 
 
 M77 adds three case-dispatch assignments: an argument interface, prioritized full-record routing and a validate-before-publication capstone. Separate examples,31 deterministic assignment cases and alternate conditional solutions are verified in the bounded simulator and actual native Fedora flow. LPIC-1 105.2 remains narrow Partial reinforcement; mail, real interpreter selection/permissions and wider shell semantics remain absent. Native light150%/dark200% editing and save/readback/reset pass; cold-process reopen, novice, screen-reader and other-platform acceptance are not established by that flow. See SHELL_CASE_LESSONS.md.
+
+
+## Ethernet learning and aging — 2026-10-24
+
+Four distinct [MAC assignments](MAC_LESSONS.md) now follow VLAN foundations,
+before static routing. They teach source learning, known/unknown/broadcast
+forwarding, selective stale-location recovery, independent quiet-time reasoning
+and a three-switch/two-group handover. Current CCNA v1.1 1.13/a–d receive narrow
+Partial practice; source fingerprints remain unchanged, with scoped official
+PDF and technical references rechecked2026-10-24. The overlapping ledger is now
+133Partial/1Supporting/1106Open, not percentages or full objectives.
+
+Native component flows and actual fullscreen/windowed100/150/200 Light/Dark
+render review are accepted; the exact next installed-candidate all-four gate
+is pending separately. Bounded find and reverse-DNS capabilities alone add no
+new authored labs or certification credit. Most full-product criteria remain
+Open, including broader networking/Linux/shell content and platform acceptance.
