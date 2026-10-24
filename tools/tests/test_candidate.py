@@ -41,6 +41,15 @@ if __name__ == '__main__':
     unittest.main()
 
 class NativeProvenance(unittest.TestCase):
+    def test_worktree_cannot_reuse_main_candidate_target(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary).resolve()
+            with patch.object(candidate, 'ROOT', root / 'worktree'), patch.object(candidate, 'project_root', return_value=root), patch.object(candidate, 'safe_run') as run:
+                with self.assertRaisesRegex(ValueError, 'main checkout'):
+                    candidate.compile_native('cargo', 'test-native-target', 'app', {})
+                run.assert_not_called()
+            self.assertFalse((root / 'target').exists())
+
     def test_target_overrides_cannot_package_a_stale_host_binary(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary).resolve()

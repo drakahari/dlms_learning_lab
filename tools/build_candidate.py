@@ -59,6 +59,8 @@ def copy_tracked_tree(relative, destination):
 def compile_native(cargo, target, binary_name, env):
     # Explicit CLI options override Cargo environment and config target settings.
     common = project_root(ROOT)
+    if ROOT.resolve() != common:
+        raise ValueError('Build candidates from the main checkout; never share its packaging target with a worktree')
     build_dir = (common / 'target/candidate-build').resolve()
     if not build_dir.is_relative_to(common):
         raise ValueError('Candidate build target escaped the project volume')
