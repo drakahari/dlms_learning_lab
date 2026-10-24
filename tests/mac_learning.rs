@@ -666,3 +666,36 @@ fn negative_physical_guards_cover_destination_transit_and_native_input_failures(
         );
     }
 }
+
+#[test]
+fn failed_frame_feedback_uses_none_and_plain_host_lists_with_unchanged_outcome_decisions() {
+    use dlms_learning_lab::mac_learning::{MAX_ERROR_BYTES, Requirement};
+    let s = fixture();
+    let accepted = Requirement::Frame {
+        label: "Separate group check".into(),
+        from: "a".into(),
+        destination: mac(3),
+        after_seconds: 0,
+        arrivals: names(&["b", "c"]),
+        accepted_by: BTreeSet::new(),
+        forwarding: None,
+    };
+    let (ok, text) = accepted.check(&s);
+    assert!(!ok);
+    assert!(text.contains("accepted by c; required none"), "{text}");
+    assert!(text.len() <= MAX_ERROR_BYTES && text.capacity() <= MAX_ERROR_BYTES);
+    let copies = Requirement::Frame {
+        label: "Directed copies".into(),
+        from: "a".into(),
+        destination: mac(3),
+        after_seconds: 0,
+        arrivals: names(&["c"]),
+        accepted_by: names(&["c"]),
+        forwarding: None,
+    };
+    let (ok, text) = copies.check(&s);
+    assert!(!ok);
+    assert!(text.contains("copies reached b, c; required c"), "{text}");
+    assert!(!text.contains('{') && !text.contains('}') && !text.contains('"'));
+    assert!(text.len() <= MAX_ERROR_BYTES && text.capacity() <= MAX_ERROR_BYTES);
+}

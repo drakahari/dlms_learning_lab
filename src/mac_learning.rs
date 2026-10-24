@@ -31,6 +31,35 @@ fn diagnostic(text: String) -> String {
     bounded
 }
 
+/// Display only: comparisons still use the complete validated host sets.
+/// Separate list bounds leave space for both actual and required in feedback.
+fn host_list(hosts: &BTreeSet<String>) -> String {
+    const LIMIT: usize = 160;
+    if hosts.is_empty() {
+        return "none".into();
+    }
+    let mut out = String::with_capacity(LIMIT);
+    for host in hosts {
+        let separator = if out.is_empty() { "" } else { ", " };
+        if out.len() + separator.len() + host.len() > LIMIT - 3 {
+            let room = (LIMIT - 3).saturating_sub(out.len() + separator.len());
+            if room > 0 {
+                out.push_str(separator);
+                let mut end = room.min(host.len());
+                while !host.is_char_boundary(end) {
+                    end -= 1;
+                }
+                out.push_str(&host[..end]);
+            }
+            out.push_str("...");
+            break;
+        }
+        out.push_str(separator);
+        out.push_str(host);
+    }
+    out
+}
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub struct Mac(pub [u8; 6]);
 impl Mac {
@@ -834,8 +863,9 @@ impl Requirement {
                     return (
                         false,
                         format!(
-                            "{label}: accepted by {:?}; required {:?}. Inspect the current VLAN path and destination address",
-                            out.accepted_by, accepted_by
+                            "{label}: accepted by {}; required {}. Inspect the current VLAN path and destination address",
+                            host_list(&out.accepted_by),
+                            host_list(accepted_by)
                         ),
                     );
                 }
@@ -843,8 +873,9 @@ impl Requirement {
                     return (
                         false,
                         format!(
-                            "{label}: copies reached {:?}; required {:?}. Unknown unicast can flood even when only its destination accepts it",
-                            out.arrivals, arrivals
+                            "{label}: copies reached {}; required {}. Unknown unicast can flood even when only its destination accepts it",
+                            host_list(&out.arrivals),
+                            host_list(arrivals)
                         ),
                     );
                 }
@@ -905,5 +936,23 @@ mod retained_diagnostic_tests {
         assert!(
             result.len() <= super::MAX_ERROR_BYTES && result.capacity() <= super::MAX_ERROR_BYTES
         );
+    }
+}
+
+#[cfg(test)]
+mod host_list_display_tests {
+    use super::*;
+    #[test]
+    fn host_lists_are_plain_bounded_utf8_without_losing_comparison_data() {
+        assert_eq!(host_list(&BTreeSet::new()), "none");
+        assert_eq!(
+            host_list(&BTreeSet::from(["archive".into(), "desk".into()])),
+            "archive, desk"
+        );
+        let names = BTreeSet::from(["é".repeat(100_000)]);
+        let text = host_list(&names);
+        assert!(text.len() <= 160 && text.capacity() <= 160);
+        assert!(text.ends_with("..."));
+        assert_eq!(names.iter().next().unwrap().len(), 200_000);
     }
 }
