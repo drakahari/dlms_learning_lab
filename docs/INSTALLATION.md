@@ -473,3 +473,29 @@ model in this candidate is not itself an additional authored lab. No release pub
 
 
 Additional M77 installed follow-through passes all four multi-unit service lessons,72captures inrun-uxkjmlot (m77-installed-unit-manager-r1.log). Root reviewed each introduction and full editor/terminal assignment plus representative wrong feedback/large-text views. Actual flows include separate examples/experiments, diagnosis, wrong/partial/current/alternate outcomes, query purity,150/200% Save/terminal repair, exact drafts/readback, Undo and selected Reset/Challenge. No host service was accessed. This strengthens the same5a968c7 candidate acceptance; it does not add lab titles or prove other-platform, novice, screen-reader or cold-process reopening.
+
+
+## M84 — Windows CI candidate, desktop acceptance pending
+
+[Native CI40111561758](https://github.com/drakahari/dlms_learning_lab/actions/runs/40111561758)
+at exact sourcec41352a8c003bda8f4216860ac2604cc8ce6e463 passes the Windows2025
+job, including its tests, Clippy and candidate creation. The downloaded archive
+and sidecar agree, its PE executable matches the build manifest, and all25
+embedded scenario/unit source packs match their declared hashes and that exact
+Git revision. This candidate contains109 labs/26units (31CCNA/21LPIC-1/17LPIC-2/
+40Bash), not the later113-lab work. Its target inventory has137 dependency packages.
+
+Local owner-test archive:
+`dist/native-ci-c41352a/windows/dlms-learning-lab-0.1.0-gc41352a8c003-x86_64-pc-windows-msvc-windows-candidate.zip`
+(36108503bytes).
+Archive SHA256`eda9eafb71f484d900159edbf035c84953e045dabbb5ec789dd519cc579f4b73`;
+executable SHA256`de9a032815d3fdeb6cc3bf5839bede1d95111c5a37e67336cf4759da84766383`.
+Private receipt is audits/m84-windows-c413-candidate.json. No Windows executable
+was run on Fedora, no desktop installation/reopen/upgrade/uninstall acceptance
+is inferred, and the candidate is unsigned. No release was published.
+
+The same CI run finds synthetic-path assumptions in two reopen tests: Ubuntu's
+ordinary temp directory lacks the deliberately required artifact-parent shape,
+and macOS exposes a temp parent through a symlink. Test fixtures are being
+corrected without relaxing production containment or skipping the tests.
+A subsequent full CI rerun is required; neither failed job is reported as passed.

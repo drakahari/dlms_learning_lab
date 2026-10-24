@@ -25,3 +25,13 @@ Typed outcome requirements distinguish reading/writing an existing file, listing
 Primary sources: GNU coreutils chmod/chgrp/id invocation and symbolic permission sections, plus POSIX pathname/DAC rules; checked2026-10-22 using the installed original coreutils manual. Direct GNU page requests timed out. References: https://www.gnu.org/software/coreutils/manual/html_node/chmod-invocation.html ; https://www.gnu.org/software/coreutils/manual/html_node/chgrp-invocation.html ; https://www.gnu.org/software/coreutils/manual/html_node/id-invocation.html . Host reference commands are permitted only on checked-in development fixtures in disposable directories, never learner input.
 
 Ownership-retention outcomes (specified before dependent update/retirement teaching) compare existing path owner/group metadata with declared known modeled names. A copied/recreated file cannot pretend to retain another owner's identity. These checks add no chown/root command or permission to change accounts. They remain distinct from discretionary-access outcomes.
+
+
+M84 source-reference follow-through2026-10-24: the bounded find extension and
+actual fixed GNU comparisons are recorded in FIND_SUBSET.md. Long-listing
+regular files have link count1 because this tree does not implement hard links;
+directories use conventional2-plus-child-directory bookkeeping. Btrfs may report
+1 instead. Directory size/link-count and owner/time/SELinux fields are therefore
+not compared for host equality; permissions, names/types and regular-file
+size/link-count remain checked. These are declared model limits, not evidence
+for the still-unimplemented hard-link objectives.

@@ -69,7 +69,11 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    job limit in Rust tests/release compile respectively. Exact annotations confirm
    timeouts. The proposed60-minute limit retains every check and two workers;
    run40111060414 failed only a line-wrap omission in merged probe selection;
-   formatting-onlyfec8cfe corrects it. Rerun after the next coherent push. CI is not other-platform desktop acceptance.
+   formatting-onlyfec8cfe corrects it. Subsequent40111561758 passes Windows,
+   whose109-lab candidate is downloaded and archive/PE/embedded-content hashes
+   verified underdist/native-ci-c41352a/windows. Ubuntu/macOS expose synthetic
+   reopen-test temp-path assumptions; tests-only fixture corrections are pending,
+   production containment stays strict. Rerun after the next coherent push. CI is not other-platform desktop acceptance.
 2. Native MAC workspace aac951f is integrated through ea7c6b1. Main combined
    model/integration suite passes846 checks across79 targets; seven targeted
    MAC UI/plan checks and all-target Clippy pass. Accepted final native R2 has17
@@ -98,7 +102,16 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    m83-mac-lessons-native-r1.log. Fix real popup scrolling/selected-value assertions,
    preserve all37 capstone requirements, and rerun. Render review also requests
    shared label columns and a clear Frame-not-sent action-error prefix.
-   Four-lab delivered count and coverage promotion remain pending.
+   R2 retains first-three passes but its stricter popup controller fails in the
+   capstone example: bare ui.clip_rect spans the whole window horizontally, so
+   the generated wheel point misses the narrow popup. Keep actual popup content
+   bounds, add a real ComboBox regression, and use a focused capstone run before
+   final full-candidate checks. R2 evidence is run-v518tg9y. Do not claim a full
+   four-lab native pass. Four-lab delivered count and coverage promotion remain pending.
+   The added render-only mac-layout probe separately hit a nested Context read
+   inside a data write lock before captures; one-file precomputed-PPP fix and a
+   real phase1 regression are source-ready, not yet tested. This is measurement
+   code, distinct from the historical Wayland callback stall.
 4. Guarded cold-reopen harness is integrated in b9786fa. It executes ordinary
    profile lock/load/preferences/save in two real native processes using only a
    marked private project-disk profile. Current97 Python guards and13 targeted
@@ -127,7 +140,16 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    697754e after42 scoped checks/Clippy/fmt; fixed GNU comparison source is separate,
    with110 Python guards passing, including13 new boundary tests. All152 existing
    controlled reference commands are preserved. Build the actual MAIN probe and
-   execute the reviewed fixed comparison under the shared guard after integration. Candidate packaging, pure capabilities
+   execute the reviewed fixed comparison under the shared guard after integration.
+   Actual GNU R1 caught an excessive depth bound and Btrfs directory-link-count
+   comparison assumptions. Corrections3ff64de and strict CI-fixture fix a0cdb48
+   pass112Python/12find/17reopen checks/Clippy/fmt. Actual rebuilt MAIN GNU R2 now
+   passes152 legacy comparisons and32 find observations:31 matched path/status/
+   error comparisons plus one explicit unsupported boundary. Evidence
+   filesystem-find-reference-d2vakr7o, manifest67ee7757bf94488875a42adf9f4c9550f86c5929d1063a1b4b29700047303ed4.
+   All earlier failures and exact152-fixture bytes remain. DirectoryEntries typed
+   exact inventory grading is being prepared source-only before three distinct
+   search/investigation lessons; no new find authored lab is counted. Candidate packaging, pure capabilities
    and source proposals do not complete curriculum. Windows/macOS desktop, physical-device/accessibility and novice
    acceptance remain explicitly pending.
 

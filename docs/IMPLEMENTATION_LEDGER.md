@@ -832,3 +832,31 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   PSIavg10 zero and no OOM counter increase. Two jobs/two test threads and disk
   artifacts remain mandatory; these observations are not a stress test or safety
   guarantee. No release, desktop setting or unrelated application is changed.
+
+
+### M84 reference and delivery follow-through
+
+- Actual rebuilt MAIN GNU comparison R2 passes152 existing commands and32 new
+  find observations (31 matched path/status/error comparisons, one explicitly
+  unsupported traversal boundary). The first run is retained. It exposed an
+  overlarge maxdepth range; the model now rejects2147483648 and4294967295 before
+  lookup and accepts2147483647. Btrfs directory link counts are explicitly outside
+  equality alongside directory sizes; regular-file link counts/sizes, modes,
+  types and names remain checked. Source/ELF/GNU pins and before/after metadata
+  are in manifest67ee7757… under filesystem-find-reference-d2vakr7o.
+- The strict synthetic reopen fixtures now create their required artifact-parent
+  shape independently of CI TMPDIR and canonicalize only a known fresh fixture
+  base on macOS. Production containment is byte-identical.112 Python checks,
+  12 find checks and17 reopen/geometry checks, Clippy/fmt pass before integration.
+- Windows CI40111561758 atc41352a passes and its109/26 candidate is downloaded.
+  Archive, PE and all25 embedded scenario/unit source hashes agree, along with
+  the Rust standard-library notice and137-package inventory. Actual Windows
+  desktop acceptance/signing is not claimed. Ubuntu/macOS CI had the fixture
+  failures above; fresh corrected-source CI is still required.
+- Actual MAC R2 again passes first-three full tasks but catches a stricter popup
+  controller issue in the capstone example: an inherited paint clip is wider
+  than the actual menu, directing its wheel outside the popup. Correct actual
+  content bounds and a genuine off-center ComboBox regression are pending;
+  no requirement or grade is weakened. Render-only layout measurement separately
+  reentered a Context lock; its one-file correction is distinct from the old
+  unanswered Wayland callback and awaits actual verification.

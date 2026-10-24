@@ -41,3 +41,29 @@ Metadata snapshots temporarily raise only known private fixture permissions and 
 Actual GNU4.10.0 rejected -maxdepth4294967295 with an out-of-range diagnostic. Explicit supported depth now ends at2147483647; larger depths fail syntax validation before even resolving the start. The independently fixed reference table retains4294967295 as a negative and adds2147483648 negative plus2147483647 valid maximum. This is a transparent corrected contract, not relabeling original failed observations. Internal unlimited traversal still reaches every bounded Tree depth without exposing a larger numeric option.
 
 Two original152 legacy comparisons differed because Btrfs reported directory nlink1 while the existing virtual model reports conventional2-plus-subdirectory counts. The model is unchanged. Controlled GNU normalization now excludes host-filesystem-dependent directory link counts along with directory byte size; it still compares exact type/mode/name, regular-file size and regular-file link count. Regression strings demonstrate Btrfs1 and conventional2 directory observations normalize alike, while bad mode, filename, file size or regular-file nlink still fail. This does not expand supported link semantics or change any original fixture command/expectation. Root reviewed these corrections; the next guarded112Python/12find/17reopen checks and Clippy/fmt passed. Fresh MAIN probe/reference and actual platform CI remain separate acceptance gates.
+
+
+## Actual GNU comparison — 2026-10-24
+
+The rebuilt MAIN probe and GNU findutils4.10.0 complete152 existing filesystem
+comparisons and32 new observations under the shared memory guard. The new set
+has31 matched path/status/error comparisons and one explicitly unsupported
+readable/nonsearchable-directory boundary; that last observation is retained,
+not reported as GNU-equivalent. Source/probe/GNU hashes are unchanged before and
+after, and every find query preserves simulated state and measured private
+fixture metadata. Evidence is ignored tmp/filesystem-find-reference-d2vakr7o,
+its COMPLETE/manifest and m84-main-find-gnu-reference-r2.log.
+
+The first run is retained in filesystem-find-reference-e966s8wf. It caught an
+incorrect unsigned32-bit depth limit: GNU rejects4294967295. The corrected
+subset accepts0..2147483647, with actual valid-maximum and both2147483648/
+4294967295 rejection comparisons. No original failed observation was rewritten.
+Two old long-listing comparisons also exposed Btrfs directory link counts of1
+versus the model's traditional2-plus-child-directories bookkeeping. Directory
+link counts join the already excluded directory sizes in host equality checks;
+regular-file link count/size, type, permissions and names remain checked.
+Dedicated negative tests retain those distinctions. This does not add hard-link
+or filesystem-specific inode semantics to the learner simulator.
+
+No dependent find curriculum is accepted yet. New activities require prerequisite
+teaching, separate examples, meaningful state outcomes and actual native review.
