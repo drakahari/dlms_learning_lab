@@ -905,7 +905,7 @@ fn ospf_diagram(ui: &mut egui::Ui, state: &ospf::State, metrics: &mut Metrics) {
         );
         metrics.ospf_diagram = Some(r.rect);
     } else {
-        let r = egui::CollapsingHeader::new("Links and outgoing costs · applied settings")
+        let r = egui::CollapsingHeader::new("Links and costs · applied")
             .default_open(true)
             .show(ui, |ui| {
                 for link in segments.into_keys() {
