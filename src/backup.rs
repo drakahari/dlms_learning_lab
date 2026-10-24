@@ -407,3 +407,57 @@ mod cancellation_tests {
         assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 1);
     }
 }
+
+#[cfg(test)]
+mod revision8_capture_cancellation_acceptance {
+    use super::*;
+    #[test]
+    fn actual7_profile_preview_cancelled_inside_child_retains_every_input_target_and_history_byte()
+    {
+        assert_eq!(shell::EVALUATOR_REVISION, 8);
+        let labs = crate::pack::bundled().unwrap();
+        let mut value: serde_json::Value = serde_json::from_slice(include_bytes!(
+            "../tests/fixtures/shell-v7-synthetic-writer-progress.json"
+        ))
+        .unwrap();
+        value["attempts"]["shell-arguments"]["state"]["source"] =
+            serde_json::json!("pending=$(while true; do :; done); printf parent-must-not-run");
+        let bytes = serde_json::to_vec_pretty(&value).unwrap();
+        let dir = tempfile::tempdir().unwrap();
+        let input = dir.path().join("input.json");
+        let target = dir.path().join("progress.json");
+        std::fs::write(&input, &bytes).unwrap();
+        let original: &[u8] =
+            include_bytes!("../tests/fixtures/shell-v7-synthetic-writer-progress.json");
+        std::fs::write(&target, original).unwrap();
+        let (entered_tx, entered_rx) = mpsc::channel();
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let child_barrier = barrier.clone();
+        let mut stopped = false;
+        let task = Inspection::start_observing(input.clone(), labs, move |vm| {
+            if !stopped && vm.active_capture_depth() > 0 {
+                stopped = true;
+                entered_tx.send(()).unwrap();
+                child_barrier.wait();
+            }
+        });
+        entered_rx
+            .recv_timeout(std::time::Duration::from_secs(5))
+            .unwrap();
+        task.cancel.store(true, Ordering::Relaxed);
+        barrier.wait();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        loop {
+            if let Some(result) = task.poll() {
+                assert!(result.err().unwrap().contains("cancelled"));
+                break;
+            }
+            assert!(std::time::Instant::now() < deadline);
+            thread::yield_now();
+        }
+        assert_eq!(std::fs::read(input).unwrap(), bytes);
+        assert_eq!(std::fs::read(target).unwrap(), original);
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 2);
+        assert_eq!(task.checked.load(Ordering::Relaxed), 0);
+    }
+}
