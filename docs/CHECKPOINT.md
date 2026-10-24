@@ -119,8 +119,14 @@ in maina0cdb48; production containment is unchanged. Fresh clean-source CI401203
    strict cold reopen are complete as above. Root now has source-only narrow
    DNS/Mount pending-editor credit fix plus4 backend tests and extended existing
    UI regression. Applied State/Goals/old missing-draft credit stay unchanged.
-   Current sole-heavy MAIN model gate is m87-main-models-r1; reap before next
-   heavy. Then run focused UI/Clippy before committing that separate fix.
+   Full893 model/integration checks across84 targets, focused actual-egui editor
+   regression and Clippy/fmt pass. First UI invocation had a mistyped development
+   revision; corrected exact-revision R2 passes and retained R1 is not identity
+   evidence. Independent read-only review finds no material issue: explicit Some
+   drafts match actual editor fields, None preserves legacy truth, original goals
+   still reject wrong applied values. The scoped fix is ready to commit.
+   Root released the heavy slot; Find helper has the next grant, confirm its
+   status before any root heavy run.
 4. Source-only helper is preparing three unregistered Find assignments: exact
    evidence handover, partial-search permission repair, private review handover
    capstone. Review teaching, two alternatives each and scoped safety goals before

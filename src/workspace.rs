@@ -473,3 +473,29 @@ pub fn issues(s: &State, g: &engine::Goal) -> Vec<String> {
 pub fn pending_service_draft(a: &Attempt) -> bool {
     matches!(&a.state,State::Service{port,..}if a.workspace.as_ref().and_then(|w|w.service_port.as_ref()).is_some_and(|d|d!=port))
 }
+
+/// Missing legacy drafts describe the applied state, not an invented unsaved edit.
+pub fn pending_seed_configuration_draft(a: &Attempt) -> bool {
+    let Some(w) = &a.workspace else {
+        return false;
+    };
+    match &a.state {
+        State::Dns {
+            records, serial, ..
+        } => {
+            w.dns_address
+                .as_ref()
+                .is_some_and(|draft| records.values().next().is_none_or(|saved| draft != saved))
+                || w.dns_serial
+                    .as_ref()
+                    .is_some_and(|draft| draft != &serial.to_string())
+        }
+        State::Mount {
+            configured_device, ..
+        } => w
+            .mount_device
+            .as_ref()
+            .is_some_and(|draft| draft != configured_device),
+        _ => false,
+    }
+}

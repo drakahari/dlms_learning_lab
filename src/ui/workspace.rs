@@ -644,6 +644,10 @@ impl LabApp {
             ui.label("Unsaved configuration · Save your draft, then verify the service again.");
             return;
         }
+        if model::pending_seed_configuration_draft(a) {
+            ui.label("Unsaved configuration · Save your draft, then check the current configuration again.");
+            return;
+        }
         let now = progress::current_solved(a, s);
         self.metrics.completion = now;
         if now {

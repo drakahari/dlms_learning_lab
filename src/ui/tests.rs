@@ -829,6 +829,40 @@ fn dns_and_mount_editors_stage_configuration_then_terminal_verifies_application(
     a.submit(7);
     draw(&ctx, &mut a);
     assert!(a.metrics.completion);
+    let served = a.progress.attempts["lpic2-dns"].state.clone();
+    a.progress
+        .attempts
+        .get_mut("lpic2-dns")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .dns_serial = Some("unfinished serial".into());
+    draw(&ctx, &mut a);
+    assert!(
+        !a.metrics.completion,
+        "An unsaved DNS edit must hide completion"
+    );
+    assert_eq!(a.progress.attempts["lpic2-dns"].state, served);
+    check(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    let r = a.metrics.editor_save.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.progress.attempts["lpic2-dns"].state, served);
+    assert!(
+        !a.metrics.completion,
+        "An invalid Save must retain the pending draft"
+    );
+    a.progress
+        .attempts
+        .get_mut("lpic2-dns")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .dns_serial = Some("2026102102".into());
+    draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
     open_assignment(&mut a, 8);
     draw(&ctx, &mut a);
     a.progress
@@ -854,6 +888,49 @@ fn dns_and_mount_editors_stage_configuration_then_terminal_verifies_application(
         a.submit(8);
     }
     draw(&ctx, &mut a);
+    assert!(a.metrics.completion);
+    let mounted = a.progress.attempts["lpic2-storage"].state.clone();
+    a.progress
+        .attempts
+        .get_mut("lpic2-storage")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .mount_device = Some("unfinished device".into());
+    draw(&ctx, &mut a);
+    assert!(
+        !a.metrics.completion,
+        "An unsaved mount edit must hide completion"
+    );
+    assert_eq!(a.progress.attempts["lpic2-storage"].state, mounted);
+    let r = a.metrics.editor_save.unwrap();
+    click(&ctx, &mut a, r);
+    assert_eq!(a.progress.attempts["lpic2-storage"].state, mounted);
+    assert!(!a.metrics.completion);
+    a.selected = None;
+    open_assignment(&mut a, 8);
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.completion);
+    assert_eq!(
+        a.progress.attempts["lpic2-storage"]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .mount_device
+            .as_deref(),
+        Some("unfinished device")
+    );
+    a.progress
+        .attempts
+        .get_mut("lpic2-storage")
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .mount_device = Some("/dev/vdb1".into());
+    draw(&ctx, &mut a);
+    check(&ctx, &mut a);
     assert!(a.metrics.completion);
 }
 #[test]

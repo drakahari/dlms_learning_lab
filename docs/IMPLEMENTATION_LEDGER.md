@@ -891,3 +891,26 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   quiet10/10 and strict two-process cold reopening9captures all pass. Root reviewed
   actual renders. Exact identities and limitations are in INSTALLATION.md.
   Fresh three-platform CI40120315031 is running; no release is published.
+
+
+### M87 honest current credit for older configuration editors
+
+- Older DNS and data-volume workspaces now treat explicitly changed unsaved
+  fields as pending. Their completion panel/library current credit cannot borrow
+  success from an older applied value. Missing optional legacy drafts preserve
+  applied-state credit; reverting a draft restores it. Save remains explicit,
+  and malformed Save never mutates the applied model.
+- Full893 model/integration checks across84 targets pass, including4 new tests
+  for blank/malformed/different drafts, saved wrong state, exact read-only resume
+  and unrelated-attempt preservation. The extended existing actual-egui editor
+  regression passes Save/reject/reopen/revert/completion checks. Clippy/fmt pass.
+  One development UI invocation had a mistyped build-revision environment value;
+  it was rejected as identity evidence and rerun with the exact observed revision.
+  The separately identified73777e0 installation candidate is unaffected.
+- No scenario, Goal, model State, progress schema, history, course count or
+  dependency changes. The model gate observes minimum22.46GiB available,
+  peak PSIavg10 at0.18%, no OOM counter increase. Two workers and one shared
+  heavy-work lock remain mandatory. This source fix is not inside73777e0.
+- Independent read-only source review finds no material issue: only explicit
+  drafts invalidate, comparisons match the existing editors, missing legacy
+  values retain credit and wrong applied values still fail the original goals.

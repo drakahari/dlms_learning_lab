@@ -286,7 +286,9 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
             return false;
         }
     }
-    if crate::workspace::pending_service_draft(a) {
+    if crate::workspace::pending_service_draft(a)
+        || crate::workspace::pending_seed_configuration_draft(a)
+    {
         return false;
     }
     if crate::address_teaching::goal(&s.initial).is_some()
