@@ -400,3 +400,20 @@ The fixed main-guard `installed_acceptance.py` tool actually verified upgrade fr
 Candidate build55 memory samples: minimum available11.74GiB, peak some/full PSIavg10 zero, observed OOM-counter delta0. Earlier761-check combined run355 samples: minimum11.20GiB, peak PSI zero/OOMdelta0. Swap remained nearly full. These ordinary serialized2-job/2-test-worker runs are not a stress test or guarantee; no desktop/GPU/swap/model setting changed. Detailed ignored audit m65-m66-memory.json.
 
 [Native CI40041702686](https://github.com/drakahari/dlms_learning_lab/actions/runs/40041702686) checks this exact source; all three native build/test jobs passed. Its eventual build/test results do not establish Windows/macOS desktop runtime acceptance. macOS original dispatch notice/signing/notarization, actual other-platform installation/reopening/uninstall, screen reader, physical-device and novice acceptance remain pending. The historical intermittent Wayland callback cause remains unresolved; no cure is claimed. Most full-product curriculum/completion requirements remain Open.
+
+
+## M68 — installed102-lab Fedora candidate
+
+Clean source `29096be81982de2812b2e25c609703bf40688472`,102 authored labs/24units (31CCNA,21LPIC-1,13LPIC-2,37Bash), evaluator7:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-g29096be81982-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA-256 `7e0c4624d593f797d65f64b267c4bc9128978d487a7686d6e85da42b791023ce`; binary SHA-256 `7df8724919b05fd532c80bfd7ce9d3343ef9585fa21671e48c3e9b86466cecea`. All223 applicable Linux notice/source packages resolve. No installer/release publication. The normal OSPF unit is playable; the newer multi-unit service core/editor foundation is not itself authored coverage.
+
+The actual installed launcher in `.build-artifacts/installations/verified-29096be81982-2eflmz82/bin/` passes identified877 upgrade, clean uninstall/reinstall, outside-checkout identity/content/hash, desktop validation and exact separate synthetic original-nine-byte retention. Evidence: m68-installed-lifecycle-r1.log and that prefix's acceptance.json. All four normal OSPF introduction/example/assignment flows pass84actual native captures (m68-installed-ospf-r1.log, run-cgz5szfn), including keyboard/pickers, wrong/partial/alternate configurations, fill-only isolation, success invalidation, malformed drafts, exact save/resume, selected reset and Challenge Light150/Dark200. The72-view IPv4/VLAN alignment matrix passes wide/narrow100/150/200 light/dark (m68-installed-alignment-r1.log, run-htak7fy9); root reviewed actual centered placeholders/values and reserved/stacked VLAN controls. Ten quiet default-Wayland launch/readbacks pass10/10 (m68-installed-quiet-r1.log, prefix quiet-startup/results.json), without lifecycle/protocol logs.0.965–0.966s includes harness pacing, not a speed benchmark. The historical unanswered-frame cause remains unresolved.
+
+Guarded ordinary candidate66samples minimum11.49GiB available/PSIzero/OOMdelta0; installed OSPF307samples minimum12.28GiB, peak some/full PSIavg10 0.90%,OOMdelta0. Alignment/quiet69/10samples minimum12.60/12.59GiB,PSIzero/OOMdelta0. Swap was effectively full, including0bytes free in the OSPF interval. These results are scoped observations, not a safety guarantee. All artifacts remain project disk-backed.
+
+[Native CI40049251314](https://github.com/drakahari/dlms_learning_lab/actions/runs/40049251314) at this exact source stopped at formatting: cherry-picked module declarations needed rustfmt ordering. No remote runtime/build acceptance is inferred; the formatting-only correction and rerun are separate evidence. Fedora's actual package checks above passed. Windows/macOS desktop, physical-device, screen-reader and novice acceptance, macOS original dispatch notice and signing/notarization remain pending. Most curriculum/completion criteria remain Open.

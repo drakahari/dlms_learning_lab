@@ -55,3 +55,6 @@ The necessary132-overlapping-check combined run recorded277samples with minimum1
 
 
 M68 main focused manager/terminal integration:37 ordinary samples, minimum9.68GiB MemAvailable, peak some/full PSIavg10 0.18%, observed oom_kill counter delta0. Shared runner/Cargo2/test2/project disk retained. Nearly full swap remains a risk; no safety guarantee or stress test. Exact ignored command and sample logs: m68-manager-terminal-main-r1.log and20261024T011452.295379Z-test-memory.jsonl.
+
+
+M68 clean Fedora candidate:66samples minimum11.49GiB available,PSIavg10zero,OOMdelta0. Actual installed OSPF/alignment/quiet runs:307/69/10samples, minimum12.28/12.60/12.59GiB, peakPSI0.90/0/0%,OOMdelta0. Swap reached0free bytes during OSPF, with no sustained guard threshold. No other workloads/settings were changed or interrupted. Evidence .build-artifacts/audits/m68-memory-r1.json, disk-backed native/install/log directories. All runs serial under the2job/2test-worker shared guard; not a guarantee or stress workload.
