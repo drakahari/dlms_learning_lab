@@ -741,3 +741,39 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
 - First native run exposed a deadlock in new capture-only geometry code: reading zoom inside a context-data lock reentered the egui lock. Moved that read before the lock; independent review, focused plan, build, actual R2 and final Clippy pass. Failed R1 diagnostics remain. Product layout/grading were not weakened. Existing models, drafts, favorites and examples retain their behavior.
 - Combined main passes836 model/integration checks across78 targets, including the18 pure MAC checks, after merging both capabilities. The accepted109 UI source is unchanged. Coverage integrity validates109 and unchanged reference statuses.
 - Only already Partial LPIC-1 105.2/K3 evidence is strengthened; no status/fingerprint promotion. Core MAC learning is independently tested but native MAC instruction/practice remains unaccepted. Candidate packaging and complete certification coverage remain open; no release publication.
+
+
+## 2026-10-24 — M77 delivery follow-through
+
+- Pushed the109/26 unit and accurate coverage reporting. Built identified normal5a968c7 and a clean Fedora candidate with all223 applicable notice/source packages. Actual102 upgrade, uninstall/reinstall, outside-checkout identity/content/desktop and exact original-nine synthetic progress retention pass. Exact launch/hash inventory is in INSTALLATION.md.
+- The installed candidate passes all-three new scripting native workflows (45 captures),72 shared IPv4/VLAN alignment views at100/150/200 light/dark wide/narrow and10/10 quiet default-Wayland starts. Root reviewed actual instructions/examples/assignments/feedback and centered field/column/focus renders. Private receipts preserve exact hashes and ordinary memory observations; no OOM or sustained pressure occurred. Not a memory guarantee, novice study, physical-device/screen-reader or cold-process reopen result. The old Wayland callback cause remains unresolved.
+- Full-tree formatting caught one line-wrap omission after the capture-lock correction. Fixed only that wrapping in pushedcee0432; local full-tree fmt passes. Native CI40101334715 at5a stopped onlyFormat on all three OS runners; corrected40101440051 passes Ubuntu; Windows/macOS hit the30-minute job limit in tests/release compile. The proposed60-minute limit retains every check and two workers and has no desktop-acceptance implication. No candidate is relabeled to the later source.
+- The new MAC workspace separately passes10backend+7UI/plan checks and Clippy/fmt/build. Actual first native flow passes; rendered review caught and corrected a misleading inherited Check-applies instruction for its separate Apply settings flow, and compacted repeated example-action controls. Actual final R2 render acceptance passes17captures and the workspace is integrated in ea7c6b1. Authored content still follows; catalog and coverage counts do not change for that fixture.
+
+
+## 2026-10-24 — M78: native MAC workspace before authored coverage
+
+- Integrated workspaceaac951f through main ea7c6b1: native source/destination sends, current learned table, optional configuration/time/clear/trace, explicit Apply versus Check, saved malformed drafts and independent Introduction/practice/assignment. Closed typed pack-only actions validate reachability without teaching invented IOS commands. Profile identities/example origin are pinned, wrong-kind/oversized data rejected, and current grading accepts genuine alternate outcomes. No shell revision, dependency, theme, original scenario or desktop setting changed.
+- Seventeen distinct new workspace checks pass (10backend,6UI and1native-plan), plus three affected existing VLAN UI checks; prior18pure-core checks remain separate. Clippy denying warnings, formatting and build pass. First compilation caught test-only nonexistent API/imports; modal diagnostics showed current responses disabled while post-pass getters returned old data. Tests now assert actual measured Response flags plus unchanged keyboard-driven state, retaining all safety assertions. Failed sources/logs remain.
+- Actual native final R2 passes17 captures inrun-xrywx5uv. Root reviewed separate insert-without-execution, practice expiry/repair, full task, malformed/partial/current/reverse-order outcomes, actual150/200% editing and invalidation, reset/readback/Challenge and readable errors/completion. First render review caught a misleading inherited Check-applies message and repeated action caption; explicit contextual help and adjacent selector/Insert fix those without changing old VLAN wording/IDs. Short tiled windows scroll; this is not cold restart, novice, physical-device, screen-reader or other-platform acceptance.
+- Foundation only: normal catalog109/26 and128Partial/1Supporting/1111Open stay unchanged. Four distinct authored MAC assignments follow separately; no fixture or numeric-variant inflation. Combined-main follow-through still follows the completed installed-candidate run.
+
+
+## 2026-10-24 — M79: exact native restart verification, acceptance still open
+
+- Integrated a guarded two-process native development probe. Both children use the
+  normal profile lock, progress load, preference load and save paths against a
+  marked private disk profile, with bounded process/output handling. Raw saved
+  bytes, full JSON, portable progress and loaded migration receipts are compared
+  separately; portable export intentionally omits those receipts. No personal
+  profile, host learner execution, default application behavior or grade is changed.
+- Current97 Python guard tests and13 Rust controller/serialization tests, all-target
+  Clippy and build pass. Native R1 found a post-launch controller assertion; R2
+  found an incorrectly equated portable/raw projection. Failed evidence remains.
+  Actual R3 writer and new-process reader pass exact raw/decoded receipt, draft,
+  favorite and appearance comparisons. Later Back navigation hits a fractional
+  visibility assertion at150%; full end-to-end acceptance is still open. Eight
+  captures and raw snapshots remain; no COMPLETE receipt is fabricated.
+- The pending controller-only correction must retain real center visibility and
+  offscreen rejection. Repeat on a fresh profile and later the installed candidate.
+  None of these gates is a novice, screen-reader or other-platform runtime study.

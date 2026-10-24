@@ -52,3 +52,14 @@ M56f4d7bc0/evaluator7 and M57 7ffbfff/90labs each pass10/10 quiet default-Waylan
 
 
 M68 clean29096be Fedora candidate separately passes all four installed OSPF workflows,72IPv4/VLAN alignment captures and10/10quiet default-Wayland launch/readbacks. Actual launcher, hashes and scopes are in INSTALLATION.md; evidence m68-installed-{ospf,alignment,quiet}-r1.log, installed prefix verified-29096be81982-2eflmz82. Root inspected representative actual light/dark100/150/200 renders. No failing unanswered-callback process was observed, so that historical cause is still unresolved; no backend/compositor/theme/security change or cure is claimed. Synthetic controls/readbacks are not Windows/macOS desktop, novice, physical-device or screen-reader acceptance.
+
+
+M77 installed109/26 source5a968c7 passes all-three case-dispatch flows,72 shared
+IPv4/VLAN alignment captures and10/10 quiet default-Wayland launch/readbacks.
+Actual installed prefix verified-5a968c735523-mzx5b592, exact hashes/scopes in
+INSTALLATION.md. No historical unanswered-frame failure was observed, so its
+cause remains unresolved. A separate first M77 teaching capture deadlocked in
+new screenshot-harness geometry by reading zoom inside a context-data lock;
+that recursive read was moved outside the lock and actual native checks pass.
+It is not evidence about the historical Wayland startup stall. No compositor,
+backend, theme, security or other desktop setting changed.

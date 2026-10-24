@@ -7,8 +7,10 @@ Ordinary implementation remains authorized; no public release is authorized.
 
 - Main integrates tested evaluator8, the pure MAC-learning foundation and the
   accepted three-lesson case-dispatch unit. The unit source commit is853b572;
-  main's integration commit is discoverable with `git log -3`. MAC core/documentation
-  through de23a6e was pushed; case integration/reporting still needs push.
+  main integration is8e9b6f6, reporting5a968c7. Both are pushed. Maincee0432
+  is a formatting-only follow-up to the capture-lock correction; full-tree format passes.
+  Main now also integrates accepted native MAC workspace ea7c6b1 and guarded
+  two-process reopen verification b9786fa. These do not add bundled scenarios.
 - **109 authored labs /26 units:31CCNA,21LPIC-1,17LPIC-2,40Bash/Shell.**
   All prior106 scenario identities/goals remain, as do28 themes. No numeric variants
   or synthetic navigation fixtures are counted. Cases are bundled in normal mode.
@@ -34,39 +36,71 @@ Ordinary implementation remains authorized; no public release is authorized.
 
 ## Actual executable and installer identities
 
-The normal development binary currently on disk still embeds c711c79 and106/25:
-`./target/debug/dlms-learning-lab` (377456904bytes,
-SHA2562c8ade6ed15a6ed9b3a253c6f3aa4fec2b3cd698514722a8e5cf05b56ac67d6b).
-Build the newly integrated109 source before advertising that launch as109.
-The tested109 worktree binary is development identity88,691,928bytes,
-SHA2563c18e4424b701c385679150b32f37ab36efab3f2ccaef1f8d5da843d646e468b;
-path `.build-artifacts/targets/evaluator8-migration-fe542e765a0347df/debug/dlms-learning-lab`.
-It predates metadata-only simplification text refresh and is not an installer.
+The ordinary main development target has since been rebuilt by integration tests;
+its identity must be checked before quoting a new development build. Use the
+separately identified installed candidate below for the last packaged acceptance.
+Do not relabel that artifact to newer source commits. Existing candidates remain.
 
-Last actually installed Fedora candidate is102/24, source29096be81982de2812b2e25c609703bf40688472:
-`dist/dlms-learning-lab-0.1.0-g29096be81982-x86_64-unknown-linux-gnu-fedora-44-candidate`.
-ArchiveSHA2567e0c4624d593f797d65f64b267c4bc9128978d487a7686d6e85da42b791023ce;
-binarySHA2567df8724919b05fd532c80bfd7ce9d3343ef9585fa21671e48c3e9b86466cecea.
-Its installed lifecycle, original-nine synthetic progress, all-four OSPF native,
-72 shared IPv4/VLAN views and10 quiet Wayland readbacks passed. It predates the
-current unit-manager/case content; it is not application completion.
+New clean109/26 Fedora candidate source5a968c7:
+`dist/dlms-learning-lab-0.1.0-g5a968c735523-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+ArchiveSHA2563031a439608f47d2a1d5f09bdcb9d4b1ae722cb573344ff6cc9c6f195f42246e;
+binarySHA256202c7b993f7517e697a7203e42a8cb511ff2c4c5591ecb2b1ee2dee5d70552cd.
+All223 applicable Linux notices/source packages resolve. Actual install/identified102
+upgrade/clean uninstall-reinstall/outside-checkout identity/content/desktop and exact
+synthetic original-nine progress retention pass; receipt/logm77-installed-lifecycle-r1.
+Installed prefix `.build-artifacts/installations/verified-5a968c735523-mzx5b592`.
+Root actual installed all-three scripting native flow passes45 captures (run-k9iyd4_w),
+shared alignment passes72 views (run-795xb4yi), and quiet Wayland starts pass10/10.
+Logs m77-installed-{case-lessons,alignment,quiet}-r1. Runtime receipt
+SHAdef749e0234e805e8e3b01ac98e77b1e5d47a37f1eb0255ef3c66a00f894b702. This candidate is not application completion.
+The older102 installed acceptance remains in INSTALLATION.md and earlier artifacts.
 
 ## Next serial implementation actions
 
-1. Verify combined main, commit updated inventory/evidence, push, build identified
-   normal109 executable and a clean Fedora candidate. Verify that actual installed
-   candidate outside the checkout, including shared IPv4/VLAN alignment, light/dark,
-   scaling and repeated quiet Wayland launches. Keep exact identities/checksums.
-2. Review and first-compile the MAC workspace in
-   `.build-artifacts/worktrees/mac-learning` (`mac-learning-workspace`). Core is
-   integrated c7bdaf2;16-path source R2 adapter/practice/native work remains uncompiled
-   and unbundled. Manifest source-r2/SOURCE-READY.json SHA1f47f096a9354e3374dbd7ed4ebfbe47891b6d4535a8566691ca913019b5584b.
-   Root reviewed backend/pack/progress/draft/practice/native/test source; no blocking
-   source finding. The helper is preparing a source-only native fixture plan.
-   Run actual tests/Clippy/native before authored lessons or coverage promotion.
-3. Once workspace accepted, author distinct Ethernet learning/flooding/aging/
-   troubleshooting practice against the tested capabilities. Then continue remaining
-   Linux/network/shell gaps; do not treat packaging as curriculum completion.
+1. Commit/push accurate installed109 evidence and the CI timeout correction.
+   Installed scripting, alignment, service and quiet-start runs have finished:
+   three case lessons45 captures, IPv4/VLAN72 views, four service assignments72
+   captures and quiet Wayland10/10 starts. Candidate source remains5a968c7.
+   CI40101440051 atcee0432: Ubuntu passes; Windows/macOS hit the30-minute
+   job limit in Rust tests/release compile respectively. Exact annotations confirm
+   timeouts. The proposed60-minute limit retains every check and two workers;
+   rerun after the next coherent push. CI is not other-platform desktop acceptance.
+2. Native MAC workspace aac951f is integrated through ea7c6b1. Main combined
+   model/integration suite passes846 checks across79 targets; seven targeted
+   MAC UI/plan checks and all-target Clippy pass. Accepted final native R2 has17
+   captures inrun-xrywx5uv, including separate practice, explicit Apply, current
+   grading, real150/200% edits, reset/readback and Challenge.
+   A subsequent focused refinement hides irrelevant port configuration, exposes
+   task-required lifetime settings, preserves pending drafts and uses plain host
+   lists. Its44 scoped checks, Clippy/fmt/build and actual17-capture native run
+   run-cfeb22ku pass. Root reviewed real compact/light/dark/validation renders.
+   Refinement source is still in worktree mac-learning, branchmac-learning-content.
+   Integrate after its exact source freeze; no additional authored lab counted.
+3. Four distinct MAC lessons are source proposals: first learning/forwarding,
+   stale-location repair, source-refresh/expiry, and three-switch handover.
+   Their nine content checks must actually run before registering the unit.
+   Metadata-only teaching review follows the source proposal; retain old109 IDs,
+   genuine6/7 history and all simulation predicates. Then perform normal catalog
+   regression and actual native all-four flows before coverage promotion.
+4. Guarded cold-reopen harness is integrated in b9786fa. It executes ordinary
+   profile lock/load/preferences/save in two real native processes using only a
+   marked private project-disk profile. Current97 Python guards and13 targeted
+   Rust checks, Clippy/fmt/build pass. No personal profile is opened.
+   Native R1 failed its post-launch card controller; corrected without changing
+   product behavior. R2 exposed raw-versus-portable serialization of migration
+   receipts; strict pre-exit raw bytes, full JSON and loaded receipt comparisons
+   were added rather than ignoring keys. R3 writer and real reader pass all exact
+   cold-load comparisons, retaining unfinished assignment/example drafts, favorite,
+   theme/scale and receipts. Later reader Back control fails a fractional clipping
+   assertion at150% (0.0208 logical points); eight captures and all raw snapshots
+   remain in tmp/native-reopen-m79-worktree-r3. Full-flow acceptance remains OPEN.
+   Review a uniform one-physical-pixel controller geometry tolerance with real
+   center-hit/offscreen guards, test it serially, then run a fresh R4. Do not alter
+   product layout or waive data assertions to satisfy the acceptance controller.
+5. Continue remaining Linux/network/shell gaps after the tested MAC batch.
+   Candidate packaging, pure capabilities and source proposals do not complete
+   curriculum. Windows/macOS desktop, physical-device/accessibility and novice
+   acceptance remain explicitly pending.
 
 ## Build safety and preserved evidence
 
