@@ -1,0 +1,576 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "development-mac-learning",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ethernet source learning",
+      "unit": "",
+      "title": "Developer fixture: learn two directions",
+      "summary": "Unbundled workspace acceptance fixture only.",
+      "objective": "Keep the supplied uplink settings. Teach the office and archive switches where the opposite workstation sends from, so a frame from a to 02:00:00:00:00:03 follows known-unicast forwarding and reaches only c. Use sends to build the learned state; Check work tests the current table and forwarding.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied addresses and connections.",
+        "Send from the archive, then from the office.",
+        "Check work and inspect the current result."
+      ],
+      "guide": [],
+      "explanation": "This private fixture establishes no curriculum coverage. The two directions can be learned in either order; probes clone the current state independently.",
+      "hints": [
+        "The archive workstation must send before the office switch knows its source."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/cdp-lldp-mac-udld/cdp-lldp-mac-udld-configuration-guide/c-configure-mac.html"
+      ],
+      "simplifications": "Developer fixture, sources checked2026-10-24. Individual Ethernet metadata only; finite virtual topology, manual time, no IOS terminal, IP, ARP, hardware timing, STP or real frames. Seeded old entries are a separate disclosed diagnostic boundary.",
+      "initial": {
+        "kind": "MacLearning",
+        "simulation": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "s1": {
+                "label": "Office switch",
+                "vlans": [
+                  10,
+                  99
+                ],
+                "ports": {
+                  "a": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "b": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 99,
+                      "allowed": [
+                        10,
+                        99
+                      ]
+                    }
+                  }
+                }
+              },
+              "s2": {
+                "label": "Archive switch",
+                "vlans": [
+                  10,
+                  99
+                ],
+                "ports": {
+                  "c": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 99,
+                      "allowed": [
+                        10,
+                        99
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "a": {
+                "label": "Office desk",
+                "up": true
+              },
+              "b": {
+                "label": "Other desk",
+                "up": true
+              },
+              "c": {
+                "label": "Archive desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-a",
+                "a": {
+                  "kind": "host",
+                  "host": "a"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s1",
+                  "port": "a"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-b",
+                "a": {
+                  "kind": "host",
+                  "host": "b"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s1",
+                  "port": "b"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-c",
+                "a": {
+                  "kind": "host",
+                  "host": "c"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s2",
+                  "port": "c"
+                },
+                "up": true
+              },
+              {
+                "id": "between",
+                "a": {
+                  "kind": "switch",
+                  "switch": "s1",
+                  "port": "uplink"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s2",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "a": "02:00:00:00:00:01",
+            "b": "02:00:00:00:00:02",
+            "c": "02:00:00:00:00:03"
+          },
+          "entries": [],
+          "now": 0,
+          "aging_seconds": 300
+        }
+      },
+      "goal": {
+        "kind": "MacLearning",
+        "initial": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "s1": {
+                "label": "Office switch",
+                "vlans": [
+                  10,
+                  99
+                ],
+                "ports": {
+                  "a": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "b": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 99,
+                      "allowed": [
+                        10,
+                        99
+                      ]
+                    }
+                  }
+                }
+              },
+              "s2": {
+                "label": "Archive switch",
+                "vlans": [
+                  10,
+                  99
+                ],
+                "ports": {
+                  "c": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 99,
+                      "allowed": [
+                        10,
+                        99
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "a": {
+                "label": "Office desk",
+                "up": true
+              },
+              "b": {
+                "label": "Other desk",
+                "up": true
+              },
+              "c": {
+                "label": "Archive desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-a",
+                "a": {
+                  "kind": "host",
+                  "host": "a"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s1",
+                  "port": "a"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-b",
+                "a": {
+                  "kind": "host",
+                  "host": "b"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s1",
+                  "port": "b"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-c",
+                "a": {
+                  "kind": "host",
+                  "host": "c"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s2",
+                  "port": "c"
+                },
+                "up": true
+              },
+              {
+                "id": "between",
+                "a": {
+                  "kind": "switch",
+                  "switch": "s1",
+                  "port": "uplink"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "s2",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "a": "02:00:00:00:00:01",
+            "b": "02:00:00:00:00:02",
+            "c": "02:00:00:00:00:03"
+          },
+          "entries": [],
+          "now": 0,
+          "aging_seconds": 300
+        },
+        "requirements": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "s1",
+              "vlan": 10,
+              "address": "02:00:00:00:00:03",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "s2",
+              "vlan": 10,
+              "address": "02:00:00:00:00:01",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Specified individual frame",
+              "from": "a",
+              "destination": "02:00:00:00:00:03",
+              "after_seconds": 0,
+              "arrivals": [
+                "c"
+              ],
+              "accepted_by": [
+                "c"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "s1",
+            "port": "uplink",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 99,
+                "allowed": [
+                  10,
+                  99
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "@mac {\"kind\":\"Send\",\"source\":\"c\",\"destination\":\"02:00:00:00:00:01\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"a\",\"destination\":\"02:00:00:00:00:03\"}"
+      ],
+      "prerequisites": [],
+      "mac_teaching": {
+        "prerequisite_note": "This is a separate museum network. A MAC address identifies an Ethernet interface inside this simulation. No operating-system commands or real packets are involved.",
+        "concepts": [
+          {
+            "title": "A frame has a sender and a destination",
+            "text": "Choose a supplied sender and type the destination MAC address. Send frame sends one bounded piece of Ethernet metadata, not ping or application data."
+          },
+          {
+            "title": "A switch learns the source",
+            "text": "When a frame enters a switch, that switch remembers its source MAC address, local VLAN and incoming port. Receiving a reply teaches the other direction."
+          },
+          {
+            "title": "Unknown destinations can flood",
+            "text": "Without a destination entry, a switch copies an individual frame to other eligible ports in that VLAN. Only the intended modeled endpoint accepts it. After learning the destination, forwarding can use one port."
+          },
+          {
+            "title": "Entries age only in virtual time",
+            "text": "Advance time expires old source entries. Looking up a destination does not refresh it. The museum example uses a 300-second lifetime; typing does not advance time."
+          }
+        ],
+        "example_description": "Museum sender y uses 02:00:00:00:30:02; sender x uses 02:00:00:00:30:01. Send from y to x, then from x to y. Inspect the learned table and the optional last-frame trace.",
+        "fixture": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "demo": {
+                "label": "Museum switch",
+                "vlans": [
+                  30
+                ],
+                "ports": {
+                  "x": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "y": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "z": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "x": {
+                "label": "Front desk",
+                "up": true
+              },
+              "y": {
+                "label": "Store room",
+                "up": true
+              },
+              "z": {
+                "label": "Gallery desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "demo-x",
+                "a": {
+                  "kind": "host",
+                  "host": "x"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo",
+                  "port": "x"
+                },
+                "up": true
+              },
+              {
+                "id": "demo-y",
+                "a": {
+                  "kind": "host",
+                  "host": "y"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo",
+                  "port": "y"
+                },
+                "up": true
+              },
+              {
+                "id": "demo-z",
+                "a": {
+                  "kind": "host",
+                  "host": "z"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo",
+                  "port": "z"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "x": "02:00:00:00:30:01",
+            "y": "02:00:00:00:30:02",
+            "z": "02:00:00:00:30:03"
+          },
+          "entries": [],
+          "now": 0,
+          "aging_seconds": 300
+        },
+        "example_solution": [
+          {
+            "kind": "Send",
+            "source": "y",
+            "destination": "02:00:00:00:30:01"
+          },
+          {
+            "kind": "Send",
+            "source": "x",
+            "destination": "02:00:00:00:30:02"
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "demo",
+              "vlan": 30,
+              "address": "02:00:00:00:30:02",
+              "port": "y"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Specified individual frame",
+              "from": "x",
+              "destination": "02:00:00:00:30:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "y"
+              ],
+              "accepted_by": [
+                "y"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          }
+        ],
+        "try_change": "After the two sends, enter 300 seconds in Time and selective clear tools and choose Advance time. Both old entries expire. A fresh x-to-y probe now floods to y and z, while only y accepts it. Repeat the two sends to repair the example.",
+        "try_actions": [
+          {
+            "kind": "Advance",
+            "seconds": 300
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Specified individual frame",
+              "from": "x",
+              "destination": "02:00:00:00:30:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "y",
+                "z"
+              ],
+              "accepted_by": [
+                "y"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -26,6 +26,7 @@ use std::{path::PathBuf, time::Instant};
 mod ipv4_routing_workspace;
 mod ipv4_workspace;
 mod ipv6_workspace;
+mod mac_learning_workspace;
 mod smoke;
 mod switching_workspace;
 #[cfg(test)]
@@ -69,6 +70,7 @@ struct Metrics {
     pagination: bool,
     inputs: Vec<egui::Rect>,
     vlan_fields: Vec<(egui::Id, egui::Rect)>,
+    vlan_field_enabled: Vec<(egui::Id, bool)>,
     terminal: Option<egui::Rect>,
     accounts_run: Option<egui::Rect>,
     manager_slot: Option<egui::Rect>,
@@ -119,6 +121,18 @@ struct Metrics {
     routing_port_options: Vec<(String, egui::Id)>,
     routing_load_example: Option<egui::Rect>,
     routing_router_options: Option<egui::Rect>,
+    mac_source: Option<egui::Rect>,
+    mac_sources: Vec<(String, egui::Rect)>,
+    mac_destination: Option<egui::Rect>,
+    mac_time: Option<egui::Rect>,
+    mac_tools: Option<egui::Rect>,
+    mac_example_action: Option<egui::Rect>,
+    mac_example_choices: Vec<(usize, egui::Rect)>,
+    mac_send: Option<egui::Rect>,
+    mac_send_id: Option<egui::Id>,
+    mac_send_enabled: Option<bool>,
+    mac_advance: Option<egui::Rect>,
+    mac_clear: Option<egui::Rect>,
     script_history: Option<egui::Rect>,
     script_diagnostic: Option<egui::Rect>,
     script_completion: Option<egui::Rect>,
@@ -162,6 +176,7 @@ pub struct LabApp {
     profile_lock: Option<progress::ProfileLock>,
     preferences_error: Option<String>,
     preferences_read_only: bool,
+    mac_trace_reset: Option<usize>,
     script_job: Option<scripting::Job>,
     script_case: usize,
     focus_input: bool,
@@ -280,6 +295,7 @@ impl LabApp {
             profile_lock,
             preferences_error,
             preferences_read_only,
+            mac_trace_reset: None,
             script_job: None,
             script_case: 0,
             focus_input: false,
@@ -296,8 +312,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-history")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-learning")
             {
+                16000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-history") {
                 15000
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("unit-manager-unit")
@@ -515,6 +533,9 @@ impl LabApp {
             dlms_learning_lab::unit_manager_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated unit-manager lesson");
         }
+        if let Some(lesson) = &s.mac_teaching {
+            dlms_learning_lab::mac_learning_teaching::prepare(a, lesson, new_attempt);
+        }
         if let Some(lesson) = &s.switching_teaching {
             dlms_learning_lab::switching_teaching::prepare(a, lesson, new_attempt);
         }
@@ -593,6 +614,9 @@ impl LabApp {
     fn reset_attempt(&mut self, i: usize) {
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
+        if matches!(s.initial, engine::State::MacLearning { .. }) {
+            self.mac_trace_reset = Some(i);
+        }
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
@@ -635,6 +659,9 @@ impl LabApp {
         if let Some(lesson) = &s.unit_manager_teaching {
             dlms_learning_lab::unit_manager_teaching::prepare(a, lesson, true)
                 .expect("validated unit-manager lesson");
+        }
+        if let Some(lesson) = &s.mac_teaching {
+            dlms_learning_lab::mac_learning_teaching::prepare(a, lesson, true);
         }
         if let Some(lesson) = &s.switching_teaching {
             dlms_learning_lab::switching_teaching::prepare(a, lesson, true);

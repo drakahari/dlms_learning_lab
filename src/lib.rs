@@ -88,3 +88,5 @@ pub mod unit_manager_workspace;
 
 /// Bounded Ethernet source learning; not yet bundled curriculum.
 pub mod mac_learning;
+pub mod mac_learning_teaching;
+pub mod mac_learning_workspace;

@@ -7,6 +7,7 @@ mod acl;
 mod acl_lessons;
 mod capture_lessons;
 mod case_history;
+mod mac_learning;
 mod ospf;
 mod ospf_lessons;
 mod substitution;
@@ -315,6 +316,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 16000..=16399 => {
+                let (advance, capture) = self.mac_learning_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 15000..=15255 => {
                 let (advance, capture) = self.case_history_native(ctx, n);
                 if !advance {

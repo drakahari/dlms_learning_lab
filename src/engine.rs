@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    MacLearning {
+        simulation: crate::mac_learning::State,
+    },
     UnitManager {
         simulation: crate::unit_manager::State,
     },
@@ -124,6 +127,11 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    MacLearning {
+        initial: crate::mac_learning::State,
+        #[serde(deserialize_with = "crate::mac_learning_workspace::requirements")]
+        requirements: Vec<crate::mac_learning_workspace::Requirement>,
+    },
     UnitManager {
         definition: Box<crate::unit_manager_workspace::Definition>,
     },
@@ -317,6 +325,13 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
         (State::AuthoritativeDns { server }, Goal::AuthoritativeDns { requirements }) => {
             requirements.iter().map(|r| r.check(server)).collect()
         }
+        (
+            State::MacLearning { simulation },
+            Goal::MacLearning {
+                initial,
+                requirements,
+            },
+        ) => crate::mac_learning_workspace::checks(initial, simulation, requirements),
         (State::Switching { fabric }, Goal::Switching { requirements }) => {
             requirements.iter().map(|r| r.check(fabric)).collect()
         }
@@ -552,6 +567,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::MacLearning { .. } => crate::mac_learning_workspace::HELP,
         State::UnitManager { .. } => crate::unit_manager_workspace::HELP,
         State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
         State::Ospf { .. } => crate::ospf_workspace::HELP,
@@ -709,6 +725,9 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     if let State::AuthoritativeDns { server } = s {
         return crate::dns_workspace::adapter(server, input);
     }
+    if let State::MacLearning { simulation } = s {
+        return crate::mac_learning_workspace::adapter(simulation, input);
+    }
     if let State::Switching { fabric } = s {
         return crate::switching_workspace::adapter(fabric, input);
     }
@@ -768,6 +787,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         | State::Discovery { .. }
         | State::Processes { .. }
         | State::AuthoritativeDns { .. }
+        | State::MacLearning { .. }
         | State::Switching { .. }
         | State::Ipv6 { .. }
         | State::Ipv4Routing { .. }
@@ -1238,6 +1258,12 @@ pub fn describe(s: &State) -> String {
             server.configured.serial,
             server.primary.serial,
             server.secondary.serial
+        ),
+        State::MacLearning { simulation } => format!(
+            "Ethernet source learning · {} switches · {} learned entries · {} simulated seconds",
+            simulation.fabric().switches.len(),
+            simulation.entries().len(),
+            simulation.now()
         ),
         State::Switching { fabric } => format!(
             "VLAN data plane · {} switches · {} workstations",
