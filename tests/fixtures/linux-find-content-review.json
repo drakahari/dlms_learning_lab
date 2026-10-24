@@ -1,0 +1,503 @@
+[
+  {
+    "id": "lpic1-search-release-set",
+    "reference": [
+      "find /work/intake -maxdepth 1 -type f -name '*.log'",
+      "cp /work/intake/app.log /work/handover/app.log",
+      "cp /work/intake/.health.log /work/handover/.health.log",
+      "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+      "ls -a /work/handover"
+    ],
+    "alternates": [
+      [
+        "ls -a /work/intake",
+        "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+        "cp /work/intake/.health.log /work/handover/.health.log",
+        "cp /work/intake/app.log /work/handover/app.log"
+      ],
+      [
+        "cd intake",
+        "find . -maxdepth 1 -name '*.log' -type f -print",
+        "cp .health.log ../handover/.health.log",
+        "cp app.log ../handover/app.log",
+        "cp 'night shift.log' '../handover/night shift.log'",
+        "find . -maxdepth 1 -type f -name '*.log'"
+      ]
+    ],
+    "partial": [
+      "find /work/intake -maxdepth 1 -type f -name '*.log'",
+      "cp /work/intake/app.log /work/handover/app.log"
+    ],
+    "wrong": [
+      {
+        "name": "missed-hidden-report",
+        "commands": [
+          "cp /work/intake/app.log /work/handover/app.log",
+          "cp '/work/intake/night shift.log' '/work/handover/night shift.log'"
+        ],
+        "misconception": "ls without -a or a visible-only copy list omits the hidden log.",
+        "failed_rows": [
+          0,
+          1
+        ]
+      },
+      {
+        "name": "copied-nested-history",
+        "commands": [
+          "find /work/intake -maxdepth 1 -type f -name '*.log'",
+          "cp /work/intake/app.log /work/handover/app.log",
+          "cp /work/intake/.health.log /work/handover/.health.log",
+          "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+          "ls -a /work/handover",
+          "cp /work/intake/history/previous.log /work/handover/previous.log"
+        ],
+        "misconception": "Recursive matches are not all immediate current files.",
+        "failed_rows": [
+          0
+        ]
+      },
+      {
+        "name": "name-matches-directory",
+        "commands": [
+          "mkdir /work/handover/app.log",
+          "cp /work/intake/app.log /work/handover/app.log",
+          "cp /work/intake/.health.log /work/handover/.health.log",
+          "cp '/work/intake/night shift.log' '/work/handover/night shift.log'"
+        ],
+        "misconception": "A directory can occupy an expected basename; correct ordinary file text is still required.",
+        "failed_rows": [
+          2
+        ]
+      },
+      {
+        "name": "renamed-private-copy",
+        "commands": [
+          "find /work/intake -maxdepth 1 -type f -name '*.log'",
+          "cp /work/intake/app.log /work/handover/app.log",
+          "cp /work/intake/.health.log /work/handover/.health.log",
+          "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+          "ls -a /work/handover",
+          "cp /work/intake/private.txt /work/handover/notes-for-support.txt"
+        ],
+        "misconception": "A new filename does not make private content an allowed package member.",
+        "failed_rows": [
+          0
+        ]
+      },
+      {
+        "name": "private-overwrites-public",
+        "commands": [
+          "find /work/intake -maxdepth 1 -type f -name '*.log'",
+          "cp /work/intake/app.log /work/handover/app.log",
+          "cp /work/intake/.health.log /work/handover/.health.log",
+          "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+          "ls -a /work/handover",
+          "cp /work/intake/private.txt /work/handover/app.log"
+        ],
+        "misconception": "An allowed name with wrong/private text still fails.",
+        "failed_rows": [
+          2
+        ]
+      },
+      {
+        "name": "damaged-original",
+        "commands": [
+          "find /work/intake -maxdepth 1 -type f -name '*.log'",
+          "cp /work/intake/app.log /work/handover/app.log",
+          "cp /work/intake/.health.log /work/handover/.health.log",
+          "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+          "ls -a /work/handover",
+          "rm /work/intake/app.log"
+        ],
+        "misconception": "A correct package does not authorize losing its original source.",
+        "failed_rows": [
+          6,
+          7
+        ]
+      }
+    ],
+    "malformed": [
+      "find /work/intake -name *.log",
+      "find /work/intake -exec whoami ';'",
+      "find /work/intake -delete",
+      "find /work/intake -maxdepth 2147483648"
+    ],
+    "example": {
+      "experiment": [
+        "rm /practice/ready/.queue.log",
+        "ls -a /practice/ready"
+      ],
+      "expected_errors": [],
+      "repair": [
+        "cp /practice/notices/.queue.log /practice/ready/.queue.log",
+        "ls -a /practice/ready"
+      ],
+      "failed_rows": [
+        0,
+        1
+      ]
+    }
+  },
+  {
+    "id": "lpic1-search-incomplete-intake",
+    "reference": [
+      "ls -ld /work/intake/pending",
+      "chmod u+r /work/intake/pending",
+      "find /work/intake -type f -name '*-receipt.txt'",
+      "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+      "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+      "ls -a /work/triage"
+    ],
+    "alternates": [
+      [
+        "chmod 700 /work/intake/pending",
+        "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+        "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt"
+      ],
+      [
+        "cd /work/intake",
+        "chmod u=rx,g=,o= pending",
+        "cp pending/amber-receipt.txt ../triage/amber-receipt.txt",
+        "cp open/green-receipt.txt ../triage/green-receipt.txt",
+        "find . -name '*-receipt.txt' -type f"
+      ]
+    ],
+    "partial": [
+      "chmod u+r /work/intake/pending",
+      "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt"
+    ],
+    "wrong": [
+      {
+        "name": "known-path-without-listing-repair",
+        "commands": [
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+          "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt"
+        ],
+        "misconception": "A direct known pathname is not the required directory listing repair.",
+        "failed_rows": [
+          3
+        ]
+      },
+      {
+        "name": "healthy-only-copy",
+        "commands": [
+          "ls -ld /work/intake/pending",
+          "chmod u+r /work/intake/pending",
+          "find /work/intake -type f -name '*-receipt.txt'",
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt"
+        ],
+        "misconception": "One healthy receipt does not complete the two-branch investigation.",
+        "failed_rows": [
+          0,
+          2
+        ]
+      },
+      {
+        "name": "lost-search",
+        "commands": [
+          "ls -ld /work/intake/pending",
+          "chmod u+r /work/intake/pending",
+          "find /work/intake -type f -name '*-receipt.txt'",
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+          "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+          "ls -a /work/triage",
+          "chmod 400 /work/intake/pending"
+        ],
+        "misconception": "Read without search is not a supported complete traversal.",
+        "failed_rows": [
+          4
+        ]
+      },
+      {
+        "name": "opened-nonowners",
+        "commands": [
+          "ls -ld /work/intake/pending",
+          "chmod u+r /work/intake/pending",
+          "find /work/intake -type f -name '*-receipt.txt'",
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+          "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+          "ls -a /work/triage",
+          "chmod 777 /work/intake/pending"
+        ],
+        "misconception": "Unneeded nonowner listing/traversal violates the stated policy.",
+        "failed_rows": [
+          5,
+          6,
+          7,
+          8
+        ]
+      },
+      {
+        "name": "private-extra",
+        "commands": [
+          "ls -ld /work/intake/pending",
+          "chmod u+r /work/intake/pending",
+          "find /work/intake -type f -name '*-receipt.txt'",
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+          "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+          "ls -a /work/triage",
+          "cp /work/private.txt /work/triage/.extra-note"
+        ],
+        "misconception": "A hidden private copy is still an extra immediate triage entry.",
+        "failed_rows": [
+          0
+        ]
+      },
+      {
+        "name": "changed-source-mode",
+        "commands": [
+          "ls -ld /work/intake/pending",
+          "chmod u+r /work/intake/pending",
+          "find /work/intake -type f -name '*-receipt.txt'",
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+          "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+          "ls -a /work/triage",
+          "chmod 644 /work/intake/pending/amber-receipt.txt"
+        ],
+        "misconception": "Changing a source file mode is not needed to repair its folder.",
+        "failed_rows": [
+          13
+        ]
+      },
+      {
+        "name": "damaged-healthy-branch",
+        "commands": [
+          "ls -ld /work/intake/pending",
+          "chmod u+r /work/intake/pending",
+          "find /work/intake -type f -name '*-receipt.txt'",
+          "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+          "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+          "ls -a /work/triage",
+          "chmod 700 /work/intake/open"
+        ],
+        "misconception": "The already-healthy branch has an explicit preservation policy.",
+        "failed_rows": [
+          16
+        ]
+      }
+    ],
+    "malformed": [
+      "find /work/intake -type l",
+      "find /work/intake -name '[ab]*'",
+      "chmod -R 777 /work/intake",
+      "find /work/intake -print -type f"
+    ],
+    "example": {
+      "experiment": [
+        "chmod u-r /practice/dispatch/locked",
+        "find /practice/dispatch -type f -name '*-ticket.txt'"
+      ],
+      "expected_errors": [
+        1
+      ],
+      "repair": [
+        "chmod u+r /practice/dispatch/locked",
+        "find /practice/dispatch -type f -name '*-ticket.txt'"
+      ],
+      "failed_rows": [
+        3
+      ]
+    }
+  },
+  {
+    "id": "lpic1-search-private-handover",
+    "reference": [
+      "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+      "cat /work/releases/north/current/approved.ready",
+      "cat /work/releases/south/current/approved.ready",
+      "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+      "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+      "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+      "ls -al /work/review"
+    ],
+    "alternates": [
+      [
+        "cd /work/releases/north/current",
+        "cat approved.ready",
+        "cp approved.ready ../../../review/north.txt",
+        "cd ../../south/current",
+        "cp approved.ready ../../../review/south.txt",
+        "cp /work/review/obsolete.txt /work/archive/obsolete.txt",
+        "rm /work/review/obsolete.txt"
+      ],
+      [
+        "rm /work/review/north.txt",
+        "rm /work/review/south.txt",
+        "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+        "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+        "chgrp review /work/review/north.txt",
+        "chgrp review /work/review/south.txt",
+        "chmod 640 /work/review/north.txt",
+        "chmod 640 /work/review/south.txt",
+        "mv /work/review/obsolete.txt /work/archive/obsolete.txt"
+      ]
+    ],
+    "partial": [
+      "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+      "cat /work/releases/north/current/approved.ready",
+      "cat /work/releases/south/current/approved.ready",
+      "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+      "cp /work/releases/south/current/approved.ready /work/review/south.txt"
+    ],
+    "wrong": [
+      {
+        "name": "left-obsolete-public",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt"
+        ],
+        "misconception": "Correct new copies do not retire the obsolete shared name or retain its archive text.",
+        "failed_rows": [
+          0,
+          16
+        ]
+      },
+      {
+        "name": "selected-history",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+          "ls -al /work/review",
+          "cp /work/releases/north/history/approved.ready /work/review/north.txt"
+        ],
+        "misconception": "The first matching basename may be old history rather than current approval.",
+        "failed_rows": [
+          1
+        ]
+      },
+      {
+        "name": "recreated-without-sharing-repair",
+        "commands": [
+          "rm /work/review/north.txt",
+          "rm /work/review/south.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt"
+        ],
+        "misconception": "New copies of600 sources use the primary group, unlike replacing existing review files.",
+        "failed_rows": [
+          3,
+          4,
+          5,
+          6,
+          19
+        ]
+      },
+      {
+        "name": "renamed-private-leak",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+          "ls -al /work/review",
+          "cp /work/releases/internal/private.ready /work/review/.handover-note"
+        ],
+        "misconception": "Renaming a private extra does not satisfy an exact shared folder inventory.",
+        "failed_rows": [
+          0
+        ]
+      },
+      {
+        "name": "private-under-approved-name",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+          "ls -al /work/review",
+          "cp /work/releases/internal/private.ready /work/review/south.txt"
+        ],
+        "misconception": "Exact names alone are insufficient when a required public file holds private text.",
+        "failed_rows": [
+          2
+        ]
+      },
+      {
+        "name": "opened-private-archive",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+          "ls -al /work/review",
+          "chmod 755 /work/archive"
+        ],
+        "misconception": "The archive must retain its explicit owner-private700 policy.",
+        "failed_rows": [
+          17
+        ]
+      },
+      {
+        "name": "private-mode-damaged",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+          "ls -al /work/review",
+          "chmod 644 /work/releases/internal/private.ready"
+        ],
+        "misconception": "The original private-file600 mode is an explicit preservation requirement.",
+        "failed_rows": [
+          14
+        ]
+      },
+      {
+        "name": "missing-current-source",
+        "commands": [
+          "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+          "cat /work/releases/north/current/approved.ready",
+          "cat /work/releases/south/current/approved.ready",
+          "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+          "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+          "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+          "ls -al /work/review",
+          "rm /work/releases/south/current/approved.ready"
+        ],
+        "misconception": "The handover is not permission to discard the named current source.",
+        "failed_rows": [
+          11,
+          12
+        ]
+      }
+    ],
+    "malformed": [
+      "cp -r /work/releases /work/review",
+      "find /work/releases -o -print",
+      "find /work/releases -maxdepth -1",
+      "find /work/releases -print0"
+    ],
+    "example": {
+      "experiment": [
+        "chmod g-r /practice/review/island.txt",
+        "ls -l /practice/review/island.txt",
+        "id -Gn blair"
+      ],
+      "expected_errors": [],
+      "repair": [
+        "chmod g+r /practice/review/island.txt",
+        "ls -l /practice/review/island.txt"
+      ],
+      "failed_rows": [
+        4,
+        19
+      ]
+    }
+  }
+]

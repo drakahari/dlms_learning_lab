@@ -1,0 +1,1648 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-search-release-set",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-search",
+      "topic": "File search and investigation",
+      "title": "Build the right release evidence set",
+      "summary": "Select current logs by scope, type and name, including hidden entries, then prepare a precise evidence set.",
+      "objective": "You are Alex in /work. Assemble the current incident logs from /work/intake into /work/handover. Select ordinary files whose names end in .log immediately inside intake, including hidden names. The history subfolder is not current, and a folder ending in .log is not a log file. Copy each selected file under its original filename.\n\nThe handover folder must finish with exactly those current log files, including no extra hidden or renamed private copy. Preserve the text and modes of all six supplied intake files, including the history file, the log-named folder's readme and private.txt. Keep the handover folder owned by alex, group staff, mode750. Use supported commands to investigate and make the copies, then Check work.",
+      "retry_guidance": "Inspect immediate entries with a quoted *.log pattern and -type f. A hidden file still matches; a deeper file is outside this request.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the request",
+        "Investigate and make changes",
+        "Verify the complete handover"
+      ],
+      "guide": [
+        {
+          "title": "Understand the request",
+          "why": "Search scope and file type decide what belongs in this incident package.",
+          "action": "Inspect the current intake and distinguish immediate files from deeper history.",
+          "commands": [
+            {
+              "command": "find /work/intake -maxdepth 1 -type f -name '*.log'",
+              "explanation": "Match immediate ordinary log files; quotes pass the pattern to find, and hidden matches are included.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and make changes",
+          "why": "Copying selected files preserves the originals; matching a name alone does not make it a file.",
+          "action": "Inspect candidate text if needed, then copy the selected files under their original names. Keep the supplied source text/modes and destination-folder policy.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete handover",
+          "why": "An extra or missing hidden entry changes the requested package.",
+          "action": "Inspect the destination including hidden names, then Check work.",
+          "commands": [
+            {
+              "command": "ls -a /work/handover",
+              "explanation": "Show all immediate handover names; compare the whole requested set.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "hints": [
+        "Inspect immediate entries with a quoted *.log pattern and -type f. A hidden file still matches; a deeper file is outside this request.",
+        "Put -maxdepth 1 before the predicates. You can also inspect names with ls -a and make correct individual copies.",
+        "The current files are .health.log, app.log and night shift.log. Copy all three under those names, quote the path with spaces, and remove any extra handover entries without changing the sources."
+      ],
+      "explanation": "The three immediate regular log files are .health.log, app.log and night shift.log. The leading dot is included in find matching, the space stays part of one quoted path, and the percent sign is ordinary text. history/previous.log is deeper than the request, while legacy.log is a folder.\n\nCorrect current contents and the exact handover inventory matter; a successful command or a plausible filename alone does not prove the whole result. Manual inspection and reordered individual copies are equally valid. The source guards protect the six named supplied file texts/modes; this is not a whole-filesystem history check.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Base-Name-Patterns.html",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Directories.html",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Type.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex and supplied virtual files/memberships only; no root, host files or account changes. One explicit virtual start per find; optional leading -maxdepth, -name with C-byte * and ? plus escaped literals, -type f/d, implicit AND and optional final -print. No brackets/ranges, Boolean operators, execution/deletion actions, links, indexes or full GNU find or shell behavior. Quote patterns and paths containing spaces; terminal expansion, pipelines and redirection are unsupported. Search errors mean partial results. Readable but nonsearchable directory descent is explicitly unsupported/incomplete here; do not treat it as an empty successful search. Check work uses the requested current files, exact named-folder inventories and access policy, so equivalent supported methods are accepted. Exact inventory applies only to the declared destination folder; nested contents, unmentioned locations and unrequested metadata are not a global nondisclosure claim.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/handover": {
+              "directory": true,
+              "mode": 488,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/history": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/legacy.log": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/.health.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/app.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/night shift.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/history/previous.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/legacy.log/readme.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/private.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/intake/.health.log": "BUILD=cedar\nCHANNEL=health\nSTATE=green\n",
+            "/work/intake/app.log": "BUILD=cedar\nCHANNEL=application\nSTATE=ready\n",
+            "/work/intake/night shift.log": "BUILD=cedar\nCHANNEL=night shift\nSTATE=ready 100%\n",
+            "/work/intake/history/previous.log": "BUILD=birch-old\nSTATE=retired\n",
+            "/work/intake/legacy.log/readme.txt": "This entry is a folder; its name alone is not a file type.\n",
+            "/work/intake/private.txt": "INTERNAL=triage working note; not part of the support package\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "staff"
+            ],
+            "casey": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {}
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "DirectoryEntries",
+            "path": "/work/handover",
+            "names": [
+              ".health.log",
+              "app.log",
+              "night shift.log"
+            ]
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/handover/.health.log",
+            "text": "BUILD=cedar\nCHANNEL=health\nSTATE=green\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/handover/app.log",
+            "text": "BUILD=cedar\nCHANNEL=application\nSTATE=ready\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/handover/night shift.log",
+            "text": "BUILD=cedar\nCHANNEL=night shift\nSTATE=ready 100%\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/.health.log",
+            "text": "BUILD=cedar\nCHANNEL=health\nSTATE=green\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/.health.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/app.log",
+            "text": "BUILD=cedar\nCHANNEL=application\nSTATE=ready\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/app.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/night shift.log",
+            "text": "BUILD=cedar\nCHANNEL=night shift\nSTATE=ready 100%\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/night shift.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/history/previous.log",
+            "text": "BUILD=birch-old\nSTATE=retired\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/history/previous.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/legacy.log/readme.txt",
+            "text": "This entry is a folder; its name alone is not a file type.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/legacy.log/readme.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/private.txt",
+            "text": "INTERNAL=triage working note; not part of the support package\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/private.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/handover",
+            "mode": 488
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/handover",
+            "owner": "alex",
+            "group": "staff"
+          }
+        ]
+      },
+      "solution": [
+        "find /work/intake -maxdepth 1 -type f -name '*.log'",
+        "cp /work/intake/app.log /work/handover/app.log",
+        "cp /work/intake/.health.log /work/handover/.health.log",
+        "cp '/work/intake/night shift.log' '/work/handover/night shift.log'",
+        "ls -a /work/handover"
+      ],
+      "prerequisites": [
+        "lpic1-file-handover",
+        "lpic1-logs"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Continue after Prepare a safe project handover and Find the failing requests. Here you will search simulated folders and their subfolders.",
+        "concepts": [
+          {
+            "title": "Search a folder and its subfolders",
+            "text": "find START visits the starting file or folder and, normally, its descendants. For this example, START is /practice/notices. Find the failing requests used a literal name under /var/log. Here you can search a supplied simulated folder and its subfolders; that earlier lab keeps its smaller command list."
+          },
+          {
+            "title": "Quote the pattern for find",
+            "text": "In find /practice/notices -name '*.log', the terminal removes the quotes and passes *.log to find. Find still treats * as a wildcard. It matches the whole basename, not the file text. An unquoted * is rejected in this terminal instead of being expanded. Quote a complete path when its name contains spaces."
+          },
+          {
+            "title": "Hidden names and file types",
+            "text": "A leading dot does not hide a name from find: *.log matches .queue.log too. ls -a also includes hidden entries. A folder can be named legacy.log, so -type f selects ordinary files rather than trusting an extension. Adjacent -type f and -name tests mean AND: both must match."
+          },
+          {
+            "title": "Depth includes the starting entry",
+            "text": "The start is depth0. find /practice/notices -maxdepth 0 prints just that starting folder; adding -type f selects nothing because the start is a folder. With -maxdepth 1, its immediate children are considered. Failed name/type tests do not prune subfolders; the depth limit controls descent."
+          },
+          {
+            "title": "Inspect, copy and inspect again",
+            "text": "cat /practice/notices/sync.log reads the selected text without running it. The two cp commands copy sync.log and .queue.log into the existing ready folder and leave the sources in place. ls -a /practice/ready lets you inspect the exact immediate names, including the hidden receipt."
+          },
+          {
+            "title": "A partial list is not a complete search",
+            "text": "An error can follow useful matching paths. Treat Search incomplete as a warning to investigate the reported folder, not as proof that no other files exist. These exercises accept any supported commands that produce the requested current files and access policy; repeating a particular find command is not a completion requirement."
+          }
+        ],
+        "example": [
+          "find /practice/notices -maxdepth 1 -type f -name '*.log'",
+          "cat /practice/notices/sync.log",
+          "cp /practice/notices/sync.log /practice/ready/sync.log",
+          "cp /practice/notices/.queue.log /practice/ready/.queue.log",
+          "ls -a /practice/ready"
+        ],
+        "inputs": "Practice uses /practice/notices and /practice/ready with different report texts. Try the commands one at a time with Insert command and Run; the assignment stays separate.",
+        "try_change": "Run rm /practice/ready/.queue.log, inspect ready with ls -a, then search notices again and restore that missing copy. This example is ungraded.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/practice": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/ready": {
+              "directory": true,
+              "mode": 488,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/history": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/legacy.log": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/.queue.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/sync.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/history/previous.log": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/legacy.log/readme.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/notices/private.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/practice/notices/.queue.log": "PACK=harbor\nQUEUE=clear\n",
+            "/practice/notices/sync.log": "PACK=harbor\nSYNC=ready\n",
+            "/practice/notices/history/previous.log": "PACK=harbor-old\nSYNC=retired\n",
+            "/practice/notices/legacy.log/readme.txt": "This entry is a folder; its name alone is not a file type.\n",
+            "/practice/notices/private.txt": "Private practice note; retain here.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "staff"
+            ],
+            "casey": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/practice",
+          "cwd": "/practice",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {}
+        },
+        "outcomes": [
+          {
+            "kind": "DirectoryEntries",
+            "path": "/practice/ready",
+            "names": [
+              ".queue.log",
+              "sync.log"
+            ]
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/ready/.queue.log",
+            "text": "PACK=harbor\nQUEUE=clear\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/ready/sync.log",
+            "text": "PACK=harbor\nSYNC=ready\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/notices/.queue.log",
+            "text": "PACK=harbor\nQUEUE=clear\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/notices/.queue.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/notices/sync.log",
+            "text": "PACK=harbor\nSYNC=ready\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/notices/sync.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/notices/history/previous.log",
+            "text": "PACK=harbor-old\nSYNC=retired\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/notices/history/previous.log",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/notices/legacy.log/readme.txt",
+            "text": "This entry is a folder; its name alone is not a file type.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/notices/legacy.log/readme.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/notices/private.txt",
+            "text": "Private practice note; retain here.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/notices/private.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/ready",
+            "mode": 488
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/ready",
+            "owner": "alex",
+            "group": "staff"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-search-incomplete-intake",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-search",
+      "topic": "File search and investigation",
+      "title": "Recover an incomplete intake investigation",
+      "summary": "Repair a directory access fault, distinguish partial results and deliver both branches without opening unrelated users.",
+      "objective": "Alex is investigating /work/intake. A search can report the open branch, but pending is owned by Alex and cannot be listed. Restore Alex's read and search access to pending while keeping Blair and Casey unable to list or traverse that folder. Keep its owner alex and group staff. Owner write is your choice; it is not assessed.\n\nDeliver the two receipt texts from the open and pending branches into /work/triage under their existing receipt filenames. Triage must contain exactly those two ordinary files and stay mode700. Preserve both source-file texts and modes, /work/private.txt's text and600 mode, and the755 modes of intake and its already-healthy open branch. Inspect the reported access problem, repair the policy and prepare both receipts, then Check work. A known pathname or one healthy copy does not complete the repair.",
+      "retry_guidance": "Inspect pending with ls -ld: directory read lists names, while search lets a path cross it. Repairing a receipt file does not fix the parent folder.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the request",
+        "Investigate and make changes",
+        "Verify the complete handover"
+      ],
+      "guide": [
+        {
+          "title": "Understand the request",
+          "why": "The reported folder and its receipt have different permission requirements.",
+          "action": "Inspect pending itself and review the supplied users before changing its mode.",
+          "commands": [
+            {
+              "command": "ls -ld /work/intake/pending",
+              "explanation": "Read folder metadata without trying to list its contents.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and make changes",
+          "why": "Owner read and search are both required; an unrequested write bit is not the distinction.",
+          "action": "Repair only the requested policy, then investigate both branches and prepare the two receipt copies.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete handover",
+          "why": "Two correct copies and safe current access are both necessary.",
+          "action": "Inspect triage including hidden names; retry the search as needed, then Check work.",
+          "commands": [
+            {
+              "command": "ls -a /work/triage",
+              "explanation": "Inspect the exact receipt set without hiding extra dot entries.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "hints": [
+        "Inspect pending with ls -ld: directory read lists names, while search lets a path cross it. Repairing a receipt file does not fix the parent folder.",
+        "Restore owner read while retaining search. Keep the named nonowners unable to list or traverse;500 and700 are both valid owner choices.",
+        "chmod u+r /work/intake/pending repairs the supplied missing read bit. Then stage green-receipt.txt from open and amber-receipt.txt from pending, retaining their originals and the exact private triage inventory."
+      ],
+      "explanation": "pending initially gives Alex search but not directory read. A direct known pathname can still reach the readable receipt, which is why copying both files alone is not the requested access repair. Owner500 or700 supplies both listing and search; opening the folder to Blair or Casey is unnecessary.\n\nThe completed state includes both receipt texts, exactly two triage names, the repaired owner/nonowner access policy and the stated source/private/healthy-branch guards. The search can be repeated to inspect the repaired supplied layout, but no command history is a grading credential.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Base-Name-Patterns.html",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Directories.html",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Type.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex and supplied virtual files/memberships only; no root, host files or account changes. One explicit virtual start per find; optional leading -maxdepth, -name with C-byte * and ? plus escaped literals, -type f/d, implicit AND and optional final -print. No brackets/ranges, Boolean operators, execution/deletion actions, links, indexes or full GNU find or shell behavior. Quote patterns and paths containing spaces; terminal expansion, pipelines and redirection are unsupported. Search errors mean partial results. Readable but nonsearchable directory descent is explicitly unsupported/incomplete here; do not treat it as an empty successful search. Check work uses the requested current files, exact named-folder inventories and access policy, so equivalent supported methods are accepted. Exact inventory applies only to the declared destination folder; nested contents, unmentioned locations and unrequested metadata are not a global nondisclosure claim.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/open": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/pending": {
+              "directory": true,
+              "mode": 64,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/triage": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/open/green-receipt.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/intake/pending/amber-receipt.txt": {
+              "directory": false,
+              "mode": 256,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/private.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/work/intake/open/green-receipt.txt": "INTAKE=orchard\nBRANCH=open\nRECEIPT=G-482\n",
+            "/work/intake/pending/amber-receipt.txt": "INTAKE=orchard\nBRANCH=pending\nRECEIPT=A-913\n",
+            "/work/private.txt": "INTERNAL=orchard coordination note; not a triage receipt\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "staff"
+            ],
+            "casey": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {}
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "DirectoryEntries",
+            "path": "/work/triage",
+            "names": [
+              "green-receipt.txt",
+              "amber-receipt.txt"
+            ]
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/triage/green-receipt.txt",
+            "text": "INTAKE=orchard\nBRANCH=open\nRECEIPT=G-482\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/triage/amber-receipt.txt",
+            "text": "INTAKE=orchard\nBRANCH=pending\nRECEIPT=A-913\n"
+          },
+          {
+            "kind": "Access",
+            "path": "/work/intake/pending",
+            "user": "alex",
+            "operation": "list_names",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/intake/pending",
+            "user": "alex",
+            "operation": "search_directory",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/work/intake/pending",
+            "user": "blair",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/intake/pending",
+            "user": "blair",
+            "operation": "search_directory",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/intake/pending",
+            "user": "casey",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/work/intake/pending",
+            "user": "casey",
+            "operation": "search_directory",
+            "allowed": false
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/intake/pending",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/open/green-receipt.txt",
+            "text": "INTAKE=orchard\nBRANCH=open\nRECEIPT=G-482\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/open/green-receipt.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/intake/pending/amber-receipt.txt",
+            "text": "INTAKE=orchard\nBRANCH=pending\nRECEIPT=A-913\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/pending/amber-receipt.txt",
+            "mode": 256
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/private.txt",
+            "text": "INTERNAL=orchard coordination note; not a triage receipt\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/private.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake/open",
+            "mode": 493
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/intake",
+            "mode": 493
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/triage",
+            "mode": 448
+          }
+        ]
+      },
+      "solution": [
+        "ls -ld /work/intake/pending",
+        "chmod u+r /work/intake/pending",
+        "find /work/intake -type f -name '*-receipt.txt'",
+        "cp /work/intake/open/green-receipt.txt /work/triage/green-receipt.txt",
+        "cp /work/intake/pending/amber-receipt.txt /work/triage/amber-receipt.txt",
+        "ls -a /work/triage"
+      ],
+      "prerequisites": [
+        "lpic1-search-release-set",
+        "lpic1-drop-directory"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Continue after Build the right release evidence set and Configure a drop folder without browsing. This practice uses different tickets and a separate directory tree.",
+        "concepts": [
+          {
+            "title": "Incomplete can still contain useful matches",
+            "text": "A search may print a healthy branch before reporting that another folder cannot be read. The partial paths are useful leads, not the full answer. Find diagnoses directory access; changing a receipt file alone does not repair listing its parent."
+          },
+          {
+            "title": "Directory read and search do different jobs",
+            "text": "Directory read lets Alex list its names; search lets a path cross it to an entry. The locked practice folder initially has owner search but no read. ls -ld /practice/dispatch/locked inspects that folder itself through its accessible parent, without listing the locked contents."
+          },
+          {
+            "title": "Repair the owner without opening everyone",
+            "text": "chmod u+r /practice/dispatch/locked adds owner read and keeps the existing search bit. Owner500 and700 both allow listing and search; owner write is not needed for this investigation. Group and other users must still be blocked as requested. id can show the supplied memberships; the owner class takes precedence."
+          },
+          {
+            "title": "Repeat the search after repair",
+            "text": "find /practice/dispatch -type f -name '*-ticket.txt' now reports both tickets without an incomplete warning. Matching names/types does not require file-read permission, but cp and cat need to read the selected file. The example tickets already give Alex the file read access needed to copy them."
+          },
+          {
+            "title": "Deliver both branches and verify the set",
+            "text": "The two cp commands stage west-ticket.txt and east-ticket.txt in the existing private triage folder. ls -a /practice/triage includes unexpected hidden copies too. In the full task, Check work assesses the requested current directory access, both receipt texts and exact triage names; knowing a path is not a substitute for repairing the access policy."
+          },
+          {
+            "title": "Keep the supported boundary honest",
+            "text": "In this small model, descending into a readable but nonsearchable folder is explicitly unsupported and incomplete. Do not treat that as an empty successful search. Preserve both owner read and search when repairing the supplied fault. Use Run for each practice command and inspect its output and permissions. The full assignment has Check work for its complete outcome."
+          }
+        ],
+        "example": [
+          "ls -ld /practice/dispatch/locked",
+          "chmod u+r /practice/dispatch/locked",
+          "find /practice/dispatch -type f -name '*-ticket.txt'",
+          "cp /practice/dispatch/open/west-ticket.txt /practice/triage/west-ticket.txt",
+          "cp /practice/dispatch/locked/east-ticket.txt /practice/triage/east-ticket.txt",
+          "ls -a /practice/triage"
+        ],
+        "inputs": "Practice uses /practice/dispatch and /practice/triage. The worked sequence first inspects and repairs locked, so every default command succeeds; a later experiment shows the partial-result failure.",
+        "try_change": "Run chmod u-r /practice/dispatch/locked and repeat find /practice/dispatch -type f -name '*-ticket.txt'. Inspect the partial warning, then restore owner read and retry.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/practice": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/dispatch": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/dispatch/open": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/dispatch/locked": {
+              "directory": true,
+              "mode": 64,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/triage": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/dispatch/open/west-ticket.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/dispatch/locked/east-ticket.txt": {
+              "directory": false,
+              "mode": 256,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/private.txt": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            }
+          },
+          "files": {
+            "/practice/dispatch/open/west-ticket.txt": "DISPATCH=lake\nTICKET=W-26\n",
+            "/practice/dispatch/locked/east-ticket.txt": "DISPATCH=lake\nTICKET=E-71\n",
+            "/practice/private.txt": "Private dispatch practice note.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "staff"
+            ],
+            "casey": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/practice",
+          "cwd": "/practice",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {}
+        },
+        "outcomes": [
+          {
+            "kind": "DirectoryEntries",
+            "path": "/practice/triage",
+            "names": [
+              "west-ticket.txt",
+              "east-ticket.txt"
+            ]
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/triage/west-ticket.txt",
+            "text": "DISPATCH=lake\nTICKET=W-26\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/triage/east-ticket.txt",
+            "text": "DISPATCH=lake\nTICKET=E-71\n"
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/dispatch/locked",
+            "user": "alex",
+            "operation": "list_names",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/dispatch/locked",
+            "user": "alex",
+            "operation": "search_directory",
+            "allowed": true
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/dispatch/locked",
+            "user": "blair",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/dispatch/locked",
+            "user": "blair",
+            "operation": "search_directory",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/dispatch/locked",
+            "user": "casey",
+            "operation": "list_names",
+            "allowed": false
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/dispatch/locked",
+            "user": "casey",
+            "operation": "search_directory",
+            "allowed": false
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/dispatch/locked",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/dispatch/open/west-ticket.txt",
+            "text": "DISPATCH=lake\nTICKET=W-26\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/dispatch/open/west-ticket.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/dispatch/locked/east-ticket.txt",
+            "text": "DISPATCH=lake\nTICKET=E-71\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/dispatch/locked/east-ticket.txt",
+            "mode": 256
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/private.txt",
+            "text": "Private dispatch practice note.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/private.txt",
+            "mode": 384
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/dispatch/open",
+            "mode": 493
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/dispatch",
+            "mode": 493
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/triage",
+            "mode": 448
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-search-private-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "unit": "linux-file-search",
+      "topic": "File search and investigation",
+      "title": "Complete a private support handover",
+      "summary": "Investigate ambiguous release receipts, restore the review copies and retire obsolete text without exposing private material.",
+      "objective": "The North and South current branches under /work/releases each contain an approved .ready receipt. Investigate the nested ordinary files and read their texts to distinguish current approved receipts from history, drafts and private notes. Update /work/review/north.txt and south.txt with the corresponding approved texts. Finish with both ordinary review files owned by alex, group review, mode640, and readable by Blair.\n\nThe review folder must contain exactly north.txt and south.txt, with no extra hidden or renamed private copy. Keep that folder alex:review750. Archive its obsolete.txt as /work/archive/obsolete.txt, retaining its text and removing the old shared name. Keep the archive folder alex:staff700.\n\nPreserve the two approved current source texts and600 modes. Keep /work/releases/internal/private.ready's original text, alex:staff ownership and600 mode, and keep that private text out of the review files/folder. These private boundaries are the named review, original and archive policies. Use supported methods to reach the complete final state, then Check work.",
+      "retry_guidance": "A .ready match is only a candidate. Search the current branches and inspect their REVIEW fields and surrounding paths before replacing the handover texts.",
+      "difficulty": "Intermediate",
+      "minutes": 45,
+      "steps": [
+        "Understand the request",
+        "Investigate and make changes",
+        "Verify the complete handover"
+      ],
+      "guide": [
+        {
+          "title": "Understand the request",
+          "why": "Matching names are candidates, not an approval decision.",
+          "action": "Inspect nested candidate paths and their text before updating the public review files.",
+          "commands": [
+            {
+              "command": "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+              "explanation": "Search the supplied release tree; compare current, history/draft and private candidates before selecting.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Investigate and make changes",
+          "why": "Correct texts, sharing metadata and retirement are separate parts of the handover.",
+          "action": "Update the two review files, preserve the stated source/private policies, and retain the obsolete text in the private archive.",
+          "commands": []
+        },
+        {
+          "title": "Verify the complete handover",
+          "why": "A correct-looking file can still have the wrong access or an extra hidden sibling.",
+          "action": "Inspect exact names and metadata, including hidden entries, then Check work.",
+          "commands": [
+            {
+              "command": "ls -al /work/review",
+              "explanation": "Show all immediate names and simplified modes/groups; compare the requested final review policy.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "hints": [
+        "A .ready match is only a candidate. Search the current branches and inspect their REVIEW fields and surrounding paths before replacing the handover texts.",
+        "Copying into the existing review files preserves their640 mode and review group. If you recreated them, inspect and repair both fields; then retire the obsolete shared name into the private archive.",
+        "Use the North/South current approved.ready texts for north.txt/south.txt. The final review inventory is those two names only; preserve the named sources/private record and keep the obsolete text under /work/archive/obsolete.txt."
+      ],
+      "explanation": "The approved North and South current receipts belong in their matching review files. Historical/draft receipts and the internal private note are not substitutes, even when their names match a broad search. Existing destinations keep their sharing metadata when cp replaces their text; rebuilding them requires restoring alex:review640 before Blair can read them.\n\nAn exact immediate review inventory rejects renamed or hidden extra copies, while the expected file texts reject private data placed under an allowed filename. The named private original remains600 and alex:staff. Moving or copying-then-removing the obsolete shared file is valid when its text is retained in the owner-private archive. The requirements concern these declared folders and fields, not global disclosure or a particular command history.",
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Base-Name-Patterns.html",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Directories.html",
+        "https://www.gnu.org/software/findutils/manual/html_node/find_html/Type.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cp-invocation.html"
+      ],
+      "simplifications": "Ordinary simulated user Alex and supplied virtual files/memberships only; no root, host files or account changes. One explicit virtual start per find; optional leading -maxdepth, -name with C-byte * and ? plus escaped literals, -type f/d, implicit AND and optional final -print. No brackets/ranges, Boolean operators, execution/deletion actions, links, indexes or full GNU find or shell behavior. Quote patterns and paths containing spaces; terminal expansion, pipelines and redirection are unsupported. Search errors mean partial results. Readable but nonsearchable directory descent is explicitly unsupported/incomplete here; do not treat it as an empty successful search. Check work uses the requested current files, exact named-folder inventories and access policy, so equivalent supported methods are accepted. Exact inventory applies only to the declared destination folder; nested contents, unmentioned locations and unrequested metadata are not a global nondisclosure claim.",
+      "initial": {
+        "kind": "Filesystem",
+        "tree": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/work": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/review": {
+              "directory": true,
+              "mode": 488,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/work/archive": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/north": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/north/current": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/south": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/south/current": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/north/history": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/south/draft": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/internal": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/north/history/approved.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/south/draft/approved.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/north/current/approved.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/south/current/approved.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/releases/internal/private.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/work/review/north.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/work/review/south.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/work/review/obsolete.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "review"
+            }
+          },
+          "files": {
+            "/work/releases/north/history/approved.ready": "TICKET=NORTH-091\nREVIEW=retired\n",
+            "/work/releases/south/draft/approved.ready": "TICKET=SOUTH-700\nREVIEW=draft\n",
+            "/work/releases/north/current/approved.ready": "TICKET=NORTH-742\nREVIEW=approved\nSERVICE=north relay\n",
+            "/work/releases/south/current/approved.ready": "TICKET=SOUTH-319\nREVIEW=approved\nSERVICE=south intake\n",
+            "/work/releases/internal/private.ready": "INTERNAL=release coordination; not part of the review handover\n",
+            "/work/review/north.txt": "Previous handover: replace this text after investigation.\n",
+            "/work/review/south.txt": "Previous handover: replace this text after investigation.\n",
+            "/work/review/obsolete.txt": "TICKET=REVIEW-008\nSTATE=obsolete but retain this archive text\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/work",
+          "cwd": "/work",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {}
+        }
+      },
+      "goal": {
+        "kind": "Filesystem",
+        "requirements": [
+          {
+            "kind": "DirectoryEntries",
+            "path": "/work/review",
+            "names": [
+              "north.txt",
+              "south.txt"
+            ]
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/review/north.txt",
+            "text": "TICKET=NORTH-742\nREVIEW=approved\nSERVICE=north relay\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/review/south.txt",
+            "text": "TICKET=SOUTH-319\nREVIEW=approved\nSERVICE=south intake\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/review/north.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/review/south.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/review/north.txt",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/review/south.txt",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/review",
+            "mode": 488
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/review",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/releases/north/current/approved.ready",
+            "text": "TICKET=NORTH-742\nREVIEW=approved\nSERVICE=north relay\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/releases/north/current/approved.ready",
+            "mode": 384
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/releases/south/current/approved.ready",
+            "text": "TICKET=SOUTH-319\nREVIEW=approved\nSERVICE=south intake\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/releases/south/current/approved.ready",
+            "mode": 384
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/releases/internal/private.ready",
+            "text": "INTERNAL=release coordination; not part of the review handover\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/releases/internal/private.ready",
+            "mode": 384
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/releases/internal/private.ready",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Contents",
+            "path": "/work/archive/obsolete.txt",
+            "text": "TICKET=REVIEW-008\nSTATE=obsolete but retain this archive text\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/work/archive",
+            "mode": 448
+          },
+          {
+            "kind": "Ownership",
+            "path": "/work/archive",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Access",
+            "path": "/work/review/south.txt",
+            "user": "blair",
+            "operation": "read_file",
+            "allowed": true
+          }
+        ]
+      },
+      "solution": [
+        "find /work/releases -maxdepth 3 -type f -name '*.ready'",
+        "cat /work/releases/north/current/approved.ready",
+        "cat /work/releases/south/current/approved.ready",
+        "cp /work/releases/north/current/approved.ready /work/review/north.txt",
+        "cp /work/releases/south/current/approved.ready /work/review/south.txt",
+        "mv /work/review/obsolete.txt /work/archive/obsolete.txt",
+        "ls -al /work/review"
+      ],
+      "prerequisites": [
+        "lpic1-search-incomplete-intake",
+        "lpic1-update-existing",
+        "lpic1-retire-handover"
+      ],
+      "terminal_teaching": {
+        "prerequisite_note": "Continue after Recover an incomplete intake investigation, Update files inside a read-only directory, and Retire a read-only handover safely. Practice has different packs, paths and texts.",
+        "concepts": [
+          {
+            "title": "Find candidates, then investigate approval",
+            "text": "find /practice/packs/current -type f -name '*.ready' narrows the start to the current branch. A broader search can also find historical or private records with the same extension. Names are candidates; cat on harbor.ready and island.ready shows the approval and which change each receipt describes."
+          },
+          {
+            "title": "Update existing copies without losing sharing",
+            "text": "The two cp commands replace the text of existing review files. Their current owner, group and mode remain. Copying to a new file uses Alex's primary group and the new-file permission mask instead. The assignment asks for final alex:review640 on both published files, so a recreate-and-repair method is also valid if it restores that complete policy."
+          },
+          {
+            "title": "Archive the obsolete text privately",
+            "text": "mv /practice/review/old.txt /practice/vault/old.txt removes the obsolete shared name while retaining the text in the owner-private vault. Copying and then removing the obsolete shared file can also meet the stated final data/privacy outcome. Inspect the destination before discarding an original."
+          },
+          {
+            "title": "Inspect both names and access",
+            "text": "ls -al /practice/review shows hidden names and simplified file metadata. id -Gn blair shows the supplied review membership. Blair needs search on the parent directories and group read on these files; Alex being able to cat a file does not prove Blair can read it. The final review set has only harbor.txt and island.txt."
+          },
+          {
+            "title": "State the private boundary precisely",
+            "text": "Keep the private original unchanged and out of the declared shared review folder, even under a new hidden name. Correct expected file text also prevents a private record from replacing an allowed public name. The private vault's owner and700 mode close access there. This is a virtual file-policy task, not global monitoring or real authentication."
+          },
+          {
+            "title": "Experiment using the real terminal",
+            "text": "After the worked sequence, remove group read from the practice island receipt with chmod g-r /practice/review/island.txt. Inspect ls -l and the review membership: owner read still works, but the reviewer policy no longer does. Restore group read and inspect again. Practice stays ungraded and independent; use the assignment's Check work for its complete current outcome."
+          }
+        ],
+        "example": [
+          "find /practice/packs/current -type f -name '*.ready'",
+          "cat /practice/packs/current/harbor.ready",
+          "cat /practice/packs/current/island.ready",
+          "cp /practice/packs/current/harbor.ready /practice/review/harbor.txt",
+          "cp /practice/packs/current/island.ready /practice/review/island.txt",
+          "mv /practice/review/old.txt /practice/vault/old.txt",
+          "ls -al /practice/review",
+          "id -Gn blair"
+        ],
+        "inputs": "Practice uses Harbor and Island packs under /practice/packs, the separate /practice/review folder and owner-private /practice/vault. Insert fills one command; Run performs it.",
+        "try_change": "Run chmod g-r /practice/review/island.txt, inspect ls -l and id -Gn blair, then restore group read with chmod g+r and inspect again. Use Run and inspect the resulting permissions.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "directory": true,
+              "mode": 493,
+              "owner": "root",
+              "group": "root"
+            },
+            "/practice": {
+              "directory": true,
+              "mode": 493,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/review": {
+              "directory": true,
+              "mode": 488,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/practice/vault": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs/current": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs/history": {
+              "directory": true,
+              "mode": 448,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs/history/harbor.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs/current/harbor.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs/current/island.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/packs/private.ready": {
+              "directory": false,
+              "mode": 384,
+              "owner": "alex",
+              "group": "staff"
+            },
+            "/practice/review/harbor.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/practice/review/island.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "review"
+            },
+            "/practice/review/old.txt": {
+              "directory": false,
+              "mode": 416,
+              "owner": "alex",
+              "group": "review"
+            }
+          },
+          "files": {
+            "/practice/packs/history/harbor.ready": "PACK=harbor-old\nREVIEW=draft\n",
+            "/practice/packs/current/harbor.ready": "PACK=harbor\nREVIEW=approved\nCHANGE=terminal adapter\n",
+            "/practice/packs/current/island.ready": "PACK=island\nREVIEW=approved\nCHANGE=queue repair\n",
+            "/practice/packs/private.ready": "Private practice coordination note.\n",
+            "/practice/review/harbor.txt": "Previous handover: replace this text after investigation.\n",
+            "/practice/review/island.txt": "Previous handover: replace this text after investigation.\n",
+            "/practice/review/old.txt": "Old practice note to archive, not discard.\n"
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "alex": [
+              "staff",
+              "review"
+            ],
+            "blair": [
+              "review"
+            ],
+            "casey": [
+              "visitors"
+            ]
+          },
+          "user": "alex",
+          "home": "/practice",
+          "cwd": "/practice",
+          "previous": null,
+          "umask": 18,
+          "clock": 0,
+          "modified": {}
+        },
+        "outcomes": [
+          {
+            "kind": "DirectoryEntries",
+            "path": "/practice/review",
+            "names": [
+              "harbor.txt",
+              "island.txt"
+            ]
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/review/harbor.txt",
+            "text": "PACK=harbor\nREVIEW=approved\nCHANGE=terminal adapter\n"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/review/island.txt",
+            "text": "PACK=island\nREVIEW=approved\nCHANGE=queue repair\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/review/harbor.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/review/island.txt",
+            "mode": 416
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/review/harbor.txt",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/review/island.txt",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/review",
+            "mode": 488
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/review",
+            "owner": "alex",
+            "group": "review"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/packs/current/harbor.ready",
+            "text": "PACK=harbor\nREVIEW=approved\nCHANGE=terminal adapter\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/packs/current/harbor.ready",
+            "mode": 384
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/packs/current/island.ready",
+            "text": "PACK=island\nREVIEW=approved\nCHANGE=queue repair\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/packs/current/island.ready",
+            "mode": 384
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/packs/private.ready",
+            "text": "Private practice coordination note.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/packs/private.ready",
+            "mode": 384
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/packs/private.ready",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Contents",
+            "path": "/practice/vault/old.txt",
+            "text": "Old practice note to archive, not discard.\n"
+          },
+          {
+            "kind": "Mode",
+            "path": "/practice/vault",
+            "mode": 448
+          },
+          {
+            "kind": "Ownership",
+            "path": "/practice/vault",
+            "owner": "alex",
+            "group": "staff"
+          },
+          {
+            "kind": "Access",
+            "path": "/practice/review/island.txt",
+            "user": "blair",
+            "operation": "read_file",
+            "allowed": true
+          }
+        ]
+      }
+    }
+  ]
+}
