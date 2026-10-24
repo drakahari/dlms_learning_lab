@@ -10,6 +10,7 @@ import re
 import shlex
 import shutil
 import subprocess
+import sys
 import tempfile
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
@@ -120,12 +121,18 @@ def run_checked(argv, cwd, work, mask, previous):
 
 
 def main():
+    if len(sys.argv) != 1:
+        raise SystemExit('Only the checked-in fixed filesystem reference fixtures are accepted')
     if not BASH or os.name != 'posix' or os.getuid() == 0:
         raise SystemExit('Ordinary-user POSIX/Bash reference environment unavailable: NOT RUN')
+    from filesystem_find_reference import preflight, load_legacy, load_fixed
+    preflight(ROOT, PROBE)  # Before ANY legacy or new subprocess, including probe.
+    legacy = load_legacy(FIXTURES)
+    load_fixed(ROOT)  # Fail closed before any old or new reference command.
     failures = []
     count = 0
     long_rows = 0
-    for fixture in json.loads(FIXTURES.read_text()):
+    for fixture in legacy:
         initial = tree(fixture['entries'])
         simulated = json.loads(subprocess.run([str(PROBE)], input=json.dumps({'tree': initial, 'commands': fixture['commands']}),
                                              capture_output=True, text=True, check=True, timeout=3).stdout)
@@ -164,8 +171,11 @@ def main():
                 count += 1
                 if expected != observed:
                     failures.append({'fixture': fixture['name'], 'command': command, 'gnu': expected, 'simulated': observed})
-    print(json.dumps({'fixtures': count, 'long_listing_subset_checks': long_rows, 'failures': failures}, indent=2))
-    return bool(failures)
+    from filesystem_find_reference import compare_fixed
+    find_report = compare_fixed(ROOT, PROBE, tree)
+    print(json.dumps({'fixtures': count, 'long_listing_subset_checks': long_rows, 'failures': failures,
+                      'find': find_report}, indent=2))
+    return bool(failures) or bool(find_report['failures'])
 
 
 if __name__ == '__main__':

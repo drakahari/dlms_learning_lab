@@ -1,0 +1,379 @@
+{
+  "schema_version": 1,
+  "fixtures": [
+    {
+      "name": "patterns-and-hidden-names",
+      "entries": {
+        "docs": {
+          "mode": 493
+        },
+        "docs/deep": {
+          "mode": 493
+        },
+        "docs/readme.log": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "docs/deep/archive.log": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        ".hidden.log": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "two words 100%.log": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "é": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "*": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "?": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "[x]": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "\\": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        }
+      },
+      "commands": [
+        {
+          "source": "find .",
+          "comparison": "complete",
+          "expected_paths": [
+            ".",
+            "./*",
+            "./.hidden.log",
+            "./?",
+            "./[x]",
+            "./\\",
+            "./docs",
+            "./docs/deep",
+            "./docs/deep/archive.log",
+            "./docs/readme.log",
+            "./two words 100%.log",
+            "./é"
+          ]
+        },
+        {
+          "source": "find . -type f -name '*.log'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./.hidden.log",
+            "./docs/deep/archive.log",
+            "./docs/readme.log",
+            "./two words 100%.log"
+          ]
+        },
+        {
+          "source": "find . -type d",
+          "comparison": "complete",
+          "expected_paths": [
+            ".",
+            "./docs",
+            "./docs/deep"
+          ]
+        },
+        {
+          "source": "find . -type f -name '??'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./é"
+          ]
+        },
+        {
+          "source": "find . -name '\\*'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./*"
+          ]
+        },
+        {
+          "source": "find . -name '\\?'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./?"
+          ]
+        },
+        {
+          "source": "find . -name '\\[x\\]'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./[x]"
+          ]
+        },
+        {
+          "source": "find . -name '\\\\'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./\\"
+          ]
+        },
+        {
+          "source": "find . -name 'two words 100%.log'",
+          "comparison": "complete",
+          "expected_paths": [
+            "./two words 100%.log"
+          ]
+        },
+        {
+          "source": "find . -name '*.log' -type f -name 'read*' -print",
+          "comparison": "complete",
+          "expected_paths": [
+            "./docs/readme.log"
+          ]
+        },
+        {
+          "source": "find . -type f -type d",
+          "comparison": "complete",
+          "expected_paths": []
+        },
+        {
+          "source": "find . -name ''",
+          "comparison": "complete",
+          "expected_paths": []
+        }
+      ]
+    },
+    {
+      "name": "root-spelling-and-depth",
+      "entries": {
+        "docs": {
+          "mode": 493
+        },
+        "docs/deep": {
+          "mode": 493
+        },
+        "docs/deep/a": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "docs/x": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        }
+      },
+      "commands": [
+        {
+          "source": "find ./docs/ -maxdepth 1",
+          "comparison": "complete",
+          "expected_paths": [
+            "./docs/",
+            "./docs/deep",
+            "./docs/x"
+          ]
+        },
+        {
+          "source": "find docs/.. -maxdepth 0 -name '..'",
+          "comparison": "complete",
+          "expected_paths": [
+            "docs/.."
+          ]
+        },
+        {
+          "source": "find . -maxdepth 0 -name '.'",
+          "comparison": "complete",
+          "expected_paths": [
+            "."
+          ]
+        },
+        {
+          "source": "find docs//deep",
+          "comparison": "complete",
+          "expected_paths": [
+            "docs//deep",
+            "docs//deep/a"
+          ]
+        },
+        {
+          "source": "find docs/x -type f",
+          "comparison": "complete",
+          "expected_paths": [
+            "docs/x"
+          ]
+        },
+        {
+          "source": "find docs -maxdepth 4294967295 -type f",
+          "comparison": "complete",
+          "expected_paths": [
+            "docs/deep/a",
+            "docs/x"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "directory-read-denial-and-file-read-not-needed",
+      "entries": {
+        "denied": {
+          "mode": 0
+        },
+        "denied/item": {
+          "mode": 0,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "good": {
+          "mode": 493
+        },
+        "good/item": {
+          "mode": 0,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "unreadable": {
+          "mode": 0,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        }
+      },
+      "commands": [
+        {
+          "source": "find . -type f",
+          "comparison": "incomplete",
+          "expected_paths": [
+            "./good/item",
+            "./unreadable"
+          ]
+        },
+        {
+          "source": "find denied -maxdepth 0",
+          "comparison": "complete",
+          "expected_paths": [
+            "denied"
+          ]
+        },
+        {
+          "source": "find good/item -type f",
+          "comparison": "complete",
+          "expected_paths": [
+            "good/item"
+          ]
+        },
+        {
+          "source": "find unreadable -type f",
+          "comparison": "complete",
+          "expected_paths": [
+            "unreadable"
+          ]
+        },
+        {
+          "source": "find denied/item -type f",
+          "comparison": "lookup_error",
+          "expected_paths": []
+        }
+      ]
+    },
+    {
+      "name": "search-only-directory",
+      "entries": {
+        "searchable": {
+          "mode": 64
+        },
+        "searchable/item": {
+          "mode": 0,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "safe": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        }
+      },
+      "commands": [
+        {
+          "source": "find searchable -maxdepth 0",
+          "comparison": "complete",
+          "expected_paths": [
+            "searchable"
+          ]
+        },
+        {
+          "source": "find searchable/item -type f",
+          "comparison": "complete",
+          "expected_paths": [
+            "searchable/item"
+          ]
+        },
+        {
+          "source": "find . -type f",
+          "comparison": "incomplete",
+          "expected_paths": [
+            "./safe"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "explicit-readable-nonsearchable-boundary",
+      "entries": {
+        "readable": {
+          "mode": 256
+        },
+        "readable/item": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "safe": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        }
+      },
+      "commands": [
+        {
+          "source": "find readable -maxdepth 0",
+          "comparison": "complete",
+          "expected_paths": [
+            "readable"
+          ]
+        },
+        {
+          "source": "find . -type f",
+          "comparison": "unsupported",
+          "expected_paths": [
+            "./safe"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "literal-leading-hyphen-start",
+      "entries": {
+        "-name": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        },
+        "space dir": {
+          "mode": 493
+        },
+        "space dir/100%": {
+          "mode": 384,
+          "text": "fixed sample only; file reads are not find predicates\n"
+        }
+      },
+      "commands": [
+        {
+          "source": "find ./-name",
+          "comparison": "complete",
+          "expected_paths": [
+            "./-name"
+          ]
+        },
+        {
+          "source": "find 'space dir' -type f",
+          "comparison": "complete",
+          "expected_paths": [
+            "space dir/100%"
+          ]
+        }
+      ]
+    }
+  ]
+}
