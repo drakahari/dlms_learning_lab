@@ -10,6 +10,7 @@ mod ospf;
 mod ospf_lessons;
 mod substitution;
 mod unit_manager;
+mod unit_manager_lessons;
 impl LabApp {
     fn storage_reference_action(
         &mut self,
@@ -313,6 +314,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 13000..=14999 => {
+                let (advance, capture) = self.unit_manager_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 12000..=12399 => {
                 let (advance, capture) = self.unit_manager_native(ctx, n);
                 if !advance {

@@ -254,6 +254,7 @@ fn unit_manager_controls_reflow_at_readable_scales_and_keep_contextual_focus_ids
             }
             let content = ctx.content_rect();
             for r in [
+                a.metrics.manager_example_action,
                 a.metrics.manager_slot,
                 a.metrics.manager_file,
                 a.metrics.terminal,
@@ -422,4 +423,210 @@ fn unit_manager_read_only_inspector_distinguishes_saved_loaded_and_actual_runnin
         panic!()
     };
     assert_eq!(*simulation, before);
+}
+
+#[test]
+fn unit_manager_visible_example_selector_insert_is_not_execution_and_selection_resumes() {
+    let (ctx, mut a, i) = manager_app(teaching::View::Example);
+    let s = a.scenarios[i].clone();
+    draw(&ctx, &mut a);
+    assert!(a.metrics.manager_example_action.is_some());
+    assert!(a.metrics.command_insert.is_none());
+    let original = a.progress.attempts[&s.id].state.clone();
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .unit_manager_learning
+        .as_ref()
+        .unwrap();
+    let state = l.state.clone();
+    let draft = l.draft.clone();
+    accounts_ui_click(&ctx, &mut a, |m| m.manager_example_action);
+    draw(&ctx, &mut a);
+    let row = a
+        .metrics
+        .manager_example_items
+        .iter()
+        .find(|(index, _)| *index == 1)
+        .unwrap()
+        .1;
+    click(&ctx, &mut a, row);
+    draw(&ctx, &mut a);
+    accounts_ui_click(&ctx, &mut a, |m| m.command_insert);
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .unit_manager_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.selected_action, 1);
+    assert_eq!(l.state, state);
+    assert_eq!(l.draft, draft);
+    assert_eq!(
+        l.terminal.as_ref().unwrap().command,
+        "systemctl daemon-reload"
+    );
+    assert!(l.terminal.as_ref().unwrap().entries.is_empty());
+    assert_eq!(a.progress.attempts[&s.id].state, original);
+    let command_id = egui::Id::new(("manager-command", (s.id.as_str(), true)));
+    assert_eq!(ctx.memory(|m| m.focused()), Some(command_id));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![key(egui::Key::Enter, false)],
+    );
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .unit_manager_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.terminal.as_ref().unwrap().entries.len(), 1);
+    let executed = l.state.clone();
+    a.save();
+    assert!(a.storage_error.is_none());
+    a.progress = progress::load(&a.path, &a.scenarios).unwrap();
+    a.launch(i);
+    a.set_unit_manager_view(i, teaching::View::Example);
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .unit_manager_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.selected_action, 1);
+    assert_eq!(a.progress.attempts[&s.id].state, original);
+    let internal = s
+        .unit_manager_teaching
+        .as_ref()
+        .unwrap()
+        .example_actions
+        .len()
+        - 1;
+    a.progress
+        .attempts
+        .get_mut(&s.id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .unit_manager_learning
+        .as_mut()
+        .unwrap()
+        .selected_action = internal;
+    draw(&ctx, &mut a);
+    let l = a.progress.attempts[&s.id]
+        .workspace
+        .as_ref()
+        .unwrap()
+        .unit_manager_learning
+        .as_ref()
+        .unwrap();
+    assert_eq!(l.selected_action, 0);
+    assert_eq!(l.state, executed);
+    assert!(l.valid_for(s.unit_manager_teaching.as_ref().unwrap()));
+}
+
+#[test]
+fn unit_manager_authored_four_lesson_views_keep_visible_controls_bounded_and_keyboard_focus_at_all_scales()
+ {
+    let authored = pack::load_catalog(&[
+        include_str!("../../../scenarios/starter-v1.json"),
+        include_str!("../../../scenarios/unit-manager-v1.json"),
+    ])
+    .unwrap()
+    .into_iter()
+    .filter(|s| s.unit_manager_teaching.is_some())
+    .collect::<Vec<_>>();
+    assert_eq!(authored.len(), 4);
+    for s in authored {
+        for (view, challenge) in [
+            (teaching::View::Introduction, false),
+            (teaching::View::Example, false),
+            (teaching::View::Assignment, false),
+            (teaching::View::Assignment, true),
+        ] {
+            let (ctx, mut a) = app();
+            let i = a
+                .scenarios
+                .iter()
+                .position(|lab| lab.id == s.id)
+                .unwrap_or_else(|| {
+                    let i = a.scenarios.len();
+                    a.scenarios.push(s.clone());
+                    i
+                });
+            a.launch(i);
+            a.set_unit_manager_view(i, view);
+            a.progress.attempts.get_mut(&s.id).unwrap().challenge = challenge;
+            let practice = view == teaching::View::Example;
+            let id = egui::Id::new(("manager-command", (s.id.as_str(), practice)));
+            for (width, height, scale) in [
+                (1200., 850., 1.),
+                (1920., 1080., 1.5),
+                (1920., 1080., 2.),
+                (720., 560., 1.),
+                (720., 560., 1.5),
+                (960., 900., 2.),
+            ] {
+                a.scale = scale;
+                for _ in 0..3 {
+                    frame(&ctx, &mut a, width, height, vec![]);
+                }
+                let content = ctx.content_rect();
+                for r in [
+                    a.metrics.manager_example_action,
+                    a.metrics.manager_slot,
+                    a.metrics.editor_viewport,
+                    a.metrics.terminal,
+                    a.metrics.manager_run,
+                    a.metrics.editor_save,
+                    a.metrics.example_action,
+                    a.metrics.assignment_action,
+                    a.metrics.check,
+                ]
+                .into_iter()
+                .flatten()
+                {
+                    assert!(
+                        r.left() >= content.left() - 1. && r.right() <= content.right() + 1.,
+                        "{}/{view:?}/challenge{challenge}/{width}/{scale}: {r:?} outside {content:?}",
+                        s.id
+                    );
+                }
+                if challenge {
+                    assert!(a.metrics.manager_example_action.is_none());
+                    assert!(a.metrics.lesson_tabs.is_empty());
+                }
+                if view != teaching::View::Introduction {
+                    ctx.memory_mut(|m| m.request_focus(id));
+                    frame(
+                        &ctx,
+                        &mut a,
+                        width,
+                        height,
+                        vec![egui::Event::Text("x".into())],
+                    );
+                    assert_eq!(ctx.memory(|m| m.focused()), Some(id));
+                    frame(
+                        &ctx,
+                        &mut a,
+                        width,
+                        height,
+                        vec![key(egui::Key::Tab, false)],
+                    );
+                    assert_ne!(ctx.memory(|m| m.focused()), Some(id));
+                }
+            }
+        }
+    }
 }

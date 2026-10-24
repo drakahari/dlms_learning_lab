@@ -1,52 +1,111 @@
-# Proposed virtual unit-manager lessons
+# Service definitions, dependencies and target handover
 
-Source and backend validation checked2026-10-23 against d78feba. The four lessons are not registered or counted; all-four native lesson acceptance remains pending. The13 content tests and broader163-check regression scope passed under the shared two-job/two-test-thread guard. Existing Service scenarios, script evaluator7, actual6 histories and accepted baseline artifacts are untouched.
+Checked2026-10-23. Four authored LPIC-2 assignments are bundled in unit
+`linux-unit-manager-foundations`, following `linux-service-recovery`. The normal
+catalog is106 assignments/25units (31CCNA/21LPIC-1/17LPIC-2/37Bash). These are
+bounded systemd-style exercises, not real boot or complete exam preparation.
 
-Four different assignments
+| Assignment | Meaningful task | Accepted alternatives |
+| --- | --- | --- |
+| lpic2-unit-loaded-recovery | Diagnose a wrong supplied ExecStart, distinguish saved/loaded/running definitions and recover the application while preserving the observer and policy | Different description/comments; stop before or after manager reload; start the application or its target |
+| lpic2-unit-preparation-order | Repair preparation data, require preparation, guarantee its ordering and verify current plus next-session work | Consumer After or producer Before; starting the app or target |
+| lpic2-unit-optional-wants | Keep a deliberately broken optional helper requested and failed while allowing the core to work | Keep or remove optional After; target or direct application start |
+| lpic2-unit-target-handover | Prepare new data, retire the old service and link, enable/select the replacement target and preserve the observer and unrelated files/links | Different valid ordering relation and stop/enable/default sequence |
 
-1. lpic2-unit-loaded-recovery: repair the supplied ExecStart selecting the observer program, distinguish save/reload/running execution, and replace the wrong running program. The application configuration is already correct and must remain exact. There is no dependency repair or target-policy change to distract from this investigation. A different comment/description and stopping before reload are valid alternatives.
-2. lpic2-unit-preparation-order: correct preparation data and establish required pull-in plus real ordering. A successful remaining one-shot preparation, its current prepared value, the application’s matching input and next-session ordering are all checked. Consumer After or producer Before are accepted. A manually lucky current start order alone fails the next-session ordering predicate.
-3. lpic2-unit-optional-wants: an intentionally broken optional helper must be requested and visibly fail while the core runs. The helper’s input and document are protected, so neither deleting the dependency nor silently fixing the helper meets the assignment. Requires=false and Wants=true are explicit outcomes; keeping or removing its optional After relation is valid. There is no readiness or full-failure-propagation claim.
-4. lpic2-unit-target-handover: repair data/application input and ordering, stop the old current service, remove its old target link, enable the replacement at its new target and select the future default. Preserve the observer, old service configuration/documents, both targets and every other link. The old service and old target must be inactive in the next-session copy, not merely absent from the successful-start checklist.
+## Teaching and tools
 
-Prerequisites and teaching
+The prerequisite teaches PORT configuration, not unit-file grammar. The first
+introduction therefore explains [Unit]/[Service]/[Install], Type=simple,
+ExecStart and fixed virtual program identities before testing them. Later
+introductions teach one-shot completion/RemainAfterExit, requesting versus
+ordering, Requires versus Wants and target/install/default policy. Experienced
+learners can skip the introduction and reopen it later.
 
-The verified existing prerequisite is scenario lpic2-service in unit linux-service-recovery (starter-v1). It teaches the supplied PORT input, not service-file grammar. The first introduction therefore teaches what a unit file means, [Unit]/[Service]/[Install], Type=simple, ExecStart and fixed virtual /sim/bin identities using the different sketch example’s concrete snippet. It explains Save, manager reload and stop/start separately. Later introductions teach a dependency as requesting another unit, a one-shot job that exits, RemainAfterExit and Requires versus ordering before those are assessed; Wants is then introduced as optional pull-in.
+Each worked example uses different names, paths, ports and prepared values from
+its assignment. A visible selector shows one annotated example action and real
+command at a time. Insert fills input only; Save and Run are explicit. Fill
+worked editor drafts changes only example text. Each example has a separate
+experiment and repair. Challenge keeps the full practical task, editor, terminal
+and grader, with guidance available only when requested.
 
-Each example has different unit names, configuration paths, program identities, prepared values and ports from its assignment and the other examples. Individual actions explain exact edits and purposes; no JSON is learner guidance. Queries are real spellings within the existing closed terminal: systemctl cat/status, show with the supported dependency properties, and journalctl -u NAME -o cat. No host tool runs. The introductory query text distinguishes backing files, the optional collapsed Loaded definition and current inputs inspector and current status. The separate worked fill changes only the example editor; explicit actions are required. Each example has one stop-and-inspect experiment with an explicit repair, not several vague changes.
+The native workspace provides one selected unit/configuration editor, a bounded
+virtual terminal and an optional read-only saved/loaded/current-input inspector.
+Supported real command spellings are documented in UNIT_MANAGER_TERMINAL.md;
+internal typed authoring actions are never presented as Linux commands.
 
-A successful start message may precede a program-configuration failure. Learner text says to inspect status/logs. Implementation details such as the controller/event boundary and prepared-artifact snapshots stay in this technical document. The model’s artifact means the fictional producer’s saved result plus actual execution input; it is not a host file, process, PID or readiness credential. The terminal/native Start controller includes one program-initialization event; the pack-only typed reference sequence retains explicit AdvancePrograms to work with the existing pure adapter. A redundant explicit advance is harmless when nothing is pending. This controller agreement must be tested in native integration rather than assumed from backend source.
+An earlier wrong attempt can leave successful preparation active with old data.
+Another start correctly does not rerun an active RemainAfterExit job. Teaching
+and the native walkthrough now explain stopping the application and preparation,
+then starting the target to use corrected input and order. This recovery was
+found by the actual native flow, reproduced in a model regression, and fixed in
+guidance/test actions without weakening the simulator.
 
-Outcome and preservation contract
+## Grading and limits
 
-Every assignment and isolated example uses Definition with fixed Inventory, current positive Runtime/ExecutionCurrent outcomes, SavedConfigurationValid, LoadedCurrent for the edited application and a separate fresh-session positive workload. No journal entry, exit status, checked flag, exact source blob or command string awards success. Task2/4 also require the successful preparation/current artifact and an actual start-transaction ordering path. Task3’s optional helper is deliberately excluded from Fresh.started: that collection requires SUCCESSFUL jobs. Its separate fresh Failed runtime proves an attempt. Task4’s old target is explicitly Inactive in fresh.requirements; Fresh.started alone does not assert exclusion.
+Goals derive current program outcomes and a separate next-session workload from
+State. Saved/loaded definitions, current input provenance, required preparation,
+real transaction ordering and explicit preserved context are checked. No journal
+entry, successful start message, command string or walkthrough position awards
+success. Pending editor changes invalidate current completion. Queries preserve
+it. Raw malformed drafts remain editable and resumable.
 
-Preservation matches the visible tasks: task1 protects every configuration and every unit document except the application. Task2 allows application/preparation document ordering edits and only preparation configuration changes. Task3 allows only application-document changes. Tasks1–3 retain all install links and the default. Task4 permits only its application/preparation documents, their two configurations, the new application link, the retired old-service link and the new default. Current observer running state and current input are positive requirements everywhere. This proves a healthy current observer, not uninterrupted historical uptime; stopping and correctly restarting it is not falsely treated as authenticated history.
+The optional helper must actually fail: removing its request or repairing its
+protected input is not success. The handover requires the old service and old
+target inactive in the next-session copy, not merely absent from a successful
+start list. A healthy observer is required at the end; uninterrupted historical
+uptime is not claimed. Protected files/links are explicit task constraints.
 
-Validated backend behavior and remaining native gate
+Current-input provenance compares actual saved/loaded/consumed text, including
+comments, byte for byte. Comment-only edits therefore need a reload/new execution
+to satisfy this conservative model. Alternate source text is accepted after it
+is genuinely loaded and used; no one expected source blob is required. This
+snapshot policy is narrower than reasoning about effective settings alone.
 
-tests/unit_manager_content.rs passed13 tests covering references and two alternatives per assignment, plain failed feedback, exact current predicate failures, protected documents/configurations/present and absent install links/default, valid wrong ports, stale inputs, successful one-shots without remaining active, optional-helper Requires/deletion/repair mistakes, old-target activation, current-only/enable-only/default-only shortcuts, editor invalidation, isolated fill/experiment/repair and typed-reference versus actual terminal-controller parity. The manual-order counterexamples keep every non-Fresh row passing and fail specifically the fresh ordering guarantee. No preservation/fresh failure substitutes for an intended current predicate failure.
+There is no host systemd, PID, process, listener, filesystem, real boot,
+concurrency/readiness protocol, SysV/LSB administration or complete unit grammar.
+The controlled fictional programs and deterministic scheduling limits are in
+UNIT_MANAGER_SUBSET.md. Check work tests the next session in a separate copy;
+it cannot repair the current state.
 
-The profile regression pins the original102 activity IDs, computes real current7 records for all37 script assignments and worked examples, keeps all33 actual6 histories/182 outcomes, and derives every other old assignment state from its real reference. Separate pending ACL/account/storage/OSPF examples and assignment drafts, favorites and current states survive save/load/export/inspect/confirmed restore and selected reset. A non7 evaluator is rejected before any record generation; later outcomes are never mislabeled7. Backup inspection deliberately rechecks supported script/example inputs through the current VM.
+## Actual verification
 
-The guarded broader run passed163 checks across library, content, core, terminal, sessions, workspaces, backup and migration targets. The wording-only R4 revision passed all13 content tests again; final all-target Clippy with warnings denied and copied-rustfmt checking passed. Native all-four lesson editing/terminal/inspector, focus/scrolling, light/dark/scaled rendering and full UI save/resume remain separate acceptance gates. The private generic workspace’s native acceptance does not establish these four normal lessons.
+Fourteen content regressions cover reference/two alternatives per assignment,
+wrong and partial states, each individual current predicate, protected present
+and absent links/default/files, wrong ports/stale inputs, failed helper shortcuts,
+manual current-only ordering, invalidation and genuine retry after early start.
+Original102 IDs, real37 revision7 runs/examples and33 exact revision6 histories
+survive save/export/review/restore/reset at this milestone. No historical outcome
+is regenerated and relabeled as an older evaluator.
 
-The four integration files are scenarios/unit-manager-v1.json, tests/unit_manager_content.rs, tests/fixtures/unit-manager-content-review.json and this document. Pack registration, the proposed linux-unit-manager-foundations unit map/advisory prerequisite linux-service-recovery, global review and normal all-four native acceptance are separate. This change supplies no registration, coverage or count patch.
+The integrated source passes771 library/integration and120 UI checks
+(891distinct combined), all-target Clippy and formatting. Actual normal all-four
+Fedora input flow passes72 captures in `m70-normal-service-native-r2.log`, capture
+root `.build-artifacts/native-runs/run-pejyy86y`. It exercises real picker/editor/
+Save/terminal/Check controls, partial/wrong/reference/alternate/retry, fill-only
+practice and experiment, exact separate draft/Session/editor-kind resume, Undo,
+reset/cancel, query retention and independent Challenge. Every assignment types,
+saves and retries at150% light and200% dark, with actual render review. The earlier
+failed native r1 remains preserved; its active-preparation recovery cause is above.
 
-Primary sources freshly checked
+These synthetic input flows are not novice comprehension, physical-device,
+screen-reader, Windows/macOS or full-product acceptance. The latest installed
+candidate is separately identified in INSTALLATION.md; development acceptance
+does not silently update that artifact.
 
-The issuer’s current official objectives page identifies LPIC2 version4.5, exam201-450/202-450.202.1 covers service behavior at targets/runlevels and also requires SysV/LSB/Linux boot knowledge. These lessons propose only a narrow systemd-style virtual subset; they cannot complete that objective or the surrounding boot/supervision content.
+## Official sources and coverage
 
-- https://www.lpi.org/our-certifications/exam-201-202-objectives/ — version4.5 and202.1 scope; fetched2026-10-23.
-- https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html — explicit pull-in versus ordering, failed ordered Requires and weak Wants, install-link distinction. The model’s strict whole-source parser and fixed named units remain narrower than this manual.
-- https://www.freedesktop.org/software/systemd/man/262/systemd.service.html — simple start boundary, one-shot completion and RemainAfterExit. No real exec/PID/readiness implementation is claimed.
-- https://www.freedesktop.org/software/systemd/man/262/systemctl.html — saved backing cat versus loaded manager definitions, daemon-reload versus program restart, enable versus start and default-target policy.
-- https://www.freedesktop.org/software/systemd/man/262/journalctl.html — exact unit selection and cat message-only output. The bounded typed virtual window has no real clock/PID/boot identifiers and is never grade authority.
+Rechecked2026-10-23: LPIC-2 objectives4.5, exams201-450/202-450. Only already
+Partial202.1, its systemd knowledge bulletK1 and named systemctl termT4 gain
+stronger evidence. SysV/LSB and other unimplemented requirements stay Open;
+coverage counts remain128Partial/1Supporting/1111Open overlapping references.
 
-All five official pages were actually opened in this source review and identify systemd262 where applicable. No host account/service/reference experiment, dependency, copied systemd source or external process model is introduced. Scenario and teaching text was authored originally for this project. This proposal makes no new licensing decision.
+- [Official LPIC-2 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/)
+- [systemd262 unit dependencies and install links](https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html)
+- [systemd262 service start/one-shot behavior](https://www.freedesktop.org/software/systemd/man/262/systemd.service.html)
+- [systemctl262](https://www.freedesktop.org/software/systemd/man/262/systemctl.html)
+- [journalctl262](https://www.freedesktop.org/software/systemd/man/262/journalctl.html)
 
-Actual UI alignment (source review only): native helper now supplies the collapsed Loaded definition and current inputs inspector with saved/loaded and previously used inputs, plus current port/value summary. Learner text names that inspector. Check work automatically runs the next-session check; no separate Test button is described. The port explanation is plain: virtual values for this exercise, nothing listens on the computer. COVERAGE-PROPOSAL.json recommends strengthening only the already Partial202.1/K1(systemd)/T4(systemctl) after acceptance; SysV/LSB/all other exact items stay Open. No new Partial status or count is proposed.
-
-Reviewed outcome/prose boundaries: observer wording now asks for final current/next-session health, not uninterrupted uptime; all four experiments say start and inspect status/logs, with no pending-initialization control. Initial/model/goal/reference/alternate/example action data were compared equal to R2. Tests now require the exact current predicate row to fail, the actual default-preservation row to fail, all non-Fresh rows to pass for each manual-order counterexample, and a supported previously absent helper-link addition to fail preservation while current behavior stays healthy. Those precise backend assertions passed in the13 content tests; they do not establish real process concurrency or uninterrupted uptime.
-
-Guarded backend/content validation2026-10-23 (R4, isolated d78feba worktree): first compile reported one test-only borrowed-slice API error, retained in unit-manager-content-first-r1.log; the single ampersand fix changes no model/data/expectation. The next guarded scoped run passed163 checks including all13 content functions,48 library units and the core/terminal/sessions/workspaces/backup/migration targets. R4 defines target and gives literal systemctl daemon-reload in the introduction; every model/goal/reference/alternate/example action remains equal to R3. Its13 content tests passed again, followed by final all-target Clippy with warnings denied and a guarded copied-rustfmt check. These results establish the stated backend assertions, including exact current/default/fresh-only/absent-link negatives, not all-four native lesson acceptance or registration/coverage. Normal lessons remain unbundled and uncounted. No all-four native or exam-completion claim follows from the backend results.
+All five official pages were actually opened during content review. Original
+scenario/teaching data and algorithms are project-authored MIT material; no
+upstream implementation or manual passage is imported. No vendor endorsement,
+certification guarantee or equipment equivalence is claimed.

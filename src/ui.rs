@@ -79,6 +79,8 @@ struct Metrics {
     manager_inspector_open: bool,
     manager_kind: Vec<(bool, egui::Rect)>,
     manager_items: Vec<(String, egui::Rect)>,
+    manager_example_action: Option<egui::Rect>,
+    manager_example_items: Vec<(usize, egui::Rect)>,
     manager_challenge: Option<egui::Rect>,
     manager_learn: Option<egui::Rect>,
     reset_cancel: Option<egui::Rect>,
@@ -289,6 +291,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("unit-manager-unit")
+            {
+                13000
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("unit-manager-workspace")
             {
                 12000

@@ -474,10 +474,18 @@ fn terminal_sequence(
     actions: &[EditAction],
 ) -> dlms_learning_lab::unit_manager::State {
     let mut state = def.initial.clone();
+    terminal_actions(def, &mut state, actions);
+    state
+}
+fn terminal_actions(
+    def: &Definition,
+    state: &mut dlms_learning_lab::unit_manager::State,
+    actions: &[EditAction],
+) {
     for action in actions {
         let command = match action {
             EditAction::Save { draft } => {
-                draft.apply(&mut state).unwrap();
+                draft.apply(state).unwrap();
                 continue;
             }
             EditAction::Manager {
@@ -493,10 +501,73 @@ fn terminal_sequence(
                 _ => panic!("Unsupported native reference mapping"),
             },
         };
-        let result = unit_manager_terminal::execute(def, &mut state, &command).unwrap();
+        let result = unit_manager_terminal::execute(def, state, &command).unwrap();
         assert_eq!(result.status, 0, "{command}");
     }
-    state
+}
+#[test]
+fn retry_after_an_early_start_reruns_active_preparation_with_corrected_input() {
+    let labs = catalog();
+    for plan in plans().into_iter().filter(|p| {
+        matches!(
+            p.id.as_str(),
+            "lpic2-unit-preparation-order" | "lpic2-unit-target-handover"
+        )
+    }) {
+        let def = definition(labs.iter().find(|s| s.id == plan.id).unwrap());
+        let mut state = def.initial.clone();
+        let app = state
+            .documents()
+            .keys()
+            .find(|u| u.ends_with("-app.service"))
+            .unwrap()
+            .clone();
+        let prepare = state
+            .documents()
+            .keys()
+            .find(|u| u.ends_with("-prepare.service"))
+            .unwrap()
+            .clone();
+        unit_manager_terminal::execute(def, &mut state, &format!("systemctl start {app}")).unwrap();
+        let previous = state.runtime()[&prepare].clone();
+        assert!(matches!(
+            previous,
+            dlms_learning_lab::unit_manager::Runtime::Exited { .. }
+        ));
+        terminal_actions(def, &mut state, &plan.reference);
+        assert_eq!(
+            state.runtime()[&prepare],
+            previous,
+            "start must not silently rerun an active oneshot"
+        );
+        rejected_with_feedback(
+            def,
+            &state,
+            "saved repair cannot replace earlier preparation output",
+        );
+        for unit in [&app, &prepare] {
+            unit_manager_terminal::execute(def, &mut state, &format!("systemctl stop {unit}"))
+                .unwrap();
+        }
+        unit_manager_terminal::execute(def, &mut state, &format!("systemctl start {app}")).unwrap();
+        assert!(
+            passed(def, &state),
+            "explicit recovery must work for {}",
+            plan.id
+        );
+        for alternative in &plan.alternates {
+            for unit in [&app, &prepare] {
+                unit_manager_terminal::execute(def, &mut state, &format!("systemctl stop {unit}"))
+                    .unwrap();
+            }
+            terminal_actions(def, &mut state, alternative);
+            assert!(
+                passed(def, &state),
+                "alternate must work after prior attempts: {}",
+                plan.id
+            );
+        }
+    }
 }
 #[test]
 fn native_terminal_controller_matches_typed_reference_and_alternates_with_automatic_initialization()

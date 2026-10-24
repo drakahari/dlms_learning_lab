@@ -350,6 +350,28 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
         if let State::Ipv4Acl { network } = &mut a.state {
             // Removing the real policies permits every forbidden flow again.
             network.devices.clear();
+        } else if let State::UnitManager { simulation } = &a.state {
+            // Stop an actually running required program through the pinned adapter.
+            let unit = simulation
+                .runtime()
+                .iter()
+                .find_map(|(unit, runtime)| {
+                    matches!(
+                        runtime,
+                        dlms_learning_lab::unit_manager::Runtime::Running { .. }
+                    )
+                    .then(|| unit.clone())
+                })
+                .expect("reference has a running application");
+            let action = dlms_learning_lab::unit_manager_workspace::EditAction::Manager {
+                action: dlms_learning_lab::unit_manager::Action::Stop { unit },
+            };
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!("unit-manager {}", serde_json::to_string(&action).unwrap()),
+            )
+            .unwrap();
         } else if let State::Ospf { simulation } = &a.state {
             let (router, current) = simulation.configuration().routers.iter().next().unwrap();
             let mut configuration = current.process.clone();
