@@ -26,7 +26,7 @@ class FindReferenceTests(unittest.TestCase):
         raw, fixtures = reference.load_fixed(ROOT)
         self.assertEqual(hashlib.sha256(raw).hexdigest(), reference.FIND_SHA)
         self.assertEqual(len(fixtures), 6)
-        self.assertEqual(sum(len(f['commands']) for f in fixtures), 30)
+        self.assertEqual(sum(len(f['commands']) for f in fixtures), 32)
         self.assertEqual(sum(c['comparison'] == 'unsupported' for f in fixtures for c in f['commands']), 1)
         old = reference.load_legacy(ROOT / 'tests/fixtures/filesystem-reference.json')
         self.assertEqual(sum(len(f['commands']) for f in old), 152)
@@ -54,12 +54,40 @@ class FindReferenceTests(unittest.TestCase):
             self.rejected(['find', '.', '-name', pattern])
 
     def test_decimal_predicate_count_and_command_byte_caps_are_strict(self):
-        for depth in ['-1', '+1', '', '4294967296', '00000000000', '１２']:
+        for depth in ['-1', '+1', '', '2147483648', '4294967295', '4294967296', '00000000000', '１２']:
             self.rejected(['find', '.', '-maxdepth', depth])
-        reference.validate_argv(['find', '.', '-maxdepth', '4294967295'])
+        reference.validate_argv(['find', '.', '-maxdepth', '2147483647'])
         reference.validate_argv(['find', '.', *(['-type', 'f'] * 16)])
         self.rejected(['find', '.', *(['-type', 'f'] * 17)])
         self.rejected(['find', 'a' * 4097])
+
+    def test_exact_invalid_depth_controls_remain_safe_and_are_compared_as_errors(self):
+        for value in ['2147483648', '4294967295']:
+            argv = ['find', 'docs', '-maxdepth', value, '-type', 'f']
+            self.rejected(argv)
+            reference.validate_argv(argv, invalid_depth=True)
+            command = {'comparison': 'rejected', 'expected_paths': []}
+            actual = {'ok': False, 'output': '', 'error': 'find -maxdepth exceeds2147483647.'}
+            native = {'status': 1, 'stdout': '', 'stderr': 'maxdepth: Numerical result out of range'}
+            self.assertEqual(reference.compare_observation(command, actual, native), {'matched': True})
+            with self.assertRaises(reference.finite.OracleError):
+                reference.compare_observation(command, {'ok': True, 'output': '', 'error': None}, native)
+        for argv in [['find', '.'], ['find', '.', '-maxdepth', '2147483647'],
+                     ['find', '.', '-maxdepth', '4294967296'], ['find', '/', '-maxdepth', '4294967295'],
+                     ['find', '.', '-maxdepth', '4294967295', '-exec', 'id', ';']]:
+            with self.assertRaises(reference.finite.OracleError):
+                reference.validate_argv(argv, invalid_depth=True)
+
+    def test_long_listing_normalization_excludes_only_filesystem_dependent_directory_fields(self):
+        import filesystem_reference as legacy
+        conventional = 'drwx------ 2 alex staff 0 Jan 01 00:00 locked\n-rw------- 1 alex staff 7 Jan 01 00:00 note\n'
+        btrfs = 'drwx------ 1 owner other 4096 Oct 24 12:00 locked\n-rw------- 1 owner other 7 Oct 24 12:00 note\n'
+        normalize = legacy.normalize_long_listing
+        self.assertEqual(normalize(conventional), normalize(btrfs))
+        self.assertNotEqual(normalize(conventional), normalize(btrfs.replace('drwx------', 'drwxr-x---')))
+        self.assertNotEqual(normalize(conventional), normalize(btrfs.replace('-rw------- 1', '-rw------- 2')))
+        self.assertNotEqual(normalize(conventional), normalize(btrfs.replace('other 7', 'other 8')))
+        self.assertNotEqual(normalize(conventional), normalize(btrfs.replace('locked', 'different')))
 
     def test_fixture_metadata_rejects_parent_symlink_shapes_unknown_fields_and_bounds(self):
         for mutate in [lambda d: d.update(schema_version=True),

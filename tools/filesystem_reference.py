@@ -120,6 +120,18 @@ def run_checked(argv, cwd, work, mask, previous):
     return result, output, cwd, previous, mask
 
 
+
+def normalize_long_listing(text):
+    """Compare modeled portable fields; directory link count/size depend on FS.
+
+    Btrfs can report a directory nlink of1; traditional filesystems often report
+    2 plus subdirectories. Preserve exact regular-file nlink and size checks.
+    """
+    rows = [row.split(maxsplit=8) for row in text.splitlines() if not row.startswith('total ')]
+    return [(r[0][:10], None if r[0][0] == 'd' else r[1],
+             None if r[0][0] == 'd' else r[4], r[8]) for r in rows]
+
+
 def main():
     if len(sys.argv) != 1:
         raise SystemExit('Only the checked-in fixed filesystem reference fixtures are accepted')
@@ -161,12 +173,10 @@ def main():
                             'cwd': state['cwd'], 'umask': state['umask']}
                 if argv[0] == 'ls' and any(a.startswith('-') and 'l' in a for a in argv[1:]):
                     # Owner names, timestamps, directory byte sizes and SELinux/ACL
-                    # suffixes deliberately differ. Compare the modeled fields only.
-                    def long_fields(text):
-                        rows = [row.split(maxsplit=8) for row in text.splitlines() if not row.startswith('total ')]
-                        return [(r[0][:10], r[1], r[4] if r[0][0] != 'd' else None, r[8]) for r in rows]
-                    expected['output'] = long_fields(expected['output'])
-                    observed['output'] = long_fields(observed['output'])
+                    # suffixes and directory link counts deliberately differ.
+                    # Compare portable modeled fields, retaining file link counts.
+                    expected['output'] = normalize_long_listing(expected['output'])
+                    observed['output'] = normalize_long_listing(observed['output'])
                     long_rows += 1
                 count += 1
                 if expected != observed:

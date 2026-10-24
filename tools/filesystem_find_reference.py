@@ -15,7 +15,7 @@ import time
 import case_bash_oracle as finite
 
 LEGACY_SHA = 'f69ea58baeebfc76aa1711d81ae1395ee3b023f7ec5b8abc72ec59125a2f55ea'
-FIND_SHA = '2b0aa1fd98f3c806a9c4fcc0a9bcf035a98e52d34f7a5d13ca513215feaee47c'
+FIND_SHA = '42282afe4c538baba58dc8597e733a5378bb14d6fc418d9bb131b5a4609f7d83'
 FIXTURE = 'tests/fixtures/filesystem-find-reference.json'
 FIND = Path('/usr/bin/find')
 INPUT_CAP = 128 * 1024
@@ -69,7 +69,7 @@ def pattern(value):
     require(not escaped, 'Unpaired pattern escape')
 
 
-def validate_argv(argv):
+def validate_argv(argv, *, invalid_depth=False):
     require(isinstance(argv, list) and 2 <= len(argv) <= 37
             and all(isinstance(a, str) and '\0' not in a for a in argv)
             and sum(len(a.encode()) + 1 for a in argv) <= 4096
@@ -79,8 +79,13 @@ def validate_argv(argv):
     if i < len(argv) and argv[i] == '-maxdepth':
         require(i + 1 < len(argv) and 1 <= len(argv[i + 1]) <= 10
                 and argv[i + 1].isascii() and argv[i + 1].isdecimal()
-                and int(argv[i + 1]) <= 4294967295, 'Fixed nonnegative depth subset')
+                and (int(argv[i + 1]) <= 2147483647
+                     or (invalid_depth and argv[i + 1] in ('2147483648', '4294967295'))),
+                'Fixed signed nonnegative depth subset or exact negative control')
+        if invalid_depth:
+            require(argv[i + 1] in ('2147483648', '4294967295'), 'Exact reviewed invalid-depth control required')
         i += 2
+    require(not invalid_depth or (len(argv) >= 4 and argv[2] == '-maxdepth'), 'Invalid-depth control needs leading maxdepth')
     while i < len(argv):
         if argv[i] == '-print' and i + 1 == len(argv):
             return
@@ -138,8 +143,8 @@ def validate_fixtures(data):
                     and isinstance(command['source'], str) and len(command['source'].encode()) <= 4096,
                     'Fixed query fields/source ceiling')
             argv = shlex.split(command['source'])
-            validate_argv(argv)
-            require(command['comparison'] in ('complete', 'incomplete', 'lookup_error', 'unsupported'), 'Known comparison mode')
+            require(command['comparison'] in ('complete', 'incomplete', 'lookup_error', 'unsupported', 'rejected'), 'Known comparison mode')
+            validate_argv(argv, invalid_depth=command['comparison'] == 'rejected')
             paths = command['expected_paths']
             require(isinstance(paths, list) and len(paths) <= 66
                     and all(isinstance(p, str) and len(p.encode()) <= 2048
@@ -227,6 +232,9 @@ def compare_observation(command, actual, native):
     if mode == 'unsupported':
         require(not actual['ok'] and 'Unsupported descent' in actual['error'], 'Boundary must be explicitly unsupported/incomplete')
         return {'boundary': 'GNU behavior retained; not compared as supported', 'native_status': native['status']}
+    if mode == 'rejected':
+        require(not actual['ok'] and '-maxdepth' in actual['error']
+                and 'Partial matches' not in actual['error'], 'Invalid depth must fail before traversal')
     complete = mode == 'complete'
     require(actual['ok'] == complete and (native['status'] == 0) == complete, 'Reference status/error mismatch')
     require(sorted(native['stdout'].splitlines()) == sorted(observed), 'Reference path set or entered root spelling differs')
@@ -295,7 +303,7 @@ def compare_fixed(root, probe, make_tree):
         for j, (command, step) in enumerate(zip(fixture['commands'], steps, strict=True)):
             require(time.monotonic() < deadline, 'Fixed reference total deadline')
             argv = shlex.split(command['source'])
-            validate_argv(argv)
+            validate_argv(argv, invalid_depth=command['comparison'] == 'rejected')
             require(step['tree'] == initial, 'Query mutated simulated state/metadata')
             command_dir = finite.private_dir(folder, f'query-{j:02}')
             native = finite.capture_command([str(FIND), *argv[1:]], command_dir, work, env, b'', budget, STREAM_CAP, timeout=2, inherited=inherited)

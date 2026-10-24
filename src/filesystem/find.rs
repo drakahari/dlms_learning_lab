@@ -229,11 +229,15 @@ impl<'a> Query<'a> {
                 .ok_or("find -maxdepth needs a nonnegative decimal depth.")?;
             if n.is_empty() || n.len() > 10 || !n.bytes().all(|b| b.is_ascii_digit()) {
                 return Err(
-                    "find -maxdepth supports a decimal value0..4294967295 (at most10digits)."
+                    "find -maxdepth supports a decimal value0..2147483647 (at most10digits)."
                         .into(),
                 );
             }
-            depth = n.parse().map_err(|_| "find -maxdepth exceeds4294967295.")?;
+            depth = n
+                .parse::<u32>()
+                .ok()
+                .filter(|n| *n <= i32::MAX as u32)
+                .ok_or("find -maxdepth exceeds2147483647.")?;
             i += 2;
         }
         let mut tests = Vec::new();

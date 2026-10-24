@@ -106,7 +106,7 @@ fn depth_limits_skip_descent_checks_but_predicate_failure_does_not_prune() {
     );
     assert_eq!(t.execute("find open -type f").unwrap(), "open/report.log\n");
     assert_eq!(
-        t.execute("find open -maxdepth 4294967295 -type f").unwrap(),
+        t.execute("find open -maxdepth 2147483647 -type f").unwrap(),
         "open/report.log\n"
     );
     assert_eq!(
@@ -222,6 +222,8 @@ fn unsupported_or_malformed_grammar_fails_before_any_partial_traversal() {
         "find . -maxdepth",
         "find . -maxdepth -1",
         "find . -maxdepth +1",
+        "find . -maxdepth 2147483648",
+        "find . -maxdepth 4294967295",
         "find . -maxdepth 4294967296",
         "find . -maxdepth 00000000000",
         "find . -maxdepth 1 -maxdepth 2",
@@ -250,6 +252,16 @@ fn unsupported_or_malformed_grammar_fails_before_any_partial_traversal() {
             "syntax must be validated before traversal: {command}: {error}"
         );
         assert_eq!(t, before, "{command}");
+    }
+    for depth in ["2147483648", "4294967295"] {
+        let error = t
+            .execute(&format!("find missing -maxdepth {depth}"))
+            .unwrap_err();
+        assert!(
+            error.contains("-maxdepth") && !error.contains("No such"),
+            "depth syntax must fail before lookup: {error}"
+        );
+        assert_eq!(t, before);
     }
     add(&mut t, "/work/-name", false, 0o600);
     assert_eq!(t.execute("find ./-name").unwrap(), "./-name\n");
