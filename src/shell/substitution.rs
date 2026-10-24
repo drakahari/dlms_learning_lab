@@ -49,6 +49,87 @@ pub(super) fn parameter_end(chars: &[char], start: usize) -> Result<usize, Strin
     Err("Close ${parameter} before running".into())
 }
 
+/// A lexical case frame distinguishes a pattern-closing `)` from the capture's
+/// closing `)`. This scanner locates spans only; Parser validates actual grammar.
+#[derive(Clone, Copy)]
+enum CasePhase {
+    Selector,
+    In,
+    Pattern(bool),
+    Body,
+}
+struct Delimiter {
+    cases: Vec<CasePhase>,
+    command: bool,
+    word: String,
+    bare: bool,
+    started: bool,
+    redirect: bool,
+}
+impl Delimiter {
+    fn new() -> Self {
+        Self {
+            cases: Vec::new(),
+            command: true,
+            word: String::new(),
+            bare: true,
+            started: false,
+            redirect: false,
+        }
+    }
+    fn opaque(&mut self) {
+        self.started = true;
+        self.bare = false;
+    }
+    fn word(&mut self) -> Result<(), String> {
+        if !self.started {
+            return Ok(());
+        }
+        if std::mem::take(&mut self.redirect) {
+            self.word.clear();
+            self.started = false;
+            self.bare = true;
+            return Ok(());
+        }
+        let text = if self.bare { self.word.as_str() } else { "" };
+        match self.cases.last_mut() {
+            Some(phase @ CasePhase::Selector) => *phase = CasePhase::In,
+            Some(phase @ CasePhase::In) if text == "in" => *phase = CasePhase::Pattern(true),
+            Some(CasePhase::In) => {} // invalid grammar is diagnosed by Parser
+            Some(CasePhase::Pattern(first)) => {
+                if *first && text == "esac" {
+                    self.cases.pop();
+                    self.command = false;
+                } else {
+                    *first = false;
+                }
+            }
+            _ => {
+                if self.command && text == "case" {
+                    if self.cases.len() == 24 {
+                        return Err("Syntax nesting exceeds 24 levels".into());
+                    }
+                    self.cases.push(CasePhase::Selector);
+                    self.command = false;
+                } else if self.command
+                    && text == "esac"
+                    && matches!(self.cases.last(), Some(CasePhase::Body))
+                {
+                    self.cases.pop();
+                    self.command = false;
+                } else {
+                    self.command = self.command
+                        && matches!(text, "if" | "while" | "then" | "do" | "else" | "{");
+                }
+            }
+        }
+        self.word.clear();
+        self.started = false;
+        self.bare = true;
+        Ok(())
+    }
+}
+
 /// Return the character position following the matching close parenthesis.
 /// Child source has its own quote domain even inside an outer double quote.
 pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, String> {
@@ -58,7 +139,7 @@ pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, S
     let mut i = body_start(chars, start).ok_or("Invalid command substitution opener")?;
     let mut parens = 1usize;
     let mut quote = None;
-    let mut word_start = true;
+    let mut scan = Delimiter::new();
     while i < chars.len() {
         let c = chars[i];
         if quote == Some('\'') {
@@ -69,12 +150,12 @@ pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, S
             continue;
         }
         if c == '\\' {
-            let Some(next) = chars.get(i + 1) else {
-                return Err("Unfinished escape in command substitution".into());
-            };
+            let next = chars
+                .get(i + 1)
+                .ok_or("Unfinished escape in command substitution")?;
             if quote.is_none() || matches!(next, '$' | '`' | '"' | '\\' | '\n') {
                 if *next != '\n' {
-                    word_start = false;
+                    scan.opaque();
                 }
                 i += 2;
                 continue;
@@ -86,7 +167,7 @@ pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, S
             continue;
         }
         if quote.is_none() {
-            if c == '#' && word_start {
+            if c == '#' && !scan.started {
                 while i < chars.len() && chars[i] != '\n' {
                     i += 1;
                 }
@@ -94,41 +175,83 @@ pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, S
             }
             if matches!(c, '\'' | '"') {
                 quote = Some(c);
-                word_start = false;
+                scan.opaque();
                 i += 1;
                 continue;
             }
         }
         if chars[i..].starts_with(&['$', '(', '(']) {
             i = arithmetic_end(chars, i)?;
-            word_start = false;
+            scan.opaque();
             continue;
         }
         if body_start(chars, i).is_some() {
             i = end(chars, i, depth + 1)?;
-            word_start = false;
+            scan.opaque();
             continue;
         }
         if chars[i..].starts_with(&['$', '{']) {
             i = parameter_end(chars, i)?;
-            word_start = false;
+            scan.opaque();
             continue;
         }
-        if quote.is_none() {
-            if c == '(' {
+        if quote.is_some() {
+            i += 1;
+            continue;
+        }
+        if c.is_ascii_whitespace() {
+            scan.word()?;
+            if c == '\n'
+                && !matches!(
+                    scan.cases.last(),
+                    Some(CasePhase::Selector | CasePhase::In | CasePhase::Pattern(_))
+                )
+            {
+                scan.command = true;
+            }
+            i += 1;
+            continue;
+        }
+        if matches!(c, '(' | ')' | ';' | '|' | '&' | '<' | '>') {
+            scan.word()?;
+            if matches!(c, '<' | '>') {
+                scan.redirect = true;
+            }
+            if c == '(' && matches!(scan.cases.last(), Some(CasePhase::Pattern(_))) {
+                // Optional opening parenthesis prevents bare esac from closing this arm.
+                *scan.cases.last_mut().unwrap() = CasePhase::Pattern(false);
+            } else if c == ')' && matches!(scan.cases.last(), Some(CasePhase::Pattern(_))) {
+                *scan.cases.last_mut().unwrap() = CasePhase::Body;
+                scan.command = true;
+            } else if c == '(' {
                 parens += 1;
                 if parens > 24 {
                     return Err("Syntax nesting exceeds 24 levels".into());
                 }
+                scan.command = true;
             } else if c == ')' {
                 parens -= 1;
                 if parens == 0 {
                     return Ok(i + 1);
                 }
+                scan.command = true;
+            } else if c == ';'
+                && chars.get(i + 1) == Some(&';')
+                && matches!(scan.cases.last(), Some(CasePhase::Body))
+            {
+                *scan.cases.last_mut().unwrap() = CasePhase::Pattern(true);
+                i += 1;
+                scan.command = false;
+            } else if matches!(c, ';' | '|' | '&')
+                && !matches!(scan.cases.last(), Some(CasePhase::Pattern(_)))
+            {
+                scan.command = true;
             }
-            word_start =
-                c.is_ascii_whitespace() || matches!(c, ';' | '|' | '&' | '<' | '>' | '(' | ')');
+            i += 1;
+            continue;
         }
+        scan.started = true;
+        scan.word.push(c);
         i += 1;
     }
     Err("Close command substitution with ) before running".into())
@@ -151,6 +274,9 @@ mod tests {
                 .collect(),
             Code::ArrayAssign(_, words) | Code::For(_, words, _) => words.iter().collect(),
             Code::WhileStart(Some(word), _) => vec![word],
+            Code::Case(definition) => std::iter::once(&definition.selector)
+                .chain(definition.arms.iter().flat_map(|arm| &arm.patterns))
+                .collect(),
             _ => vec![],
         }
     }
@@ -162,6 +288,13 @@ mod tests {
                 | Code::For(_, _, pc)
                 | Code::Next(pc)
                 | Code::WhileStart(_, pc) => Some(pc),
+                Code::Case(definition) => {
+                    assert!((range.start..=range.end).contains(&definition.end));
+                    for arm in &definition.arms {
+                        assert!(range.contains(&arm.entry));
+                    }
+                    None
+                }
                 Code::Define(_, entry, end) => {
                     assert!(range.contains(entry));
                     assert!(entry < end);
@@ -218,6 +351,36 @@ mod tests {
         assert_eq!(definitions.len(), 2);
         assert!(p.main.contains(&definitions[0].1));
         assert!(p.bodies[0].contains(&definitions[1].1));
+    }
+    #[test]
+    fn case_descriptors_and_nested_captures_relocate_with_function_and_main_boundaries() {
+        let p = compile("f() { case x in x) printf parent;; esac; }; result=$(g() { case \"$(printf x)\" in \"$(printf x)\") case y in y) printf child;; esac;; esac; }; g); printf main").unwrap();
+        targets_stay_in_range(&p, p.main.clone());
+        for range in &p.bodies {
+            targets_stay_in_range(&p, range.clone());
+        }
+        let definitions: Vec<_> = p
+            .code
+            .iter()
+            .filter_map(|code| {
+                if let Code::Case(definition) = code {
+                    Some(definition)
+                } else {
+                    None
+                }
+            })
+            .collect();
+        assert_eq!(definitions.len(), 3);
+        assert!(
+            definitions
+                .iter()
+                .any(|definition| p.main.contains(&definition.arms[0].entry))
+        );
+        assert!(definitions.iter().any(|definition| {
+            p.bodies
+                .iter()
+                .any(|range| range.contains(&definition.arms[0].entry))
+        }));
     }
     #[test]
     fn main_end_never_falls_into_an_appended_child_body() {

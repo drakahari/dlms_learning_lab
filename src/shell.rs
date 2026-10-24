@@ -1,6 +1,7 @@
 //! Bounded, pure shell-subset interpreter. No host I/O, subprocesses or network.
 mod arithmetic;
 mod capture;
+mod case;
 mod execution;
 mod globbing;
 mod preparation;
@@ -18,7 +19,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 7;
+pub const EVALUATOR_REVISION: u32 = 8;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -570,11 +571,14 @@ fn lex_unit(
                 i += 1;
             }
             if i < cs.len()
-                && ((cs[i] == c && matches!(c, '|' | '&' | '>' | '<'))
+                && ((cs[i] == c && matches!(c, ';' | '|' | '&' | '>' | '<'))
                     || (cs[i] == '>' && op.ends_with('>')))
             {
                 op.push(cs[i]);
                 i += 1;
+            }
+            if c == ';' && cs.get(i) == Some(&'&') {
+                return Err("Unsupported case fallthrough operator ;& or ;;&".into());
             }
             if op.ends_with('>') && cs.get(i) == Some(&'&') {
                 op.push('&');
@@ -587,8 +591,8 @@ fn lex_unit(
                 }
             }
             if ![
-                "=(", "(", ")", ";", "|", "&&", "||", "<", ">", ">>", "1>", "1>>", "2>", "2>>",
-                ">&2", "1>&2", "2>&1",
+                "=(", "(", ")", ";", ";;", "|", "&&", "||", "<", ">", ">>", "1>", "1>>", "2>",
+                "2>>", ">&2", "1>&2", "2>&1",
             ]
             .contains(&op.as_str())
             {
@@ -609,20 +613,6 @@ fn lex_unit(
     if tokens.len() > 4096 {
         return Err("Script exceeds 4096 tokens".into());
     }
-    for token in &tokens {
-        if let Token::Word(w) = token {
-            for p in &w.0 {
-                if p.quote == Quote::Bare
-                    && let Some(text) = p.text()
-                    && values::bracket_glob(text)?
-                    && text != "["
-                    && text != "]"
-                {
-                    return Err("Bracket globbing is unsupported; quote literal brackets".into());
-                }
-            }
-        }
-    }
     Ok(tokens)
 }
 #[derive(Clone, Debug)]
@@ -633,6 +623,7 @@ struct Command {
 #[derive(Clone, Debug)]
 enum Code {
     Pipe(Vec<Command>),
+    Case(Arc<case::Definition>),
     ArrayAssign(String, Vec<Word>),
     Jump(usize),
     JumpIf(bool, usize),
@@ -683,6 +674,7 @@ impl Program {
                 Code::ArrayAssign(key, values) | Code::For(key, values, _) => {
                     key.len() + words(values)
                 }
+                Code::Case(definition) => definition.text_bytes(),
                 Code::Define(key, _, _) => key.len(),
                 Code::WhileStart(Some(word), _) => words(std::slice::from_ref(word)),
                 _ => 0,
@@ -746,6 +738,13 @@ impl Compiler {
                     | Code::For(_, _, pc)
                     | Code::Next(pc)
                     | Code::WhileStart(_, pc) => *pc += start,
+                    Code::Case(definition) => {
+                        let definition = Arc::get_mut(definition).expect("unique compiled case");
+                        definition.end += start;
+                        for arm in &mut definition.arms {
+                            arm.entry += start;
+                        }
+                    }
                     Code::Define(_, entry, end) => {
                         *entry += start;
                         *end += start;
@@ -769,6 +768,10 @@ struct Parser<'a> {
 }
 impl Parser<'_> {
     fn note_word(&mut self, word: &Word) -> Result<(), String> {
+        case::check_static_word(word)?;
+        self.note_scalar(word)
+    }
+    fn note_scalar(&mut self, word: &Word) -> Result<(), String> {
         for part in &word.0 {
             if let PartValue::Substitution(BodyId(id)) = &part.value {
                 let child = self
@@ -835,7 +838,11 @@ impl Parser<'_> {
                 self.compound()?;
                 self.patch(idx);
             }
-            if self.pos < self.tokens.len() && !self.eat(";") && !self.eat("\n") {
+            if self.pos < self.tokens.len()
+                && !(stops.contains(&";;") && self.is(";;"))
+                && !self.eat(";")
+                && !self.eat("\n")
+            {
                 return Err(format!("Expected newline or ; near token {}", self.pos + 1));
             }
             while self.eat("\n") {}
@@ -854,6 +861,76 @@ impl Parser<'_> {
         Ok(())
     }
     fn compound(&mut self) -> Result<(), String> {
+        if self.eat("case") {
+            let Some(Token::Word(selector)) = self.tokens.get(self.pos) else {
+                return Err("case needs one selector word".into());
+            };
+            let selector = selector.clone();
+            self.note_scalar(&selector)?;
+            self.pos += 1;
+            while self.eat("\n") {}
+            self.expect("in")?;
+            while self.eat("\n") {}
+            let instruction = self.code.len();
+            self.code.push(Code::Status(0)); // replaced by immutable descriptor
+            let mut arms = Vec::new();
+            let mut exits = Vec::new();
+            let mut alternatives = 0;
+            while !self.eat("esac") {
+                if arms.len() == 32 {
+                    return Err("Case arm limit exceeded (32)".into());
+                }
+                self.eat("(");
+                let mut patterns = Vec::new();
+                loop {
+                    let Some(Token::Word(pattern)) = self.tokens.get(self.pos) else {
+                        return Err("Case arm needs a pattern before )".into());
+                    };
+                    let pattern = pattern.clone();
+                    self.note_word(&pattern)?;
+                    patterns.push(pattern);
+                    self.pos += 1;
+                    alternatives += 1;
+                    if patterns.len() > 8 || alternatives > 128 {
+                        return Err(
+                            "Case alternative limit exceeded (8 per arm,128 per case)".into()
+                        );
+                    }
+                    if !self.eat("|") {
+                        break;
+                    }
+                    while self.eat("\n") {}
+                }
+                self.expect(")")?;
+                let entry = self.code.len();
+                self.list(&[";;", "esac"])?;
+                if self.code.len() == entry {
+                    self.code.push(Code::Status(0));
+                }
+                arms.push(case::Arm { patterns, entry });
+                exits.push(self.code.len());
+                self.code.push(Code::Jump(0));
+                if !self.eat(";;") {
+                    self.expect("esac")?;
+                    break;
+                }
+                while self.eat("\n") {}
+            }
+            let end = self.code.len();
+            for exit in exits {
+                self.patch(exit);
+            }
+            self.code[instruction] = Code::Case(Arc::new(case::Definition {
+                selector,
+                arms,
+                end,
+            }));
+            if matches!(self.tokens.get(self.pos),Some(Token::Op(op)) if op == "|" || op.contains('>') || op == "<")
+            {
+                return Err("Unsupported pipeline or redirection on whole case; redirect commands inside an arm".into());
+            }
+            return Ok(());
+        }
         if let (Some(Token::Word(word)), Some(Token::Op(op))) =
             (self.tokens.get(self.pos), self.tokens.get(self.pos + 1))
             && op == "=("
@@ -1014,7 +1091,7 @@ impl Parser<'_> {
             self.patch(branch);
             return Ok(());
         }
-        if ["then", "else", "fi", "do", "done"]
+        if ["then", "else", "fi", "do", "done", "esac"]
             .iter()
             .any(|s| self.is(s))
         {
@@ -1023,7 +1100,7 @@ impl Parser<'_> {
                     .into(),
             );
         }
-        if ["case", "until", "select", "function", "!"]
+        if ["until", "select", "function", "!"]
             .iter()
             .any(|s| self.is(s))
         {
@@ -1118,6 +1195,11 @@ fn lex(source: &str) -> Result<Vec<Token>, String> {
     let tokens = lex_unit(source, &mut compiler, 0)?;
     if !compiler.bodies.is_empty() {
         return Err("Command substitution is unsupported in this terminal".into());
+    }
+    for token in &tokens {
+        if let Token::Word(word) = token {
+            case::check_static_word(word)?;
+        }
     }
     Ok(tokens)
 }
@@ -1724,6 +1806,10 @@ impl Vm {
                             key,
                             preparation::Words::new(words.into_iter().map(|w| (w, true)).collect()),
                         ));
+                    }
+                    Code::Case(definition) => {
+                        self.pending =
+                            Some(execution::Pending::Case(case::Task::new(self, definition)?));
                     }
                     Code::Status(s) => self.outcome.status = s,
                     Code::WhileStart(word, end) => {

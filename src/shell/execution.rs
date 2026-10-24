@@ -524,6 +524,7 @@ impl Pipeline {
 }
 
 pub(super) enum Pending {
+    Case(case::Task),
     Pipeline(Box<Pipeline>),
     Array(String, Words),
     For(String, usize, Words),
@@ -549,7 +550,11 @@ impl Pending {
         value: String,
         status: i32,
     ) -> Result<(), String> {
+        if let Self::Case(task) = self {
+            return task.resume(vm, value);
+        }
         let words = match self {
+            Self::Case(_) => unreachable!(),
             Self::Array(_, words) | Self::For(_, _, words) | Self::While(_, words) => words,
             Self::Pipeline(pipeline) => match &mut pipeline
                 .active
@@ -575,6 +580,7 @@ impl Pending {
     }
     pub(super) fn bytes(&self) -> usize {
         match self {
+            Self::Case(task) => task.bytes(),
             Self::Pipeline(pipeline) => pipeline.bytes(),
             Self::Array(key, words) | Self::For(key, _, words) => key.len() + words.bytes(),
             Self::While(_, words) => words.bytes(),
@@ -582,6 +588,7 @@ impl Pending {
     }
     pub(super) fn advance(&mut self, vm: &mut Vm) -> Result<bool, String> {
         match self {
+            Self::Case(task) => task.advance(vm),
             Self::Pipeline(pipeline) => pipeline.advance(vm),
             Self::Array(key, words) => {
                 let Some(elements) = words.advance(vm)? else {
