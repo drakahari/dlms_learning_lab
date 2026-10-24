@@ -57,6 +57,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub service_teaching: Option<crate::service_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub client_teaching: Option<crate::client_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dns_teaching: Option<crate::dns_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
@@ -452,6 +454,14 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 ));
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let Some(lesson) = &s.client_teaching
+            && (!matches!(s.goal, Goal::Network { .. }) || !lesson.valid_for(&s.initial))
+        {
+            return Err(format!(
+                "{}: client teaching needs a separate compatible single-client example",
+                s.id
+            ));
         }
         if let Some(lesson) = &s.ipv4_routing_teaching {
             if !matches!(s.initial, State::Ipv4Routing { .. }) {

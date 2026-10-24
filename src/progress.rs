@@ -286,6 +286,15 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
             return false;
         }
     }
+    if let Some(current) = crate::client_teaching::Client::from_state(&a.state)
+        && crate::client_teaching::Client::from_state(&s.initial)
+            .is_none_or(|initial| !current.same_problem(&initial))
+    {
+        return false;
+    }
+    if crate::client_teaching::pending_draft(a) {
+        return false;
+    }
     if crate::workspace::pending_service_draft(a)
         || crate::workspace::pending_seed_configuration_draft(a)
     {
@@ -597,6 +606,24 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             );
         }
         validate_service_workspace(a)?;
+        validate_client_workspace(a)?;
+        if let Some(current) = crate::client_teaching::Client::from_state(&a.state)
+            && crate::client_teaching::Client::from_state(&s.initial)
+                .is_none_or(|initial| !current.same_problem(&initial))
+        {
+            return Err("Saved client router, LAN plan or remote target differ from this assignment; original retained".into());
+        }
+
+        if let Some(l) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.client_learning.as_ref())
+            && s.client_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        {
+            return Err("Saved client example differs from this lesson; original retained".into());
+        }
         validate_discovery_workspace(a)?;
         if let (
             State::Discovery { simulation },
@@ -863,6 +890,21 @@ fn validate_dns_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_client_workspace(a: &Attempt) -> Result<(), String> {
+    if let Some(w) = &a.workspace {
+        if (w.client_draft.is_some() || w.client_learning.is_some())
+            && !matches!(a.state, State::Network { .. })
+        {
+            return Err("Client metadata on another activity; original retained".into());
+        }
+        if w.client_draft.as_ref().is_some_and(|d| !d.valid())
+            || w.client_learning.as_ref().is_some_and(|l| !l.valid())
+        {
+            return Err("Invalid client workspace; original retained".into());
+        }
+    }
+    Ok(())
+}
 fn validate_service_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace
         .as_ref()
@@ -943,6 +985,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         validate_process_workspace(a)?;
         validate_dns_workspace(a)?;
         validate_service_workspace(a)?;
+        validate_client_workspace(a)?;
         validate_address_workspace(a)?;
         validate_routing_workspace(a)?;
         if let State::Switching { fabric } = &a.state

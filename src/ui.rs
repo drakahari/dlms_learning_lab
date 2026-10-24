@@ -10,6 +10,7 @@ use eframe::egui::{self, RichText};
 mod accounts_workspace;
 mod acl_workspace;
 mod address_learning;
+mod client_learning;
 mod controls;
 mod data;
 mod discovery_workspace;
@@ -121,6 +122,10 @@ struct Metrics {
     routing_port_options: Vec<(String, egui::Id)>,
     routing_load_example: Option<egui::Rect>,
     routing_router_options: Option<egui::Rect>,
+    client_fields: Vec<(String, egui::Id, egui::Rect)>,
+    client_action: Option<egui::Rect>,
+    client_actions: Vec<(usize, egui::Rect)>,
+    client_run: Option<egui::Rect>,
     mac_source: Option<egui::Rect>,
     mac_inspect: Option<egui::Rect>,
     mac_source_popup: Option<egui::Rect>,
@@ -545,6 +550,10 @@ impl LabApp {
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.client_teaching {
+            dlms_learning_lab::client_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated client teaching");
+        }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, new_attempt);
         }
@@ -673,6 +682,10 @@ impl LabApp {
         }
         if let Some(lesson) = &s.teaching {
             teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.client_teaching {
+            dlms_learning_lab::client_teaching::prepare(a, lesson, true)
+                .expect("validated client teaching");
         }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, true);

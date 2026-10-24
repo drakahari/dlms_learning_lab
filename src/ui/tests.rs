@@ -1,5 +1,6 @@
 use super::*;
 use engine::State;
+mod client_learning;
 mod mac_learning;
 mod ospf;
 fn app() -> (egui::Context, LabApp) {
@@ -434,6 +435,9 @@ fn open_assignment(a: &mut LabApp, i: usize) {
     }
     if a.scenarios[i].service_teaching.is_some() {
         a.set_service_view(i, teaching::View::Assignment);
+    }
+    if a.scenarios[i].client_teaching.is_some() {
+        a.set_client_view(i, teaching::View::Assignment);
     }
     if a.scenarios[i].process_teaching.is_some() {
         a.set_process_view(i, teaching::View::Assignment);

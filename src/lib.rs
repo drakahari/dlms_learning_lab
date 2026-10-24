@@ -1,6 +1,7 @@
 //! Offline simulation, declarative content validation, catalog, and local persistence.
 #![forbid(unsafe_code)]
 pub mod catalog;
+pub mod client_teaching;
 pub mod engine;
 pub mod filesystem;
 pub mod pack;

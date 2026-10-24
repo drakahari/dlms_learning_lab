@@ -82,6 +82,8 @@ impl LabApp {
                 self.discovery_learning_workspace(ui, i);
             } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_workspace(ui, i);
+            } else if s.client_teaching.is_some() {
+                self.client_learning_workspace(ui, i);
             } else if s.service_teaching.is_some() {
                 self.service_learning_workspace(ui, i);
             } else if s.address_teaching.is_some() {
@@ -163,6 +165,8 @@ impl LabApp {
                 self.discovery_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_view(i) == teaching::View::Assignment
+            } else if s.client_teaching.is_some() {
+                self.client_view(i) == teaching::View::Assignment
             } else if s.service_teaching.is_some() {
                 self.service_view(i) == teaching::View::Assignment
             } else if s.address_teaching.is_some() {
@@ -596,7 +600,7 @@ impl LabApp {
             }
             run |= r.clicked();
         });
-        if run {
+        if run && (self.scenarios[i].client_teaching.is_none() || ui.is_enabled()) {
             self.submit(i);
         }
     }
@@ -640,6 +644,12 @@ impl LabApp {
         }
         let s = &self.scenarios[i];
         let a = &self.progress.attempts[&s.id];
+        if dlms_learning_lab::client_teaching::pending_draft(a) {
+            ui.label(
+                "Pending client settings · Apply client settings before checking these edits.",
+            );
+            return;
+        }
         if model::pending_service_draft(a) {
             ui.label("Unsaved configuration · Save your draft, then verify the service again.");
             return;
@@ -904,6 +914,16 @@ fn refresh_drafts(w: &mut model::WorkspaceData, before: &State, after: &State) {
         }
     };
     match (before, after) {
+        (State::Network { .. }, State::Network { .. }) => {
+            if let (Some(old), Some(new)) = (
+                dlms_learning_lab::client_teaching::Client::from_state(before),
+                dlms_learning_lab::client_teaching::Client::from_state(after),
+            ) && w.client_draft.as_ref().is_some_and(|d| d.matches(&old))
+            {
+                w.client_draft = Some(dlms_learning_lab::client_teaching::Draft::new(&new));
+            }
+        }
+
         (State::Service { port: old, .. }, State::Service { port: new, .. }) => {
             replace(&mut w.service_port, old.clone(), new.clone())
         }

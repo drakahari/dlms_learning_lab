@@ -316,7 +316,98 @@
         }
       ],
       "explanation": "The client .70 and router .65 share 192.168.40.64/26. Keeping .70/26 and routing remote traffic via .65 restores this modeled path. A /24 mask would incorrectly treat additional addresses as on-link.",
-      "unit": "ipv4-foundations"
+      "unit": "ipv4-foundations",
+      "client_teaching": {
+        "prerequisite_note": "Builds on Read an IPv4 address. Keep a workstation’s assigned address while applying the supplied LAN prefix and choosing its local router; no new subnet calculation is required here.",
+        "concepts": [
+          {
+            "title": "Address and prefix have different jobs",
+            "text": "The address identifies this client. The prefix describes its local group. Follow the supplied LAN plan while keeping the client’s assigned address; changing the gateway does not change that address."
+          },
+          {
+            "title": "A default gateway is the next hop",
+            "text": "For a destination outside the local group, this task uses the supplied LAN router as its default next hop. The remote target is a different address reached through that router, not the value to enter as the gateway."
+          },
+          {
+            "title": "Apply, then inspect",
+            "text": "Fields are saved drafts until Apply client settings changes this virtual client. The diagram shows applied values. ip addr and ip route give compact simulated views; the router’s plan is supplied context, not information a real ip addr command discovers. The retained ip addr set form is an older simulator editor shortcut, not full Linux syntax."
+          },
+          {
+            "title": "Test the local and remote paths separately",
+            "text": "A reply from the LAN router does not prove the required remote setup is correct. Try ping with the supplied router and target addresses, then Check work for all three requirements. These are abstract path checks, without ARP, packet forwarding or real ICMP."
+          }
+        ],
+        "example_description": "A different client is assigned 198.51.100.150. Its supplied LAN router is 198.51.100.129/27 and remote target is 203.0.113.90. Repair the current /24 prefix and .1 gateway without changing .150. Practice is separate from the office assignment.",
+        "fixture": {
+          "address": "198.51.100.150",
+          "prefix": 24,
+          "gateway": "198.51.100.1",
+          "router": "198.51.100.129",
+          "lan_prefix": 27,
+          "target": "203.0.113.90"
+        },
+        "example_actions": [
+          {
+            "title": "Inspect the client",
+            "explanation": "Read the current address/prefix alongside the supplied router LAN plan. This query changes no settings.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "ip addr",
+                "explanation": "Compact simulated client view; not a complete real iproute2 dump.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Inspect the default route",
+            "explanation": "Compare the current next hop with the supplied router. This query changes no settings.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "ip route",
+                "explanation": "Shows the one modeled default gateway.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Apply the example LAN plan",
+            "explanation": "Insert fills the three example fields only: keep .150, use /27 and choose .129 as gateway. Press Apply client settings to apply them to the example.",
+            "action": {
+              "kind": "Apply",
+              "draft": {
+                "address": "198.51.100.150",
+                "prefix": "27",
+                "gateway": "198.51.100.129"
+              }
+            }
+          },
+          {
+            "title": "Test the remote target",
+            "explanation": "Run this path check after applying the example settings. A simulated reply checks this particular target, not full network or application behavior.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "ping 203.0.113.90",
+                "explanation": "Checks the abstract remote path in this example; no real packet or host command runs.",
+                "simulator_only": false
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, change only Default gateway to 198.51.100.130 and Apply. ping 198.51.100.129 can still reply locally, but ping 203.0.113.90 is unreachable. Check example shows the route still needs work. Restore gateway .129 and Apply to repair the example.",
+        "try_settings": {
+          "address": "198.51.100.150",
+          "prefix": "27",
+          "gateway": "198.51.100.130"
+        },
+        "repair_settings": {
+          "address": "198.51.100.150",
+          "prefix": "27",
+          "gateway": "198.51.100.129"
+        }
+      }
     },
     {
       "id": "lpic1-permissions",

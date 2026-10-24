@@ -1,0 +1,302 @@
+{
+  "source_revision": "73777e0",
+  "scenarios": [
+    {
+      "id": "ccna-ipv4",
+      "version": 1,
+      "initial": {
+        "kind": "Subnet",
+        "ip": "192.168.10.77",
+        "prefix": 27,
+        "answers": [
+          "",
+          "",
+          "",
+          ""
+        ],
+        "second": ""
+      },
+      "goal": {
+        "kind": "Subnet"
+      },
+      "solution": [
+        "answer network 192.168.10.64",
+        "answer broadcast 192.168.10.95",
+        "answer first 192.168.10.65",
+        "answer last 192.168.10.94",
+        "answer second 192.168.10.80"
+      ]
+    },
+    {
+      "id": "ccna-vlsm",
+      "version": 1,
+      "initial": {
+        "kind": "Vlsm",
+        "base": "10.20.0.0",
+        "prefix": 24,
+        "allocations": [
+          {
+            "name": "design",
+            "hosts": 60,
+            "cidr": ""
+          },
+          {
+            "name": "support",
+            "hosts": 28,
+            "cidr": ""
+          },
+          {
+            "name": "lab",
+            "hosts": 12,
+            "cidr": ""
+          }
+        ]
+      },
+      "goal": {
+        "kind": "Vlsm"
+      },
+      "solution": [
+        "allocate design 10.20.0.0/26",
+        "allocate support 10.20.0.64/27",
+        "allocate lab 10.20.0.96/28"
+      ]
+    },
+    {
+      "id": "ccna-gateway",
+      "version": 1,
+      "initial": {
+        "kind": "Network",
+        "address": "192.168.40.70",
+        "prefix": 24,
+        "gateway": "192.168.40.1",
+        "router": "192.168.40.65",
+        "lan_prefix": 26,
+        "target": "203.0.113.10"
+      },
+      "goal": {
+        "kind": "Network",
+        "address": "192.168.40.70"
+      },
+      "solution": [
+        "ip addr set 192.168.40.70/26",
+        "ip route replace default via 192.168.40.65",
+        "ping 203.0.113.10"
+      ]
+    },
+    {
+      "id": "lpic1-permissions",
+      "version": 1,
+      "initial": {
+        "kind": "Unix",
+        "nodes": {
+          "/": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv/report.txt": {
+            "mode": 384,
+            "owner": "root",
+            "group": "editors",
+            "directory": false
+          }
+        },
+        "users": {
+          "root": [
+            "root"
+          ],
+          "alex": [
+            "alex",
+            "editors"
+          ],
+          "blair": [
+            "blair"
+          ],
+          "nobody": [
+            "nobody"
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Access",
+        "path": "/srv/report.txt",
+        "user": "alex",
+        "read": true,
+        "write": true,
+        "private": true,
+        "exclusive": true
+      },
+      "solution": [
+        "chmod 660 /srv/report.txt",
+        "test-access alex /srv/report.txt rw"
+      ]
+    },
+    {
+      "id": "lpic1-traversal",
+      "version": 1,
+      "initial": {
+        "kind": "Unix",
+        "nodes": {
+          "/": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv": {
+            "mode": 493,
+            "owner": "root",
+            "group": "root",
+            "directory": true
+          },
+          "/srv/project": {
+            "mode": 480,
+            "owner": "root",
+            "group": "editors",
+            "directory": true
+          },
+          "/srv/project/notes.txt": {
+            "mode": 416,
+            "owner": "root",
+            "group": "editors",
+            "directory": false
+          }
+        },
+        "users": {
+          "root": [
+            "root"
+          ],
+          "alex": [
+            "alex",
+            "editors"
+          ],
+          "blair": [
+            "blair"
+          ],
+          "nobody": [
+            "nobody"
+          ]
+        }
+      },
+      "goal": {
+        "kind": "Access",
+        "path": "/srv/project/notes.txt",
+        "user": "blair",
+        "read": true,
+        "write": false,
+        "private": true
+      },
+      "solution": [
+        "usermod -aG editors blair",
+        "chmod 750 /srv/project",
+        "test-access blair /srv/project/notes.txt r"
+      ]
+    },
+    {
+      "id": "lpic1-logs",
+      "version": 1,
+      "initial": {
+        "kind": "Logs",
+        "files": {
+          "/var/log/app.log": "09:00 INFO startup ready\n09:02 ERROR database unavailable\n09:03 INFO retry scheduled\n09:04 ERROR request timeout\n09:05 WARN queue growing\n",
+          "/var/log/auth.log": "09:00 INFO session opened\n"
+        },
+        "result": ""
+      },
+      "goal": {
+        "kind": "Logs",
+        "path": "/var/log/app.log",
+        "needle": "ERROR"
+      },
+      "solution": [
+        "find /var/log -name app.log",
+        "cat /var/log/app.log | grep ERROR"
+      ]
+    },
+    {
+      "id": "lpic2-service",
+      "version": 1,
+      "initial": {
+        "kind": "Service",
+        "port": "eighty",
+        "running": false,
+        "enabled": false,
+        "loaded_port": null,
+        "failed": true,
+        "journal": [
+          {
+            "kind": "Rejected",
+            "port": "eighty"
+          }
+        ]
+      },
+      "goal": {
+        "kind": "Service",
+        "port": 8080
+      },
+      "solution": [
+        "config set port 8080",
+        "systemctl restart atlas",
+        "systemctl enable atlas"
+      ]
+    },
+    {
+      "id": "lpic2-dns",
+      "version": 1,
+      "initial": {
+        "kind": "Dns",
+        "records": {
+          "portal.lab.test": "192.0.2.8"
+        },
+        "loaded": {
+          "portal.lab.test": "192.0.2.8"
+        },
+        "serial": 2026102101,
+        "loaded_serial": 2026102101
+      },
+      "goal": {
+        "kind": "Dns",
+        "name": "portal.lab.test",
+        "address": "192.0.2.80"
+      },
+      "solution": [
+        "dns set portal.lab.test 192.0.2.80",
+        "dns serial 2026102102",
+        "named-checkzone lab.test",
+        "systemctl reload named",
+        "dig portal.lab.test"
+      ]
+    },
+    {
+      "id": "lpic2-storage",
+      "version": 1,
+      "initial": {
+        "kind": "Mount",
+        "capacity": 1000,
+        "used": 950,
+        "cache": 300,
+        "mounted": true,
+        "device": "/dev/vdb1",
+        "configured_device": "/dev/vdc1",
+        "writable": false
+      },
+      "goal": {
+        "kind": "Mount"
+      },
+      "solution": [
+        "config set device /dev/vdb1",
+        "mount -o remount,rw /data",
+        "rm -r /data/cache",
+        "umount /data",
+        "mount /data"
+      ]
+    }
+  ]
+}

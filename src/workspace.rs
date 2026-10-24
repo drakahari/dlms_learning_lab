@@ -65,6 +65,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub service_learning: Option<crate::service_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub client_learning: Option<crate::client_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub client_draft: Option<crate::client_teaching::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dns_learning: Option<crate::dns_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dns_draft: Option<crate::dns_workspace::Draft>,
@@ -139,6 +143,8 @@ impl WorkspaceData {
             && self.routing_v4_learning.as_ref().is_none_or(|l| l.valid())
             && self.address_learning.as_ref().is_none_or(|l| l.valid())
             && self.service_learning.as_ref().is_none_or(|l| l.valid())
+            && self.client_learning.as_ref().is_none_or(|l| l.valid())
+            && self.client_draft.as_ref().is_none_or(|d| d.valid())
             && self.dns_learning.as_ref().is_none_or(|l| l.valid())
             && self.dns_draft.as_ref().is_none_or(|d| d.valid())
             && self.command.len() <= 4096

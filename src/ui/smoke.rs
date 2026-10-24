@@ -189,6 +189,9 @@ impl LabApp {
         if self.scenarios[i].service_teaching.is_some() {
             self.set_service_view(i, teaching::View::Assignment);
         }
+        if self.scenarios[i].client_teaching.is_some() {
+            self.set_client_view(i, teaching::View::Assignment);
+        }
     }
     pub(super) fn add_routing_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
