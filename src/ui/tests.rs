@@ -3,6 +3,55 @@ use engine::State;
 mod client_learning;
 mod mac_learning;
 mod ospf;
+#[test]
+fn opening_terminal_assignment_keeps_task_visible_and_scrolling_does_not_grow_output() {
+    for scale in [1., 1.5, 2.] {
+        let (ctx, mut a) = app();
+        a.scale = scale;
+        let i = a
+            .scenarios
+            .iter()
+            .position(|s| s.id == "lpic1-search-release-set")
+            .unwrap();
+        a.launch(i);
+        a.set_terminal_view(i, teaching::View::Assignment);
+        for _ in 0..6 {
+            frame(&ctx, &mut a, 1268., 632., vec![]);
+        }
+        assert!(
+            a.metrics.main_scroll_offset.y < 1.,
+            "opening must show the beginning of the task at {scale}: {:?}",
+            a.metrics.main_scroll_offset
+        );
+        let before = a.metrics.output.unwrap().height();
+        let viewport = a.metrics.main_viewport.unwrap();
+        frame(
+            &ctx,
+            &mut a,
+            1268.,
+            632.,
+            vec![
+                egui::Event::PointerMoved(egui::pos2(viewport.left() + 1., viewport.center().y)),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -220.),
+                    modifiers: Default::default(),
+                },
+            ],
+        );
+        for _ in 0..15 {
+            frame(&ctx, &mut a, 1268., 632., vec![]);
+        }
+        assert!(
+            a.metrics.main_scroll_offset.y > 1.,
+            "test must actually scroll"
+        );
+        assert!(
+            (a.metrics.output.unwrap().height() - before).abs() < 1.,
+            "scrolling must not resize the terminal at {scale}"
+        );
+    }
+}
 fn app() -> (egui::Context, LabApp) {
     let ctx = egui::Context::default();
     let mut a = LabApp::from_context(&ctx, true, false);

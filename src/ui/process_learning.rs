@@ -24,7 +24,7 @@ impl LabApp {
             .unwrap()
             .view = view;
         self.focus_input = true;
-        self.scroll_command = view != teaching::View::Introduction;
+        self.scroll_command = false;
         self.help_open = false;
         self.lesson_scroll_reset = true;
         self.dirty = true;

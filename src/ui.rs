@@ -38,6 +38,8 @@ struct Metrics {
     main_viewport: Option<egui::Rect>,
     main_scroll_offset: egui::Vec2,
     main_content_size: egui::Vec2,
+    main_content_top: f32,
+    main_available_height: f32,
     header: Vec<egui::Rect>,
     lesson_tabs: Vec<egui::Rect>,
     example_action: Option<egui::Rect>,
@@ -1550,10 +1552,12 @@ impl LabApp {
                 let mut area = egui::ScrollArea::vertical()
                     .id_salt(("main", self.selected))
                     .min_scrolled_height(0.);
+                self.metrics.main_available_height = ui.available_height();
                 if std::mem::take(&mut self.lesson_scroll_reset) {
                     area = area.vertical_scroll_offset(0.);
                 }
                 let scroll = area.auto_shrink([false, false]).show(ui, |ui| {
+                    self.metrics.main_content_top = ui.cursor().top();
                     let width = ui.available_width().min(if self.selected.is_some() {
                         1060.
                     } else {

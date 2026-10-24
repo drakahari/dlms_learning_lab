@@ -28,7 +28,7 @@ impl LabApp {
         }
         self.checked = view == teaching::View::Assignment && w.checked;
         self.focus_input = true;
-        self.scroll_command = view != teaching::View::Introduction;
+        self.scroll_command = false;
         self.help_open = false;
         self.lesson_scroll_reset = true;
         self.dirty = true;

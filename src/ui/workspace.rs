@@ -484,9 +484,11 @@ impl LabApp {
         } else {
             4096
         };
-        let height =
-            (ui.ctx().input(|input| input.content_rect().bottom()) - ui.cursor().top() - 190.)
-                .clamp(140., 260.);
+        // Measure from the unscrolled content origin. Screen coordinates move
+        // when the outer lesson scrolls; using those grew an empty terminal
+        // while scrolling and pushed the task farther out of view.
+        let used = ui.cursor().top() - self.metrics.main_content_top;
+        let height = (self.metrics.main_available_height - used - 190.).clamp(140., 260.);
         let output = egui::Frame::new()
             .fill(palette(ui).input)
             .inner_margin(10.)

@@ -4,56 +4,60 @@ Updated2026-10-24 during authorized continuation. **The application is not compl
 Ordinary implementation remains authorized; no public release is authorized.
 Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference runs.
 
-## Active continuation state (M90)
+## Active continuation state (M91)
 
-- Main61ae1b2 integrates client d403077/native0dad and Find61c03e7/85a351e.
-  Normal source is116/28:35CCNA,24LPIC-1,17LPIC-2,40Bash. Native driver ranges
-  are21000 Find and23000 client, separate from20000 MAC layout. Merges preserve
-  client supplied-context pin, all pending-draft guards, shared active Run guard,
-  both passive metric sets and dispatches. Source after0f5 is not yet pushed.
-- Combined MAIN gates now finish:914distinct models and173UI accounted. Model
-  R1=913pass/1fail (IPv6 fixture copied incompatible client teaching); corrected
- 9IPv6+10Find+11client scope30 passes, preserving explicit foreign-kind rejection.
-  UI R1=171pass/2fail (new client Check below850, ignored click). Shared compact
-  chain, gateway in clientcard fixes unchanged original-nine layout/grading tests;
- 7clientfocused checks pass. All failures remain retained. No fonts/IDs/Goals
-  or model changed by the layout correction. Final Clippy/fmt,112Python, coverage,
-  palette provenance PASS. No heavy child remains; next root action is clean
-  candidate build after committing this source/doc follow-through.
-- All3Find semantics/commands/practice data and frozen113/109/106/genuine6/7
-  remain exact. New unit library summary and permission-number spacing are prose
-  only. Ledger stays133Partial/1Supporting/1106Open until actual Find native
-  acceptance and the independently reviewed narrowK5 update.
-- Find branch gates903models+166UI=1069 distinct, Clippy/fmt/build pass. A real
-  focused Enter reproduction found practice command execution behind reset;
-  corrected shared assignment/practice terminals now disable Run and prevent
-  execution/autofocus during reset/settings/theme samples/data dialogs. All six
-  cases retain exact attempts, and36 configurations prove actual painted Run
-  text fits100/150/200 wide/narrow. No actual Find native run yet.
-- Client adapter70 scoped checks and native followup11 checks/Clippy/fmt pass.
-  Root reviewed full native plans and required finite20-attempt actual-zoom
-  settling, bounded progress reads and explicit popup selection before gating.
-  No actual client native run yet. First actual runs will target a clean installed
-  combined candidate, avoiding duplicate long worktree+installed flows.
-- Independent Find teaching/goal review finds no material blocker. Official LPI5.0
-  rechecked2026-10-24. AFTER actual native acceptance, promote ONLY103.3.K5 from
-  Open to narrow Partial, strengthen already Partial103.3/T2/K1 evidence; keep
- 104.7/FHS/command-discovery Open and preserve every source fingerprint. Current
-  counts remain133Partial/1Supporting/1106Open until that accepted update.
-- CI40120315031 at73777e0 COMPLETE: Ubuntu tests/Clippy/candidate PASS; macOS
-  tests/Clippy/release compile PASS, archive notice-gated; Windows156pass/1fail
-  UI due fresh test fixture canonicalization. Root ab2a1b5 test-only correction
-  retains ordinary Windows temp paths/component joins, all assertions and exact
-  production-prefix28148b37…. Focused Fedora test and merged client/seed/backup22
-  pass. New Windows CI remains required; never claim Windows desktop acceptance.
-- Existing Fedora73777e0/113 accepted package still opens below: full4MAC57,
-  alignment72, quiet Wayland10/10, strict real two-process cold reopen9 PASS.
-  Next clean116 candidate must upgrade that113, preserve exact original-nine
-  fixture bytes and pass first full Find3/client flows, quiet starts and reopening.
-- Helpers source-only: independent reviewer completed Find/LPI audit; Find helper
-  is preparing a concrete contract for the remaining original DNS/Mount teaching
-  adapters. Preserve old State/Goal/version/rawdrafts/terminal semantics, distinct
-  examples and missing-legacy first-open Assignment. No new labs/counts for these.
+- Pushed clean main1608a18b0aa03c5f853afb18b472c4dd0d82c5e1 has116 authored
+  assignments/28units:35CCNA,24LPIC-1,17LPIC-2,40Bash. Source integrates the
+  original client/gateway teaching adapter and three distinct Find assignments.
+  Original assignment IDs/versions/initial states/goals and28 themes are retained.
+- The first116 Fedora candidate is built and actually installed outside checkout:
+  `dist/dlms-learning-lab-0.1.0-g1608a18b0aa0-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+  ArchiveSHA256d437e475f8b3d197b44ba5295474ad94952ab87e7bb8519ebfad71266a69b88e;
+  binarySHA25683e54fd59ae6d3256aa07e03f804729b62ed688ec75e21f6c3647d3c66a70b31.
+  Installed prefix `.build-artifacts/installations/verified-1608a18b0aa0-ul0vthpx`.
+  Actual identified113 upgrade/uninstall/reinstall/content/hash/desktop checks and
+  exact original-nine synthetic bytes pass. Quiet Wayland10/10 and one bounded
+  protocol/lifecycle probe pass. The historical callback cause remains unresolved.
+- Actual installed116 Find3 full flow passes46 captures in run-9i7bn02d:
+  Intro/example/experiment/repair, wrong/partial/correct/manual alternatives,
+  invalidation, separate drafts, save/readback/resume, reset/cancel and Challenge,
+  actual Light150/Dark200 typing. Root screenshot review found task auto-scroll
+  and scroll-dependent empty terminal growth. Functional PASS is retained, but
+  visual acceptance and coverage promotion are withheld pending the narrow fix.
+- Root source fix measures terminal space relative to the unscrolled content
+  origin and preserves top-of-task opening for terminal/process/account views.
+  Explicit Insert/keyboard focus behavior remains. New actual-egui opening/scroll
+  regression passes100/150/200 at1268x632. Full174 UI rerun passes (m91-main-ui-r1.log),631.80s.
+  Independent source review accepts the coordinate/focus correction. Clippy/fmt pass. New
+  clean candidate/native before-after review still pending. Never relabel1608 artifacts.
+- Source1608 combined gates:914distinct models and173UI accounted (R1 failures
+  retained; metadata fixture and compact client diagram corrections have focused
+  successful reruns); final Clippy/fmt,112Python, coverage and palette checks PASS.
+  No changed Goal/evaluator/dependency from those corrections. Sources/failures and
+  memory observations remain in ignored logs/audits.
+- Native CI40128237589 at1608a18 is in progress on Ubuntu/Windows/macOS. Earlier
+ 73777 run passed Ubuntu/macOS tests/Clippy/compile; Windows had one test-only
+  developer-path fixture failure. ab2a1b5 preserves all assertions and exact
+  production reopen prefix28148b37...; new Windows result remains required.
+- DNS/Mount adapters are frozen SOURCE ONLY in same-project legacy-seed-teaching
+  worktree at5a4ec49 base. Manifest reviews/legacy-seed-dns-mount-source-r3 SHA256
+ 6228570e921b5e06ad20833c45d7df286a297552a80a2786fabd699da3904a18.
+  R1/R2 remain exact; R3 corrects typed historical Goal comparison, accessible
+  DNS/storage labels and learner prose only; fixture/action/numeric outcomes exact.
+ 17paths,21prospective UNRUN checks. Root and independent source review before
+  heavy gate grant. Preserve M87 pending-draft guards, exact older histories,
+  lowercase-seed DNS limitation, simulator-only abbreviated named-checkzone, and
+  unchanged mount<=80% goal. No new lab count or coverage from adapters.
+- Bash getopts remains research only: hidden cluster scan state must follow
+  function/local/capture/pipeline ownership; OPTERR currently ordinary/unset means
+  future defaults need evaluator9 and actual8-before9/history evidence. No builtin,
+  dependency, lab or coverage is implemented by that proposal. Reviewer retains
+  precise sources/subset; current POSIX Issue8 body was unavailable (403), so no
+  conformance claim. Find helper is source-only proposing distinct PTR assignments.
+- Root owns the only heavy slot. Helpers have no grant to build/test/reference/run.
+  Continue independent work; do not stop at a candidate. Last fully accepted113
+  installed build remains below until corrected116 installed flows/alignment/cold
+  reopening pass. Windows/macOS desktop, screen reader and novice acceptance open.
 
 ## Current source and actual coverage
 
@@ -65,7 +69,7 @@ Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference ru
 - Main integrates evaluator8/case-dispatch, native MAC workspace/content,
   strict cold-reopen tool, bounded virtual find, PTR/reverse-name capability and
   exact typed DirectoryEntries grading. Source foundations alone are not labs.
-  No authored find or reverse-DNS unit is registered yet.
+  Three Find assignments are registered; reverse-DNS remains capability-only.
 - CCNA1.13/a–d now have narrowly Partial authored evidence. Current totals are
  **133Partial/1Supporting/1106Open across1240 overlapping references**, not a
   completion percentage. Most certification and advanced shell work remains
@@ -76,7 +80,7 @@ Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference ru
   acceptance. Two legacy seeds (DNS and storage) still lack newer teaching
   metadata. Do not claim every unit meets that standard.
 
-## Current integration gates and native evidence
+## Retained earlier integration gates and native evidence (M86)
 
 - Main97c617f combined model/integration gate passes **889 checks across83 targets**
   (m86-main-combined-models-r1.log). Whole UI gate finishes159pass/2fail: both
@@ -157,41 +161,28 @@ ZIP is underdist/native-ci-c41352a/windows; archiveSHA256
 eda9eafb71f484d900159edbf035c84953e045dabbb5ec789dd519cc579f4b73.
 PE, all25 embedded scenario/unit source packs and notices were verified without
 executing it on Fedora. Ubuntu/macOS fixture failures in that run are corrected
-in maina0cdb48; production containment is unchanged. Fresh clean-source CI40120315031 at73777e0 is running. Windows/macOS actual desktop acceptance remains pending.
+in maina0cdb48; production containment is unchanged. CI40120315031 at73777e0 completed as described above; fresh1608 CI is pending. Windows/macOS actual desktop acceptance remains pending.
 
 ## Next serial actions, without another planning restart
 
-1. Completed current-catalog native-plan rerun26/26, Clippy/fmt,112 Python,
-   coverage and palette provenance. Combined model/UI runs observe minimum
-   available memory21.08GiB, peak PSIavg10 at0.18% and no OOM counter increase.
-   Two jobs/two test threads remain mandatory, not a safety guarantee.
-2. Reviewed reporting73777e0 and all preceding source milestones are pushed.
-   CI40120315031 is running with60-minute native jobs. No release publication.
-3. Actual clean MAIN113 candidate/lifecycle/full-four MAC/quiet10/alignment72/
-   strict cold reopen are complete as above. Root now has source-only narrow
-   DNS/Mount pending-editor credit fix plus4 backend tests and extended existing
-   UI regression. Applied State/Goals/old missing-draft credit stay unchanged.
-   Full893 model/integration checks across84 targets, focused actual-egui editor
-   regression and Clippy/fmt pass. First UI invocation had a mistyped development
-   revision; corrected exact-revision R2 passes and retained R1 is not identity
-   evidence. Independent read-only review finds no material issue: explicit Some
-   drafts match actual editor fields, None preserves legacy truth, original goals
-   still reject wrong applied values. The scoped fix is ready to commit.
-   Root released the heavy slot; Find helper has the next grant, confirm its
-   status before any root heavy run.
-4. Source-only helper is preparing three unregistered Find assignments: exact
-   evidence handover, partial-search permission repair, private review handover
-   capstone. Review teaching, two alternatives each and scoped safety goals before
-   gates/registration. Owner-read/search repair must accept500 or700; no forced
-   unrequested write bit. Keep the old catalog/order/progress intact.
-5. Independent legacy-three audit is complete; root approved a narrow first
-   client/gateway adapter on client-teaching branch/worktree, source-only. Add
-   optional bounded teaching/practice and native atomic client editor while
-   preserving existing State/Goal/version/solutions and old first-open Assignment.
-   DNS/Mount teaching adapters remain subsequent work. Root owns their pending
-   draft guard fix separately; coordinate merges in progress/workspace files.
-   Then continue remaining Linux/network/shell curriculum, extending capabilities
-   before authoring dependent tasks. Do not stop at a candidate or test count.
+1. Full174 UI and independent shared-fix review pass. Clippy/fmt pass;
+   commit clean; no changed model requires repeating unrelated914 backend checks.
+2. Build next clean MAIN116 candidate. Upgrade the actual1608 installation;
+   repeat installed Find/client actual flows and inspect before/after captures,
+   shared IPv4/VLAN72 alignment, quiet launches and strict real two-process cold
+   reopening. Keep every older immutable package/evidence identity separate.
+3. After accepted Find native review only, promote narrow103.3.K5 Open->Partial,
+   strengthen existing103.3/K1/T2 evidence, retain104.7Open/source fingerprints.
+   Totals then134Partial/1Supporting/1105Open, not completion percentage.
+4. Finish independent DNS/Mount source review and grant one guarded worktree gate
+   when root releases slot. Run21new plus affected compatibility/UI checks;
+   resolve failures, integrate coherent reviewed source, native inspect both.
+5. Continue capability-first Linux/network/Bash progression. PTR authored unit
+   proposal and bounded getopts contract are not implemented coverage. Preserve
+   genuine6/7/8 history and accepted full tasks/separate practice, no canned shell.
+6. Check fresh exact-source CI and retain available candidate identities/notices.
+   No public releases. Keep macOS missing dispatch notice and actual non-Fedora
+   desktop/accessibility/novice acceptance explicitly open.
 
 ## Build safety and preserved evidence
 

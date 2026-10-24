@@ -972,3 +972,31 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   pass. Main914 distinct models and173 UI are technical gates, not novice or
   platform acceptance. First actual Find3/client runs remain pending on the next
   clean installed candidate; existing113 packaged evidence stays separate.
+
+
+### M91 installed116 review and shared opening correction in progress
+
+- Clean1608a18 candidate116/28 is built/installed. Identified113 upgrade,
+  uninstall/reinstall and exact original-nine synthetic bytes pass. Quiet Wayland
+ 10/10 and one bounded protocol probe pass; historical callback cause unresolved.
+- Actual installed Find3 flow passes46 captures: separate teaching/practice/task,
+  wrong/partial/reference/manual alternatives, current invalidation, exact raw
+  save/readback, reset/cancel/Challenge and Light150/Dark200 native typing. These
+  functional results do not by themselves establish visual/novice acceptance.
+- Screenshot review catches opening auto-scroll past the task and growing blank
+  terminal space as outer scroll changes screen coordinates. Narrow shared fix
+  keeps view opening at the task and sizes terminal relative to unscrolled content.
+  The real egui opening/scroll regression passes100/150/200; full174UI rerun
+  passes631.80s. Independent source review accepts coordinate/focus behavior.
+  The guarded run observes minimum24.00GiB available, PSIavg10some/full0%, OOM
+  delta0; this is an ordinary observation, not a memory guarantee.
+  No model, field alignment, font, grading, progress schema or dependency changes.
+  Installed1608 artifacts remain immutable; corrected screens require a new build.
+- Curriculum overview corrects stale blanket OSPF absence. Existing four bounded
+  configuration/route-reasoning labs do not model a neighbor FSM, LSA exchange,
+  convergence or broadcast elections. Narrow Find coverage promotion remains
+  withheld until visual acceptance; matrix stays133Partial/1Supporting/1106Open.
+- Original DNS/Mount teaching adapters remain source-only under independent
+  review;21 prospective tests are unrun. Getopts is a researched capability
+  contract only, not an implemented builtin or authored curriculum. Source-only
+  parallel review never launches a second heavy command.

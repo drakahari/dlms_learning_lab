@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Source inventory is **116 authored assignments in28 units:35CCNA,24LPIC-1,17LPIC-2 and40Bash/Shell**. The last accepted installed Fedora candidate contains113; the new Find unit awaits its actual installed native run. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Source inventory is **116 authored assignments in28 units:35CCNA,24LPIC-1,17LPIC-2 and40Bash/Shell**. The last accepted installed Fedora candidate contains113; the116 candidate has passed its functional Find native run, with visual acceptance held for an opening-scroll correction. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -39,11 +39,11 @@ Each row records implemented scenario IDs (or None), a distinct proposed assignm
 
 | `shell-streams`, `shell-pipelines`, `shell-eof`, `shell-batch-audit` | Separate channels, pipeline intersection/status, EOF repair and resilient batches | No complete shell option parser or broader utility suite; functions are taught in the next unit |
 
-| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | No arrays/substitution or complete option parser; Bash scope follows in its own unit |
+| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | This unit does not assess arrays, substitution or option parsing; later units teach arrays, capture and Bash scope, while getopts remains planned |
 
 ## Learning order and capability gates
 
-CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Integrated dual-stack and dynamic-protocol diagnosis still require additional models and content. OSPF, STP, LACP, DHCP and FHRP need explicit state transitions and negative tests before content is accepted. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
+CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. Integrated dual-stack diagnosis, STP, LACP, DHCP and FHRP still require additional models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
 
 LPIC-1 progresses through terminal/files → permissions/accounts → packages/processes → storage/boot → shell/scheduling → networking/services/security. Hardware probing, bootloaders, real package transactions, locale behavior, accessibility and cryptography require new evidence/state models; existing tests do not establish those capabilities. A visual configuration exercise must identify what it models and what it cannot execute.
 
