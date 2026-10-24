@@ -330,18 +330,23 @@ pub(super) fn configuration_editor(
     // Keep the physical connections visible; field values show the learner's current draft.
     ui.horizontal_wrapped(|ui| {
         ui.label("Switch");
-        egui::ComboBox::from_id_salt(("switch", index, practice))
+        let picker = egui::ComboBox::from_id_salt(("switch", index, practice))
             .width(180.)
             .selected_text(&draft.selected_switch)
             .show_ui(ui, |ui| {
                 for (name, s) in &fabric.switches {
-                    ui.selectable_value(
+                    let choice = ui.selectable_value(
                         &mut draft.selected_switch,
                         name.clone(),
                         format!("{} ({name})", s.label),
                     );
+                    metrics
+                        .vlan_switch_choices
+                        .push((name.clone(), choice.rect));
                 }
+                metrics.vlan_switch_popup = Some(controls::popup_content_clip(ui));
             });
+        metrics.vlan_switch_picker = Some(picker.response.rect);
     });
     let name = draft.selected_switch.clone();
     let switch = draft.switches.get_mut(&name).unwrap();
@@ -354,6 +359,12 @@ pub(super) fn configuration_editor(
         metrics,
         focus,
     );
+    metrics.vlan_named_fields.push((
+        name.clone(),
+        String::new(),
+        "vlans",
+        *metrics.inputs.last().expect("active VLAN field"),
+    ));
     ui.label(RichText::new("Lists use commas, for example 30,40. Access connects a workstation to one VLAN; a trunk carries several VLANs between switches.").small().color(palette(ui).muted));
     let wide = ui.available_width() >= 850.;
     let columns = [
@@ -485,6 +496,12 @@ pub(super) fn configuration_editor(
                     metrics,
                     focus,
                 );
+                metrics.vlan_named_fields.push((
+                    name.clone(),
+                    port.clone(),
+                    if p.trunk { "native" } else { "access" },
+                    *metrics.inputs.last().expect("port VLAN field"),
+                ));
                 if !wide {
                     ui.end_row();
                     if p.trunk {
@@ -508,6 +525,12 @@ pub(super) fn configuration_editor(
                         metrics,
                         focus,
                     );
+                    metrics.vlan_named_fields.push((
+                        name.clone(),
+                        port.clone(),
+                        "allowed",
+                        *metrics.inputs.last().expect("allowed VLAN field"),
+                    ));
                 } else if wide {
                     controls::label(ui, "— Access port", if wide { columns[4] } else { 160. });
                 }

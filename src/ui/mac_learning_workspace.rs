@@ -143,6 +143,8 @@ impl LabApp {
                                         self.dirty = true;
                                     }
                                 }
+                                self.metrics.mac_action_popup =
+                                    Some(controls::popup_content_clip(ui));
                             })
                     })
                     .inner;
@@ -340,6 +342,23 @@ fn settings_header(
         .id_salt(salt)
         .open(pending.then_some(true))
 }
+/// A rejected Send is an action error; existing objective truth is unchanged.
+fn frame_not_sent(error: &str) -> String {
+    const PREFIX: &str = "Frame not sent: ";
+    let room = net::MAX_ERROR_BYTES - PREFIX.len();
+    let clipped = error.len() > room;
+    let mut end = error.len().min(room - if clipped { 3 } else { 0 });
+    while !error.is_char_boundary(end) {
+        end -= 1;
+    }
+    let mut text = String::with_capacity(PREFIX.len() + end + if clipped { 3 } else { 0 });
+    text.push_str(PREFIX);
+    text.push_str(&error[..end]);
+    if clipped {
+        text.push_str("...");
+    }
+    text
+}
 fn mac_feedback(ui: &mut egui::Ui, checks: &[(bool, String)], complete: &str, id: (usize, bool)) {
     let passed = checks.iter().filter(|c| c.0).count();
     if passed == checks.len() {
@@ -448,8 +467,9 @@ fn mac_controls(
         }
     }
     ui.label(RichText::new("Send one Ethernet metadata frame").strong());
-    ui.horizontal_wrapped(|ui| {
-        ui.label("From workstation");
+    ui.horizontal(|ui| {
+        let label_width = controls::form_label_width(ui);
+        controls::label(ui, "From workstation", label_width);
         let width = 240_f32.min(ui.available_width());
         let picker = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt(("mac-from", i, practice))
@@ -465,6 +485,7 @@ fn mac_controls(
                         );
                         metrics.mac_sources.push((h.clone(), choice.rect));
                     }
+                    metrics.mac_source_popup = Some(controls::popup_content_clip(ui));
                 })
         })
         .inner;
@@ -502,7 +523,7 @@ fn mac_controls(
                 *notice = None;
                 changed = true
             }
-            Err(e) => *notice = Some(e),
+            Err(e) => *notice = Some(frame_not_sent(&e)),
         }
     }
     ui.label(format!(
@@ -512,8 +533,9 @@ fn mac_controls(
     ));
     ui.label(RichText::new("Learned MAC entries · applied state").strong());
     if !config_open {
-        ui.horizontal_wrapped(|ui| {
-            ui.label("Inspect switch");
+        ui.horizontal(|ui| {
+            let label_width = controls::form_label_width(ui);
+            controls::label(ui, "Inspect switch", label_width);
             let width = 240_f32.min(ui.available_width());
             let r = controls::cell(ui, width, |ui| {
                 egui::ComboBox::from_id_salt(("mac-inspect-switch", i, practice))
@@ -532,6 +554,7 @@ fn mac_controls(
             })
             .inner;
             name_control(&r.response, "Switch whose learned MAC table is displayed");
+            metrics.mac_inspect = Some(r.response.rect);
         });
     }
     let selected = &d.configuration.selected_switch;
@@ -563,8 +586,9 @@ fn mac_controls(
         super::ipv6_workspace::field(ui,"Advance seconds (0–86400)",&mut d.advance_seconds,20,("mac-advance",i,practice),metrics,focus);
         metrics.mac_time=metrics.inputs.last().copied();
         let r=ui.add(button("Advance time"));metrics.mac_advance=Some(r.rect);if r.clicked(){match work::decimal(&d.advance_seconds,86400).and_then(|n|s.advance(n)){Ok(())=>{*notice=None;changed=true},Err(e)=>*notice=Some(e)}}
-        ui.horizontal_wrapped(|ui|{ui.label("Clear on switch");let width=220_f32.min(ui.available_width());let r=controls::cell(ui,width,|ui|egui::ComboBox::from_id_salt(("mac-clear-switch",i,practice)).width(width).truncate().selected_text(&d.clear_switch).show_ui(ui,|ui|{for id in s.fabric().switches.keys(){ui.selectable_value(&mut d.clear_switch,id.clone(),id);}})).inner;name_control(&r.response,"Switch for selective MAC clear");});
+        ui.horizontal(|ui|{let label_width=controls::form_label_width(ui);controls::label(ui,"Clear on switch",label_width);let width=220_f32.min(ui.available_width());let r=controls::cell(ui,width,|ui|egui::ComboBox::from_id_salt(("mac-clear-switch",i,practice)).width(width).truncate().selected_text(&d.clear_switch).show_ui(ui,|ui|{for id in s.fabric().switches.keys(){let choice=ui.selectable_value(&mut d.clear_switch,id.clone(),id);metrics.mac_clear_choices.push((id.clone(),choice.rect));}metrics.mac_clear_popup=Some(controls::popup_content_clip(ui));})).inner;name_control(&r.response,"Switch for selective MAC clear");metrics.mac_clear_switch=Some(r.response.rect);});
         super::ipv6_workspace::field(ui,"Clear VLAN (empty means all VLANs on this switch)",&mut d.clear_vlan,4,("mac-clear-vlan",i,practice),metrics,focus);
+        metrics.mac_clear_vlan=metrics.inputs.last().copied();
         let r=ui.add(button("Clear dynamic entries"));metrics.mac_clear=Some(r.rect);if r.clicked(){let vlan=if d.clear_vlan.is_empty(){Ok(None)}else{work::decimal(&d.clear_vlan,4094).and_then(|n|if n>0{Ok(Some(n as u16))}else{Err("Use a VLAN from 1 to 4094, or leave it empty".into())})};match vlan.and_then(|v|s.clear_dynamic(&d.clear_switch,v)){Ok(n)=>{*notice=Some(format!("Cleared {n} dynamic entries on {}.",d.clear_switch));changed=true},Err(e)=>*notice=Some(e)}}
     });
     metrics.mac_tools = Some(tools.header_response.rect);

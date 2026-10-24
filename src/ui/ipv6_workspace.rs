@@ -442,7 +442,7 @@ pub(super) fn field(
     focus: &mut bool,
 ) {
     ui.horizontal(|ui| {
-        let label_width = (ui.available_width() * 0.4).clamp(90., 165.);
+        let label_width = controls::form_label_width(ui);
         ui.allocate_ui_with_layout(
             egui::vec2(label_width, controls::height(ui)),
             egui::Layout::left_to_right(egui::Align::Center),

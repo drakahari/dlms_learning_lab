@@ -61,6 +61,15 @@ pub fn cell<R>(
         },
     )
 }
+/// Existing native form column; all related rows reserve the same label width.
+/// Call after popup options render: scrolling clips Y but can inherit window X.
+/// The used content rectangle supplies the actual popup's horizontal bounds.
+pub fn popup_content_clip(ui: &egui::Ui) -> egui::Rect {
+    ui.clip_rect().intersect(ui.min_rect())
+}
+pub fn form_label_width(ui: &egui::Ui) -> f32 {
+    (ui.available_width() * 0.4).clamp(90., 165.)
+}
 pub fn label(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f32) {
     cell(ui, width, |ui| {
         ui.add(egui::Label::new(text).wrap());
