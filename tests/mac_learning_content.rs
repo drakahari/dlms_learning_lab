@@ -367,6 +367,9 @@ fn original109_catalog_and_advisory_unit_prerequisites_are_preserved_without_reg
     let authored_ids: Vec<_> = authored().iter().map(|s| s.id.clone()).collect();
     let index = units.iter().find(|u| u.id == "ethernet-learning").unwrap();
     assert_eq!(index.labs, authored_ids);
+    let position = |id: &str| units.iter().position(|u| u.id == id).unwrap();
+    assert!(position("vlan-data-foundations") < position("ethernet-learning"));
+    assert!(position("ethernet-learning") < position("ipv4-static-foundations"));
     for s in authored() {
         for id in &s.prerequisites {
             assert!(labs.iter().any(|lab| &lab.id == id));
