@@ -943,3 +943,20 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
 - Test-only Windows fixture correction passes the focused Fedora regression;
   production-prefix bytes remain identical. MAIN merged client/DNS/Mount/backup
   checks pass22; Windows execution of the correction still needs fresh CI.
+
+
+### M90 combined integration in progress
+
+- Main integrates both reviewed new teaching flows and normal116/28 catalog,
+ 35CCNA/24LPIC-1/17LPIC-2/40Bash. First installed116 candidate remains pending;
+  the accepted113 package retains its exact identity. No added curriculum credit
+  is inferred from library count or new native controllers.
+- Combined model R1 passes913/914. Its sole failure is an IPv6 test fixture
+  unintentionally retaining newly added incompatible client teaching. Clearing
+  only that fixture metadata plus explicitly testing incompatible rejection
+  preserves validation. R2 passes9IPv6/10Find/11client;914distinct model checks
+  accounted without relabeling the original failed run. Full combined UI running.
+- Plain unit-summary/permission-number spacing changes preserve every Find
+  initial/goal/version/reference/practice/outcome/command value. Frozen113/109/
+ 106/genuine6/7 sources remain unchanged. Independent Find/LPI review approves
+  only narrow103.3.K5 promotion after native acceptance;104.7 stays Open.

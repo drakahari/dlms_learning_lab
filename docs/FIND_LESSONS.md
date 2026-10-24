@@ -1,8 +1,8 @@
 # Search, investigate and hand over files
 
-Original three-lesson addition, checked2026-10-24. Registration is prepared in
-source (116 lessons/28 units); the accepted normal catalog remains113 until the
-normal integration and native gates pass. Unit `linux-file-search`
+Original three-lesson addition, checked2026-10-24. Registration is integrated in normal source (116 lessons/28 units); the
+last accepted installed Fedora package remains113 until the first new-unit
+installed native run passes. Unit `linux-file-search`
 follows `linux-file-access` and precedes `linux-processes`, without changing the
 relative order of existing units. No coverage promotion or native acceptance is
 claimed here.
@@ -103,3 +103,13 @@ The capability's retained actual GNU4.10.0 comparison passed152 existing and32
 find queries after the transparently retained first failure/corrections; that is
 utility evidence, not native curriculum acceptance. No upstream implementation
 or manual prose was copied. Existing project licensing boundaries remain intact.
+
+
+Main integration adds the reviewed original-client teaching adapter without
+changing any original113 initial state, goal or version. Combined model R1
+passes913/914; an older IPv6 test clone inherited the new incompatible client
+metadata. Its fixture now explicitly clears it and separately proves the
+incompatible metadata is rejected. The corrected9 IPv6 checks plus10 Find and11
+client content checks pass. Permission-number spacing is prose-only: all3 Find
+initials, goals, solutions, practice fixtures/outcomes and command sequences
+remain exact. Main final UI and installed native gates remain pending.

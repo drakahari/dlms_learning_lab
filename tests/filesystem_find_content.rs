@@ -768,7 +768,7 @@ fn taught_commands_run_in_their_declared_context_and_introductions_explain_requi
         );
         assert!(!lab.objective.trim().is_empty() && lab.hints.len() >= 3);
         if id == IDS[0] {
-            for word in ["quotes", "leading dot", "depth0", "AND", "incomplete"] {
+            for word in ["quotes", "leading dot", "depth 0", "AND", "incomplete"] {
                 assert!(intro.contains(word), "missing prerequisite concept {word}");
             }
         }

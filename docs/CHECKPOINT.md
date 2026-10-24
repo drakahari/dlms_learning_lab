@@ -4,47 +4,58 @@ Updated2026-10-24 during authorized continuation. **The application is not compl
 Ordinary implementation remains authorized; no public release is authorized.
 Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference runs.
 
-## Active continuation state (M87–M89)
+## Active continuation state (M90)
 
-- Main7809b5f integrates reviewed client teaching d403077 after70 scoped gates.
-  It preserves the original client State/Goal/version/solutions, adds independent
-  practice and atomic native fields, pins supplied router/LAN/target context and
-  derives Run width from text. Merge conflict retains BOTH root DNS/Mount pending
-  guard and client checks. Main combined regression/native acceptance is pending.
-  Source count is still113/27. Root0f5bed0 feedback fix and8a21899 delivery evidence
-  are pushed;7809b5f is not yet pushed. Main has a test-only Windows CI fixture fix
-  pending targeted gate. Do not claim these newer changes are in73777e0 candidate.
-- Find content61c03e7 passes55 targeted checks/Clippy, remains source-reviewed.
-  Helper filesystem-find-lessons worktree has normal116/28 registration + native
-  controller21000..21999 uncommitted. Its903 model/integration checks across85
-  targets pass after correcting only a stale current-context101→104 expectation.
-  Original113/frozen109/106/6/7 data remain unchanged. Current normal-main count
-  does not increase until integration; no find authored coverage promotion yet.
-- Find focused UI R1 passes4/5, including36 actual painted Run-text configurations
-  and real capture-geometry execution. The fifth reproduces Enter executing a
-  practice command behind reset confirmation. Helper owns the sole heavy slot
-  for narrow inactive execution/disabled-Run/focus fix and unchanged modal
-  regression, then affected UI/Clippy/build. No actual Find native run yet.
-- Client helper has finished70 gates, source committed d403077 and is writing a
-  separate actual-native driver23000..23999, source-only. It must be reviewed/
-  gated before running. No successful State/engine execution injection permitted.
-- CI40120315031 at73777e0 is COMPLETE: Ubuntu tests/Clippy/candidate PASS;
-  macOS tests/Clippy/release compile PASS (archive still notice-gated); Windows
-  fails one contained-profile-path test (156pass/1fail UI). Root retrieved the
-  safe viewer log m87-windows-737-ci-step.log. The known fresh macOS-fixture
-  canonicalization introduced Windows verbatim path semantics. Source-only test
-  correction retains ordinary Windows temp paths and component-wise joins;
-  all assertions and production guard bytes are unchanged (prefix28148b37…).
-  Exact correction passes its focused Fedora test; production prefix is byte-
-  identical. MAIN merged client/seed pending guards and backup pass22 checks.
-  Verify the correction in new Windows CI before claiming it passes there.
-- MAIN latest accepted package is113/73777e0: full4MAC57captures, alignment72,
-  quiet Wayland10/10 and strict two-process cold reopen9captures PASS. Exact
-  launch and checksums below. Historical startup cause remains unresolved.
+- Main61ae1b2 integrates client d403077/native0dad and Find61c03e7/85a351e.
+  Normal source is116/28:35CCNA,24LPIC-1,17LPIC-2,40Bash. Native driver ranges
+  are21000 Find and23000 client, separate from20000 MAC layout. Merges preserve
+  client supplied-context pin, all pending-draft guards, shared active Run guard,
+  both passive metric sets and dispatches. Source after0f5 is not yet pushed.
+- Root owns sole heavy MAIN full UI **session92993** (m90-main-combined-ui-r1).
+  Reap before any other heavy work. Combined model R1 finishes913pass/1fail across
+ 86targets: an old IPv6 test clone inherited new incompatible client metadata.
+  Fixture-only correction clears it and explicitly tests that foreign lesson
+  metadata still rejects. Scoped R2 passes9IPv6+10Find+11client (30); all914
+  distinct checks now accounted, original R1 retained. Do not call R1 all-green.
+- Root postmerge changes pending commit: current client catalog113→116 assertion,
+  plain new-unit library summary, readable permission-number spacing and IPv6
+  fixture hygiene. Proof keeps all3 Find IDs/versions/initials/goals/solutions/
+  practice fixtures/outcomes/commands exact. Full UI173-ish count must be read
+  from actual log, then Clippy/fmt/Python/coverage/palette gates serially.
+- Find branch gates903models+166UI=1069 distinct, Clippy/fmt/build pass. A real
+  focused Enter reproduction found practice command execution behind reset;
+  corrected shared assignment/practice terminals now disable Run and prevent
+  execution/autofocus during reset/settings/theme samples/data dialogs. All six
+  cases retain exact attempts, and36 configurations prove actual painted Run
+  text fits100/150/200 wide/narrow. No actual Find native run yet.
+- Client adapter70 scoped checks and native followup11 checks/Clippy/fmt pass.
+  Root reviewed full native plans and required finite20-attempt actual-zoom
+  settling, bounded progress reads and explicit popup selection before gating.
+  No actual client native run yet. First actual runs will target a clean installed
+  combined candidate, avoiding duplicate long worktree+installed flows.
+- Independent Find teaching/goal review finds no material blocker. Official LPI5.0
+  rechecked2026-10-24. AFTER actual native acceptance, promote ONLY103.3.K5 from
+  Open to narrow Partial, strengthen already Partial103.3/T2/K1 evidence; keep
+ 104.7/FHS/command-discovery Open and preserve every source fingerprint. Current
+  counts remain133Partial/1Supporting/1106Open until that accepted update.
+- CI40120315031 at73777e0 COMPLETE: Ubuntu tests/Clippy/candidate PASS; macOS
+  tests/Clippy/release compile PASS, archive notice-gated; Windows156pass/1fail
+  UI due fresh test fixture canonicalization. Root ab2a1b5 test-only correction
+  retains ordinary Windows temp paths/component joins, all assertions and exact
+  production-prefix28148b37…. Focused Fedora test and merged client/seed/backup22
+  pass. New Windows CI remains required; never claim Windows desktop acceptance.
+- Existing Fedora73777e0/113 accepted package still opens below: full4MAC57,
+  alignment72, quiet Wayland10/10, strict real two-process cold reopen9 PASS.
+  Next clean116 candidate must upgrade that113, preserve exact original-nine
+  fixture bytes and pass first full Find3/client flows, quiet starts and reopening.
+- Helpers source-only: independent reviewer completed Find/LPI audit; Find helper
+  is preparing a concrete contract for the remaining original DNS/Mount teaching
+  adapters. Preserve old State/Goal/version/rawdrafts/terminal semantics, distinct
+  examples and missing-legacy first-open Assignment. No new labs/counts for these.
 
 ## Current source and actual coverage
 
-- Normal catalog: **113 authored labs /27 units:35CCNA,21LPIC-1,17LPIC-2,40Bash/Shell**.
+- Normal source catalog: **116 authored labs /28 units:35CCNA,24LPIC-1,17LPIC-2,40Bash/Shell**.
   The four Ethernet-learning assignments follow VLAN foundations, before static
   routing. All original109 identities/versions/initial states/goals remain;
  28 themes and original-nine progress are preserved. No numeric variants or

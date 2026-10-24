@@ -10,6 +10,8 @@ mod support;
 use support::*;
 fn scenario() -> pack::Scenario {
     let mut lab = pack::bundled().unwrap()[2].clone();
+    // This fixture changes activity kind; do not inherit the IPv4 client's lesson.
+    lab.client_teaching = None;
     lab.id = "test-ipv6".into();
     lab.unit.clear();
     lab.prerequisites.clear();
@@ -197,6 +199,13 @@ fn malformed_packs_adapters_and_changed_shapes_fail_honestly() {
     })
     .unwrap();
     assert!(pack::load(&serialized.to_string()).is_ok());
+    let mut foreign_teaching = lab.clone();
+    foreign_teaching.client_teaching = pack::bundled().unwrap()[2].client_teaching.clone();
+    let incompatible = pack::Pack {
+        schema_version: 1,
+        scenarios: vec![foreign_teaching],
+    };
+    assert!(pack::load(&serde_json::to_string(&incompatible).unwrap()).is_err());
     serialized["scenarios"][0]["goal"]["requirements"][1]["from"] = "unknown".into();
     assert!(pack::load(&serialized.to_string()).is_err());
     let mut t = topology();

@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **113 authored assignments:** 35 CCNA,21 LPIC-1,17 LPIC-2 and40 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **116 authored assignments in source:** 35 CCNA,24 LPIC-1,17 LPIC-2 and40 Bash/Shell. The last accepted Fedora package below contains113; the newly registered Find unit is awaiting its installed native run. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
