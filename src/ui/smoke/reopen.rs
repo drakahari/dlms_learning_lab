@@ -955,14 +955,18 @@ mod tests {
     #[test]
     fn contained_profile_paths_reject_parent_escape_symlinks_and_nonordinary_files() {
         let root = tempfile::tempdir().unwrap();
-        let data = root.path().join("data");
+        // Canonicalize only this known freshly created fixture base. macOS may
+        // expose its temp directory through /var -> /private/var; production
+        // containment still refuses all symlink components without normalization.
+        let base = fs::canonicalize(root.path()).unwrap();
+        let data = base.join("data");
         fs::create_dir(&data).unwrap();
         assert!(contained_path(&data.join("future/progress-v1.json"), &data).is_ok());
         assert!(contained_path(&data.join("../outside"), &data).is_err());
-        assert!(contained_path(&root.path().join("outside"), &data).is_err());
+        assert!(contained_path(&base.join("outside"), &data).is_err());
         #[cfg(unix)]
         {
-            let target = root.path().join("outside");
+            let target = base.join("outside");
             fs::write(&target, b"unchanged").unwrap();
             std::os::unix::fs::symlink(&target, data.join("progress-v1.json")).unwrap();
             assert!(contained_path(&data.join("progress-v1.json"), &data).is_err());
@@ -992,11 +996,31 @@ mod tests {
 #[cfg(all(test, target_os = "linux"))]
 mod context_tests {
     use super::*;
-    fn context() -> (tempfile::TempDir, BTreeMap<String, String>, PathBuf) {
-        let root = tempfile::Builder::new()
-            .prefix("native-reopen-")
-            .tempdir()
-            .unwrap();
+    struct ContextFixture {
+        root: tempfile::TempDir,
+        // Keep the synthetic artifact parent alive until its child is dropped.
+        _base: tempfile::TempDir,
+    }
+    impl ContextFixture {
+        fn path(&self) -> &Path {
+            self.root.path()
+        }
+    }
+    fn context() -> (ContextFixture, BTreeMap<String, String>, PathBuf) {
+        // CI may supply an ordinary /tmp without the developer runner. Build the
+        // exact required shape privately; never mutate process-wide environment.
+        let base = tempfile::tempdir().unwrap();
+        let tmp = fs::canonicalize(base.path())
+            .unwrap()
+            .join(".build-artifacts/tmp");
+        fs::create_dir_all(&tmp).unwrap();
+        let root = ContextFixture {
+            root: tempfile::Builder::new()
+                .prefix("native-reopen-")
+                .tempdir_in(&tmp)
+                .unwrap(),
+            _base: base,
+        };
         use std::os::unix::fs::PermissionsExt;
         fs::set_permissions(root.path(), fs::Permissions::from_mode(0o700)).unwrap();
         for name in ["data", "config", "cache", "write", "read"] {
