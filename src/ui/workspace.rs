@@ -472,6 +472,11 @@ impl LabApp {
         }
     }
     pub(super) fn terminal(&mut self, ui: &mut egui::Ui, i: usize) {
+        let active = ui.is_enabled()
+            && !(self.reset_pending
+                || self.settings_open
+                || self.theme_preview
+                || self.data_tools.modal_open());
         let a = &self.progress.attempts[&self.scenarios[i].id];
         let accounts = matches!(a.state, State::Accounts { .. });
         let command_limit = if accounts {
@@ -553,7 +558,8 @@ impl LabApp {
             if !accounts {
                 ui.label(RichText::new(prompt).monospace().color(palette(ui).accent));
             }
-            let width = (ui.available_width() - 90.).max(40.);
+            let run_width = controls::button_width(ui, "Run");
+            let width = (ui.available_width() - run_width - ui.spacing().item_spacing.x).max(40.);
             let r = ui.add_sized(
                 [width, controls::height(ui)],
                 controls::singleline(ui, &mut self.input)
@@ -568,6 +574,7 @@ impl LabApp {
             self.metrics.terminal = Some(r.rect);
             self.metrics.focus = Some(r.id);
             if self.focus_input
+                && active
                 && (!accounts
                     || !ui
                         .input(|input| input.pointer.any_pressed() || input.pointer.any_released()))
@@ -578,7 +585,7 @@ impl LabApp {
                     self.scroll_command = false;
                 }
                 self.focus_input = false;
-            } else if accounts && self.focus_input {
+            } else if accounts && self.focus_input && active {
                 ui.ctx().request_repaint();
             }
             if r.changed() {
@@ -594,13 +601,19 @@ impl LabApp {
                 self.dirty = true;
             }
             run = r.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
-            let r = ui.add_sized([78., controls::height(ui)], button("Run"));
+            let r = ui
+                .add_enabled_ui(active, |ui| {
+                    ui.add_sized([run_width, controls::height(ui)], button("Run"))
+                })
+                .inner;
+            self.metrics.terminal_run = Some(r.rect);
+            self.metrics.terminal_run_enabled = Some(r.enabled());
             if accounts {
                 self.metrics.accounts_run = Some(r.rect);
             }
             run |= r.clicked();
         });
-        if run && (self.scenarios[i].client_teaching.is_none() || ui.is_enabled()) {
+        if run && active {
             self.submit(i);
         }
     }

@@ -73,6 +73,11 @@ struct Metrics {
     vlan_fields: Vec<(egui::Id, egui::Rect)>,
     vlan_field_enabled: Vec<(egui::Id, bool)>,
     terminal: Option<egui::Rect>,
+    terminal_run: Option<egui::Rect>,
+    terminal_run_enabled: Option<bool>,
+    terminal_example_picker: Option<egui::Rect>,
+    terminal_example_popup: Option<egui::Rect>,
+    terminal_example_choices: Vec<(usize, egui::Rect)>,
     accounts_run: Option<egui::Rect>,
     manager_slot: Option<egui::Rect>,
     manager_file: Option<egui::Rect>,
@@ -350,6 +355,8 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("find-lessons") {
+                21000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-layout") {
                 20000
             } else if smoke

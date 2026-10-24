@@ -1,4 +1,4 @@
-//! Unregistered original search lessons. Every command uses the in-process VM.
+//! Original search lessons. Every command uses the in-process VM.
 use dlms_learning_lab::{
     backup, course,
     engine::{self, Goal, State},

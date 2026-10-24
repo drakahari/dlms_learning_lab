@@ -1,7 +1,8 @@
 # Search, investigate and hand over files
 
-Original three-lesson proposal, checked2026-10-24. The pack is unregistered;
-the accepted normal catalog remains113 lessons. Proposed unit `linux-file-search`
+Original three-lesson addition, checked2026-10-24. Registration is prepared in
+source (116 lessons/28 units); the accepted normal catalog remains113 until the
+normal integration and native gates pass. Unit `linux-file-search`
 follows `linux-file-access` and precedes `linux-processes`, without changing the
 relative order of existing units. No coverage promotion or native acceptance is
 claimed here.
@@ -66,8 +67,24 @@ Guarded validation2026-10-24:10 new content tests and45 affected tests passed
 (backup7, DirectoryEntries8, find12, access-content6, terminal-teaching5,
 workspaces7), plus all-target Clippy with warnings denied and scoped rustfmt.
 The first run had9 content passes and the one expectation error described above;
-repeats are not counted as new tests. Separate native lesson rendering/navigation,
-normal registration, broader main regression and coverage review remain pending.
+repeats are not counted as new tests. At that point, normal registration, normal
+catalog regression, native lesson rendering/navigation and coverage review were
+still pending.
+
+The subsequent normal116 source gate passed903 library/integration tests and166
+binary/UI tests (1069 distinct, not added to the overlapping55). The full UI suite
+includes five Find-controller regressions, real Insert/Run isolation, actual
+capture-geometry phase execution, and painted Run text fitting36 combinations of
+lesson/view/width/100–150–200percent scale. It also exercises existing focus,
+keyboard, Undo, draft, reset and whole-course layout checks. A current context-free
+catalog count was corrected101→104; frozen113/109/106 inputs and real6/7 records
+were preserved. A focused Enter regression reproduced background execution during
+reset confirmation; shared terminal execution/autofocus now respects inactive
+reset/settings/data states and Run is visibly disabled. The unchanged six-case
+negative passed, with an additional explicit disabled-Response assertion. Existing
+heights, input IDs and pending command bytes are preserved. All-target Clippy with
+warnings denied and formatting passed again. These are model/headless UI results;
+the actual three-lesson native flow remains unrun and must pass before acceptance.
 
 The supported utility contract is in [FIND_SUBSET.md](FIND_SUBSET.md). It provides
 one start, bounded leading maxdepth, simple C-byte name patterns, ordinary-file or

@@ -110,13 +110,19 @@ impl LabApp {
                                     ))
                                     .show_ui(ui, |ui| {
                                         for (index, command) in lesson.example.iter().enumerate() {
-                                            ui.selectable_value(
+                                            let choice = ui.selectable_value(
                                                 &mut learning.example_command,
                                                 index,
                                                 format!("{}. {command}", index + 1),
                                             );
+                                            self.metrics
+                                                .terminal_example_choices
+                                                .push((index, choice.rect));
                                         }
+                                        self.metrics.terminal_example_popup =
+                                            Some(controls::popup_content_clip(ui));
                                     });
+                            self.metrics.terminal_example_picker = Some(picker.response.rect);
                             name_control(&picker.response, "Practice example command to insert");
                         },
                     );
@@ -163,6 +169,11 @@ impl LabApp {
         }
     }
     fn practice_terminal(&mut self, ui: &mut egui::Ui, i: usize) {
+        let active = ui.is_enabled()
+            && !(self.reset_pending
+                || self.settings_open
+                || self.theme_preview
+                || self.data_tools.modal_open());
         let l = self
             .progress
             .attempts
@@ -211,8 +222,11 @@ impl LabApp {
         let mut run = false;
         ui.horizontal(|ui| {
             ui.label(RichText::new("alex $").monospace());
+            let run_width = controls::button_width(ui, "Run");
+            let input_width =
+                (ui.available_width() - run_width - ui.spacing().item_spacing.x).max(40.);
             let r = ui.add_sized(
-                [(ui.available_width() - 90.).max(40.), controls::height(ui)],
+                [input_width, controls::height(ui)],
                 controls::singleline(ui, &mut l.command)
                     .id_salt(("practice-command", i))
                     .hint_text("Command · Enter to run")
@@ -223,6 +237,7 @@ impl LabApp {
             self.metrics.inputs.push(r.rect);
             self.metrics.focus = Some(r.id);
             if self.focus_input
+                && active
                 && !ui.input(|input| input.pointer.any_pressed() || input.pointer.any_released())
             {
                 r.request_focus();
@@ -237,11 +252,16 @@ impl LabApp {
                 self.dirty = true;
             }
             run = r.lost_focus() && ui.input(|input| input.key_pressed(egui::Key::Enter));
-            run |= ui
-                .add_sized([78., controls::height(ui)], button("Run"))
-                .clicked();
+            let run_control = ui
+                .add_enabled_ui(active, |ui| {
+                    ui.add_sized([run_width, controls::height(ui)], button("Run"))
+                })
+                .inner;
+            self.metrics.terminal_run = Some(run_control.rect);
+            self.metrics.terminal_run_enabled = Some(run_control.enabled());
+            run |= run_control.clicked();
         });
-        if run {
+        if run && active {
             l.execute();
             self.dirty = true;
             self.focus_input = true;
