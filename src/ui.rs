@@ -21,6 +21,7 @@ mod scripting;
 mod service_learning;
 mod storage_workspace;
 mod terminal_learning;
+mod unit_manager_workspace;
 use std::{path::PathBuf, time::Instant};
 mod ipv4_routing_workspace;
 mod ipv4_workspace;
@@ -70,6 +71,10 @@ struct Metrics {
     vlan_fields: Vec<(egui::Id, egui::Rect)>,
     terminal: Option<egui::Rect>,
     accounts_run: Option<egui::Rect>,
+    manager_slot: Option<egui::Rect>,
+    manager_file: Option<egui::Rect>,
+    manager_run: Option<egui::Rect>,
+    manager_diagnostics: Vec<(egui::Rect, f32)>,
     accounts_output_scroll: Option<(f32, egui::Rect)>,
     accounts_latest_output: Option<egui::Rect>,
     output: Option<egui::Rect>,
@@ -478,6 +483,10 @@ impl LabApp {
         if let Some(lesson) = &s.accounts_teaching {
             dlms_learning_lab::accounts_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.unit_manager_teaching {
+            dlms_learning_lab::unit_manager_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated unit-manager lesson");
+        }
         if let Some(lesson) = &s.switching_teaching {
             dlms_learning_lab::switching_teaching::prepare(a, lesson, new_attempt);
         }
@@ -594,6 +603,10 @@ impl LabApp {
         }
         if let Some(lesson) = &s.accounts_teaching {
             dlms_learning_lab::accounts_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.unit_manager_teaching {
+            dlms_learning_lab::unit_manager_teaching::prepare(a, lesson, true)
+                .expect("validated unit-manager lesson");
         }
         if let Some(lesson) = &s.switching_teaching {
             dlms_learning_lab::switching_teaching::prepare(a, lesson, true);

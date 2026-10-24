@@ -239,6 +239,8 @@ pub struct Learning {
     #[serde(deserialize_with = "transcript")]
     pub transcript: Vec<Message>,
     pub checked: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub terminal: Option<crate::unit_manager_terminal::Session>,
 }
 impl Learning {
     pub fn from_json(text: &str, lesson: &Lesson) -> Result<Self, String> {
@@ -264,10 +266,12 @@ impl Learning {
             selected_action: 0,
             transcript: vec![],
             checked: false,
+            terminal: None,
         })
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.terminal.as_ref().is_none_or(|s| s.valid())
             && self.transcript.len() <= 100
             && self.selected_action < 8
             && self.fixture.validate().is_ok()

@@ -638,7 +638,10 @@ fn validate_unit_manager_workspace(a: &Attempt) -> Result<(), String> {
                 );
             }
         }
-        _ if w.unit_manager_draft.is_some() || w.unit_manager_learning.is_some() => {
+        _ if w.unit_manager_draft.is_some()
+            || w.unit_manager_learning.is_some()
+            || w.unit_manager_terminal.is_some() =>
+        {
             return Err(
                 "Unit-manager metadata belongs to another activity; previous progress retained"
                     .into(),

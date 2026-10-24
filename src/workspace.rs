@@ -14,6 +14,8 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unit_manager_learning: Option<crate::unit_manager_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub unit_manager_terminal: Option<crate::unit_manager_terminal::Session>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ospf_draft: Option<crate::ospf_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ospf_learning: Option<crate::ospf_teaching::Learning>,
@@ -83,6 +85,10 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self
+                .unit_manager_terminal
+                .as_ref()
+                .is_none_or(|s| s.valid())
             && self.unit_manager_draft.as_ref().is_none_or(|d| d.valid())
             && self
                 .unit_manager_learning

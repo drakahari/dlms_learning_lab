@@ -183,6 +183,9 @@ pub struct Definition {
     pub fresh: Fresh,
     pub preservation: Preservation,
 }
+fn is_false(value: &bool) -> bool {
+    !*value
+}
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Draft {
@@ -195,6 +198,8 @@ pub struct Draft {
     pub selected_unit: String,
     #[serde(deserialize_with = "core::text128")]
     pub selected_config: String,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub editing_configuration: bool,
 }
 impl Draft {
     pub fn new(state: &State) -> Result<Self, String> {
@@ -204,6 +209,7 @@ impl Draft {
             documents: state.documents().clone(),
             configuration: state.configuration().clone(),
             selected_unit: state.inventory().units.iter().next().cloned().unwrap(),
+            editing_configuration: false,
             selected_config: state
                 .inventory()
                 .config_paths
@@ -215,6 +221,7 @@ impl Draft {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && (!self.editing_configuration || !self.configuration.is_empty())
             && !self.documents.is_empty()
             && self.documents.len() <= core::MAX_UNITS
             && self.configuration.len() <= core::MAX_CONFIGS

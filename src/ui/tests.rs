@@ -6798,3 +6798,6 @@ fn accounts_authored_unit_keeps_full_terminal_tasks_and_separate_guidance_at_all
         }
     }
 }
+
+#[path = "tests/unit_manager.rs"]
+mod unit_manager;

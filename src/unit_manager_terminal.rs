@@ -1,14 +1,17 @@
 //! Closed literal service commands over supplied virtual data. Never host execution.
+pub mod session;
 use crate::{
     shell,
     unit_manager::{self as core, Action, JobResult, Runtime, State},
     unit_manager_workspace::Definition,
 };
+use serde::{Deserialize, Serialize};
+pub use session::Session;
 
 pub const MAX_COMMAND_BYTES: usize = 2048;
 pub const MAX_OUTPUT_BYTES: usize = 32_768;
 pub const HELP: &str = "Virtual service terminal: systemctl status/cat NAME; systemctl show NAME -p Description,Requires,Wants,After,Before,ActiveState; is-active/is-enabled NAME; start/stop/enable/disable NAME; daemon-reload; get-default/set-default TARGET. journalctl -u NAME -o cat [-n N] [--no-pager]. Literal supplied units only; no shell, host services, restart/reload/mask/isolate, remote commands or arbitrary properties. Start includes one disclosed simulated program-initialization event after its start job; exit0 is not readiness or assignment credit.";
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum DiagnosticKind {
     Syntax,
     Unsupported,
