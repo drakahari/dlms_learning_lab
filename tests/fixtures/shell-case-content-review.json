@@ -1,0 +1,204 @@
+[
+  {
+    "id": "shell-case-interface",
+    "alternates": [
+      "if test \"$1\" = --help || test \"$1\" = -h; then\n    if test \"$#\" -eq 1; then\n        printf 'Usage: card brief|full LABEL\\n'\n        exit 0\n    fi\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\nif test \"$1\" = brief; then\n    printf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\"\nelse\n    if test \"$1\" = full; then\n        printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n        cat details.txt\n    else\n        printf 'Usage: card brief|full LABEL\\n' >&2\n        exit 2\n    fi\nfi\n",
+      "case \"$#\" in\n    1)\n        case \"$1\" in\n            -h|--help) printf 'Usage: card brief|full LABEL\\n' ;;\n            *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\n        esac\n        ;;\n    2)\n        if test -z \"$2\"; then\n            printf 'Usage: card brief|full LABEL\\n' >&2\n            exit 2\n        fi\n        case \"$1\" in\n            full)\n                printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n                cat details.txt\n                ;;\n            brief) printf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\" ;;\n            *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\n        esac\n        ;;\n    *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\nesac\n"
+    ],
+    "wrong": [
+      {
+        "name": "always-brief",
+        "source": "# Build the full argument interface and both report views.\nprintf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\"\n",
+        "misconception": "An interface that always prints a brief card ignores modes and does not validate the arguments or report errors."
+      },
+      {
+        "name": "broad-mode",
+        "source": "case \"$1\" in\n    --help|-h)\n        if test \"$#\" -ne 1; then\n            printf 'Usage: card brief|full LABEL\\n' >&2\n            exit 2\n        fi\n        printf 'Usage: card brief|full LABEL\\n'\n        exit 0\n        ;;\nesac\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    brief*) printf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\" ;;\n    full)\n        printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n        cat details.txt\n        ;;\n    *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\nesac\n",
+        "misconception": "A prefix pattern accepts the unsupported spaced mode brief full; an interface can require exact modes."
+      },
+      {
+        "name": "unquoted-label",
+        "source": "case \"$1\" in\n    --help|-h)\n        if test \"$#\" -ne 1; then\n            printf 'Usage: card brief|full LABEL\\n' >&2\n            exit 2\n        fi\n        printf 'Usage: card brief|full LABEL\\n'\n        exit 0\n        ;;\nesac\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    brief) printf 'Card: %s\\nSummary: %s\\n'  $2 \"$SUMMARY\" ;;\n    full)\n        printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n        cat details.txt\n        ;;\n    *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\nesac\n",
+        "misconception": "The selector itself stays scalar, but an ordinary unquoted printf argument can split or filename-expand the label."
+      },
+      {
+        "name": "split-selector-before-dispatch",
+        "source": "case \"$1\" in\n    --help|-h)\n        if test \"$#\" -ne 1; then\n            printf 'Usage: card brief|full LABEL\\n' >&2\n            exit 2\n        fi\n        printf 'Usage: card brief|full LABEL\\n'\n        exit 0\n        ;;\nesac\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\nfor selected_mode in $1; do\ncase \"$selected_mode\" in\n    brief) printf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\" ;;\n    full)\n        printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n        cat details.txt\n        ;;\n    *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\nesac\ndone\n",
+        "misconception": "Splitting a mode through an ordinary unquoted for-list turns the single unsupported value brief full into two accepted operations."
+      }
+    ],
+    "partial": "always-brief",
+    "try_change": {
+      "source": "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Need VIEW TITLE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    'quick*') printf 'Loan %s: %s\\n' \"$2\" \"$NOTE\" ;;\n    detail) printf 'Loan %s\\n' \"$2\"; cat museum.txt ;;\n    *) printf 'Unknown view\\n' >&2; exit 2 ;;\nesac\n",
+      "expected": {
+        "name": "Quoted quick-star experiment",
+        "args": [
+          "quick",
+          "Gallery desk"
+        ],
+        "stdin": "",
+        "env": {
+          "NOTE": "Map catalog"
+        },
+        "files": {
+          "/work/museum.txt": "Two map sets\n",
+          "/work/keep.txt": "intact\n"
+        },
+        "stdout": "",
+        "stderr": "Unknown view\n",
+        "status": 2,
+        "after": {
+          "/work/museum.txt": "Two map sets\n",
+          "/work/keep.txt": "intact\n"
+        }
+      },
+      "repair": "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Need VIEW TITLE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    quick|summary) printf 'Loan %s: %s\\n' \"$2\" \"$NOTE\" ;;\n    detail) printf 'Loan %s\\n' \"$2\"; cat museum.txt ;;\n    *) printf 'Unknown view\\n' >&2; exit 2 ;;\nesac\n"
+    },
+    "first_case_hardcode": "printf '%s' 'Card: North\nSummary: Ready\n'\nprintf '%s' '' >&2\nexit 0\n",
+    "file_damage": "printf damaged > sentinel.txt\ncase \"$1\" in\n    --help|-h)\n        if test \"$#\" -ne 1; then\n            printf 'Usage: card brief|full LABEL\\n' >&2\n            exit 2\n        fi\n        printf 'Usage: card brief|full LABEL\\n'\n        exit 0\n        ;;\nesac\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    brief) printf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\" ;;\n    full)\n        printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n        cat details.txt\n        ;;\n    *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\nesac\n",
+    "record_input": null
+  },
+  {
+    "id": "shell-case-routing",
+    "alternates": [
+      ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    case \"$record\" in\n        ship:*)\n            case \"$record\" in\n                ship:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n                ship:urgent:*) printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1)) ;;\n                *) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n            esac\n            ;;\n        collect:*)\n            case \"$record\" in\n                collect:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n                *) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n            esac\n            ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n",
+      ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    kind=$(printf '%s\\n' \"$record\" | cut -d : -f 1)\n    prefix=$(printf '%s\\n' \"$record\" | cut -d : -f 1,2)\n    if test -z \"$record\"; then\n        ignored=$((ignored+1))\n    else\n        if test \"$kind\" = hold && test \"$record\" != \"$kind\"; then\n            ignored=$((ignored+1))\n        else\n            valid=0\n            if test \"$kind\" = ship || test \"$kind\" = collect; then\n                if test \"$record\" != \"$kind\" && test \"$record\" != ship: && test \"$record\" != collect: && test \"$record\" != ship:urgent:; then valid=1; fi\n            fi\n            if test \"$valid\" -eq 0; then\n                printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1))\n            else\n                if test \"$prefix\" = ship:urgent && test \"$record\" != \"$prefix\"; then\n                    printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1))\n                else\n                    printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1))\n                fi\n            fi\n        fi\n    fi\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n"
+    ],
+    "wrong": [
+      {
+        "name": "broad-first",
+        "source": ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    case \"$record\" in\n        ship:|collect:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n        ship:*|collect:*) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n        ship:urgent:*) printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1)) ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n",
+        "misconception": "A general shipment arm takes urgent records before the more specific route can run."
+      },
+      {
+        "name": "overwrite-per-record",
+        "source": ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    case \"$record\" in\n        ship:|collect:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n        ship:urgent:*) printf '%s\\n' \"$record\" > priority.txt; priority=$((priority+1)) ;;\n        ship:*|collect:*) printf '%s\\n' \"$record\" > regular.txt; regular=$((regular+1)) ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n",
+        "misconception": "Replacing a route file for every record erases earlier records even when the counters are correct."
+      },
+      {
+        "name": "lose-final-record",
+        "source": ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record; do\n    case \"$record\" in\n        ship:|collect:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n        ship:urgent:*) printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1)) ;;\n        ship:*|collect:*) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n",
+        "misconception": "A final input record without LF is still a record and must not disappear."
+      },
+      {
+        "name": "literal-priority-pattern",
+        "source": ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    case \"$record\" in\n        ship:|collect:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n        'ship:urgent:*') printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1)) ;;\n        ship:*|collect:*) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n",
+        "misconception": "Quoting the star makes it literal, so real urgent record labels fall through to the regular route."
+      }
+    ],
+    "partial": "broad-first",
+    "try_change": {
+      "source": ": > 'fast lane.txt'\n: > 'normal lane.txt'\nfast=0\nnormal=0\nheld=0\nwhile read -r row || test -n \"$row\"; do\n    case \"$row\" in\n        send:*|return:*) printf '%s\\n' \"$row\" >> 'normal lane.txt'; normal=$((normal+1)) ;;\n        send:rush:*) printf '%s\\n' \"$row\" >> 'fast lane.txt'; fast=$((fast+1)) ;;\n        ''|hold:*) held=$((held+1)) ;;\n        *) printf 'Unknown: %s\\n' \"$row\" >&2; exit 1 ;;\n    esac\ndone < 'museum queue.txt'\nprintf 'Fast: %s\\nNormal: %s\\nHeld: %s\\n' \"$fast\" \"$normal\" \"$held\"\n",
+      "expected": {
+        "name": "Broad arm first experiment",
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/museum queue.txt": "send:rush:Frame\nsend:Crate\nhold:Label\n",
+          "/work/fast lane.txt": "old\n",
+          "/work/normal lane.txt": "old\n",
+          "/work/keep.txt": "intact\n"
+        },
+        "stdout": "Fast: 0\nNormal: 2\nHeld: 1\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/museum queue.txt": "send:rush:Frame\nsend:Crate\nhold:Label\n",
+          "/work/fast lane.txt": "",
+          "/work/normal lane.txt": "send:rush:Frame\nsend:Crate\n",
+          "/work/keep.txt": "intact\n"
+        }
+      },
+      "repair": ": > 'fast lane.txt'\n: > 'normal lane.txt'\nfast=0\nnormal=0\nheld=0\nwhile read -r row || test -n \"$row\"; do\n    case \"$row\" in\n        send:rush:*) printf '%s\\n' \"$row\" >> 'fast lane.txt'; fast=$((fast+1)) ;;\n        send:*|return:*) printf '%s\\n' \"$row\" >> 'normal lane.txt'; normal=$((normal+1)) ;;\n        ''|hold:*) held=$((held+1)) ;;\n        *) printf 'Unknown: %s\\n' \"$row\" >&2; exit 1 ;;\n    esac\ndone < 'museum queue.txt'\nprintf 'Fast: %s\\nNormal: %s\\nHeld: %s\\n' \"$fast\" \"$normal\" \"$held\"\n"
+    },
+    "first_case_hardcode": "printf '%s' 'Priority: 1\nRegular: 2\nIgnored: 1\nRejected: 0\n'\nprintf '%s' '' >&2\nprintf '%s' 'ship:urgent:Globe\n' > '/work/priority.txt'\nprintf '%s' 'ship:Map\ncollect:Stand\n' > '/work/regular.txt'\nexit 0\n",
+    "file_damage": "printf damaged > sentinel.txt\n: > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    case \"$record\" in\n        ship:|collect:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n        ship:urgent:*) printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1)) ;;\n        ship:*|collect:*) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n",
+    "record_input": {
+      "argument": 0,
+      "example_file": "/work/museum queue.txt",
+      "canonical_record_edges": true,
+      "output_files": [
+        "/work/priority.txt",
+        "/work/regular.txt"
+      ],
+      "example_output_files": [
+        "/work/fast lane.txt",
+        "/work/normal lane.txt"
+      ]
+    }
+  },
+  {
+    "id": "shell-case-publication",
+    "alternates": [
+      "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\ncandidate=\nseparator=\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*)\n                candidate=\"$candidate$separator$record\"\n                separator='\n'\n                ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\nif build_plan \"$2\"; then :; else exit 1; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+      "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\nif test \"$1\" != preview && test \"$1\" != apply; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        if test -n \"$record\"; then\n            kind=$(printf '%s\\n' \"$record\" | cut -d : -f 1)\n            if test \"$kind\" = hold && test \"$record\" != \"$kind\"; then :; else\n                if test \"$kind\" = ready && test \"$record\" != ready: && test \"$record\" != \"$kind\"; then\n                    printf '%s\\n' \"$record\"\n                else\n                    printf 'Bad entry: %s\\n' \"$record\" >&2\n                    return 1\n                fi\n            fi\n        fi\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\nif test \"$1\" = preview; then\n    printf 'Plan: <%s>\\n' \"$candidate\"\nelse\n    printf '%s' \"$candidate\" > published.txt\n    printf 'Source: %s\\n' \"$2\" >> ledger.txt\n    printf 'Applied: <%s>\\n' \"$candidate\"\nfi\n"
+    ],
+    "wrong": [
+      {
+        "name": "write-before-validation",
+        "source": ": > published.txt\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*) printf '%s\\n' \"$record\" ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+        "misconception": "An early output redirect destroys the old publication even in preview and failure paths."
+      },
+      {
+        "name": "lose-preparation-status",
+        "source": "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*) printf '%s\\n' \"$record\" ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=0\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+        "misconception": "Forcing success after the helper hides a real rejected record and can publish partial captured text."
+      },
+      {
+        "name": "final-newline",
+        "source": "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*) printf '%s\\n' \"$record\" ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s\\n' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+        "misconception": "The saved publication has no final line break; adding one changes the file even when the report looks similar."
+      },
+      {
+        "name": "replace-ledger",
+        "source": "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*) printf '%s\\n' \"$record\" ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" > ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+        "misconception": "A successful publication appends one source line without discarding the existing ledger."
+      }
+    ],
+    "partial": "final-newline",
+    "try_change": {
+      "source": "mode=save\nprepare() {\n    while read -r item || test -n \"$item\"; do\n        case \"$item\" in\n            ''|wait:*) : ;;\n            ok:?*) printf '%s\\n' \"$item\" ;;\n            *) printf 'Bad loan: %s\\n' \"$item\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ntext=$(prepare \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$mode\" in\n    review) printf 'Review <%s>\\n' \"$text\" ;;\n    save)\n        printf '%s' \"$text\" > docket.txt\n        printf 'Saved from %s\\n' \"$2\" >> 'loan ledger.txt'\n        printf 'Saved <%s>\\n' \"$text\"\n        ;;\n    *) printf 'Unknown action\\n' >&2; exit 2 ;;\nesac\n",
+      "expected": {
+        "name": "Save action experiment",
+        "args": [
+          "review",
+          "requests.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/requests.txt": "ok:Guide\nwait:Map\nok:Stool\n",
+          "/work/docket.txt": "old docket\n",
+          "/work/loan ledger.txt": "Past\n",
+          "/work/keep.txt": "intact\n"
+        },
+        "stdout": "Saved <ok:Guide\nok:Stool>\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/requests.txt": "ok:Guide\nwait:Map\nok:Stool\n",
+          "/work/docket.txt": "ok:Guide\nok:Stool",
+          "/work/loan ledger.txt": "Past\nSaved from requests.txt\n",
+          "/work/keep.txt": "intact\n"
+        }
+      },
+      "repair": "mode=$1\nprepare() {\n    while read -r item || test -n \"$item\"; do\n        case \"$item\" in\n            ''|wait:*) : ;;\n            ok:?*) printf '%s\\n' \"$item\" ;;\n            *) printf 'Bad loan: %s\\n' \"$item\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ntext=$(prepare \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$mode\" in\n    review) printf 'Review <%s>\\n' \"$text\" ;;\n    save)\n        printf '%s' \"$text\" > docket.txt\n        printf 'Saved from %s\\n' \"$2\" >> 'loan ledger.txt'\n        printf 'Saved <%s>\\n' \"$text\"\n        ;;\n    *) printf 'Unknown action\\n' >&2; exit 2 ;;\nesac\n"
+    },
+    "first_case_hardcode": "printf '%s' 'Plan: <ready:Map\nready:Audio>\n'\nprintf '%s' '' >&2\nexit 0\n",
+    "file_damage": "printf damaged > sentinel.txt\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*) printf '%s\\n' \"$record\" ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+    "record_input": {
+      "argument": 1,
+      "example_file": "/work/requests.txt",
+      "canonical_record_edges": true,
+      "output_files": [
+        "/work/published.txt",
+        "/work/ledger.txt"
+      ],
+      "example_output_files": [
+        "/work/docket.txt",
+        "/work/loan ledger.txt"
+      ]
+    }
+  }
+]

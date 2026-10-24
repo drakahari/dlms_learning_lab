@@ -250,6 +250,7 @@ impl LabApp {
                     palette(ui).error
                 }),
             );
+            self.metrics.script_feedback = Some(summary.rect);
             let same_error = run.as_ref().is_some_and(|r| {
                 r.current()
                     && r.results.len() == cases.len()

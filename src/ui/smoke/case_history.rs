@@ -183,8 +183,8 @@ impl LabApp {
                 assert!(self.smoke && self._smoke_profile.is_some());
                 assert_eq!(
                     self.scenarios.len(),
-                    106,
-                    "native acceptance requires the merged normal106 library"
+                    109,
+                    "native acceptance requires the merged normal109 library"
                 );
                 assert_eq!(
                     self.path.parent(),
@@ -689,7 +689,7 @@ mod tests {
             assert_eq!(band.width(), viewport.width());
         }
         let labs = pack::bundled().unwrap();
-        assert_eq!(labs.len(), 106);
+        assert_eq!(labs.len(), 109);
         let p = progress::decode(WRITER7, &labs).unwrap();
         assert_eq!(p.attempts.len(), 102);
         assert_eq!(records().len(), 37);

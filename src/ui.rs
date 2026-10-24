@@ -122,6 +122,7 @@ struct Metrics {
     script_history: Option<egui::Rect>,
     script_diagnostic: Option<egui::Rect>,
     script_completion: Option<egui::Rect>,
+    script_feedback: Option<egui::Rect>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
     why: Option<egui::Rect>,
@@ -331,7 +332,11 @@ impl LabApp {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
-            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("capture-lessons")
+            } else if smoke
+                && matches!(
+                    std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                    Ok("capture-lessons" | "case-lessons")
+                )
             {
                 7200
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("substitution") {

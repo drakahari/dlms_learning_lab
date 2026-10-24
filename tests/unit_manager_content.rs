@@ -777,14 +777,15 @@ fn original102_current_runs_real6_history_drafts_favorites_and_selected_reset_su
             "runs generated in this test retain their actual current revision; frozen6 data stays6"
         );
     };
+    let review: Review =
+        serde_json::from_str(include_str!("fixtures/unit-manager-content-review.json")).unwrap();
     let mut all: Vec<_> = pack::bundled()
         .unwrap()
         .into_iter()
-        .filter(|s| !IDS.contains(&s.id.as_str()))
+        // This is the authored original102 preservation boundary, not the growing catalog.
+        .filter(|s| review.original_catalog_ids.contains(&s.id))
         .collect();
     let original_ids: Vec<_> = all.iter().map(|s| s.id.clone()).collect();
-    let review: Review =
-        serde_json::from_str(include_str!("fixtures/unit-manager-content-review.json")).unwrap();
     assert_eq!(
         original_ids.iter().collect::<BTreeSet<_>>(),
         review.original_catalog_ids.iter().collect::<BTreeSet<_>>()
