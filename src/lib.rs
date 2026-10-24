@@ -85,3 +85,6 @@ pub mod ospf_workspace;
 pub mod unit_manager_teaching;
 pub mod unit_manager_terminal;
 pub mod unit_manager_workspace;
+
+/// Bounded Ethernet source learning; not yet bundled curriculum.
+pub mod mac_learning;
