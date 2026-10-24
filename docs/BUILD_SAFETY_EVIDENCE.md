@@ -52,3 +52,6 @@ application milestone, not an already completed installation acceptance claim.
 ## M67 ordinary test/native observations
 
 The necessary132-overlapping-check combined run recorded277samples with minimum11.96GiB available, PSIavg10some/full maxima0 and OOM-counter delta0. The following41-sample native flow had minimum12.51GiB available, peak some/full PSIavg100.32% and OOMdelta0; swap free fell to4096bytes. These serialized2-Cargo-job/2-test-worker observations are not a stress test or memory guarantee. No GPU/swap/OOM/model/desktop setting changed. Ignored exact audit: `.build-artifacts/audits/m67-memory-r1.json`. Later full-unit/final runs retain separate command/memory logs.
+
+
+M68 main focused manager/terminal integration:37 ordinary samples, minimum9.68GiB MemAvailable, peak some/full PSIavg10 0.18%, observed oom_kill counter delta0. Shared runner/Cargo2/test2/project disk retained. Nearly full swap remains a risk; no safety guarantee or stress test. Exact ignored command and sample logs: m68-manager-terminal-main-r1.log and20261024T011452.295379Z-test-memory.jsonl.
