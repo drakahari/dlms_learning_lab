@@ -61,3 +61,6 @@ M68 clean Fedora candidate:66samples minimum11.49GiB available,PSIavg10zero,OOMd
 
 
 M69 merged main ordinary broad compile/UI interval363samples: minimum9.58GiB available, peak some/full PSIavg10 0.72%,OOMdelta0. Final actual private manager native198samples: minimum12.66GiB,PSIzero/OOMdelta0. Swap reached0free bytes. Runs remain serial main-guarded2jobs/2test workers; project disk staging/evidence, no stress/system changes or guarantee. Detailed per-run ignored audit m69-memory-r1.json.
+
+
+M70/M71 completed ordinary guarded runs: main120UI/771models, scoped retry, Clippy/build, Python73 and fixed37reference observations remain serialized Cargo2/test2 on verified project NVMe Btrfs. Across the nine completed audit intervals, minimum11.079GiB available and peak some/full PSIavg10 0.21%,OOMdelta0; swap reached0free. Actual normal four-service native r2 recorded879samples, minimum12.566GiB, peak some/full PSIavg10 0.0/0.0%,OOMdelta0. No pressure threshold/stress test or unrelated workload/settings change. These observations do not guarantee sufficient memory under other workloads. Exact ignored audits m70-memory-r1.json and m70-native-r2-memory.json.

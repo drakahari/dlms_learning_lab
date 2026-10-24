@@ -3,7 +3,7 @@
 use super::*;
 use dlms_learning_lab::unit_manager_workspace::{Draft, EditAction};
 #[derive(Clone)]
-enum Control {
+pub(super) enum Control {
     Try,
     Fill,
     Save,
@@ -22,9 +22,12 @@ enum Control {
     Confirm,
     Challenge,
     ResetExample,
+    ExampleActionPicker,
+    ExampleActionChoice(usize),
+    InsertExample,
 }
 #[derive(Clone)]
-enum Step {
+pub(super) enum Step {
     Setup,
     Wait,
     Click(Control),
@@ -52,7 +55,7 @@ fn ctrl(key: egui::Key) -> egui::Event {
         },
     }
 }
-fn command(plan: &mut Vec<Step>, text: &str, keyboard: bool) {
+pub(super) fn command(plan: &mut Vec<Step>, text: &str, keyboard: bool) {
     plan.extend([
         Step::Click(Control::Command),
         Step::Type(text.into()),
@@ -64,7 +67,7 @@ fn command(plan: &mut Vec<Step>, text: &str, keyboard: bool) {
         Step::Wait,
     ]);
 }
-fn draft(plan: &mut Vec<Step>, configuration: bool, key: &str, text: &str, save: bool) {
+pub(super) fn draft(plan: &mut Vec<Step>, configuration: bool, key: &str, text: &str, save: bool) {
     assert!(key.len() <= 128 && text.len() <= 8192);
     plan.extend([
         Step::Click(Control::Kind(configuration)),
@@ -417,18 +420,87 @@ impl LabApp {
             Control::Confirm => self.metrics.confirm_reset,
             Control::Challenge => self.metrics.manager_challenge,
             Control::ResetExample => self.metrics.example_reset,
+            Control::ExampleActionPicker => self.metrics.manager_example_action,
+            Control::ExampleActionChoice(index) => self
+                .metrics
+                .manager_example_items
+                .iter()
+                .find(|(i, _)| i == index)
+                .map(|(_, rect)| *rect),
+            Control::InsertExample => self.metrics.command_insert,
             Control::Editor => unreachable!(),
         };
         // Header/reset controls have their own top-panel location; popup options
         // use the actual visible menu rect, never a guessed row offset.
         if matches!(
             target,
-            Control::Choice(_) | Control::Reset | Control::Challenge
+            Control::Choice(_)
+                | Control::ExampleActionChoice(_)
+                | Control::Reset
+                | Control::Challenge
         ) {
             self.click_smoke_control(ctx, rect)
         } else {
             self.click_visible_smoke_control(ctx, rect)
         }
+    }
+    pub(super) fn manager_native_input(
+        &mut self,
+        ctx: &egui::Context,
+        step: &Step,
+    ) -> Option<(bool, Option<String>)> {
+        match step {
+            Step::Wait => {}
+            Step::Click(target) => {
+                if !self.manager_native_click(ctx, target) {
+                    return Some((false, None));
+                }
+            }
+            Step::Type(text) => {
+                assert!(text.len() <= 8192);
+                let press = ctrl(egui::Key::A);
+                let mut release = press.clone();
+                if let egui::Event::Key { pressed, .. } = &mut release {
+                    *pressed = false;
+                }
+                self.pending_events = vec![press, release, egui::Event::Text(text.clone())];
+            }
+            Step::Enter => {
+                self.pending_events = [true, false]
+                    .into_iter()
+                    .map(|pressed| egui::Event::Key {
+                        key: egui::Key::Enter,
+                        physical_key: None,
+                        pressed,
+                        repeat: false,
+                        modifiers: Default::default(),
+                    })
+                    .collect();
+            }
+            Step::CtrlEnter | Step::Undo => {
+                let key = if matches!(step, Step::Undo) {
+                    egui::Key::Z
+                } else {
+                    egui::Key::Enter
+                };
+                let press = ctrl(key);
+                let mut release = press.clone();
+                if let egui::Event::Key { pressed, .. } = &mut release {
+                    *pressed = false;
+                }
+                self.pending_events = vec![press, release];
+            }
+            Step::Shot(name) => return Some((true, Some((*name).into()))),
+            Step::Theme(theme_id, scale) => {
+                self.scale = *scale;
+                self.theme_id = (*theme_id).into();
+                theme::apply(ctx, theme_id);
+                self.lesson_scroll_reset = true;
+                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 900.)));
+            }
+            _ => return None,
+        }
+        Some((true, None))
     }
     pub(super) fn unit_manager_native(
         &mut self,
@@ -474,57 +546,22 @@ impl LabApp {
             ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(1200., 850.)));
             return (true, None);
         }
+        if let Some(result) = self.manager_native_input(ctx, step) {
+            return result;
+        }
         let i = self.scenarios.iter().position(|x| x.id == id).unwrap();
         let a = &self.progress.attempts[id];
         match step {
             Step::Setup => unreachable!(),
-            Step::Wait => {}
-            Step::Click(target) => {
-                if !self.manager_native_click(ctx, target) {
-                    return (false, None);
-                }
-            }
-            Step::Type(text) => {
-                assert!(text.len() <= 8192);
-                let press = ctrl(egui::Key::A);
-                let mut release = press.clone();
-                if let egui::Event::Key { pressed, .. } = &mut release {
-                    *pressed = false;
-                }
-                self.pending_events = vec![press, release, egui::Event::Text(text.clone())];
-            }
-            Step::Enter => {
-                self.pending_events = [true, false]
-                    .into_iter()
-                    .map(|pressed| egui::Event::Key {
-                        key: egui::Key::Enter,
-                        physical_key: None,
-                        pressed,
-                        repeat: false,
-                        modifiers: Default::default(),
-                    })
-                    .collect();
-            }
-            Step::CtrlEnter | Step::Undo => {
-                let key = if matches!(step, Step::Undo) {
-                    egui::Key::Z
-                } else {
-                    egui::Key::Enter
-                };
-                let press = ctrl(key);
-                let mut release = press.clone();
-                if let egui::Event::Key { pressed, .. } = &mut release {
-                    *pressed = false;
-                }
-                self.pending_events = vec![press, release];
-            }
-            Step::Shot(name) => return (true, Some((*name).into())),
-            Step::Theme(theme_id, scale) => {
-                self.scale = *scale;
-                self.theme_id = (*theme_id).into();
-                theme::apply(ctx, theme_id);
-                self.lesson_scroll_reset = true;
-                ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(960., 900.)));
+            Step::Wait
+            | Step::Click(_)
+            | Step::Type(_)
+            | Step::Enter
+            | Step::CtrlEnter
+            | Step::Undo
+            | Step::Shot(_)
+            | Step::Theme(_, _) => {
+                unreachable!("shared mechanical input handled before state observations")
             }
             Step::Record(name) => {
                 ctx.data_mut(|d| {

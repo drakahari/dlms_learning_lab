@@ -407,6 +407,9 @@ fn accounts_native_long_transcripts_follow_the_latest_error_in_both_terminals() 
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].unit_manager_teaching.is_some() {
+        a.set_unit_manager_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].ospf_teaching.is_some() {
         a.set_ospf_view(i, teaching::View::Assignment);
     }

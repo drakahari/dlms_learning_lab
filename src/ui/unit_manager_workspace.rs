@@ -152,19 +152,15 @@ impl LabApp {
                         if r.clicked(){*l=Learning::new(lesson).expect("validated lesson");l.view=teaching::View::Example;self.notice=None;changed=true;self.focus_input=false;}
                     });
                     ui.label(RichText::new("Fill changes example text only. Save it and use the virtual terminal to investigate and apply it.").small().color(palette(ui).muted));
-                    let effects=panel(ui,(&s.id,true),&mut l.state,&mut l.draft,l.terminal.get_or_insert_with(Session::default),&lesson.definition,&mut PanelControls { metrics: &mut self.metrics, focus: &mut self.focus_input, notice: &mut self.notice });
+                    let (guide_changed, inserted) = example_guidance(ui, lesson, l, &mut self.metrics);
+                    changed |= guide_changed;
+                    if inserted { self.focus_input = true; }
+                    // An Insert click requests the terminal on the NEXT frame,
+                    // after egui finishes dispatching the pointer release.
+                    let mut panel_focus = self.focus_input && !inserted;
+                    let effects=panel(ui,(&s.id,true),&mut l.state,&mut l.draft,l.terminal.get_or_insert_with(Session::default),&lesson.definition,&mut PanelControls { metrics: &mut self.metrics, focus: &mut panel_focus, notice: &mut self.notice });
+                    if !inserted { self.focus_input = panel_focus; }
                     changed|=effects.dirty;if effects.invalidate{l.checked=false;}
-                    egui::CollapsingHeader::new("Example action guide").id_salt(("manager-example-guide",&s.id)).show(ui,|ui|{
-                        for a in &lesson.example_actions{
-                            if matches!(&a.action, model::EditAction::Manager { action: Action::AdvancePrograms {} }) { continue; }
-                            ui.label(RichText::new(&a.title).strong());ui.label(&a.explanation);
-                            if let Some(command)=real_command(&a.action){
-                                ui.horizontal_wrapped(|ui|{ui.label(RichText::new(&command).monospace());let r=ui.add(button("Insert command"));self.metrics.command_insert=Some(r.rect);
-                                    if r.clicked(){l.terminal.get_or_insert_with(Session::default).command=command;changed=true;self.focus_input=true;}
-                                });
-                            }
-                        }
-                    });
                     let r=ui.add(primary(ui,"Check example · ungraded"));self.metrics.check=Some(r.rect);
                     if r.clicked(){l.checked=true;changed=true;}
                     let result=controls::feedback(ui,r.clicked(),|ui|{if l.checked{let checks=l.checks(lesson);if checks.iter().all(|c|c.0){ui.colored_label(palette(ui).success,"Example checks pass · No assignment credit");}else{for(_,message)in checks.iter().filter(|c|!c.0).take(2){ui.colored_label(palette(ui).error,message);}}}});self.metrics.feedback=Some(result.response.rect);
@@ -569,7 +565,9 @@ fn editor(
     );
     metrics.manager_file = Some(field.inner.rect);
     metrics.editor_viewport = Some(field.inner_rect);
-    metrics.inputs.push(field.inner.rect);
+    // Code may scroll horizontally; geometry uses its visible viewport, while
+    // manager_file retains the full widget for native input identity.
+    metrics.inputs.push(field.inner_rect);
     if field.inner.changed() {
         if text.len() > limit {
             workspace::bound(text, limit);
@@ -818,4 +816,104 @@ pub(super) fn inspection_rows(state: &core::State, unit: &str) -> Vec<(String, S
         )),
     }
     rows
+}
+
+fn example_action_title(action: &model::EditAction) -> String {
+    match action {
+        model::EditAction::Save { .. } => "Edit and save the example files".into(),
+        model::EditAction::Manager { action } => match action {
+            Action::DaemonReload {} => "Load the saved unit definitions".into(),
+            Action::Start { unit } => format!("Start {unit}"),
+            Action::Stop { unit } => format!("Stop {unit}"),
+            Action::Enable { unit } => format!("Enable {unit} for its target"),
+            Action::Disable { unit } => format!("Remove future links for {unit}"),
+            Action::SetDefault { target } => format!("Select {target} for the next session"),
+            _ => "Inspect the annotated example action".into(),
+        },
+    }
+}
+fn example_guidance(
+    ui: &mut egui::Ui,
+    lesson: &dlms_learning_lab::unit_manager_teaching::Lesson,
+    learning: &mut Learning,
+    metrics: &mut Metrics,
+) -> (bool, bool) {
+    let actions = lesson
+        .example_actions
+        .iter()
+        .enumerate()
+        .filter(|(_, a)| {
+            !matches!(
+                &a.action,
+                model::EditAction::Manager {
+                    action: Action::AdvancePrograms {}
+                }
+            )
+        })
+        .collect::<Vec<_>>();
+    if actions.is_empty() {
+        ui.label("Use the example editor and terminal below to try the described change.");
+        return (false, false);
+    }
+    let mut changed = false;
+    if !actions
+        .iter()
+        .any(|(index, _)| *index == learning.selected_action)
+    {
+        learning.selected_action = actions[0].0;
+        changed = true;
+    }
+    ui.label(RichText::new("Example action").strong());
+    let before = learning.selected_action;
+    let width = ui.available_width();
+    controls::cell(ui, width, |ui| {
+        let response = egui::ComboBox::from_id_salt((
+            "manager-example-action",
+            &lesson.definition.initial.inventory().fixture,
+        ))
+        .width(width)
+        .truncate()
+        .selected_text(example_action_title(
+            &lesson.example_actions[learning.selected_action].action,
+        ))
+        .show_ui(ui, |ui| {
+            for (index, action) in &actions {
+                let option = ui.selectable_value(
+                    &mut learning.selected_action,
+                    *index,
+                    example_action_title(&action.action),
+                );
+                metrics.manager_example_items.push((*index, option.rect));
+            }
+        });
+        name_control(&response.response, "Ungraded example action explanation");
+        metrics.manager_example_action = Some(response.response.rect);
+    });
+    changed |= before != learning.selected_action;
+    let annotation = &lesson.example_actions[learning.selected_action];
+    ui.label(&annotation.explanation);
+    let mut inserted = false;
+    if let Some(command) = real_command(&annotation.action) {
+        ui.add(egui::Label::new(RichText::new(&command).monospace()).wrap());
+        let response = ui.add(button("Insert command"));
+        metrics.command_insert = Some(response.rect);
+        if response.clicked() {
+            learning
+                .terminal
+                .get_or_insert_with(Session::default)
+                .command = command;
+            changed = true;
+            inserted = true;
+        }
+        ui.label(
+            RichText::new(
+                "Insert fills the command field only. Choose Run or press Enter when ready.",
+            )
+            .small()
+            .color(palette(ui).muted),
+        );
+    } else {
+        ui.label(RichText::new("Make the described edit, then use Save editor drafts below. Nothing runs automatically.").small().color(palette(ui).muted));
+    }
+    (changed, inserted)
 }

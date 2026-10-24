@@ -6,7 +6,9 @@ internal parser/VM extension; it does not add curriculum or coverage.
 
 The developer-only `tools/case_bash_oracle.py` accepts exactly the37 hash-pinned
 original fixtures in `tests/fixtures/shell-case-oracle-inputs.json`. It cannot
-accept an arbitrary script, fixture path or Bash executable. It is absent from
+accept an arbitrary script, fixture path or Bash executable. The immutable input
+file intentionally retains its proposal-era NOT RUN/null fields; actual
+observations are separate retained records, never substituted into the inputs. It is absent from
 the app's execution path. The ordinary app always uses the in-process simulator.
 
 Run through the shared memory guard, with a new evidence ID:

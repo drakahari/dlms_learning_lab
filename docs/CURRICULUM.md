@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **102 authored assignments in24 units:31CCNA,21LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **106 authored assignments in25 units:31CCNA,21LPIC-1,17LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -114,3 +114,6 @@ Four reviewed [local-record lifecycle assignments](ACCOUNT_LESSONS.md) follow th
 ## M67 — configured OSPFv2 practice
 
 Four original [P2P OSPF assignments](OSPF_LESSONS.md) add explicit identity/process diagnosis, parameter matching, directed equal-cost reasoning and a passive-LAN handover. They retain full native configuration tasks, different isolated worked networks, alternate solutions and current-state checks. Catalog102/24units:31CCNA/21LPIC-1/13LPIC-2/37Bash. Current CCNA v1.1/3.4 sources were rechecked2026-10-23; only four explicitly bounded current-version rows gain Partial practice. Most networking/Linux/scripting objectives remain unfinished. No neighbor FSM/Full observation, LSA exchange, convergence, broadcast DR/BDR or real-device/packet-delivery coverage is claimed; futurev2.0 remains separate. Fedora native evidence and final acceptance limits belong in the ledger.
+
+
+M70 adds four [service definition/dependency/handover assignments](UNIT_MANAGER_LESSONS.md) in a coherent LPIC-2 unit, with separate worked systems, full editors/terminals, active-preparation retry, alternate solutions and current plus next-session outcomes. Normal catalog106/25units:31CCNA/21LPIC-1/17LPIC-2/37Bash. Official current LPIC-2v4.5/202.1 sources were rechecked2026-10-23. Only existing Partial202.1/K1/T4 evidence strengthens; SysV/LSB/real boot/readiness/full systemd and most curriculum stay unfinished. No new objective status counts or exam-completion claim.

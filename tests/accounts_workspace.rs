@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 102);
+    assert_eq!(all.len(), 106);
     assert!(!all.iter().any(|x| x.id == s.id));
     assert_eq!(shell::EVALUATOR_REVISION, 7);
     assert!(!engine::solved(&s.initial, &s.goal));
@@ -402,8 +402,13 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         .unwrap()
         .into_iter()
         // This regression compares the original pre-context-wrapper kinds.
-        // OSPF deliberately requires a goal, and has its own pinned98 regression.
-        .filter(|s| !matches!(s.initial, State::Accounts { .. } | State::Ospf { .. }))
+        // OSPF and multi-unit services require pinned goals and have dedicated parity/regression tests.
+        .filter(|s| {
+            !matches!(
+                s.initial,
+                State::Accounts { .. } | State::Ospf { .. } | State::UnitManager { .. }
+            )
+        })
         .collect::<Vec<_>>();
     assert_eq!(
         old.len(),
