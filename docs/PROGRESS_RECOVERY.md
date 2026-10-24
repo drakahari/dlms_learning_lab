@@ -70,3 +70,29 @@ Successful main-file writes include small optional internal `migration_receipts`
 Metadata is prepared only in pending main bytes. Failed pre-copy, safety-copy or main persistence leaves the original target and caller provenance unchanged; exact backup artifacts already created may remain and support retry. A directory-sync warning after replacement counts as committed and retains the new receipts. Readers/imports reject malformed or future receipts. Exports deliberately omit receipts, imports validate then strip them, and restored profiles obtain target-derived receipts through the same writer. Portable data cannot supply target migration permission.
 
 Normal load/save still rejects corrupt or incompatible targets. The existing explicit validated-preview/confirmed-Restore recovery path can replace a bounded corrupt/future target only after its exact raw bytes are protected in a new no-clobber `progress-before-restore-N.json`. Those bytes are not classified as evaluator6 and no fixed before7 backup is claimed. Recovery does not inspect, replace or claim an unrelated fixed migration slot. The new receipt records that the creation/recovery boundary was handled. Cancelling preview performs no write; an active nested capture is cooperatively cancelled without returning a graded candidate. Invalid/oversized/special-file originals remain protected by the existing bounded reader rules.
+
+
+## Bounded history and receipt sequences
+
+The reader now bounds `script_history_more` and `migration_receipts.shell` while
+reading each sequence, before retaining more than32 elements or decoding an
+excess record. It never reserves memory from an unchecked sequence size hint.
+Existing validation still enforces a combined maximum of32 earlier records
+across `script_history` and `script_history_more`, along with each record's
+revision/content bounds. A standalone history list may contain32; if the primary
+history is present, only31 additional records are valid. The optional primary
+record is separate, so at most32 list records plus that one record can be
+decoded before the unchanged combined check rejects the profile. Receipt order,
+unique nonzero revisions, current/future policy, portable omission, exact backup
+provenance and the evaluator revision do not change. Missing/empty fields retain
+their previous defaults and serialization. This is a reader allocation bound,
+not a new migration or support for additional shell syntax.
+
+The scoped reader verification passed80 checks:49 library checks (including a
+typed-element counter proving an excess item is not decoded), six new sequence
+reader checks, seven backup checks and18 existing actual-history/migration
+regressions. The new checks retain all33 original revision6 records byte for byte
+and exercise an empty current7 record shape without claiming an observed
+solution. No earlier-history snapshot was regenerated. All-target Clippy with
+warnings denied and formatting checks pass. These reader checks do not establish
+new evaluator syntax, curriculum or native-platform acceptance.

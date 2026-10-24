@@ -5,6 +5,12 @@ use crate::{
     progress::Attempt,
 };
 use serde::{Deserialize, Serialize};
+const MAX_SCRIPT_HISTORY: usize = 32;
+fn script_histories<'de, D: serde::Deserializer<'de>>(
+    d: D,
+) -> Result<Vec<crate::shell::Record>, D::Error> {
+    crate::progress::bounded_saved_sequence::<D, crate::shell::Record, MAX_SCRIPT_HISTORY>(d)
+}
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
@@ -27,7 +33,10 @@ pub struct WorkspaceData {
     pub script_learning: Option<crate::script_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub script_history: Option<crate::shell::Record>,
-    #[serde(skip_serializing_if = "Vec::is_empty")]
+    #[serde(
+        skip_serializing_if = "Vec::is_empty",
+        deserialize_with = "script_histories"
+    )]
     pub script_history_more: Vec<crate::shell::Record>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub terminal_learning: Option<crate::terminal_teaching::Learning>,
@@ -103,7 +112,8 @@ impl WorkspaceData {
                 .script_history
                 .as_ref()
                 .is_none_or(|r| r.valid() && r.engine_revision < crate::shell::EVALUATOR_REVISION)
-            && self.script_history_more.len() + usize::from(self.script_history.is_some()) <= 32
+            && self.script_history_more.len() + usize::from(self.script_history.is_some())
+                <= MAX_SCRIPT_HISTORY
             && self
                 .script_history_more
                 .iter()
@@ -155,7 +165,8 @@ pub fn can_preserve_script_history(a: &Attempt) -> bool {
             .into_iter()
             .chain(&w.script_history_more)
             .any(|r| r == record)
-            || w.script_history_more.len() + usize::from(w.script_history.is_some()) < 32
+            || w.script_history_more.len() + usize::from(w.script_history.is_some())
+                < MAX_SCRIPT_HISTORY
     })
 }
 pub fn preserve_script_history(a: &mut Attempt) {

@@ -51,12 +51,60 @@ pub struct Progress {
 pub struct MigrationReceipts {
     #[serde(default)]
     pub workspace: bool,
-    #[serde(default)]
+    #[serde(default, deserialize_with = "receipt_revisions")]
     pub shell: Vec<u32>,
+}
+const MAX_MIGRATION_RECEIPTS: usize = 32;
+
+/// Do not trust a serialized sequence's size hint or deserialize an excess item.
+/// Domain validity (combined history, record shape, revision order) stays separate.
+pub(crate) fn bounded_saved_sequence<'de, D, T, const N: usize>(d: D) -> Result<Vec<T>, D::Error>
+where
+    D: serde::Deserializer<'de>,
+    T: Deserialize<'de>,
+{
+    use serde::de::{Error as _, SeqAccess, Visitor};
+    struct Items<T, const N: usize>(std::marker::PhantomData<T>);
+    struct Excess<const N: usize>;
+    impl<'de, const N: usize> Deserialize<'de> for Excess<N> {
+        fn deserialize<D: serde::Deserializer<'de>>(_: D) -> Result<Self, D::Error> {
+            Err(D::Error::custom(format!(
+                "Saved sequence exceeds {N} items"
+            )))
+        }
+    }
+    impl<'de, T: Deserialize<'de>, const N: usize> Visitor<'de> for Items<T, N> {
+        type Value = Vec<T>;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            write!(f, "at most {N} saved items")
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut a: A) -> Result<Self::Value, A::Error> {
+            if a.size_hint().is_some_and(|hint| hint > N) {
+                return Err(A::Error::custom(format!(
+                    "Saved sequence exceeds {N} items"
+                )));
+            }
+            let mut items = Vec::new();
+            while items.len() < N {
+                match a.next_element()? {
+                    Some(item) => items.push(item),
+                    None => return Ok(items),
+                }
+            }
+            // The sentinel rejects immediately if another element exists, before
+            // decoding its record/strings or retaining one more vector entry.
+            let _ = a.next_element::<Excess<N>>()?;
+            Ok(items)
+        }
+    }
+    d.deserialize_seq(Items::<T, N>(std::marker::PhantomData))
+}
+fn receipt_revisions<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<u32>, D::Error> {
+    bounded_saved_sequence::<D, u32, MAX_MIGRATION_RECEIPTS>(d)
 }
 pub(crate) fn validate_provenance(p: &Progress) -> Result<(), String> {
     if let Some(receipts) = &p.migration_receipts
-        && (receipts.shell.len() > 32
+        && (receipts.shell.len() > MAX_MIGRATION_RECEIPTS
             || receipts
                 .shell
                 .iter()
@@ -1176,5 +1224,54 @@ mod migration_writer_tests {
             std::fs::read(path.with_extension("before-shell-v7.json")).unwrap(),
             original
         );
+    }
+}
+
+#[cfg(test)]
+mod saved_sequence_reader_tests {
+    use super::*;
+    use std::cell::Cell;
+    thread_local! { static DECODED: Cell<usize> = const { Cell::new(0) }; }
+    struct Probe;
+    impl<'de> Deserialize<'de> for Probe {
+        fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+            let _ = bool::deserialize(d)?;
+            DECODED.with(|n| n.set(n.get() + 1));
+            Ok(Self)
+        }
+    }
+    fn probes<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<Probe>, D::Error> {
+        bounded_saved_sequence::<D, Probe, 32>(d)
+    }
+    #[derive(Deserialize)]
+    struct Probes {
+        #[serde(deserialize_with = "probes")]
+        items: Vec<Probe>,
+    }
+    #[test]
+    fn saved_sequence_never_decodes_or_retains_an_excess_typed_element() {
+        DECODED.with(|n| n.set(0));
+        let maximum = format!(
+            r#"{{"items":[{}]}}"#,
+            std::iter::repeat_n("true", 32)
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        let parsed: Probes = serde_json::from_str(&maximum).unwrap();
+        assert_eq!(parsed.items.len(), 32);
+        assert_eq!(DECODED.with(Cell::get), 32);
+        DECODED.with(|n| n.set(0));
+        let excess = format!(
+            r#"{{"items":[{},{{"deliberately":"not a bool"}}]}}"#,
+            std::iter::repeat_n("true", 32)
+                .collect::<Vec<_>>()
+                .join(",")
+        );
+        let error = serde_json::from_str::<Probes>(&excess)
+            .err()
+            .unwrap()
+            .to_string();
+        assert!(error.contains("exceeds 32"), "{error}");
+        assert_eq!(DECODED.with(Cell::get), 32);
     }
 }
