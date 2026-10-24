@@ -1,0 +1,1284 @@
+{
+  "checked": "2026-10-23",
+  "status": "UNRUN source-only proposal, not registered curriculum",
+  "cases": [
+    {
+      "id": "ccna-ospf-router-identity",
+      "expected_reference": true,
+      "reference_actions": [
+        {
+          "kind": "SetProcess",
+          "router": "Branch",
+          "process": {
+            "enabled": true,
+            "process_id": 7,
+            "router_id": "1.1.1.1",
+            "area": 0
+          }
+        },
+        {
+          "kind": "SetProcess",
+          "router": "Transit",
+          "process": {
+            "enabled": true,
+            "process_id": 18,
+            "router_id": "2.2.2.2",
+            "area": 0
+          }
+        }
+      ],
+      "alternates": [
+        {
+          "name": "enable-before-identity",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Transit",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "2.2.2.2",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Branch",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "1.1.1.1",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "Both independent faults are repaired in the reverse order."
+        },
+        {
+          "name": "other-unique-identity",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Branch",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "10.255.0.17",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Transit",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "2.2.2.2",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "The task requires uniqueness, not the reference router ID."
+        }
+      ],
+      "negatives": [
+        {
+          "name": "enable-only",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Transit",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "2.2.2.2",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "The duplicate Branch/Hub identity remains."
+        },
+        {
+          "name": "identity-only",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Branch",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "1.1.1.1",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "Disabled Transit still breaks both attachments."
+        },
+        {
+          "name": "zero-identity",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Branch",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "0.0.0.0",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Transit",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "2.2.2.2",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "Explicit zero remains a non-running model condition."
+        },
+        {
+          "name": "move-the-protected-hub-id",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Hub",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "4.4.4.4",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Transit",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "2.2.2.2",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "This can remove the collision, but violates the explicit Hub process guard."
+        },
+        {
+          "name": "physical-shortcut",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Branch",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "1.1.1.1",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Transit",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "2.2.2.2",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetUp",
+              "endpoint": {
+                "router": "Branch",
+                "interface": "transit"
+              },
+              "up": false
+            }
+          ],
+          "explanation": "A down interface violates physical preservation and loses the path."
+        }
+      ],
+      "independent_expectations": {
+        "branch_records_cost": 12,
+        "terms": [
+          "Branch/transit 6",
+          "Transit/hub 4",
+          "Hub/records 2"
+        ],
+        "branch_records_next_hop": {
+          "interface": "transit",
+          "via": "10.70.0.2",
+          "peer": {
+            "router": "Transit",
+            "interface": "branch"
+          }
+        },
+        "fixed_processes": [
+          "Transit with enabled=true",
+          "Hub unchanged"
+        ],
+        "reference_id_is_not_required": true
+      },
+      "partial_feedback": "With only enable repaired, report the remaining duplicate identity/current missing peers. With only identity repaired, report the remaining disabled Transit/current missing route.",
+      "native_checks": [
+        "Read-only inspection and opening worked help do not complete the assignment.",
+        "After a passing applied configuration, a valid different unsaved draft and malformed/blank numeric draft each invalidate current completion without destroying the applied simulation.",
+        "Fill example changes only its draft. Apply/check, try-change and repair stay in its own fixture and do not alter assignment state.",
+        "Current peer and route rows are recomputed after apply, so a formerly passing peer/metric cannot survive a breaking applied edit as credit.",
+        "Resume retains both contexts and their unfinished drafts; selected reset affects only this lab."
+      ],
+      "validation_status": "Source-authored expectations only; no learner VM, pack execution, native or curriculum acceptance run."
+    },
+    {
+      "id": "ccna-ospf-p2p-parameters",
+      "expected_reference": true,
+      "reference_actions": [
+        {
+          "kind": "SetProcess",
+          "router": "Office",
+          "process": {
+            "enabled": true,
+            "process_id": 7,
+            "router_id": "11.1.1.1",
+            "area": 0
+          }
+        },
+        {
+          "kind": "SetPort",
+          "endpoint": {
+            "router": "Office",
+            "interface": "relay"
+          },
+          "configuration": {
+            "enabled": true,
+            "passive": false,
+            "network_type": "PointToPoint",
+            "cost": 7,
+            "hello_seconds": 10,
+            "dead_seconds": 40
+          }
+        }
+      ],
+      "alternates": [
+        {
+          "name": "repair-peer-timers",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "11.1.1.1",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Relay",
+                "interface": "office"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 12,
+                "hello_seconds": 5,
+                "dead_seconds": 20
+              }
+            }
+          ],
+          "explanation": "Matching 5/20 works as well as matching 10/40."
+        },
+        {
+          "name": "timers-before-area",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Office",
+                "interface": "relay"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 7,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "11.1.1.1",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "The final current configuration is independent of edit order."
+        }
+      ],
+      "negatives": [
+        {
+          "name": "area-only",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "11.1.1.1",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "Hello and Dead still mismatch."
+        },
+        {
+          "name": "hello-only",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "11.1.1.1",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Office",
+                "interface": "relay"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 7,
+                "hello_seconds": 10,
+                "dead_seconds": 20
+              }
+            }
+          ],
+          "explanation": "Dead remains 20 versus 40."
+        },
+        {
+          "name": "process-number-only",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "11.1.1.1",
+                "area": 9
+              }
+            }
+          ],
+          "explanation": "Matching local numbers does not repair area/timers and breaks a protected number."
+        },
+        {
+          "name": "move-all-areas",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "11.1.1.1",
+                "area": 9
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Relay",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "12.2.2.2",
+                "area": 9
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Backup",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "13.3.3.3",
+                "area": 9
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Office",
+                "interface": "relay"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 7,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Compatible area9 paths do not meet the explicit area0/process-preservation requirement."
+        },
+        {
+          "name": "healthy-port-damage",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Office",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "11.1.1.1",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Office",
+                "interface": "relay"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 7,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Backup",
+                "interface": "relay"
+              },
+              "configuration": {
+                "enabled": false,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "The protected Backup-facing transport is damaged."
+        }
+      ],
+      "independent_expectations": {
+        "reference_office_vault_cost": 15,
+        "terms": [
+          "Office/relay 7",
+          "Relay/backup 3",
+          "Backup/vault 5"
+        ],
+        "alternate_5_20_same_route_cost": 15,
+        "dead_mismatch_blocks_even_after_hello_repair": true
+      },
+      "partial_feedback": "Area-only and Hello-only partial repairs must identify remaining current mismatches and the still-missing remote candidate; do not report successful historical work.",
+      "native_checks": [
+        "Read-only inspection and opening worked help do not complete the assignment.",
+        "After a passing applied configuration, a valid different unsaved draft and malformed/blank numeric draft each invalidate current completion without destroying the applied simulation.",
+        "Fill example changes only its draft. Apply/check, try-change and repair stay in its own fixture and do not alter assignment state.",
+        "Current peer and route rows are recomputed after apply, so a formerly passing peer/metric cannot survive a breaking applied edit as credit.",
+        "Resume retains both contexts and their unfinished drafts; selected reset affects only this lab."
+      ],
+      "validation_status": "Source-authored expectations only; no learner VM, pack execution, native or curriculum acceptance run."
+    },
+    {
+      "id": "ccna-ospf-directed-ecmp",
+      "expected_reference": true,
+      "reference_actions": [
+        {
+          "kind": "SetPort",
+          "endpoint": {
+            "router": "Ingress",
+            "interface": "west"
+          },
+          "configuration": {
+            "enabled": true,
+            "passive": false,
+            "network_type": "PointToPoint",
+            "cost": 10,
+            "hello_seconds": 10,
+            "dead_seconds": 40
+          }
+        }
+      ],
+      "alternates": [
+        {
+          "name": "higher-equal-pair",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Ingress",
+                "interface": "east"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 14,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Ingress",
+                "interface": "west"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 15,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Both directed totals24; the requested set remains two hops."
+        },
+        {
+          "name": "lower-equal-pair",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Ingress",
+                "interface": "west"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Ingress",
+                "interface": "east"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 7,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Both totals17 in the reverse edit order."
+        }
+      ],
+      "negatives": [
+        {
+          "name": "read-only",
+          "actions": [],
+          "explanation": "Compatible paths already exist, but west total29 loses to19."
+        },
+        {
+          "name": "symmetric-interface-costs",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Ingress",
+                "interface": "west"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 9,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Equal Ingress costs give east19/west18, still only one shortest hop."
+        },
+        {
+          "name": "wrong-direction",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "West",
+                "interface": "ingress"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 1,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "The reverse-facing port changes and the protected port guard fails; the forward imbalance remains."
+        },
+        {
+          "name": "single-path-shortcut",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Ingress",
+                "interface": "west"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 10,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetUp",
+              "endpoint": {
+                "router": "West",
+                "interface": "storage"
+              },
+              "up": false
+            }
+          ],
+          "explanation": "Losing one branch cannot meet a complete two-hop set and violates physical preservation."
+        }
+      ],
+      "independent_expectations": {
+        "reference_forward_cost": 19,
+        "reference_terms": {
+          "east": [
+            9,
+            6,
+            4
+          ],
+          "west": [
+            10,
+            5,
+            4
+          ]
+        },
+        "alternate_costs": {
+          "14/15": 24,
+          "7/8": 17
+        },
+        "reverse_east": 12,
+        "reverse_west": 21,
+        "required_forward_hops": [
+          {
+            "interface": "east",
+            "via": "10.72.0.2",
+            "peer": {
+              "router": "East",
+              "interface": "ingress"
+            }
+          },
+          {
+            "interface": "west",
+            "via": "10.72.0.6",
+            "peer": {
+              "router": "West",
+              "interface": "ingress"
+            }
+          }
+        ],
+        "reverse_required_hop": {
+          "interface": "east",
+          "via": "10.72.0.9",
+          "peer": {
+            "router": "East",
+            "interface": "storage"
+          }
+        }
+      },
+      "partial_feedback": "A route with one shortest hop is partial, even when reachable and every attachment is compatible. Identify the missing required first-hop choice; do not grade mere prefix presence as full ECMP success.",
+      "native_checks": [
+        "Read-only inspection and opening worked help do not complete the assignment.",
+        "After a passing applied configuration, a valid different unsaved draft and malformed/blank numeric draft each invalidate current completion without destroying the applied simulation.",
+        "Fill example changes only its draft. Apply/check, try-change and repair stay in its own fixture and do not alter assignment state.",
+        "Current peer and route rows are recomputed after apply, so a formerly passing peer/metric cannot survive a breaking applied edit as credit.",
+        "Resume retains both contexts and their unfinished drafts; selected reset affects only this lab."
+      ],
+      "validation_status": "Source-authored expectations only; no learner VM, pack execution, native or curriculum acceptance run."
+    },
+    {
+      "id": "ccna-ospf-passive-handover",
+      "expected_reference": true,
+      "reference_actions": [
+        {
+          "kind": "SetProcess",
+          "router": "Archive",
+          "process": {
+            "enabled": true,
+            "process_id": 29,
+            "router_id": "33.3.3.3",
+            "area": 0
+          }
+        },
+        {
+          "kind": "SetPort",
+          "endpoint": {
+            "router": "Hub",
+            "interface": "users"
+          },
+          "configuration": {
+            "enabled": true,
+            "passive": true,
+            "network_type": "Broadcast",
+            "cost": 3,
+            "hello_seconds": 10,
+            "dead_seconds": 40
+          }
+        },
+        {
+          "kind": "SetPort",
+          "endpoint": {
+            "router": "Site",
+            "interface": "hub"
+          },
+          "configuration": {
+            "enabled": true,
+            "passive": false,
+            "network_type": "PointToPoint",
+            "cost": 8,
+            "hello_seconds": 10,
+            "dead_seconds": 40
+          }
+        }
+      ],
+      "alternates": [
+        {
+          "name": "repair-hub-endpoint",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "site"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 12,
+                "hello_seconds": 20,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Matching both Hello20 is valid while preserving the same policy and healthy link."
+        },
+        {
+          "name": "policy-and-timing-before-process",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            }
+          ],
+          "explanation": "Final current state is independent of the reference edit order."
+        }
+      ],
+      "negatives": [
+        {
+          "name": "only-passive-lan",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Both router/path faults remain."
+        },
+        {
+          "name": "only-transport-and-process",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Remote user-LAN advertisements and explicit enabled+passive policy remain missing."
+        },
+        {
+          "name": "disable-instead-of-passive",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": false,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "No peer alone is insufficient: advertisement and explicit policy fail."
+        },
+        {
+          "name": "active-user-policy",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "Active Broadcast is unsupported and violates the required passive policy."
+        },
+        {
+          "name": "p2p-advertisement-shortcut",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "An active P2P singleton can advertise in this model; explicit passive+Broadcast policy still rejects it."
+        },
+        {
+          "name": "physical-shutdown",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetUp",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "up": false
+            }
+          ],
+          "explanation": "A down user interface fails physical preservation and remote advertisement checks."
+        },
+        {
+          "name": "unrelated-records-damage",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Archive",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "33.3.3.3",
+                "area": 0
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Hub",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Site",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Archive",
+                "interface": "records"
+              },
+              "configuration": {
+                "enabled": false,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 4,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "explanation": "User routes can remain, but the required cross-site records candidate and protected port fail."
+        }
+      ],
+      "independent_expectations": {
+        "site_users": {
+          "cost": 11,
+          "terms": [
+            8,
+            3
+          ]
+        },
+        "archive_users": {
+          "cost": 12,
+          "terms": [
+            9,
+            3
+          ]
+        },
+        "site_records": {
+          "cost": 17,
+          "terms": [
+            8,
+            5,
+            4
+          ]
+        },
+        "archive_office": {
+          "cost": 23,
+          "terms": [
+            9,
+            12,
+            2
+          ]
+        },
+        "passive_and_enabled_are_explicit_not_inferred_from_route": true,
+        "healthy_p2p_ports": [
+          "Hub/archive",
+          "Archive/hub"
+        ],
+        "try_change_false_indices": [
+          2,
+          3,
+          13
+        ]
+      },
+      "partial_feedback": "Feedback must distinguish missing user advertisement, current incompatible transport, disabled Archive and physical/policy preservation. A route-only success must never hide an active-user-policy or unrelated LAN failure.",
+      "native_checks": [
+        "Read-only inspection and opening worked help do not complete the assignment.",
+        "After a passing applied configuration, a valid different unsaved draft and malformed/blank numeric draft each invalidate current completion without destroying the applied simulation.",
+        "Fill example changes only its draft. Apply/check, try-change and repair stay in its own fixture and do not alter assignment state.",
+        "Current peer and route rows are recomputed after apply, so a formerly passing peer/metric cannot survive a breaking applied edit as credit.",
+        "Resume retains both contexts and their unfinished drafts; selected reset affects only this lab."
+      ],
+      "validation_status": "Source-authored expectations only; no learner VM, pack execution, native or curriculum acceptance run."
+    }
+  ]
+}

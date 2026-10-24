@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **98 authored assignments:** 27 CCNA,21 LPIC-1,13 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **102 authored assignments:** 31 CCNA,21 LPIC-1,13 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -27,7 +27,7 @@ python3 tools/dev.py build --locked --offline
 python3 tools/dev.py test --locked --offline --all-targets
 python3 tools/dev.py clippy --locked --offline --all-targets -- -D warnings
 cargo fmt --all -- --check
-./target/debug/dlms-learning-lab --validate-pack scenarios/starter-v1.json
+python3 tools/dev.py native ./target/debug/dlms-learning-lab --validate-pack "$PWD/scenarios/starter-v1.json"
 ```
 
 Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two test threads, one shared heavy-work lock across worktrees, disk-backed temporary/cache data and lightweight memory-pressure observations. The local isolated Rust toolchain was copied into ignored `.build-artifacts/toolchains`; its original temporary copies were retained. No system packages, global shell settings, mounts, GPU reservations, swap or model settings were changed. First-time developer toolchain preparation is described in that guide; installed learners need none of it.
@@ -35,6 +35,14 @@ Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two te
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 
 ## This milestone
+
+The [OSPF settings and route-cost unit](docs/OSPF_LESSONS.md) adds four native
+configuration assignments: repair router identities/process enablement, match
+P2P parameters, restore equal-cost paths and hand over a passive user LAN.
+Different practice networks stay ungraded. Current parameter/route calculations
+are modeled; live neighbor exchange, DR/BDR, convergence and real packet delivery
+remain unimplemented.
+
 
 The accepted native workspace design remains the basis of all labs. The header adds a native theme picker with samples under **Settings → Appearance → Theme samples**: all five stock DLMS palettes and all 22 official Omarchy v4.0.4 palettes, plus the existing Navy default (**28 choices**). Selection and text size persist independently of progress. No desktop settings are changed. Exact inventory, source revision, contrast adaptation and MIT notices: [themes](docs/THEMES.md).
 

@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **98 authored assignments in23 units:27CCNA,21LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **102 authored assignments in24 units:31CCNA,21LPIC-1,13LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -110,3 +110,7 @@ Four distinct source/service-order/direction/two-boundary assignments now add na
 ## Local accounts and handover — M65
 
 Four reviewed [local-record lifecycle assignments](ACCOUNT_LESSONS.md) follow the access-policy unit. They teach explicit account/home creation, exact membership repair and owned-home GID effects, precise retirement with orphan numeric evidence, and a stable-GID/expiry-metadata handover. Different runnable examples remain separate from full assignments; alternate supported commands and negative/current-state checks pass. Catalog98/23units:27CCNA/21LPIC-1/13LPIC-2/37Bash. Current LPI v5.0/107.1 was rechecked2026-10-23. Only explicit local-record/tool slices are Partial; passwords, chage, special-purpose policy, PAM/login, full NSS and complete options remain absent.
+
+## M67 — configured OSPFv2 practice
+
+Four original [P2P OSPF assignments](OSPF_LESSONS.md) add explicit identity/process diagnosis, parameter matching, directed equal-cost reasoning and a passive-LAN handover. They retain full native configuration tasks, different isolated worked networks, alternate solutions and current-state checks. Catalog102/24units:31CCNA/21LPIC-1/13LPIC-2/37Bash. Current CCNA v1.1/3.4 sources were rechecked2026-10-23; only four explicitly bounded current-version rows gain Partial practice. Most networking/Linux/scripting objectives remain unfinished. No neighbor FSM/Full observation, LSA exchange, convergence, broadcast DR/BDR or real-device/packet-delivery coverage is claimed; futurev2.0 remains separate. Fedora native evidence and final acceptance limits belong in the ledger.

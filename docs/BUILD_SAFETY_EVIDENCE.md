@@ -48,3 +48,7 @@ No GPU reservation, swap, OOM policy, LM Studio/model/monitor, service, global s
 or mount setting was changed. The packaging guard and source tests are verified;
 a newly packaged artifact using this guard remains part of the next clean
 application milestone, not an already completed installation acceptance claim.
+
+## M67 ordinary test/native observations
+
+The necessary132-overlapping-check combined run recorded277samples with minimum11.96GiB available, PSIavg10some/full maxima0 and OOM-counter delta0. The following41-sample native flow had minimum12.51GiB available, peak some/full PSIavg100.32% and OOMdelta0; swap free fell to4096bytes. These serialized2-Cargo-job/2-test-worker observations are not a stress test or memory guarantee. No GPU/swap/OOM/model/desktop setting changed. Ignored exact audit: `.build-artifacts/audits/m67-memory-r1.json`. Later full-unit/final runs retain separate command/memory logs.

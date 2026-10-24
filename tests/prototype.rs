@@ -350,6 +350,20 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
         if let State::Ipv4Acl { network } = &mut a.state {
             // Removing the real policies permits every forbidden flow again.
             network.devices.clear();
+        } else if let State::Ospf { simulation } = &a.state {
+            let (router, current) = simulation.configuration().routers.iter().next().unwrap();
+            let mut configuration = current.process.clone();
+            configuration.enabled = false;
+            let action = dlms_learning_lab::ospf::Action::SetProcess {
+                router: router.clone(),
+                process: configuration,
+            };
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!("ospf {}", serde_json::to_string(&action).unwrap()),
+            )
+            .unwrap();
         } else if matches!(a.state, State::Accounts { .. }) {
             engine::execute_for_goal(
                 &mut a.state,

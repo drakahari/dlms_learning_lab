@@ -1,10 +1,9 @@
-# Native OSPF settings adapter (source-only integration)
+# Native OSPF settings and isolated practice
 
-Checked2026-10-23 against the bounded foundation in OSPF_SUBSET.md. No new labs,
-unit, objective credit, real protocol traffic, IOS session, shell, dependency or
-native renderer is introduced here. The private ospf-workspace-preview fixture is
-development data, excluded from the normal catalog. Actual native UI acceptance
-and authored lesson review remain separate work.
+Checked2026-10-23 against OSPF_SUBSET.md. The normal catalog now includes four
+configured-snapshot activities, documented in OSPF_LESSONS.md. The private
+ospf-workspace-preview fixture remains excluded from curriculum counts. This
+native Rust workspace introduces no host session, packets, shell or dependency.
 
 The engine variant holds only the current `ospf::State`. The immutable authored
 initial State lives in Goal::Ospf, alongside at most32 typed requirements.
@@ -101,3 +100,32 @@ the goal-aware engine wrapper. Save/load/export/inspection/confirmed restore
 and selected reset assertions retain exact attempt data, unfinished assignment
 and example drafts, favorites, and the observed current-completion results.
 This source-authored regression is not a new curriculum or native UI claim.
+
+## Native interaction and authoring
+
+Introduction, a different ungraded practice network and the full assignment use
+separate persistent editing state. One Check configuration applies all numeric
+and toggle fields atomically and grades fresh state. Pending edits clear current
+success. A router/interface selection is navigation and does not break success.
+A new/reset assignment opens the router/endpoint of its first positive task
+requirement; it never fills required values or infers a desired next hop. A new
+practice example opens its first explained action's router/interface; Fill keeps
+the learner's current selection and changes only example field values. Resume
+keeps saved selection and drafts. Put meaningful behavior before preservation
+guards in authored requirements; cross-unit prerequisites resolve through the
+combined catalog, not standalone single-pack loading.
+
+Shared font-derived native fields retain padding, cursor/selection geometry and
+stable IDs across responsive column/stack layouts. A compact chain uses equal
+cards with centered connectors; more complex graphs use truthful link readouts,
+with directional raw link/LAN costs rather than solved path totals. Current
+parameter mismatches are visible before checking. Failed objective feedback
+names the local field or configuration condition. Passing preservation details,
+worked reference values, advanced scope and sources are optional. Modal backup
+operations disable background shortcuts/focus. Challenge keeps the complete task
+without unsolicited worked solutions.
+
+Actual Fedora normal-unit native input/render acceptance is recorded in the
+implementation ledger, separate from headless UI checks and synthetic progress
+roundtrips. Neither establishes novice comprehension, physical-device or screen
+reader acceptance, real routing-equipment experience or Windows/macOS runtime.

@@ -335,19 +335,18 @@ impl Draft {
             .filter_map(|i| i.address.as_ref().map(|a| a.address))
             .collect();
         for (id, r) in &self.routers {
-            let process =
-                ProcessConfig {
-                    enabled: r.enabled,
-                    process_id: small(&r.process_id, "Process ID")?,
-                    router_id: if r.router_id.is_empty() {
-                        None
-                    } else {
-                        Some(r.router_id.parse::<Ipv4Addr>().map_err(|_| {
-                            "Router ID: use dotted-decimal 32-bit notation".to_owned()
-                        })?)
-                    },
-                    area: integer(&r.area, "Area")?,
-                };
+            let process = ProcessConfig {
+                enabled: r.enabled,
+                process_id: small(&r.process_id, &format!("{id}: process ID"))?,
+                router_id: if r.router_id.is_empty() {
+                    None
+                } else {
+                    Some(r.router_id.parse::<Ipv4Addr>().map_err(|_| {
+                        format!("{id}: router ID needs dotted-decimal 32-bit notation")
+                    })?)
+                },
+                area: integer(&r.area, &format!("{id}: area (decimal)"))?,
+            };
             let mut interfaces = BTreeMap::new();
             for (port, p) in &r.interfaces {
                 let endpoint = Endpoint::new(id, port);
@@ -355,9 +354,12 @@ impl Draft {
                     enabled: p.enabled,
                     passive: p.passive,
                     network_type: p.network_type,
-                    cost: small(&p.cost, "Cost")?,
-                    hello_seconds: small(&p.hello_seconds, "Hello interval")?,
-                    dead_seconds: integer(&p.dead_seconds, "Dead interval")?,
+                    cost: small(&p.cost, &format!("{id}/{port}: cost"))?,
+                    hello_seconds: small(
+                        &p.hello_seconds,
+                        &format!("{id}/{port}: Hello interval"),
+                    )?,
+                    dead_seconds: integer(&p.dead_seconds, &format!("{id}/{port}: Dead interval"))?,
                 };
                 if config.dead_seconds == 0 {
                     return Err(format!("{id}/{port}: Dead interval must be positive"));
@@ -366,7 +368,7 @@ impl Draft {
                     None
                 } else {
                     let address=p.address.parse::<Ipv4Addr>().map_err(|_|format!("{id}/{port}: enter a valid IPv4 address, or clear both address and prefix"))?;
-                    let prefix = u8::try_from(integer(&p.prefix, "Prefix")?)
+                    let prefix = u8::try_from(integer(&p.prefix, &format!("{id}/{port}: prefix"))?)
                         .map_err(|_| format!("{id}/{port}: prefix must be 1 through 30"))?;
                     let a = Assignment { address, prefix };
                     if !a.valid() {
@@ -604,7 +606,7 @@ pub fn valid_requirements(initial: &State, rs: &[Requirement]) -> bool {
     // Compare only after every item's scalar/context/collection bounds passed.
     valid && rs.iter().enumerate().all(|(i, r)| !rs[..i].contains(r))
 }
-fn condition(c: &ospf::Condition) -> String {
+pub fn describe_condition(c: &ospf::Condition) -> String {
     match c {
         ospf::Condition::Router { router, issue } => format!(
             "{router}: {}",
@@ -655,6 +657,32 @@ fn condition(c: &ospf::Condition) -> String {
         }
     }
 }
+fn process_difference(actual: &ProcessConfig, expected: &ProcessConfig) -> &'static str {
+    if actual.enabled != expected.enabled {
+        "process Enabled setting"
+    } else if actual.process_id != expected.process_id {
+        "local process number"
+    } else if actual.router_id != expected.router_id {
+        "router ID"
+    } else {
+        "area"
+    }
+}
+fn port_difference(actual: &PortConfig, expected: &PortConfig) -> &'static str {
+    if actual.enabled != expected.enabled {
+        "OSPF Enabled setting"
+    } else if actual.passive != expected.passive {
+        "Passive setting"
+    } else if actual.network_type != expected.network_type {
+        "network type"
+    } else if actual.cost != expected.cost {
+        "outgoing cost"
+    } else if actual.hello_seconds != expected.hello_seconds {
+        "Hello interval"
+    } else {
+        "Dead interval"
+    }
+}
 pub fn checks(initial: &State, state: &State, rs: &[Requirement]) -> Vec<(bool, String)> {
     if !same_context(initial, state) || !valid_requirements(initial, rs) {
         return vec![(
@@ -666,7 +694,7 @@ pub fn checks(initial: &State, state: &State, rs: &[Requirement]) -> Vec<(bool, 
         return vec![(false, "Current OSPF snapshot cannot be derived".into())];
     };
     rs.iter().map(|r|{let (pass,message)=match r{
-        Requirement::Compatibility{local,peer}=>{let l=snapshot.routers[&local.router].links.iter().find(|l|l.local==*local).unwrap();let pass=l.compatible&&l.peer.as_ref()==Some(peer);let message=if pass{format!("{}/{}: compatible with {}/{} in the current P2P model",local.router,local.interface,peer.router,peer.interface)}else{format!("{}/{}: {}",local.router,local.interface,l.conditions.iter().filter(|c|c.blocking()).map(condition).collect::<Vec<_>>().join("; "))};(pass,message)},
+        Requirement::Compatibility{local,peer}=>{let l=snapshot.routers[&local.router].links.iter().find(|l|l.local==*local).unwrap();let pass=l.compatible&&l.peer.as_ref()==Some(peer);let message=if pass{format!("{}/{}: compatible with {}/{} in the current P2P model",local.router,local.interface,peer.router,peer.interface)}else{format!("{}/{}: {}",local.router,local.interface,l.conditions.iter().filter(|c|c.blocking()).map(describe_condition).collect::<Vec<_>>().join("; "))};(pass,message)},
         Requirement::AbsentCompatibility{local}=>{let l=snapshot.routers[&local.router].links.iter().find(|l|l.local==*local).unwrap();(!l.compatible,format!("{}/{}: {}",local.router,local.interface,if l.compatible{"a compatible direct peer remains"}else{"no compatible direct peer, as requested"}))},
         Requirement::RemoteRoute{router,destination,cost,next_hops}=>{
             let route=snapshot.routers[router].route(*destination);let pass=route.is_some_and(|r|cost.is_none_or(|c|r.cost==c)&&next_hops.as_ref().is_none_or(|h|r.next_hops==*h));
@@ -674,8 +702,8 @@ pub fn checks(initial: &State, state: &State, rs: &[Requirement]) -> Vec<(bool, 
         },
         Requirement::AbsentRemoteRoute{router,destination}=>{let absent=snapshot.routers[router].route(*destination).is_none();(absent,format!("{router}: {} remote SPF candidate {}",destination.text(),if absent{"absent as requested"}else{"is still present"}))},
         Requirement::Physical{expected}=>{let pass=state.topology()==expected;let first=expected.devices.iter().find_map(|(r,d)|d.interfaces.iter().find_map(|(p,i)|(state.topology().devices[r].interfaces[p]!=*i).then(||format!("{r}/{p}"))));(pass,if pass{"Requested interface addresses and availability match".into()}else{format!("{}: address or interface availability differs from the task's physical requirement",first.unwrap_or_else(||"Physical context".into()))})},
-        Requirement::Process{router,expected}=>(state.configuration().routers[router].process==*expected,format!("{router}: requested process enable/ID/area/router-ID settings")),
-        Requirement::Port{endpoint,expected}=>(state.configuration().routers[&endpoint.router].interfaces[&endpoint.interface]==*expected,format!("{}/{}: requested OSPF enable/passive/type/cost/Hello/Dead settings",endpoint.router,endpoint.interface)),
+        Requirement::Process{router,expected}=>{ let actual=&state.configuration().routers[router].process; let pass=actual==expected; (pass,if pass {format!("{router}: requested process enable/ID/area/router-ID settings")} else {format!("{router}: {} differs from the task's required settings. Check that field and retry.",process_difference(actual,expected))}) },
+        Requirement::Port{endpoint,expected}=>{let actual=&state.configuration().routers[&endpoint.router].interfaces[&endpoint.interface];let pass=actual==expected;(pass,if pass{format!("{}/{}: requested OSPF enable/passive/type/cost/Hello/Dead settings",endpoint.router,endpoint.interface)}else{format!("{}/{}: {} differs from the task's required settings. Check that field and retry.",endpoint.router,endpoint.interface,port_difference(actual,expected))})},
         Requirement::RouterId{router,expected}=>(state.configuration().routers[router].process.router_id==Some(*expected),format!("{router}: requested opaque router identity {expected}")),
         Requirement::WholeState{expected}=>(state==expected,"All explicitly requested final settings, including preserved context".into()),
     };(pass,notice(&message))}).collect()

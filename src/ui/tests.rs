@@ -1,5 +1,6 @@
 use super::*;
 use engine::State;
+mod ospf;
 fn app() -> (egui::Context, LabApp) {
     let ctx = egui::Context::default();
     let mut a = LabApp::from_context(&ctx, true, false);
@@ -406,6 +407,9 @@ fn accounts_native_long_transcripts_follow_the_latest_error_in_both_terminals() 
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].ospf_teaching.is_some() {
+        a.set_ospf_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].acl_teaching.is_some() {
         a.set_acl_view(i, teaching::View::Assignment);
     }

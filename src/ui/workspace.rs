@@ -58,7 +58,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::Accounts { .. }) {
+            if matches!(s.initial, State::Ospf { .. }) {
+                self.ospf_workspace(ui, i);
+            } else if matches!(s.initial, State::Accounts { .. }) {
                 self.accounts_workspace(ui, i);
             } else if matches!(s.initial, State::Ipv4Acl { .. }) {
                 self.acl_workspace(ui, i);
@@ -133,7 +135,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::Accounts { .. }) {
+            let show_help = if matches!(s.initial, State::Ospf { .. }) {
+                self.ospf_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::Accounts { .. }) {
                 self.accounts_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Ipv4Acl { .. }) {
                 self.acl_view(i) == teaching::View::Assignment
@@ -178,7 +182,9 @@ impl LabApp {
                     self.help_open = !self.help_open;
                 }
                 if self.help_open {
-                    if matches!(s.initial, State::Ipv4Acl { .. }) {
+                    if matches!(s.initial, State::Ospf { .. }) {
+                        ui.push_id(("ospf-help", &s.id, challenge), |ui| self.ospf_help(ui, i));
+                    } else if matches!(s.initial, State::Ipv4Acl { .. }) {
                         ui.push_id(("acl-help", &s.id, challenge), |ui| self.acl_help(ui, i));
                     } else if matches!(s.initial, State::Accounts { .. }) {
                         ui.push_id(("accounts-help", &s.id, challenge), |ui| self.help(ui, i));

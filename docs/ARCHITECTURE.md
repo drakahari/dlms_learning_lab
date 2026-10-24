@@ -137,7 +137,7 @@ processes.rs owns a fixed virtual process table, signal/priority transitions and
 M49 adds `discovery_workspace` (identity-pinned native drafts, bounded typed reference actions and plain current feedback), `discovery_teaching` (isolated validated runnable examples), `State/Goal::Discovery` and the normal native LLDP editor route. Progress pins the actual authored assignment/example graph and keeps optional metadata absent for existing attempts. Draft/application/cache events remain separate; exact limits, authoring gates and verification in DISCOVERY_WORKSPACE.md. No authored LLDP scenario is counted at this integration milestone.
 
 
-## Current capability boundaries (M58)
+## Earlier M58 foundation boundary (historical)
 
 `acl`, `acl_routing` and `acl_editor` are bounded pure models and a configuration-document adapter: packet classification, the existing one-way forwarding loop with typed ingress/egress hooks, and same-state flow grading. They do not yet register a playable scenario or native workspace. Topology/host identities stay fixed for the initial ACL-focused slice. Explicit and implicit denials can be equivalent unless the task asks for a cause; healthy traffic must cross the required boundary. See ACL_SUBSET.md, ACL_ROUTING_SUBSET.md and ACL_EDITOR_SUBSET.md. Typed workspace/teaching/persistence integration comes before authored credit.
 
@@ -147,3 +147,33 @@ Authoring difficulty labels are the shared `pack::DIFFICULTIES`: Beginner, Inter
 
 
 Pure OSPF compatibility/SPF and virtual multi-unit manager foundations are documented in OSPF_SUBSET.md and UNIT_MANAGER_SUBSET.md. These modules add no playable lab or issuer coverage by themselves. Their native/backend adapters remain under independent review; the existing IPv4/static/single-service activities and progress stay unchanged.
+
+## Current M67 integration and authoring
+
+The earlier foundation-only notes above are historical. ACL policy, local-account,
+LLDP, persistent-mount and IPv4-routing units now have real authored tasks and
+native workspaces; see their dedicated subset/lesson guides and the ledger.
+The normal catalog has102assignments/24units. New fields stay optional/omitted
+for original attempts, and current completion is derived from current state,
+not walkthrough position or a saved success flag.
+
+`ospf` is a pure bounded configured P2P graph/SPF model. `ospf_workspace` provides
+raw editable text and atomic apply/typed goals; `ospf_teaching` owns a separate
+immutable-origin example; `ui/ospf_workspace` uses shared native controls and
+one Check configuration. The four OSPF tasks demonstrate configuration/route
+reasoning only, with explicit preservation and alternates, not a live protocol.
+Author requirements put positive task behavior before guards; current task
+context determines only a new attempt's initial selection. Example field values
+and assignment values stay separate. The pack-only JSON adapter is reachability
+data, never learner IOS syntax. Cross-unit prerequisites require combined
+catalog validation. See OSPF_WORKSPACE.md and OSPF_LESSONS.md.
+
+The multi-unit manager remains a pure foundation in main. Independently reviewed
+workspace/persistence and closed service-terminal work is isolated; it adds no
+normal curriculum until main integration, native editor/terminal acceptance and
+content verification. Existing single-Service data and commands remain intact.
+No original project VM architecture or dynamic executable plugin is imported.
+
+The shell engine remains revision7. Proposed case/esac work requires an actual
+unchanged7 baseline and explicit multirevision progress preservation before
+activation; source proposals are not implemented capability or mastery.

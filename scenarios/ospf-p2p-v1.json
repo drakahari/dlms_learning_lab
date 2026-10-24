@@ -1,0 +1,4510 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-ospf-router-identity",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Single-area OSPFv2 compatibility and SPF snapshots",
+      "unit": "ospf-p2p-foundations",
+      "title": "Recover a branch identity and transit process",
+      "summary": "Separate an identity collision from a disabled transit process before touching interface settings.",
+      "objective": "Branch cannot obtain a remote SPF candidate for Hub's 192.0.2.0/24 records network. Inspect router-level issues, give Branch an explicit nonzero router ID different from Transit and Hub, and enable Transit. Both supplied P2P attachments must become compatible.\n\nKeep Transit's supplied process number, router ID and area, and keep Hub's whole process configuration unchanged. Preserve every supplied interface address, up state and OSPF port setting. Branch's local process number is not required to match its peers. Apply your edits and check current work.",
+      "retry_guidance": "Inspect the current per-router issues, compatible P2P peers and remote SPF candidates. A pending draft or an old passing check cannot stand in for the current applied configuration.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Understand the model and supplied network",
+        "Practice on the separate example",
+        "Apply the requested assignment settings and check current work"
+      ],
+      "guide": [],
+      "explanation": "The reference changes Branch's identity and Transit's enable flag, producing a Branch\u2013Transit\u2013Hub graph. The records candidate costs 6+4+2=12. A different unique Branch router ID and either action order are equally valid; matching local process numbers is unnecessary.",
+      "hints": [
+        "Inspect the router issue list before assuming the interface timers are wrong. All supplied port parameters already match.",
+        "Branch and Hub currently use the same router ID. Transit has a separate disabled-process issue.",
+        "Choose a distinct nonzero Branch router ID such as 1.1.1.1 and enable Transit. Keep all port settings and the protected Transit/Hub process fields as supplied."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2328.txt",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ip-routing/b-ip-routing/m_iri-default-passive-interface.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13689-17.html"
+      ],
+      "simplifications": "Model boundaries checked 2026-10-23 against CCNA 200-301 v1.1 (2024), RFC 2328 (April 1998), and Cisco IOS XE 17.x references. Single-area derived compatibility and positive directed-cost SPF snapshots only. No observed Full adjacency, Hello packets, missed-Hello/convergence timing, DBD/LSA exchange, flooding, authentication, broadcast DR/BDR, multi-area or external routes, IOS CLI, FIB installation or packet delivery. Broadcast is used only for passive advertised LANs. Router IDs are opaque nonzero identities in this model, not interface host addresses. The ospf+JSON reference data is pack-only and never learner-visible CLI. These activities cover only this configured snapshot subset, not the complete exam objective.",
+      "prerequisites": [
+        "ccna-ipv4-branch-handover"
+      ],
+      "initial": {
+        "kind": "Ospf",
+        "simulation": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Branch": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "identity-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Transit": {
+                "forwarding": true,
+                "interfaces": {
+                  "branch": {
+                    "link": "identity-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "hub": {
+                    "link": "identity-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.5",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Hub": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "identity-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "identity-records",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Branch": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "3.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "transit": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 6,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Transit": {
+                "process": {
+                  "enabled": false,
+                  "process_id": 18,
+                  "router_id": "2.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "branch": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 13,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Hub": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "3.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "transit": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ospf",
+        "initial": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Branch": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "identity-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Transit": {
+                "forwarding": true,
+                "interfaces": {
+                  "branch": {
+                    "link": "identity-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "hub": {
+                    "link": "identity-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.5",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Hub": {
+                "forwarding": true,
+                "interfaces": {
+                  "transit": {
+                    "link": "identity-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.70.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "identity-records",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Branch": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "3.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "transit": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 6,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Transit": {
+                "process": {
+                  "enabled": false,
+                  "process_id": 18,
+                  "router_id": "2.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "branch": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 13,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Hub": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "3.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "transit": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Branch",
+              "interface": "transit"
+            },
+            "peer": {
+              "router": "Transit",
+              "interface": "branch"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Transit",
+              "interface": "hub"
+            },
+            "peer": {
+              "router": "Hub",
+              "interface": "transit"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Branch",
+            "destination": {
+              "address": "192.0.2.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Branch": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "transit": {
+                      "link": "identity-west",
+                      "up": true,
+                      "address": {
+                        "address": "10.70.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Transit": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "branch": {
+                      "link": "identity-west",
+                      "up": true,
+                      "address": {
+                        "address": "10.70.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "hub": {
+                      "link": "identity-east",
+                      "up": true,
+                      "address": {
+                        "address": "10.70.0.5",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Hub": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "transit": {
+                      "link": "identity-east",
+                      "up": true,
+                      "address": {
+                        "address": "10.70.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "records": {
+                      "link": "identity-records",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Branch",
+              "interface": "transit"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 6,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Transit",
+              "interface": "branch"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 13,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Transit",
+              "interface": "hub"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Hub",
+              "interface": "transit"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 9,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Hub",
+              "interface": "records"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 2,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Transit",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "2.2.2.2",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Hub",
+            "expected": {
+              "enabled": true,
+              "process_id": 29,
+              "router_id": "3.3.3.3",
+              "area": 0
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ospf {\"kind\":\"SetProcess\",\"router\":\"Branch\",\"process\":{\"enabled\":true,\"process_id\":7,\"router_id\":\"1.1.1.1\",\"area\":0}}",
+        "ospf {\"kind\":\"SetProcess\",\"router\":\"Transit\",\"process\":{\"enabled\":true,\"process_id\":18,\"router_id\":\"2.2.2.2\",\"area\":0}}"
+      ],
+      "ospf_teaching": {
+        "prerequisite_note": "Review IPv4 prefixes, next-hop interfaces and route metrics from the IPv4 static-routing unit. Read these concepts or open the separate worked example before the assignment. Applied settings produce an immediate derived snapshot; this activity does not run protocol packets or convergence timers.",
+        "concepts": [
+          {
+            "title": "What OSPF means here",
+            "text": "Open Shortest Path First version 2 is an IPv4 link-state routing protocol. This workbench derives a compatible point-to-point graph and shortest-path candidates from configured fields. It does not observe a live adjacency or install a forwarding table."
+          },
+          {
+            "title": "Separate router and process identities",
+            "text": "A router ID distinguishes a router; a process number identifies a local process. Different routers may use different process numbers. A duplicate router ID and a disabled process are different faults, and both need attention in this example."
+          },
+          {
+            "title": "Read the current evidence",
+            "text": "Inspect router-level issues before changing interface timers. Enabling Library removes its disabled-process issue, while choosing a distinct Studio router ID removes the identity collision. A remote prefix still needs a complete compatible path."
+          },
+          {
+            "title": "Edit, apply, then check",
+            "text": "Use the router fields for process enable and router ID. Fill the worked example to place its desired settings in the practice draft, then apply/check explicitly. Assignment and practice use separate networks; unfinished draft text invalidates a previous applied success."
+          }
+        ],
+        "example_description": "Studio and Library share a router ID, and Library is disabled. Give Studio a distinct nonzero router ID, enable Library, and preserve all supplied interface settings. Studio should then have a remote candidate for Library's 172.16.41.0/24 shelves network. The worked path costs 5+4=9; Library's reverse interface cost 8 is not the outgoing Studio cost.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Studio": {
+                "forwarding": true,
+                "interfaces": {
+                  "reading": {
+                    "link": "example-identity-path",
+                    "up": true,
+                    "address": {
+                      "address": "10.170.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Library": {
+                "forwarding": true,
+                "interfaces": {
+                  "studio": {
+                    "link": "example-identity-path",
+                    "up": true,
+                    "address": {
+                      "address": "10.170.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "shelves": {
+                    "link": "example-identity-lan",
+                    "up": true,
+                    "address": {
+                      "address": "172.16.41.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Studio": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "101.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "reading": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Library": {
+                "process": {
+                  "enabled": false,
+                  "process_id": 18,
+                  "router_id": "101.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "studio": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "shelves": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Studio",
+              "interface": "reading"
+            },
+            "peer": {
+              "router": "Library",
+              "interface": "studio"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Studio",
+            "destination": {
+              "address": "172.16.41.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Studio": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "reading": {
+                      "link": "example-identity-path",
+                      "up": true,
+                      "address": {
+                        "address": "10.170.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Library": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "studio": {
+                      "link": "example-identity-path",
+                      "up": true,
+                      "address": {
+                        "address": "10.170.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "shelves": {
+                      "link": "example-identity-lan",
+                      "up": true,
+                      "address": {
+                        "address": "172.16.41.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Studio",
+              "interface": "reading"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Library",
+              "interface": "studio"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 8,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Library",
+              "interface": "shelves"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Library",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "101.0.0.1",
+              "area": 0
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "SetProcess",
+              "router": "Studio",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "101.0.0.9",
+                "area": 0
+              }
+            },
+            "explanation": "Change only Studio's router ID to 101.0.0.9. Keep its enabled state, local process number and area."
+          },
+          {
+            "action": {
+              "kind": "SetProcess",
+              "router": "Library",
+              "process": {
+                "enabled": true,
+                "process_id": 18,
+                "router_id": "101.0.0.1",
+                "area": 0
+              }
+            },
+            "explanation": "Enable Library's process while retaining its router ID, local number and area. Then apply/check this separate practice draft."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, change Studio's router ID back to Library's 101.0.0.1, apply, and inspect the two failed behavior rows. Restore 101.0.0.9 to repair the example.",
+          "actions": [
+            {
+              "kind": "SetProcess",
+              "router": "Studio",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "101.0.0.1",
+                "area": 0
+              }
+            }
+          ],
+          "expected": [
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SetProcess",
+            "router": "Studio",
+            "process": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "101.0.0.9",
+              "area": 0
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-ospf-p2p-parameters",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Single-area OSPFv2 compatibility and SPF snapshots",
+      "unit": "ospf-p2p-foundations",
+      "title": "Repair a P2P parameter handover",
+      "summary": "Reconcile area and timer pairs without disturbing an already working backup attachment.",
+      "objective": "Office must obtain a current remote SPF candidate for Backup's 198.51.100.0/24 vault network. Put Office in the requested area 0, then make both Office\u2013Relay endpoints agree on Hello and Dead intervals. You may repair either endpoint's OSPF port settings; process numbers need not match. Both P2P attachments must remain compatible.\n\nKeep all addresses and physical up states unchanged. Retain every process's supplied enabled state, local process number and router ID; Relay and Backup remain in area 0. Preserve both Relay\u2013Backup port configurations and both LAN port configurations exactly. Apply and check the current configured snapshot.",
+      "retry_guidance": "Inspect the current per-router issues, compatible P2P peers and remote SPF candidates. A pending draft or an old passing check cannot stand in for the current applied configuration.",
+      "difficulty": "Beginner",
+      "minutes": 25,
+      "steps": [
+        "Understand the model and supplied network",
+        "Practice on the separate example",
+        "Apply the requested assignment settings and check current work"
+      ],
+      "guide": [],
+      "explanation": "Area 0 joins the Office process to the same modeled area as its peers. Either matching timer pair is valid. The reference Office-to-vault candidate costs 7+3+5=15. Changing local process numbers or physical addresses does not address the requested mismatch and violates the stated guards.",
+      "hints": [
+        "Compare area and both intervals independently; matching Hello alone is insufficient when Dead differs.",
+        "Office is in area 9 with Hello 5/Dead 20. Relay is in area 0 with Hello 10/Dead 40. Relay\u2013Backup is already compatible.",
+        "Set Office's area to 0. Either give Office\u2013Relay the pair 10/40 or change Relay's Office-facing pair to 5/20; preserve the healthy attachment and LAN ports."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2328.txt",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ip-routing/b-ip-routing/m_iri-default-passive-interface.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13689-17.html"
+      ],
+      "simplifications": "Model boundaries checked 2026-10-23 against CCNA 200-301 v1.1 (2024), RFC 2328 (April 1998), and Cisco IOS XE 17.x references. Single-area derived compatibility and positive directed-cost SPF snapshots only. No observed Full adjacency, Hello packets, missed-Hello/convergence timing, DBD/LSA exchange, flooding, authentication, broadcast DR/BDR, multi-area or external routes, IOS CLI, FIB installation or packet delivery. Broadcast is used only for passive advertised LANs. Router IDs are opaque nonzero identities in this model, not interface host addresses. The ospf+JSON reference data is pack-only and never learner-visible CLI. These activities cover only this configured snapshot subset, not the complete exam objective.",
+      "prerequisites": [
+        "ccna-ospf-router-identity"
+      ],
+      "initial": {
+        "kind": "Ospf",
+        "simulation": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Office": {
+                "forwarding": true,
+                "interfaces": {
+                  "relay": {
+                    "link": "parameters-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "desks": {
+                    "link": "parameters-desks",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Relay": {
+                "forwarding": true,
+                "interfaces": {
+                  "office": {
+                    "link": "parameters-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "backup": {
+                    "link": "parameters-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.5",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Backup": {
+                "forwarding": true,
+                "interfaces": {
+                  "relay": {
+                    "link": "parameters-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "vault": {
+                    "link": "parameters-vault",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Office": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "11.1.1.1",
+                  "area": 9
+                },
+                "interfaces": {
+                  "relay": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 5,
+                    "dead_seconds": 20
+                  },
+                  "desks": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Relay": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "12.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "office": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 12,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "backup": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Backup": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "13.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "relay": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "vault": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ospf",
+        "initial": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Office": {
+                "forwarding": true,
+                "interfaces": {
+                  "relay": {
+                    "link": "parameters-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "desks": {
+                    "link": "parameters-desks",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Relay": {
+                "forwarding": true,
+                "interfaces": {
+                  "office": {
+                    "link": "parameters-west",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "backup": {
+                    "link": "parameters-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.5",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Backup": {
+                "forwarding": true,
+                "interfaces": {
+                  "relay": {
+                    "link": "parameters-east",
+                    "up": true,
+                    "address": {
+                      "address": "10.71.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "vault": {
+                    "link": "parameters-vault",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Office": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "11.1.1.1",
+                  "area": 9
+                },
+                "interfaces": {
+                  "relay": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 5,
+                    "dead_seconds": 20
+                  },
+                  "desks": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Relay": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "12.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "office": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 12,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "backup": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Backup": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "13.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "relay": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "vault": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Office",
+              "interface": "relay"
+            },
+            "peer": {
+              "router": "Relay",
+              "interface": "office"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Relay",
+              "interface": "backup"
+            },
+            "peer": {
+              "router": "Backup",
+              "interface": "relay"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Office",
+            "destination": {
+              "address": "198.51.100.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Office": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "relay": {
+                      "link": "parameters-west",
+                      "up": true,
+                      "address": {
+                        "address": "10.71.0.1",
+                        "prefix": 30
+                      }
+                    },
+                    "desks": {
+                      "link": "parameters-desks",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Relay": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "office": {
+                      "link": "parameters-west",
+                      "up": true,
+                      "address": {
+                        "address": "10.71.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "backup": {
+                      "link": "parameters-east",
+                      "up": true,
+                      "address": {
+                        "address": "10.71.0.5",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Backup": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "relay": {
+                      "link": "parameters-east",
+                      "up": true,
+                      "address": {
+                        "address": "10.71.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "vault": {
+                      "link": "parameters-vault",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Office",
+            "expected": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "11.1.1.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Relay",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "12.2.2.2",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Backup",
+            "expected": {
+              "enabled": true,
+              "process_id": 29,
+              "router_id": "13.3.3.3",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Office",
+              "interface": "desks"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 2,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Relay",
+              "interface": "backup"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Backup",
+              "interface": "relay"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 8,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Backup",
+              "interface": "vault"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ospf {\"kind\":\"SetProcess\",\"router\":\"Office\",\"process\":{\"enabled\":true,\"process_id\":7,\"router_id\":\"11.1.1.1\",\"area\":0}}",
+        "ospf {\"kind\":\"SetPort\",\"endpoint\":{\"router\":\"Office\",\"interface\":\"relay\"},\"configuration\":{\"enabled\":true,\"passive\":false,\"network_type\":\"PointToPoint\",\"cost\":7,\"hello_seconds\":10,\"dead_seconds\":40}}"
+      ],
+      "ospf_teaching": {
+        "prerequisite_note": "Review IPv4 prefixes, next-hop interfaces and route metrics from the IPv4 static-routing unit. Read these concepts or open the separate worked example before the assignment. Applied settings produce an immediate derived snapshot; this activity does not run protocol packets or convergence timers.",
+        "concepts": [
+          {
+            "title": "Area belongs to the local process",
+            "text": "These single-area fixtures give each router one area field. Peers must agree on it. The number need not be zero in every independent example; the assignment explicitly asks for area 0. Local process numbers remain separate labels."
+          },
+          {
+            "title": "Two intervals, one compatibility decision",
+            "text": "Hello is the configured interval between Hello messages in a real protocol; Dead is the configured time without hearing a peer before it is lost. Here their positive values are compared only. Both ends must match on each interval; no messages or missed-Hello clock are simulated."
+          },
+          {
+            "title": "Preserve the physical network",
+            "text": "The supplied addresses and up flags stay unchanged. On supported P2P links, a mask difference is a diagnostic warning, not a Hello blocker. Repair the requested process/timer fields instead of renumbering an attachment."
+          },
+          {
+            "title": "Choose a coherent endpoint repair",
+            "text": "Workshop uses area 5 and intervals 5/20; Depot uses area 3 and 10/40. The example moves Workshop to area 3 and 10/40. Matching Depot to Workshop's intervals would also restore timing compatibility after the area repair, without requiring equal process numbers."
+          }
+        ],
+        "example_description": "Repair Workshop\u2013Depot in area 3 and obtain a remote candidate for 172.17.42.0/24. Change Workshop's area and both timer fields, keeping all addresses/up flags, both local process numbers/router IDs and Depot's stock port unchanged. This example compares configured parameters; it does not demonstrate a stable live adjacency.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Workshop": {
+                "forwarding": true,
+                "interfaces": {
+                  "depot": {
+                    "link": "example-parameters-path",
+                    "up": true,
+                    "address": {
+                      "address": "10.171.0.1",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Depot": {
+                "forwarding": true,
+                "interfaces": {
+                  "workshop": {
+                    "link": "example-parameters-path",
+                    "up": true,
+                    "address": {
+                      "address": "10.171.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "stock": {
+                    "link": "example-parameters-stock",
+                    "up": true,
+                    "address": {
+                      "address": "172.17.42.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Workshop": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "111.0.0.1",
+                  "area": 5
+                },
+                "interfaces": {
+                  "depot": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 4,
+                    "hello_seconds": 5,
+                    "dead_seconds": 20
+                  }
+                }
+              },
+              "Depot": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "112.0.0.1",
+                  "area": 3
+                },
+                "interfaces": {
+                  "workshop": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "stock": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 6,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Workshop",
+              "interface": "depot"
+            },
+            "peer": {
+              "router": "Depot",
+              "interface": "workshop"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Workshop",
+            "destination": {
+              "address": "172.17.42.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Workshop": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "depot": {
+                      "link": "example-parameters-path",
+                      "up": true,
+                      "address": {
+                        "address": "10.171.0.1",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Depot": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "workshop": {
+                      "link": "example-parameters-path",
+                      "up": true,
+                      "address": {
+                        "address": "10.171.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "stock": {
+                      "link": "example-parameters-stock",
+                      "up": true,
+                      "address": {
+                        "address": "172.17.42.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Workshop",
+            "expected": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "111.0.0.1",
+              "area": 3
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Depot",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "112.0.0.1",
+              "area": 3
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Depot",
+              "interface": "stock"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 6,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "SetProcess",
+              "router": "Workshop",
+              "process": {
+                "enabled": true,
+                "process_id": 7,
+                "router_id": "111.0.0.1",
+                "area": 3
+              }
+            },
+            "explanation": "Set Workshop's process area to 3, retaining its local process number, router ID and enabled state."
+          },
+          {
+            "action": {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Workshop",
+                "interface": "depot"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 4,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            "explanation": "Set Workshop/depot Hello 10 and Dead 40 to match Depot/workshop. Retain cost 4 and active P2P operation, then apply/check."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, change only Workshop/depot Dead from 40 to 80 and apply. Its peer still has 40, so the compatibility and remote-route rows fail immediately in the snapshot. Restore 40 to repair.",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Workshop",
+                "interface": "depot"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 4,
+                "hello_seconds": 10,
+                "dead_seconds": 80
+              }
+            }
+          ],
+          "expected": [
+            false,
+            false,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SetPort",
+            "endpoint": {
+              "router": "Workshop",
+              "interface": "depot"
+            },
+            "configuration": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-ospf-directed-ecmp",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Single-area OSPFv2 compatibility and SPF snapshots",
+      "unit": "ospf-p2p-foundations",
+      "title": "Restore two equal-cost first hops",
+      "summary": "Calculate outgoing transport plus destination-LAN cost without confusing the reverse direction.",
+      "objective": "Ingress currently prefers only East for Storage's 198.51.100.0/24 records network. Use only Ingress's east and west OSPF port costs to give that prefix both first-hop choices: East via Ingress/east and West via Ingress/west. The two forward totals must be equal; no particular equal total is required. Keep all four P2P attachments compatible.\n\nPreserve every process configuration, every other OSPF port configuration, and all supplied addresses/up states. Storage must still have its current reverse candidate for Ingress's 192.0.2.0/24 local network at cost 12 through East. Apply and inspect the complete next-hop sets in both directions.",
+      "retry_guidance": "Inspect the current per-router issues, compatible P2P peers and remote SPF candidates. A pending draft or an old passing check cannot stand in for the current applied configuration.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the model and supplied network",
+        "Practice on the separate example",
+        "Apply the requested assignment settings and check current work"
+      ],
+      "guide": [],
+      "explanation": "The forward equality is east+6+4 = west+5+4, so west must be east+1. Reference costs 9/10 give 19; 14/15 give 24; 7/8 give 17. Storage's reverse East path remains3+7+2=12 rather than8+11+2=21 through West. The goal checks both actual forward first hops and the preserved reverse choice, not a canned metric or one named reference state.",
+      "hints": [
+        "List each directed path's outgoing costs, then add Storage/records cost. Reverse-facing numbers are not part of the forward sum.",
+        "The forward totals are initially 9+6+4=19 through East and 20+5+4=29 through West. The west Ingress cost is the excess.",
+        "Ingress east/west costs 9/10 produce equal totals 19. Another positive pair such as 14/15 produces equal totals 24 and is also valid. Keep the reverse ports untouched."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2328.txt",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ip-routing/b-ip-routing/m_iri-default-passive-interface.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13689-17.html"
+      ],
+      "simplifications": "Model boundaries checked 2026-10-23 against CCNA 200-301 v1.1 (2024), RFC 2328 (April 1998), and Cisco IOS XE 17.x references. Single-area derived compatibility and positive directed-cost SPF snapshots only. No observed Full adjacency, Hello packets, missed-Hello/convergence timing, DBD/LSA exchange, flooding, authentication, broadcast DR/BDR, multi-area or external routes, IOS CLI, FIB installation or packet delivery. Broadcast is used only for passive advertised LANs. Router IDs are opaque nonzero identities in this model, not interface host addresses. The ospf+JSON reference data is pack-only and never learner-visible CLI. These activities cover only this configured snapshot subset, not the complete exam objective.",
+      "prerequisites": [
+        "ccna-ospf-p2p-parameters"
+      ],
+      "initial": {
+        "kind": "Ospf",
+        "simulation": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Ingress": {
+                "forwarding": true,
+                "interfaces": {
+                  "east": {
+                    "link": "10.72.0-east-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "west": {
+                    "link": "10.72.0-west-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.5",
+                      "prefix": 30
+                    }
+                  },
+                  "local": {
+                    "link": "10.72.0-local",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "East": {
+                "forwarding": true,
+                "interfaces": {
+                  "ingress": {
+                    "link": "10.72.0-east-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "storage": {
+                    "link": "10.72.0-east-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.9",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "West": {
+                "forwarding": true,
+                "interfaces": {
+                  "ingress": {
+                    "link": "10.72.0-west-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "storage": {
+                    "link": "10.72.0-west-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.13",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Storage": {
+                "forwarding": true,
+                "interfaces": {
+                  "east": {
+                    "link": "10.72.0-east-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.10",
+                      "prefix": 30
+                    }
+                  },
+                  "west": {
+                    "link": "10.72.0-west-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.14",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "10.72.0-records",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Ingress": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "21.1.1.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "east": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "west": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 20,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "local": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "East": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "22.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "ingress": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "storage": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 6,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "West": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "23.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "ingress": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 11,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "storage": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Storage": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 40,
+                  "router_id": "24.4.4.4",
+                  "area": 0
+                },
+                "interfaces": {
+                  "east": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "west": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ospf",
+        "initial": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Ingress": {
+                "forwarding": true,
+                "interfaces": {
+                  "east": {
+                    "link": "10.72.0-east-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "west": {
+                    "link": "10.72.0-west-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.5",
+                      "prefix": 30
+                    }
+                  },
+                  "local": {
+                    "link": "10.72.0-local",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "East": {
+                "forwarding": true,
+                "interfaces": {
+                  "ingress": {
+                    "link": "10.72.0-east-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "storage": {
+                    "link": "10.72.0-east-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.9",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "West": {
+                "forwarding": true,
+                "interfaces": {
+                  "ingress": {
+                    "link": "10.72.0-west-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "storage": {
+                    "link": "10.72.0-west-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.13",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Storage": {
+                "forwarding": true,
+                "interfaces": {
+                  "east": {
+                    "link": "10.72.0-east-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.10",
+                      "prefix": 30
+                    }
+                  },
+                  "west": {
+                    "link": "10.72.0-west-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.72.0.14",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "10.72.0-records",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Ingress": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "21.1.1.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "east": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "west": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 20,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "local": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "East": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "22.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "ingress": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "storage": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 6,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "West": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "23.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "ingress": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 11,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "storage": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Storage": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 40,
+                  "router_id": "24.4.4.4",
+                  "area": 0
+                },
+                "interfaces": {
+                  "east": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "west": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "RemoteRoute",
+            "router": "Ingress",
+            "destination": {
+              "address": "198.51.100.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": [
+              {
+                "interface": "east",
+                "via": "10.72.0.2",
+                "peer": {
+                  "router": "East",
+                  "interface": "ingress"
+                }
+              },
+              {
+                "interface": "west",
+                "via": "10.72.0.6",
+                "peer": {
+                  "router": "West",
+                  "interface": "ingress"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Storage",
+            "destination": {
+              "address": "192.0.2.0",
+              "length": 24
+            },
+            "cost": 12,
+            "next_hops": [
+              {
+                "interface": "east",
+                "via": "10.72.0.9",
+                "peer": {
+                  "router": "East",
+                  "interface": "storage"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Ingress",
+              "interface": "east"
+            },
+            "peer": {
+              "router": "East",
+              "interface": "ingress"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Ingress",
+              "interface": "west"
+            },
+            "peer": {
+              "router": "West",
+              "interface": "ingress"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "East",
+              "interface": "storage"
+            },
+            "peer": {
+              "router": "Storage",
+              "interface": "east"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "West",
+              "interface": "storage"
+            },
+            "peer": {
+              "router": "Storage",
+              "interface": "west"
+            }
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Ingress": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "east": {
+                      "link": "10.72.0-east-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.1",
+                        "prefix": 30
+                      }
+                    },
+                    "west": {
+                      "link": "10.72.0-west-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.5",
+                        "prefix": 30
+                      }
+                    },
+                    "local": {
+                      "link": "10.72.0-local",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "East": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "ingress": {
+                      "link": "10.72.0-east-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "storage": {
+                      "link": "10.72.0-east-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.9",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "West": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "ingress": {
+                      "link": "10.72.0-west-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "storage": {
+                      "link": "10.72.0-west-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.13",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Storage": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "east": {
+                      "link": "10.72.0-east-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.10",
+                        "prefix": 30
+                      }
+                    },
+                    "west": {
+                      "link": "10.72.0-west-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.72.0.14",
+                        "prefix": 30
+                      }
+                    },
+                    "records": {
+                      "link": "10.72.0-records",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Ingress",
+            "expected": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "21.1.1.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "East",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "22.2.2.2",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "West",
+            "expected": {
+              "enabled": true,
+              "process_id": 29,
+              "router_id": "23.3.3.3",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Storage",
+            "expected": {
+              "enabled": true,
+              "process_id": 40,
+              "router_id": "24.4.4.4",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Ingress",
+              "interface": "local"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 2,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "East",
+              "interface": "ingress"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 7,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "East",
+              "interface": "storage"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 6,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "West",
+              "interface": "ingress"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 11,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "West",
+              "interface": "storage"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Storage",
+              "interface": "east"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Storage",
+              "interface": "west"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 8,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Storage",
+              "interface": "records"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ospf {\"kind\":\"SetPort\",\"endpoint\":{\"router\":\"Ingress\",\"interface\":\"west\"},\"configuration\":{\"enabled\":true,\"passive\":false,\"network_type\":\"PointToPoint\",\"cost\":10,\"hello_seconds\":10,\"dead_seconds\":40}}"
+      ],
+      "ospf_teaching": {
+        "prerequisite_note": "Review IPv4 prefixes, next-hop interfaces and route metrics from the IPv4 static-routing unit. Read these concepts or open the separate worked example before the assignment. Applied settings produce an immediate derived snapshot; this activity does not run protocol packets or convergence timers.",
+        "concepts": [
+          {
+            "title": "Read outgoing costs in the right direction",
+            "text": "Each edge uses the sending router's interface cost. To reach a remote LAN, add each outgoing transport cost and the destination router's LAN cost. The opposite-direction interface values belong to a different calculation."
+          },
+          {
+            "title": "Equal-cost choices form a set",
+            "text": "Equal-cost multipath, or ECMP, retains every shortest first-hop choice. Two compatible physical paths do not guarantee two route choices when their totals differ. This task checks the complete first-hop set, not one arbitrarily selected path or a packet load-balancing result."
+          },
+          {
+            "title": "Keep forward and reverse calculations separate",
+            "text": "The Vantage-to-Store totals initially differ: Amber gives 4+3+2=9; Blue gives 9+4+2=15. Store-to-Vantage uses different costs: Amber gives 7+5+1=13; Blue gives 11+8+1=20. Changing Vantage's outgoing west cost does not change Store's reverse total."
+          },
+          {
+            "title": "Choose values from the path equation",
+            "text": "Set Vantage/west to 3 and both forward totals become 9. The goal requires both forward first hops, not that one exact metric: another positive pair could satisfy the same equality. Keep every other port and every process unchanged."
+          }
+        ],
+        "example_description": "Vantage must retain both Amber and Blue first hops for Store's 172.19.43.0/24 records network. Use Vantage's outgoing east/west costs while preserving every other port, all processes and all physical fields. Keep the reverse Store-to-Vantage 172.18.43.0/24 candidate at cost 13 through Amber. The worked edit makes the forward total 9 on both branches.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Vantage": {
+                "forwarding": true,
+                "interfaces": {
+                  "east": {
+                    "link": "10.172.0-east-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "west": {
+                    "link": "10.172.0-west-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.5",
+                      "prefix": 30
+                    }
+                  },
+                  "local": {
+                    "link": "10.172.0-local",
+                    "up": true,
+                    "address": {
+                      "address": "172.18.43.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Amber": {
+                "forwarding": true,
+                "interfaces": {
+                  "ingress": {
+                    "link": "10.172.0-east-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "storage": {
+                    "link": "10.172.0-east-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.9",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Blue": {
+                "forwarding": true,
+                "interfaces": {
+                  "ingress": {
+                    "link": "10.172.0-west-first",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "storage": {
+                    "link": "10.172.0-west-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.13",
+                      "prefix": 30
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Store": {
+                "forwarding": true,
+                "interfaces": {
+                  "east": {
+                    "link": "10.172.0-east-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.10",
+                      "prefix": 30
+                    }
+                  },
+                  "west": {
+                    "link": "10.172.0-west-last",
+                    "up": true,
+                    "address": {
+                      "address": "10.172.0.14",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "10.172.0-records",
+                    "up": true,
+                    "address": {
+                      "address": "172.19.43.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Vantage": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "121.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "east": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "west": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "local": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 1,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Amber": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "122.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "ingress": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "storage": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Blue": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 29,
+                  "router_id": "123.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "ingress": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "storage": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Store": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 40,
+                  "router_id": "124.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "east": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 7,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "west": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 11,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "RemoteRoute",
+            "router": "Vantage",
+            "destination": {
+              "address": "172.19.43.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": [
+              {
+                "interface": "east",
+                "via": "10.172.0.2",
+                "peer": {
+                  "router": "Amber",
+                  "interface": "ingress"
+                }
+              },
+              {
+                "interface": "west",
+                "via": "10.172.0.6",
+                "peer": {
+                  "router": "Blue",
+                  "interface": "ingress"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Store",
+            "destination": {
+              "address": "172.18.43.0",
+              "length": 24
+            },
+            "cost": 13,
+            "next_hops": [
+              {
+                "interface": "east",
+                "via": "10.172.0.9",
+                "peer": {
+                  "router": "Amber",
+                  "interface": "storage"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Vantage",
+              "interface": "east"
+            },
+            "peer": {
+              "router": "Amber",
+              "interface": "ingress"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Vantage",
+              "interface": "west"
+            },
+            "peer": {
+              "router": "Blue",
+              "interface": "ingress"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Amber",
+              "interface": "storage"
+            },
+            "peer": {
+              "router": "Store",
+              "interface": "east"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Blue",
+              "interface": "storage"
+            },
+            "peer": {
+              "router": "Store",
+              "interface": "west"
+            }
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Vantage": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "east": {
+                      "link": "10.172.0-east-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.1",
+                        "prefix": 30
+                      }
+                    },
+                    "west": {
+                      "link": "10.172.0-west-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.5",
+                        "prefix": 30
+                      }
+                    },
+                    "local": {
+                      "link": "10.172.0-local",
+                      "up": true,
+                      "address": {
+                        "address": "172.18.43.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Amber": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "ingress": {
+                      "link": "10.172.0-east-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "storage": {
+                      "link": "10.172.0-east-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.9",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Blue": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "ingress": {
+                      "link": "10.172.0-west-first",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "storage": {
+                      "link": "10.172.0-west-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.13",
+                        "prefix": 30
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Store": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "east": {
+                      "link": "10.172.0-east-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.10",
+                        "prefix": 30
+                      }
+                    },
+                    "west": {
+                      "link": "10.172.0-west-last",
+                      "up": true,
+                      "address": {
+                        "address": "10.172.0.14",
+                        "prefix": 30
+                      }
+                    },
+                    "records": {
+                      "link": "10.172.0-records",
+                      "up": true,
+                      "address": {
+                        "address": "172.19.43.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Vantage",
+            "expected": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "121.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Amber",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "122.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Blue",
+            "expected": {
+              "enabled": true,
+              "process_id": 29,
+              "router_id": "123.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Store",
+            "expected": {
+              "enabled": true,
+              "process_id": 40,
+              "router_id": "124.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Vantage",
+              "interface": "local"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 1,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Amber",
+              "interface": "ingress"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Amber",
+              "interface": "storage"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Blue",
+              "interface": "ingress"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 8,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Blue",
+              "interface": "storage"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Store",
+              "interface": "east"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 7,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Store",
+              "interface": "west"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 11,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Store",
+              "interface": "records"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 2,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Vantage",
+                "interface": "west"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            "explanation": "Change only Vantage/west outgoing cost from 9 to 3. Its total becomes 3+4+2=9, matching the Amber branch's 4+3+2=9. Apply/check and inspect both first-hop rows; reverse values stay untouched."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, increase Vantage/west cost from 3 to 4 and apply. The Blue total becomes 10, so only Amber remains shortest and the required two-hop set fails. Restore west cost 3 to repair.",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Vantage",
+                "interface": "west"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 4,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "expected": [
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SetPort",
+            "endpoint": {
+              "router": "Vantage",
+              "interface": "west"
+            },
+            "configuration": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-ospf-passive-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Single-area OSPFv2 compatibility and SPF snapshots",
+      "unit": "ospf-p2p-foundations",
+      "title": "Hand over a passive user LAN and both sites",
+      "summary": "Combine process recovery, compatible transport and passive prefix advertisement with explicit healthy-state guards.",
+      "objective": "Site and Archive need current remote candidates for Hub's 172.28.50.0/24 user LAN and for each other's supplied LAN prefixes: Archive's 198.51.100.0/24 and Site's 192.0.2.0/24. Enable Archive and repair Site\u2013Hub P2P compatibility; Hub\u2013Archive must also be compatible.\n\nEnable OSPF on Hub/users and make it passive, with no compatible peer there. Keep that port's supplied Broadcast type, cost 3, Hello 10 and Dead 40. Preserve all addresses and physical up states, both LAN ports on Site/Archive, and both Hub\u2013Archive port configurations. Keep all supplied process numbers, router IDs and areas; only Archive's process enable flag needs to change. Site\u2013Hub OSPF port parameters may be repaired at either end.\n\nApply your edits and inspect all current behavior and preservation rows. Reachable prefix data alone is insufficient if the user LAN is disabled, active or physically shut down.",
+      "retry_guidance": "Inspect the current per-router issues, compatible P2P peers and remote SPF candidates. A pending draft or an old passing check cannot stand in for the current applied configuration.",
+      "difficulty": "Intermediate",
+      "minutes": 35,
+      "steps": [
+        "Understand the model and supplied network",
+        "Practice on the separate example",
+        "Apply the requested assignment settings and check current work"
+      ],
+      "guide": [],
+      "explanation": "The reference enables Archive, makes Hub/users enabled/passive, and matches Site Hello to 10. Matching Hub/site to 20 also works. Site-to-users costs8+3=11; Archive-to-users9+3=12; Site-to-Archive records8+5+4=17; Archive-to-Site office9+12+2=23. The exact user-port guard is intentional: the task explicitly preserves its Broadcast type, cost and intervals as well as requiring passive+enabled.",
+      "hints": [
+        "Separate the missing path faults from the user-LAN advertisement policy. The physical topology is already healthy.",
+        "Archive is disabled, Site\u2013Hub Hello values differ, and Hub/users has OSPF disabled and passive off. Enabling only one of these cannot meet all remote-route checks.",
+        "Enable Archive; set Hub/users enabled+passive while retaining Broadcast type, cost 3 and intervals 10/40; match Site\u2013Hub Hello at either endpoint. Keep the already supplied Hub\u2013Archive port values and the other protected fields."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc2328.txt",
+        "https://www.cisco.com/c/en/us/td/docs/routers/ios/config/17-x/ip-routing/b-ip-routing/m_iri-default-passive-interface.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/open-shortest-path-first-ospf/13689-17.html"
+      ],
+      "simplifications": "Model boundaries checked 2026-10-23 against CCNA 200-301 v1.1 (2024), RFC 2328 (April 1998), and Cisco IOS XE 17.x references. Single-area derived compatibility and positive directed-cost SPF snapshots only. No observed Full adjacency, Hello packets, missed-Hello/convergence timing, DBD/LSA exchange, flooding, authentication, broadcast DR/BDR, multi-area or external routes, IOS CLI, FIB installation or packet delivery. Broadcast is used only for passive advertised LANs. Router IDs are opaque nonzero identities in this model, not interface host addresses. The ospf+JSON reference data is pack-only and never learner-visible CLI. These activities cover only this configured snapshot subset, not the complete exam objective.",
+      "prerequisites": [
+        "ccna-ospf-directed-ecmp"
+      ],
+      "initial": {
+        "kind": "Ospf",
+        "simulation": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Site": {
+                "forwarding": true,
+                "interfaces": {
+                  "hub": {
+                    "link": "10.73.0-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "office": {
+                    "link": "10.73.0-office",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Hub": {
+                "forwarding": true,
+                "interfaces": {
+                  "site": {
+                    "link": "10.73.0-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "archive": {
+                    "link": "10.73.0-archive",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.5",
+                      "prefix": 30
+                    }
+                  },
+                  "users": {
+                    "link": "10.73.0-users",
+                    "up": true,
+                    "address": {
+                      "address": "172.28.50.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Archive": {
+                "forwarding": true,
+                "interfaces": {
+                  "hub": {
+                    "link": "10.73.0-archive",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "10.73.0-records",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Workstation": {
+                "forwarding": false,
+                "interfaces": {
+                  "ethernet": {
+                    "link": "10.73.0-users",
+                    "up": true,
+                    "address": {
+                      "address": "172.28.50.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Site": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "31.1.1.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 20,
+                    "dead_seconds": 40
+                  },
+                  "office": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Hub": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "32.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "site": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 12,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "archive": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "users": {
+                    "enabled": false,
+                    "passive": false,
+                    "network_type": "Broadcast",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Archive": {
+                "process": {
+                  "enabled": false,
+                  "process_id": 29,
+                  "router_id": "33.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ospf",
+        "initial": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Site": {
+                "forwarding": true,
+                "interfaces": {
+                  "hub": {
+                    "link": "10.73.0-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "office": {
+                    "link": "10.73.0-office",
+                    "up": true,
+                    "address": {
+                      "address": "192.0.2.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Hub": {
+                "forwarding": true,
+                "interfaces": {
+                  "site": {
+                    "link": "10.73.0-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "archive": {
+                    "link": "10.73.0-archive",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.5",
+                      "prefix": 30
+                    }
+                  },
+                  "users": {
+                    "link": "10.73.0-users",
+                    "up": true,
+                    "address": {
+                      "address": "172.28.50.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Archive": {
+                "forwarding": true,
+                "interfaces": {
+                  "hub": {
+                    "link": "10.73.0-archive",
+                    "up": true,
+                    "address": {
+                      "address": "10.73.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "10.73.0-records",
+                    "up": true,
+                    "address": {
+                      "address": "198.51.100.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Workstation": {
+                "forwarding": false,
+                "interfaces": {
+                  "ethernet": {
+                    "link": "10.73.0-users",
+                    "up": true,
+                    "address": {
+                      "address": "172.28.50.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Site": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "31.1.1.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 20,
+                    "dead_seconds": 40
+                  },
+                  "office": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Hub": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "32.2.2.2",
+                  "area": 0
+                },
+                "interfaces": {
+                  "site": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 12,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "archive": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "users": {
+                    "enabled": false,
+                    "passive": false,
+                    "network_type": "Broadcast",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Archive": {
+                "process": {
+                  "enabled": false,
+                  "process_id": 29,
+                  "router_id": "33.3.3.3",
+                  "area": 0
+                },
+                "interfaces": {
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Site",
+              "interface": "hub"
+            },
+            "peer": {
+              "router": "Hub",
+              "interface": "site"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Hub",
+              "interface": "archive"
+            },
+            "peer": {
+              "router": "Archive",
+              "interface": "hub"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Site",
+            "destination": {
+              "address": "172.28.50.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Archive",
+            "destination": {
+              "address": "172.28.50.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Site",
+            "destination": {
+              "address": "198.51.100.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Archive",
+            "destination": {
+              "address": "192.0.2.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "AbsentCompatibility",
+            "local": {
+              "router": "Hub",
+              "interface": "users"
+            }
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Site": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "hub": {
+                      "link": "10.73.0-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.73.0.1",
+                        "prefix": 30
+                      }
+                    },
+                    "office": {
+                      "link": "10.73.0-office",
+                      "up": true,
+                      "address": {
+                        "address": "192.0.2.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Hub": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "site": {
+                      "link": "10.73.0-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.73.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "archive": {
+                      "link": "10.73.0-archive",
+                      "up": true,
+                      "address": {
+                        "address": "10.73.0.5",
+                        "prefix": 30
+                      }
+                    },
+                    "users": {
+                      "link": "10.73.0-users",
+                      "up": true,
+                      "address": {
+                        "address": "172.28.50.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Archive": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "hub": {
+                      "link": "10.73.0-archive",
+                      "up": true,
+                      "address": {
+                        "address": "10.73.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "records": {
+                      "link": "10.73.0-records",
+                      "up": true,
+                      "address": {
+                        "address": "198.51.100.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Workstation": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "ethernet": {
+                      "link": "10.73.0-users",
+                      "up": true,
+                      "address": {
+                        "address": "172.28.50.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Site",
+            "expected": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "31.1.1.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Hub",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "32.2.2.2",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Archive",
+            "expected": {
+              "enabled": true,
+              "process_id": 29,
+              "router_id": "33.3.3.3",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Site",
+              "interface": "office"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 2,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Hub",
+              "interface": "archive"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Hub",
+              "interface": "users"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Archive",
+              "interface": "hub"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 9,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Archive",
+              "interface": "records"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      },
+      "solution": [
+        "ospf {\"kind\":\"SetProcess\",\"router\":\"Archive\",\"process\":{\"enabled\":true,\"process_id\":29,\"router_id\":\"33.3.3.3\",\"area\":0}}",
+        "ospf {\"kind\":\"SetPort\",\"endpoint\":{\"router\":\"Hub\",\"interface\":\"users\"},\"configuration\":{\"enabled\":true,\"passive\":true,\"network_type\":\"Broadcast\",\"cost\":3,\"hello_seconds\":10,\"dead_seconds\":40}}",
+        "ospf {\"kind\":\"SetPort\",\"endpoint\":{\"router\":\"Site\",\"interface\":\"hub\"},\"configuration\":{\"enabled\":true,\"passive\":false,\"network_type\":\"PointToPoint\",\"cost\":8,\"hello_seconds\":10,\"dead_seconds\":40}}"
+      ],
+      "ospf_teaching": {
+        "prerequisite_note": "Review IPv4 prefixes, next-hop interfaces and route metrics from the IPv4 static-routing unit. Read these concepts or open the separate worked example before the assignment. Applied settings produce an immediate derived snapshot; this activity does not run protocol packets or convergence timers.",
+        "concepts": [
+          {
+            "title": "Advertise a LAN without a peer",
+            "text": "A passive OSPF interface can contribute its attached prefix while forming no OSPF peer there. Disabling OSPF removes that contribution instead. The required policy therefore needs both enabled and passive, with the supplied LAN parameters retained."
+          },
+          {
+            "title": "Repair paths and policy separately",
+            "text": "Depot's disabled process, Grove\u2013Centre's mismatched Hello value and Centre/users' disabled advertisement are independent faults. Recovering just the LAN does not connect the routers; recovering just the routers does not publish the user LAN."
+          },
+          {
+            "title": "Prove useful work and preserve healthy state",
+            "text": "Check remote user-LAN candidates from both ends, cross-site LAN candidates and both P2P attachments. Also inspect the absence of a Centre/users peer. Those positive checks prevent an all-disabled or interface-down shortcut."
+          },
+          {
+            "title": "Passive is not a broadcast election exercise",
+            "text": "The supplied user port has Broadcast type and is retained as a passive advertised LAN only. The workbench has no DR/BDR election. Its readonly workstation is not an OSPF router, and the lesson does not send a packet to it."
+          }
+        ],
+        "example_description": "Grove, Centre and Depot are a separate handover fixture. Enable Depot, repair Grove\u2013Centre Hello compatibility, and enable Centre/users passively. Keep Centre/users Broadcast type, cost 3 and Hello/Dead 10/40; keep the other protected ports, process fields, addresses and up flags. Verify user network 172.22.44.0/24 from both ends plus both cross-site LAN candidates.",
+        "fixture": {
+          "schema_version": 1,
+          "topology": {
+            "devices": {
+              "Grove": {
+                "forwarding": true,
+                "interfaces": {
+                  "hub": {
+                    "link": "10.173.0-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.173.0.1",
+                      "prefix": 30
+                    }
+                  },
+                  "office": {
+                    "link": "10.173.0-office",
+                    "up": true,
+                    "address": {
+                      "address": "172.20.44.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Centre": {
+                "forwarding": true,
+                "interfaces": {
+                  "site": {
+                    "link": "10.173.0-site",
+                    "up": true,
+                    "address": {
+                      "address": "10.173.0.2",
+                      "prefix": 30
+                    }
+                  },
+                  "archive": {
+                    "link": "10.173.0-archive",
+                    "up": true,
+                    "address": {
+                      "address": "10.173.0.5",
+                      "prefix": 30
+                    }
+                  },
+                  "users": {
+                    "link": "10.173.0-users",
+                    "up": true,
+                    "address": {
+                      "address": "172.22.44.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "Depot": {
+                "forwarding": true,
+                "interfaces": {
+                  "hub": {
+                    "link": "10.173.0-archive",
+                    "up": true,
+                    "address": {
+                      "address": "10.173.0.6",
+                      "prefix": 30
+                    }
+                  },
+                  "records": {
+                    "link": "10.173.0-records",
+                    "up": true,
+                    "address": {
+                      "address": "172.21.44.1",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              },
+              "DemoDesk": {
+                "forwarding": false,
+                "interfaces": {
+                  "ethernet": {
+                    "link": "10.173.0-users",
+                    "up": true,
+                    "address": {
+                      "address": "172.22.44.20",
+                      "prefix": 24
+                    }
+                  }
+                },
+                "routes": []
+              }
+            }
+          },
+          "configuration": {
+            "routers": {
+              "Grove": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 7,
+                  "router_id": "131.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 8,
+                    "hello_seconds": 30,
+                    "dead_seconds": 40
+                  },
+                  "office": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 2,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Centre": {
+                "process": {
+                  "enabled": true,
+                  "process_id": 18,
+                  "router_id": "132.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "site": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 12,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "archive": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 5,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "users": {
+                    "enabled": false,
+                    "passive": false,
+                    "network_type": "Broadcast",
+                    "cost": 3,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              },
+              "Depot": {
+                "process": {
+                  "enabled": false,
+                  "process_id": 29,
+                  "router_id": "133.0.0.1",
+                  "area": 0
+                },
+                "interfaces": {
+                  "hub": {
+                    "enabled": true,
+                    "passive": false,
+                    "network_type": "PointToPoint",
+                    "cost": 9,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  },
+                  "records": {
+                    "enabled": true,
+                    "passive": true,
+                    "network_type": "Broadcast",
+                    "cost": 4,
+                    "hello_seconds": 10,
+                    "dead_seconds": 40
+                  }
+                }
+              }
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Grove",
+              "interface": "hub"
+            },
+            "peer": {
+              "router": "Centre",
+              "interface": "site"
+            }
+          },
+          {
+            "kind": "Compatibility",
+            "local": {
+              "router": "Centre",
+              "interface": "archive"
+            },
+            "peer": {
+              "router": "Depot",
+              "interface": "hub"
+            }
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Grove",
+            "destination": {
+              "address": "172.22.44.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Depot",
+            "destination": {
+              "address": "172.22.44.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Grove",
+            "destination": {
+              "address": "172.21.44.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "RemoteRoute",
+            "router": "Depot",
+            "destination": {
+              "address": "172.20.44.0",
+              "length": 24
+            },
+            "cost": null,
+            "next_hops": null
+          },
+          {
+            "kind": "AbsentCompatibility",
+            "local": {
+              "router": "Centre",
+              "interface": "users"
+            }
+          },
+          {
+            "kind": "Physical",
+            "expected": {
+              "devices": {
+                "Grove": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "hub": {
+                      "link": "10.173.0-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.173.0.1",
+                        "prefix": 30
+                      }
+                    },
+                    "office": {
+                      "link": "10.173.0-office",
+                      "up": true,
+                      "address": {
+                        "address": "172.20.44.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Centre": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "site": {
+                      "link": "10.173.0-site",
+                      "up": true,
+                      "address": {
+                        "address": "10.173.0.2",
+                        "prefix": 30
+                      }
+                    },
+                    "archive": {
+                      "link": "10.173.0-archive",
+                      "up": true,
+                      "address": {
+                        "address": "10.173.0.5",
+                        "prefix": 30
+                      }
+                    },
+                    "users": {
+                      "link": "10.173.0-users",
+                      "up": true,
+                      "address": {
+                        "address": "172.22.44.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "Depot": {
+                  "forwarding": true,
+                  "interfaces": {
+                    "hub": {
+                      "link": "10.173.0-archive",
+                      "up": true,
+                      "address": {
+                        "address": "10.173.0.6",
+                        "prefix": 30
+                      }
+                    },
+                    "records": {
+                      "link": "10.173.0-records",
+                      "up": true,
+                      "address": {
+                        "address": "172.21.44.1",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                },
+                "DemoDesk": {
+                  "forwarding": false,
+                  "interfaces": {
+                    "ethernet": {
+                      "link": "10.173.0-users",
+                      "up": true,
+                      "address": {
+                        "address": "172.22.44.20",
+                        "prefix": 24
+                      }
+                    }
+                  },
+                  "routes": []
+                }
+              }
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Grove",
+            "expected": {
+              "enabled": true,
+              "process_id": 7,
+              "router_id": "131.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Centre",
+            "expected": {
+              "enabled": true,
+              "process_id": 18,
+              "router_id": "132.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Process",
+            "router": "Depot",
+            "expected": {
+              "enabled": true,
+              "process_id": 29,
+              "router_id": "133.0.0.1",
+              "area": 0
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Grove",
+              "interface": "office"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 2,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Centre",
+              "interface": "archive"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 5,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Centre",
+              "interface": "users"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Depot",
+              "interface": "hub"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": false,
+              "network_type": "PointToPoint",
+              "cost": 9,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          },
+          {
+            "kind": "Port",
+            "endpoint": {
+              "router": "Depot",
+              "interface": "records"
+            },
+            "expected": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 4,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "SetProcess",
+              "router": "Depot",
+              "process": {
+                "enabled": true,
+                "process_id": 29,
+                "router_id": "133.0.0.1",
+                "area": 0
+              }
+            },
+            "explanation": "Enable Depot while retaining its supplied process number, router ID and area. Do not replace it with an interface shutdown."
+          },
+          {
+            "action": {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Centre",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            "explanation": "Enable OSPF and passive policy on Centre/users. Retain Broadcast type, cost 3, Hello 10 and Dead 40; this keeps its LAN advertisement without a peer there."
+          },
+          {
+            "action": {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Grove",
+                "interface": "hub"
+              },
+              "configuration": {
+                "enabled": true,
+                "passive": false,
+                "network_type": "PointToPoint",
+                "cost": 8,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            },
+            "explanation": "Match Grove/hub Hello to Centre/site's 10. Retain its other fields, then apply/check the complete separate practice draft."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, turn off only OSPF enable on Centre/users and apply, leaving it passive and physically up. Both remote user-LAN rows and its explicit policy guard fail, while cross-site routes remain. Turn OSPF enable back on to repair.",
+          "actions": [
+            {
+              "kind": "SetPort",
+              "endpoint": {
+                "router": "Centre",
+                "interface": "users"
+              },
+              "configuration": {
+                "enabled": false,
+                "passive": true,
+                "network_type": "Broadcast",
+                "cost": 3,
+                "hello_seconds": 10,
+                "dead_seconds": 40
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SetPort",
+            "endpoint": {
+              "router": "Centre",
+              "interface": "users"
+            },
+            "configuration": {
+              "enabled": true,
+              "passive": true,
+              "network_type": "Broadcast",
+              "cost": 3,
+              "hello_seconds": 10,
+              "dead_seconds": 40
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

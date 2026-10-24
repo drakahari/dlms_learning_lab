@@ -14,6 +14,7 @@ mod controls;
 mod data;
 mod discovery_workspace;
 mod dns_workspace;
+mod ospf_workspace;
 mod process_learning;
 mod script_learning;
 mod scripting;
@@ -42,6 +43,14 @@ struct Metrics {
     address_diagram: Option<egui::Rect>,
     acl_diagram: Option<egui::Rect>,
     acl_router: Option<egui::Rect>,
+    ospf_router: Option<egui::Rect>,
+    ospf_interface: Option<egui::Rect>,
+    ospf_router_items: Vec<(String, egui::Rect)>,
+    ospf_interface_items: Vec<(String, egui::Rect)>,
+    ospf_fields: Vec<(String, egui::Rect, egui::Id)>,
+    ospf_toggles: Vec<(String, egui::Rect)>,
+    ospf_type: Option<egui::Rect>,
+    ospf_diagram: Option<egui::Rect>,
     acl_router_items: Vec<(String, egui::Rect)>,
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
@@ -268,8 +277,15 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("accounts-unit")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-layout")
             {
+                11500
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-unit") {
+                11000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-workspace")
+            {
+                10000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("accounts-unit") {
                 9000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-unit-layout")
             {
@@ -455,6 +471,9 @@ impl LabApp {
         if let Some(lesson) = &s.ospf_teaching {
             dlms_learning_lab::ospf_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated OSPF lesson");
+            if new_attempt {
+                Self::ospf_initial_selection(a, s);
+            }
         }
         if let Some(lesson) = &s.accounts_teaching {
             dlms_learning_lab::accounts_teaching::prepare(a, lesson, new_attempt);
@@ -571,6 +590,7 @@ impl LabApp {
         if let Some(lesson) = &s.ospf_teaching {
             dlms_learning_lab::ospf_teaching::prepare(a, lesson, true)
                 .expect("validated OSPF lesson");
+            Self::ospf_initial_selection(a, s);
         }
         if let Some(lesson) = &s.accounts_teaching {
             dlms_learning_lab::accounts_teaching::prepare(a, lesson, true);

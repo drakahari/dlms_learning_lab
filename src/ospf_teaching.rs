@@ -309,12 +309,24 @@ impl<'de> Deserialize<'de> for Learning {
 impl Learning {
     pub fn new(lesson: &Lesson) -> Result<Self, String> {
         lesson.validate()?;
+        let mut draft = Draft::new(&lesson.fixture)?;
+        if let Some(first) = lesson.example_actions.first() {
+            draft.selected = match &first.action {
+                Action::SetProcess { router, .. } => crate::ospf::Endpoint::new(
+                    router,
+                    draft.routers[router].interfaces.keys().next().unwrap(),
+                ),
+                Action::SetPort { endpoint, .. }
+                | Action::SetAddress { endpoint, .. }
+                | Action::SetUp { endpoint, .. } => endpoint.clone(),
+            };
+        }
         Ok(Self {
             version: 1,
             view: View::Introduction,
             fixture: lesson.fixture.clone(),
             simulation: lesson.fixture.clone(),
-            draft: Draft::new(&lesson.fixture)?,
+            draft,
             checked: false,
         })
     }

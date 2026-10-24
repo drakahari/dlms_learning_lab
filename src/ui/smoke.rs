@@ -6,6 +6,8 @@ mod accounts_lessons;
 mod acl;
 mod acl_lessons;
 mod capture_lessons;
+mod ospf;
+mod ospf_lessons;
 mod substitution;
 impl LabApp {
     fn storage_reference_action(
@@ -185,6 +187,16 @@ impl LabApp {
         self.scenarios.push(lab);
         index
     }
+    pub(super) fn add_ospf_fixture(&mut self) -> usize {
+        let lab = pack::load(include_str!(
+            "../../tests/fixtures/ospf-workspace-preview.json"
+        ))
+        .expect("development OSPF fixture validates")
+        .remove(0);
+        let index = self.scenarios.len();
+        self.scenarios.push(lab);
+        index
+    }
     pub(super) fn add_acl_fixture(&mut self) -> usize {
         let lab = pack::load(include_str!(
             "../../tests/fixtures/acl-workspace-preview.json"
@@ -300,6 +312,27 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 11500..=11539 => {
+                let (advance, capture) = self.ospf_lessons_layout(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 11000..=11399 => {
+                let (advance, capture) = self.ospf_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 10000..=10049 => {
+                let (advance, capture) = self.ospf_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 9000..=9799 => {
                 let (advance, capture) = self.accounts_lessons_native(ctx, n);
                 if !advance {
