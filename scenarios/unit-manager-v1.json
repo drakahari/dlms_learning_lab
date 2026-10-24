@@ -1,0 +1,2932 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-unit-loaded-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-unit-manager-foundations",
+      "title": "Recover the definition a running service actually uses",
+      "objective": "Dispatch runs the observer program instead of its own supplied application. Inspect saved source, loaded properties and current status. Restore dispatch-app.service to its declared /sim/bin/dispatch-app program, then load and execute that definition at port8443. A save, reload or successful start message alone is insufficient.\n\nKeep every supplied application configuration, both target documents, observer document, target link and selected default unchanged. Finish with the observer running at9100, and both application and observer must work in the next-session inspection.",
+      "minutes": 25,
+      "prerequisites": [
+        "lpic2-service"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "dispatch-inventory",
+            "units": [
+              "dispatch-app.service",
+              "dispatch-observer.service",
+              "dispatch-spare.target",
+              "dispatch.target"
+            ],
+            "config_paths": [
+              "/etc/dispatch/app.conf",
+              "/etc/dispatch/observer.conf"
+            ],
+            "artifact_ids": [],
+            "programs": {
+              "/sim/bin/dispatch-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/dispatch/app.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/dispatch-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/dispatch/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+            "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+            "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+            "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+          },
+          "configuration": {
+            "/etc/dispatch/app.conf": "PORT=8443\n",
+            "/etc/dispatch/observer.conf": "PORT=9100\n"
+          },
+          "loaded": {
+            "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+            "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+            "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+            "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+          },
+          "runtime": {
+            "dispatch-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                "configuration": "PORT=9100\n",
+                "artifact_input": null
+              }
+            },
+            "dispatch-app.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                "configuration": "PORT=9100\n",
+                "artifact_input": null
+              }
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "dispatch.target": [
+              "dispatch-app.service",
+              "dispatch-observer.service"
+            ]
+          },
+          "default_target": "dispatch.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "dispatch-inventory",
+              "units": [
+                "dispatch-app.service",
+                "dispatch-observer.service",
+                "dispatch-spare.target",
+                "dispatch.target"
+              ],
+              "config_paths": [
+                "/etc/dispatch/app.conf",
+                "/etc/dispatch/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/dispatch-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/dispatch/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/dispatch-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/dispatch/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+              "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+              "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+              "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+            },
+            "configuration": {
+              "/etc/dispatch/app.conf": "PORT=8443\n",
+              "/etc/dispatch/observer.conf": "PORT=9100\n"
+            },
+            "loaded": {
+              "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+              "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+              "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+              "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+            },
+            "runtime": {
+              "dispatch-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              },
+              "dispatch-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                  "configuration": "PORT=9100\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "dispatch.target": [
+                "dispatch-app.service",
+                "dispatch-observer.service"
+              ]
+            },
+            "default_target": "dispatch.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "dispatch-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "dispatch-app.service",
+              "phase": "Running",
+              "port": 8443,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "dispatch-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "dispatch-observer.service",
+              "phase": "Running",
+              "port": 9100,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "dispatch-observer.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "dispatch-app.service",
+                "phase": "Running",
+                "port": 8443,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "dispatch-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "dispatch-observer.service",
+                "phase": "Running",
+                "port": 9100,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "dispatch-observer.service"
+              }
+            ],
+            "started": [
+              "dispatch-app.service",
+              "dispatch-observer.service",
+              "dispatch.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "dispatch-observer.service",
+              "dispatch-spare.target",
+              "dispatch.target"
+            ],
+            "configuration": [
+              "/etc/dispatch/app.conf",
+              "/etc/dispatch/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [],
+            "default_target": true
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Complete the earlier service recovery activity. Read these concepts, then run this different ungraded example before opening the full assignment.",
+        "concepts": [
+          {
+            "title": "Read a supplied service unit",
+            "text": "A unit file tells the service manager how a named unit works. [Unit] holds its description and dependencies. [Service] describes how its program starts. A target is a named group of units to start together. [Install] tells Enable which target link to create; it does not start a program. The repaired separate example contains:\n\n[Unit]\nDescription=App for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-app\n[Install]\nWantedBy=sketch.target\n\nType=simple starts a program intended to keep running. ExecStart selects the program. The supplied /sim/bin identifiers name fixed virtual programs here; they are not host executables. Change the wrong ExecStart line, then save, reload the manager, and stop/start the old running service."
+          },
+          {
+            "title": "Saved files, loaded definitions and running programs",
+            "text": "Saving changes a supplied file. Run systemctl daemon-reload to make the service manager read saved unit definitions; this does not restart a running program. A program already running keeps its previous settings until you stop and start it. A previous passing check or old log entry does not prove the current work is correct."
+          },
+          {
+            "title": "Investigate before changing more files",
+            "text": "Use systemctl cat sketch-app.service to inspect its saved backing text and systemctl status sketch-app.service for current status. Open Loaded definition and current inputs below the editor to see the saved and loaded unit text and the settings used by its current program. systemctl show sketch-app.service -p Requires,Wants,After lists the supported dependency properties. journalctl -u sketch-app.service -o cat shows retained virtual messages. These queries change nothing; old messages are history, not proof of current success."
+          },
+          {
+            "title": "Start, then inspect status and logs",
+            "text": "Here, starting a service also lets the simulated program initialize. A successful start message can still be followed by a configuration failure; inspect status and logs. A simple service is intended to keep running. Its active label alone does not prove the application is ready."
+          },
+          {
+            "title": "Current service and the next session",
+            "text": "A target is a named group of units to start together. The default selects the group for the next session. Enabling links a service to that group; it does not start the program now. Stop affects the running program without removing that link. The default chooses the next-session target. Check work also tests the next session in a separate copy, so that check cannot repair the current assignment."
+          }
+        ],
+        "example_description": "Repair the separate sketch application at virtual port7301, then finish with its observer running at5201. The saved unit points to the wrong supplied program. Load the corrected source, then replace the old current execution. Use the individually explained actions, then inspect current and next-session outcomes. Virtual ports are values for this exercise; nothing listens on your computer.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "sketch-inventory",
+              "units": [
+                "sketch-app.service",
+                "sketch-observer.service",
+                "sketch-spare.target",
+                "sketch.target"
+              ],
+              "config_paths": [
+                "/etc/sketch/app.conf",
+                "/etc/sketch/observer.conf"
+              ],
+              "artifact_ids": [],
+              "programs": {
+                "/sim/bin/sketch-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/sketch/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/sketch-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/sketch/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "sketch-app.service": "[Unit]\nDescription=App for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+              "sketch-observer.service": "[Unit]\nDescription=Observer for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+              "sketch.target": "[Unit]\nDescription=sketch working target\n",
+              "sketch-spare.target": "[Unit]\nDescription=sketch alternate target\n"
+            },
+            "configuration": {
+              "/etc/sketch/app.conf": "PORT=7301\n",
+              "/etc/sketch/observer.conf": "PORT=5201\n"
+            },
+            "loaded": {
+              "sketch-app.service": "[Unit]\nDescription=App for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+              "sketch-observer.service": "[Unit]\nDescription=Observer for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+              "sketch.target": "[Unit]\nDescription=sketch working target\n",
+              "sketch-spare.target": "[Unit]\nDescription=sketch alternate target\n"
+            },
+            "runtime": {
+              "sketch-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+                  "configuration": "PORT=5201\n",
+                  "artifact_input": null
+                }
+              },
+              "sketch-app.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=App for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+                  "configuration": "PORT=5201\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "sketch.target": [
+                "sketch-app.service",
+                "sketch-observer.service"
+              ]
+            },
+            "default_target": "sketch.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "sketch-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "sketch-app.service",
+              "phase": "Running",
+              "port": 7301,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "sketch-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "sketch-observer.service",
+              "phase": "Running",
+              "port": 5201,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "sketch-observer.service"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "sketch-app.service",
+                "phase": "Running",
+                "port": 7301,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "sketch-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "sketch-observer.service",
+                "phase": "Running",
+                "port": 5201,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "sketch-observer.service"
+              }
+            ],
+            "started": [
+              "sketch-app.service",
+              "sketch-observer.service",
+              "sketch.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "sketch-observer.service",
+              "sketch-spare.target",
+              "sketch.target"
+            ],
+            "configuration": [
+              "/etc/sketch/app.conf",
+              "/etc/sketch/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [],
+            "default_target": true
+          }
+        },
+        "solution": [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "sketch-app.service": "[Unit]\nDescription=App for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-app\n[Install]\nWantedBy=sketch.target\n",
+                "sketch-observer.service": "[Unit]\nDescription=Observer for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+                "sketch.target": "[Unit]\nDescription=sketch working target\n",
+                "sketch-spare.target": "[Unit]\nDescription=sketch alternate target\n"
+              },
+              "configuration": {
+                "/etc/sketch/app.conf": "PORT=7301\n",
+                "/etc/sketch/observer.conf": "PORT=5201\n"
+              },
+              "selected_unit": "sketch-app.service",
+              "selected_config": "/etc/sketch/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "sketch-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "sketch.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Save",
+            "explanation": "In sketch-app.service, replace ExecStart with /sim/bin/sketch-app. Keep its supplied Type=simple and all application inputs. Save the unit; this does not alter the program already running.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "sketch-app.service": "[Unit]\nDescription=App for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-app\n[Install]\nWantedBy=sketch.target\n",
+                  "sketch-observer.service": "[Unit]\nDescription=Observer for sketch\n[Service]\nType=simple\nExecStart=/sim/bin/sketch-observer\n[Install]\nWantedBy=sketch.target\n",
+                  "sketch.target": "[Unit]\nDescription=sketch working target\n",
+                  "sketch-spare.target": "[Unit]\nDescription=sketch alternate target\n"
+                },
+                "configuration": {
+                  "/etc/sketch/app.conf": "PORT=7301\n",
+                  "/etc/sketch/observer.conf": "PORT=5201\n"
+                },
+                "selected_unit": "sketch-app.service",
+                "selected_config": "/etc/sketch/app.conf"
+              }
+            }
+          },
+          {
+            "title": "DaemonReload",
+            "explanation": "Read the saved unit definitions into the manager. This does not replace a running program.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          },
+          {
+            "title": "Stop sketch-app.service",
+            "explanation": "Stop only the named unit as shown; check the observer again when the repair is finished.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "sketch-app.service"
+              }
+            }
+          },
+          {
+            "title": "Start sketch.target",
+            "explanation": "Start the supplied target and its requested dependencies, with ordering handled by the loaded definitions.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "sketch.target"
+              }
+            }
+          },
+          {
+            "title": "Inspect the started program",
+            "explanation": "Starting the virtual service also gives its program a chance to read its settings. Inspect status and logs to check whether it accepted them.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, stop sketch-app.service. Its saved definition and future link remain. Inspect the difference between current and next-session checks, then start the application again and inspect its status and logs to confirm the repair.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "sketch-app.service"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Runtime",
+            "unit": "sketch-app.service",
+            "phase": "Inactive",
+            "port": null,
+            "value": null
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "sketch-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.service.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/journalctl.html"
+      ],
+      "hints": [
+        "Compare saved files, loaded definitions, the settings used by the running program and next-session checks before changing more files.",
+        "Check the named observer/preserved files and every failed current outcome; a journal success is historical evidence only.",
+        "Restore the application\u2019s own supplied ExecStart, save, reload, then stop/start the old execution."
+      ],
+      "topic": "Bounded virtual multi-unit service recovery",
+      "summary": "Recover the definition a running service actually uses and verify the supplied observer at the end.",
+      "difficulty": "Intermediate",
+      "steps": [
+        "Understand the service-manager model",
+        "Work through the separate example",
+        "Repair the complete assignment and check current work"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Save\",\"draft\":{\"version\":1,\"documents\":{\"dispatch-app.service\":\"[Unit]\\nDescription=App for dispatch\\n[Service]\\nType=simple\\nExecStart=/sim/bin/dispatch-app\\n[Install]\\nWantedBy=dispatch.target\\n\",\"dispatch-observer.service\":\"[Unit]\\nDescription=Observer for dispatch\\n[Service]\\nType=simple\\nExecStart=/sim/bin/dispatch-observer\\n[Install]\\nWantedBy=dispatch.target\\n\",\"dispatch.target\":\"[Unit]\\nDescription=dispatch working target\\n\",\"dispatch-spare.target\":\"[Unit]\\nDescription=dispatch alternate target\\n\"},\"configuration\":{\"/etc/dispatch/app.conf\":\"PORT=8443\\n\",\"/etc/dispatch/observer.conf\":\"PORT=9100\\n\"},\"selected_unit\":\"dispatch-app.service\",\"selected_config\":\"/etc/dispatch/app.conf\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"DaemonReload\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Stop\",\"unit\":\"dispatch-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Start\",\"unit\":\"dispatch.target\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"AdvancePrograms\"}}"
+      ],
+      "retry_guidance": "Inspect the failed current/fresh outcomes, saved-versus-loaded source, settings used by the running program and virtual logs. Preserve pending work and the named observer.",
+      "explanation": "The reference is one working route through the supplied model. It separates saved source, loaded definitions, input used by the running program and future target policy. Dependency direction and actual next-session job ordering matter; equivalent supported ordering, comments and safe action orders are accepted. Read the task\u2019s explicit preservation requirements rather than copying an unseen exact file.",
+      "simplifications": "UNVALIDATED STAGED CONTENT, not bundled or counted. Fixed virtual Inventory/program descriptors only; no host services, files, packets, processes, clock or boot. Simple-program initialization is a disclosed bounded event; Virtual ports are values for this exercise; nothing listens on your computer. No readiness, PID, real journal timestamp, restart/reload/mask, broad systemd or full LPIC2 coverage claim. Source references freshly checked2026-10-23; systemd262 and LPI LPIC2 objectives4.5.0."
+    },
+    {
+      "id": "lpic2-unit-preparation-order",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-unit-manager-foundations",
+      "title": "Make preparation a real prerequisite",
+      "objective": "Archive needs archive-ready data from its supplied preparation job before its application can run at8181. Repair the preparation input, make the application request preparation as a required dependency, and make it wait until preparation finishes. Starting the units by hand in the right order is insufficient: the saved settings must work next session too. Keep preparation active after its successful one-shot job exits.\n\nKeep the supplied application and observer configuration, observer document, target documents, links and selected default unchanged. Finish with the observer running at9101. Check that the running application uses the prepared data and that the next-session test works too.",
+      "minutes": 30,
+      "prerequisites": [
+        "lpic2-unit-loaded-recovery"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "archive-inventory",
+            "units": [
+              "archive-app.service",
+              "archive-observer.service",
+              "archive-prepare.service",
+              "archive-spare.target",
+              "archive.target"
+            ],
+            "config_paths": [
+              "/etc/archive/app.conf",
+              "/etc/archive/observer.conf",
+              "/etc/archive/prepare.conf"
+            ],
+            "artifact_ids": [
+              "archive-prepared"
+            ],
+            "programs": {
+              "/sim/bin/archive-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/archive/app.conf",
+                "key": "PORT",
+                "prerequisite": {
+                  "artifact": "archive-prepared",
+                  "value": "archive-ready"
+                }
+              },
+              "/sim/bin/archive-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/archive/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/archive-prepare": {
+                "kind": "ValueTask",
+                "config": "/etc/archive/prepare.conf",
+                "key": "VALUE",
+                "artifact": "archive-prepared",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+            "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+            "archive.target": "[Unit]\nDescription=archive working target\n",
+            "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+            "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+          },
+          "configuration": {
+            "/etc/archive/app.conf": "PORT=8181\n",
+            "/etc/archive/observer.conf": "PORT=9101\n",
+            "/etc/archive/prepare.conf": "VALUE=obsolete\n"
+          },
+          "loaded": {
+            "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+            "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+            "archive.target": "[Unit]\nDescription=archive working target\n",
+            "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+            "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+          },
+          "runtime": {
+            "archive-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                "configuration": "PORT=9101\n",
+                "artifact_input": null
+              }
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "archive.target": [
+              "archive-app.service",
+              "archive-observer.service"
+            ]
+          },
+          "default_target": "archive.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "archive-inventory",
+              "units": [
+                "archive-app.service",
+                "archive-observer.service",
+                "archive-prepare.service",
+                "archive-spare.target",
+                "archive.target"
+              ],
+              "config_paths": [
+                "/etc/archive/app.conf",
+                "/etc/archive/observer.conf",
+                "/etc/archive/prepare.conf"
+              ],
+              "artifact_ids": [
+                "archive-prepared"
+              ],
+              "programs": {
+                "/sim/bin/archive-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/archive/app.conf",
+                  "key": "PORT",
+                  "prerequisite": {
+                    "artifact": "archive-prepared",
+                    "value": "archive-ready"
+                  }
+                },
+                "/sim/bin/archive-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/archive/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/archive-prepare": {
+                  "kind": "ValueTask",
+                  "config": "/etc/archive/prepare.conf",
+                  "key": "VALUE",
+                  "artifact": "archive-prepared",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+              "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+              "archive.target": "[Unit]\nDescription=archive working target\n",
+              "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+              "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+            },
+            "configuration": {
+              "/etc/archive/app.conf": "PORT=8181\n",
+              "/etc/archive/observer.conf": "PORT=9101\n",
+              "/etc/archive/prepare.conf": "VALUE=obsolete\n"
+            },
+            "loaded": {
+              "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+              "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+              "archive.target": "[Unit]\nDescription=archive working target\n",
+              "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+              "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+            },
+            "runtime": {
+              "archive-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                  "configuration": "PORT=9101\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "archive.target": [
+                "archive-app.service",
+                "archive-observer.service"
+              ]
+            },
+            "default_target": "archive.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "archive-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "archive-app.service",
+              "phase": "Running",
+              "port": 8181,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "archive-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "archive-observer.service",
+              "phase": "Running",
+              "port": 9101,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "archive-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "archive-prepare.service",
+              "phase": "Exited",
+              "port": null,
+              "value": "archive-ready"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "archive-prepare.service"
+            },
+            {
+              "kind": "Artifact",
+              "artifact": "archive-prepared",
+              "producer": "archive-prepare.service",
+              "value": "archive-ready",
+              "current_inputs": true
+            },
+            {
+              "kind": "Dependency",
+              "unit": "archive-app.service",
+              "target": "archive-prepare.service",
+              "dependency": "Requires",
+              "present": true
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "archive-app.service",
+                "phase": "Running",
+                "port": 8181,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "archive-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "archive-observer.service",
+                "phase": "Running",
+                "port": 9101,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "archive-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "archive-prepare.service",
+                "phase": "Exited",
+                "port": null,
+                "value": "archive-ready"
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "archive-prepare.service"
+              },
+              {
+                "kind": "Artifact",
+                "artifact": "archive-prepared",
+                "producer": "archive-prepare.service",
+                "value": "archive-ready",
+                "current_inputs": true
+              }
+            ],
+            "started": [
+              "archive-app.service",
+              "archive-observer.service",
+              "archive-prepare.service",
+              "archive.target"
+            ],
+            "ordering": [
+              {
+                "before": "archive-prepare.service",
+                "after": "archive-app.service"
+              }
+            ]
+          },
+          "preservation": {
+            "unit_documents": [
+              "archive-observer.service",
+              "archive-spare.target",
+              "archive.target"
+            ],
+            "configuration": [
+              "/etc/archive/app.conf",
+              "/etc/archive/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [],
+            "default_target": true
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Complete the earlier service recovery activity. Read these concepts, then run this different ungraded example before opening the full assignment.",
+        "concepts": [
+          {
+            "title": "Saved files, loaded definitions and running programs",
+            "text": "Saving changes a supplied file. Run systemctl daemon-reload to make the service manager read saved unit definitions; this does not restart a running program. A program already running keeps its previous settings until you stop and start it. A previous passing check or old log entry does not prove the current work is correct."
+          },
+          {
+            "title": "Investigate before changing more files",
+            "text": "Use systemctl cat parcel-app.service to inspect its saved backing text and systemctl status parcel-app.service for current status. Open Loaded definition and current inputs below the editor to see the saved and loaded unit text and the settings used by its current program. systemctl show parcel-app.service -p Requires,Wants,After lists the supported dependency properties. journalctl -u parcel-app.service -o cat shows retained virtual messages. These queries change nothing; old messages are history, not proof of current success."
+          },
+          {
+            "title": "Request preparation and wait for it",
+            "text": "A dependency requests another unit. Requires makes that request a strong requirement, but does not put it first. Add After on the application or Before on preparation to order both requested jobs. A one-shot service runs one job and then exits: Type=oneshot describes this. RemainAfterExit=yes keeps it active after success. Here that job supplies named data for the application."
+          },
+          {
+            "title": "Start, then inspect status and logs",
+            "text": "Here, starting a service also lets the simulated program initialize. A successful start message can still be followed by a configuration failure; inspect status and logs. A simple service is intended to keep running. Its active label alone does not prove the application is ready."
+          },
+          {
+            "title": "Current service and the next session",
+            "text": "A target is a named group of units to start together. The default selects the group for the next session. Enabling links a service to that group; it does not start the program now. Stop affects the running program without removing that link. The default chooses the next-session target. Check work also tests the next session in a separate copy, so that check cannot repair the current assignment."
+          }
+        ],
+        "example_description": "Repair the separate parcel application at virtual port7302, then finish with its observer running at5202. Its preparation must successfully produce example-ready-2 before the application initializes; requesting another unit alone does not put it first. Use the individually explained actions, then inspect current and next-session outcomes. Virtual ports are values for this exercise; nothing listens on your computer.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "parcel-inventory",
+              "units": [
+                "parcel-app.service",
+                "parcel-observer.service",
+                "parcel-prepare.service",
+                "parcel-spare.target",
+                "parcel.target"
+              ],
+              "config_paths": [
+                "/etc/parcel/app.conf",
+                "/etc/parcel/observer.conf",
+                "/etc/parcel/prepare.conf"
+              ],
+              "artifact_ids": [
+                "parcel-prepared"
+              ],
+              "programs": {
+                "/sim/bin/parcel-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/parcel/app.conf",
+                  "key": "PORT",
+                  "prerequisite": {
+                    "artifact": "parcel-prepared",
+                    "value": "example-ready-2"
+                  }
+                },
+                "/sim/bin/parcel-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/parcel/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/parcel-prepare": {
+                  "kind": "ValueTask",
+                  "config": "/etc/parcel/prepare.conf",
+                  "key": "VALUE",
+                  "artifact": "parcel-prepared",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "parcel-app.service": "[Unit]\nDescription=App for parcel\nRequires=parcel-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-app\n[Install]\nWantedBy=parcel.target\n",
+              "parcel-observer.service": "[Unit]\nDescription=Observer for parcel\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-observer\n[Install]\nWantedBy=parcel.target\n",
+              "parcel.target": "[Unit]\nDescription=parcel working target\n",
+              "parcel-spare.target": "[Unit]\nDescription=parcel alternate target\n",
+              "parcel-prepare.service": "[Unit]\nDescription=Prepare for parcel\n[Service]\nType=oneshot\nExecStart=/sim/bin/parcel-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=parcel.target\n"
+            },
+            "configuration": {
+              "/etc/parcel/app.conf": "PORT=7302\n",
+              "/etc/parcel/observer.conf": "PORT=5202\n",
+              "/etc/parcel/prepare.conf": "VALUE=obsolete\n"
+            },
+            "loaded": {
+              "parcel-app.service": "[Unit]\nDescription=App for parcel\nRequires=parcel-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-app\n[Install]\nWantedBy=parcel.target\n",
+              "parcel-observer.service": "[Unit]\nDescription=Observer for parcel\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-observer\n[Install]\nWantedBy=parcel.target\n",
+              "parcel.target": "[Unit]\nDescription=parcel working target\n",
+              "parcel-spare.target": "[Unit]\nDescription=parcel alternate target\n",
+              "parcel-prepare.service": "[Unit]\nDescription=Prepare for parcel\n[Service]\nType=oneshot\nExecStart=/sim/bin/parcel-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=parcel.target\n"
+            },
+            "runtime": {
+              "parcel-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for parcel\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-observer\n[Install]\nWantedBy=parcel.target\n",
+                  "configuration": "PORT=5202\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "parcel.target": [
+                "parcel-app.service",
+                "parcel-observer.service"
+              ]
+            },
+            "default_target": "parcel.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "parcel-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "parcel-app.service",
+              "phase": "Running",
+              "port": 7302,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "parcel-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "parcel-observer.service",
+              "phase": "Running",
+              "port": 5202,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "parcel-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "parcel-prepare.service",
+              "phase": "Exited",
+              "port": null,
+              "value": "example-ready-2"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "parcel-prepare.service"
+            },
+            {
+              "kind": "Artifact",
+              "artifact": "parcel-prepared",
+              "producer": "parcel-prepare.service",
+              "value": "example-ready-2",
+              "current_inputs": true
+            },
+            {
+              "kind": "Dependency",
+              "unit": "parcel-app.service",
+              "target": "parcel-prepare.service",
+              "dependency": "Requires",
+              "present": true
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "parcel-app.service",
+                "phase": "Running",
+                "port": 7302,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "parcel-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "parcel-observer.service",
+                "phase": "Running",
+                "port": 5202,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "parcel-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "parcel-prepare.service",
+                "phase": "Exited",
+                "port": null,
+                "value": "example-ready-2"
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "parcel-prepare.service"
+              },
+              {
+                "kind": "Artifact",
+                "artifact": "parcel-prepared",
+                "producer": "parcel-prepare.service",
+                "value": "example-ready-2",
+                "current_inputs": true
+              }
+            ],
+            "started": [
+              "parcel-app.service",
+              "parcel-observer.service",
+              "parcel-prepare.service",
+              "parcel.target"
+            ],
+            "ordering": [
+              {
+                "before": "parcel-prepare.service",
+                "after": "parcel-app.service"
+              }
+            ]
+          },
+          "preservation": {
+            "unit_documents": [
+              "parcel-observer.service",
+              "parcel-spare.target",
+              "parcel.target"
+            ],
+            "configuration": [
+              "/etc/parcel/app.conf",
+              "/etc/parcel/observer.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [],
+            "default_target": true
+          }
+        },
+        "solution": [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "parcel-app.service": "[Unit]\nDescription=App for parcel\nRequires=parcel-prepare.service\nAfter=parcel-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-app\n[Install]\nWantedBy=parcel.target\n",
+                "parcel-observer.service": "[Unit]\nDescription=Observer for parcel\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-observer\n[Install]\nWantedBy=parcel.target\n",
+                "parcel.target": "[Unit]\nDescription=parcel working target\n",
+                "parcel-spare.target": "[Unit]\nDescription=parcel alternate target\n",
+                "parcel-prepare.service": "[Unit]\nDescription=Prepare for parcel\n[Service]\nType=oneshot\nExecStart=/sim/bin/parcel-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=parcel.target\n"
+              },
+              "configuration": {
+                "/etc/parcel/app.conf": "PORT=7302\n",
+                "/etc/parcel/observer.conf": "PORT=5202\n",
+                "/etc/parcel/prepare.conf": "VALUE=example-ready-2\n"
+              },
+              "selected_unit": "parcel-app.service",
+              "selected_config": "/etc/parcel/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "parcel.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Save",
+            "explanation": "Set /etc/parcel/prepare.conf to VALUE=example-ready-2. Keep Requires=parcel-prepare.service in the application and add After=parcel-prepare.service. Keep the producer Type=oneshot and RemainAfterExit=yes. Save these example edits only.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "parcel-app.service": "[Unit]\nDescription=App for parcel\nRequires=parcel-prepare.service\nAfter=parcel-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-app\n[Install]\nWantedBy=parcel.target\n",
+                  "parcel-observer.service": "[Unit]\nDescription=Observer for parcel\n[Service]\nType=simple\nExecStart=/sim/bin/parcel-observer\n[Install]\nWantedBy=parcel.target\n",
+                  "parcel.target": "[Unit]\nDescription=parcel working target\n",
+                  "parcel-spare.target": "[Unit]\nDescription=parcel alternate target\n",
+                  "parcel-prepare.service": "[Unit]\nDescription=Prepare for parcel\n[Service]\nType=oneshot\nExecStart=/sim/bin/parcel-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=parcel.target\n"
+                },
+                "configuration": {
+                  "/etc/parcel/app.conf": "PORT=7302\n",
+                  "/etc/parcel/observer.conf": "PORT=5202\n",
+                  "/etc/parcel/prepare.conf": "VALUE=example-ready-2\n"
+                },
+                "selected_unit": "parcel-app.service",
+                "selected_config": "/etc/parcel/app.conf"
+              }
+            }
+          },
+          {
+            "title": "DaemonReload",
+            "explanation": "Read the saved unit definitions into the manager. This does not replace a running program.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          },
+          {
+            "title": "Start parcel.target",
+            "explanation": "Start the supplied target and its requested dependencies, with ordering handled by the loaded definitions.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "parcel.target"
+              }
+            }
+          },
+          {
+            "title": "Inspect the started program",
+            "explanation": "Starting the virtual service also gives its program a chance to read its settings. Inspect status and logs to check whether it accepted them.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, stop parcel-app.service. Its saved definition and future link remain. Inspect the difference between current and next-session checks, then start the application again and inspect its status and logs to confirm the repair.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "parcel-app.service"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Runtime",
+            "unit": "parcel-app.service",
+            "phase": "Inactive",
+            "port": null,
+            "value": null
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "parcel-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.service.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/journalctl.html"
+      ],
+      "hints": [
+        "Compare saved files, loaded definitions, the settings used by the running program and next-session checks before changing more files.",
+        "Check the named observer/preserved files and every failed current outcome; a journal success is historical evidence only.",
+        "Keep Requires; add real ordering via consumer After or producer Before, repair VALUE, then rerun preparation and application."
+      ],
+      "topic": "Bounded virtual multi-unit service recovery",
+      "summary": "Make preparation a real prerequisite and verify the supplied observer at the end.",
+      "difficulty": "Intermediate",
+      "steps": [
+        "Understand the service-manager model",
+        "Work through the separate example",
+        "Repair the complete assignment and check current work"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Save\",\"draft\":{\"version\":1,\"documents\":{\"archive-app.service\":\"[Unit]\\nDescription=App for archive\\nRequires=archive-prepare.service\\nAfter=archive-prepare.service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/archive-app\\n[Install]\\nWantedBy=archive.target\\n\",\"archive-observer.service\":\"[Unit]\\nDescription=Observer for archive\\n[Service]\\nType=simple\\nExecStart=/sim/bin/archive-observer\\n[Install]\\nWantedBy=archive.target\\n\",\"archive.target\":\"[Unit]\\nDescription=archive working target\\n\",\"archive-spare.target\":\"[Unit]\\nDescription=archive alternate target\\n\",\"archive-prepare.service\":\"[Unit]\\nDescription=Prepare for archive\\n[Service]\\nType=oneshot\\nExecStart=/sim/bin/archive-prepare\\nRemainAfterExit=yes\\n[Install]\\nWantedBy=archive.target\\n\"},\"configuration\":{\"/etc/archive/app.conf\":\"PORT=8181\\n\",\"/etc/archive/observer.conf\":\"PORT=9101\\n\",\"/etc/archive/prepare.conf\":\"VALUE=archive-ready\\n\"},\"selected_unit\":\"archive-app.service\",\"selected_config\":\"/etc/archive/app.conf\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"DaemonReload\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Start\",\"unit\":\"archive.target\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"AdvancePrograms\"}}"
+      ],
+      "retry_guidance": "Inspect the failed current/fresh outcomes, saved-versus-loaded source, settings used by the running program and virtual logs. Preserve pending work and the named observer.",
+      "explanation": "The reference is one working route through the supplied model. It separates saved source, loaded definitions, input used by the running program and future target policy. Dependency direction and actual next-session job ordering matter; equivalent supported ordering, comments and safe action orders are accepted. Read the task\u2019s explicit preservation requirements rather than copying an unseen exact file.",
+      "simplifications": "UNVALIDATED STAGED CONTENT, not bundled or counted. Fixed virtual Inventory/program descriptors only; no host services, files, packets, processes, clock or boot. Simple-program initialization is a disclosed bounded event; Virtual ports are values for this exercise; nothing listens on your computer. No readiness, PID, real journal timestamp, restart/reload/mask, broad systemd or full LPIC2 coverage claim. Source references freshly checked2026-10-23; systemd262 and LPI LPIC2 objectives4.5.0."
+    },
+    {
+      "id": "lpic2-unit-optional-wants",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-unit-manager-foundations",
+      "title": "Keep a failed optional helper from blocking the core",
+      "objective": "Portal\u2019s optional data helper is intentionally broken and reserved for a specialist. Change the application\u2019s dependency so starting portal-app.service still requests that helper but its failure cannot block the core. The helper must actually be attempted and failed; deleting the dependency is not a repair. Portal must run at8282 now and in the selected fresh session.\n\nPreserve every supplied configuration, the helper and observer documents, target documents, links and default target. Finish with the observer running at9102. Inspect the application\u2019s status and configured port; a successful start message alone cannot prove it is working.",
+      "minutes": 25,
+      "prerequisites": [
+        "lpic2-unit-preparation-order"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "portal-inventory",
+            "units": [
+              "portal-app.service",
+              "portal-observer.service",
+              "portal-optional.service",
+              "portal-spare.target",
+              "portal.target"
+            ],
+            "config_paths": [
+              "/etc/portal/app.conf",
+              "/etc/portal/observer.conf",
+              "/etc/portal/optional.conf"
+            ],
+            "artifact_ids": [
+              "portal-optional-data"
+            ],
+            "programs": {
+              "/sim/bin/portal-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/portal/app.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/portal-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/portal/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/portal-optional": {
+                "kind": "ValueTask",
+                "config": "/etc/portal/optional.conf",
+                "key": "VALUE",
+                "artifact": "portal-optional-data",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "portal-app.service": "[Unit]\nDescription=App for portal\nRequires=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+            "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+            "portal.target": "[Unit]\nDescription=portal working target\n",
+            "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+            "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+          },
+          "configuration": {
+            "/etc/portal/app.conf": "PORT=8282\n",
+            "/etc/portal/observer.conf": "PORT=9102\n",
+            "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+          },
+          "loaded": {
+            "portal-app.service": "[Unit]\nDescription=App for portal\nRequires=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+            "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+            "portal.target": "[Unit]\nDescription=portal working target\n",
+            "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+            "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+          },
+          "runtime": {
+            "portal-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                "configuration": "PORT=9102\n",
+                "artifact_input": null
+              }
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "portal.target": [
+              "portal-app.service",
+              "portal-observer.service"
+            ]
+          },
+          "default_target": "portal.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "portal-inventory",
+              "units": [
+                "portal-app.service",
+                "portal-observer.service",
+                "portal-optional.service",
+                "portal-spare.target",
+                "portal.target"
+              ],
+              "config_paths": [
+                "/etc/portal/app.conf",
+                "/etc/portal/observer.conf",
+                "/etc/portal/optional.conf"
+              ],
+              "artifact_ids": [
+                "portal-optional-data"
+              ],
+              "programs": {
+                "/sim/bin/portal-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/portal/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/portal-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/portal/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/portal-optional": {
+                  "kind": "ValueTask",
+                  "config": "/etc/portal/optional.conf",
+                  "key": "VALUE",
+                  "artifact": "portal-optional-data",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "portal-app.service": "[Unit]\nDescription=App for portal\nRequires=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+              "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+              "portal.target": "[Unit]\nDescription=portal working target\n",
+              "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+              "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+            },
+            "configuration": {
+              "/etc/portal/app.conf": "PORT=8282\n",
+              "/etc/portal/observer.conf": "PORT=9102\n",
+              "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+            },
+            "loaded": {
+              "portal-app.service": "[Unit]\nDescription=App for portal\nRequires=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+              "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+              "portal.target": "[Unit]\nDescription=portal working target\n",
+              "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+              "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+            },
+            "runtime": {
+              "portal-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                  "configuration": "PORT=9102\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "portal.target": [
+                "portal-app.service",
+                "portal-observer.service"
+              ]
+            },
+            "default_target": "portal.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "portal-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "portal-app.service",
+              "phase": "Running",
+              "port": 8282,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "portal-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "portal-observer.service",
+              "phase": "Running",
+              "port": 9102,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "portal-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "portal-optional.service",
+              "phase": "Failed",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "Dependency",
+              "unit": "portal-app.service",
+              "target": "portal-optional.service",
+              "dependency": "Wants",
+              "present": true
+            },
+            {
+              "kind": "Dependency",
+              "unit": "portal-app.service",
+              "target": "portal-optional.service",
+              "dependency": "Requires",
+              "present": false
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "portal-app.service",
+                "phase": "Running",
+                "port": 8282,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "portal-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "portal-observer.service",
+                "phase": "Running",
+                "port": 9102,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "portal-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "portal-optional.service",
+                "phase": "Failed",
+                "port": null,
+                "value": null
+              }
+            ],
+            "started": [
+              "portal-app.service",
+              "portal-observer.service",
+              "portal.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "portal-observer.service",
+              "portal-optional.service",
+              "portal-spare.target",
+              "portal.target"
+            ],
+            "configuration": [
+              "/etc/portal/app.conf",
+              "/etc/portal/observer.conf",
+              "/etc/portal/optional.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [],
+            "default_target": true
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Complete the earlier service recovery activity. Read these concepts, then run this different ungraded example before opening the full assignment.",
+        "concepts": [
+          {
+            "title": "Saved files, loaded definitions and running programs",
+            "text": "Saving changes a supplied file. Run systemctl daemon-reload to make the service manager read saved unit definitions; this does not restart a running program. A program already running keeps its previous settings until you stop and start it. A previous passing check or old log entry does not prove the current work is correct."
+          },
+          {
+            "title": "Investigate before changing more files",
+            "text": "Use systemctl cat gallery-app.service to inspect its saved backing text and systemctl status gallery-app.service for current status. Open Loaded definition and current inputs below the editor to see the saved and loaded unit text and the settings used by its current program. systemctl show gallery-app.service -p Requires,Wants,After lists the supported dependency properties. journalctl -u gallery-app.service -o cat shows retained virtual messages. These queries change nothing; old messages are history, not proof of current success."
+          },
+          {
+            "title": "Optional failure is different from a required failure",
+            "text": "Wants requests an optional unit while allowing the requesting start job to succeed if that unit fails. Requires together with After can block activation on a required failure. Neither dependency itself establishes readiness. Keep the actual optional failure visible rather than inventing a success or deleting the helper."
+          },
+          {
+            "title": "Start, then inspect status and logs",
+            "text": "Here, starting a service also lets the simulated program initialize. A successful start message can still be followed by a configuration failure; inspect status and logs. A simple service is intended to keep running. Its active label alone does not prove the application is ready."
+          },
+          {
+            "title": "Current service and the next session",
+            "text": "A target is a named group of units to start together. The default selects the group for the next session. Enabling links a service to that group; it does not start the program now. Stop affects the running program without removing that link. The default chooses the next-session target. Check work also tests the next session in a separate copy, so that check cannot repair the current assignment."
+          }
+        ],
+        "example_description": "Repair the separate gallery application at virtual port7303, then finish with its observer running at5203. Keep the broken optional helper requested and visibly failed while allowing the core application to run. Preserve its intentionally broken input. Use the individually explained actions, then inspect current and next-session outcomes. Virtual ports are values for this exercise; nothing listens on your computer.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "gallery-inventory",
+              "units": [
+                "gallery-app.service",
+                "gallery-observer.service",
+                "gallery-optional.service",
+                "gallery-spare.target",
+                "gallery.target"
+              ],
+              "config_paths": [
+                "/etc/gallery/app.conf",
+                "/etc/gallery/observer.conf",
+                "/etc/gallery/optional.conf"
+              ],
+              "artifact_ids": [
+                "gallery-optional-data"
+              ],
+              "programs": {
+                "/sim/bin/gallery-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/gallery/app.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/gallery-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/gallery/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/gallery-optional": {
+                  "kind": "ValueTask",
+                  "config": "/etc/gallery/optional.conf",
+                  "key": "VALUE",
+                  "artifact": "gallery-optional-data",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "gallery-app.service": "[Unit]\nDescription=App for gallery\nRequires=gallery-optional.service\nAfter=gallery-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-app\n[Install]\nWantedBy=gallery.target\n",
+              "gallery-observer.service": "[Unit]\nDescription=Observer for gallery\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-observer\n[Install]\nWantedBy=gallery.target\n",
+              "gallery.target": "[Unit]\nDescription=gallery working target\n",
+              "gallery-spare.target": "[Unit]\nDescription=gallery alternate target\n",
+              "gallery-optional.service": "[Unit]\nDescription=Optional for gallery\n[Service]\nType=oneshot\nExecStart=/sim/bin/gallery-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=gallery.target\n"
+            },
+            "configuration": {
+              "/etc/gallery/app.conf": "PORT=7303\n",
+              "/etc/gallery/observer.conf": "PORT=5203\n",
+              "/etc/gallery/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+            },
+            "loaded": {
+              "gallery-app.service": "[Unit]\nDescription=App for gallery\nRequires=gallery-optional.service\nAfter=gallery-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-app\n[Install]\nWantedBy=gallery.target\n",
+              "gallery-observer.service": "[Unit]\nDescription=Observer for gallery\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-observer\n[Install]\nWantedBy=gallery.target\n",
+              "gallery.target": "[Unit]\nDescription=gallery working target\n",
+              "gallery-spare.target": "[Unit]\nDescription=gallery alternate target\n",
+              "gallery-optional.service": "[Unit]\nDescription=Optional for gallery\n[Service]\nType=oneshot\nExecStart=/sim/bin/gallery-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=gallery.target\n"
+            },
+            "runtime": {
+              "gallery-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for gallery\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-observer\n[Install]\nWantedBy=gallery.target\n",
+                  "configuration": "PORT=5203\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "gallery.target": [
+                "gallery-app.service",
+                "gallery-observer.service"
+              ]
+            },
+            "default_target": "gallery.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "gallery-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "gallery-app.service",
+              "phase": "Running",
+              "port": 7303,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "gallery-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "gallery-observer.service",
+              "phase": "Running",
+              "port": 5203,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "gallery-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "gallery-optional.service",
+              "phase": "Failed",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "Dependency",
+              "unit": "gallery-app.service",
+              "target": "gallery-optional.service",
+              "dependency": "Wants",
+              "present": true
+            },
+            {
+              "kind": "Dependency",
+              "unit": "gallery-app.service",
+              "target": "gallery-optional.service",
+              "dependency": "Requires",
+              "present": false
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "gallery-app.service",
+                "phase": "Running",
+                "port": 7303,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "gallery-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "gallery-observer.service",
+                "phase": "Running",
+                "port": 5203,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "gallery-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "gallery-optional.service",
+                "phase": "Failed",
+                "port": null,
+                "value": null
+              }
+            ],
+            "started": [
+              "gallery-app.service",
+              "gallery-observer.service",
+              "gallery.target"
+            ],
+            "ordering": []
+          },
+          "preservation": {
+            "unit_documents": [
+              "gallery-observer.service",
+              "gallery-optional.service",
+              "gallery-spare.target",
+              "gallery.target"
+            ],
+            "configuration": [
+              "/etc/gallery/app.conf",
+              "/etc/gallery/observer.conf",
+              "/etc/gallery/optional.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [],
+            "default_target": true
+          }
+        },
+        "solution": [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "gallery-app.service": "[Unit]\nDescription=App for gallery\nWants=gallery-optional.service\nAfter=gallery-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-app\n[Install]\nWantedBy=gallery.target\n",
+                "gallery-observer.service": "[Unit]\nDescription=Observer for gallery\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-observer\n[Install]\nWantedBy=gallery.target\n",
+                "gallery.target": "[Unit]\nDescription=gallery working target\n",
+                "gallery-spare.target": "[Unit]\nDescription=gallery alternate target\n",
+                "gallery-optional.service": "[Unit]\nDescription=Optional for gallery\n[Service]\nType=oneshot\nExecStart=/sim/bin/gallery-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=gallery.target\n"
+              },
+              "configuration": {
+                "/etc/gallery/app.conf": "PORT=7303\n",
+                "/etc/gallery/observer.conf": "PORT=5203\n",
+                "/etc/gallery/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+              },
+              "selected_unit": "gallery-app.service",
+              "selected_config": "/etc/gallery/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "gallery.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Save",
+            "explanation": "In gallery-app.service, replace Requires=gallery-optional.service with Wants=gallery-optional.service; keeping After is valid. Leave the optional helper and every configuration unchanged. Save this unit edit only.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "gallery-app.service": "[Unit]\nDescription=App for gallery\nWants=gallery-optional.service\nAfter=gallery-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-app\n[Install]\nWantedBy=gallery.target\n",
+                  "gallery-observer.service": "[Unit]\nDescription=Observer for gallery\n[Service]\nType=simple\nExecStart=/sim/bin/gallery-observer\n[Install]\nWantedBy=gallery.target\n",
+                  "gallery.target": "[Unit]\nDescription=gallery working target\n",
+                  "gallery-spare.target": "[Unit]\nDescription=gallery alternate target\n",
+                  "gallery-optional.service": "[Unit]\nDescription=Optional for gallery\n[Service]\nType=oneshot\nExecStart=/sim/bin/gallery-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=gallery.target\n"
+                },
+                "configuration": {
+                  "/etc/gallery/app.conf": "PORT=7303\n",
+                  "/etc/gallery/observer.conf": "PORT=5203\n",
+                  "/etc/gallery/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+                },
+                "selected_unit": "gallery-app.service",
+                "selected_config": "/etc/gallery/app.conf"
+              }
+            }
+          },
+          {
+            "title": "DaemonReload",
+            "explanation": "Read the saved unit definitions into the manager. This does not replace a running program.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          },
+          {
+            "title": "Start gallery.target",
+            "explanation": "Start the supplied target and its requested dependencies, with ordering handled by the loaded definitions.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "gallery.target"
+              }
+            }
+          },
+          {
+            "title": "Inspect the started program",
+            "explanation": "Starting the virtual service also gives its program a chance to read its settings. Inspect status and logs to check whether it accepted them.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, stop gallery-app.service. Its saved definition and future link remain. Inspect the difference between current and next-session checks, then start the application again and inspect its status and logs to confirm the repair.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "gallery-app.service"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Runtime",
+            "unit": "gallery-app.service",
+            "phase": "Inactive",
+            "port": null,
+            "value": null
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "gallery-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.service.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/journalctl.html"
+      ],
+      "hints": [
+        "Compare saved files, loaded definitions, the settings used by the running program and next-session checks before changing more files.",
+        "Check the named observer/preserved files and every failed current outcome; a journal success is historical evidence only.",
+        "Replace the strong optional-helper relation with Wants. Keep the helper requested and leave its broken configuration unchanged."
+      ],
+      "topic": "Bounded virtual multi-unit service recovery",
+      "summary": "Keep a failed optional helper from blocking the core and verify the supplied observer at the end.",
+      "difficulty": "Intermediate",
+      "steps": [
+        "Understand the service-manager model",
+        "Work through the separate example",
+        "Repair the complete assignment and check current work"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Save\",\"draft\":{\"version\":1,\"documents\":{\"portal-app.service\":\"[Unit]\\nDescription=App for portal\\nWants=portal-optional.service\\nAfter=portal-optional.service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/portal-app\\n[Install]\\nWantedBy=portal.target\\n\",\"portal-observer.service\":\"[Unit]\\nDescription=Observer for portal\\n[Service]\\nType=simple\\nExecStart=/sim/bin/portal-observer\\n[Install]\\nWantedBy=portal.target\\n\",\"portal.target\":\"[Unit]\\nDescription=portal working target\\n\",\"portal-spare.target\":\"[Unit]\\nDescription=portal alternate target\\n\",\"portal-optional.service\":\"[Unit]\\nDescription=Optional for portal\\n[Service]\\nType=oneshot\\nExecStart=/sim/bin/portal-optional\\nRemainAfterExit=yes\\n[Install]\\nWantedBy=portal.target\\n\"},\"configuration\":{\"/etc/portal/app.conf\":\"PORT=8282\\n\",\"/etc/portal/observer.conf\":\"PORT=9102\\n\",\"/etc/portal/optional.conf\":\"UNRECOGNIZED=leave-for-specialist\\n\"},\"selected_unit\":\"portal-app.service\",\"selected_config\":\"/etc/portal/app.conf\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"DaemonReload\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Start\",\"unit\":\"portal.target\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"AdvancePrograms\"}}"
+      ],
+      "retry_guidance": "Inspect the failed current/fresh outcomes, saved-versus-loaded source, settings used by the running program and virtual logs. Preserve pending work and the named observer.",
+      "explanation": "The reference is one working route through the supplied model. It separates saved source, loaded definitions, input used by the running program and future target policy. Dependency direction and actual next-session job ordering matter; equivalent supported ordering, comments and safe action orders are accepted. Read the task\u2019s explicit preservation requirements rather than copying an unseen exact file.",
+      "simplifications": "UNVALIDATED STAGED CONTENT, not bundled or counted. Fixed virtual Inventory/program descriptors only; no host services, files, packets, processes, clock or boot. Simple-program initialization is a disclosed bounded event; Virtual ports are values for this exercise; nothing listens on your computer. No readiness, PID, real journal timestamp, restart/reload/mask, broad systemd or full LPIC2 coverage claim. Source references freshly checked2026-10-23; systemd262 and LPI LPIC2 objectives4.5.0."
+    },
+    {
+      "id": "lpic2-unit-target-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "unit": "linux-unit-manager-foundations",
+      "title": "Hand over a multi-unit service without damaging its observer",
+      "objective": "Replace the old publication service with publish-app.service at9443, using publish-v2 data from the successful preparation job. Repair the saved application input, make the application request and wait for preparation, load the definitions, and bring the replacement into service. Preparation must remain active after its successful one-shot job exits.\n\nStop publish-old.service and remove its link from publish-spare.target. Enable the new application for publish.target and select that target for the next session. The fresh session must start only the new target, preparation, application and observer.\n\nFinish with the observer running at9103. Preserve its document and configuration, the old service document/configuration, both target documents and every other supplied install link. Check that the running application uses the new data and that the next-session test works; old prepared data or a default-target edit alone cannot complete the handover.",
+      "minutes": 40,
+      "prerequisites": [
+        "lpic2-unit-optional-wants"
+      ],
+      "initial": {
+        "kind": "UnitManager",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "schema_version": 1,
+            "fixture": "publish-inventory",
+            "units": [
+              "publish-app.service",
+              "publish-observer.service",
+              "publish-old.service",
+              "publish-prepare.service",
+              "publish-spare.target",
+              "publish.target"
+            ],
+            "config_paths": [
+              "/etc/publish/app.conf",
+              "/etc/publish/observer.conf",
+              "/etc/publish/old.conf",
+              "/etc/publish/prepare.conf"
+            ],
+            "artifact_ids": [
+              "publish-prepared"
+            ],
+            "programs": {
+              "/sim/bin/publish-app": {
+                "kind": "PortDaemon",
+                "config": "/etc/publish/app.conf",
+                "key": "PORT",
+                "prerequisite": {
+                  "artifact": "publish-prepared",
+                  "value": "publish-v2"
+                }
+              },
+              "/sim/bin/publish-observer": {
+                "kind": "PortDaemon",
+                "config": "/etc/publish/observer.conf",
+                "key": "PORT",
+                "prerequisite": null
+              },
+              "/sim/bin/publish-prepare": {
+                "kind": "ValueTask",
+                "config": "/etc/publish/prepare.conf",
+                "key": "VALUE",
+                "artifact": "publish-prepared",
+                "prerequisite": null
+              },
+              "/sim/bin/publish-old": {
+                "kind": "PortDaemon",
+                "config": "/etc/publish/old.conf",
+                "key": "PORT",
+                "prerequisite": null
+              }
+            }
+          },
+          "documents": {
+            "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+            "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+            "publish.target": "[Unit]\nDescription=publish working target\n",
+            "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+            "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+            "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+          },
+          "configuration": {
+            "/etc/publish/app.conf": "PORT=8080\n",
+            "/etc/publish/observer.conf": "PORT=9103\n",
+            "/etc/publish/prepare.conf": "VALUE=obsolete\n",
+            "/etc/publish/old.conf": "PORT=6081\n"
+          },
+          "loaded": {
+            "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+            "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+            "publish.target": "[Unit]\nDescription=publish working target\n",
+            "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+            "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+            "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+          },
+          "runtime": {
+            "publish-observer.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                "configuration": "PORT=9103\n",
+                "artifact_input": null
+              }
+            },
+            "publish-old.service": {
+              "kind": "Running",
+              "snapshot": {
+                "unit_source": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n",
+                "configuration": "PORT=6081\n",
+                "artifact_input": null
+              }
+            }
+          },
+          "artifacts": {},
+          "boot_links": {
+            "publish.target": [
+              "publish-observer.service"
+            ],
+            "publish-spare.target": [
+              "publish-observer.service",
+              "publish-old.service"
+            ]
+          },
+          "default_target": "publish-spare.target"
+        }
+      },
+      "goal": {
+        "kind": "UnitManager",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "publish-inventory",
+              "units": [
+                "publish-app.service",
+                "publish-observer.service",
+                "publish-old.service",
+                "publish-prepare.service",
+                "publish-spare.target",
+                "publish.target"
+              ],
+              "config_paths": [
+                "/etc/publish/app.conf",
+                "/etc/publish/observer.conf",
+                "/etc/publish/old.conf",
+                "/etc/publish/prepare.conf"
+              ],
+              "artifact_ids": [
+                "publish-prepared"
+              ],
+              "programs": {
+                "/sim/bin/publish-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/publish/app.conf",
+                  "key": "PORT",
+                  "prerequisite": {
+                    "artifact": "publish-prepared",
+                    "value": "publish-v2"
+                  }
+                },
+                "/sim/bin/publish-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/publish/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/publish-prepare": {
+                  "kind": "ValueTask",
+                  "config": "/etc/publish/prepare.conf",
+                  "key": "VALUE",
+                  "artifact": "publish-prepared",
+                  "prerequisite": null
+                },
+                "/sim/bin/publish-old": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/publish/old.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+              "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+              "publish.target": "[Unit]\nDescription=publish working target\n",
+              "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+              "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+              "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+            },
+            "configuration": {
+              "/etc/publish/app.conf": "PORT=8080\n",
+              "/etc/publish/observer.conf": "PORT=9103\n",
+              "/etc/publish/prepare.conf": "VALUE=obsolete\n",
+              "/etc/publish/old.conf": "PORT=6081\n"
+            },
+            "loaded": {
+              "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+              "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+              "publish.target": "[Unit]\nDescription=publish working target\n",
+              "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+              "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+              "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+            },
+            "runtime": {
+              "publish-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                  "configuration": "PORT=9103\n",
+                  "artifact_input": null
+                }
+              },
+              "publish-old.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n",
+                  "configuration": "PORT=6081\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "publish.target": [
+                "publish-observer.service"
+              ],
+              "publish-spare.target": [
+                "publish-observer.service",
+                "publish-old.service"
+              ]
+            },
+            "default_target": "publish-spare.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "publish-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "publish-app.service",
+              "phase": "Running",
+              "port": 9443,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "publish-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "publish-observer.service",
+              "phase": "Running",
+              "port": 9103,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "publish-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "publish-prepare.service",
+              "phase": "Exited",
+              "port": null,
+              "value": "publish-v2"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "publish-prepare.service"
+            },
+            {
+              "kind": "Artifact",
+              "artifact": "publish-prepared",
+              "producer": "publish-prepare.service",
+              "value": "publish-v2",
+              "current_inputs": true
+            },
+            {
+              "kind": "Dependency",
+              "unit": "publish-app.service",
+              "target": "publish-prepare.service",
+              "dependency": "Requires",
+              "present": true
+            },
+            {
+              "kind": "Runtime",
+              "unit": "publish-old.service",
+              "phase": "Inactive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "InstallLink",
+              "target": "publish.target",
+              "unit": "publish-app.service",
+              "present": true
+            },
+            {
+              "kind": "InstallLink",
+              "target": "publish-spare.target",
+              "unit": "publish-old.service",
+              "present": false
+            },
+            {
+              "kind": "DefaultTarget",
+              "target": "publish.target"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "publish-app.service",
+                "phase": "Running",
+                "port": 9443,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "publish-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "publish-observer.service",
+                "phase": "Running",
+                "port": 9103,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "publish-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "publish-prepare.service",
+                "phase": "Exited",
+                "port": null,
+                "value": "publish-v2"
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "publish-prepare.service"
+              },
+              {
+                "kind": "Artifact",
+                "artifact": "publish-prepared",
+                "producer": "publish-prepare.service",
+                "value": "publish-v2",
+                "current_inputs": true
+              },
+              {
+                "kind": "Runtime",
+                "unit": "publish-old.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "publish-spare.target",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              }
+            ],
+            "started": [
+              "publish-app.service",
+              "publish-observer.service",
+              "publish-prepare.service",
+              "publish.target"
+            ],
+            "ordering": [
+              {
+                "before": "publish-prepare.service",
+                "after": "publish-app.service"
+              }
+            ]
+          },
+          "preservation": {
+            "unit_documents": [
+              "publish-observer.service",
+              "publish-old.service",
+              "publish-spare.target",
+              "publish.target"
+            ],
+            "configuration": [
+              "/etc/publish/observer.conf",
+              "/etc/publish/old.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "publish.target",
+                "unit": "publish-app.service"
+              },
+              {
+                "target": "publish-spare.target",
+                "unit": "publish-old.service"
+              }
+            ],
+            "default_target": false
+          }
+        }
+      },
+      "unit_manager_teaching": {
+        "prerequisite_note": "Complete the earlier service recovery activity. Read these concepts, then run this different ungraded example before opening the full assignment.",
+        "concepts": [
+          {
+            "title": "Saved files, loaded definitions and running programs",
+            "text": "Saving changes a supplied file. Run systemctl daemon-reload to make the service manager read saved unit definitions; this does not restart a running program. A program already running keeps its previous settings until you stop and start it. A previous passing check or old log entry does not prove the current work is correct."
+          },
+          {
+            "title": "Investigate before changing more files",
+            "text": "Use systemctl cat release-app.service to inspect its saved backing text and systemctl status release-app.service for current status. Open Loaded definition and current inputs below the editor to see the saved and loaded unit text and the settings used by its current program. systemctl show release-app.service -p Requires,Wants,After lists the supported dependency properties. journalctl -u release-app.service -o cat shows retained virtual messages. These queries change nothing; old messages are history, not proof of current success."
+          },
+          {
+            "title": "Request preparation and wait for it",
+            "text": "A dependency requests another unit. Requires makes that request a strong requirement, but does not put it first. Add After on the application or Before on preparation to order both requested jobs. A one-shot service runs one job and then exits: Type=oneshot describes this. RemainAfterExit=yes keeps it active after success. Here that job supplies named data for the application."
+          },
+          {
+            "title": "Start, then inspect status and logs",
+            "text": "Here, starting a service also lets the simulated program initialize. A successful start message can still be followed by a configuration failure; inspect status and logs. A simple service is intended to keep running. Its active label alone does not prove the application is ready."
+          },
+          {
+            "title": "Current service and the next session",
+            "text": "A target is a named group of units to start together. The default selects the group for the next session. Enabling links a service to that group; it does not start the program now. Stop affects the running program without removing that link. The default chooses the next-session target. Check work also tests the next session in a separate copy, so that check cannot repair the current assignment."
+          }
+        ],
+        "example_description": "Repair the separate release application at virtual port7304, then finish with its observer running at5204. Prepare example-ready-4, retire the old service/current link, enable the replacement and select release.target; keep every other link and the named preserved files. Use the individually explained actions, then inspect current and next-session outcomes. Virtual ports are values for this exercise; nothing listens on your computer.",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "schema_version": 1,
+              "fixture": "release-inventory",
+              "units": [
+                "release-app.service",
+                "release-observer.service",
+                "release-old.service",
+                "release-prepare.service",
+                "release-spare.target",
+                "release.target"
+              ],
+              "config_paths": [
+                "/etc/release/app.conf",
+                "/etc/release/observer.conf",
+                "/etc/release/old.conf",
+                "/etc/release/prepare.conf"
+              ],
+              "artifact_ids": [
+                "release-prepared"
+              ],
+              "programs": {
+                "/sim/bin/release-app": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/release/app.conf",
+                  "key": "PORT",
+                  "prerequisite": {
+                    "artifact": "release-prepared",
+                    "value": "example-ready-4"
+                  }
+                },
+                "/sim/bin/release-observer": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/release/observer.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                },
+                "/sim/bin/release-prepare": {
+                  "kind": "ValueTask",
+                  "config": "/etc/release/prepare.conf",
+                  "key": "VALUE",
+                  "artifact": "release-prepared",
+                  "prerequisite": null
+                },
+                "/sim/bin/release-old": {
+                  "kind": "PortDaemon",
+                  "config": "/etc/release/old.conf",
+                  "key": "PORT",
+                  "prerequisite": null
+                }
+              }
+            },
+            "documents": {
+              "release-app.service": "[Unit]\nDescription=App for release\nRequires=release-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/release-app\n[Install]\nWantedBy=release.target\n",
+              "release-observer.service": "[Unit]\nDescription=Observer for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-observer\n[Install]\nWantedBy=release.target\n",
+              "release.target": "[Unit]\nDescription=release working target\n",
+              "release-spare.target": "[Unit]\nDescription=release alternate target\n",
+              "release-prepare.service": "[Unit]\nDescription=Prepare for release\n[Service]\nType=oneshot\nExecStart=/sim/bin/release-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=release.target\n",
+              "release-old.service": "[Unit]\nDescription=Old for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-old\n[Install]\nWantedBy=release-spare.target\n"
+            },
+            "configuration": {
+              "/etc/release/app.conf": "PORT=8080\n",
+              "/etc/release/observer.conf": "PORT=5204\n",
+              "/etc/release/prepare.conf": "VALUE=obsolete\n",
+              "/etc/release/old.conf": "PORT=6081\n"
+            },
+            "loaded": {
+              "release-app.service": "[Unit]\nDescription=App for release\nRequires=release-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/release-app\n[Install]\nWantedBy=release.target\n",
+              "release-observer.service": "[Unit]\nDescription=Observer for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-observer\n[Install]\nWantedBy=release.target\n",
+              "release.target": "[Unit]\nDescription=release working target\n",
+              "release-spare.target": "[Unit]\nDescription=release alternate target\n",
+              "release-prepare.service": "[Unit]\nDescription=Prepare for release\n[Service]\nType=oneshot\nExecStart=/sim/bin/release-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=release.target\n",
+              "release-old.service": "[Unit]\nDescription=Old for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-old\n[Install]\nWantedBy=release-spare.target\n"
+            },
+            "runtime": {
+              "release-observer.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Observer for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-observer\n[Install]\nWantedBy=release.target\n",
+                  "configuration": "PORT=5204\n",
+                  "artifact_input": null
+                }
+              },
+              "release-old.service": {
+                "kind": "Running",
+                "snapshot": {
+                  "unit_source": "[Unit]\nDescription=Old for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-old\n[Install]\nWantedBy=release-spare.target\n",
+                  "configuration": "PORT=6081\n",
+                  "artifact_input": null
+                }
+              }
+            },
+            "artifacts": {},
+            "boot_links": {
+              "release.target": [
+                "release-observer.service"
+              ],
+              "release-spare.target": [
+                "release-observer.service",
+                "release-old.service"
+              ]
+            },
+            "default_target": "release-spare.target"
+          },
+          "requirements": [
+            {
+              "kind": "SavedConfigurationValid"
+            },
+            {
+              "kind": "LoadedCurrent",
+              "unit": "release-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "release-app.service",
+              "phase": "Running",
+              "port": 7304,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "release-app.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "release-observer.service",
+              "phase": "Running",
+              "port": 5204,
+              "value": null
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "release-observer.service"
+            },
+            {
+              "kind": "Runtime",
+              "unit": "release-prepare.service",
+              "phase": "Exited",
+              "port": null,
+              "value": "example-ready-4"
+            },
+            {
+              "kind": "ExecutionCurrent",
+              "unit": "release-prepare.service"
+            },
+            {
+              "kind": "Artifact",
+              "artifact": "release-prepared",
+              "producer": "release-prepare.service",
+              "value": "example-ready-4",
+              "current_inputs": true
+            },
+            {
+              "kind": "Dependency",
+              "unit": "release-app.service",
+              "target": "release-prepare.service",
+              "dependency": "Requires",
+              "present": true
+            },
+            {
+              "kind": "Runtime",
+              "unit": "release-old.service",
+              "phase": "Inactive",
+              "port": null,
+              "value": null
+            },
+            {
+              "kind": "InstallLink",
+              "target": "release.target",
+              "unit": "release-app.service",
+              "present": true
+            },
+            {
+              "kind": "InstallLink",
+              "target": "release-spare.target",
+              "unit": "release-old.service",
+              "present": false
+            },
+            {
+              "kind": "DefaultTarget",
+              "target": "release.target"
+            }
+          ],
+          "fresh": {
+            "requirements": [
+              {
+                "kind": "Runtime",
+                "unit": "release-app.service",
+                "phase": "Running",
+                "port": 7304,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "release-app.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "release-observer.service",
+                "phase": "Running",
+                "port": 5204,
+                "value": null
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "release-observer.service"
+              },
+              {
+                "kind": "Runtime",
+                "unit": "release-prepare.service",
+                "phase": "Exited",
+                "port": null,
+                "value": "example-ready-4"
+              },
+              {
+                "kind": "ExecutionCurrent",
+                "unit": "release-prepare.service"
+              },
+              {
+                "kind": "Artifact",
+                "artifact": "release-prepared",
+                "producer": "release-prepare.service",
+                "value": "example-ready-4",
+                "current_inputs": true
+              },
+              {
+                "kind": "Runtime",
+                "unit": "release-old.service",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              },
+              {
+                "kind": "Runtime",
+                "unit": "release-spare.target",
+                "phase": "Inactive",
+                "port": null,
+                "value": null
+              }
+            ],
+            "started": [
+              "release-app.service",
+              "release-observer.service",
+              "release-prepare.service",
+              "release.target"
+            ],
+            "ordering": [
+              {
+                "before": "release-prepare.service",
+                "after": "release-app.service"
+              }
+            ]
+          },
+          "preservation": {
+            "unit_documents": [
+              "release-observer.service",
+              "release-old.service",
+              "release-spare.target",
+              "release.target"
+            ],
+            "configuration": [
+              "/etc/release/observer.conf",
+              "/etc/release/old.conf"
+            ],
+            "preserve_other_boot_links": true,
+            "editable_boot_links": [
+              {
+                "target": "release.target",
+                "unit": "release-app.service"
+              },
+              {
+                "target": "release-spare.target",
+                "unit": "release-old.service"
+              }
+            ],
+            "default_target": false
+          }
+        },
+        "solution": [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "release-app.service": "[Unit]\nDescription=App for release\nRequires=release-prepare.service\nAfter=release-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/release-app\n[Install]\nWantedBy=release.target\n",
+                "release-observer.service": "[Unit]\nDescription=Observer for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-observer\n[Install]\nWantedBy=release.target\n",
+                "release.target": "[Unit]\nDescription=release working target\n",
+                "release-spare.target": "[Unit]\nDescription=release alternate target\n",
+                "release-prepare.service": "[Unit]\nDescription=Prepare for release\n[Service]\nType=oneshot\nExecStart=/sim/bin/release-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=release.target\n",
+                "release-old.service": "[Unit]\nDescription=Old for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-old\n[Install]\nWantedBy=release-spare.target\n"
+              },
+              "configuration": {
+                "/etc/release/app.conf": "PORT=7304\n",
+                "/etc/release/observer.conf": "PORT=5204\n",
+                "/etc/release/prepare.conf": "VALUE=example-ready-4\n",
+                "/etc/release/old.conf": "PORT=6081\n"
+              },
+              "selected_unit": "release-app.service",
+              "selected_config": "/etc/release/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "release-old.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "release-old.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "release-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "release.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "release.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Save",
+            "explanation": "Set /etc/release/app.conf to PORT=7304 and /etc/release/prepare.conf to VALUE=example-ready-4. Keep Requires=release-prepare.service and add After=release-prepare.service. Save; retain the observer/old-service/target documents and all other input.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "release-app.service": "[Unit]\nDescription=App for release\nRequires=release-prepare.service\nAfter=release-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/release-app\n[Install]\nWantedBy=release.target\n",
+                  "release-observer.service": "[Unit]\nDescription=Observer for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-observer\n[Install]\nWantedBy=release.target\n",
+                  "release.target": "[Unit]\nDescription=release working target\n",
+                  "release-spare.target": "[Unit]\nDescription=release alternate target\n",
+                  "release-prepare.service": "[Unit]\nDescription=Prepare for release\n[Service]\nType=oneshot\nExecStart=/sim/bin/release-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=release.target\n",
+                  "release-old.service": "[Unit]\nDescription=Old for release\n[Service]\nType=simple\nExecStart=/sim/bin/release-old\n[Install]\nWantedBy=release-spare.target\n"
+                },
+                "configuration": {
+                  "/etc/release/app.conf": "PORT=7304\n",
+                  "/etc/release/observer.conf": "PORT=5204\n",
+                  "/etc/release/prepare.conf": "VALUE=example-ready-4\n",
+                  "/etc/release/old.conf": "PORT=6081\n"
+                },
+                "selected_unit": "release-app.service",
+                "selected_config": "/etc/release/app.conf"
+              }
+            }
+          },
+          {
+            "title": "DaemonReload",
+            "explanation": "Read the saved unit definitions into the manager. This does not replace a running program.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          },
+          {
+            "title": "Stop release-old.service",
+            "explanation": "Stop only the named unit as shown; check the observer again when the repair is finished.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "release-old.service"
+              }
+            }
+          },
+          {
+            "title": "Disable release-old.service",
+            "explanation": "Remove this unit\u2019s supplied future target link without treating disable as a current stop.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Disable",
+                "unit": "release-old.service"
+              }
+            }
+          },
+          {
+            "title": "Enable release-app.service",
+            "explanation": "Create the declared future target link; this alone does not start the application.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Enable",
+                "unit": "release-app.service"
+              }
+            }
+          },
+          {
+            "title": "SetDefault release.target",
+            "explanation": "Choose the target used by the separate next-session inspection; current runtime is unchanged.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "SetDefault",
+                "target": "release.target"
+              }
+            }
+          },
+          {
+            "title": "Start release.target",
+            "explanation": "Start the supplied target and its requested dependencies, with ordering handled by the loaded definitions.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "release.target"
+              }
+            }
+          },
+          {
+            "title": "Inspect the started program",
+            "explanation": "Starting the virtual service also gives its program a chance to read its settings. Inspect status and logs to check whether it accepted them.",
+            "action": {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            }
+          }
+        ],
+        "try_change": "After the example passes, stop release-app.service. Its saved definition and future link remain. Inspect the difference between current and next-session checks, then start the application again and inspect its status and logs to confirm the repair.",
+        "try_actions": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "release-app.service"
+            }
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Runtime",
+            "unit": "release-app.service",
+            "phase": "Inactive",
+            "port": null,
+            "value": null
+          }
+        ],
+        "repair": [
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "release-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      },
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.unit.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemd.service.html",
+        "https://www.freedesktop.org/software/systemd/man/262/systemctl.html",
+        "https://www.freedesktop.org/software/systemd/man/262/journalctl.html"
+      ],
+      "hints": [
+        "Compare saved files, loaded definitions, the settings used by the running program and next-session checks before changing more files.",
+        "Check the named observer/preserved files and every failed current outcome; a journal success is historical evidence only.",
+        "Repair VALUE and PORT/order, retire the old current service and its link, then enable/select/start the new target."
+      ],
+      "topic": "Bounded virtual multi-unit service recovery",
+      "summary": "Hand over a multi-unit service without damaging its observer and verify the supplied observer at the end.",
+      "difficulty": "Intermediate",
+      "steps": [
+        "Understand the service-manager model",
+        "Work through the separate example",
+        "Repair the complete assignment and check current work"
+      ],
+      "guide": [],
+      "solution": [
+        "unit-manager {\"kind\":\"Save\",\"draft\":{\"version\":1,\"documents\":{\"publish-app.service\":\"[Unit]\\nDescription=App for publish\\nRequires=publish-prepare.service\\nAfter=publish-prepare.service\\n[Service]\\nType=simple\\nExecStart=/sim/bin/publish-app\\n[Install]\\nWantedBy=publish.target\\n\",\"publish-observer.service\":\"[Unit]\\nDescription=Observer for publish\\n[Service]\\nType=simple\\nExecStart=/sim/bin/publish-observer\\n[Install]\\nWantedBy=publish.target\\n\",\"publish.target\":\"[Unit]\\nDescription=publish working target\\n\",\"publish-spare.target\":\"[Unit]\\nDescription=publish alternate target\\n\",\"publish-prepare.service\":\"[Unit]\\nDescription=Prepare for publish\\n[Service]\\nType=oneshot\\nExecStart=/sim/bin/publish-prepare\\nRemainAfterExit=yes\\n[Install]\\nWantedBy=publish.target\\n\",\"publish-old.service\":\"[Unit]\\nDescription=Old for publish\\n[Service]\\nType=simple\\nExecStart=/sim/bin/publish-old\\n[Install]\\nWantedBy=publish-spare.target\\n\"},\"configuration\":{\"/etc/publish/app.conf\":\"PORT=9443\\n\",\"/etc/publish/observer.conf\":\"PORT=9103\\n\",\"/etc/publish/prepare.conf\":\"VALUE=publish-v2\\n\",\"/etc/publish/old.conf\":\"PORT=6081\\n\"},\"selected_unit\":\"publish-app.service\",\"selected_config\":\"/etc/publish/app.conf\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"DaemonReload\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Stop\",\"unit\":\"publish-old.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Disable\",\"unit\":\"publish-old.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Enable\",\"unit\":\"publish-app.service\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"SetDefault\",\"target\":\"publish.target\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"Start\",\"unit\":\"publish.target\"}}",
+        "unit-manager {\"kind\":\"Manager\",\"action\":{\"kind\":\"AdvancePrograms\"}}"
+      ],
+      "retry_guidance": "Inspect the failed current/fresh outcomes, saved-versus-loaded source, settings used by the running program and virtual logs. Preserve pending work and the named observer.",
+      "explanation": "The reference is one working route through the supplied model. It separates saved source, loaded definitions, input used by the running program and future target policy. Dependency direction and actual next-session job ordering matter; equivalent supported ordering, comments and safe action orders are accepted. Read the task\u2019s explicit preservation requirements rather than copying an unseen exact file.",
+      "simplifications": "UNVALIDATED STAGED CONTENT, not bundled or counted. Fixed virtual Inventory/program descriptors only; no host services, files, packets, processes, clock or boot. Simple-program initialization is a disclosed bounded event; Virtual ports are values for this exercise; nothing listens on your computer. No readiness, PID, real journal timestamp, restart/reload/mask, broad systemd or full LPIC2 coverage claim. Source references freshly checked2026-10-23; systemd262 and LPI LPIC2 objectives4.5.0."
+    }
+  ]
+}

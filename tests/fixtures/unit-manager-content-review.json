@@ -1,0 +1,1557 @@
+{
+  "schema_version": 1,
+  "source_only": true,
+  "original_catalog_ids": [
+    "ccna-acl-direction-repair",
+    "ccna-acl-policy-handover",
+    "ccna-acl-service-order",
+    "ccna-acl-source-policy",
+    "ccna-gateway",
+    "ccna-ipv4",
+    "ccna-ipv4-branch-handover",
+    "ccna-ipv4-floating-route",
+    "ccna-ipv4-host-exception",
+    "ccna-ipv4-network-route",
+    "ccna-ipv4-return-route",
+    "ccna-ipv4-specific-route",
+    "ccna-ipv6-backup",
+    "ccna-ipv6-handover",
+    "ccna-ipv6-neighbor",
+    "ccna-ipv6-scope",
+    "ccna-ipv6-specific-route",
+    "ccna-ipv6-workstation",
+    "ccna-lldp-handover",
+    "ccna-lldp-inventory",
+    "ccna-lldp-receive",
+    "ccna-lldp-transmit-policy",
+    "ccna-ospf-directed-ecmp",
+    "ccna-ospf-p2p-parameters",
+    "ccna-ospf-passive-handover",
+    "ccna-ospf-router-identity",
+    "ccna-vlan-access",
+    "ccna-vlan-handover",
+    "ccna-vlan-native",
+    "ccna-vlan-trunk",
+    "ccna-vlsm",
+    "lpic1-account-membership",
+    "lpic1-account-onboarding",
+    "lpic1-account-retirement",
+    "lpic1-account-team-handover",
+    "lpic1-copy-move",
+    "lpic1-creation-mask",
+    "lpic1-drop-directory",
+    "lpic1-file-cleanup",
+    "lpic1-file-handover",
+    "lpic1-file-names",
+    "lpic1-file-navigation",
+    "lpic1-logs",
+    "lpic1-permissions",
+    "lpic1-process-handover",
+    "lpic1-process-pause",
+    "lpic1-process-pending",
+    "lpic1-process-priority",
+    "lpic1-retire-handover",
+    "lpic1-team-brief",
+    "lpic1-traversal",
+    "lpic1-update-existing",
+    "lpic2-dns",
+    "lpic2-dns-aliases",
+    "lpic2-dns-dualstack",
+    "lpic2-dns-handover",
+    "lpic2-dns-mail",
+    "lpic2-dns-rrsets",
+    "lpic2-dns-secondary",
+    "lpic2-mount-handover",
+    "lpic2-mount-identity",
+    "lpic2-mount-manual",
+    "lpic2-mount-policy",
+    "lpic2-service",
+    "lpic2-storage",
+    "shell-arguments",
+    "shell-array-handover",
+    "shell-array-intake",
+    "shell-array-package",
+    "shell-array-priority",
+    "shell-batch-audit",
+    "shell-bundle",
+    "shell-capstone",
+    "shell-capture-decision",
+    "shell-capture-evidence",
+    "shell-capture-handover",
+    "shell-capture-preview",
+    "shell-collect-errors",
+    "shell-count-capstone",
+    "shell-cut-inventory",
+    "shell-eof",
+    "shell-file-batch-capstone",
+    "shell-file-manifest",
+    "shell-functions",
+    "shell-handover",
+    "shell-input",
+    "shell-local-heading",
+    "shell-loop",
+    "shell-number-records",
+    "shell-order-total",
+    "shell-pack-items",
+    "shell-pipelines",
+    "shell-report",
+    "shell-return",
+    "shell-scope-capstone",
+    "shell-scope-review",
+    "shell-shift",
+    "shell-sort-manifest",
+    "shell-streams",
+    "shell-text-capstone",
+    "shell-uniq-counts",
+    "shell-validation"
+  ],
+  "plans": [
+    {
+      "id": "lpic2-unit-loaded-recovery",
+      "reference": [
+        {
+          "kind": "Save",
+          "draft": {
+            "version": 1,
+            "documents": {
+              "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n",
+              "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+              "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+              "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+            },
+            "configuration": {
+              "/etc/dispatch/app.conf": "PORT=8443\n",
+              "/etc/dispatch/observer.conf": "PORT=9100\n"
+            },
+            "selected_unit": "dispatch-app.service",
+            "selected_config": "/etc/dispatch/app.conf"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "DaemonReload"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Stop",
+            "unit": "dispatch-app.service"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Start",
+            "unit": "dispatch.target"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "AdvancePrograms"
+          }
+        }
+      ],
+      "alternates": [
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "dispatch-app.service": "# reviewed independent edit\n[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n",
+                "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+                "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+              },
+              "configuration": {
+                "/etc/dispatch/app.conf": "PORT=8443\n",
+                "/etc/dispatch/observer.conf": "PORT=9100\n"
+              },
+              "selected_unit": "dispatch-app.service",
+              "selected_config": "/etc/dispatch/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "dispatch-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "dispatch.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n# reviewed service repair\n",
+                "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+                "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+              },
+              "configuration": {
+                "/etc/dispatch/app.conf": "PORT=8443\n",
+                "/etc/dispatch/observer.conf": "PORT=9100\n"
+              },
+              "selected_unit": "dispatch-app.service",
+              "selected_config": "/etc/dispatch/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "dispatch-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "dispatch-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      ],
+      "expected_complete": true,
+      "negative_sequences": [
+        {
+          "name": "read-only/no mutations",
+          "actions": []
+        },
+        {
+          "name": "only save edited text",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+                  "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+                },
+                "configuration": {
+                  "/etc/dispatch/app.conf": "PORT=8443\n",
+                  "/etc/dispatch/observer.conf": "PORT=9100\n"
+                },
+                "selected_unit": "dispatch-app.service",
+                "selected_config": "/etc/dispatch/app.conf"
+              }
+            }
+          ]
+        },
+        {
+          "name": "only save and reload",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+                  "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+                },
+                "configuration": {
+                  "/etc/dispatch/app.conf": "PORT=8443\n",
+                  "/etc/dispatch/observer.conf": "PORT=9100\n"
+                },
+                "selected_unit": "dispatch-app.service",
+                "selected_config": "/etc/dispatch/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer stopped",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+                  "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+                },
+                "configuration": {
+                  "/etc/dispatch/app.conf": "PORT=8443\n",
+                  "/etc/dispatch/observer.conf": "PORT=9100\n"
+                },
+                "selected_unit": "dispatch-app.service",
+                "selected_config": "/etc/dispatch/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "dispatch-app.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "dispatch.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "dispatch-observer.service"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer configuration damaged",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "dispatch-app.service": "[Unit]\nDescription=App for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-app\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch-observer.service": "[Unit]\nDescription=Observer for dispatch\n[Service]\nType=simple\nExecStart=/sim/bin/dispatch-observer\n[Install]\nWantedBy=dispatch.target\n",
+                  "dispatch.target": "[Unit]\nDescription=dispatch working target\n",
+                  "dispatch-spare.target": "[Unit]\nDescription=dispatch alternate target\n"
+                },
+                "configuration": {
+                  "/etc/dispatch/app.conf": "PORT=8443\n",
+                  "/etc/dispatch/observer.conf": "PORT=9100\n"
+                },
+                "selected_unit": "dispatch-app.service",
+                "selected_config": "/etc/dispatch/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "dispatch-app.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "dispatch.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "SaveConfig",
+                "path": "/etc/dispatch/observer.conf",
+                "text": "PORT=1\n"
+              }
+            }
+          ]
+        }
+      ],
+      "negative_expected_complete": false,
+      "additional_negative_obligations": [
+        "no changes/read-only investigation",
+        "save only",
+        "save plus reload but stale current execution",
+        "current repair without fresh transaction guarantee",
+        "stop/damage preserved observer",
+        "unrelated target/config/link damage",
+        "malformed pending editor text after a pass",
+        "valid conflicting saved edit after a pass",
+        "wrong supplied program"
+      ],
+      "feedback_assertion": "Every rejected draft/state has at least one nonempty plain-language failed outcome; no exact-string grading.",
+      "required_shared_checks": [
+        "fill_worked changes only separate draft; no saved/loaded/runtime/journal/assignment change",
+        "each annotated method really reaches all stated example outcomes",
+        "one explicit stop experiment then repair",
+        "unfinished assignment/example drafts retained through exact save/load/export/inspect/confirmed restore",
+        "mode changes retain current completion; stale checked/history cannot grant completion",
+        "selected reset resets only selected assignment, preserving every other accepted normal attempt/favorite",
+        "malformed pending text blocks current completion without discarding drafts",
+        "reference/inverse-order/direct-start alternates accepted; partial/physical or history shortcut rejected",
+        "no old Service dispatch/output/current7 and real6 history change"
+      ]
+    },
+    {
+      "id": "lpic2-unit-preparation-order",
+      "reference": [
+        {
+          "kind": "Save",
+          "draft": {
+            "version": 1,
+            "documents": {
+              "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\nAfter=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+              "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+              "archive.target": "[Unit]\nDescription=archive working target\n",
+              "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+              "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+            },
+            "configuration": {
+              "/etc/archive/app.conf": "PORT=8181\n",
+              "/etc/archive/observer.conf": "PORT=9101\n",
+              "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+            },
+            "selected_unit": "archive-app.service",
+            "selected_config": "/etc/archive/app.conf"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "DaemonReload"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Start",
+            "unit": "archive.target"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "AdvancePrograms"
+          }
+        }
+      ],
+      "alternates": [
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+                "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                "archive.target": "[Unit]\nDescription=archive working target\n",
+                "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+                "archive-prepare.service": "[Unit]\nBefore=archive-app.service\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+              },
+              "configuration": {
+                "/etc/archive/app.conf": "PORT=8181\n",
+                "/etc/archive/observer.conf": "PORT=9101\n",
+                "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+              },
+              "selected_unit": "archive-app.service",
+              "selected_config": "/etc/archive/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "archive.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\nAfter=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n# reviewed service repair\n",
+                "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                "archive.target": "[Unit]\nDescription=archive working target\n",
+                "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+                "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+              },
+              "configuration": {
+                "/etc/archive/app.conf": "PORT=8181\n",
+                "/etc/archive/observer.conf": "PORT=9101\n",
+                "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+              },
+              "selected_unit": "archive-app.service",
+              "selected_config": "/etc/archive/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "archive-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      ],
+      "expected_complete": true,
+      "negative_sequences": [
+        {
+          "name": "read-only/no mutations",
+          "actions": []
+        },
+        {
+          "name": "only save edited text",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\nAfter=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+                  "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                  "archive.target": "[Unit]\nDescription=archive working target\n",
+                  "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+                  "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+                },
+                "configuration": {
+                  "/etc/archive/app.conf": "PORT=8181\n",
+                  "/etc/archive/observer.conf": "PORT=9101\n",
+                  "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+                },
+                "selected_unit": "archive-app.service",
+                "selected_config": "/etc/archive/app.conf"
+              }
+            }
+          ]
+        },
+        {
+          "name": "only save and reload",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\nAfter=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+                  "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                  "archive.target": "[Unit]\nDescription=archive working target\n",
+                  "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+                  "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+                },
+                "configuration": {
+                  "/etc/archive/app.conf": "PORT=8181\n",
+                  "/etc/archive/observer.conf": "PORT=9101\n",
+                  "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+                },
+                "selected_unit": "archive-app.service",
+                "selected_config": "/etc/archive/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer stopped",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\nAfter=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+                  "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                  "archive.target": "[Unit]\nDescription=archive working target\n",
+                  "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+                  "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+                },
+                "configuration": {
+                  "/etc/archive/app.conf": "PORT=8181\n",
+                  "/etc/archive/observer.conf": "PORT=9101\n",
+                  "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+                },
+                "selected_unit": "archive-app.service",
+                "selected_config": "/etc/archive/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "archive.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "archive-observer.service"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer configuration damaged",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "archive-app.service": "[Unit]\nDescription=App for archive\nRequires=archive-prepare.service\nAfter=archive-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/archive-app\n[Install]\nWantedBy=archive.target\n",
+                  "archive-observer.service": "[Unit]\nDescription=Observer for archive\n[Service]\nType=simple\nExecStart=/sim/bin/archive-observer\n[Install]\nWantedBy=archive.target\n",
+                  "archive.target": "[Unit]\nDescription=archive working target\n",
+                  "archive-spare.target": "[Unit]\nDescription=archive alternate target\n",
+                  "archive-prepare.service": "[Unit]\nDescription=Prepare for archive\n[Service]\nType=oneshot\nExecStart=/sim/bin/archive-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=archive.target\n"
+                },
+                "configuration": {
+                  "/etc/archive/app.conf": "PORT=8181\n",
+                  "/etc/archive/observer.conf": "PORT=9101\n",
+                  "/etc/archive/prepare.conf": "VALUE=archive-ready\n"
+                },
+                "selected_unit": "archive-app.service",
+                "selected_config": "/etc/archive/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "archive.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "SaveConfig",
+                "path": "/etc/archive/observer.conf",
+                "text": "PORT=1\n"
+              }
+            }
+          ]
+        }
+      ],
+      "negative_expected_complete": false,
+      "additional_negative_obligations": [
+        "no changes/read-only investigation",
+        "save only",
+        "save plus reload but stale current execution",
+        "current repair without fresh transaction guarantee",
+        "stop/damage preserved observer",
+        "unrelated target/config/link damage",
+        "malformed pending editor text after a pass",
+        "valid conflicting saved edit after a pass",
+        "Requires without ordering or ordering without Requires"
+      ],
+      "feedback_assertion": "Every rejected draft/state has at least one nonempty plain-language failed outcome; no exact-string grading.",
+      "required_shared_checks": [
+        "fill_worked changes only separate draft; no saved/loaded/runtime/journal/assignment change",
+        "each annotated method really reaches all stated example outcomes",
+        "one explicit stop experiment then repair",
+        "unfinished assignment/example drafts retained through exact save/load/export/inspect/confirmed restore",
+        "mode changes retain current completion; stale checked/history cannot grant completion",
+        "selected reset resets only selected assignment, preserving every other accepted normal attempt/favorite",
+        "malformed pending text blocks current completion without discarding drafts",
+        "reference/inverse-order/direct-start alternates accepted; partial/physical or history shortcut rejected",
+        "no old Service dispatch/output/current7 and real6 history change"
+      ]
+    },
+    {
+      "id": "lpic2-unit-optional-wants",
+      "reference": [
+        {
+          "kind": "Save",
+          "draft": {
+            "version": 1,
+            "documents": {
+              "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+              "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+              "portal.target": "[Unit]\nDescription=portal working target\n",
+              "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+              "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+            },
+            "configuration": {
+              "/etc/portal/app.conf": "PORT=8282\n",
+              "/etc/portal/observer.conf": "PORT=9102\n",
+              "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+            },
+            "selected_unit": "portal-app.service",
+            "selected_config": "/etc/portal/app.conf"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "DaemonReload"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Start",
+            "unit": "portal.target"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "AdvancePrograms"
+          }
+        }
+      ],
+      "alternates": [
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+                "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                "portal.target": "[Unit]\nDescription=portal working target\n",
+                "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+                "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+              },
+              "configuration": {
+                "/etc/portal/app.conf": "PORT=8282\n",
+                "/etc/portal/observer.conf": "PORT=9102\n",
+                "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+              },
+              "selected_unit": "portal-app.service",
+              "selected_config": "/etc/portal/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "portal.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n# reviewed service repair\n",
+                "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                "portal.target": "[Unit]\nDescription=portal working target\n",
+                "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+                "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+              },
+              "configuration": {
+                "/etc/portal/app.conf": "PORT=8282\n",
+                "/etc/portal/observer.conf": "PORT=9102\n",
+                "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+              },
+              "selected_unit": "portal-app.service",
+              "selected_config": "/etc/portal/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "portal-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      ],
+      "expected_complete": true,
+      "negative_sequences": [
+        {
+          "name": "read-only/no mutations",
+          "actions": []
+        },
+        {
+          "name": "only save edited text",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+                  "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                  "portal.target": "[Unit]\nDescription=portal working target\n",
+                  "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+                  "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+                },
+                "configuration": {
+                  "/etc/portal/app.conf": "PORT=8282\n",
+                  "/etc/portal/observer.conf": "PORT=9102\n",
+                  "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+                },
+                "selected_unit": "portal-app.service",
+                "selected_config": "/etc/portal/app.conf"
+              }
+            }
+          ]
+        },
+        {
+          "name": "only save and reload",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+                  "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                  "portal.target": "[Unit]\nDescription=portal working target\n",
+                  "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+                  "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+                },
+                "configuration": {
+                  "/etc/portal/app.conf": "PORT=8282\n",
+                  "/etc/portal/observer.conf": "PORT=9102\n",
+                  "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+                },
+                "selected_unit": "portal-app.service",
+                "selected_config": "/etc/portal/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer stopped",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+                  "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                  "portal.target": "[Unit]\nDescription=portal working target\n",
+                  "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+                  "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+                },
+                "configuration": {
+                  "/etc/portal/app.conf": "PORT=8282\n",
+                  "/etc/portal/observer.conf": "PORT=9102\n",
+                  "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+                },
+                "selected_unit": "portal-app.service",
+                "selected_config": "/etc/portal/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "portal.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "portal-observer.service"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer configuration damaged",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "portal-app.service": "[Unit]\nDescription=App for portal\nWants=portal-optional.service\nAfter=portal-optional.service\n[Service]\nType=simple\nExecStart=/sim/bin/portal-app\n[Install]\nWantedBy=portal.target\n",
+                  "portal-observer.service": "[Unit]\nDescription=Observer for portal\n[Service]\nType=simple\nExecStart=/sim/bin/portal-observer\n[Install]\nWantedBy=portal.target\n",
+                  "portal.target": "[Unit]\nDescription=portal working target\n",
+                  "portal-spare.target": "[Unit]\nDescription=portal alternate target\n",
+                  "portal-optional.service": "[Unit]\nDescription=Optional for portal\n[Service]\nType=oneshot\nExecStart=/sim/bin/portal-optional\nRemainAfterExit=yes\n[Install]\nWantedBy=portal.target\n"
+                },
+                "configuration": {
+                  "/etc/portal/app.conf": "PORT=8282\n",
+                  "/etc/portal/observer.conf": "PORT=9102\n",
+                  "/etc/portal/optional.conf": "UNRECOGNIZED=leave-for-specialist\n"
+                },
+                "selected_unit": "portal-app.service",
+                "selected_config": "/etc/portal/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "portal.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "SaveConfig",
+                "path": "/etc/portal/observer.conf",
+                "text": "PORT=1\n"
+              }
+            }
+          ]
+        }
+      ],
+      "negative_expected_complete": false,
+      "additional_negative_obligations": [
+        "no changes/read-only investigation",
+        "save only",
+        "save plus reload but stale current execution",
+        "current repair without fresh transaction guarantee",
+        "stop/damage preserved observer",
+        "unrelated target/config/link damage",
+        "malformed pending editor text after a pass",
+        "valid conflicting saved edit after a pass",
+        "delete helper dependency or repair the intentionally preserved helper"
+      ],
+      "feedback_assertion": "Every rejected draft/state has at least one nonempty plain-language failed outcome; no exact-string grading.",
+      "required_shared_checks": [
+        "fill_worked changes only separate draft; no saved/loaded/runtime/journal/assignment change",
+        "each annotated method really reaches all stated example outcomes",
+        "one explicit stop experiment then repair",
+        "unfinished assignment/example drafts retained through exact save/load/export/inspect/confirmed restore",
+        "mode changes retain current completion; stale checked/history cannot grant completion",
+        "selected reset resets only selected assignment, preserving every other accepted normal attempt/favorite",
+        "malformed pending text blocks current completion without discarding drafts",
+        "reference/inverse-order/direct-start alternates accepted; partial/physical or history shortcut rejected",
+        "no old Service dispatch/output/current7 and real6 history change"
+      ]
+    },
+    {
+      "id": "lpic2-unit-target-handover",
+      "reference": [
+        {
+          "kind": "Save",
+          "draft": {
+            "version": 1,
+            "documents": {
+              "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\nAfter=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+              "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+              "publish.target": "[Unit]\nDescription=publish working target\n",
+              "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+              "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+              "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+            },
+            "configuration": {
+              "/etc/publish/app.conf": "PORT=9443\n",
+              "/etc/publish/observer.conf": "PORT=9103\n",
+              "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+              "/etc/publish/old.conf": "PORT=6081\n"
+            },
+            "selected_unit": "publish-app.service",
+            "selected_config": "/etc/publish/app.conf"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "DaemonReload"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Stop",
+            "unit": "publish-old.service"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Disable",
+            "unit": "publish-old.service"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Enable",
+            "unit": "publish-app.service"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "SetDefault",
+            "target": "publish.target"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "Start",
+            "unit": "publish.target"
+          }
+        },
+        {
+          "kind": "Manager",
+          "action": {
+            "kind": "AdvancePrograms"
+          }
+        }
+      ],
+      "alternates": [
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+                "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                "publish.target": "[Unit]\nDescription=publish working target\n",
+                "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+                "publish-prepare.service": "[Unit]\nBefore=publish-app.service\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+                "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+              },
+              "configuration": {
+                "/etc/publish/app.conf": "PORT=9443\n",
+                "/etc/publish/observer.conf": "PORT=9103\n",
+                "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+                "/etc/publish/old.conf": "PORT=6081\n"
+              },
+              "selected_unit": "publish-app.service",
+              "selected_config": "/etc/publish/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "publish-old.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "publish.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "publish-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "publish-old.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "publish.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ],
+        [
+          {
+            "kind": "Save",
+            "draft": {
+              "version": 1,
+              "documents": {
+                "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\nAfter=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+                "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                "publish.target": "[Unit]\nDescription=publish working target\n",
+                "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+                "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+                "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+              },
+              "configuration": {
+                "/etc/publish/app.conf": "PORT=9443\n",
+                "/etc/publish/observer.conf": "PORT=9103\n",
+                "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+                "/etc/publish/old.conf": "PORT=6081\n"
+              },
+              "selected_unit": "publish-app.service",
+              "selected_config": "/etc/publish/app.conf"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Stop",
+              "unit": "publish-old.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Enable",
+              "unit": "publish-app.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "SetDefault",
+              "target": "publish.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Disable",
+              "unit": "publish-old.service"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "DaemonReload"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "Start",
+              "unit": "publish.target"
+            }
+          },
+          {
+            "kind": "Manager",
+            "action": {
+              "kind": "AdvancePrograms"
+            }
+          }
+        ]
+      ],
+      "expected_complete": true,
+      "negative_sequences": [
+        {
+          "name": "read-only/no mutations",
+          "actions": []
+        },
+        {
+          "name": "only save edited text",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\nAfter=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+                  "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                  "publish.target": "[Unit]\nDescription=publish working target\n",
+                  "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+                  "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+                  "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+                },
+                "configuration": {
+                  "/etc/publish/app.conf": "PORT=9443\n",
+                  "/etc/publish/observer.conf": "PORT=9103\n",
+                  "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+                  "/etc/publish/old.conf": "PORT=6081\n"
+                },
+                "selected_unit": "publish-app.service",
+                "selected_config": "/etc/publish/app.conf"
+              }
+            }
+          ]
+        },
+        {
+          "name": "only save and reload",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\nAfter=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+                  "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                  "publish.target": "[Unit]\nDescription=publish working target\n",
+                  "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+                  "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+                  "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+                },
+                "configuration": {
+                  "/etc/publish/app.conf": "PORT=9443\n",
+                  "/etc/publish/observer.conf": "PORT=9103\n",
+                  "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+                  "/etc/publish/old.conf": "PORT=6081\n"
+                },
+                "selected_unit": "publish-app.service",
+                "selected_config": "/etc/publish/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer stopped",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\nAfter=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+                  "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                  "publish.target": "[Unit]\nDescription=publish working target\n",
+                  "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+                  "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+                  "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+                },
+                "configuration": {
+                  "/etc/publish/app.conf": "PORT=9443\n",
+                  "/etc/publish/observer.conf": "PORT=9103\n",
+                  "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+                  "/etc/publish/old.conf": "PORT=6081\n"
+                },
+                "selected_unit": "publish-app.service",
+                "selected_config": "/etc/publish/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "publish-old.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Disable",
+                "unit": "publish-old.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Enable",
+                "unit": "publish-app.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "SetDefault",
+                "target": "publish.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "publish.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "publish-observer.service"
+              }
+            }
+          ]
+        },
+        {
+          "name": "otherwise repaired but observer configuration damaged",
+          "actions": [
+            {
+              "kind": "Save",
+              "draft": {
+                "version": 1,
+                "documents": {
+                  "publish-app.service": "[Unit]\nDescription=App for publish\nRequires=publish-prepare.service\nAfter=publish-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/publish-app\n[Install]\nWantedBy=publish.target\n",
+                  "publish-observer.service": "[Unit]\nDescription=Observer for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-observer\n[Install]\nWantedBy=publish.target\n",
+                  "publish.target": "[Unit]\nDescription=publish working target\n",
+                  "publish-spare.target": "[Unit]\nDescription=publish alternate target\n",
+                  "publish-prepare.service": "[Unit]\nDescription=Prepare for publish\n[Service]\nType=oneshot\nExecStart=/sim/bin/publish-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=publish.target\n",
+                  "publish-old.service": "[Unit]\nDescription=Old for publish\n[Service]\nType=simple\nExecStart=/sim/bin/publish-old\n[Install]\nWantedBy=publish-spare.target\n"
+                },
+                "configuration": {
+                  "/etc/publish/app.conf": "PORT=9443\n",
+                  "/etc/publish/observer.conf": "PORT=9103\n",
+                  "/etc/publish/prepare.conf": "VALUE=publish-v2\n",
+                  "/etc/publish/old.conf": "PORT=6081\n"
+                },
+                "selected_unit": "publish-app.service",
+                "selected_config": "/etc/publish/app.conf"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "DaemonReload"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Stop",
+                "unit": "publish-old.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Disable",
+                "unit": "publish-old.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Enable",
+                "unit": "publish-app.service"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "SetDefault",
+                "target": "publish.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "Start",
+                "unit": "publish.target"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "AdvancePrograms"
+              }
+            },
+            {
+              "kind": "Manager",
+              "action": {
+                "kind": "SaveConfig",
+                "path": "/etc/publish/observer.conf",
+                "text": "PORT=1\n"
+              }
+            }
+          ]
+        }
+      ],
+      "negative_expected_complete": false,
+      "additional_negative_obligations": [
+        "no changes/read-only investigation",
+        "save only",
+        "save plus reload but stale current execution",
+        "current repair without fresh transaction guarantee",
+        "stop/damage preserved observer",
+        "unrelated target/config/link damage",
+        "malformed pending editor text after a pass",
+        "valid conflicting saved edit after a pass",
+        "default-only or enable-only; stale producer artifact; old unit/link left behind"
+      ],
+      "feedback_assertion": "Every rejected draft/state has at least one nonempty plain-language failed outcome; no exact-string grading.",
+      "required_shared_checks": [
+        "fill_worked changes only separate draft; no saved/loaded/runtime/journal/assignment change",
+        "each annotated method really reaches all stated example outcomes",
+        "one explicit stop experiment then repair",
+        "unfinished assignment/example drafts retained through exact save/load/export/inspect/confirmed restore",
+        "mode changes retain current completion; stale checked/history cannot grant completion",
+        "selected reset resets only selected assignment, preserving every other accepted normal attempt/favorite",
+        "malformed pending text blocks current completion without discarding drafts",
+        "reference/inverse-order/direct-start alternates accepted; partial/physical or history shortcut rejected",
+        "no old Service dispatch/output/current7 and real6 history change"
+      ]
+    }
+  ]
+}
