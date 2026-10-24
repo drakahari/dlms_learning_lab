@@ -1,6 +1,8 @@
 //! Bounded Unix file model. All paths name in-memory entries, never host files.
+mod find;
 mod permissions;
 use crate::engine::{self, Node};
+pub use find::{FindDiagnostic, FindDiagnosticKind, FindReport};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 const MAX_ENTRIES: usize = 256;
@@ -426,6 +428,11 @@ impl Tree {
             return Err("Invalid virtual filesystem state; no command executed.".into());
         }
         let words = crate::shell::literal_command(input)?;
+        // Read-only search retains partial results on traversal errors and does
+        // not enter generic option stripping or clone file contents.
+        if words.first().is_some_and(|word| word == "find") {
+            return self.find(&words[1..])?.terminal();
+        }
         let mut candidate = self.clone();
         let output = candidate.command(&words)?;
         if !candidate.valid() {
@@ -810,4 +817,4 @@ impl Tree {
         })
     }
 }
-pub const HELP: &str = "pwd [-L|-P] • cd [PATH|-] • ls [-a|-l|-d] [PATH] • cat PATH • mkdir PATH • touch PATH • cp FILE DEST • mv FILE DEST • rm [-f] FILE • rmdir EMPTY_DIR • umask [OCTAL] • chmod MODE PATH • chgrp GROUP PATH • id [-Gn|-nG] [USER]. chmod: 000–777 or explicit u/g/o/a +-= r/w/x clauses. Owner-only changes; chgrp requires membership; synthetic account IDs. -- ends options; quote spaces. No expansion, pipelines, redirection, recursion or host access. show is a simulator helper.";
+pub const HELP: &str = "pwd [-L|-P] • cd [PATH|-] • ls [-a|-l|-d] [PATH] • cat PATH • mkdir PATH • touch PATH • cp FILE DEST • mv FILE DEST • rm [-f] FILE • rmdir EMPTY_DIR • umask [OCTAL] • chmod MODE PATH • chgrp GROUP PATH • id [-Gn|-nG] [USER]. chmod: 000–777 or explicit u/g/o/a +-= r/w/x clauses. Owner-only changes; chgrp requires membership; synthetic account IDs. -- ends options; quote spaces. find START [-maxdepth N] [-name QUOTED_PATTERN|-type f|d ...] [-print] searches one virtual tree; quote * and ?. No file mutation by find; readable nonsearchable directory descent is unsupported and reported incomplete. -- applies to the older commands, not find. No expansion, pipelines, redirection, recursive mutation or host access. show is a simulator helper.";
