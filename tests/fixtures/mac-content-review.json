@@ -1,0 +1,442 @@
+[
+  {
+    "id": "ccna-mac-learn-paths",
+    "alternates": [
+      [
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:01:00:01\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}"
+      ],
+      [
+        "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}"
+      ]
+    ],
+    "partial": [
+      "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}"
+    ],
+    "wrong": [
+      {
+        "name": "destination_only",
+        "actions": [
+          "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}"
+        ],
+        "why": "Repeated destination lookup cannot supply archive source information."
+      },
+      {
+        "name": "disable_viewer_to_avoid_flooding",
+        "actions": [
+          "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:01:00:01\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"port dispatch viewer down\"}"
+        ],
+        "why": "The task preserves that port and still requires its broadcast copy."
+      }
+    ],
+    "repair_actions": [
+      {
+        "kind": "Send",
+        "source": "ticket",
+        "destination": "02:00:00:0b:00:02"
+      },
+      {
+        "kind": "Send",
+        "source": "store",
+        "destination": "02:00:00:0b:00:01"
+      }
+    ],
+    "reference": [
+      "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:01:00:01\"}"
+    ],
+    "experiment_actions": [
+      {
+        "kind": "Clear",
+        "switch": "museum",
+        "vlan": 30
+      }
+    ],
+    "experiment_outcomes": [
+      {
+        "kind": "Outcome",
+        "outcome": {
+          "kind": "Frame",
+          "label": "After clearing, the destination is unknown",
+          "from": "store",
+          "destination": "02:00:00:0b:00:01",
+          "after_seconds": 0,
+          "arrivals": [
+            "gallery",
+            "ticket"
+          ],
+          "accepted_by": [
+            "ticket"
+          ],
+          "forwarding": "UnknownUnicast"
+        }
+      }
+    ],
+    "retry_repair": [
+      "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:01:00:01\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}"
+    ]
+  },
+  {
+    "id": "ccna-mac-stale-location",
+    "alternates": [
+      [
+        "@mac {\"kind\":\"Clear\",\"switch\":\"operations\",\"vlan\":30}",
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:02:00:01\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:02:00:02\"}"
+      ],
+      [
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}"
+      ]
+    ],
+    "partial": [
+      "@mac {\"kind\":\"Clear\",\"switch\":\"operations\",\"vlan\":30}"
+    ],
+    "wrong": [
+      {
+        "name": "address_archive_only",
+        "actions": [
+          "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:02:00:02\"}"
+        ],
+        "why": "The wrong known destination remains pointed at monitor."
+      },
+      {
+        "name": "clear_all_repair_ops_only",
+        "actions": [
+          "@mac {\"kind\":\"Clear\",\"switch\":\"operations\",\"vlan\":null}",
+          "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:02:00:01\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:02:00:02\"}"
+        ],
+        "why": "Quality source rows and known service were lost."
+      },
+      {
+        "name": "down_wrong_target_port",
+        "actions": [
+          "@mac {\"kind\":\"Settings\",\"operation\":\"port operations monitor down\"}"
+        ],
+        "why": "Disabling another endpoint does not repair archive or preserve the task."
+      }
+    ],
+    "repair_actions": [
+      {
+        "kind": "Send",
+        "source": "staff-left",
+        "destination": "02:00:00:0c:00:05"
+      },
+      {
+        "kind": "Send",
+        "source": "staff-right",
+        "destination": "02:00:00:0c:00:04"
+      }
+    ],
+    "reference": [
+      "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:02:00:01\"}"
+    ],
+    "experiment_actions": [
+      {
+        "kind": "Clear",
+        "switch": "exhibit",
+        "vlan": 60
+      }
+    ],
+    "experiment_outcomes": [
+      {
+        "kind": "Outcome",
+        "outcome": {
+          "kind": "Frame",
+          "label": "Exhibit is still known",
+          "from": "front",
+          "destination": "02:00:00:0c:00:02",
+          "after_seconds": 0,
+          "arrivals": [
+            "store"
+          ],
+          "accepted_by": [
+            "store"
+          ],
+          "forwarding": "KnownUnicast"
+        }
+      },
+      {
+        "kind": "Outcome",
+        "outcome": {
+          "kind": "Frame",
+          "label": "Cleared staff destination is unknown",
+          "from": "staff-left",
+          "destination": "02:00:00:0c:00:05",
+          "after_seconds": 0,
+          "arrivals": [
+            "staff-right"
+          ],
+          "accepted_by": [
+            "staff-right"
+          ],
+          "forwarding": "UnknownUnicast"
+        }
+      }
+    ],
+    "retry_repair": [
+      "@mac {\"kind\":\"Clear\",\"switch\":\"operations\",\"vlan\":30}",
+      "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:02:00:01\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:02:00:02\"}"
+    ]
+  },
+  {
+    "id": "ccna-mac-source-refresh",
+    "alternates": [
+      [
+        "@mac {\"kind\":\"Aging\",\"seconds\":120}",
+        "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}"
+      ],
+      [
+        "@mac {\"kind\":\"Clear\",\"switch\":\"telemetry\",\"vlan\":70}",
+        "@mac {\"kind\":\"Aging\",\"seconds\":100}",
+        "@mac {\"kind\":\"Send\",\"source\":\"collector\",\"destination\":\"02:00:00:03:00:01\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}"
+      ]
+    ],
+    "partial": [
+      "@mac {\"kind\":\"Aging\",\"seconds\":120}"
+    ],
+    "wrong": [
+      {
+        "name": "destination_traffic_is_not_refresh",
+        "actions": [
+          "@mac {\"kind\":\"Aging\",\"seconds\":120}",
+          "@mac {\"kind\":\"Send\",\"source\":\"collector\",\"destination\":\"02:00:00:03:00:01\"}"
+        ],
+        "why": "Sensor’s old row expires inside the future quiet interval."
+      },
+      {
+        "name": "disable_expiry",
+        "actions": [
+          "@mac {\"kind\":\"Aging\",\"seconds\":0}",
+          "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}"
+        ],
+        "why": "Zero fails the bounded policy and later unknown-destination promise."
+      },
+      {
+        "name": "too_short",
+        "actions": [
+          "@mac {\"kind\":\"Aging\",\"seconds\":30}",
+          "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"collector\",\"destination\":\"02:00:00:03:00:01\"}"
+        ],
+        "why": "The required sixty-second interval outlasts this lifetime."
+      },
+      {
+        "name": "long_lifetime",
+        "actions": [
+          "@mac {\"kind\":\"Aging\",\"seconds\":1000}",
+          "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}"
+        ],
+        "why": "The requested upper bound and later expiry are not met."
+      }
+    ],
+    "repair_actions": [
+      {
+        "kind": "Send",
+        "source": "meter",
+        "destination": "02:00:00:0d:00:02"
+      }
+    ],
+    "reference": [
+      "@mac {\"kind\":\"Aging\",\"seconds\":90}",
+      "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}"
+    ],
+    "experiment_actions": [
+      {
+        "kind": "Advance",
+        "seconds": 50
+      }
+    ],
+    "experiment_outcomes": [
+      {
+        "kind": "Outcome",
+        "outcome": {
+          "kind": "Frame",
+          "label": "Expired meter is unknown now",
+          "from": "controller",
+          "destination": "02:00:00:0d:00:01",
+          "after_seconds": 0,
+          "arrivals": [
+            "display",
+            "meter"
+          ],
+          "accepted_by": [
+            "meter"
+          ],
+          "forwarding": "UnknownUnicast"
+        }
+      }
+    ],
+    "retry_repair": [
+      "@mac {\"kind\":\"Clear\",\"switch\":\"telemetry\",\"vlan\":70}",
+      "@mac {\"kind\":\"Aging\",\"seconds\":100}",
+      "@mac {\"kind\":\"Send\",\"source\":\"collector\",\"destination\":\"02:00:00:03:00:01\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}"
+    ]
+  },
+  {
+    "id": "ccna-mac-handover",
+    "alternates": [
+      [
+        "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+        "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+        "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+        "@mac {\"kind\":\"Clear\",\"switch\":\"left\",\"vlan\":110}",
+        "@mac {\"kind\":\"Clear\",\"switch\":\"core\",\"vlan\":110}",
+        "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}"
+      ],
+      [
+        "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+        "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+        "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"02:00:00:04:00:04\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}"
+      ]
+    ],
+    "partial": [
+      "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+      "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+      "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}"
+    ],
+    "wrong": [
+      {
+        "name": "configuration_only",
+        "actions": [
+          "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}"
+        ],
+        "why": "Required actual source rows are still missing/wrong."
+      },
+      {
+        "name": "forget_active_vlan",
+        "actions": [
+          "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:04:00:01\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:04:00:04\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"02:00:00:04:00:04\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"02:00:00:04:00:06\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"02:00:00:04:00:03\"}"
+        ],
+        "why": "Allowed lists alone do not activate the missing core VLAN."
+      },
+      {
+        "name": "omit_printer_relearning_after_clear",
+        "actions": [
+          "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+          "@mac {\"kind\":\"Clear\",\"switch\":\"left\",\"vlan\":110}",
+          "@mac {\"kind\":\"Clear\",\"switch\":\"core\",\"vlan\":110}",
+          "@mac {\"kind\":\"Clear\",\"switch\":\"right\",\"vlan\":110}",
+          "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:04:00:01\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:04:00:04\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"02:00:00:04:00:06\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"02:00:00:04:00:03\"}"
+        ],
+        "why": "Printer’s protected current source rows were erased."
+      },
+      {
+        "name": "first_desk_send_follows_bad_history",
+        "actions": [
+          "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+          "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:04:00:04\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:04:00:01\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"02:00:00:04:00:04\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"02:00:00:04:00:06\"}",
+          "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"02:00:00:04:00:03\"}"
+        ],
+        "why": "Desk never traversed all three switches before archive repaired the old location."
+      }
+    ],
+    "repair_actions": [
+      {
+        "kind": "Send",
+        "source": "store",
+        "destination": "02:00:00:0e:00:01"
+      }
+    ],
+    "reference": [
+      "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+      "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+      "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:04:00:01\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:04:00:04\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"02:00:00:04:00:04\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"02:00:00:04:00:06\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"02:00:00:04:00:03\"}"
+    ],
+    "experiment_actions": [
+      {
+        "kind": "Clear",
+        "switch": "demo-left",
+        "vlan": 25
+      }
+    ],
+    "experiment_outcomes": [
+      {
+        "kind": "Outcome",
+        "outcome": {
+          "kind": "Frame",
+          "label": "Visitors stay known",
+          "from": "guest-left",
+          "destination": "02:00:00:0e:00:04",
+          "after_seconds": 0,
+          "arrivals": [
+            "guest-right"
+          ],
+          "accepted_by": [
+            "guest-right"
+          ],
+          "forwarding": "KnownUnicast"
+        }
+      },
+      {
+        "kind": "Outcome",
+        "outcome": {
+          "kind": "Frame",
+          "label": "Museum reaches the intended peer",
+          "from": "front",
+          "destination": "02:00:00:0e:00:02",
+          "after_seconds": 0,
+          "arrivals": [
+            "store"
+          ],
+          "accepted_by": [
+            "store"
+          ],
+          "forwarding": null
+        }
+      }
+    ],
+    "retry_repair": [
+      "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+      "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+      "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+      "@mac {\"kind\":\"Clear\",\"switch\":\"left\",\"vlan\":110}",
+      "@mac {\"kind\":\"Clear\",\"switch\":\"core\",\"vlan\":110}",
+      "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}",
+      "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"ff:ff:ff:ff:ff:ff\"}"
+    ]
+  }
+]

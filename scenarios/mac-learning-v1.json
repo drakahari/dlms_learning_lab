@@ -1,0 +1,3780 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-mac-learn-paths",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ethernet learning and recovery",
+      "unit": "ethernet-learning",
+      "title": "Build directed paths from both sources",
+      "summary": "Prepare a small dispatch exchange and distinguish an individual reply from a broadcast.",
+      "objective": "Prepare the dispatch switch so console (02:00:00:01:00:01) and archive (02:00:00:01:00:02) have current source rows on their own ports. Both directions must use known-unicast forwarding: a console-to-archive frame arrives only at archive, and its reply arrives only at console. Viewer must not receive those directed copies.\n\nA console broadcast must still arrive at and be accepted by archive and viewer. Keep the supplied port states, access membership and active VLAN 10. Use actual sends to build the table, then Check work; an earlier trace is not evidence of the current table.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied endpoints",
+        "Learn both directions",
+        "Verify individual and broadcast behavior"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the supplied endpoints",
+          "why": "A sender choice supplies a fixed source address.",
+          "action": "Locate console, archive and viewer in the diagram and From menu.",
+          "commands": []
+        },
+        {
+          "title": "Learn both directions",
+          "why": "A received source, not a destination lookup, supplies a table row.",
+          "action": "Send from each exchange endpoint and inspect the resulting rows.",
+          "commands": []
+        },
+        {
+          "title": "Verify individual and broadcast behavior",
+          "why": "The checks use fresh independent copies of the same current network.",
+          "action": "Use Check work and compare its known paths with the broadcast requirement.",
+          "commands": []
+        }
+      ],
+      "explanation": "The native editor and frame controls change only this virtual network. Completion uses the current port/table state and independent test frames and time checks; no remembered trace or exact sequence of actions is required. Legitimate alternate sends and recovery order are accepted when the stated outcomes hold.",
+      "hints": [
+        "A frame sent only by console cannot create archive’s source row.",
+        "Broadcast is a different destination address; it is not restricted to one learned port."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/cdp-lldp-mac-udld/cdp-lldp-mac-udld-configuration-guide/c-configure-mac.html",
+        "https://www.cisco.com/c/en/us/support/docs/switches/catalyst-6000-series-switches/23563-143.html"
+      ],
+      "simplifications": "Source check 2026-10-24: current CCNA 200-301 v 1.1, 1.13/a–d concepts only; future blueprints separate. Finite metadata frames and fixed Ethernet forest, manual simulated clock, source-only refresh, educational aging range 0–3600s, untagged endpoint acceptance, no real packets/ARP/IP/STP/multicast beyond broadcast/Cisco CLI/hardware conformance. A supplied older table shows a previous location for diagnosis; the simulator has not moved a live cable. No vendor endorsement or complete objective/exam-preparation claim.",
+      "initial": {
+        "kind": "MacLearning",
+        "simulation": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "dispatch": {
+                "label": "Dispatch",
+                "vlans": [
+                  10
+                ],
+                "ports": {
+                  "console": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "archive": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "viewer": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "console": {
+                "label": "Dispatch console",
+                "up": true
+              },
+              "archive": {
+                "label": "Archive station",
+                "up": true
+              },
+              "viewer": {
+                "label": "Monitoring desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-console",
+                "a": {
+                  "kind": "host",
+                  "host": "console"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "dispatch",
+                  "port": "console"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-archive",
+                "a": {
+                  "kind": "host",
+                  "host": "archive"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "dispatch",
+                  "port": "archive"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-viewer",
+                "a": {
+                  "kind": "host",
+                  "host": "viewer"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "dispatch",
+                  "port": "viewer"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "console": "02:00:00:01:00:01",
+            "archive": "02:00:00:01:00:02",
+            "viewer": "02:00:00:01:00:03"
+          },
+          "entries": [],
+          "now": 0,
+          "aging_seconds": 300
+        }
+      },
+      "goal": {
+        "kind": "MacLearning",
+        "initial": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "dispatch": {
+                "label": "Dispatch",
+                "vlans": [
+                  10
+                ],
+                "ports": {
+                  "console": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "archive": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  },
+                  "viewer": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 10
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "console": {
+                "label": "Dispatch console",
+                "up": true
+              },
+              "archive": {
+                "label": "Archive station",
+                "up": true
+              },
+              "viewer": {
+                "label": "Monitoring desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-console",
+                "a": {
+                  "kind": "host",
+                  "host": "console"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "dispatch",
+                  "port": "console"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-archive",
+                "a": {
+                  "kind": "host",
+                  "host": "archive"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "dispatch",
+                  "port": "archive"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-viewer",
+                "a": {
+                  "kind": "host",
+                  "host": "viewer"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "dispatch",
+                  "port": "viewer"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "console": "02:00:00:01:00:01",
+            "archive": "02:00:00:01:00:02",
+            "viewer": "02:00:00:01:00:03"
+          },
+          "entries": [],
+          "now": 0,
+          "aging_seconds": 300
+        },
+        "requirements": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "dispatch",
+              "vlan": 10,
+              "address": "02:00:00:01:00:01",
+              "port": "console"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "dispatch",
+              "vlan": 10,
+              "address": "02:00:00:01:00:02",
+              "port": "archive"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Console to archive",
+              "from": "console",
+              "destination": "02:00:00:01:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "archive"
+              ],
+              "accepted_by": [
+                "archive"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Archive reply",
+              "from": "archive",
+              "destination": "02:00:00:01:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "console"
+              ],
+              "accepted_by": [
+                "console"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Broadcast remains a group copy",
+              "from": "console",
+              "destination": "ff:ff:ff:ff:ff:ff",
+              "after_seconds": 0,
+              "arrivals": [
+                "archive",
+                "viewer"
+              ],
+              "accepted_by": [
+                "archive",
+                "viewer"
+              ],
+              "forwarding": "Broadcast"
+            }
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "dispatch",
+            "vlans": [
+              10
+            ]
+          },
+          {
+            "kind": "Port",
+            "switch": "dispatch",
+            "port": "console",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 10
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "dispatch",
+            "port": "archive",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 10
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "dispatch",
+            "port": "viewer",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 10
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "@mac {\"kind\":\"Send\",\"source\":\"console\",\"destination\":\"02:00:00:01:00:02\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:01:00:01\"}"
+      ],
+      "prerequisites": [
+        "ccna-vlan-access"
+      ],
+      "mac_teaching": {
+        "prerequisite_note": "Builds on Reconnect a workstation to its workgroup: use an existing VLAN without changing its ports. This lesson introduces frames, MAC addresses and source learning before you send anything.",
+        "concepts": [
+          {
+            "title": "Where to work",
+            "text": "The From workstation menu supplies the available senders and their MAC addresses. Type a destination address in Destination MAC and choose Send frame. Check work reveals current objective results. The network diagram, table and Last frame trace are native simulator views, not switch commands."
+          },
+          {
+            "title": "What a frame identifies",
+            "text": "A frame is one local Ethernet message. A MAC address has six pairs using digits 0–9 and letters a–f, such as 02:00:00:0b:00:02. Copy the supplied values; no hexadecimal calculation is needed. Each frame has a source and a destination. Choose the source by its workstation name; this activity does not let you invent or spoof a sender."
+          },
+          {
+            "title": "How the switch learns",
+            "text": "Receiving a frame teaches the switch its source address, local VLAN and incoming port. Addressing a quiet station does not teach where that destination lives. A frame sent back from the quiet station supplies that missing source information."
+          },
+          {
+            "title": "Copies and acceptance are different",
+            "text": "Known unicast means the destination has a learned table entry: the switch sends through that one learned port. If the destination has no entry, unknown unicast copies the frame to other eligible ports in its VLAN; only the addressed modeled station accepts it. A broadcast uses ff:ff:ff:ff:ff:ff and is accepted by all other running stations in the group. Learning is not a privacy or security boundary."
+          }
+        ],
+        "example_description": "In the museum example, ticket is 02:00:00:0b:00:01 and store is 02:00:00:0b:00:02. Insert the ticket-to-store action, then choose Send frame; observe the source row. Choose the store-to-ticket action, Insert and Send. Check example, then inspect the optional trace.",
+        "fixture": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "museum": {
+                "label": "Museum",
+                "vlans": [
+                  30
+                ],
+                "ports": {
+                  "ticket": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "store": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "gallery": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "ticket": {
+                "label": "Ticket desk",
+                "up": true
+              },
+              "store": {
+                "label": "Museum store",
+                "up": true
+              },
+              "gallery": {
+                "label": "Gallery desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-ticket",
+                "a": {
+                  "kind": "host",
+                  "host": "ticket"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "museum",
+                  "port": "ticket"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-store",
+                "a": {
+                  "kind": "host",
+                  "host": "store"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "museum",
+                  "port": "store"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-gallery",
+                "a": {
+                  "kind": "host",
+                  "host": "gallery"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "museum",
+                  "port": "gallery"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "ticket": "02:00:00:0b:00:01",
+            "store": "02:00:00:0b:00:02",
+            "gallery": "02:00:00:0b:00:03"
+          },
+          "entries": [],
+          "now": 0,
+          "aging_seconds": 300
+        },
+        "example_solution": [
+          {
+            "kind": "Send",
+            "source": "ticket",
+            "destination": "02:00:00:0b:00:02"
+          },
+          {
+            "kind": "Send",
+            "source": "store",
+            "destination": "02:00:00:0b:00:01"
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "museum",
+              "vlan": 30,
+              "address": "02:00:00:0b:00:01",
+              "port": "ticket"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "museum",
+              "vlan": 30,
+              "address": "02:00:00:0b:00:02",
+              "port": "store"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Directed store reply",
+              "from": "store",
+              "destination": "02:00:00:0b:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "ticket"
+              ],
+              "accepted_by": [
+                "ticket"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          }
+        ],
+        "try_change": "Use Time and selective clear tools to clear VLAN 30 on museum. Both rows disappear. Send a store-to-ticket frame now: this test frame uses unknown-destination copying and can reach gallery as well as ticket. Repeat both original sends to repair the example.",
+        "try_actions": [
+          {
+            "kind": "Clear",
+            "switch": "museum",
+            "vlan": 30
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "After clearing, the destination is unknown",
+              "from": "store",
+              "destination": "02:00:00:0b:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "gallery",
+                "ticket"
+              ],
+              "accepted_by": [
+                "ticket"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-mac-stale-location",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ethernet learning and recovery",
+      "unit": "ethernet-learning",
+      "title": "Repair an older location without losing another group",
+      "summary": "Diagnose a directed frame that follows the wrong historical port and retain quality-team service.",
+      "objective": "The supplied older operations table points archive (02:00:00:02:00:02) at monitor instead of archive’s current attached port. Restore archive’s source row to port archive and retain desk’s row on desk. At handover, both directions between desk and archive must use known paths and arrive only at the addressed peer.\n\nQuality VLAN 40 must retain both current source rows and known-unicast service in both directions between qa-left and qa-right. A VLAN 30 frame aimed at qa-left may be copied to archive and monitor, but no quality station may accept it. Keep every supplied port and active VLAN setting. Selective clear and direct source relearning are both valid recovery tools; final outcomes matter, not an exact action sequence.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Compare table and physical attachment",
+        "Recover only the relevant learning",
+        "Keep the other group working"
+      ],
+      "guide": [
+        {
+          "title": "Compare table and physical attachment",
+          "why": "A known row can be wrong in the supplied older snapshot.",
+          "action": "Inspect archive’s row and its actual connected port.",
+          "commands": []
+        },
+        {
+          "title": "Recover only the relevant learning",
+          "why": "Destination lookups do not repair a source location.",
+          "action": "Have the correct source talk, or clear the affected VLAN and rebuild its necessary rows.",
+          "commands": []
+        },
+        {
+          "title": "Keep the other group working",
+          "why": "Current quality rows and both directions remain part of the task.",
+          "action": "Check all objectives, including quality and group separation.",
+          "commands": []
+        }
+      ],
+      "explanation": "The native editor and frame controls change only this virtual network. Completion uses the current port/table state and independent test frames and time checks; no remembered trace or exact sequence of actions is required. Legitimate alternate sends and recovery order are accepted when the stated outcomes hold.",
+      "hints": [
+        "Archive must be the source of at least one useful recovery frame.",
+        "Clearing every VLAN is not itself a repair; any required known rows must exist again at handover."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/cdp-lldp-mac-udld/cdp-lldp-mac-udld-configuration-guide/c-configure-mac.html",
+        "https://www.cisco.com/c/en/us/support/docs/switches/catalyst-6000-series-switches/23563-143.html"
+      ],
+      "simplifications": "Source check 2026-10-24: current CCNA 200-301 v 1.1, 1.13/a–d concepts only; future blueprints separate. Finite metadata frames and fixed Ethernet forest, manual simulated clock, source-only refresh, educational aging range 0–3600s, untagged endpoint acceptance, no real packets/ARP/IP/STP/multicast beyond broadcast/Cisco CLI/hardware conformance. A supplied older table shows a previous location for diagnosis; the simulator has not moved a live cable. No vendor endorsement or complete objective/exam-preparation claim.",
+      "initial": {
+        "kind": "MacLearning",
+        "simulation": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "operations": {
+                "label": "Operations",
+                "vlans": [
+                  30,
+                  40
+                ],
+                "ports": {
+                  "desk": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "archive": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "monitor": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "qa-left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 40
+                    }
+                  },
+                  "qa-right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 40
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "desk": {
+                "label": "Operations desk",
+                "up": true
+              },
+              "archive": {
+                "label": "Archive station",
+                "up": true
+              },
+              "monitor": {
+                "label": "Monitor desk",
+                "up": true
+              },
+              "qa-left": {
+                "label": "Quality left",
+                "up": true
+              },
+              "qa-right": {
+                "label": "Quality right",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-desk",
+                "a": {
+                  "kind": "host",
+                  "host": "desk"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "desk"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-archive",
+                "a": {
+                  "kind": "host",
+                  "host": "archive"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "archive"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-monitor",
+                "a": {
+                  "kind": "host",
+                  "host": "monitor"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "monitor"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-qa-left",
+                "a": {
+                  "kind": "host",
+                  "host": "qa-left"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "qa-left"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-qa-right",
+                "a": {
+                  "kind": "host",
+                  "host": "qa-right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "qa-right"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "desk": "02:00:00:02:00:01",
+            "archive": "02:00:00:02:00:02",
+            "monitor": "02:00:00:02:00:03",
+            "qa-left": "02:00:00:02:00:04",
+            "qa-right": "02:00:00:02:00:05"
+          },
+          "entries": [
+            {
+              "switch": "operations",
+              "vlan": 30,
+              "address": "02:00:00:02:00:01",
+              "port": "desk",
+              "learned_at": 90
+            },
+            {
+              "switch": "operations",
+              "vlan": 30,
+              "address": "02:00:00:02:00:02",
+              "port": "monitor",
+              "learned_at": 90
+            },
+            {
+              "switch": "operations",
+              "vlan": 40,
+              "address": "02:00:00:02:00:04",
+              "port": "qa-left",
+              "learned_at": 90
+            },
+            {
+              "switch": "operations",
+              "vlan": 40,
+              "address": "02:00:00:02:00:05",
+              "port": "qa-right",
+              "learned_at": 90
+            }
+          ],
+          "now": 100,
+          "aging_seconds": 300
+        }
+      },
+      "goal": {
+        "kind": "MacLearning",
+        "initial": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "operations": {
+                "label": "Operations",
+                "vlans": [
+                  30,
+                  40
+                ],
+                "ports": {
+                  "desk": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "archive": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "monitor": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 30
+                    }
+                  },
+                  "qa-left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 40
+                    }
+                  },
+                  "qa-right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 40
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "desk": {
+                "label": "Operations desk",
+                "up": true
+              },
+              "archive": {
+                "label": "Archive station",
+                "up": true
+              },
+              "monitor": {
+                "label": "Monitor desk",
+                "up": true
+              },
+              "qa-left": {
+                "label": "Quality left",
+                "up": true
+              },
+              "qa-right": {
+                "label": "Quality right",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-desk",
+                "a": {
+                  "kind": "host",
+                  "host": "desk"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "desk"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-archive",
+                "a": {
+                  "kind": "host",
+                  "host": "archive"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "archive"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-monitor",
+                "a": {
+                  "kind": "host",
+                  "host": "monitor"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "monitor"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-qa-left",
+                "a": {
+                  "kind": "host",
+                  "host": "qa-left"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "qa-left"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-qa-right",
+                "a": {
+                  "kind": "host",
+                  "host": "qa-right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "operations",
+                  "port": "qa-right"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "desk": "02:00:00:02:00:01",
+            "archive": "02:00:00:02:00:02",
+            "monitor": "02:00:00:02:00:03",
+            "qa-left": "02:00:00:02:00:04",
+            "qa-right": "02:00:00:02:00:05"
+          },
+          "entries": [
+            {
+              "switch": "operations",
+              "vlan": 30,
+              "address": "02:00:00:02:00:01",
+              "port": "desk",
+              "learned_at": 90
+            },
+            {
+              "switch": "operations",
+              "vlan": 30,
+              "address": "02:00:00:02:00:02",
+              "port": "monitor",
+              "learned_at": 90
+            },
+            {
+              "switch": "operations",
+              "vlan": 40,
+              "address": "02:00:00:02:00:04",
+              "port": "qa-left",
+              "learned_at": 90
+            },
+            {
+              "switch": "operations",
+              "vlan": 40,
+              "address": "02:00:00:02:00:05",
+              "port": "qa-right",
+              "learned_at": 90
+            }
+          ],
+          "now": 100,
+          "aging_seconds": 300
+        },
+        "requirements": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "operations",
+              "vlan": 30,
+              "address": "02:00:00:02:00:02",
+              "port": "archive"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "operations",
+              "vlan": 30,
+              "address": "02:00:00:02:00:01",
+              "port": "desk"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "operations",
+              "vlan": 40,
+              "address": "02:00:00:02:00:04",
+              "port": "qa-left"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "operations",
+              "vlan": 40,
+              "address": "02:00:00:02:00:05",
+              "port": "qa-right"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Operations request",
+              "from": "desk",
+              "destination": "02:00:00:02:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "archive"
+              ],
+              "accepted_by": [
+                "archive"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Operations reply",
+              "from": "archive",
+              "destination": "02:00:00:02:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "desk"
+              ],
+              "accepted_by": [
+                "desk"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Quality left to right",
+              "from": "qa-left",
+              "destination": "02:00:00:02:00:05",
+              "after_seconds": 0,
+              "arrivals": [
+                "qa-right"
+              ],
+              "accepted_by": [
+                "qa-right"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Quality right to left",
+              "from": "qa-right",
+              "destination": "02:00:00:02:00:04",
+              "after_seconds": 0,
+              "arrivals": [
+                "qa-left"
+              ],
+              "accepted_by": [
+                "qa-left"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "VLAN 30 stays separate from quality",
+              "from": "desk",
+              "destination": "02:00:00:02:00:04",
+              "after_seconds": 0,
+              "arrivals": [
+                "archive",
+                "monitor"
+              ],
+              "accepted_by": [],
+              "forwarding": null
+            }
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "operations",
+            "vlans": [
+              30,
+              40
+            ]
+          },
+          {
+            "kind": "Port",
+            "switch": "operations",
+            "port": "desk",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 30
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "operations",
+            "port": "archive",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 30
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "operations",
+            "port": "monitor",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 30
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "operations",
+            "port": "qa-left",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 40
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "operations",
+            "port": "qa-right",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 40
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:02:00:01\"}"
+      ],
+      "prerequisites": [
+        "ccna-mac-learn-paths"
+      ],
+      "mac_teaching": {
+        "prerequisite_note": "Builds on Build directed paths from both sources: you can already choose source/destination and read a learned row. This activity supplies an older table on purpose; cables and fixed station identities have not changed during the simulation.",
+        "concepts": [
+          {
+            "title": "Read the current location",
+            "text": "A known entry can point to the wrong existing port in the supplied older table. The switch can then direct a frame to that port, yet the intended station receives nothing. Delivery failure is not always a missing VLAN."
+          },
+          {
+            "title": "Repair from the actual source",
+            "text": "A valid frame from that station replaces its source-to-ingress location. Sending more frames only to its address does not update its source row. Relearning is an alternative to clearing the bad entry first."
+          },
+          {
+            "title": "Limit a clear to the intended group",
+            "text": "Open Time and selective clear tools, choose a switch, enter a VLAN and choose Clear dynamic entries. Empty VLAN means every dynamic row on that switch. A clear removes information; it does not rebuild a known path. Other VLANs keep their own rows."
+          },
+          {
+            "title": "Preserve outcomes at handover",
+            "text": "The task checks the repaired group and the other group from the same current state. You may use any send order that produces the required current results. Extra legitimate learning is allowed when every stated outcome still holds."
+          }
+        ],
+        "example_description": "The exhibit table points store at spare, while staff VLAN 60 already works. Insert each native example action: clear VLAN 50 only, send store to front, then front to store. Check example. Staff must still have its known path.",
+        "fixture": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "exhibit": {
+                "label": "Exhibit",
+                "vlans": [
+                  50,
+                  60
+                ],
+                "ports": {
+                  "front": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 50
+                    }
+                  },
+                  "store": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 50
+                    }
+                  },
+                  "spare": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 50
+                    }
+                  },
+                  "staff-left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 60
+                    }
+                  },
+                  "staff-right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 60
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "front": {
+                "label": "Exhibit front",
+                "up": true
+              },
+              "store": {
+                "label": "Store station",
+                "up": true
+              },
+              "spare": {
+                "label": "Spare desk",
+                "up": true
+              },
+              "staff-left": {
+                "label": "Staff left",
+                "up": true
+              },
+              "staff-right": {
+                "label": "Staff right",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-front",
+                "a": {
+                  "kind": "host",
+                  "host": "front"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "exhibit",
+                  "port": "front"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-store",
+                "a": {
+                  "kind": "host",
+                  "host": "store"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "exhibit",
+                  "port": "store"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-spare",
+                "a": {
+                  "kind": "host",
+                  "host": "spare"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "exhibit",
+                  "port": "spare"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-staff-left",
+                "a": {
+                  "kind": "host",
+                  "host": "staff-left"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "exhibit",
+                  "port": "staff-left"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-staff-right",
+                "a": {
+                  "kind": "host",
+                  "host": "staff-right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "exhibit",
+                  "port": "staff-right"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "front": "02:00:00:0c:00:01",
+            "store": "02:00:00:0c:00:02",
+            "spare": "02:00:00:0c:00:03",
+            "staff-left": "02:00:00:0c:00:04",
+            "staff-right": "02:00:00:0c:00:05"
+          },
+          "entries": [
+            {
+              "switch": "exhibit",
+              "vlan": 50,
+              "address": "02:00:00:0c:00:01",
+              "port": "front",
+              "learned_at": 70
+            },
+            {
+              "switch": "exhibit",
+              "vlan": 50,
+              "address": "02:00:00:0c:00:02",
+              "port": "spare",
+              "learned_at": 70
+            },
+            {
+              "switch": "exhibit",
+              "vlan": 60,
+              "address": "02:00:00:0c:00:04",
+              "port": "staff-left",
+              "learned_at": 70
+            },
+            {
+              "switch": "exhibit",
+              "vlan": 60,
+              "address": "02:00:00:0c:00:05",
+              "port": "staff-right",
+              "learned_at": 70
+            }
+          ],
+          "now": 80,
+          "aging_seconds": 300
+        },
+        "example_solution": [
+          {
+            "kind": "Clear",
+            "switch": "exhibit",
+            "vlan": 50
+          },
+          {
+            "kind": "Send",
+            "source": "store",
+            "destination": "02:00:00:0c:00:01"
+          },
+          {
+            "kind": "Send",
+            "source": "front",
+            "destination": "02:00:00:0c:00:02"
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "exhibit",
+              "vlan": 50,
+              "address": "02:00:00:0c:00:01",
+              "port": "front"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "exhibit",
+              "vlan": 50,
+              "address": "02:00:00:0c:00:02",
+              "port": "store"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "exhibit",
+              "vlan": 60,
+              "address": "02:00:00:0c:00:04",
+              "port": "staff-left"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "exhibit",
+              "vlan": 60,
+              "address": "02:00:00:0c:00:05",
+              "port": "staff-right"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Repaired exhibit path",
+              "from": "front",
+              "destination": "02:00:00:0c:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "store"
+              ],
+              "accepted_by": [
+                "store"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Protected staff path",
+              "from": "staff-left",
+              "destination": "02:00:00:0c:00:05",
+              "after_seconds": 0,
+              "arrivals": [
+                "staff-right"
+              ],
+              "accepted_by": [
+                "staff-right"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          }
+        ],
+        "try_change": "Clear VLAN 60 on exhibit instead. The exhibit path remains known, but a new staff-left-to-staff-right test frame now uses unknown-unicast forwarding. Repair staff by sending from both staff stations; do not reset the assignment.",
+        "try_actions": [
+          {
+            "kind": "Clear",
+            "switch": "exhibit",
+            "vlan": 60
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Exhibit is still known",
+              "from": "front",
+              "destination": "02:00:00:0c:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "store"
+              ],
+              "accepted_by": [
+                "store"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Cleared staff destination is unknown",
+              "from": "staff-left",
+              "destination": "02:00:00:0c:00:05",
+              "after_seconds": 0,
+              "arrivals": [
+                "staff-right"
+              ],
+              "accepted_by": [
+                "staff-right"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-mac-source-refresh",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ethernet learning and recovery",
+      "unit": "ethernet-learning",
+      "title": "Refresh the quiet source and prove expiry",
+      "summary": "Choose a bounded lifetime and keep a quiet destination known for the promised interval without disabling aging.",
+      "objective": "The virtual clock is 100 seconds. Sensor (02:00:00:03:00:01) last sent at time 0; collector (02:00:00:03:00:02) last sent at 90. Set the entry lifetime to any value from 90 through 120 seconds and refresh the source information needed for both directions. Keep the supplied port/VLAN 70 settings.\n\nAt handover, both directions between collector and sensor must be known, including independent checks 60 seconds into a quiet interval. After 180 quiet seconds, a console-to-sensor test frame must instead use unknown-unicast copying to sensor and collector, with only sensor accepting it. Zero or an excessively long lifetime cannot satisfy both promises. Check work predicts from the actual current table; you do not need to advance the main workspace through each quiet interval.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect ages and the required interval",
+        "Apply policy and refresh the source",
+        "Verify survival and later expiry"
+      ],
+      "guide": [
+        {
+          "title": "Inspect ages and the required interval",
+          "why": "An old destination row can still be valid now but fail the future quiet period.",
+          "action": "Compare current source ages with the promised sixty-second interval.",
+          "commands": []
+        },
+        {
+          "title": "Apply policy and refresh the source",
+          "why": "Destination lookups are not source refreshes.",
+          "action": "Choose a permitted lifetime and have any required quiet source send.",
+          "commands": []
+        },
+        {
+          "title": "Verify survival and later expiry",
+          "why": "Each future check starts with its own temporary copy of the same current network and sends a test frame.",
+          "action": "Check both known and later unknown outcomes; inspect failures without changing the expected interval.",
+          "commands": []
+        }
+      ],
+      "explanation": "The native editor and frame controls change only this virtual network. Completion uses the current port/table state and independent test frames and time checks; no remembered trace or exact sequence of actions is required. Legitimate alternate sends and recovery order are accepted when the stated outcomes hold.",
+      "hints": [
+        "A collector frame addressed to sensor refreshes collector, not sensor.",
+        "A row aged 100 seconds can survive now under 120 but still expire during a further 60-second quiet period."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/cdp-lldp-mac-udld/cdp-lldp-mac-udld-configuration-guide/c-configure-mac.html",
+        "https://www.cisco.com/c/en/us/support/docs/switches/catalyst-6000-series-switches/23563-143.html"
+      ],
+      "simplifications": "Source check 2026-10-24: current CCNA 200-301 v 1.1, 1.13/a–d concepts only; future blueprints separate. Finite metadata frames and fixed Ethernet forest, manual simulated clock, source-only refresh, educational aging range 0–3600s, untagged endpoint acceptance, no real packets/ARP/IP/STP/multicast beyond broadcast/Cisco CLI/hardware conformance. A supplied older table shows a previous location for diagnosis; the simulator has not moved a live cable. No vendor endorsement or complete objective/exam-preparation claim.",
+      "initial": {
+        "kind": "MacLearning",
+        "simulation": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "telemetry": {
+                "label": "Telemetry",
+                "vlans": [
+                  70
+                ],
+                "ports": {
+                  "sensor": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 70
+                    }
+                  },
+                  "collector": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 70
+                    }
+                  },
+                  "console": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 70
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "sensor": {
+                "label": "Quiet sensor",
+                "up": true
+              },
+              "collector": {
+                "label": "Collector",
+                "up": true
+              },
+              "console": {
+                "label": "Maintenance console",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-sensor",
+                "a": {
+                  "kind": "host",
+                  "host": "sensor"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "telemetry",
+                  "port": "sensor"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-collector",
+                "a": {
+                  "kind": "host",
+                  "host": "collector"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "telemetry",
+                  "port": "collector"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-console",
+                "a": {
+                  "kind": "host",
+                  "host": "console"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "telemetry",
+                  "port": "console"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "sensor": "02:00:00:03:00:01",
+            "collector": "02:00:00:03:00:02",
+            "console": "02:00:00:03:00:03"
+          },
+          "entries": [
+            {
+              "switch": "telemetry",
+              "vlan": 70,
+              "address": "02:00:00:03:00:01",
+              "port": "sensor",
+              "learned_at": 0
+            },
+            {
+              "switch": "telemetry",
+              "vlan": 70,
+              "address": "02:00:00:03:00:02",
+              "port": "collector",
+              "learned_at": 90
+            }
+          ],
+          "now": 100,
+          "aging_seconds": 300
+        }
+      },
+      "goal": {
+        "kind": "MacLearning",
+        "initial": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "telemetry": {
+                "label": "Telemetry",
+                "vlans": [
+                  70
+                ],
+                "ports": {
+                  "sensor": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 70
+                    }
+                  },
+                  "collector": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 70
+                    }
+                  },
+                  "console": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 70
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "sensor": {
+                "label": "Quiet sensor",
+                "up": true
+              },
+              "collector": {
+                "label": "Collector",
+                "up": true
+              },
+              "console": {
+                "label": "Maintenance console",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-sensor",
+                "a": {
+                  "kind": "host",
+                  "host": "sensor"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "telemetry",
+                  "port": "sensor"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-collector",
+                "a": {
+                  "kind": "host",
+                  "host": "collector"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "telemetry",
+                  "port": "collector"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-console",
+                "a": {
+                  "kind": "host",
+                  "host": "console"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "telemetry",
+                  "port": "console"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "sensor": "02:00:00:03:00:01",
+            "collector": "02:00:00:03:00:02",
+            "console": "02:00:00:03:00:03"
+          },
+          "entries": [
+            {
+              "switch": "telemetry",
+              "vlan": 70,
+              "address": "02:00:00:03:00:01",
+              "port": "sensor",
+              "learned_at": 0
+            },
+            {
+              "switch": "telemetry",
+              "vlan": 70,
+              "address": "02:00:00:03:00:02",
+              "port": "collector",
+              "learned_at": 90
+            }
+          ],
+          "now": 100,
+          "aging_seconds": 300
+        },
+        "requirements": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Aging",
+              "minimum": 90,
+              "maximum": 120
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "telemetry",
+              "vlan": 70,
+              "address": "02:00:00:03:00:01",
+              "port": "sensor"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "telemetry",
+              "vlan": 70,
+              "address": "02:00:00:03:00:02",
+              "port": "collector"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Current collector request",
+              "from": "collector",
+              "destination": "02:00:00:03:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "sensor"
+              ],
+              "accepted_by": [
+                "sensor"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Quiet destination after 60 seconds",
+              "from": "collector",
+              "destination": "02:00:00:03:00:01",
+              "after_seconds": 60,
+              "arrivals": [
+                "sensor"
+              ],
+              "accepted_by": [
+                "sensor"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Reply after 60 seconds",
+              "from": "sensor",
+              "destination": "02:00:00:03:00:02",
+              "after_seconds": 60,
+              "arrivals": [
+                "collector"
+              ],
+              "accepted_by": [
+                "collector"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Entries really expire after 180 seconds",
+              "from": "console",
+              "destination": "02:00:00:03:00:01",
+              "after_seconds": 180,
+              "arrivals": [
+                "collector",
+                "sensor"
+              ],
+              "accepted_by": [
+                "sensor"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "telemetry",
+            "vlans": [
+              70
+            ]
+          },
+          {
+            "kind": "Port",
+            "switch": "telemetry",
+            "port": "sensor",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 70
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "telemetry",
+            "port": "collector",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 70
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "telemetry",
+            "port": "console",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 70
+              }
+            }
+          }
+        ]
+      },
+      "solution": [
+        "@mac {\"kind\":\"Aging\",\"seconds\":90}",
+        "@mac {\"kind\":\"Send\",\"source\":\"sensor\",\"destination\":\"02:00:00:03:00:02\"}"
+      ],
+      "prerequisites": [
+        "ccna-mac-stale-location"
+      ],
+      "mac_teaching": {
+        "prerequisite_note": "Builds on Repair an older location without losing another group. This lesson introduces explicit virtual time and future test frames. No real waiting, operating-system clock or automatic network traffic is involved.",
+        "concepts": [
+          {
+            "title": "Age measures time since a source arrived",
+            "text": "Each row records the last simulated time that its source entered the switch. Merely sending to that destination does not reset its age. A quiet station must send to refresh its own row."
+          },
+          {
+            "title": "Use the native lifetime and clock controls",
+            "text": "Entry lifetime is a setting: type the required seconds in Entry lifetime, then choose Apply settings. Port and VLAN controls are separate optional settings in this activity. Advance seconds is an action in Time and selective clear tools: type a duration and choose Advance time. Editing a field alone does not advance time."
+          },
+          {
+            "title": "Expiry removes a row",
+            "text": "In this model, a positive lifetime expires a row when its age reaches that value. Zero disables expiry, so it is unsuitable when a task requires entries to expire. Raising a lifetime cannot bring back a row already removed; send from the source again."
+          },
+          {
+            "title": "Future checks do not teach each other",
+            "text": "Each future check uses its own temporary copy of the current network, advances only that copy and sends a test frame. This cannot refresh the real assignment or the next check. Keep the entry lifetime inside the stated range and provide source information that survives the required quiet interval."
+          }
+        ],
+        "example_description": "Monitoring starts at virtual time 60. Meter’s source row is old. Insert a 50-second entry lifetime and Apply settings, then send from meter to controller. Check example: the meter path is known after 30 quiet seconds and unknown after 80.",
+        "fixture": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "monitoring": {
+                "label": "Monitoring",
+                "vlans": [
+                  80
+                ],
+                "ports": {
+                  "meter": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 80
+                    }
+                  },
+                  "controller": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 80
+                    }
+                  },
+                  "display": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 80
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "meter": {
+                "label": "Quiet meter",
+                "up": true
+              },
+              "controller": {
+                "label": "Controller",
+                "up": true
+              },
+              "display": {
+                "label": "Display desk",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-meter",
+                "a": {
+                  "kind": "host",
+                  "host": "meter"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "monitoring",
+                  "port": "meter"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-controller",
+                "a": {
+                  "kind": "host",
+                  "host": "controller"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "monitoring",
+                  "port": "controller"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-display",
+                "a": {
+                  "kind": "host",
+                  "host": "display"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "monitoring",
+                  "port": "display"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "meter": "02:00:00:0d:00:01",
+            "controller": "02:00:00:0d:00:02",
+            "display": "02:00:00:0d:00:03"
+          },
+          "entries": [
+            {
+              "switch": "monitoring",
+              "vlan": 80,
+              "address": "02:00:00:0d:00:01",
+              "port": "meter",
+              "learned_at": 0
+            },
+            {
+              "switch": "monitoring",
+              "vlan": 80,
+              "address": "02:00:00:0d:00:02",
+              "port": "controller",
+              "learned_at": 50
+            }
+          ],
+          "now": 60,
+          "aging_seconds": 300
+        },
+        "example_solution": [
+          {
+            "kind": "Aging",
+            "seconds": 50
+          },
+          {
+            "kind": "Send",
+            "source": "meter",
+            "destination": "02:00:00:0d:00:02"
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Aging",
+              "minimum": 40,
+              "maximum": 50
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "monitoring",
+              "vlan": 80,
+              "address": "02:00:00:0d:00:01",
+              "port": "meter"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Meter survives the short quiet period",
+              "from": "controller",
+              "destination": "02:00:00:0d:00:01",
+              "after_seconds": 30,
+              "arrivals": [
+                "meter"
+              ],
+              "accepted_by": [
+                "meter"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Longer quiet period expires the entry",
+              "from": "controller",
+              "destination": "02:00:00:0d:00:01",
+              "after_seconds": 80,
+              "arrivals": [
+                "display",
+                "meter"
+              ],
+              "accepted_by": [
+                "meter"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          }
+        ],
+        "try_change": "Advance the actual example by 50 seconds. The refreshed meter row reaches its lifetime and expires. A new controller-to-meter test frame now copies to meter and display; only meter accepts. Send from meter again to repair the current row.",
+        "try_actions": [
+          {
+            "kind": "Advance",
+            "seconds": 50
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Expired meter is unknown now",
+              "from": "controller",
+              "destination": "02:00:00:0d:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "display",
+                "meter"
+              ],
+              "accepted_by": [
+                "meter"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-mac-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ethernet learning and recovery",
+      "unit": "ethernet-learning",
+      "title": "Hand over two learned groups across three switches",
+      "summary": "Repair active VLAN/trunk/access faults and older locations, then prove both groups and their later aging.",
+      "objective": "Restore this handover: core must have active VLANs 110, 120, 199; core/right must allow 110, 120, 199 with native 199; right/archive must be an up access port in 110. Keep all other supplied ports, active lists and native 199 trunk settings. Use an entry lifetime from 180 through 360 seconds.\n\nBuild correct current source rows on all three switches for desk, archive and printer in 110, and visitor-left/visitor-right in 120. Desk (02:00:00:04:00:01), printer (02:00:00:04:00:02), visitor-left (02:00:00:04:00:03), archive (02:00:00:04:00:04) and visitor-right (02:00:00:04:00:06) must use the specified known paths. Both directions between desk and archive, and between visitor-left and visitor-right, must arrive only at their peer; archive→printer stays known. Office and visitor delivery must remain known after 60 quiet seconds.\n\nA desk frame aimed at visitor-right may reach printer, archive and observer as copies, but no visitor may accept it. A visitor-left frame aimed at archive may reach visitor-right but must not enter the office group. After 400 quiet seconds the desk-to-archive destination must be unknown: copies reach printer/archive/observer, only archive accepts. These are finite virtual handover flows, not an isolation/security guarantee for unmodeled traffic. Check work recomputes the current state; no exact action history is required.",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "steps": [
+        "Repair the paths",
+        "Repair and build source locations",
+        "Prove the whole handover"
+      ],
+      "guide": [
+        {
+          "title": "Repair the paths",
+          "why": "Source learning cannot correct an inactive VLAN or wrong access group.",
+          "action": "Restore the explicitly requested active, allowed and access settings; Apply settings.",
+          "commands": []
+        },
+        {
+          "title": "Repair and build source locations",
+          "why": "Historical rows may hide the missing remote source path.",
+          "action": "Use the actual required sources or selective clears plus relearning across the corrected links.",
+          "commands": []
+        },
+        {
+          "title": "Prove the whole handover",
+          "why": "The other group and future checks are part of the assignment.",
+          "action": "Check current/quiet-period known paths, cross-group acceptance and later expiry together.",
+          "commands": []
+        }
+      ],
+      "explanation": "The native editor and frame controls change only this virtual network. Completion uses the current port/table state and independent test frames and time checks; no remembered trace or exact sequence of actions is required. Legitimate alternate sends and recovery order are accepted when the stated outcomes hold.",
+      "hints": [
+        "Repair active and permitted VLAN 120 as well as archive’s access membership.",
+        "The archive source must be learned through core/right and left/uplink, not the older left/printer route.",
+        "If you clear a whole VLAN, rebuild the printer and the required remote source rows too."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.cisco.com/c/en/us/td/docs/switches/lan/c9000/lyr2-fwd/cdp-lldp-mac-udld/cdp-lldp-mac-udld-configuration-guide/c-configure-mac.html",
+        "https://www.cisco.com/c/en/us/support/docs/switches/catalyst-6000-series-switches/23563-143.html"
+      ],
+      "simplifications": "Source check 2026-10-24: current CCNA 200-301 v 1.1, 1.13/a–d concepts only; future blueprints separate. Finite metadata frames and fixed Ethernet forest, manual simulated clock, source-only refresh, educational aging range 0–3600s, untagged endpoint acceptance, no real packets/ARP/IP/STP/multicast beyond broadcast/Cisco CLI/hardware conformance. A supplied older table shows a previous location for diagnosis; the simulator has not moved a live cable. No vendor endorsement or complete objective/exam-preparation claim.",
+      "initial": {
+        "kind": "MacLearning",
+        "simulation": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "core": {
+                "label": "Core switch",
+                "vlans": [
+                  110,
+                  199
+                ],
+                "ports": {
+                  "left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        120,
+                        199
+                      ]
+                    }
+                  },
+                  "right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        199
+                      ]
+                    }
+                  }
+                }
+              },
+              "left": {
+                "label": "Office switch",
+                "vlans": [
+                  110,
+                  120,
+                  199
+                ],
+                "ports": {
+                  "desk": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 110
+                    }
+                  },
+                  "printer": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 110
+                    }
+                  },
+                  "visitor-left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 120
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        120,
+                        199
+                      ]
+                    }
+                  }
+                }
+              },
+              "right": {
+                "label": "Archive switch",
+                "vlans": [
+                  110,
+                  120,
+                  199
+                ],
+                "ports": {
+                  "archive": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 120
+                    }
+                  },
+                  "observer": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 110
+                    }
+                  },
+                  "visitor-right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 120
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        120,
+                        199
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "desk": {
+                "label": "Office desk",
+                "up": true
+              },
+              "printer": {
+                "label": "Office printer",
+                "up": true
+              },
+              "visitor-left": {
+                "label": "Visitor left",
+                "up": true
+              },
+              "archive": {
+                "label": "Archive station",
+                "up": true
+              },
+              "observer": {
+                "label": "Archive observer",
+                "up": true
+              },
+              "visitor-right": {
+                "label": "Visitor right",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-desk",
+                "a": {
+                  "kind": "host",
+                  "host": "desk"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "desk"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-printer",
+                "a": {
+                  "kind": "host",
+                  "host": "printer"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "printer"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-visitor-left",
+                "a": {
+                  "kind": "host",
+                  "host": "visitor-left"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "visitor-left"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-archive",
+                "a": {
+                  "kind": "host",
+                  "host": "archive"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "archive"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-observer",
+                "a": {
+                  "kind": "host",
+                  "host": "observer"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "observer"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-visitor-right",
+                "a": {
+                  "kind": "host",
+                  "host": "visitor-right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "visitor-right"
+                },
+                "up": true
+              },
+              {
+                "id": "left-core",
+                "a": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "uplink"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "core",
+                  "port": "left"
+                },
+                "up": true
+              },
+              {
+                "id": "core-right",
+                "a": {
+                  "kind": "switch",
+                  "switch": "core",
+                  "port": "right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "desk": "02:00:00:04:00:01",
+            "printer": "02:00:00:04:00:02",
+            "visitor-left": "02:00:00:04:00:03",
+            "archive": "02:00:00:04:00:04",
+            "observer": "02:00:00:04:00:05",
+            "visitor-right": "02:00:00:04:00:06"
+          },
+          "entries": [
+            {
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "printer",
+              "learned_at": 40
+            },
+            {
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "left",
+              "learned_at": 40
+            },
+            {
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "printer",
+              "learned_at": 40
+            },
+            {
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "left",
+              "learned_at": 40
+            },
+            {
+              "switch": "right",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "uplink",
+              "learned_at": 40
+            }
+          ],
+          "now": 50,
+          "aging_seconds": 300
+        }
+      },
+      "goal": {
+        "kind": "MacLearning",
+        "initial": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "core": {
+                "label": "Core switch",
+                "vlans": [
+                  110,
+                  199
+                ],
+                "ports": {
+                  "left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        120,
+                        199
+                      ]
+                    }
+                  },
+                  "right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        199
+                      ]
+                    }
+                  }
+                }
+              },
+              "left": {
+                "label": "Office switch",
+                "vlans": [
+                  110,
+                  120,
+                  199
+                ],
+                "ports": {
+                  "desk": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 110
+                    }
+                  },
+                  "printer": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 110
+                    }
+                  },
+                  "visitor-left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 120
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        120,
+                        199
+                      ]
+                    }
+                  }
+                }
+              },
+              "right": {
+                "label": "Archive switch",
+                "vlans": [
+                  110,
+                  120,
+                  199
+                ],
+                "ports": {
+                  "archive": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 120
+                    }
+                  },
+                  "observer": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 110
+                    }
+                  },
+                  "visitor-right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 120
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        110,
+                        120,
+                        199
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "desk": {
+                "label": "Office desk",
+                "up": true
+              },
+              "printer": {
+                "label": "Office printer",
+                "up": true
+              },
+              "visitor-left": {
+                "label": "Visitor left",
+                "up": true
+              },
+              "archive": {
+                "label": "Archive station",
+                "up": true
+              },
+              "observer": {
+                "label": "Archive observer",
+                "up": true
+              },
+              "visitor-right": {
+                "label": "Visitor right",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-desk",
+                "a": {
+                  "kind": "host",
+                  "host": "desk"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "desk"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-printer",
+                "a": {
+                  "kind": "host",
+                  "host": "printer"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "printer"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-visitor-left",
+                "a": {
+                  "kind": "host",
+                  "host": "visitor-left"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "visitor-left"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-archive",
+                "a": {
+                  "kind": "host",
+                  "host": "archive"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "archive"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-observer",
+                "a": {
+                  "kind": "host",
+                  "host": "observer"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "observer"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-visitor-right",
+                "a": {
+                  "kind": "host",
+                  "host": "visitor-right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "visitor-right"
+                },
+                "up": true
+              },
+              {
+                "id": "left-core",
+                "a": {
+                  "kind": "switch",
+                  "switch": "left",
+                  "port": "uplink"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "core",
+                  "port": "left"
+                },
+                "up": true
+              },
+              {
+                "id": "core-right",
+                "a": {
+                  "kind": "switch",
+                  "switch": "core",
+                  "port": "right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "right",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "desk": "02:00:00:04:00:01",
+            "printer": "02:00:00:04:00:02",
+            "visitor-left": "02:00:00:04:00:03",
+            "archive": "02:00:00:04:00:04",
+            "observer": "02:00:00:04:00:05",
+            "visitor-right": "02:00:00:04:00:06"
+          },
+          "entries": [
+            {
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "printer",
+              "learned_at": 40
+            },
+            {
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "left",
+              "learned_at": 40
+            },
+            {
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "printer",
+              "learned_at": 40
+            },
+            {
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "left",
+              "learned_at": 40
+            },
+            {
+              "switch": "right",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "uplink",
+              "learned_at": 40
+            }
+          ],
+          "now": 50,
+          "aging_seconds": 300
+        },
+        "requirements": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Aging",
+              "minimum": 180,
+              "maximum": 360
+            }
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "core",
+            "vlans": [
+              110,
+              120,
+              199
+            ]
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "left",
+            "vlans": [
+              110,
+              120,
+              199
+            ]
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "right",
+            "vlans": [
+              110,
+              120,
+              199
+            ]
+          },
+          {
+            "kind": "Port",
+            "switch": "core",
+            "port": "left",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 199,
+                "allowed": [
+                  110,
+                  120,
+                  199
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "core",
+            "port": "right",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 199,
+                "allowed": [
+                  110,
+                  120,
+                  199
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "left",
+            "port": "desk",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 110
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "left",
+            "port": "printer",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 110
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "left",
+            "port": "visitor-left",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 120
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "left",
+            "port": "uplink",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 199,
+                "allowed": [
+                  110,
+                  120,
+                  199
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "right",
+            "port": "archive",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 110
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "right",
+            "port": "observer",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 110
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "right",
+            "port": "visitor-right",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 120
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "right",
+            "port": "uplink",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 199,
+                "allowed": [
+                  110,
+                  120,
+                  199
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:01",
+              "port": "desk"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:01",
+              "port": "left"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "right",
+              "vlan": 110,
+              "address": "02:00:00:04:00:01",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "right"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "right",
+              "vlan": 110,
+              "address": "02:00:00:04:00:04",
+              "port": "archive"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "left",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "printer"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "core",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "left"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "right",
+              "vlan": 110,
+              "address": "02:00:00:04:00:02",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "left",
+              "vlan": 120,
+              "address": "02:00:00:04:00:03",
+              "port": "visitor-left"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "right",
+              "vlan": 120,
+              "address": "02:00:00:04:00:03",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "left",
+              "vlan": 120,
+              "address": "02:00:00:04:00:06",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "right",
+              "vlan": 120,
+              "address": "02:00:00:04:00:06",
+              "port": "visitor-right"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Office to archive",
+              "from": "desk",
+              "destination": "02:00:00:04:00:04",
+              "after_seconds": 0,
+              "arrivals": [
+                "archive"
+              ],
+              "accepted_by": [
+                "archive"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Archive to office",
+              "from": "archive",
+              "destination": "02:00:00:04:00:01",
+              "after_seconds": 0,
+              "arrivals": [
+                "desk"
+              ],
+              "accepted_by": [
+                "desk"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Protected printer path",
+              "from": "archive",
+              "destination": "02:00:00:04:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "printer"
+              ],
+              "accepted_by": [
+                "printer"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Visitors left to right",
+              "from": "visitor-left",
+              "destination": "02:00:00:04:00:06",
+              "after_seconds": 0,
+              "arrivals": [
+                "visitor-right"
+              ],
+              "accepted_by": [
+                "visitor-right"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Visitors right to left",
+              "from": "visitor-right",
+              "destination": "02:00:00:04:00:03",
+              "after_seconds": 0,
+              "arrivals": [
+                "visitor-left"
+              ],
+              "accepted_by": [
+                "visitor-left"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Office path after 60 seconds",
+              "from": "desk",
+              "destination": "02:00:00:04:00:04",
+              "after_seconds": 60,
+              "arrivals": [
+                "archive"
+              ],
+              "accepted_by": [
+                "archive"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Visitor path after 60 seconds",
+              "from": "visitor-left",
+              "destination": "02:00:00:04:00:06",
+              "after_seconds": 60,
+              "arrivals": [
+                "visitor-right"
+              ],
+              "accepted_by": [
+                "visitor-right"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Office cannot enter visitors",
+              "from": "desk",
+              "destination": "02:00:00:04:00:06",
+              "after_seconds": 0,
+              "arrivals": [
+                "archive",
+                "observer",
+                "printer"
+              ],
+              "accepted_by": [],
+              "forwarding": null
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Visitors cannot enter archive",
+              "from": "visitor-left",
+              "destination": "02:00:00:04:00:04",
+              "after_seconds": 0,
+              "arrivals": [
+                "visitor-right"
+              ],
+              "accepted_by": [],
+              "forwarding": null
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Long quiet office destination expires",
+              "from": "desk",
+              "destination": "02:00:00:04:00:04",
+              "after_seconds": 400,
+              "arrivals": [
+                "archive",
+                "observer",
+                "printer"
+              ],
+              "accepted_by": [
+                "archive"
+              ],
+              "forwarding": "UnknownUnicast"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "@mac {\"kind\":\"Settings\",\"operation\":\"vlan core 120 present\"}",
+        "@mac {\"kind\":\"Settings\",\"operation\":\"trunk core right 199 110,120,199\"}",
+        "@mac {\"kind\":\"Settings\",\"operation\":\"access right archive 110\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"archive\",\"destination\":\"02:00:00:04:00:01\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"desk\",\"destination\":\"02:00:00:04:00:04\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"printer\",\"destination\":\"02:00:00:04:00:04\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"visitor-left\",\"destination\":\"02:00:00:04:00:06\"}",
+        "@mac {\"kind\":\"Send\",\"source\":\"visitor-right\",\"destination\":\"02:00:00:04:00:03\"}"
+      ],
+      "prerequisites": [
+        "ccna-mac-source-refresh",
+        "ccna-vlan-handover"
+      ],
+      "mac_teaching": {
+        "prerequisite_note": "Builds on Refresh the quiet source and prove expiry and Hand over three working, separate groups. You should already recognize access membership, active VLANs, trunk allowed lists and source-only aging. This capstone combines those skills rather than introducing new switch commands.",
+        "concepts": [
+          {
+            "title": "Separate configuration from learning",
+            "text": "A correct source send cannot cross a missing/inactive VLAN path. Repair the relevant native port/VLAN settings and Apply settings before rebuilding the source rows. Check work does not secretly apply an unfinished draft."
+          },
+          {
+            "title": "Follow the fixed physical path",
+            "text": "Each switch has its own local VLAN table. A remote source can be learned on the inter-switch ingress port, while its local switch learns its workstation port. The same MAC can therefore have different correct port names on different switches."
+          },
+          {
+            "title": "Treat an old row as evidence to repair",
+            "text": "The supplied historical locations can direct a frame down the wrong branch. A source frame traversing the corrected path updates each receiving switch; selective clear is also valid if you rebuild every required result."
+          },
+          {
+            "title": "Handover includes both groups and quiet intervals",
+            "text": "Known paths, other-group acceptance and later aging are checked independently from the same current state. A flooded copy is not the same as acceptance, and turning off a port is not a valid way to keep groups separate."
+          }
+        ],
+        "example_description": "Museum store is on the wrong access VLAN, while the visitor links already carry group 35. The older store row on demo-left also points at guest-left. Insert and apply the store access-setting action, then use the four source sends. Check example after all required paths are learned. The larger assignment also needs active and allowed-list repairs already taught in VLAN handover.",
+        "fixture": {
+          "schema_version": 1,
+          "fabric": {
+            "switches": {
+              "demo-left": {
+                "label": "Museum left",
+                "vlans": [
+                  25,
+                  35,
+                  199
+                ],
+                "ports": {
+                  "front": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 25
+                    }
+                  },
+                  "guest-left": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 35
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        25,
+                        35,
+                        199
+                      ]
+                    }
+                  }
+                }
+              },
+              "demo-right": {
+                "label": "Museum right",
+                "vlans": [
+                  25,
+                  35,
+                  199
+                ],
+                "ports": {
+                  "store": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 35
+                    }
+                  },
+                  "guest-right": {
+                    "up": true,
+                    "mode": {
+                      "kind": "access",
+                      "vlan": 35
+                    }
+                  },
+                  "uplink": {
+                    "up": true,
+                    "mode": {
+                      "kind": "trunk",
+                      "native": 199,
+                      "allowed": [
+                        25,
+                        35,
+                        199
+                      ]
+                    }
+                  }
+                }
+              }
+            },
+            "hosts": {
+              "front": {
+                "label": "Museum front",
+                "up": true
+              },
+              "store": {
+                "label": "Museum store",
+                "up": true
+              },
+              "guest-left": {
+                "label": "Visitor left",
+                "up": true
+              },
+              "guest-right": {
+                "label": "Visitor right",
+                "up": true
+              }
+            },
+            "cables": [
+              {
+                "id": "wire-front",
+                "a": {
+                  "kind": "host",
+                  "host": "front"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo-left",
+                  "port": "front"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-store",
+                "a": {
+                  "kind": "host",
+                  "host": "store"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo-right",
+                  "port": "store"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-guest-left",
+                "a": {
+                  "kind": "host",
+                  "host": "guest-left"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo-left",
+                  "port": "guest-left"
+                },
+                "up": true
+              },
+              {
+                "id": "wire-guest-right",
+                "a": {
+                  "kind": "host",
+                  "host": "guest-right"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo-right",
+                  "port": "guest-right"
+                },
+                "up": true
+              },
+              {
+                "id": "between",
+                "a": {
+                  "kind": "switch",
+                  "switch": "demo-left",
+                  "port": "uplink"
+                },
+                "b": {
+                  "kind": "switch",
+                  "switch": "demo-right",
+                  "port": "uplink"
+                },
+                "up": true
+              }
+            ]
+          },
+          "host_addresses": {
+            "front": "02:00:00:0e:00:01",
+            "store": "02:00:00:0e:00:02",
+            "guest-left": "02:00:00:0e:00:03",
+            "guest-right": "02:00:00:0e:00:04"
+          },
+          "entries": [
+            {
+              "switch": "demo-left",
+              "vlan": 25,
+              "address": "02:00:00:0e:00:02",
+              "port": "guest-left",
+              "learned_at": 30
+            }
+          ],
+          "now": 40,
+          "aging_seconds": 300
+        },
+        "example_solution": [
+          {
+            "kind": "Settings",
+            "operation": "access demo-right store 25"
+          },
+          {
+            "kind": "Send",
+            "source": "store",
+            "destination": "02:00:00:0e:00:01"
+          },
+          {
+            "kind": "Send",
+            "source": "front",
+            "destination": "02:00:00:0e:00:02"
+          },
+          {
+            "kind": "Send",
+            "source": "guest-left",
+            "destination": "02:00:00:0e:00:04"
+          },
+          {
+            "kind": "Send",
+            "source": "guest-right",
+            "destination": "02:00:00:0e:00:03"
+          }
+        ],
+        "outcomes": [
+          {
+            "kind": "ActiveVlans",
+            "switch": "demo-left",
+            "vlans": [
+              25,
+              35,
+              199
+            ]
+          },
+          {
+            "kind": "ActiveVlans",
+            "switch": "demo-right",
+            "vlans": [
+              25,
+              35,
+              199
+            ]
+          },
+          {
+            "kind": "Port",
+            "switch": "demo-left",
+            "port": "front",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 25
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "demo-left",
+            "port": "guest-left",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 35
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "demo-left",
+            "port": "uplink",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 199,
+                "allowed": [
+                  25,
+                  35,
+                  199
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "demo-right",
+            "port": "store",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 25
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "demo-right",
+            "port": "guest-right",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "access",
+                "vlan": 35
+              }
+            }
+          },
+          {
+            "kind": "Port",
+            "switch": "demo-right",
+            "port": "uplink",
+            "settings": {
+              "up": true,
+              "mode": {
+                "kind": "trunk",
+                "native": 199,
+                "allowed": [
+                  25,
+                  35,
+                  199
+                ]
+              }
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "demo-left",
+              "vlan": 25,
+              "address": "02:00:00:0e:00:02",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Learned",
+              "switch": "demo-right",
+              "vlan": 25,
+              "address": "02:00:00:0e:00:01",
+              "port": "uplink"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Museum known exchange",
+              "from": "front",
+              "destination": "02:00:00:0e:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "store"
+              ],
+              "accepted_by": [
+                "store"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Visitor known exchange",
+              "from": "guest-left",
+              "destination": "02:00:00:0e:00:04",
+              "after_seconds": 0,
+              "arrivals": [
+                "guest-right"
+              ],
+              "accepted_by": [
+                "guest-right"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          }
+        ],
+        "try_change": "Clear VLAN 25 on demo-left. The visitor group still has a known path, while a front-to-store test frame now floods on the left side before using the right switch’s known store port. Relearn from store to front to restore the missing left-side store row.",
+        "try_actions": [
+          {
+            "kind": "Clear",
+            "switch": "demo-left",
+            "vlan": 25
+          }
+        ],
+        "try_outcomes": [
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Visitors stay known",
+              "from": "guest-left",
+              "destination": "02:00:00:0e:00:04",
+              "after_seconds": 0,
+              "arrivals": [
+                "guest-right"
+              ],
+              "accepted_by": [
+                "guest-right"
+              ],
+              "forwarding": "KnownUnicast"
+            }
+          },
+          {
+            "kind": "Outcome",
+            "outcome": {
+              "kind": "Frame",
+              "label": "Museum reaches the intended peer",
+              "from": "front",
+              "destination": "02:00:00:0e:00:02",
+              "after_seconds": 0,
+              "arrivals": [
+                "store"
+              ],
+              "accepted_by": [
+                "store"
+              ],
+              "forwarding": null
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
