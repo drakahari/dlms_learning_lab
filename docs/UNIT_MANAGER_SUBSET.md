@@ -217,3 +217,20 @@ Checked2026-10-23 against official versioned **systemd262** manuals:
 No upstream implementation/manual bodies are copied. This original pure model
 is not systemd, Linux, a VM, a container, equipment/runtime acceptance or complete
 LPIC coverage. Full202.1, SysV/LSB and boot/shutdown details remain Open.
+
+## Optional retained events — tested backend extension
+
+The subsequent terminal foundation adds an optional version1 typed journal to
+this new State only. See [UNIT_MANAGER_TERMINAL.md](UNIT_MANAGER_TERMINAL.md).
+Existing absent event data remains absent on serialization. The store is bounded
+at256 events, contiguous checked u64 sequence/dropped counters, known unit IDs and
+512-byte diagnostic detail; decoding validates shape and Inventory context. Job
+start, dispatch, program initialization, ordered dependency failure and meaningful
+stop results create events only on committed candidate actions. Invalid actions
+or event counter overflow retain the exact original State. Queries, saved edits,
+reload and enable/default changes do not fabricate program-output events. Fresh
+sessions receive a separate window. No PID/time/real journald behavior or current
+success is inferred from historical messages. The17 focused journal/terminal tests
+and113 existing scoped regression checks pass, as does all-target Clippy. Native
+UI/content adoption remains separate; these backend checks do not establish
+release readiness or actual systemd/runtime acceptance.

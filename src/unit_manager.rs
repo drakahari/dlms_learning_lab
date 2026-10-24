@@ -8,6 +8,8 @@ use std::{
     fmt,
 };
 
+pub mod journal;
+
 pub const MAX_UNITS: usize = 16;
 pub const MAX_PROGRAMS: usize = 8;
 pub const MAX_CONFIGS: usize = 16;
@@ -17,7 +19,7 @@ pub const MAX_CONFIG_BYTES: usize = 4096;
 pub const MAX_JSON_BYTES: usize = 4_194_304;
 pub const MAX_ERROR_BYTES: usize = 512;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ErrorKind {
     Invalid,
     Limit,
@@ -335,6 +337,16 @@ pub struct Definition {
     pub before: BTreeSet<String>,
     pub wanted_by: BTreeSet<String>,
     pub kind: UnitType,
+}
+/// Direct relations currently modeled by loaded sources and install links.
+/// This is not transitive ordering, an execution schedule or a readiness claim.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct EffectiveProperties {
+    pub description: String,
+    pub requires: BTreeSet<String>,
+    pub wants: BTreeSet<String>,
+    pub after: BTreeSet<String>,
+    pub before: BTreeSet<String>,
 }
 fn line_error(kind: ErrorKind, id: &str, line: usize, message: &str) -> Error {
     error(kind, format!("{id}, line{line}: {message}"))
@@ -758,6 +770,8 @@ pub struct State {
     artifacts: BTreeMap<String, Artifact>,
     boot_links: BTreeMap<String, BTreeSet<String>>,
     default_target: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    journal: Option<journal::Journal>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -778,6 +792,8 @@ struct RawState {
     boot_links: BTreeMap<String, BTreeSet<String>>,
     #[serde(deserialize_with = "text128")]
     default_target: String,
+    #[serde(default)]
+    journal: Option<journal::Journal>,
 }
 impl<'de> Deserialize<'de> for State {
     fn deserialize<D: Deserializer<'de>>(d: D) -> std::result::Result<Self, D::Error> {
@@ -792,6 +808,7 @@ impl<'de> Deserialize<'de> for State {
             artifacts: r.artifacts,
             boot_links: r.boot_links,
             default_target: r.default_target,
+            journal: r.journal,
         };
         s.validate().map_err(D::Error::custom)?;
         Ok(s)
@@ -997,6 +1014,7 @@ impl State {
             artifacts: BTreeMap::new(),
             boot_links: BTreeMap::new(),
             default_target,
+            journal: None,
         };
         s.validate()?;
         Ok(s)
@@ -1036,6 +1054,10 @@ impl State {
     pub fn default_target(&self) -> &str {
         &self.default_target
     }
+    pub fn journal(&self) -> Option<&journal::Journal> {
+        self.journal.as_ref()
+    }
+
     pub fn same_context(&self, initial: &Self) -> bool {
         self.validate().is_ok() && initial.validate().is_ok() && self.inventory == initial.inventory
     }
@@ -1067,6 +1089,38 @@ impl State {
     pub fn definitions(&self) -> Result<BTreeMap<String, Definition>> {
         self.validate()?;
         self.parse_sources(&self.loaded)
+    }
+    /// Only direct modeled edges, including inverse declarations and target
+    /// ordering complements. Known missing units remain named dependencies;
+    /// no host/default-system unit, transitive edge or saved-only rule is added.
+    pub fn effective_properties(&self, id: &str) -> Result<EffectiveProperties> {
+        self.validate()?;
+        self.known(id)?;
+        let definitions = self.parse_sources(&self.loaded)?;
+        let definition = definitions.get(id).ok_or_else(|| {
+            error(
+                ErrorKind::Missing,
+                "This virtual definition is not loaded; use daemon-reload",
+            )
+        })?;
+        let direct = edges(&definitions, &self.boot_links);
+        let mut wants = definition.wants.clone();
+        wants.extend(self.boot_links.get(id).into_iter().flatten().cloned());
+        Ok(EffectiveProperties {
+            description: definition.description.clone(),
+            requires: definition.requires.clone(),
+            wants,
+            after: direct
+                .iter()
+                .filter(|(_, after)| after == id)
+                .map(|(before, _)| before.clone())
+                .collect(),
+            before: direct
+                .iter()
+                .filter(|(before, _)| before == id)
+                .map(|(_, after)| after.clone())
+                .collect(),
+        })
     }
     pub fn validate_documents(&self) -> Result<()> {
         self.validate()?;
@@ -1132,6 +1186,9 @@ impl State {
             ));
         }
         self.inventory.validate()?;
+        if let Some(journal) = &self.journal {
+            journal.validate(&self.inventory)?;
+        }
         if self.documents.keys().cloned().collect::<BTreeSet<_>>() != self.inventory.units
             || self.configuration.keys().cloned().collect::<BTreeSet<_>>()
                 != self.inventory.config_paths
@@ -1640,6 +1697,7 @@ impl State {
             Action::AdvancePrograms {} => report = next.advance()?,
             Action::Stop { unit } => report = next.stop(unit)?,
         }
+        journal::record(&self.runtime, &mut next, &report)?;
         next.validate()?;
         *self = next;
         Ok(report)
@@ -1656,9 +1714,11 @@ impl State {
         let mut next = self.clone();
         next.runtime.clear();
         next.artifacts.clear();
+        next.journal = None;
         next.loaded = next.documents.clone();
         let target = next.default_target.clone();
         let (report, ordering) = next.start_inspected(&target)?;
+        journal::record(&BTreeMap::new(), &mut next, &report)?;
         next.validate()?;
         Ok((next, report, ordering))
     }
