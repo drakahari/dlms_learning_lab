@@ -960,3 +960,15 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   initial/goal/version/reference/practice/outcome/command value. Frozen113/109/
  106/genuine6/7 sources remain unchanged. Independent Find/LPI review approves
   only narrow103.3.K5 promotion after native acceptance;104.7 stays Open.
+
+- Combined UI R1 finishes171pass/2fail: the new client's two-row diagram and
+  redundant gateway label push Check to y927–962 at1200×850, so its grading-test
+  click is also ignored. The shared one-row/stacked chain with gateway in its
+  client card fixes both unchanged original-nine regressions. All7 focused
+  client checks pass, including editing/Undo/modal safety and painted text-fit.
+  No fonts, field IDs, model or goal changes.173distinct UI checks accounted;
+  R1 is retained, never relabeled all-green. Independent source review approves.
+- Final Clippy/fmt,112 workflow guards, coverage and pinned palette provenance
+  pass. Main914 distinct models and173 UI are technical gates, not novice or
+  platform acceptance. First actual Find3/client runs remain pending on the next
+  clean installed candidate; existing113 packaged evidence stays separate.

@@ -11,17 +11,19 @@ Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference ru
   are21000 Find and23000 client, separate from20000 MAC layout. Merges preserve
   client supplied-context pin, all pending-draft guards, shared active Run guard,
   both passive metric sets and dispatches. Source after0f5 is not yet pushed.
-- Root owns sole heavy MAIN full UI **session92993** (m90-main-combined-ui-r1).
-  Reap before any other heavy work. Combined model R1 finishes913pass/1fail across
- 86targets: an old IPv6 test clone inherited new incompatible client metadata.
-  Fixture-only correction clears it and explicitly tests that foreign lesson
-  metadata still rejects. Scoped R2 passes9IPv6+10Find+11client (30); all914
-  distinct checks now accounted, original R1 retained. Do not call R1 all-green.
-- Root postmerge changes pending commit: current client catalog113→116 assertion,
-  plain new-unit library summary, readable permission-number spacing and IPv6
-  fixture hygiene. Proof keeps all3 Find IDs/versions/initials/goals/solutions/
-  practice fixtures/outcomes/commands exact. Full UI173-ish count must be read
-  from actual log, then Clippy/fmt/Python/coverage/palette gates serially.
+- Combined MAIN gates now finish:914distinct models and173UI accounted. Model
+  R1=913pass/1fail (IPv6 fixture copied incompatible client teaching); corrected
+ 9IPv6+10Find+11client scope30 passes, preserving explicit foreign-kind rejection.
+  UI R1=171pass/2fail (new client Check below850, ignored click). Shared compact
+  chain, gateway in clientcard fixes unchanged original-nine layout/grading tests;
+ 7clientfocused checks pass. All failures remain retained. No fonts/IDs/Goals
+  or model changed by the layout correction. Final Clippy/fmt,112Python, coverage,
+  palette provenance PASS. No heavy child remains; next root action is clean
+  candidate build after committing this source/doc follow-through.
+- All3Find semantics/commands/practice data and frozen113/109/106/genuine6/7
+  remain exact. New unit library summary and permission-number spacing are prose
+  only. Ledger stays133Partial/1Supporting/1106Open until actual Find native
+  acceptance and the independently reviewed narrowK5 update.
 - Find branch gates903models+166UI=1069 distinct, Clippy/fmt/build pass. A real
   focused Enter reproduction found practice command execution behind reset;
   corrected shared assignment/practice terminals now disable Run and prevent

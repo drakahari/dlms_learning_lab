@@ -61,3 +61,14 @@ inspect/restore and failed-save bytes. Native-egui checks typing, focus/Undo,
 modal safety, pending/retry, independent Challenge and100/150/200 wide/narrow
 geometry. Actual native/source-candidate gates remain separate; no novice,
 physical keyboard, screen-reader or Windows/macOS acceptance is implied.
+
+
+Whole-main integration exposed a desktop layout regression: the two-row star
+and separate applied-gateway line placed Check at y927–962 in1200×850.
+The existing shared topology_chain now shows client/router/remote in one row
+when wide, with the applied gateway inside its client card and existing stacked
+scrolling when narrow. No model, fields, IDs, font size or goal changes.
+Both unchanged original-nine layout and grading regressions now pass; all seven
+client-focused checks pass at100/150/200. Independent review confirms applied
+context and diagram widget metadata are preserved. Actual installed rendering
+remains a separate next gate.

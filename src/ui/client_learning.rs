@@ -335,20 +335,16 @@ fn fields(ui: &mut egui::Ui, id: &str, practice: bool, draft: &mut Draft, metric
 }
 fn diagram(ui: &mut egui::Ui, c: &Client) {
     let client = format!("{}/{}", c.address, c.prefix);
+    let gateway = format!("Gateway: {}", c.gateway);
     let router = format!("{}/{}", c.router, c.lan_prefix);
     let target = c.target.to_string();
-    if !controls::topology_star(
+    controls::topology_chain(
         ui,
-        ["LAN router", &router, "Supplied LAN plan"],
         &[
-            ["Client", &client, "Applied address/prefix"],
-            ["Remote target", &target, "Simulated path destination"],
+            ["Client", &client, &gateway],
+            ["LAN router", &router, "Supplied LAN plan"],
+            ["Remote target", &target, "Simulated destination"],
         ],
-        "Client to router to remote target · abstract path only",
-    ) {
-        ui.label(format!("Client: {client} (applied)"));
-        ui.label(format!("LAN router: {router} (supplied plan)"));
-        ui.label(format!("Remote target: {target} (abstract path)"));
-    }
-    ui.label(format!("Applied default gateway: {}", c.gateway));
+        "Applied client to LAN router to remote target · abstract path only",
+    );
 }
