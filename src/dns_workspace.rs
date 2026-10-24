@@ -30,7 +30,7 @@ pub fn data_text(data: &Data) -> String {
     match data {
         Data::A { address } => address.to_string(),
         Data::Aaaa { address } => address.to_string(),
-        Data::Cname { target } | Data::Ns { target } => target.clone(),
+        Data::Cname { target } | Data::Ns { target } | Data::Ptr { target } => target.clone(),
         Data::Mx {
             preference,
             exchange,
@@ -44,6 +44,7 @@ pub fn type_text(kind: QueryType) -> &'static str {
         QueryType::Cname => "CNAME",
         QueryType::Mx => "MX",
         QueryType::Ns => "NS",
+        QueryType::Ptr => "PTR",
     }
 }
 pub fn record_text(record: &Record) -> String {
@@ -97,7 +98,7 @@ impl Draft {
                     let mut r = r.clone();
                     r.owner = dns::canonical_name(&r.owner).unwrap_or(r.owner);
                     match &mut r.data {
-                        Data::Cname { target } | Data::Ns { target } => {
+                        Data::Cname { target } | Data::Ns { target } | Data::Ptr { target } => {
                             *target = dns::canonical_name(target).unwrap_or(target.clone())
                         }
                         Data::Mx { exchange, .. } => {
@@ -147,9 +148,10 @@ impl Draft {
                     "AAAA" if p.len()==5=>Data::Aaaa{address:p[4].parse().map_err(|_|"AAAA needs a valid IPv6 address")?},
                     "CNAME" if p.len()==5=>Data::Cname{target:absolute(p[4])?},
                     "NS" if p.len()==5=>Data::Ns{target:absolute(p[4])?},
+                    "PTR" if p.len()==5=>Data::Ptr{target:absolute(p[4])?},
                     "MX" if p.len()==6=>Data::Mx{preference:number(p[4],u16::MAX as u32,"MX preference")? as u16,exchange:absolute(p[5])?},
-                    "A"|"AAAA"|"CNAME"|"NS"|"MX"=>return Err("Wrong number of record fields; MX needs preference and full exchange name, other supported types need one data value".into()),
-                    _=>return Err("Unsupported record type or syntax: this editor supports A, AAAA, CNAME, MX and apex NS only; no directives, includes or SOA lines".into()),
+                    "A"|"AAAA"|"CNAME"|"NS"|"MX"|"PTR"=>return Err("Wrong number of record fields; MX needs preference and full exchange name, other supported types need one data value".into()),
+                    _=>return Err("Unsupported record type or syntax: this editor supports A, AAAA, CNAME, MX, PTR and apex NS only; no directives, includes or SOA lines".into()),
                 }; Ok(Record{owner,ttl,data})
             })().map_err(|e:String|format!("Line {}: {e}",line_number+1))?;
             records.push(parsed);
@@ -223,6 +225,9 @@ fn canonical_data(data: &[Data]) -> Result<BTreeSet<Data>, String> {
                     target: dns::canonical_name(target).map_err(|e| e.message)?,
                 },
                 Data::Ns { target } => Data::Ns {
+                    target: dns::canonical_name(target).map_err(|e| e.message)?,
+                },
+                Data::Ptr { target } => Data::Ptr {
                     target: dns::canonical_name(target).map_err(|e| e.message)?,
                 },
                 Data::Mx {

@@ -1,5 +1,11 @@
 # Authoritative DNS capability contract (M38)
 
+Extension2026-10-24: bounded PTR data/query/editor support and pure IPv4/IPv6
+reverse-question conversion are specified and checked separately in
+[DNS_REVERSE_SUBSET.md](DNS_REVERSE_SUBSET.md). The original contract below
+describes the forward-DNS milestone; it does not claim reverse-zone curriculum,
+delegation or a complete DNS implementation.
+
 Specified2026-10-23 before implementation. Add a bounded pure DNS model before dependent curriculum. Retain the original nine scenarios and their progress; the earlier single-A-record exercise is a separate compatibility model. This capability alone adds no authored lab or objective coverage. Native integration and reviewed content follow in separate milestones using the accepted editors and shared layout controls.
 
 Model one configured primary zone, the currently loaded primary copy and a secondary copy, with typed A, AAAA, CNAME, MX and NS records. Query only in-memory copies. Owners and targets use bounded ASCII domain labels, case-insensitive comparisons and fully qualified names; trailing dot is optional and never implies a relative name. No wildcards, IDNA/escaped labels, arbitrary zone-file grammar, recursion, delegation/glue, caching/expiry timers, actual packets/services, DNSSEC, TSIG or host I/O. Return honest unsupported/invalid/configuration diagnostics rather than fabricated network success. SOA serial/origin are modeled metadata; other SOA fields/query types remain explicitly unsupported.

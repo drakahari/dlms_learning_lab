@@ -459,6 +459,7 @@ fn configuration(
                         QueryType::Cname,
                         QueryType::Mx,
                         QueryType::Ns,
+                        QueryType::Ptr,
                     ] {
                         ui.selectable_value(
                             &mut draft.query_type,

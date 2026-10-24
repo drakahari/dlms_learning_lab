@@ -11,7 +11,11 @@ Ordinary implementation remains authorized; no public release is authorized.
   is a formatting-only follow-up to the capture-lock correction; full-tree format passes.
   Main now also integrates accepted native MAC workspace ea7c6b1 and guarded
   two-process reopen verification b9786fa. These do not add bundled scenarios.
-- **109 authored labs /26 units:31CCNA,21LPIC-1,17LPIC-2,40Bash/Shell.**
+- **Last accepted delivered batch:109 authored labs /26 units:31CCNA,21LPIC-1,17LPIC-2,40Bash/Shell.**
+  Main source fe6a52d now registers four reviewed MAC assignments:113/27,
+ 35CCNA/21LPIC-1/17LPIC-2/40Bash. Their857-model integration gate passes in
+  the isolated merged branch; actual all-four native teaching acceptance is
+  pending. The last installed candidate remains109; do not relabel it.
   All prior106 scenario identities/goals remain, as do28 themes. No numeric variants
   or synthetic navigation fixtures are counted. Cases are bundled in normal mode.
 - M77 normal109 regression passed818 model/integration plus122 UI checks
@@ -84,8 +88,17 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    and stale native-input-draft assumptions; corrected helpers retain all model,
    expected-outcome and negative predicates. Metadata-only teaching corrections
    leave simulation semantics identical. Retain old109 IDs and genuine6/7 history.
-   Normal registration/regression and actual native all-four flows still follow
-   before authored count or coverage promotion.
+   Normal registration9d83f06 is integrated through fe6a52d. Its857 models and
+   Clippy/fmt pass. Main then passes869 model/integration checks with the PTR
+   extension;17 content follow-through checks pass after metadata and course-order
+   refinements. The unit now follows VLAN foundations, before static routing.
+   Actual native R1 passes first-three full tasks and capstone practice/partial,
+   then correctly fails capstone completion because the controller missed the
+   last source in a clipped six-row dropdown. Evidence is run-885ru_28 and
+   m83-mac-lessons-native-r1.log. Fix real popup scrolling/selected-value assertions,
+   preserve all37 capstone requirements, and rerun. Render review also requests
+   shared label columns and a clear Frame-not-sent action-error prefix.
+   Four-lab delivered count and coverage promotion remain pending.
 4. Guarded cold-reopen harness is integrated in b9786fa. It executes ordinary
    profile lock/load/preferences/save in two real native processes using only a
    marked private project-disk profile. Current97 Python guards and13 targeted
@@ -97,7 +110,7 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    cold-load comparisons, retaining unfinished assignment/example drafts, favorite,
    theme/scale and receipts. Later reader Back control fails a fractional clipping
    assertion at150% (0.0208 logical points); eight captures and all raw snapshots
-   remain in tmp/native-reopen-m79-worktree-r3. Full-flow acceptance remains OPEN.
+   remain in tmp/native-reopen-m79-worktree-r3. That run was not accepted.
    Corrected controller-only geometry b8c0175 allows one physical pixel of edge
    rounding while requiring the click center inside the actual viewport; four
    scale/offscreen regressions retain bounded failure. Seventeen targeted checks,
@@ -108,8 +121,14 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    are byte-identical. Repeat against the next installed candidate; existing5a
    candidate predates this guarded verification entry point.
 5. Continue remaining Linux/network/shell gaps after the tested MAC batch.
-   Candidate packaging, pure capabilities and source proposals do not complete
-   curriculum. Windows/macOS desktop, physical-device/accessibility and novice
+   Reverse DNS/PTR capability is being tested separately in main, with12 new
+   pure/editor/progress checks plus existing DNS/lib checks passing. No reverse
+   DNS authored unit or coverage is claimed. Bounded find core is integrated in
+   697754e after42 scoped checks/Clippy/fmt; fixed GNU comparison source is separate,
+   with110 Python guards passing, including13 new boundary tests. All152 existing
+   controlled reference commands are preserved. Build the actual MAIN probe and
+   execute the reviewed fixed comparison under the shared guard after integration. Candidate packaging, pure capabilities
+   and source proposals do not complete curriculum. Windows/macOS desktop, physical-device/accessibility and novice
    acceptance remain explicitly pending.
 
 ## Build safety and preserved evidence

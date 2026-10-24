@@ -3,7 +3,7 @@
 use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeMap, BTreeSet},
-    net::{Ipv4Addr, Ipv6Addr},
+    net::{IpAddr, Ipv4Addr, Ipv6Addr},
 };
 pub const MAX_RECORDS: usize = 64;
 pub const MAX_ALIASES: usize = 16;
@@ -86,6 +86,27 @@ pub fn canonical_name(name: &str) -> Result<String> {
 fn within(name: &str, origin: &str) -> bool {
     name == origin || name.ends_with(&format!(".{origin}"))
 }
+/// Construct a reverse-DNS question name; performs no lookup or host operation.
+pub fn reverse_name(address: IpAddr) -> String {
+    match address {
+        IpAddr::V4(address) => {
+            let [a, b, c, d] = address.octets();
+            format!("{d}.{c}.{b}.{a}.in-addr.arpa.")
+        }
+        IpAddr::V6(address) => {
+            let mut result = String::with_capacity(73);
+            const HEX: &[u8; 16] = b"0123456789abcdef";
+            for octet in address.octets().into_iter().rev() {
+                for nibble in [octet & 15, octet >> 4] {
+                    result.push(HEX[usize::from(nibble)] as char);
+                    result.push('.');
+                }
+            }
+            result.push_str("ip6.arpa.");
+            result
+        }
+    }
+}
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum QueryType {
@@ -94,6 +115,7 @@ pub enum QueryType {
     Cname,
     Mx,
     Ns,
+    Ptr,
 }
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 #[serde(tag = "type", rename_all = "UPPERCASE", deny_unknown_fields)]
@@ -103,6 +125,7 @@ pub enum Data {
     Cname { target: String },
     Mx { preference: u16, exchange: String },
     Ns { target: String },
+    Ptr { target: String },
 }
 impl Data {
     pub fn query_type(&self) -> QueryType {
@@ -112,6 +135,7 @@ impl Data {
             Self::Cname { .. } => QueryType::Cname,
             Self::Mx { .. } => QueryType::Mx,
             Self::Ns { .. } => QueryType::Ns,
+            Self::Ptr { .. } => QueryType::Ptr,
         }
     }
     fn canonical(&self) -> Result<Self> {
@@ -120,6 +144,9 @@ impl Data {
                 target: canonical_name(target)?,
             },
             Self::Ns { target } => Self::Ns {
+                target: canonical_name(target)?,
+            },
+            Self::Ptr { target } => Self::Ptr {
                 target: canonical_name(target)?,
             },
             Self::Mx {
@@ -231,7 +258,7 @@ impl Zone {
         for rows in owners.values() {
             for data in rows {
                 let target = match data {
-                    Data::Ns { target } => Some(target),
+                    Data::Ns { target } | Data::Ptr { target } => Some(target),
                     Data::Mx { exchange, .. } => Some(exchange),
                     _ => None,
                 };
@@ -240,10 +267,15 @@ impl Zone {
                         .get(target)
                         .is_some_and(|rows| rows.iter().any(|r| matches!(r, Data::Cname { .. })))
                 {
+                    let kinds = if matches!(data, Data::Ptr { .. }) {
+                        "PTR"
+                    } else {
+                        "MX and NS"
+                    };
                     return Err(error(
                         ErrorKind::Configuration,
                         format!(
-                            "{target}: MX and NS targets must name a canonical host, not a CNAME alias"
+                            "{target}: {kinds} targets must name a canonical host, not a CNAME alias"
                         ),
                     ));
                 }

@@ -796,3 +796,39 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
 - Cross-platform run40111060414 stopped at a merge-only line-wrap omission.
   Corrected formatting-onlyfec8cfe; no runtime check was disabled. Other-platform
   desktop, physical-device/screen-reader and novice acceptance remain pending.
+
+
+## 2026-10-24 — M81–M84: reviewed teaching data and bounded Linux extensions
+
+- Four distinct Ethernet assignments are registered in normal source113/27
+  (35CCNA/21LPIC-1/17LPIC-2/40Bash), after VLAN foundations and before static
+  routing. Their9 content checks accept reference and alternate plans, reject
+  misconceptions and partial work, independently break each requirement, isolate
+  practice and retain real6/7 history/drafts/favorites. Early failures were test
+  catalog loading and stale draft assumptions; no state predicate was weakened.
+  The normal merged branch passes857 model/integration checks and Clippy/fmt.
+- Native R1 passes first-three full flows and capstone practice/partial work,
+  but correctly leaves capstone incomplete after its controller misses the last
+  item in a clipped source dropdown. All37 requirements stay intact. Actual
+  screenshots reveal two smaller clarity/alignment issues: distinguish rejected
+  Send from a still-correct configuration, and align dropdown labels with the
+  shared field column. Fixes and full native acceptance remain pending. No new
+  authored coverage is promoted yet; the installed5a candidate still has109 labs.
+- Original PTR capability adds no dependency, host lookup, new authored activity
+  or objective promotion. Twelve new tests plus77 existing library/DNS checks
+  and all-target Clippy/fmt pass; independent review rechecked RFC1035/3596/2181.
+  The main combined869 model/integration checks pass before the find merge.
+  Six forward-DNS limitations texts now accurately describe editor PTR support;
+  all other scenario JSON values are identical. Their8 content tests and9 MAC
+  course-order/content tests pass after those metadata-only edits.
+- Bounded virtual find core697754e passes42 scoped checks (12new,30existing),
+  all-target Clippy and formatting, with no host reference execution or dependent
+  lessons yet. Read-only traversal preserves Tree serialization, reports partial
+  permission failures honestly and discloses the readable/nonsearchable boundary.
+  The fixed GNU comparison remains a separate gate; all152 existing fixture
+  commands, including the original79, are preserved. See FIND_SUBSET.md and
+  DNS_REVERSE_SUBSET.md for exact scope and remaining teaching work.
+- Ordinary serialized root model checks observe at least21.33GiB available,
+  PSIavg10 zero and no OOM counter increase. Two jobs/two test threads and disk
+  artifacts remain mandatory; these observations are not a stress test or safety
+  guarantee. No release, desktop setting or unrelated application is changed.
