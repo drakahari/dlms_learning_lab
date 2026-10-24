@@ -97,7 +97,7 @@ def main():
         elif args.action == 'python-tests':
             session.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/tests', '-v'], cwd=args.cwd)
         elif args.action == 'tool':
-            allowed = {'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
+            allowed = {'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
             if args.cwd.resolve() != root or args.target_dir:
                 raise RuntimeError('Fixed reference tools currently require the main checkout/default target to preserve probe provenance')
             if not args.args or args.args[0] not in allowed:

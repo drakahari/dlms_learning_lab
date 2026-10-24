@@ -137,6 +137,10 @@ struct Metrics {
     script_diagnostic: Option<egui::Rect>,
     script_completion: Option<egui::Rect>,
     script_feedback: Option<egui::Rect>,
+    reopen_scale: Option<egui::Rect>,
+    reopen_scale_items: Vec<(f32, egui::Rect)>,
+    reopen_theme: Option<egui::Rect>,
+    reopen_theme_items: Vec<(String, egui::Rect)>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
     why: Option<egui::Rect>,
@@ -191,6 +195,7 @@ pub struct LabApp {
     address_example: Option<ipv4_workspace::Assignment>,
     address_worked: std::collections::BTreeMap<String, String>,
     smoke: bool,
+    reopen: Option<smoke::reopen::Session>,
     started: Instant,
     smoke_stage: usize,
     pending_events: Vec<egui::Event>,
@@ -222,6 +227,10 @@ impl LabApp {
         ctx.set_style(style);
         let scenarios = pack::bundled().expect("Bundled pack validates");
         let units = course::bundled(&scenarios).expect("Bundled units validate");
+        // Developer reopen validation runs before default path/fallback/profile I/O.
+        let reopen = smoke::reopen::Session::from_environment(smoke, developer)
+            .unwrap_or_else(|e| panic!("Developer reopen refused: {e}"));
+        let is_reopen = reopen.is_some();
         let smoke_profile = smoke.then(|| {
             let mut builder = tempfile::Builder::new();
             builder.prefix("dlms-native-smoke-");
@@ -234,10 +243,18 @@ impl LabApp {
         });
         let path = if let Some(profile) = &smoke_profile {
             profile.path().join("progress-v1.json")
+        } else if is_reopen {
+            progress::default_path()
+                .expect("Private normal profile path must resolve without fallback")
         } else {
             progress::default_path()
                 .unwrap_or_else(|_| PathBuf::from("local-data/progress-v1.json"))
         };
+        if let Some(session) = &reopen {
+            session
+                .verify_profile_paths(&path)
+                .expect("Private profile paths must be contained before any lock/load");
+        }
         let fresh = || Progress {
             schema_version: 1,
             ..Default::default()
@@ -310,8 +327,11 @@ impl LabApp {
             address_example: None,
             address_worked: Default::default(),
             smoke,
+            reopen,
             started: Instant::now(),
-            smoke_stage: if smoke
+            smoke_stage: if is_reopen {
+                17000
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-learning")
             {
                 16000
@@ -726,10 +746,20 @@ impl LabApp {
             .selected_text(format!("{:.0}%", self.scale * 100.))
             .show_ui(ui, |ui| {
                 for scale in [1., 1.15, 1.25, 1.5, 2.] {
-                    ui.selectable_value(&mut self.scale, scale, format!("{:.0}%", scale * 100.));
+                    let item = ui.selectable_value(
+                        &mut self.scale,
+                        scale,
+                        format!("{:.0}%", scale * 100.),
+                    );
+                    if self.reopen.is_some() {
+                        self.metrics.reopen_scale_items.push((scale, item.rect));
+                    }
                 }
             });
         name_control(&r.response, "Text size");
+        if self.reopen.is_some() {
+            self.metrics.reopen_scale = Some(r.response.rect);
+        }
         self.metrics.header.push(r.response.rect);
     }
     fn theme_picker(&mut self, ui: &mut egui::Ui) {
@@ -755,16 +785,24 @@ impl LabApp {
                 .selected_text(theme::find(&self.theme_id).name.clone())
                 .show_ui(ui, |ui| {
                     for t in theme::inventory() {
-                        ui.selectable_value(
+                        let item = ui.selectable_value(
                             &mut self.theme_id,
                             t.id.clone(),
                             format!("{} · {}", t.group, t.name),
                         );
+                        if self.reopen.is_some() {
+                            self.metrics
+                                .reopen_theme_items
+                                .push((t.id.clone(), item.rect));
+                        }
                     }
                 })
         })
         .inner;
         name_control(&r.response, "Application theme");
+        if self.reopen.is_some() {
+            self.metrics.reopen_theme = Some(r.response.rect);
+        }
         self.metrics.header.push(r.response.rect);
     }
     fn header(&mut self, ctx: &egui::Context) {
@@ -1577,7 +1615,7 @@ fn combo<'a>(
 }
 impl eframe::App for LabApp {
     fn raw_input_hook(&mut self, _: &egui::Context, input: &mut egui::RawInput) {
-        if self.smoke {
+        if self.smoke || self.reopen.is_some() {
             if let Some(modifiers) = self.pending_events.iter().rev().find_map(|e| {
                 if let egui::Event::Key { modifiers, .. } = e {
                     Some(*modifiers)
@@ -1592,13 +1630,18 @@ impl eframe::App for LabApp {
     }
     fn update(&mut self, ctx: &egui::Context, _: &mut eframe::Frame) {
         crate::startup_trace::frame(ctx, false);
-        if self.smoke {
+        if self.reopen.is_some() {
+            self.reopen_capture_events(ctx);
+        } else if self.smoke {
             self.capture_events(ctx);
         }
         self.render(ctx);
         self.save();
         crate::startup_trace::frame(ctx, true);
-        if self.smoke {
+        if self.reopen.is_some() {
+            self.reopen_tick(ctx);
+            ctx.request_repaint_after(std::time::Duration::from_millis(50));
+        } else if self.smoke {
             self.smoke_tick(ctx);
             ctx.request_repaint_after(std::time::Duration::from_millis(50));
         }
