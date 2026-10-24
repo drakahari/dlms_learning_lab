@@ -1,94 +1,238 @@
-# Implementation continuation checkpoint
+# Safe continuation checkpoint
 
-2026-10-23 Fedora (UTC logs may say10-24). Continue the authorized unfinished application, not another UI redesign or candidate-only delivery. Owner approved MIT for original code/content, native Rust/egui, offline simulation and Introduction → isolated practice → full assignment. Preserve all progress, drafts, favorites and28themes. No host execution of learner input, VMs, old-project edits, desktop/GPU/swap/service/model changes, public releases or deployments. Two existing helpers are authorized; no additional agents are needed.
+Stopped at the owner's request on2026-10-23 (Fedora; UTC logs use10-24).
+Do not restart work until the owner resumes. The application is NOT complete.
+This current checkpoint supersedes historical pending notes in earlier versions;
+[IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md) and retained ignored evidence
+preserve the milestone history. No public release is authorized.
 
-## Mandatory memory workflow
+## Verified normal app and source
 
-Read AGENTS.md and BUILD_WORKFLOW.md. One heavy invocation across all worktrees, MAIN absolute `python3 tools/dev.py`, shared OS lock, Cargo2jobs and tests2runtime threads. Never bypass a busy lock or retained command marker. A sandbox may expose namespace PIDs such as2/7; do not misclassify/delete its live marker. All artifacts/cache/targets/native/package data remain on verified NVMe Btrfs project disk under `.build-artifacts`,target,dist. `/tmp` is RAM-backed; no new large data there. Only the seven owner-approved old review executables were removed earlier (1,513,992,192bytes); sources/diagnostics/toolchain originals and uncertain evidence remain. No broad deletion or cargo clean. Swap is nearly full; low observed PSI/headroom is not a memory guarantee. The guard cancels only its owned group on sustained pressure. Leave LM Studio connect-only monitor and all other applications alone.
+- Main's application implementation is pushed `b73c2ef21cfa5738ab0091bcb8bc46c024235fd7`.
+  The later pushed `ab4d990` changes only build-cache safeguards/docs, not the app.
+- **106 authored labs /25 units:31 CCNA,21 LPIC-1,17 LPIC-2,37 Bash/Shell.**
+  Evaluator7 remains active on main;28 themes and all existing scenarios/progress
+  remain. Pending lesson files and numeric variants do not count.
+- Launch the last verified development build from the main checkout:
 
-**Sole heavy slot: ROOT**, fresh exclusive author-worktree target build/captureR2, m73-after8-exclusive-target-r2.log. Check actual session46556/marker before another heavy call. Reviewer holds heavy/source-only native8 harness; author source-only three practical case lessons. Main normal106/25/evaluator7 remains unchanged/pushedb73; no main8 activation.
+  ```sh
+  ./target/debug/dlms-learning-lab
+  ```
 
-**Build-cache correction:** R2 first attempt m73-after8-actual-comparison-r2.log failed BEFORE creating any capture output: Cargo reused a106 library from the other worktree in the old shared target, despite pinned102 author source. Do not weaken the catalog assertion. Root now enforces exclusive path-hashed worktree targets in tools/dev.py (main target unchanged), rejects alternate/shared target overrides and symlink aliases, and gates candidates to main.76Python checks pass including new regressions. Old target/diagnostics untouched. Exact unchanged R2source/control may rerun because no R2STARTED/output directory existed; the fresh invocation rebuilds all dependencies. Main guard source is not among160capture pins; its new source/test evidence is separate. Main source changes are limited to workflow safeguards and checkpoint, not a learner model.
+  Embedded identity is b73c2ef. Executable375,840,112bytes;
+  SHA256 `89c1dbf101fed80cb0bd34b01aa0a00762ed227eb592f8060aa00e0fd60b72a0`,
+  independently rehashed unchanged at this stop. No current106 installer exists.
+- M70 normal service unit is integrated: saved/loaded/running recovery, strong
+  preparation/ordering, optional Wants and target handover. Current baseline
+  has891 distinct Rust checks, Clippy/fmt/build and actual all-four Fedora native
+ 72-capture acceptance, including real typing at light150%/dark200%.
+  Logs `m70-*`; screenshots in `.build-artifacts/native-runs/run-pejyy86y`.
+  Earlier failed native preparation retry is retained and corrected in teaching,
+  native actions and a14th content regression, without weakening the model.
+- Latest actually installed candidate is still102 labs/24 units, source
+  `29096be81982de2812b2e25c609703bf40688472`, under
+  `dist/dlms-learning-lab-0.1.0-g29096be81982-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+  Installed lifecycle, all-four OSPF,72-view shared IPv4/VLAN alignment and10/10
+  quiet Wayland readbacks passed. That candidate predates M69/M70 and is NOT
+  completion. INSTALLATION.md records exact hashes and acceptance scope.
 
-R1 actual8 comparison finished0; root independently verified all16output hashes,4124actualOutcomes/1031slice-equal groups (3968unchanged/156listed changes),37new8records equal real7 exceptactualrevision and exact copied raw7profiles. Four real Stop outcomes have inaccurate ticks:0 metadata; R1/source/control archived unchanged. R2 minimal helper returns actual positive pre-Stop ticks; post-Stop immobility probes excluded.160pins489,236,595bytes independently rehashed, R2controlf1a7fc196e297bbacbebf0b8a7cb07612962dc94ed0bc1d7f83f357ee05fa998. No successful R2 runtime claim yet.
+## Mandatory safe build workflow
 
-Reviewer merged106 lib/integration observed810PASS/76targets,0warnings/failures; logm73-full-lib-integration-r1.log explicitly compiled migration worktree and asserted106/evaluator8. Minimum11,371,507,712available bytes,PSIavg10zero/OOMdelta0. Because it used the old shared target, this is observed behavior, not clean cache/source identity proof. Preserve it; rerun acceptance on the dedicated migration target. Bin/UI and Clippy not yet run. No memory pressure/stress test, no unrelated process changes.
+Read AGENTS.md and BUILD_WORKFLOW.md. Use MAIN absolute `python3 tools/dev.py`.
+One heavy invocation across all worktrees, Cargo2 jobs and2 runtime test threads;
+never bypass the shared lock or a retained active/unfinished marker. Root verified
+both markers absent and the lock free after the final running UI suite.
+Both helpers confirm idle with no owned running processes; no further work until resumed.
 
+**New, independently reviewed fix, pushed ab4d990:** targets must be exclusive
+per canonical checkout even when builds are serial. A comparison caught Cargo
+reusing a106-lab library from another worktree for pinned102 source in the old
+shared `target/acl-foundation`. It failed before output; that target/log remain.
+Main retains `target/`; worktrees now automatically use
+`.build-artifacts/targets/NAME-PATHHASH`. Omit `--target-dir`; overrides to another
+checkout and aliases of the target namespace are refused. Candidate builds require
+main. All76 Python checks pass, including new cross-worktree/candidate regressions.
 
-## Actual delivered inventory versus staging
+```sh
+# Main
+python3 tools/dev.py test --locked --offline --lib --test '*'
+# Isolated worktree; no shared target override
+CARGO_PROFILE_DEV_DEBUG=0 CARGO_PROFILE_TEST_DEBUG=0 CARGO_INCREMENTAL=0 \
+python3 /path/to/dlms_learning_lab/tools/dev.py --cwd /path/to/worktree test --offline --test TARGET
+```
 
-HEAD and confirmed pushed `b73c2ef`: reviewed normal four-service unit/native recovery, b16008d bounded saved-sequence readers and61888a3 fixed Bash reference tooling/docs. Current verified normal source is106 authored assignments/25units:31CCNA/21LPIC-1/17LPIC-2/37Bash. Four service activities pass corrected all-four native72captures in run-pejyy86y; M70 normal source/docs are committed and pushed. The previous102/24 source is historical, not the current implementation count. No generated variants/placeholders count. Coverage remains128narrowly Partial/1Supporting/1111Open of1240overlapping references; this is not a completion percentage. Most full-product checklist requirements remain Open. Current CCNAv1.1 is separate from futurev2.0 (2027-02-03); LPIC-1v5 and LPIC-2v4.5. Full inventory checked10-22; scoped official sources10-23.
+All artifacts/cache/targets/dist remain on verified NVMe Btrfs project disk.
+`/tmp` is RAM-backed; no new large artifacts there. Only the exact seven approved
+old review executables were removed earlier (1,513,992,192bytes). Sources,
+diagnostics, toolchain originals, old targets and uncertain evidence remain.
+No broad cleanup, cargo clean, GPU/swap/OOM/service/desktop/model changes.
+Swap is nearly full; low observed PSI/headroom is not a guarantee. The guard
+refuses low headroom/pressure and cancels only its owned group if sustained.
 
-CI40051826980 atd78: Ubuntu/macOS build/tests pass, Windows still in progress without a failed step at last check. Earlier6bb CI failed the minimum-width OSPF heading; source ba86b42 fixes only that heading without weakening geometry checks. CI is build/test evidence, not desktop acceptance.
+## Isolated evaluator8: not activated or pushed as normal app
 
-## Service milestone: finish acceptance and commit
+Worktree `.build-artifacts/worktrees/evaluator8-migration`, branch
+`evaluator8-migration-acceptance`; HEAD `c06a03f5e33cad6311790a4caa76a3ebc0e9ca37`
+merges main ab4d990. Reviewed uncommitted changes are intentionally retained.
+Do not reset/clean them or confuse this worktree's binary with the normal app.
 
-M69 native foundation/inspector/session integrated and verified: combined867distinct Rust checks, Clippy/fmt/build and actual private17-capture native flow (run-erni39j9). Saved unit, loaded definition, running snapshot and future links/default remain distinct. Optional command Session16entries/128KiB reserves2KiB for editable input; active editor kind, separate example/assignment work and old absent metadata preserved. No host systemd/process/network. Original single-service and37script tasks remain unchanged.
+- Original case engine: author commits `27d0a0e` then corrected `65da217`;
+  cherry-picked as `ede002a`/`2df5933` in migration. Own migration tests/fixtures
+  commit `c228458`, main b73 merge `604ff4b`. No new dependency/public architecture.
+  Explicit revision8 because case support/diagnostics change earlier outcomes.
+- Corrected engine passes55 focused checks/Clippy/fmt; source and fixtures are
+  frozen. See `docs/SHELL_CASE.md` in the worktree and ignored receipt
+  `reviews/shell-case/CASE-CORRECTED-VALIDATION-R6.json` under `.build-artifacts`.
+  Array-data delimiter, reached locale refusal and static diagnostic fixes are
+  included. A later keyword-array concern was retracted after lexer inspection;
+  its author test-only addition remains unrun/uncommitted, not a proved bug fix.
+- Genuine6/7 migration acceptance:11 public+3 private checks pass, exact33 real6
+  records and37 real7 records retained, target-driven exact before8 snapshots,
+  Reset-first/practice-only, capacity, conflicts/write failures/cancel/recovery,
+  portable restore and selected reset. Receipt
+  `reviews/evaluator8-migration/passed-r5/RUN_RESULTS.json` (SHA48116208…).
+  Old outcomes were NEVER generated with8 and relabeled6/7.
+- **Fresh exclusive-target full regressions pass:**810 library/integration checks
+  across76 targets (`m73-exclusive-full-lib-integration-r1.log`), plus121 UI tests
+  (`m73-exclusive-full-bin-ui-r2.log`,434.36seconds). Combined931 distinct checks;
+  no overlap counts added. Target
+  `.build-artifacts/targets/evaluator8-migration-fe542e765a0347df`.
+  Final stop receipt `reviews/evaluator8-migration/owner-stop-checkpoint/CHECKPOINT.json`
+  SHA521d84a390693ec509dc8b48a37cfd0b1952cd01654185c654fab2d4b1801599
+  records all20 dirty/untracked file hashes, patch, executable/log identity and
+  remaining gates. UI memory438samples: minimum12,922,429,440available bytes,
+  peakPSIavg10zero andOOMdelta0; ordinary observation, not a guarantee.
+  Full dependency compile and source worktree are recorded. Old810 shared-target
+  observation remains qualified; use the clean-target run as current evidence.
+- The121 UI run includes new genuine7-to8 native-plan fixture/source checks but
+  **the actual new native flow has NOT run**. First UI compile failed because a
+  proposed observer used a test-only private Vm method; retained log
+  `m73-exclusive-full-bin-ui-r1.log`. Accepted two-path correction observes a
+  fixed virtual marker emitted by the selector child, with no VM/API/budget change.
+  The successful121 run uses this correction (native8-marker-r2).
+- Applied native proposal has six narrow UI paths, stage15000..15075 and
+  `DLMS_SMOKE_STAGE=case-history`. Exact frozen writer7 private fixture, actual
+  typed Run/Stop/retry, separate example, history6/7,150/200 syntax retry,
+  export/old7 Cancel+Confirm/safety copy and selected Reset/Challenge are intended.
+  No solved State is installed. Readback is not a cold-process restart claim.
+- **Held, UNAPPLIED focus-band correction:**
+  `reviews/evaluator8-migration/native8-focus-band-r3/SOURCE-READY.json`,
+  SHA471c7486a5938e238d53e9da1802a28631def1e550330719a3cbeda84117b611.
+  Root reviewed the patch; final application/test grant was not sent before stop.
+  It reveals a font/control-height band inside the actual scrollable editor,
+  then proves TextEdit focus. The whole180pt editor need not fit a short200%
+  viewport. Changes capture-only helper and acceptance doc, no product geometry.
+  On resume verify hashes, apply, run the affected plan check, Clippy/fmt/build,
+  then inspect actual Fedora native flow before enabling8. Shared Tab tests are
+  separate; new flow uses clicks/Ctrl+A/Ctrl+Enter, not native Tab acceptance.
+- Root staged three docs in this worktree only: SHELL_SUBSET, SHELL_CASE_REFERENCE
+  and PROGRESS_RECOVERY for8. Main docs still describe shipped7. Update stale
+  staging headings/evidence after acceptance; do not publish pending as complete.
 
-Four data/test/doc files c878b1e were root-integrated asc1c8e4b: loaded-definition recovery, strong preparation/ordering, optional Wants failure, target handover. Their13 content tests plus163scoped regressions/Clippy/fmt passed in isolation. Root staged normal pack/unit registration and correct106counts, preserved frozen original102/98-ID fixtures, and updated generic goal-aware broken-resume/open-assignment helpers. Main763model checks/73targets passed (`m70-staged-catalog-models-r1.log`). Do not weaken explicit current/fresh/preservation outcomes.
+## Accepted before/after/reference evidence
 
-Native guide/normal input plans: reviewed seven paths from isolated54b8faa, exact passed-r3 hashes copied to root (same c1base), retaining OSPF dispatch and root viewport comment.10focused checks/Clippy/fmt passed. Examples now have one visible annotated action selector, Insert-only command population and next-frame focus; full task/editor/terminal unchanged. Root matrix adjustment reuses a registered ID rather than appending a duplicate. Root render review corrected missing spaces in port8443/at9100 prose and topic to “Service definitions and startup”; models/actions/goals equal.
+All paths below are inside ignored `.build-artifacts/reviews/shell-case`.
 
-**Historical native r1 retained failure (superseded by accepted r2 below):** `m70-normal-service-native-r1.log`, run-945yc__3. First normal task passes18captures: Intro/example experiment/repair, wrong/partial/reference/alternate, pure-query retention, actual150%light/200%dark typing+Save+terminal retry, exact separate draft/Session/editor-kind resume, Undo, reset/cancel and Challenge. Root inspected actual Intro/example/assignment/light150 feedback; shared fields remain centered. Second task fails the expected-success assertion after an earlier wrong start: preparation remains Exited/active with OLD data. This is correct RemainAfterExit behavior, not an engine defect. Reference sequences originally solve pristine state; a later start cannot silently rerun active preparation.
+- Actual public7 baseline `captures/before-case-public7-8eadf3d-r2`, COMPLETE
+  `9a924e116ee7768053e361f6a651b956393d36c7df53c513924181de4fa486de`:
+ 4124 real observations,37 assignment records/215 results/37 examples,33 exact
+  earlier6 records,102-context raw/writer profiles and4 actual Stop outcomes.
+- Fixed37 builtin-only Bash5.3.9 reference is independently accepted, manifest
+  `7af1b2e86a9cf9364c5ea170bcdfba4142a5c8cff0c5046efd0be57c55af02bd`.
+  Root+peer verify all157 outputs and pins. This fixed developer oracle has no
+  learner-input path and never becomes the app engine. Original NOT RUN/null
+  input metadata remains immutable; actual observations are separate.
+- Actual8 R1 completed but used inaccurate ticks:0 metadata on four genuine Stop
+  outcomes. It and all original source/controls remain archived unchanged.
+- **Corrected actual8 R2 accepted from a fresh exclusive author target**:
+  `captures/after-case-public8-reviewed-r2`, manifest
+  `7053d055a629fca5e07fc73efe074874682824f53293bd16630ee66a0a62fdb8`.
+  Root independently verifies all16 output hashes,4124 outcomes,3968 equal to7,
+ 156 explicitly allowed changes/39 groups,37 actual8 records equal genuine7
+  except revision, exact old raw profiles, Stop measured ticks3/1/1/1 by slice.
+  `ROOT-ACTUAL-R2-VERIFICATION.json` records source/target/binary identity.
+  Private control `CAPTURE-PINS-R2.json` SHA
+  `f1a7fc196e297bbacbebf0b8a7cb07612962dc94ed0bc1d7f83f357ee05fa998`.
+  Full binary SHA `c0c891333cb6a5ead07a2c2bd04e81f1ca354922966f8e0510f379cde55d8cb8`.
+  Scope is isolated102 catalog/unchanged37 scripts, not106 native acceptance.
+- First R2 attempt hit the wrong-library catalog guard before creating output.
+  Preserve `m73-after8-actual-comparison-r2.log`; the same no-clobber captureID
+  could be used by the later fresh-target invocation because no STARTED existed.
+  No evidence was overwritten or a catalog assertion weakened.
 
-**Correction is implemented/reviewed:** native plan explicitly stops application and preparation before applying reference/alternate after prior attempts; Intro/example annotation/optional hints explain that recovery. New14th content regression reproduces stale successful preparation, proves another start retains the old snapshot and fails, then explicit stop/start and both alternatives pass. `m70-service-retry-models-r1.log`14PASS. No production model/predicate changed. Assertions now print failing rows on error. Independent review confirms all payloads/IDs/versions/initials/goals/solutions/try/repair actions unchanged. Rebuild then rerun normal `DLMS_SMOKE_STAGE=unit-manager-unit` through guarded native runner, inspect actual all-four screens and typing at both larger sizes; preserve r1.
+## Source-only future curriculum/capability — not counted
 
-After acceptance: update README/CURRICULUM/COMPLETION/OBJECTIVE_MAPPING/SKILL_COVERAGE/ledger with106/25 (31/21/17/37). Only strengthen already Partial LPIC2current202.1/K1/T4; no new status counts, SysV/LSB/full boot remain Open. Document correction and actual evidence, privacy-check explicit paths, commit/push. Continue shell/remaining tracks rather than stopping after this batch.
+**Three scripting tasks**, `.build-artifacts/reviews/shell-case-content`:
+report-mode interface, prioritized batch routing and validate-all preview/apply
+publication.11/8/12 independent cases, separate museum examples/experiments,
+two alternatives each (including no-case methods), wrong/partial/hardcoded/file
+mutation candidates and seven proposed tests. R1 manifestd811fb72… is preserved;
+no VM/compiler/native/main registration or coverage claim.
 
-## Bounded progress sequence readers integrated, evaluator still7
+Author stopped with exact R1 intact; **R2 edits had NOT started**. Its precise
+source-only follow-up is `reviews/shell-case-content/STOP_CHECKPOINT.md`,
+SHA97320e43377754660b0bf392a0fd9ca11923b305cf87eced678cc2005128e174.
 
-Reviewed source d558de29 (four paths) copied with verified final hashes from `reviews/progress-sequences/passed-r2/RUN_RESULTS.json`.80scoped checks pass (49lib incl new reader counter,6new sequence tests,7backup,18actual migration regressions), Clippy/fmt pass. Generic serde reader decodes at most32 typed entries and refuses an excess before its Record/strings, ignores untrusted size-hint allocation. Applied only script_history_more and receipt revisions; default/omitted serialized bytes, combined32/domain policy and target-driven writer unchanged. Combined primary+more can decode33 bounded records before existing combined validation; do not claim a stricter bound. Real33frozen6 records retained exactly; an empty7 shape test is not generated historical credit. Root current all-UI run and later affected-model regression remain. Commit this coherent reader improvement separately from service/oracle if useful.
+Root found a real teaching/reference mismatch before execution: default
+`read -r` trims outer spaces/tabs, so a promised full-record trailing-space
+preservation and one fixture could not work. Existing original shell-input,
+shell-eof and shell-number-records already teach this correctly. Author was
+asked to preserve R1 and scope a new R2 canonical-record format explicitly,
+fix the wording/fixture, add input-format guards and defer whitespace-preserving
+IFS behavior. Check the helper's final receipt/latest manifest before runtime.
+Do not change the frozen8 engine or silently weaken expected outputs.
 
-## Shell case next: actual baseline/oracle accepted; isolated implementation underway
+**CCNA MAC-learning draft**, `.build-artifacts/reviews/mac-learning-foundation`:
+SOURCE-DRAFT-R2 SHA925e82f1d1c96634457e918a284626d393009573fa96421d0b15c2b940d6847a;
+787-line pure module plus12 proposed tests, formatted/parsechecked only.
+Uncompiled/unintegrated, no public lab/title/coverage. Source/VLAN learning,
+known/unknown/broadcast, source-only aging, NIC arrival vs acceptance and independent
+cloned current-state checks over existing VLAN forest. Primary current Cisco
+sources checked10-23. Independent read-only review found three required fixes:
 
-Before-edit public7 baseline is accepted unchanged at `reviews/shell-case/captures/before-case-public7-8eadf3d-r2`, COMPLETE/MANIFEST9a924e116ee7768053e361f6a651b956393d36c7df53c513924181de4fa486de.4124actualoutcomes,37genuine7 records/215results/37examples,33exactactual6records/182outcomes,102attempt raw and actual-writer profiles,4actualStop observations; slices1/16/32/64equal. Root independently verified14output hashes, both profiles and exact6fixture; original failed r1/old pins preserved. Full41.67MBtestbinary and5.5MBdata are ignored disk evidence. Never regenerate results with8 and relabel6/7.
+1. A negative frame can pass by disabling its own port while an unrelated
+   positive stays healthy. Add per-negative physical/attachment health guards;
+   one global positive is insufficient for VLAN-isolation teaching.
+2. Cap retained UTF8 diagnostics (e.g512bytes); a huge unknown field currently
+   expands serde error text to nearly the input ceiling.
+3. Distinguish compact-state payload and raw JSON input ceilings. A legal
+   maximum shape can be120934 compact but302001 pretty bytes, exceeding the
+   current262144 raw decoder ceiling. Test legitimate maximum pretty restore.
 
-Fixed37 Bash oracle tooling is now root-integrated: three independently reviewed hash-pinned files plus ONE explicit dev.py allowlist entry.20collector mock/pipe checks and all73Python tests PASS (`m71-oracle-python-r1.log`). Actual fixed builtin-only Bash5.3.9 run PASS (`m71-fixed-case-bash-r1.log`), capture `reviews/shell-case/bash-oracle-captures/fixed37-bash539-r1`, manifest7af1b2e86a9cf9364c5ea170bcdfba4142a5c8cff0c5046efd0be57c55af02bd. Root AND independent reviewer verify COMPLETE, all157output hashes,15source/manual/binary pins,37exact input/source/stream/status/final-file maps. No learner input, host service/network or personal files. Closed C environment/no HOME/empty PATH, finite streams/files/time, retained private disk folders, inherited actual guard lock/group, no-clobber publication. Root later changed module docstrings only; executable AST remains equal to reviewed/tested875c6bbb/896d71b4 source. See SHELL_CASE_REFERENCE.md. Actual artifacts unchanged.
+Also review root's additional NIC-arrival concern: a tagged frame reaching an
+up workstation is physically present even when the modeled untagged endpoint
+rejects it; current draft omits that arrival. No fixes were applied after the
+owner's stop. Down-link seeded stale entries are intentionally permissive and
+need a documented older-table boundary before teaching. All actual compiler,
+fidelity, limits, progress, state/goal/native/content acceptance remains pending.
 
-Observed: first match; lazy reached patterns; GNU first matching alternative alone produces trace'a'; plain body sees prior1; selector/pattern capture exit7 makes first body $? see7; no-match/empty matched body0; (esac) valid; empty case still evaluates selector; C-byte ? does not match multibyte é; dot/slash/newline are ordinary case data. Dynamic backslash/brackets/fallthrough are actual GNU-supported observations but deliberately excluded from first subset. POSIX8 includes ;&, so do not call that exclusion a portability fact.
+## Resume order and remaining product scope
 
-Author `/root/ccna_discovery` now source-only in `.build-artifacts/worktrees/shell-case`, branch shell-case-foundation fromc1c8e4b. Root authorized internal parser/preparation/quote-provenance/separate resumable matcher/case-aware capture delimiter/cooperative VM extension, no dependency/public architecture rewrite. Freeze DECISIONS supplement first; send source manifest/tests before any heavy grant. New behavior must not merge as7: isolated revision8 only, migration pending. Explicit limits/shared work/memory/Stop, no synchronous nested run. No case curriculum yet. Root later reviews source, grants serialized tests/reference diffs, genuine6+7history and exact before8 receipt/reset-first/practice-only/conflict/cancel/raw recovery, then actual native Run/Stop/restore and authored distinct tasks. HISTORY8-ACCEPTANCE-REVIEW.md details mechanisms; existing multihistory/target-driven receipts already support later boundaries.
+1. Confirm no live marker/owner; use exclusive targets and serialize all work.
+2. Finish held focus-band source gate, affected check/Clippy/fmt/build and actual
+   genuine7-to8 Fedora native flow. Preserve failures; correct real issues.
+3. Commit/push reviewed8 activation only after those gates; normal app stays7
+   until then. Do not relabel historical results or invent current mastery.
+4. Independently review corrected three-task source/expected tables, test
+   reference/alternates/negative/partial/drafts/resume in isolation, register only
+   accepted real tasks, inspect actual native intro/example/assignment flows.
+5. Correct/review/test MAC capability before authoring dependent CCNA tasks;
+   continue substantive networking/Linux/shell batches against the gap map.
+6. Produce an identified clean new Fedora candidate after coherent commits and
+   test the INSTALLED app/lifecycle/reopen/alignment/startup, not only dev binary.
 
-Independent reviewer `/root/independent_review` completed bounded reader and recovery/oracle source/evidence reviews; no heavy grant currently. Use followup_task for an idle/completed helper; send_message alone does not restart it. Only these two helpers are authorized.
+Coverage remains128 narrowly Partial/1 Supporting/1111 Open of1240 overlapping
+references; not a percentage. Most full-product checklist items remain Open.
+Current CCNAv1.1 is separate from futurev2.0 (2027-02-03), LPIC-1v5 andLPIC-2v4.5;
+full source inventory checked10-22, scoped sources10-23. Preserve focused native
+workspaces, separate examples/drafts, all28 themes, simulation-only isolation and
+MIT original-code/curriculum approval. No old-project edits or new dependencies.
 
-## Latest actually installed Fedora candidate (102; not completion)
-
-`./dist/dlms-learning-lab-0.1.0-g29096be81982-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`
-
-Clean29096be81982de2812b2e25c609703bf40688472. ArchiveSHA7e0c4624d593f797d65f64b267c4bc9128978d487a7686d6e85da42b791023ce; binarySHA7df8724919b05fd532c80bfd7ce9d3343ef9585fa21671e48c3e9b86466cecea. Installed acceptance prefix `.build-artifacts/installations/verified-29096be81982-2eflmz82`: actual identified877upgrade, uninstall/reinstall, outside-checkout identity/content/hash/desktop and exact separate synthetic original-nine bytes pass. Installed four OSPF flows84captures (run-cgz5szfn), shared IPv4/VLAN alignment72views100/150/200wide/narrow/light/dark (run-htak7fy9), root actual screen review and10/10quiet Wayland readbacks pass. Logs m68-installed-{lifecycle,ospf,alignment,quiet}-r1.log. This old candidate does NOT contain current M69/M70 changes or minimum-width OSPF heading fix. Prepare a clean newer candidate after coherent commits; test packaged app, not only dev binary.
-
-Original intermittent Mesa/EGL unanswered frame callback remains unresolved/unreproduced. Separate socketECONNREFUSED/sandboxEPERM is diagnosed, not a cure. No security/compositor/theme changes. Linux223notice/source packages resolved; original dispatch0.2.0MITnotice absent from published/pinned source, rechecked official tree and lib/Cargo metadata10-23; macOS packaging remains gated, no invented notice/dependency removal. Windows/macOS actual desktop installation/reopen/upgrade/uninstall, signing/notarization, physical-device/screen-reader and novice comprehension acceptance remain pending. CI/captures/tests cannot substitute. Finish all independent curriculum/implementation work; no release publication.
-
-## Latest source gates after the recorded native failure
-
-- Root current main all-library/integration771 checks/74targets PASS in m70-current-models-with-reader-r1.log, all120UI PASS (464.89s) in m70-main-all-ui-r1.log, all-target Clippy/fmt/build PASS.891distinct combined, no repeated checks added. Native corrected all-four still pending. Root parse/port prose and explicit recovery commands are in the newly built main development binary.
-- Case sourceR2 accepted for FIRST isolated tests: manifest04f9beb62788db41c4d6ddf3eec660b6d4772760ce7ce2ba4a9a966fe94a9e17,7paths in shell-case worktree. Root hashes all source and verifies all37 oracle fixture inputs/outcomes against exact observations. Replaced an incorrect test-only generated8→labeled7 outcome with empty structural shape; added independent DP40,404short pattern/subject comparisons. No main8 activation or current/curriculum claim. The author owns sole slot now for first focused checks, not migration/whole-current-suite runtime.
-- Independent reviewer source migrationR2: worktree evaluator8-migration base618; manifest0c0221434b09dbb35188d722282367d4729dbe2948604b22428c654541358b16.8paths include exact three synthetic7 fixture files (no personal data), small provenance,11public+3private tests and docs; no production progress/backup changes (cfg(test) only). Still intentionally UNRUN/uncompiled on7. Root source review then combine with actual8 engine in isolated branch, test genuine6+7 retention/target receipts/failures/cancel/current rerun. No blanket revision replacements. R2 strengthens31→32/identical/distinct capacity, restore old/current/new targets and actual saved/reloaded selected reset. Older manifests retained.
-
-### Case gate follow-through (still isolated)
-
-Author commit27d0a0ecc5d481dcccbdaca46cca892dafaaf234 contains the seven first-tested engine paths; R3 receipt2be18e4a… reports13integration+37shellunit=50checks, Clippy/fmt pass, no behavior/golden changes. **Independent source review then found a supported-array delimiter regression**: `value=$(items=(case x in); printf '%s' "${items[0]}"); printf '%s' "$value"` misopens a case frame from array data. Root confirms and author is source-only fixing explicit array-data parenthesis context/regressions atop preserved commit. Do not activate this first-tested version in main, copy it over migration source without identifying the later fix, or exclude ordinary arrays to force acceptance. Comparison harness is also source-only and must pin the corrected source.
-
-Migration combined-R3 manifest5c2e2a706aa635f5f80fdb51218fe27d8dd9a38fc2fdd42b22369aa7a202b37b has15paths (original migration source plus exact first-tested engine). Root review caught and corrected expected history: preserve6 first when present, put genuine7 in an empty first slot otherwise, append once and compare full collections; six count remains33. Exact persisted selected-reset attempt is checked. Still no migration8 execution/compiler result. This combined manifest precedes the array correction and remains frozen pending new hash handoff.
-
-### Reviewed case corrections awaiting the next sole-slot gate
-
-Source R5 manifest95ec116903855f830ca19e1edf7003064e108869aa043034b588961e4c239fbd fixes array-data delimiter roles, pattern-only compile-time bare brackets, honest C/POSIX locale refusal after reached expansion and a bare first-word case/esac pipeline diagnostic bypass. Quoted/escaped/generated heads and later arguments remain runtime data; ordinary test [ ] and scalar array parameter brackets remain supported. New tests18integration (previous13), old37shellunits; actual C oracle goldens unchanged. Root and peer source-review accepted scope, but **R5 corrections remain uncompiled/unrun**, so earlier50check pass only applies preserved27d0a0e. No merge to main8.
-
-Combined migration worktree now exact R5 engine+corrected14migration tests/provenance in15paths, manifest4faa1a83d53b8057422cbde66b2997bfc4c43524e092254fc16c55fa63beed2f (reviews/evaluator8-migration/combined-r4/SOURCE-READY.json). No compiler/VM/migration run there yet. After root normal service native60852 exits, grant author first corrected18+shell-unit/Clippy/fmt checks, then reviewed combined migration checks under the same shared lock, never simultaneously. Full actual7→8 comparison harness source/pin proposal is being authored; do not run unreviewed producer or count unobserved differences.
-
-## M70 acceptance complete; next implementation is not blocked
-
-Normal service r2 PASS72captures/all4flows in run-pejyy86y, with representative actual render review at100/150/200light/dark; memory879samples minimum12.566GiB,PSIzero/OOMdelta0. Root current891Rust checks/Clippy/fmt/build,106coverage integrity and28theme provenance checks pass. README/curriculum/checklist/matrix/native/content docs now report106/25 (31/21/17/37), only strengthening existing LPIC2current202.1/K1/T4 Partial rows. Whole-product checklist remains Open; no installers/releases or actual Windows/macOS/reader/novice claim. Latest installed290candidate remains102 and predates M69/M70.
-
-Corrected case commit65da217284c9cfae9eabae427170c056561d2191 (parent27d) now passes55focused checks/Clippy/fmt, exact final7hashes in CASE-CORRECTED-VALIDATION-R6.json (c30107ff…). No main8 activation. Next copy exact tested/formatted7paths into combined migration branch and run11public+3private checks under a fresh sole-slot grant. Narrow current-vs-frozen7 test assumptions need honest later integration, never relabel genuine6/7 data. Source-only after8comparison proposal88e55baa… in reviews/shell-case/after8-capture-proposal has4124rows/3968exact/156allowedlisted deltas; root source/pin review still required before producer. No capture8 has executed.
-
-## Current clean delivery/checkpoint and isolated8 gate
-
-M70 b73c2ef21cfa5738ab0091bcb8bc46c024235fd7 is committed/pushed. Identified development binary `target/debug/dlms-learning-lab --version` reports that exact source; --validate-content confirms106/25. Binary375,840,112bytes SHA89c1dbf101fed80cb0bd34b01aa0a00762ed227eb592f8060aa00e0fd60b72a0; audit m70-development-build.json. Normal launch `./target/debug/dlms-learning-lab`. No current106installer candidate yet; old actually installed290remains102.
-
-Isolated migration14distinct checks (11public+3private), strengthened exact-whitespace proof, Clippy/fmt pass. Original case commits cherry-picked, own8 c228458 committed, mainb73merged as604ff4b in evaluator8-migration branch. No production progress/writer changes; source12-path current-vs-frozen assumptions proposal f6fc3e12… awaits root review/full suite; genuine6/7fixtures immutable. App-only old6 native harness labels now proposed dynamic current, not falsely a genuine7→8 flow.
-
-Root source-reviewed fixed actual8capture proposal88e55baa…; copied exact private ignored harness into author case worktree. Lightweight metadata pin preparation (no compiler/VM/reference execution) then independent root no-follow regular-file/1MiB chunk verification confirms160pins489,235,668bytes. Source65da217 stable; private control CAPTURE-PINS.json bb5b74140ae7bec17c5a679af72ddb154d7ba3f5ce88571e39ea43a11a236c59, proposal30f794e1…, ROOT-PIN-APPROVAL-r1.json retained. Capturing4124actual8 rows with3968exact outcome equalities and156full listed changes/39groups;37new8records/examples, old6/7rawprofiles copied exact only. CaptureIDafter-case-public8-reviewed-r1. This uses isolated102catalog/unchanged37scripts, not current106native UI acceptance. First execution is now active; no COMPLETE/runtime result claim yet.
-
-Root raised a keyword-array-name concern, then corrected it after lexer inspection: token is `case=` (retained '=') so no demonstrated regression. Production65da is unchanged. Author added one TEST-ONLY keyword-name/capture boundary check, unrun/uncommitted, manifest4ad71191…; do not describe as a bug fix or reorder parser gratuitously. It does not change capture core/source pins; author must not commit/change pinned source/head during active capture.
+Historical intermittent Wayland frame-callback cause remains unresolved and
+unreproduced; passing repeated launches are not a cure. Linux223 notice/source
+packages resolve. Original macOS dispatch0.2.0 MIT notice is absent from its
+published/pinned source; macOS packaging remains gated, no invented notice.
+Actual Windows/macOS desktop installation/runtime/upgrades/uninstall/signing,
+screen reader, physical-device keyboard/accessibility and novice comprehension
+remain pending. Those limits do not excuse unfinished independent curriculum.
+No installer/public release/deployment publication without separate approval.
