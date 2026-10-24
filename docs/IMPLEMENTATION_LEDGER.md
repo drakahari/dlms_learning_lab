@@ -777,3 +777,22 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
 - The pending controller-only correction must retain real center visibility and
   offscreen rejection. Repeat on a fresh profile and later the installed candidate.
   None of these gates is a novice, screen-reader or other-platform runtime study.
+
+
+### M79 follow-through: actual two-process Fedora flow accepted
+
+- Controller geometry correctionb8c0175 allows at most one physical pixel at a
+  rounded clip edge and requires the click center inside the real viewport.
+  Four scale/offscreen tests retain bounded scrolling/failure and no queued
+  offscreen click; all17 targeted tests, Clippy/fmt/build pass. Product layout,
+  profile guards and all exact raw/decoded assertions are unchanged.
+- Actual strict native R4 passes: writer exits0, a different reader process
+  reacquires the normal profile lock, loads exact records/drafts/favorite/theme/
+  scale and completes real navigation. Nine captures and full manifest63a655f3…
+  remain in ignored tmp/native-reopen-m79-worktree-r4. Root reviewed actual
+  resumed library, independent practice and current completion. Earlier failed
+  runs remain intact. Repeat on the next installed candidate; this worktree
+  binary is not relabeled as the prior installed5a candidate.
+- Cross-platform run40111060414 stopped at a merge-only line-wrap omission.
+  Corrected formatting-onlyfec8cfe; no runtime check was disabled. Other-platform
+  desktop, physical-device/screen-reader and novice acceptance remain pending.

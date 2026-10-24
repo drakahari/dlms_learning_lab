@@ -64,7 +64,8 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    CI40101440051 atcee0432: Ubuntu passes; Windows/macOS hit the30-minute
    job limit in Rust tests/release compile respectively. Exact annotations confirm
    timeouts. The proposed60-minute limit retains every check and two workers;
-   rerun after the next coherent push. CI is not other-platform desktop acceptance.
+   run40111060414 failed only a line-wrap omission in merged probe selection;
+   formatting-onlyfec8cfe corrects it. Rerun after the next coherent push. CI is not other-platform desktop acceptance.
 2. Native MAC workspace aac951f is integrated through ea7c6b1. Main combined
    model/integration suite passes846 checks across79 targets; seven targeted
    MAC UI/plan checks and all-target Clippy pass. Accepted final native R2 has17
@@ -74,14 +75,17 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    task-required lifetime settings, preserves pending drafts and uses plain host
    lists. Its44 scoped checks, Clippy/fmt/build and actual17-capture native run
    run-cfeb22ku pass. Root reviewed real compact/light/dark/validation renders.
-   Refinement source is still in worktree mac-learning, branchmac-learning-content.
-   Integrate after its exact source freeze; no additional authored lab counted.
+   Refinement0feec1a is now integrated through ece2c66 and pushed.
+   No additional authored lab is counted for that private fixture.
 3. Four distinct MAC lessons are source proposals: first learning/forwarding,
    stale-location repair, source-refresh/expiry, and three-switch handover.
-   Their nine content checks must actually run before registering the unit.
-   Metadata-only teaching review follows the source proposal; retain old109 IDs,
-   genuine6/7 history and all simulation predicates. Then perform normal catalog
-   regression and actual native all-four flows before coverage promotion.
+   Their nine content checks now pass, along with Clippy/fmt, in unregistered
+   content11c5e94. Initial test failures exposed harness-only prerequisite loading
+   and stale native-input-draft assumptions; corrected helpers retain all model,
+   expected-outcome and negative predicates. Metadata-only teaching corrections
+   leave simulation semantics identical. Retain old109 IDs and genuine6/7 history.
+   Normal registration/regression and actual native all-four flows still follow
+   before authored count or coverage promotion.
 4. Guarded cold-reopen harness is integrated in b9786fa. It executes ordinary
    profile lock/load/preferences/save in two real native processes using only a
    marked private project-disk profile. Current97 Python guards and13 targeted
@@ -94,9 +98,15 @@ The older102 installed acceptance remains in INSTALLATION.md and earlier artifac
    theme/scale and receipts. Later reader Back control fails a fractional clipping
    assertion at150% (0.0208 logical points); eight captures and all raw snapshots
    remain in tmp/native-reopen-m79-worktree-r3. Full-flow acceptance remains OPEN.
-   Review a uniform one-physical-pixel controller geometry tolerance with real
-   center-hit/offscreen guards, test it serially, then run a fresh R4. Do not alter
-   product layout or waive data assertions to satisfy the acceptance controller.
+   Corrected controller-only geometry b8c0175 allows one physical pixel of edge
+   rounding while requiring the click center inside the actual viewport; four
+   scale/offscreen regressions retain bounded failure. Seventeen targeted checks,
+   Clippy/fmt/build pass. Actual strict R4 now PASSES both processes and final
+   navigation, nine retained screenshots; root reviewed real library, separate
+   example and current completion. Manifest63a655f3071b4dd4ec439dd2ef2d68a717cd3edac1a4103896ccab7a5c133f48
+   in tmp/native-reopen-m79-worktree-r4 pins all evidence. Writer/reader observations
+   are byte-identical. Repeat against the next installed candidate; existing5a
+   candidate predates this guarded verification entry point.
 5. Continue remaining Linux/network/shell gaps after the tested MAC batch.
    Candidate packaging, pure capabilities and source proposals do not complete
    curriculum. Windows/macOS desktop, physical-device/accessibility and novice
