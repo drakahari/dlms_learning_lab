@@ -129,6 +129,7 @@ struct Metrics {
     routing_router_options: Option<egui::Rect>,
     client_fields: Vec<(String, egui::Id, egui::Rect)>,
     client_action: Option<egui::Rect>,
+    client_popup: Option<egui::Rect>,
     client_actions: Vec<(usize, egui::Rect)>,
     client_run: Option<egui::Rect>,
     mac_source: Option<egui::Rect>,
@@ -355,6 +356,9 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
+            {
+                23000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("find-lessons") {
                 21000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-layout") {

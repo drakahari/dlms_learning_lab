@@ -611,6 +611,9 @@ impl LabApp {
             if accounts {
                 self.metrics.accounts_run = Some(r.rect);
             }
+            if self.scenarios[i].client_teaching.is_some() {
+                self.metrics.client_run = Some(r.rect);
+            }
             run |= r.clicked();
         });
         if run && active {

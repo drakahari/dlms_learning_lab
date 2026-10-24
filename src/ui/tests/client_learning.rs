@@ -171,9 +171,10 @@ fn client_native_assignment_typing_atomic_retry_and_modal_keyboard_safety() {
         .find(|(key, _, _)| key == "prefix")
         .unwrap()
         .1;
-    for settings in [false, true] {
-        a.settings_open = settings;
-        a.reset_pending = !settings;
+    for modal in ["reset", "settings", "theme"] {
+        a.settings_open = modal == "settings";
+        a.reset_pending = modal == "reset";
+        a.theme_preview = modal == "theme";
         ctx.memory_mut(|m| m.request_focus(field));
         frame(
             &ctx,
@@ -193,6 +194,7 @@ fn client_native_assignment_typing_atomic_retry_and_modal_keyboard_safety() {
     }
     a.settings_open = false;
     a.reset_pending = false;
+    a.theme_preview = false;
     draw(&ctx, &mut a);
     replace_field(&ctx, &mut a, prefix, "26");
     accounts_ui_click(&ctx, &mut a, |m| m.editor_save);
@@ -200,6 +202,44 @@ fn client_native_assignment_typing_atomic_retry_and_modal_keyboard_safety() {
         &a.progress.attempts[ID],
         &a.scenarios[i]
     ));
+    // A recognized mutating command is typed through the actual separate input.
+    // Enter behind each modal must neither consume it nor mutate either context.
+    a.set_client_view(i, teaching::View::Example);
+    a.focus_input = true;
+    draw(&ctx, &mut a);
+    let command_id = a.metrics.focus.unwrap();
+    assert!(ctx.memory(|m| m.has_focus(command_id)));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![
+            acl_ctrl(egui::Key::A),
+            egui::Event::Text("ip addr set 198.51.100.151/27".into()),
+        ],
+    );
+    draw(&ctx, &mut a);
+    assert_eq!(learning(&a).command, "ip addr set 198.51.100.151/27");
+    let before = serde_json::to_value(&a.progress.attempts[ID]).unwrap();
+    for modal in ["reset", "settings", "theme"] {
+        a.reset_pending = modal == "reset";
+        a.settings_open = modal == "settings";
+        a.theme_preview = modal == "theme";
+        ctx.memory_mut(|m| m.request_focus(command_id));
+        frame(
+            &ctx,
+            &mut a,
+            1200.,
+            850.,
+            vec![key(egui::Key::Enter, false)],
+        );
+        assert_eq!(
+            serde_json::to_value(&a.progress.attempts[ID]).unwrap(),
+            before,
+            "practice Enter behind {modal}"
+        );
+    }
 }
 #[test]
 fn client_editor_mode_ids_undo_and_saved_raw_context_are_separate() {

@@ -29,7 +29,10 @@ impl LabApp {
         self.dirty = true;
     }
     pub(super) fn client_learning_workspace(&mut self, ui: &mut egui::Ui, i: usize) {
-        let active = !self.reset_pending && !self.settings_open && !self.data_tools.modal_open();
+        let active = !self.reset_pending
+            && !self.settings_open
+            && !self.theme_preview
+            && !self.data_tools.modal_open();
         if !active {
             self.focus_input = false;
         }
@@ -182,6 +185,7 @@ impl LabApp {
                                         self.dirty = true;
                                     }
                                 }
+                                self.metrics.client_popup = Some(controls::popup_content_clip(ui));
                             })
                     })
                     .inner;
