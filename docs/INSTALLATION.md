@@ -417,3 +417,59 @@ The actual installed launcher in `.build-artifacts/installations/verified-29096b
 Guarded ordinary candidate66samples minimum11.49GiB available/PSIzero/OOMdelta0; installed OSPF307samples minimum12.28GiB, peak some/full PSIavg10 0.90%,OOMdelta0. Alignment/quiet69/10samples minimum12.60/12.59GiB,PSIzero/OOMdelta0. Swap was effectively full, including0bytes free in the OSPF interval. These results are scoped observations, not a safety guarantee. All artifacts remain project disk-backed.
 
 [Native CI40049251314](https://github.com/drakahari/dlms_learning_lab/actions/runs/40049251314) at this exact source stopped at formatting: cherry-picked module declarations needed rustfmt ordering. No remote runtime/build acceptance is inferred; the formatting-only correction and rerun are separate evidence. Fedora's actual package checks above passed. Windows/macOS desktop, physical-device, screen-reader and novice acceptance, macOS original dispatch notice and signing/notarization remain pending. Most curriculum/completion criteria remain Open.
+
+
+## M77 — installed109-lab Fedora candidate
+
+Clean source `5a968c735523574ffffcb9ab4804409846f29993`,109 authored assignments/26units
+(31CCNA,21LPIC-1,17LPIC-2,40Bash), evaluator8:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-g5a968c735523-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA-256 `3031a439608f47d2a1d5f09bdcb9d4b1ae722cb573344ff6cc9c6f195f42246e`;
+binary SHA-256 `202c7b993f7517e697a7203e42a8cb511ff2c4c5591ecb2b1ee2dee5d70552cd`.
+All223 applicable Linux notice/source packages resolve. This is an owner-test
+milestone candidate, not completed curriculum or a public release.
+
+The actual installed launcher in the private project-disk prefix verified-5a968c735523-mzx5b592
+passes identified102 upgrade, clean uninstall/reinstall, outside-checkout identity/content/hash,
+desktop validation and exact separate synthetic original-nine progress bytes. All three new
+case-dispatch native flows pass45 captures: separate example/experiment/repair, full task,
+wrong/partial/reference/conditional alternatives, current edit invalidation, actual typing
+and Run at light150%/dark200%, save/readback, selected Reset and Challenge. The installed
+72-view IPv4/VLAN matrix passes wide/narrow100/150/200% light/dark. Root reviewed actual
+centered empty/populated fields, focus/cursor, equal topology cards and reserved/stacked
+VLAN controls. Ten quiet default-Wayland startup/readbacks pass10/10. Their approximately
+one-second intervals include harness pacing, not a speed benchmark or startup-cause diagnosis.
+
+Evidence: m77-installed-{lifecycle,case-lessons,alignment,quiet}-r1 logs, native runs
+run-k9iyd4_w/run-795xb4yi and ignored audits/m77-installed-runtime-r1.json
+(SHA256def749e0234e805e8e3b01ac98e77b1e5d47a37f1eb0255ef3c66a00f894b702).
+The development executable at that acceptance embedded5a968c7/109/26; SHA256
+ac9db3f9abbfb205785154d1edb3b56d6850510b57ebda737db31f3831448c79.
+Later integration tests rebuild the development target; that historical hash is
+not a claim about its current bytes. The installed candidate remains unchanged.
+A subsequent rustfmt-only source change iscee0432; candidate identity remains5a968c7.
+The5a968c7 native CI run40101334715 stopped only atFormat on all three runners;
+the corrected-source40101440051 run passed Ubuntu tests/Clippy/candidate creation.
+Windows hit30minutes during Rust tests; macOS passed its test/Clippy stages but
+hit30minutes during release compilation. Both annotations explicitly report the
+30-minute job limit; neither is desktop acceptance or a completed current candidate.
+The workflow now permits a bounded60minutes, retaining two jobs/test workers and
+every check. Its new source rerun is separate evidence.
+
+Ordinary guarded combined model tests observed21.37GiB minimum available, peak some/full
+PSIavg10 0.18% and OOM-counter delta0. Candidate building observed22.63GiB minimum/PSIzero;
+installed case/alignment runs23.66/23.49GiB minimum/PSIzero/OOMdelta0. Swap use was small
+but nonzero in this interval; no global settings or other applications were changed.
+These are serialized two-job/two-test-worker observations, not a stress test or guarantee.
+
+Historical intermittent Wayland callback cause, cold-process progress reopening, physical
+input/screen-reader/novice acceptance and actual Windows/macOS desktop lifecycle remain
+open. macOS original dispatch notice/signing/notarization gates remain. The pure MAC
+model in this candidate is not itself an additional authored lab. No release published.
+
+
+Additional M77 installed follow-through passes all four multi-unit service lessons,72captures inrun-uxkjmlot (m77-installed-unit-manager-r1.log). Root reviewed each introduction and full editor/terminal assignment plus representative wrong feedback/large-text views. Actual flows include separate examples/experiments, diagnosis, wrong/partial/current/alternate outcomes, query purity,150/200% Save/terminal repair, exact drafts/readback, Undo and selected Reset/Challenge. No host service was accessed. This strengthens the same5a968c7 candidate acceptance; it does not add lab titles or prove other-platform, novice, screen-reader or cold-process reopening.

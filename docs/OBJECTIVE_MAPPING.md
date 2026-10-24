@@ -72,3 +72,10 @@ See MAC_LEARNING_SUBSET.md.
 
 
 M77 strengthens only the already Partial LPIC-1 105.2/K3 evidence with three distinct case-dispatch assignments. State-based tests cover31 deterministic cases, alternate supported scripts, partial/wrong/hardcoded attempts, independent examples and exact original106 progress preservation. Actual native Fedora flows cover all three tasks, Challenge and current-result invalidation. No objective/source fingerprint is promoted:128Partial/1Supporting/1111Open remain overlapping references, not percentages. See SHELL_CASE_LESSONS.md for limits and actual verification.
+
+
+M78 adds a verified native MAC workspace and isolated practice foundation, using
+a private unbundled developer fixture. CCNA1.13/a–d remain Open until the authored
+unit is accepted. Only the gap descriptions change; no status/fingerprint/ID
+promotion or lab count. Actual native review caught and corrected inherited
+Apply/Check wording before content authoring. See MAC_LEARNING_SUBSET.md.
