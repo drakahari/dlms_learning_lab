@@ -133,6 +133,10 @@ fn each_objective_is_current_state_not_historical_credit() {
                     tree.files.insert(path.clone(), String::new());
                 }
                 Requirement::Directory { .. } => tree.cwd = "/home/alex".into(),
+                Requirement::DirectoryEntries { path, .. } => {
+                    tree.nodes.remove(path);
+                    tree.files.remove(path);
+                }
                 Requirement::Mode { path, mode } => {
                     tree.nodes.get_mut(path).unwrap().mode = mode ^ 0o004
                 }

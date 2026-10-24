@@ -42,6 +42,11 @@ pub enum Requirement {
     Directory {
         path: String,
     },
+    DirectoryEntries {
+        path: String,
+        #[serde(deserialize_with = "directory_entry_names")]
+        names: Vec<String>,
+    },
     Mode {
         path: String,
         mode: u16,
@@ -108,6 +113,94 @@ fn parent(path: &str) -> &str {
         .map(|(p, _)| if p.is_empty() { "/" } else { p })
         .unwrap_or("/")
 }
+fn valid_entry_name(name: &str) -> bool {
+    !name.is_empty()
+        && name.len() <= 255
+        && name != "."
+        && name != ".."
+        && !name.contains('/')
+        && !name.chars().any(char::is_control)
+}
+fn valid_entry_names(names: &[String]) -> bool {
+    names.len() <= MAX_ENTRIES
+        && names.iter().all(|name| valid_entry_name(name))
+        && names
+            .iter()
+            .map(String::as_str)
+            .collect::<std::collections::BTreeSet<_>>()
+            .len()
+            == names.len()
+}
+fn directory_entry_names<'de, D: serde::Deserializer<'de>>(
+    deserializer: D,
+) -> Result<Vec<String>, D::Error> {
+    use serde::de::{DeserializeSeed, Error as _, SeqAccess, Visitor};
+    // Requirement and its containing Goal retain their existing internally
+    // tagged readers. Serde buffers their Content under the pack's raw2MiB
+    // bound first; this visitor bounds typed names construction, not that buffer.
+    struct NameSeed<'a> {
+        prior: &'a [String],
+    }
+    impl<'de> DeserializeSeed<'de> for NameSeed<'_> {
+        type Value = String;
+        fn deserialize<D: serde::Deserializer<'de>>(self, d: D) -> Result<String, D::Error> {
+            if self.prior.len() >= MAX_ENTRIES {
+                return Err(D::Error::custom("Directory entry name count exceeds256"));
+            }
+            struct Name<'a> {
+                prior: &'a [String],
+            }
+            impl Visitor<'_> for Name<'_> {
+                type Value = String;
+                fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    f.write_str("one literal directory entry name of1..255bytes")
+                }
+                fn visit_str<E: serde::de::Error>(self, name: &str) -> Result<String, E> {
+                    if !valid_entry_name(name) {
+                        return Err(E::custom(
+                            "Invalid directory entry name: use1..255bytes without slash, dot/dot-dot or controls",
+                        ));
+                    }
+                    if self.prior.iter().any(|prior| prior == name) {
+                        return Err(E::custom("Duplicate directory entry name"));
+                    }
+                    Ok(name.to_owned())
+                }
+            }
+            d.deserialize_str(Name { prior: self.prior })
+        }
+    }
+    struct Names;
+    impl<'de> Visitor<'de> for Names {
+        type Value = Vec<String>;
+        fn expecting(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+            f.write_str("at most256unique literal directory entry names")
+        }
+        fn visit_seq<A: SeqAccess<'de>>(self, mut sequence: A) -> Result<Vec<String>, A::Error> {
+            // Never reserve from an untrusted size_hint. Reject element257
+            // before requesting typed String deserialization, even for a map.
+            let mut names = Vec::new();
+            loop {
+                match sequence.next_element_seed(NameSeed { prior: &names })? {
+                    Some(name) => names.push(name),
+                    None => return Ok(names),
+                }
+            }
+        }
+    }
+    deserializer.deserialize_seq(Names)
+}
+fn directory_feedback(path: &str, message: &str) -> String {
+    let mut end = path.len().min(192);
+    while !path.is_char_boundary(end) {
+        end -= 1;
+    }
+    let suffix = if end < path.len() { "..." } else { "" };
+    let text = format!("{}{suffix}: {message}", &path[..end]);
+    debug_assert!(text.len() <= 512);
+    // Retain only a fresh small allocation, not any larger formatting buffer.
+    text.as_str().to_owned()
+}
 fn child(dir: &str, name: &str) -> String {
     format!(
         "{}{name}",
@@ -144,6 +237,7 @@ impl Requirement {
             | Self::Contents { path, .. }
             | Self::Absent { path }
             | Self::Directory { path }
+            | Self::DirectoryEntries { path, .. }
             | Self::Mode { path, .. }
             | Self::Access { path, .. }
             | Self::Ownership { path, .. } => path,
@@ -153,6 +247,7 @@ impl Requirement {
             && match self {
                 Self::Contents { text, .. } => text.len() <= 131_072 && !text.contains('\0'),
                 Self::Mode { mode, .. } => *mode <= 0o777,
+                Self::DirectoryEntries { names, .. } => valid_entry_names(names),
                 Self::Ownership { owner, group, .. } => [owner, group].iter().all(|s| {
                     !s.is_empty()
                         && s.len() <= 32
@@ -230,6 +325,64 @@ impl Requirement {
                 format!("{path} has been removed"),
             ),
             Self::Directory { path } => (tree.cwd == *path, format!("Working directory is {path}")),
+            Self::DirectoryEntries { path, names } => {
+                if !self.valid() {
+                    return (false, "Invalid exact directory-entry requirement".into());
+                }
+                if !tree.valid() {
+                    return (
+                        false,
+                        directory_feedback(
+                            path,
+                            "Invalid virtual filesystem; the folder inventory cannot be checked.",
+                        ),
+                    );
+                }
+                match tree.nodes.get(path) {
+                    None => {
+                        return (
+                            false,
+                            directory_feedback(
+                                path,
+                                "The required folder is missing. Restore it before checking its entries.",
+                            ),
+                        );
+                    }
+                    Some(node) if !node.directory => {
+                        return (
+                            false,
+                            directory_feedback(
+                                path,
+                                "A file cannot replace the required folder, even when no entries are requested.",
+                            ),
+                        );
+                    }
+                    _ => {}
+                }
+                let actual = tree
+                    .nodes
+                    .keys()
+                    .filter(|entry| {
+                        entry.as_str() != path.as_str() && parent(entry) == path.as_str()
+                    })
+                    .map(|entry| entry.rsplit('/').next().unwrap())
+                    .collect::<std::collections::BTreeSet<_>>();
+                let expected = names
+                    .iter()
+                    .map(String::as_str)
+                    .collect::<std::collections::BTreeSet<_>>();
+                let missing = expected.difference(&actual).count();
+                let unrequested = actual.difference(&expected).count();
+                let pass = missing == 0 && unrequested == 0;
+                let message = if pass {
+                    "The immediate names, including hidden entries, match the requested set.".into()
+                } else {
+                    format!(
+                        "{missing} missing, {unrequested} unrequested immediate entries. Inspect with ls -a, including hidden names; check your search type/depth filters before copying."
+                    )
+                };
+                (pass, directory_feedback(path, &message))
+            }
             Self::Mode { path, mode } => (
                 tree.nodes.get(path).is_some_and(|n| n.mode == *mode),
                 format!("{path} permissions are {mode:03o}"),
