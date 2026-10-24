@@ -85,8 +85,8 @@ The accepted authored Ethernet unit strengthens current CCNA v1.1 1.13 and its
 four lettered rows to narrowly Partial practice, with explicit per-row source/
 aging, frame, flooding and table evidence. Four distinct full tasks have separate
 practice, alternate/negative/current-state tests and native component acceptance.
-Actual fullscreen/windowed and large-text renders are reviewed; the exact next
-installed candidate still requires its full four-task run. No future-v2.0,
+Actual fullscreen/windowed and large-text renders are reviewed; installed
+Fedora73777e0 completes the full four-task native run with57 captures. No future-v2.0,
 STP/ARP/real packet/IOS/equipment or security guarantee is inherited. Source
 fingerprints remain unchanged; scoped sources checked2026-10-24. See MAC_LESSONS.md.
 The overlapping totals133Partial/1Supporting/1106Open are bookkeeping, not a

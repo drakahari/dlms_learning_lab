@@ -133,7 +133,7 @@ PDF and technical references rechecked2026-10-24. The overlapping ledger is now
 133Partial/1Supporting/1106Open, not percentages or full objectives.
 
 Native component flows and actual fullscreen/windowed100/150/200 Light/Dark
-render review are accepted; the exact next installed-candidate all-four gate
-is pending separately. Bounded find and reverse-DNS capabilities alone add no
+render review are accepted; installed Fedora73777e0 also passes the complete
+all-four native flow,72-view shared alignment, quiet10/10 and cold reopening. Bounded find and reverse-DNS capabilities alone add no
 new authored labs or certification credit. Most full-product criteria remain
 Open, including broader networking/Linux/shell content and platform acceptance.

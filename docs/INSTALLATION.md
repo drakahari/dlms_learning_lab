@@ -499,3 +499,49 @@ ordinary temp directory lacks the deliberately required artifact-parent shape,
 and macOS exposes a temp parent through a symlink. Test fixtures are being
 corrected without relaxing production containment or skipping the tests.
 A subsequent full CI rerun is required; neither failed job is reported as passed.
+
+
+## Verified Fedora113 milestone — 2026-10-24
+
+Clean source `73777e0f094fc51964a4c8e693098d814bb9c0f8`,113 authored labs/27units
+(35CCNA,21LPIC-1,17LPIC-2,40Bash), evaluator8,28themes. Open from this checkout:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-g73777e0f094f-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+ArchiveSHA256 `b325b68b45faeb93dac21d6f457c23ef1e4b3828c27b0522deb891a27306cfeb`;
+binarySHA256 `918e939109dfa782f5bf4142eedb923ddd71742c2bc5248aa8fd8f717e1d0c16`.
+All223 applicable Linux dependency/source notices and Rust notice resolve.
+This is an owner-test milestone candidate, not a release or complete course.
+
+The actual private installed application in verified-73777e0f094f-ozlvlmhd passes
+identified109 upgrade, clean uninstall/reinstall, outside-checkout identity/content/
+hash and desktop validation. Exact separate synthetic original-nine progress bytes
+remain unchanged. Its full all-four MAC teaching/assignment flow passes57 captures
+(run-wvi9hoys), including independent practice, wrong/partial/alternate repairs,
+37 capstone requirements, real150%Light/200%Dark edits, current invalidation,
+selected Reset Cancel/Confirm, readback, Challenge and library.
+
+The installed72-view IPv4/VLAN matrix passes at100/150/200%, actual2560×1440 and
+1268×632, Light/Dark (run-b_j8cmsf). Root inspected blank/populated/focused values,
+specific feedback and reserved/stacked VLAN columns. Larger text/short windows
+scroll; text is not shrunk. Ten quiet default-Wayland launches/readbacks pass10/10;
+approximately one second includes harness pacing and is not a performance measure
+or historical callback-cause diagnosis.
+
+The same installed ELF passes strict real two-process cold reopening. Writer and
+reader preserve exact observed data, unfinished assignment and separate example
+drafts, current run, favorite, theme/scale and migration receipts. Nine captures
+and manifest `d4e0204ce0d0db5ab97ae5abf12f602357bbcc8ff2c5a1af702861b7d8671e6e`
+remain under ignored tmp/native-reopen-m86-installed-r1. Root inspected real loaded
+library, independent draft and current completion screens. No personal profile is
+used. Evidence logs are m86-installed-{lifecycle,mac-lessons,alignment,quiet,cold-reopen}-r1;
+private delivery receiptSHA256 `4b1334b1bbf0f9698644fa650deb9d244f02164696b5ff193a85aa6149268828`.
+
+Fresh CI40120315031 checks this exact source; its outcome is pending at this entry.
+Windows/macOS desktop, physical keyboard/device, screen-reader and novice acceptance
+remain pending. The historical Wayland stall remains unreproduced, not diagnosed.
+macOS dispatch notice/signing gates remain; no installer security setting is bypassed,
+no credentials generated and no public release published. Later source-only seed
+pending-draft feedback refinements are not inside this immutable candidate.

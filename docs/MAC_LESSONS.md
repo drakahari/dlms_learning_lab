@@ -1,8 +1,8 @@
 # Ethernet learning unit — authored tasks and native verification
 
 Four original assignments are registered in unit `ethernet-learning`, following
-VLAN foundations before static routing. The final installed-candidate all-four
-run is a separate pending delivery gate.
+VLAN foundations before static routing. The installed113-lab Fedora candidate
+at73777e0 passes the complete all-four run, separately from component evidence.
 The accepted [model and native workspace](MAC_LEARNING_SUBSET.md) precede this
 content. Current CCNA v1.1 section1.13 is the intended narrow reference;
 future v2.0 coverage remains separate.
@@ -35,7 +35,7 @@ results and breaking each requirement are included in the content review.
 Nine authored content checks pass, with reference and alternate outcomes,
 plausible wrong/partial work, current invalidation and original109 progress
 preservation. The normal combined model gate and native component evidence are
-recorded below; pending delivery checks are not reported as passed.
+recorded below; platform and novice acceptance remain separate.
 
 Limits remain explicit: finite fixed equipment and source identities, an
 acyclic physical fabric, manually advanced virtual time, educational aging
@@ -50,7 +50,7 @@ Teaching and implementation are original; no vendor manual paragraphs or
 implementation code are imported. See the subset document for precise limits.
 
 
-## Verified scope and remaining delivery gate
+## Verified scope and actual installed delivery
 
 The registered113/27 branch passes857 model/integration checks. The later main
 combined gate with PTR passes869 checks; subsequent whole-main regression is
@@ -69,9 +69,12 @@ Root reviewed real2560×1440 and1268×632 renders, centered values/cursors, equa
 topology cards and reserved versus stacked port columns. Scrolling remains
 necessary in short tiled windows and larger text; fonts are not reduced.
 
-No single all-four successful run or final installed-candidate run is fabricated
-from those components. The exact next candidate must run the full four-task
-flow. Physical-device keyboard, screen-reader, novice and Windows/macOS desktop
+Those components were not presented as a successful all-four run. The later
+actual installed candidate73777e0 completes all four in one run with57 captures
+in run-wvi9hoys (m86-installed-mac-lessons-r1.log), including all37 capstone
+requirements. Its72-view shared alignment matrix, quiet10/10 launch/readbacks
+and real two-process cold reopen also pass. See INSTALLATION.md for exact
+identity, checksums and scoped acceptance. Physical-device keyboard, screen-reader, novice and Windows/macOS desktop
 acceptance remain pending. Earlier failed captures/source/ELFs are retained.
 
 Actual review exposed a missing arrow glyph in the capstone prose; English

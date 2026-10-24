@@ -58,7 +58,9 @@ Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference ru
   with nine screenshots, exact15755-byte writer/reader observations, unfinished
   assignment/separate example drafts, favorite, theme/scale and migration receipts.
   Evidence tmp/native-reopen-m79-worktree-r4 manifest63a655f3… is preserved.
-  Repeat against the next actual installed ELF, not only development output.
+  Repeated successfully against the actual installed73777e0 ELF: strict two
+  processes, nine captures, exact15757-byte observations and final navigation.
+  New evidence tmp/native-reopen-m86-installed-r1 manifestd4e0204c… retained.
 - Actual rebuilt MAIN GNU reference R2 passes152 legacy comparisons and32 find
   observations:31 matched path/status/error outcomes and one explicitly unsupported
   readable/nonsearchable-directory boundary. Evidence
@@ -72,54 +74,64 @@ Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference ru
   tagged serde still buffers within the existing2MiB pack bound; no whole-pack
   streaming claim. Find/PTR gains no authored coverage merely from core tests.
 
-## Last packaged acceptance and exact launch
+## Latest packaged acceptance and exact launch
 
-The development target changes during test builds; never relabel an old hash.
-Last fully accepted Fedora package remains **109/26**, source5a968c735523574ffffcb9ab4804409846f29993:
+Clean Fedora **113/27** candidate source73777e0f094fc51964a4c8e693098d814bb9c0f8:
 
 ```sh
-./dist/dlms-learning-lab-0.1.0-g5a968c735523-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+./dist/dlms-learning-lab-0.1.0-g73777e0f094f-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
 
-ArchiveSHA2563031a439608f47d2a1d5f09bdcb9d4b1ae722cb573344ff6cc9c6f195f42246e;
-binarySHA256202c7b993f7517e697a7203e42a8cb511ff2c4c5591ecb2b1ee2dee5d70552cd.
-All223 applicable Linux notices/source packages resolve. Actual install/identified102
-upgrade/uninstall-reinstall/outside-checkout checks and exact synthetic original-nine
-progress retention pass. Installed prefix is
-.build-artifacts/installations/verified-5a968c735523-mzx5b592.
-Installed scripting45 captures, IPv4/VLAN72 alignment views, service72 captures and
-quiet Wayland10/10 launches pass; logs m77-installed-*-r1. This does not establish
-complete curriculum or diagnose the historical startup stall.
+ArchiveSHA256b325b68b45faeb93dac21d6f457c23ef1e4b3828c27b0522deb891a27306cfeb;
+binarySHA256918e939109dfa782f5bf4142eedb923ddd71742c2bc5248aa8fd8f717e1d0c16.
+All223 applicable Linux notices/source packages resolve. Actual install/identified109
+upgrade/uninstall-reinstall/outside-checkout identity/content/hash/desktop validation
+and exact separate synthetic original-nine-byte preservation pass. Installed prefix
+.build-artifacts/installations/verified-73777e0f094f-ozlvlmhd.
+
+The actual installed ELF passes full four MAC flows57captures (run-wvi9hoys),
+shared IPv4/VLAN72alignment captures (run-b_j8cmsf), quiet Wayland10/10 and strict
+real two-process cold reopening9captures (tmp/native-reopen-m86-installed-r1).
+Root reviewed actual fields/placeholders/focus/feedback/columns, light/dark scaling,
+loaded library, separate unfinished example and completion. Short windows/large
+text scroll. Logs m86-installed-*-r1; private delivery receipt4b1334b1….
+Historical callback cause remains unresolved, not fixed by inference. The previous
+109/5a968c7 candidate and all accepted/failed evidence remain untouched. This
+verified milestone does not complete the application. Later source-only seed
+pending-draft refinements are not in this immutable package.
 
 Windows CI40111561758 atc41352a passes tests/Clippy/candidate. Its unsigned109/26
 ZIP is underdist/native-ci-c41352a/windows; archiveSHA256
 eda9eafb71f484d900159edbf035c84953e045dabbb5ec789dd519cc579f4b73.
 PE, all25 embedded scenario/unit source packs and notices were verified without
 executing it on Fedora. Ubuntu/macOS fixture failures in that run are corrected
-in maina0cdb48; production containment is unchanged. Fresh clean-source full CI
-is still required. Windows/macOS actual desktop acceptance remains pending.
+in maina0cdb48; production containment is unchanged. Fresh clean-source CI40120315031 at73777e0 is running. Windows/macOS actual desktop acceptance remains pending.
 
 ## Next serial actions, without another planning restart
 
-1. Completed: current-only native-plan rerun26/26, Clippy/fmt,112 Python,
-   coverage and palette provenance. Combined model and UI runs observe minimum
-   available memory21.08GiB, peak PSIavg10 at0.18% and no OOM counter increase;
-   two jobs/two test threads remain mandatory, not a safety guarantee.
-2. Commit/push reviewed integrated MAC reporting/control follow-through and launch
-   fresh60-minute native CI. No release publication. The last pushed source is
-   c41352a; newer coherent source commits need pushing together.
-3. Build a clean MAIN113/27 Fedora candidate. Verify its actual installed lifecycle
-   upgrading the accepted109, exact protected progress, full four MAC flows,
-   quiet10/10, shared IPv4/VLAN alignment and strict real two-process cold reopen.
-   Review actual screenshots and record source/binary/archive hashes. Keep older
-   packages and all failed evidence. A new package is a milestone, not completion.
+1. Completed current-catalog native-plan rerun26/26, Clippy/fmt,112 Python,
+   coverage and palette provenance. Combined model/UI runs observe minimum
+   available memory21.08GiB, peak PSIavg10 at0.18% and no OOM counter increase.
+   Two jobs/two test threads remain mandatory, not a safety guarantee.
+2. Reviewed reporting73777e0 and all preceding source milestones are pushed.
+   CI40120315031 is running with60-minute native jobs. No release publication.
+3. Actual clean MAIN113 candidate/lifecycle/full-four MAC/quiet10/alignment72/
+   strict cold reopen are complete as above. Root now has source-only narrow
+   DNS/Mount pending-editor credit fix plus4 backend tests and extended existing
+   UI regression. Applied State/Goals/old missing-draft credit stay unchanged.
+   Current sole-heavy MAIN model gate is m87-main-models-r1; reap before next
+   heavy. Then run focused UI/Clippy before committing that separate fix.
 4. Source-only helper is preparing three unregistered Find assignments: exact
    evidence handover, partial-search permission repair, private review handover
    capstone. Review teaching, two alternatives each and scoped safety goals before
    gates/registration. Owner-read/search repair must accept500 or700; no forced
    unrequested write bit. Keep the old catalog/order/progress intact.
-5. Finish independent legacy-three teaching audit and scoped implementation with
-   real separate examples, correct saved/live semantics and progress tests.
+5. Independent legacy-three audit is complete; root approved a narrow first
+   client/gateway adapter on client-teaching branch/worktree, source-only. Add
+   optional bounded teaching/practice and native atomic client editor while
+   preserving existing State/Goal/version/solutions and old first-open Assignment.
+   DNS/Mount teaching adapters remain subsequent work. Root owns their pending
+   draft guard fix separately; coordinate merges in progress/workspace files.
    Then continue remaining Linux/network/shell curriculum, extending capabilities
    before authoring dependent tasks. Do not stop at a candidate or test count.
 

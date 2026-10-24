@@ -2,13 +2,17 @@
 
 A native, offline Rust desktop prototype for networking, Linux administration and scripting. **113 authored assignments:** 35 CCNA,21 LPIC-1,17 LPIC-2 and40 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
-## Open the Fedora development build
+## Open the verified Fedora candidate
 
-From this repository, after building:
+From this checkout, no build tools are needed to open the prepared candidate:
 
 ```sh
-./target/debug/dlms-learning-lab
+./dist/dlms-learning-lab-0.1.0-g73777e0f094f-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
+
+After a development build, `./target/debug/dlms-learning-lab` opens that separate
+working executable. Candidate identity and installation are recorded in
+[INSTALLATION.md](docs/INSTALLATION.md).
 
 The executable embeds its scenario pack and fonts; it can run outside this directory. No browser, web server, VM, container, account, profile path or infrastructure setup is required. A working graphical desktop and OpenGL driver are needed.
 
@@ -40,9 +44,10 @@ Four [Ethernet learning and recovery assignments](docs/MAC_LESSONS.md) now follo
 VLAN foundations: build directed paths, repair an older table, reason about
 source refresh/expiry and hand over two groups across three switches. Each has
 an introduction, separate runnable practice and a full native assignment.
-Model checks and native component flows pass; the exact next installed-candidate
-all-four run is still a delivery gate. The last packaged Fedora candidate has109
-labs; its identity and verified Windows candidate are in INSTALLATION.md.
+The installed113-lab Fedora candidate passes all four full native flows,
+72 shared alignment captures, ten quiet launches and real two-process reopen.
+This is a verified milestone, not completion of the curriculum or other-platform
+desktop acceptance. The separate Windows candidate remains109 labs.
 
 
 The [OSPF settings and route-cost unit](docs/OSPF_LESSONS.md) adds four native

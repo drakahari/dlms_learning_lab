@@ -885,3 +885,9 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   All-target Clippy/fmt,112 Python guards, coverage and palette provenance pass.
   The original failed full UI run is retained;159 unaffected plus the corrected
   two give161 distinct UI checks, without counting overlapping reruns as new.
+- Actual clean113/27 Fedora candidate73777e0 now passes install/109upgrade/clean
+  uninstall-reinstall/outside-checkout verification and exact synthetic original-nine
+  retention. Installed full four MAC flows57captures, shared alignment72views,
+  quiet10/10 and strict two-process cold reopening9captures all pass. Root reviewed
+  actual renders. Exact identities and limitations are in INSTALLATION.md.
+  Fresh three-platform CI40120315031 is running; no release is published.
