@@ -9,6 +9,7 @@ mod capture_lessons;
 mod case_history;
 mod ospf;
 mod ospf_lessons;
+pub(super) mod reopen;
 mod substitution;
 mod unit_manager;
 mod unit_manager_lessons;
