@@ -430,6 +430,27 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                     interface.up = false;
                 }
             }
+        } else if let State::MacLearning { simulation } = &mut a.state {
+            let engine::Goal::MacLearning { requirements, .. } = &s.goal else {
+                panic!()
+            };
+            let (switch, vlan) = requirements
+                .iter()
+                .find_map(|r| {
+                    if let dlms_learning_lab::mac_learning_workspace::Requirement::Outcome {
+                        outcome:
+                            dlms_learning_lab::mac_learning::Requirement::Learned {
+                                switch, vlan, ..
+                            },
+                    } = r
+                    {
+                        Some((switch, *vlan))
+                    } else {
+                        None
+                    }
+                })
+                .expect("authored source-learning tasks require a learned row");
+            simulation.clear_dynamic(switch, Some(vlan)).unwrap();
         } else if let State::Filesystem { tree } = &mut a.state {
             for text in tree.files.values_mut() {
                 text.push_str("changed");
