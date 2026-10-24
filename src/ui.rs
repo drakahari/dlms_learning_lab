@@ -334,9 +334,7 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
-            } else if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-learning")
-            {
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-learning") {
                 16000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-history") {
                 15000
