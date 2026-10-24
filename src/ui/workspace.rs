@@ -19,6 +19,8 @@ impl LabApp {
             let before = challenge;
             let learn = ui.selectable_value(&mut challenge, false, "Learn");
             let independent = ui.selectable_value(&mut challenge, true, "Challenge");
+            self.metrics.mode_learn = Some(learn.rect);
+            self.metrics.mode_challenge = Some(independent.rect);
             if matches!(s.initial, State::UnitManager { .. }) {
                 self.metrics.manager_learn = Some(learn.rect);
                 self.metrics.manager_challenge = Some(independent.rect);

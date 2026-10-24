@@ -402,7 +402,7 @@ fn imported_assignment_example_and_foreign_workspace_attacks_fail_without_file_c
 }
 
 #[test]
-fn all_ninety_old_attempts_shell7_receipts_history_and_malformed_acl_drafts_survive() {
+fn all_bundled_attempts_current_runs_real6_history_and_malformed_acl_drafts_survive() {
     let s = scenario();
     let mut labs = pack::bundled().unwrap();
     assert_eq!(labs.len(), 106);
@@ -429,7 +429,7 @@ fn all_ninety_old_attempts_shell7_receipts_history_and_malformed_acl_drafts_surv
     a.state = State::Script {
         source: historic.source.clone(),
         run: Some(shell::Record {
-            engine_revision: 7,
+            engine_revision: shell::EVALUATOR_REVISION,
             source: historic.source.clone(),
             results: cases
                 .iter()
@@ -468,7 +468,10 @@ fn all_ninety_old_attempts_shell7_receipts_history_and_malformed_acl_drafts_surv
     std::fs::write(&path, &raw).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v7.json")).unwrap(),
+        std::fs::read(
+            path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
+        )
+        .unwrap(),
         raw
     );
     let loaded = progress::load(&path, &labs).unwrap();
@@ -478,7 +481,7 @@ fn all_ninety_old_attempts_shell7_receipts_history_and_malformed_acl_drafts_surv
             .as_ref()
             .unwrap()
             .shell
-            .contains(&7)
+            .contains(&shell::EVALUATOR_REVISION)
     );
     for (id, want) in expected.as_object().unwrap() {
         assert_eq!(serde_json::to_value(&loaded.attempts[id]).unwrap(), *want);

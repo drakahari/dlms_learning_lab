@@ -247,7 +247,7 @@ impl LabApp {
         let output = egui::Frame::new().fill(palette(ui).input).inner_margin(10.).show(ui, |ui| {
             egui::ScrollArea::both().id_salt(("example-output", i)).max_height(300.).min_scrolled_height(if l.example_result.is_some() { 180. } else { 60. }).auto_shrink([false, l.example_result.is_none()]).show(ui, |ui| {
                 if let Some(r) = &l.example_result {
-                    scripting::outcome(ui, r);
+                    let _ = scripting::outcome(ui, r);
                     for (path, content) in &r.files { ui.label(RichText::new(format!("Virtual file {path}\n{content}")).monospace()); }
                     if l.example_revision==shell::EVALUATOR_REVISION && r.error.is_none() { ui.label("Example finished. Change a value and run again to see what changes."); }
                 } else { ui.label("Run the example to see its printed text and any virtual file changes here."); }

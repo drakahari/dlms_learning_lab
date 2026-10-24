@@ -17,7 +17,12 @@ fn case() -> Case {
 }
 #[test]
 fn excluded_or_malformed_nested_syntax_fails_before_any_parent_mutation() {
-    assert_eq!(shell::EVALUATOR_REVISION, 7);
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION >= 7,
+            "requires the supported command-substitution generation; current records use their actual evaluator"
+        );
+    };
     for source in [
         "printf changed > keep.txt; value=$(printf unfinished",
         "printf changed > keep.txt; value=$((1 + $(printf 2)))",

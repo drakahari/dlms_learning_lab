@@ -1,12 +1,17 @@
-# Bounded case implementation — isolated revision8, migration pending
+# Bounded case selection — evaluator 8
 
-Focused implementation checkpoint, 2026-10-23. The guarded first compile passed,
-with18 case integration tests and37 shell unit tests passing, all-target Clippy
-with warnings denied, and scoped formatting checks. No native or revision8 migration
-acceptance is claimed. It is not activated in the main application or curriculum. Revision8 is explicit in the isolated branch
-because new case support and some static diagnostics change public7 outcomes.
-Actual6 histories and actual7 baseline observations must retain their original
-revision and bytes through the separate migration gate.
+Accepted capability milestone, checked 2026-10-24. The native application adds
+bounded `case` selection without a new dependency or host execution. Current
+content remains106 authored labs/25units; a supported language construct alone
+is not new curriculum or certification coverage.
+
+The corrected engine passed55 focused checks. The merged106 catalog passed810
+model/integration and121 UI checks, with all-target Clippy and formatting.
+Actual comparison preserved3,968 earlier outcomes;156 enumerated changes are
+new support or static diagnostics. All37 authored scripts/215 results and37
+examples retain their behavior. Genuine6/7 records keep their original revisions.
+Backend migration checks and the actual Fedora7-to8 native flow pass; see
+[EVALUATOR8_MIGRATION_ACCEPTANCE.md](EVALUATOR8_MIGRATION_ACCEPTANCE.md).
 
 The reviewed internal extension keeps the existing pure cooperative VM and
 public API. It adds no dependencies, host shell, process, file lookup or network.
@@ -91,7 +96,7 @@ selectors can contain bracket data. The terminal retains the old bracket guard.
 Stray bare `esac` and new `;;`/fallthrough token recognition can change static
 error precedence; these are intentional8 deltas, not claimed7 compatibility.
 
-## Actual reference provenance and remaining gates
+## Actual reference provenance and acceptance
 
 The retained fixed37 GNU Bash5.3.9 oracle manifest is
 `7af1b2e86a9cf9364c5ea170bcdfba4142a5c8cff0c5046efd0be57c55af02bd`.
@@ -107,17 +112,19 @@ No GNU implementation code is copied. These are original MIT project additions.
 `tests/fixtures/shell-case-bash539.json` preserves exact observed output/status/
 files and each original observation hash. The four excluded Bash observations
 are retained as exclusions; their Bash acceptance does not become subset support.
-The proposed test suite compares the33 supported observations at slices1/16/32/64,
+The focused test suite compares the33 supported observations at slices1/16/32/64,
 then adds independent grammar, limits, laziness, provenance, input, memory/work,
 function/frame/PC and Stop cases. An independent prefix dynamic-programming
 oracle also checks40,404 exhaustive short pattern/subject pairs, including
 quoted wildcard masks. The focused tests passed at this checkpoint.
 
-Remaining before main activation: independent source/runtime review; exact actual7 before/after comparison with
-explicit new-support deltas;37 authored scripts/215 cases and37 examples;
-actual6+7 multihistory/Reset/practice-only/first-before8 exact target backup,
-conflict/failure/cancel/recovery/portable receipt tests; normal regression and
-native Run/Stop/history/restore acceptance. No new lesson or coverage is claimed.
+Actual before/after comparison is retained with manifest
+`7053d055a629fca5e07fc73efe074874682824f53293bd16630ee66a0a62fdb8`.
+The first corrected-metadata attempt caught a cross-worktree Cargo cache mismatch
+before publishing any output. Fresh exclusive checkout targets now prevent that
+reuse; the accepted comparison rebuilt in its own target. Earlier failures and
+all genuine historical evidence remain unchanged. No false old revision label,
+new authored scenario or platform acceptance follows from these observations.
 
 ## Reviewed follow-up after the first focused gate
 
@@ -140,5 +147,5 @@ is the bare literal case/esac, including later pipeline stages or after leading
 redirects. That closes a compile-first diagnostic bypass without reinterpreting
 quoted/escaped/expanded command heads, later arguments or assignment prefixes.
 This additional correction and its timing regressions passed the same55-check
-focused gate. Full actual7/8 comparison, migration and native acceptance remain
-separate pending gates.
+focused gate. The later actual7/8 comparison, migration and native acceptance passed as
+recorded above; focused checks alone were not used to establish those gates.

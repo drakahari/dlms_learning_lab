@@ -193,12 +193,13 @@ fn receipt_reader_caps_elements_without_changing_order_future_or_numeric_validat
 }
 
 #[test]
-fn all_original_revision6_records_and_current7_empty_record_shape_remain_exact() {
-    assert_eq!(
-        shell::EVALUATOR_REVISION,
-        7,
-        "this reader-only change must not activate a new evaluator"
-    );
+fn all_original_revision6_records_and_current_empty_record_shape_remain_exact() {
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION > 6,
+            "frozen6 is earlier data; this reader test does not select a current revision"
+        );
+    };
     let labs = pack::bundled().unwrap();
     let mut p = empty();
     let original = originals();
@@ -226,7 +227,7 @@ fn all_original_revision6_records_and_current7_empty_record_shape_remain_exact()
     }
     // This is an empty current record shape, NOT a claimed observed solution/history.
     let current = shell::Record {
-        engine_revision: 7,
+        engine_revision: shell::EVALUATOR_REVISION,
         source: String::new(),
         results: vec![],
     };
@@ -245,7 +246,7 @@ fn all_original_revision6_records_and_current7_empty_record_shape_remain_exact()
     ));
     let w = p.attempts.get_mut(&id).unwrap().workspace.as_mut().unwrap();
     w.script_history_more.push(shell::Record {
-        engine_revision: 7,
+        engine_revision: shell::EVALUATOR_REVISION,
         source: String::new(),
         results: vec![],
     });
@@ -279,7 +280,7 @@ fn rejected_list_input_and_invalid_direct_values_retain_exact_on_disk_bytes() {
     assert_eq!(std::fs::read(&path).unwrap(), exact);
     for receipt in [
         serde_json::json!({"shell":vec![1;33]}),
-        serde_json::json!({"shell":[8]}),
+        serde_json::json!({"shell":[shell::EVALUATOR_REVISION+1]}),
     ] {
         let mut value: serde_json::Value = serde_json::from_slice(&exact).unwrap();
         value["migration_receipts"] = receipt;

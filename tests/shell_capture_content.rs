@@ -73,7 +73,12 @@ fn quote(text: &str) -> String {
 
 #[test]
 fn authored_pack_is_reachable_and_its_actual_unit_and_lesson_prerequisites_are_valid() {
-    assert_eq!(shell::EVALUATOR_REVISION, 7);
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION >= 7,
+            "requires the supported command-substitution generation; current records use their actual evaluator"
+        );
+    };
     let bundled = pack::bundled().unwrap();
     let all = catalog();
     let mut units = course::bundled(&bundled).unwrap();

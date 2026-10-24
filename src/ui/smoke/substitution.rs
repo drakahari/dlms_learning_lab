@@ -1,8 +1,9 @@
-//! Synthetic-profile native acceptance for the public revision-seven evaluator.
+//! Synthetic-profile native regression for the actual current public evaluator.
+//! This flow migrates frozen6 data; genuine7→8 is a separate acceptance target.
 //! The frozen revision-six records are development fixtures, never learner data.
 use super::*;
 impl LabApp {
-    fn reveal_file_action(&mut self, ctx: &egui::Context) -> bool {
+    pub(super) fn reveal_file_action(&mut self, ctx: &egui::Context) -> bool {
         let action = self.metrics.data_file_action.expect("file chooser action");
         let visible = self
             .metrics
@@ -69,7 +70,7 @@ impl LabApp {
         }
         match stage {
             7000 => {
-                assert_eq!(shell::EVALUATOR_REVISION, 7);
+                const { assert!(shell::EVALUATOR_REVISION >= 7); };
                 ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(true));
                 let old: Vec<serde_json::Value> = serde_json::from_str(include_str!(
                     "../../../tests/fixtures/shell-v6-authored-records.json"
@@ -94,7 +95,7 @@ impl LabApp {
             }
             7001 => {
                 let bytes = ctx.data(|d| d.get_temp::<Vec<u8>>(egui::Id::new("capture-native-original6"))).unwrap();
-                assert_eq!(std::fs::read(self.path.with_extension("before-shell-v7.json")).unwrap(), bytes);
+                assert_eq!(std::fs::read(self.path.with_extension(format!("before-shell-v{}.json",shell::EVALUATOR_REVISION))).unwrap(), bytes);
                 let a = &self.progress.attempts[&id];
                 assert!(!progress::current_solved(a, &self.scenarios[i]));
                 assert!(progress::legacy_script_credit(a, &self.scenarios[i]));
@@ -116,12 +117,12 @@ impl LabApp {
                 assert!(progress::current_solved(a, &self.scenarios[i]));
                 assert!(progress::legacy_script_credit(a, &self.scenarios[i]));
                 let engine::State::Script { run: Some(r), .. } = &a.state else { panic!() };
-                assert_eq!(r.engine_revision, 7);
+                assert_eq!(r.engine_revision, shell::EVALUATOR_REVISION);
                 assert_eq!(a.workspace.as_ref().unwrap().script_history.as_ref().unwrap().engine_revision, 6);
                 self.save();
                 self.progress = progress::load(&self.path, &self.scenarios).unwrap();
                 assert!(progress::current_solved(&self.progress.attempts[&id], &self.scenarios[i]));
-                shot = Some(format!("capture-native-current7-{}", if stage == 7005 { "complete" } else { "repaired" }));
+                shot = Some(format!("capture-native-current-{}", if stage == 7005 { "complete" } else { "repaired" }));
             }
             7006 => {
                 self.set_script_view(i, teaching::View::Example);
@@ -134,10 +135,10 @@ impl LabApp {
                 if self.script_job.is_some() { return (false, None); }
                 let a = &self.progress.attempts[&id];
                 let l = a.workspace.as_ref().unwrap().script_learning.as_ref().unwrap();
-                assert_eq!(l.example_revision, 7);
+                assert_eq!(l.example_revision, shell::EVALUATOR_REVISION);
                 assert!(self.scenarios[i].teaching.as_ref().unwrap().fixture.accepts(l.example_result.as_ref().unwrap()));
                 assert!(progress::current_solved(a, &self.scenarios[i]));
-                shot = Some("capture-native-separate-example7".into());
+                shot = Some("capture-native-separate-example-current".into());
             }
             7009 => self.set_script_view(i, teaching::View::Assignment),
             7011 => self.pending_events = vec![key(egui::Key::A), egui::Event::Text(
@@ -246,7 +247,7 @@ impl LabApp {
                     assert!(started.elapsed().as_secs() < 10, "Restore preview unavailable: {}", self.data_tools.restore_diagnostic());
                     return (false, None);
                 }
-                shot = Some("capture-native-restore-review7".into());
+                shot = Some("capture-native-restore-review-current".into());
             }
             7038 => {
                 if !self.click_smoke_control(ctx, self.metrics.data_cancel) { return (false, None); }
@@ -260,8 +261,8 @@ impl LabApp {
             }
             7040 => {
                 let bytes = ctx.data(|d| d.get_temp::<Vec<u8>>(egui::Id::new("capture-native-original6"))).unwrap();
-                assert_eq!(std::fs::read(self.path.with_extension("before-shell-v7.json")).unwrap(), bytes);
-                println!("PASS native public evaluator7: genuine frozen33 revision6 records, exact first backup/history and separate current credit, keyboard capture repair/Run, independent example, active-child Stop leaving no graded result, resume/retry, light150/dark200 reachable Run, native backup export/review/cancel with exact retained main bytes. Synthetic fixtures; active inspection cancellation is independently backend-tested, not a novice/physical-device/platform study.");
+                assert_eq!(std::fs::read(self.path.with_extension(format!("before-shell-v{}.json",shell::EVALUATOR_REVISION))).unwrap(), bytes);
+                println!("PASS native public evaluator{}: genuine frozen33 revision6 records, exact first backup/history and separate current credit, keyboard capture repair/Run, independent example, active-child Stop leaving no graded result, resume/retry, light150/dark200 reachable Run, native backup export/review/cancel with exact retained main bytes. Synthetic fixtures; active inspection cancellation is independently backend-tested, not a novice/physical-device/platform study.",shell::EVALUATOR_REVISION);
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
             _ => unreachable!(),

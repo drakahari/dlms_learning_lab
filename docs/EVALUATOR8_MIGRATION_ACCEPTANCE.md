@@ -1,15 +1,12 @@
-# Evaluator8 migration acceptance proposal
+# Evaluator 8 migration acceptance
 
-Scoped acceptance checkpoint2026-10-23. This isolated worktree combines the exact
-seven reviewed/tested engine candidate paths from65da217 with migration checks.
-All11 public and3 private migration checks passed through the guarded runner,
-with all-target Clippy and formatting checks passing. A whitespace-conflict case
-was strengthened to use exact original bytes plus LF (parsed JSON equality is
-asserted); its affected rerun passed and is not an extra distinct test. No
-production engine/writer/history fix was needed by the migration checks. Main
-activation, full regression, actual8 baseline comparison/capture and native
-acceptance remain separate gates. Existing application/runtime architecture,
-writer and recovery policies are unchanged.
+Accepted scoped milestone, 2026-10-24. The corrected original case engine,
+existing target-driven writer and genuine earlier observations were reviewed
+independently. All11 public and3 private migration checks pass. Clean exclusive
+checkout builds pass810 model/integration and121 UI checks (931 distinct),
+all-target Clippy and formatting. Repeated focused checks are not extra counts.
+Existing application/runtime architecture, writer and recovery policies stay
+unchanged; production progress/backup changes in this milestone are test-only.
 
 ## Controlled historical evidence
 
@@ -32,7 +29,7 @@ its attempt data exactly equals the original synthetic profile. These observatio
 must never be regenerated under8 and relabeled7 or6. Synthetic observed completion
 is evidence of the fixture's behavior, not a person's mastery.
 
-## Proposed gates
+## Backend acceptance cases
 
 - Ordinary decode/prepare preserves all102 contexts, immutable actual6/7
   snapshots and edited assignment/example sources. Current credit requires8;
@@ -75,8 +72,8 @@ checks. No new curriculum, native or platform acceptance follows from this gate.
 
 Do not perform a blanket7→8 replacement. Frozen fixture versions, source commits,
 real7 records, recorded7 observations, actual6 snapshots and their hashes remain
-unchanged. The following current-writer expectations need narrow review when
-actual8 is merged (line numbers are from61888a3):
+unchanged. The following current-writer expectations received narrow review and correction
+in this milestone (historical line numbers are from61888a3):
 
 - `src/progress.rs:1188,1220,1224`: private tests create a current write. Their
   expected backup filename and newly emitted receipt use the actual current
@@ -91,7 +88,7 @@ actual8 is merged (line numbers are from61888a3):
   retain genuine6 data and valid old `[1,6,7]` provenance. The `[8]` future negative
   at282 must become current+1. Do not claim that synthetic shape is an observation.
 - `tests/shell_substitution.rs:20` and `tests/shell_capture_content.rs:76`: explicit
-  current-capability gates should accept only the reviewed current8 merge;
+  current-capability gates retain the feature floor introduced in7;
   former evaluator7 fixtures/expectations must not change silently.
 - `tests/unit_manager_integration.rs:88,454`, `tests/accounts_workspace.rs:61,367`,
   `tests/acl_workspaces.rs:432,471`, `tests/ospf_workspace.rs:242`, and
@@ -105,3 +102,35 @@ actual8 is merged (line numbers are from61888a3):
 The engine author's revision bump and supported syntax implementation remain
 separate. The root integrator owns selecting/applying each narrow correction,
 merged-regression gates and native current/earlier-output presentation checks.
+
+
+## Actual Fedora native 7-to-8 acceptance
+
+The app-only stage15000 source starts with the exact controlled writer7 fixture
+in a private smoke profile, then uses real editor input, Run/Stop and restore
+controls. It is separate from the older6-to-current regression. A short viewport
+need not display the entire scrollable editor: the capture driver derives a
+control-height band centered inside the actual editor viewport, reveals and
+clicks that band, and checks native TextEdit focus before typing. It changes no
+product height, text size or scrolling policy. Shared tests cover Tab separately;
+this source uses clicks, Ctrl+A and Ctrl+Enter and makes no new native Tab claim.
+Actual final run `m75-case-history-native-r2.log` passes15 captures in
+`run-_z5iwydb`, with actual typing/Run/Stop, separate earlier example, retained6/7
+history, exact first backup and save/readback, preview Cancel and Confirm with
+raw safety copy, selected Reset and Challenge. Light150% and dark200% syntax
+failure/repair were typed and run. Root inspected the actual error title/advice/
+detail, current completion results, history and restore screens. At the existing
+1268×632 tiled size, nested output/document scrolling remains necessary; a lower
+retry reminder may need further output scrolling. Text was not shrunk.
+
+The first native run established behavior but its larger-text captures showed
+only editor/Run. Measurement-only instrumentation was added to reveal existing
+diagnostic/completion widgets before the final captures; no product layout,
+controls, grading or saved state changed. Its affected plan check, Clippy,
+formatting and build pass. All earlier evidence is retained.
+
+This is controlled synthetic-profile Fedora technical acceptance. It is not
+actual novice comprehension, physical-device keyboard or screen-reader testing,
+a cold-process restart/power-loss study, Windows/macOS desktop acceptance or
+complete shell/certification coverage. No new curriculum or release publication
+is included. Legacy6/7 source/results are never regenerated or relabeled as old.

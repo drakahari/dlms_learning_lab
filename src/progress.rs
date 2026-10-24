@@ -1185,7 +1185,11 @@ mod migration_writer_tests {
             assert_eq!(std::fs::read(&path).unwrap(), original);
             assert!(candidate.migration_receipts.is_none());
             assert_eq!(
-                std::fs::read(path.with_extension("before-shell-v7.json")).unwrap(),
+                std::fs::read(path.with_extension(format!(
+                    "before-shell-v{}.json",
+                    crate::shell::EVALUATOR_REVISION
+                )))
+                .unwrap(),
                 original
             );
             save(&path, &candidate).unwrap();
@@ -1217,11 +1221,18 @@ mod migration_writer_tests {
                 .contains("file was replaced")
         );
         let disk: Progress = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
-        assert_eq!(disk.migration_receipts.unwrap().shell, vec![7]);
+        assert_eq!(
+            disk.migration_receipts.unwrap().shell,
+            vec![crate::shell::EVALUATOR_REVISION]
+        );
         assert!(candidate.migration_receipts.is_none());
         save(&path, &candidate).unwrap();
         assert_eq!(
-            std::fs::read(path.with_extension("before-shell-v7.json")).unwrap(),
+            std::fs::read(path.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
             original
         );
     }

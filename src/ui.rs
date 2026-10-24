@@ -83,6 +83,8 @@ struct Metrics {
     manager_example_items: Vec<(usize, egui::Rect)>,
     manager_challenge: Option<egui::Rect>,
     manager_learn: Option<egui::Rect>,
+    mode_learn: Option<egui::Rect>,
+    mode_challenge: Option<egui::Rect>,
     reset_cancel: Option<egui::Rect>,
     accounts_output_scroll: Option<(f32, egui::Rect)>,
     accounts_latest_output: Option<egui::Rect>,
@@ -118,6 +120,8 @@ struct Metrics {
     routing_load_example: Option<egui::Rect>,
     routing_router_options: Option<egui::Rect>,
     script_history: Option<egui::Rect>,
+    script_diagnostic: Option<egui::Rect>,
+    script_completion: Option<egui::Rect>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
     why: Option<egui::Rect>,
@@ -291,6 +295,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-history")
+            {
+                15000
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("unit-manager-unit")
             {
                 13000

@@ -58,7 +58,12 @@ fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_out
     let all = pack::bundled().unwrap();
     assert_eq!(all.len(), 106);
     assert!(!all.iter().any(|x| x.id == s.id));
-    assert_eq!(shell::EVALUATOR_REVISION, 7);
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION >= 7,
+            "requires the supported command-substitution generation; current records use their actual evaluator"
+        );
+    };
     assert!(!engine::solved(&s.initial, &s.goal));
     let good = reference(&s);
     assert!(engine::solved(&good, &s.goal));
@@ -346,7 +351,7 @@ fn assignment_overlapping_example_and_cross_lesson_selection_are_rejected() {
     assert!(progress::decode(&serde_json::to_vec(&p).unwrap(), &catalog()).is_err());
 }
 #[test]
-fn all_ninety_attempts_shell7_records_and_selected_reset_survive_exact_roundtrip() {
+fn all_bundled_attempts_current_records_and_selected_reset_survive_exact_roundtrip() {
     let all = catalog();
     let s = all.last().unwrap();
     let mut p = Progress {
@@ -364,7 +369,7 @@ fn all_ninety_attempts_shell7_records_and_selected_reset_survive_exact_roundtrip
                 panic!()
             };
             *run = Some(shell::Record {
-                engine_revision: 7,
+                engine_revision: shell::EVALUATOR_REVISION,
                 source: source.clone(),
                 results: cases.iter().map(|c| shell::run(source, c)).collect(),
             });

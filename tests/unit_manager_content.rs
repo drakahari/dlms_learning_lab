@@ -770,13 +770,13 @@ struct Historical {
     record: shell::Record,
 }
 #[test]
-fn real_old_catalog_runs_history_drafts_favorites_and_selected_reset_survive_roundtrip_and_restore()
-{
-    assert_eq!(
-        shell::EVALUATOR_REVISION,
-        7,
-        "Never execute a later VM and label its observations7"
-    );
+fn original102_current_runs_real6_history_drafts_favorites_and_selected_reset_survive_restore() {
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION >= 7,
+            "runs generated in this test retain their actual current revision; frozen6 data stays6"
+        );
+    };
     let mut all: Vec<_> = pack::bundled()
         .unwrap()
         .into_iter()
@@ -831,7 +831,7 @@ fn real_old_catalog_runs_history_drafts_favorites_and_selected_reset_survive_rou
                 .as_mut()
                 .unwrap();
             l.example_result = Some(shell::run(&lesson.example, &lesson.fixture));
-            l.example_revision = 7;
+            l.example_revision = shell::EVALUATOR_REVISION;
         }
         if let Some(lesson) = &lab.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(&mut a, lesson, true).unwrap();
@@ -968,5 +968,7 @@ fn real_old_catalog_runs_history_drafts_favorites_and_selected_reset_survive_rou
     }
     assert_eq!(loaded.attempts[&lab.id].state, lab.initial);
     assert!(!progress::current_solved(&loaded.attempts[&lab.id], &lab));
-    assert_eq!(shell::EVALUATOR_REVISION, 7);
+    const {
+        assert!(shell::EVALUATOR_REVISION >= 7);
+    };
 }

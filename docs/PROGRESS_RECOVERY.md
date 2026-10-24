@@ -44,7 +44,7 @@ Fedora backend/UI/native evidence is recorded in IMPLEMENTATION_LEDGER.md. The s
 
 Saved script runs now identify the evaluator revision that produced them. Earlier records without that field remain readable and preserve their original source, output, file snapshots and earned credit. They are labeled **Earlier run complete · Rerun to verify**, separately from current success. Opening the assignment moves the older result to optional saved history without changing the draft. Run verifies the current draft; a failure or unsupported construct cannot reuse earlier success. A successful current Run restores current completion, while earlier history remains available. Reset explicitly clears that selected attempt, including history. Successive upgrades retain earlier runs together, including a later earned result alongside an older incomplete run. Optional Earlier saved runs shows their scripts, output and simulated files. History is bounded to32 records per attempt and the existing16MB profile limit; a full history needing another migration is rejected with the original retained, rather than silently discarding work.
 
-Before the first upgraded write, the exact older progress bytes are copied once to `progress-v1.before-shell-vN.json` (N is the new evaluator revision; currently7) beside the main file; existing backups are never replaced. Reads alone do not rewrite progress. Save size/bounds and atomic-write protections still apply. Export/restore retains earlier history and rechecks active saved runs with the current evaluator before approval; example output has separate revision labeling and never awards assignment credit. Future incompatible record revisions are rejected with the original file retained. Downgrade compatibility after saving new metadata is not claimed.
+Before the first upgraded write, the exact older progress bytes are copied once to `progress-v1.before-shell-vN.json` (N is the new evaluator revision; currently8) beside the main file; existing backups are never replaced. Reads alone do not rewrite progress. Save size/bounds and atomic-write protections still apply. Export/restore retains earlier history and rechecks active saved runs with the current evaluator before approval; example output has separate revision labeling and never awards assignment credit. Future incompatible record revisions are rejected with the original file retained. Downgrade compatibility after saving new metadata is not claimed.
 
 
 Evaluator4 tightens shared text-expansion bounds and cumulative replacement work. A source that earned credit under3 can now reach a resource limit, even without printing large output. Its exact earlier source/results/credit remain historical; a current Run is required for current completion. Existing earlier histories stay alongside it, and the first upgraded write preserves the exact prior profile in the non-overwriting v4 backup. Reset clears only the selected attempt/history; it cannot remove that original-byte safety copy. See SHELL_EXPANSION_LIMITS.md.
@@ -96,3 +96,26 @@ and exercise an empty current7 record shape without claiming an observed
 solution. No earlier-history snapshot was regenerated. All-target Clippy with
 warnings denied and formatting checks pass. These reader checks do not establish
 new evaluator syntax, curriculum or native-platform acceptance.
+
+
+## Evaluator 8 and multiple earlier revisions
+
+Revision 8 adds bounded `case` selection. An existing revision 7 run and any
+revision 6 history retain their exact source, outcomes and revision labels.
+Current success requires a new Run; an earlier completion remains identified as
+earlier work. No new lab requirements or script answers are filled in.
+
+The first compatible write at the new boundary uses the exact original target
+bytes in `progress-v1.before-shell-v8.json`; an occupied different file blocks
+that write even if it differs only in whitespace. Reset-first and example-only
+profiles still need protection. The already completed revision 7 receipt and
+snapshot are separate. Portable backups cannot supply the target's migration
+permission. Confirmed restore rechecks saved sources in the current simulator
+and protects the exact pre-restore target; Cancel writes nothing.
+
+The controlled revision 7 fixtures are genuine observations from that evaluator,
+not revision 8 outcomes relabeled as old work. Backend checks cover history,
+capacity, separate drafts/examples, exact backups, write failures, cancellation,
+restore and selected reset. Native and platform evidence is recorded separately
+in the implementation ledger; save/readback alone is not a cold-process restart
+or power-loss test. Keep an exported backup before trying an older app version.

@@ -1,8 +1,9 @@
 # Case selection: development reference boundary
 
-Checked 2026-10-23. `case` remains unsupported in the shipped revision7
-simulator. This document records actual reference observations for the next
-internal parser/VM extension; it does not add curriculum or coverage.
+Checked 2026-10-23. These actual reference observations preceded the bounded
+revision 8 extension documented in [SHELL_CASE.md](SHELL_CASE.md). Revision 7
+rejected `case`; its genuine results are retained separately. Reference evidence
+alone does not add curriculum or establish native acceptance.
 
 The developer-only `tools/case_bash_oracle.py` accepts exactly the37 hash-pinned
 original fixtures in `tests/fixtures/shell-case-oracle-inputs.json`. It cannot

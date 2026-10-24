@@ -239,7 +239,7 @@ fn prior_profile(all: &[Scenario]) -> Progress {
                 results: cases.iter().map(|c| shell::run(&source, c)).collect(),
                 source: source.clone(),
             };
-            assert_eq!(record.engine_revision, 7);
+            assert_eq!(record.engine_revision, shell::EVALUATOR_REVISION);
             assert!(record.valid());
             assert!(
                 cases.iter().zip(&record.results).all(|(c, r)| c.accepts(r)),

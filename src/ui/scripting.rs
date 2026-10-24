@@ -22,6 +22,16 @@ pub(super) struct Job {
     example: bool,
 }
 impl Job {
+    /// Read-only smoke observation of a marker emitted by the typed selector child.
+    /// Does not advance execution, expose a host file or supply grading credit.
+    pub(super) fn has_case_native_child_marker(&self) -> bool {
+        self.vm.as_ref().is_some_and(|vm| {
+            vm.outcome
+                .files
+                .get("/work/native-case-entered.txt")
+                .is_some_and(|text| text == "entered")
+        })
+    }
     pub(super) fn example(id: String, source: String, case: shell::Case) -> Self {
         let mut job = Self::new(id, source, vec![case]);
         job.example = true;
@@ -228,7 +238,7 @@ impl LabApp {
             let checks = shell::checks(source, run, cases);
             let complete = checks.iter().all(|c| c.0);
             self.metrics.completion = complete;
-            ui.label(
+            let summary = ui.label(
                 RichText::new(if complete {
                     "Correct solution · All input sets pass."
                 } else {
@@ -269,6 +279,13 @@ impl LabApp {
             }
             if complete {
                 self.next_unit_lab(ui, i);
+                self.metrics.script_completion = Some(egui::Rect::from_min_max(
+                    summary.rect.min,
+                    egui::pos2(
+                        ui.max_rect().right(),
+                        ui.cursor().top() - ui.spacing().item_spacing.y,
+                    ),
+                ));
             }
         }
         let c = &cases[selected];
@@ -404,7 +421,7 @@ impl LabApp {
                         egui::CollapsingHeader::new("Saved output and virtual files")
                             .id_salt((i, history_index))
                             .show(ui, |ui| {
-                                outcome(ui, result);
+                                let _ = outcome(ui, result);
                                 for (name, text) in &result.files {
                                     ui.add(
                                         egui::Label::new(
@@ -423,7 +440,8 @@ impl LabApp {
         let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
             egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]).show(ui, |ui| {
                 if let Some(r) = r {
-                    outcome(ui, r);
+                    let diagnostic = outcome(ui, r);
+                    if !earlier { self.metrics.script_diagnostic = diagnostic; }
                     let engine::Goal::Script { cases } = &self.scenarios[i].goal else { return; };
                     let c = &cases[case];
                     if !earlier && r.error.is_none() && !c.accepts(r) {
@@ -505,7 +523,7 @@ fn output_diff(ui: &mut egui::Ui, label: &str, expected: &str, actual: &str) {
         .wrap(),
     );
 }
-pub(super) fn outcome(ui: &mut egui::Ui, r: &shell::Outcome) {
+pub(super) fn outcome(ui: &mut egui::Ui, r: &shell::Outcome) -> Option<egui::Rect> {
     ui.label(format!("Exit status: {}", r.status));
     ui.label(
         RichText::new("Standard output · printed text")
@@ -532,9 +550,18 @@ pub(super) fn outcome(ui: &mut egui::Ui, r: &shell::Outcome) {
         ui.add(egui::Label::new(RichText::new(&r.stderr).monospace()).wrap());
     }
     if let Some(e) = &r.error {
-        ui.label(RichText::new(teaching::diagnostic_title(e)).color(palette(ui).error));
-        ui.label(teaching::diagnostic_advice(e));
-        ui.add(egui::Label::new(e).wrap());
-        ui.label("Edit the script, then Run again. Your draft stays saved.");
+        let title = ui.label(RichText::new(teaching::diagnostic_title(e)).color(palette(ui).error));
+        let advice = ui.label(teaching::diagnostic_advice(e));
+        let detail = ui.add(egui::Label::new(e).wrap());
+        let retry = ui.label("Edit the script, then Run again. Your draft stays saved.");
+        Some(
+            title
+                .rect
+                .union(advice.rect)
+                .union(detail.rect)
+                .union(retry.rect),
+        )
+    } else {
+        None
     }
 }

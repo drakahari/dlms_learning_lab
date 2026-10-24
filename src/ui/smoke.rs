@@ -6,6 +6,7 @@ mod accounts_lessons;
 mod acl;
 mod acl_lessons;
 mod capture_lessons;
+mod case_history;
 mod ospf;
 mod ospf_lessons;
 mod substitution;
@@ -280,7 +281,7 @@ impl LabApp {
     pub(super) fn smoke_tick(&mut self, ctx: &egui::Context) {
         // Stop probes use consecutive frames so cancellation is checked during
         // execution rather than after the finite instruction budget finishes.
-        let immediate_stop = matches!(self.smoke_stage, 7012 | 7013);
+        let immediate_stop = matches!(self.smoke_stage, 7012 | 7013 | 15014 | 15015);
         if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;
         }
@@ -314,6 +315,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 15000..=15255 => {
+                let (advance, capture) = self.case_history_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 13000..=14999 => {
                 let (advance, capture) = self.unit_manager_lessons_native(ctx, n);
                 if !advance {

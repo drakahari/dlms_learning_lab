@@ -16,7 +16,7 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 
 ## Honest exclusions
 
-Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `case`, `until`, `select`, `break`, `continue`, `export`, `set`, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
+Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, `set`, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
 ## Bounded execution
 
@@ -103,3 +103,27 @@ M44 authored indexed-list unit: four practical assignments with isolated example
 
 
 Evaluator7 adds bounded original-source `$(LIST)` command substitution in the Script editor, with cooperative isolated child contexts, trailing-LF removal, quote-aware splitting/globbing, ordered redirects, shared resource/Stop limits and explicit exclusions. The separate terminal remains literal-only. Captures inside arithmetic, backticks, process substitution, Bash input-only shorthand and inherited-direct local/return are excluded. See SHELL_SUBSTITUTION.md for the precise contract and Fedora acceptance scope. Earlier records remain history; only an explicit current Run earns current credit.
+
+
+## Case selection — evaluator 8 extension
+
+The Script editor supports `case WORD in PATTERN) COMMANDS ;; ... esac` within
+its bounded shell subset. The selector is one complete value, including spaces;
+patterns match the whole value. The first matching arm runs. An unquoted `*`
+matches any number of bytes and `?` one byte; quote wildcard characters to match
+them literally. Matching uses the C/POSIX locale. `case` is portable shell syntax;
+Bash-specific indexed lists inside it retain their separate portability limits.
+
+The subset deliberately excludes bracket expressions, extended patterns,
+fallthrough (`;&` / `;;&`), whole-case pipelines/redirections and list-valued
+selectors/patterns. Unsupported syntax produces a diagnostic. Limits are 32 arms,
+128 alternatives total, 8 per arm and 256 expanded bytes per pattern, sharing
+the existing instruction, memory, output, expansion-work and responsive Stop
+budgets. Matching is iterative and cooperative. See [SHELL_CASE.md](SHELL_CASE.md)
+for expansion/status semantics, exact exclusions and acceptance evidence.
+
+New results identify evaluator 8. Genuine earlier results keep their original
+revision, source and output; opening a lesson does not invent a new solution.
+Only a current explicit Run or confirmed restore recheck can establish current
+success. Examples remain independent and ungraded. See
+[PROGRESS_RECOVERY.md](PROGRESS_RECOVERY.md) before downgrading an existing profile.

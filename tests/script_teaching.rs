@@ -189,7 +189,7 @@ fn feedback_separates_malformed_unsupported_limits_and_output_mistakes() {
         ("if true; then printf ok", Diagnostic::Syntax),
         ("fi", Diagnostic::Syntax),
         ("printf ok >", Diagnostic::Syntax),
-        ("case x in", Diagnostic::Unsupported),
+        ("case x in", Diagnostic::Syntax),
         ("ls", Diagnostic::Unsupported),
         ("printf '%d' 1", Diagnostic::Unsupported),
         ("while true; do :; done", Diagnostic::Limit),

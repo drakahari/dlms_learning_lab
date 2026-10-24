@@ -85,7 +85,12 @@ fn private_pack_reaches_current_fresh_outcomes_and_retains_typed_alternate_behav
     let labs = pack::bundled().unwrap();
     assert!(labs.len() >= 98);
     assert!(!labs.iter().any(|v| v.id == s.id));
-    assert_eq!(shell::EVALUATOR_REVISION, 7);
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION >= 7,
+            "requires the supported command-substitution generation; current records use their actual evaluator"
+        );
+    };
     assert!(!engine::solved(&s.initial, &s.goal));
     let reference = solved(&s);
     assert_eq!(reference.step, 0);
@@ -451,7 +456,7 @@ fn populate_prior98(all: &[Scenario]) -> Progress {
                 panic!()
             };
             *run = Some(shell::Record {
-                engine_revision: 7,
+                engine_revision: shell::EVALUATOR_REVISION,
                 source: source.clone(),
                 results: cases.iter().map(|c| shell::run(source, c)).collect(),
             });
@@ -500,8 +505,8 @@ fn populate_prior98(all: &[Scenario]) -> Progress {
     p
 }
 #[test]
-fn exact98_current7_actual6_histories_and_new_drafts_survive_profile_backup_restore_selected_reset()
-{
+fn original98_current_runs_actual6_histories_and_new_drafts_survive_profile_backup_restore_selected_reset()
+ {
     let all = catalog();
     let s = all.last().unwrap();
     let mut p = populate_prior98(&all);

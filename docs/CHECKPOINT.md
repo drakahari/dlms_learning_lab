@@ -1,17 +1,30 @@
-# Safe continuation checkpoint
+# Implementation continuation checkpoint
 
-Stopped at the owner's request on2026-10-23 (Fedora; UTC logs use10-24).
-Do not restart work until the owner resumes. The application is NOT complete.
-This current checkpoint supersedes historical pending notes in earlier versions;
-[IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md) and retained ignored evidence
-preserve the milestone history. No public release is authorized.
+Resumed at the owner's request on2026-10-24. The application is NOT complete.
+The M73 safe-stop snapshot is preserved in c90cec8 and ignored receipts.
+M75 evaluator8 is now accepted for normal integration:931 distinct clean-target
+model/UI checks, final Clippy/fmt/build, actual before/after comparisons, genuine
+6/7 migration and15-capture native Fedora Run/Stop/history/restore/reset flow.
+Rendered diagnostic and completion screens were reviewed at150%light/200%dark.
+Native logm75-case-history-native-r2.log; screenshots run-_z5iwydb. In short tiled
+windows, output/document scrolling is necessary; lower retry reminders may need
+further output scrolling. No physical-device/novice/screen-reader claim.
+
+**Current next actions supersede older pending sections below:** commit/integrate
+reviewed8 source, build the identified normal executable, then test and integrate
+the three distinct case-dispatch lessons from source-r3 (84c59d67…). They remain
+unbundled/unrun and do not count yet. Root independently recomputed all31 expected
+contract tables without running a shell/VM; real simulator checks still follow.
+MAC-learning R4 remains uncompiled and has a remaining retained-String-capacity
+fix; source review accepted the other guards. All work stays serial via MAIN
+runner with exclusive targets. No public release is authorized.
 
 ## Verified normal app and source
 
 - Main's application implementation is pushed `b73c2ef21cfa5738ab0091bcb8bc46c024235fd7`.
   The later pushed `ab4d990` changes only build-cache safeguards/docs, not the app.
 - **106 authored labs /25 units:31 CCNA,21 LPIC-1,17 LPIC-2,37 Bash/Shell.**
-  Evaluator7 remains active on main;28 themes and all existing scenarios/progress
+  Evaluator8 is accepted for integration;28 themes and all existing scenarios/progress
   remain. Pending lesson files and numeric variants do not count.
 - Launch the last verified development build from the main checkout:
 
@@ -69,7 +82,7 @@ No broad cleanup, cargo clean, GPU/swap/OOM/service/desktop/model changes.
 Swap is nearly full; low observed PSI/headroom is not a guarantee. The guard
 refuses low headroom/pressure and cancels only its owned group if sustained.
 
-## Isolated evaluator8: not activated or pushed as normal app
+## Earlier isolated evaluator8 gates (M75 acceptance above supersedes pending labels)
 
 Worktree `.build-artifacts/worktrees/evaluator8-migration`, branch
 `evaluator8-migration-acceptance`; HEAD `c06a03f5e33cad6311790a4caa76a3ebc0e9ca37`
