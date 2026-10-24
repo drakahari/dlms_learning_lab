@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 106);
+    assert_eq!(all.len(), 109);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -417,8 +417,8 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         .collect::<Vec<_>>();
     assert_eq!(
         old.len(),
-        94,
-        "all pre-account assignments remain exercised"
+        97,
+        "all current context-free assignment kinds remain exercised"
     );
     for s in old {
         let mut raw = s.initial.clone();

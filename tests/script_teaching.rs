@@ -46,6 +46,14 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         (r"%s\n\n%s\n\n", r"%s\n\n\n%s\n\n"),
         ("return 4", "return 0"),
         ("note=$(make_note)", "make_note; note='direct call'"),
+        ("quick|summary", "'quick*'"),
+        (
+            r#"send:rush:*) printf '%s\n' "$row" >> 'fast lane.txt'; fast=$((fast+1)) ;;
+        send:*|return:*) printf '%s\n' "$row" >> 'normal lane.txt'; normal=$((normal+1)) ;;"#,
+            r#"send:*|return:*) printf '%s\n' "$row" >> 'normal lane.txt'; normal=$((normal+1)) ;;
+        send:rush:*) printf '%s\n' "$row" >> 'fast lane.txt'; fast=$((fast+1)) ;;"#,
+        ),
+        ("mode=$1", "mode=save"),
     ];
     assert_eq!(
         edits.len(),

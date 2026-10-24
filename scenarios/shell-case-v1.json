@@ -1,0 +1,1088 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-case-interface",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-case-dispatch",
+      "topic": "Case dispatch",
+      "title": "Build a reliable report-mode interface",
+      "summary": "Validate an operation before choosing a read-only report.",
+      "objective": "Build a card interface. brief LABEL and full LABEL each require exactly two arguments and a nonempty LABEL. --help or -h alone prints Usage: card brief|full LABEL followed by a line break and returns 0. Any other mode, missing/extra argument or empty label prints that same usage line only to standard error and returns 2.\n\nFor brief, print Card: LABEL and Summary: SUMMARY, each followed by a line break. For full, print those same lines, then Details: and a line break, then the exact contents of details.txt. SUMMARY is supplied, and LABEL and SUMMARY may contain spaces, percent signs or wildcard-looking text. Successful cards return 0 with no error output. Leave every virtual file unchanged. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your script draft stays saved.",
+          "action": "Build a card interface. brief LABEL and full LABEL each require exactly two arguments and a nonempty LABEL. --help or -h alone prints Usage: card brief|full LABEL followed by a line break and returns 0. Any other mode, missing/extra argument or empty label prints that same usage line only to standard error and returns 2.\n\nFor brief, print Card: LABEL and Summary: SUMMARY, each followed by a line break. For full, print those same lines, then Details: and a line break, then the exact contents of details.txt. SUMMARY is supplied, and LABEL and SUMMARY may contain spaces, percent signs or wildcard-looking text. Successful cards return 0 with no error output. Leave every virtual file unchanged. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Whole output, status and every final file matter.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your current run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A useful script handles the full task across independent inputs.",
+          "action": "Write or repair the complete script, Run it, inspect a differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Decide whether help has its own argument count before validating ordinary views.",
+        "Match exact modes and put the error/default arm last; a spaced mode remains one scalar.",
+        "Use quoted arguments in fixed printf formats and preserve details.txt exactly."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Evaluator8 native simulation only; no host commands or filesystem. Portable case core with active * and ? and first-match ;; only. C/POSIX byte matching, not Unicode-character matching; no bracket expressions, extglob, ;& or ;;&, whole-case redirects/pipelines or list-valued selector/patterns. Quotes make pattern wildcards literal; selector expansion is one scalar without splitting or filename expansion. Other syntax/utilities retain the documented bounded subset. Inputs use supplied flat canonical virtual filenames without aliases or leading hyphens; matching text names is not a general real-filesystem alias safeguard. Original Bash manual Edition5.3/SHA rechecked2026-10-23; live GNU pages timed out and POSIX page returned403, so no fresh successful web retrieval is claimed. Capability uses separately retained fixed Bash5.3.9 C-locale observations. Authored lesson outcomes and alternatives pass the registered evaluator8 checks. The three-lesson native flow passed on Fedora on2026-10-24.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Build the full argument interface and both report views.\nprintf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\"\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "A brief card",
+            "args": [
+              "brief",
+              "North"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "Card: North\nSummary: Ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "A full card preserves an unterminated detail",
+            "args": [
+              "full",
+              "South desk"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Two checks"
+            },
+            "files": {
+              "/work/details.txt": "Rack B\n100% complete",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "Card: South desk\nSummary: Two checks\nDetails:\nRack B\n100% complete",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/details.txt": "Rack B\n100% complete",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Keep the whole label and summary literal",
+            "args": [
+              "brief",
+              "*.txt 100% ready"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Line one\nLine two"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "Card: *.txt 100% ready\nSummary: Line one\nLine two\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Long help form",
+            "args": [
+              "--help"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "Usage: card brief|full LABEL\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Short help alias",
+            "args": [
+              "-h"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "Usage: card brief|full LABEL\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "A spaced unknown mode is one value",
+            "args": [
+              "brief full",
+              "North"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: card brief|full LABEL\n",
+            "status": 2,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Missing label",
+            "args": [
+              "brief"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: card brief|full LABEL\n",
+            "status": 2,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Explicit empty label",
+            "args": [
+              "full",
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: card brief|full LABEL\n",
+            "status": 2,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Extra argument",
+            "args": [
+              "full",
+              "North",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: card brief|full LABEL\n",
+            "status": 2,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "No arguments",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: card brief|full LABEL\n",
+            "status": 2,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Help must not ignore extra arguments",
+            "args": [
+              "--help",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {
+              "SUMMARY": "Ready"
+            },
+            "files": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: card brief|full LABEL\n",
+            "status": 2,
+            "after": {
+              "/work/details.txt": "Map check\n",
+              "/work/sentinel.txt": "keep exactly\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "case \"$1\" in\n    --help|-h)\n        if test \"$#\" -ne 1; then\n            printf 'Usage: card brief|full LABEL\\n' >&2\n            exit 2\n        fi\n        printf 'Usage: card brief|full LABEL\\n'\n        exit 0\n        ;;\nesac\nif test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: card brief|full LABEL\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    brief) printf 'Card: %s\\nSummary: %s\\n' \"$2\" \"$SUMMARY\" ;;\n    full)\n        printf 'Card: %s\\nSummary: %s\\nDetails:\\n' \"$2\" \"$SUMMARY\"\n        cat details.txt\n        ;;\n    *) printf 'Usage: card brief|full LABEL\\n' >&2; exit 2 ;;\nesac\n"
+      ],
+      "prerequisites": [
+        "shell-capture-handover"
+      ],
+      "retry_guidance": "Inspect argument count and mode first, then quoting and exact line breaks. A valid view must not touch files.",
+      "explanation": "The interface separates help, ordinary argument validation and exact mode selection. A default arm gives unknown modes a real error path. Whole outcomes test output, status and unchanged files; equivalent supported conditionals are accepted.",
+      "teaching": {
+        "prerequisite_note": "Use the argument checks, quoted printing and statuses from “Preview or publish a batch investigation safely”. This lesson adds a clear multi-way decision.",
+        "concepts": [
+          {
+            "title": "Choose the first matching arm",
+            "text": "case \"$1\" in starts a decision using the entire first argument. A pattern ends at ), its commands follow, and ;; finishes that arm. The first match wins; later arms do not run. End the decision with esac. Patterns separated by | choose the same commands, such as quick|summary)."
+          },
+          {
+            "title": "An explicit default is part of the interface",
+            "text": "Use *) as the final arm for everything else. Print a useful diagnostic to standard error and choose a nonzero exit status. Check help separately before ordinary argument counts when help has a different interface. No-match alone returns 0; it is not an error handler."
+          },
+          {
+            "title": "Patterns and values have different roles",
+            "text": "The selector stays one value, even if it contains spaces or wildcard-looking text. In patterns, unquoted * matches any number of bytes and ? one byte; quoting either makes it literal. quick* is a broad pattern; 'quick*' expects a literal star. Use exact mode names here. When printing a label, quote it and use a fixed printf format."
+          },
+          {
+            "title": "Keep the workbench boundary clear",
+            "text": "Patterns here support simple * and ? with C/POSIX byte matching. A byte is not necessarily a whole UTF8 character. Bracket patterns such as [ab] and fallthrough operators ;& and ;;& are outside this workbench; use ;;. These limits do not restrict quoted literal text."
+          }
+        ],
+        "example": "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Need VIEW TITLE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    quick|summary) printf 'Loan %s: %s\\n' \"$2\" \"$NOTE\" ;;\n    detail) printf 'Loan %s\\n' \"$2\"; cat museum.txt ;;\n    *) printf 'Unknown view\\n' >&2; exit 2 ;;\nesac\n",
+        "inputs": "Arguments are quick and Gallery desk. NOTE is Map catalog; museum.txt belongs only to this example. The assignment uses different modes, variables and files.",
+        "try_change": "Replace only quick|summary with 'quick*' in the first pattern and Run. The literal star no longer matches quick, so the default reports Unknown view. Restore the original patterns to repair it.",
+        "fixture": {
+          "name": "Museum view example",
+          "args": [
+            "quick",
+            "Gallery desk"
+          ],
+          "stdin": "",
+          "env": {
+            "NOTE": "Map catalog"
+          },
+          "files": {
+            "/work/museum.txt": "Two map sets\n",
+            "/work/keep.txt": "intact\n"
+          },
+          "stdout": "Loan Gallery desk: Map catalog\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/museum.txt": "Two map sets\n",
+            "/work/keep.txt": "intact\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-case-routing",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-case-dispatch",
+      "topic": "Case dispatch",
+      "title": "Route a prioritized work list without losing records",
+      "summary": "Apply ordered routes, preserve records and finish an audit after errors.",
+      "objective": "One argument names an existing work-list file. Its supplied filename differs from priority.txt and regular.txt. Replace priority.txt and regular.txt with the routed records, in input order, one complete record per line. ship:urgent:TEXT goes to priority; other ship:TEXT and collect:TEXT go to regular. TEXT must be nonempty; ship:, collect: and ship:urgent: are rejected. The supplied records have no leading or trailing spaces or tabs; spaces inside a record are text. Blank records and hold: records are ignored. Every other record is rejected. Keep each supplied record, including its prefix and internal spaces, exactly; do not split or interpret it.\n\nContinue after rejection, printing Cannot route: RECORD and a line break to standard error for each rejected record, in order. Print Priority: N, Regular: N, Ignored: N and Rejected: N to standard output, each on its own line. Include a final record without a line break. Return 1 if anything was rejected, otherwise 0. Leave the input and every other supplied file unchanged. Use the supplied filenames exactly.",
+      "difficulty": "Advanced",
+      "minutes": 36,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your script draft stays saved.",
+          "action": "One argument names an existing work-list file. Its supplied filename differs from priority.txt and regular.txt. Replace priority.txt and regular.txt with the routed records, in input order, one complete record per line. ship:urgent:TEXT goes to priority; other ship:TEXT and collect:TEXT go to regular. TEXT must be nonempty; ship:, collect: and ship:urgent: are rejected. The supplied records have no leading or trailing spaces or tabs; spaces inside a record are text. Blank records and hold: records are ignored. Every other record is rejected. Keep each supplied record, including its prefix and internal spaces, exactly; do not split or interpret it.\n\nContinue after rejection, printing Cannot route: RECORD and a line break to standard error for each rejected record, in order. Print Priority: N, Regular: N, Ignored: N and Rejected: N to standard output, each on its own line. Include a final record without a line break. Return 1 if anything was rejected, otherwise 0. Leave the input and every other supplied file unchanged. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Whole output, status and every final file matter.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your current run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A useful script handles the full task across independent inputs.",
+          "action": "Write or repair the complete script, Run it, inspect a differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Reject the three empty payload forms before broader routes. Put urgent shipments before all shipments.",
+        "Clear the two output files once, then append one full quoted record to its selected destination.",
+        "Count each route, continue after invalid records, and choose final status from the rejection count."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Evaluator8 native simulation only; no host commands or filesystem. Portable case core with active * and ? and first-match ;; only. C/POSIX byte matching, not Unicode-character matching; no bracket expressions, extglob, ;& or ;;&, whole-case redirects/pipelines or list-valued selector/patterns. Quotes make pattern wildcards literal; selector expansion is one scalar without splitting or filename expansion. Other syntax/utilities retain the documented bounded subset. Inputs use supplied flat canonical virtual filenames without aliases or leading hyphens; matching text names is not a general real-filesystem alias safeguard. Original Bash manual Edition5.3/SHA rechecked2026-10-23; live GNU pages timed out and POSIX page returned403, so no fresh successful web retrieval is claimed. Capability uses separately retained fixed Bash5.3.9 C-locale observations. Authored lesson outcomes and alternatives pass the registered evaluator8 checks. The three-lesson native flow passed on Fedora on2026-10-24. Supplied record inputs have no leading/trailing spaces or tabs; default-IFS read -r trims those edges. Backslashes and internal spaces remain text. Custom-IFS whitespace-preserving input is not taught here.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Route and count every record; keep a complete rejection audit.\n: > priority.txt\n: > regular.txt\nwhile read -r record || test -n \"$record\"; do\n    printf '%s\\n' \"$record\" >> regular.txt\ndone < \"$1\"\nprintf 'Priority: 0\\nRegular: 0\\nIgnored: 0\\nRejected: 0\\n'\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Route a mixed work list",
+            "args": [
+              "jobs.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/jobs.txt": "ship:urgent:Globe\nship:Map\ncollect:Stand\nhold:Frame\n",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 1\nRegular: 2\nIgnored: 1\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/jobs.txt": "ship:urgent:Globe\nship:Map\ncollect:Stand\nhold:Frame\n",
+              "/work/priority.txt": "ship:urgent:Globe\n",
+              "/work/regular.txt": "ship:Map\ncollect:Stand\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Urgent shipments precede broad shipments",
+            "args": [
+              "rush jobs.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/rush jobs.txt": "ship:urgent:A\nship:urgent:B\nship:urgent\ncollect:urgent:C\n",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 2\nRegular: 2\nIgnored: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/rush jobs.txt": "ship:urgent:A\nship:urgent:B\nship:urgent\ncollect:urgent:C\n",
+              "/work/priority.txt": "ship:urgent:A\nship:urgent:B\n",
+              "/work/regular.txt": "ship:urgent\ncollect:urgent:C\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Continue after several rejected records",
+            "args": [
+              "audit.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/audit.txt": "ship:Map\nship:\nunknown:Box\ncollect:Stand\nship:urgent:\n",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 0\nRegular: 2\nIgnored: 0\nRejected: 3\n",
+            "stderr": "Cannot route: ship:\nCannot route: unknown:Box\nCannot route: ship:urgent:\n",
+            "status": 1,
+            "after": {
+              "/work/audit.txt": "ship:Map\nship:\nunknown:Box\ncollect:Stand\nship:urgent:\n",
+              "/work/priority.txt": "",
+              "/work/regular.txt": "ship:Map\ncollect:Stand\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Blank and held records are ignored",
+            "args": [
+              "holds.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/holds.txt": "\nhold:Map\nhold:\n\n",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 0\nRegular: 0\nIgnored: 4\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/holds.txt": "\nhold:Map\nhold:\n\n",
+              "/work/priority.txt": "",
+              "/work/regular.txt": "",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Empty input still clears old outputs",
+            "args": [
+              "empty.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/empty.txt": "",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 0\nRegular: 0\nIgnored: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/empty.txt": "",
+              "/work/priority.txt": "",
+              "/work/regular.txt": "",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Spaces percent signs wildcards and colons stay literal",
+            "args": [
+              "day queue.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/day queue.txt": "ship:urgent:100% ready\ncollect:*.txt\nship:path\\name\nship:other:ship:urgent:X\n",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 1\nRegular: 3\nIgnored: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/day queue.txt": "ship:urgent:100% ready\ncollect:*.txt\nship:path\\name\nship:other:ship:urgent:X\n",
+              "/work/priority.txt": "ship:urgent:100% ready\n",
+              "/work/regular.txt": "collect:*.txt\nship:path\\name\nship:other:ship:urgent:X\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Process an unterminated final record",
+            "args": [
+              "tail.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/tail.txt": "ship:Map\nship:urgent:Frame",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 1\nRegular: 1\nIgnored: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/tail.txt": "ship:Map\nship:urgent:Frame",
+              "/work/priority.txt": "ship:urgent:Frame\n",
+              "/work/regular.txt": "ship:Map\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          },
+          {
+            "name": "Append each routed record after one initial clear",
+            "args": [
+              "repeat.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/repeat.txt": "ship:A\nship:B\nship:A\ncollect:C\n",
+              "/work/priority.txt": "OLD PRIORITY\n",
+              "/work/regular.txt": "OLD REGULAR\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            },
+            "stdout": "Priority: 0\nRegular: 4\nIgnored: 0\nRejected: 0\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/repeat.txt": "ship:A\nship:B\nship:A\ncollect:C\n",
+              "/work/priority.txt": "",
+              "/work/regular.txt": "ship:A\nship:B\nship:A\ncollect:C\n",
+              "/work/sentinel.txt": "do not touch\n",
+              "/work/matching.txt": "unrelated\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        ": > priority.txt\n: > regular.txt\npriority=0\nregular=0\nignored=0\nrejected=0\nwhile read -r record || test -n \"$record\"; do\n    case \"$record\" in\n        ship:|collect:|ship:urgent:) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n        ship:urgent:*) printf '%s\\n' \"$record\" >> priority.txt; priority=$((priority+1)) ;;\n        ship:*|collect:*) printf '%s\\n' \"$record\" >> regular.txt; regular=$((regular+1)) ;;\n        ''|hold:*) ignored=$((ignored+1)) ;;\n        *) printf 'Cannot route: %s\\n' \"$record\" >&2; rejected=$((rejected+1)) ;;\n    esac\ndone < \"$1\"\nprintf 'Priority: %s\\nRegular: %s\\nIgnored: %s\\nRejected: %s\\n' \"$priority\" \"$regular\" \"$ignored\" \"$rejected\"\nif test \"$rejected\" -gt 0; then exit 1; fi\nexit 0\n"
+      ],
+      "prerequisites": [
+        "shell-case-interface",
+        "shell-number-records",
+        "shell-cut-inventory"
+      ],
+      "retry_guidance": "Compare route files as well as counts. A later urgent pattern cannot undo an earlier broad match. Rejection should not stop the batch.",
+      "explanation": "A record takes the first matching route. Specific and empty-payload decisions must precede broader forms; appending preserves records already routed. Counts and a continued rejection stream describe the entire batch. Equivalent supported loops and tests can produce the same outcomes.",
+      "teaching": {
+        "prerequisite_note": "Use first-match/default decisions from “Build a reliable report-mode interface”, finite input from “Keep the final record when input ends”, and counters from “Number a handover queue”.",
+        "concepts": [
+          {
+            "title": "Put specific routes before broad ones",
+            "text": "send:rush:* also matches send:*. Put the rush pattern first when it must take the fast lane. A later, more specific pattern does not override an earlier match. The complete record stays text; the pattern does not remove its prefix."
+          },
+          {
+            "title": "Preserve complete records while routing",
+            "text": "By default, read -r removes spaces and tabs at the ends of a record, while keeping backslashes and internal spaces. These supplied records have no edge spaces or tabs, so quoted printf '%s\\n' \"$row\" writes each complete record unchanged, including percent signs. while read -r row || test -n \"$row\" keeps a final record without a line break. A blank row is one empty value."
+          },
+          {
+            "title": "Clear once, append per record",
+            "text": "Prepare each output once before reading the list, then append each routed record. Clearing inside the loop loses earlier work. Count the route actually taken. Decide explicitly which records are held and which are rejected, and keep processing when the task requires a complete audit."
+          }
+        ],
+        "example": ": > 'fast lane.txt'\n: > 'normal lane.txt'\nfast=0\nnormal=0\nheld=0\nwhile read -r row || test -n \"$row\"; do\n    case \"$row\" in\n        send:rush:*) printf '%s\\n' \"$row\" >> 'fast lane.txt'; fast=$((fast+1)) ;;\n        send:*|return:*) printf '%s\\n' \"$row\" >> 'normal lane.txt'; normal=$((normal+1)) ;;\n        ''|hold:*) held=$((held+1)) ;;\n        *) printf 'Unknown: %s\\n' \"$row\" >&2; exit 1 ;;\n    esac\ndone < 'museum queue.txt'\nprintf 'Fast: %s\\nNormal: %s\\nHeld: %s\\n' \"$fast\" \"$normal\" \"$held\"\n",
+        "inputs": "No arguments. museum queue.txt supplies three museum movements. The example writes fast lane.txt and normal lane.txt; keep.txt must stay intact. Like the assignment, these records have no leading or trailing spaces or tabs; this lets read -r preserve the supplied text. The supplied input filename differs from fast lane.txt and normal lane.txt.",
+        "try_change": "Move the send:*|return:* arm before send:rush:* and Run. The frame takes the normal lane because the first match wins. Move the rush arm back first to repair the result.",
+        "fixture": {
+          "name": "Museum queue example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/museum queue.txt": "send:rush:Frame\nsend:Crate\nhold:Label\n",
+            "/work/fast lane.txt": "old\n",
+            "/work/normal lane.txt": "old\n",
+            "/work/keep.txt": "intact\n"
+          },
+          "stdout": "Fast: 1\nNormal: 1\nHeld: 1\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/museum queue.txt": "send:rush:Frame\nsend:Crate\nhold:Label\n",
+            "/work/fast lane.txt": "send:rush:Frame\n",
+            "/work/normal lane.txt": "send:Crate\n",
+            "/work/keep.txt": "intact\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-case-publication",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-case-dispatch",
+      "topic": "Case dispatch",
+      "title": "Preview or publish a validated release plan",
+      "summary": "Separate whole-plan validation from file publication and ledger updates.",
+      "objective": "Accept exactly two arguments: preview|apply and a nonempty source filename. The supplied source filename differs from published.txt and ledger.txt. Otherwise print Usage: release preview|apply FILE only to standard error, with a line break, and return 2. If the source is absent, print Missing input: FILE to standard error with a line break and return 1. Neither failure may print normal output or change any file.\n\nRead the complete source, including an unterminated final record. ready:TEXT with nonempty TEXT enters the plan as the whole record, in input order. The supplied records have no leading or trailing spaces or tabs; spaces inside a record are text. Blank and hold: records are ignored. At the first other record, print Bad entry: RECORD to standard error with a line break and return 1; print no plan and leave every file unchanged. The plan joins accepted records with line breaks inside, with none at the end.\n\nA successful preview prints Plan: <PLAN> and a line break, changing no files. A successful apply replaces published.txt with exactly PLAN, appends Source: FILE and a line break to ledger.txt, and prints Applied: <PLAN> with a line break. This also applies to an empty plan. Return 0 with no error output; preserve the source and all other supplied files. Use the supplied filenames exactly.",
+      "difficulty": "Advanced",
+      "minutes": 42,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your script draft stays saved.",
+          "action": "Accept exactly two arguments: preview|apply and a nonempty source filename. The supplied source filename differs from published.txt and ledger.txt. Otherwise print Usage: release preview|apply FILE only to standard error, with a line break, and return 2. If the source is absent, print Missing input: FILE to standard error with a line break and return 1. Neither failure may print normal output or change any file.\n\nRead the complete source, including an unterminated final record. ready:TEXT with nonempty TEXT enters the plan as the whole record, in input order. The supplied records have no leading or trailing spaces or tabs; spaces inside a record are text. Blank and hold: records are ignored. At the first other record, print Bad entry: RECORD to standard error with a line break and return 1; print no plan and leave every file unchanged. The plan joins accepted records with line breaks inside, with none at the end.\n\nA successful preview prints Plan: <PLAN> and a line break, changing no files. A successful apply replaces published.txt with exactly PLAN, appends Source: FILE and a line break to ledger.txt, and prints Applied: <PLAN> with a line break. This also applies to an empty plan. Return 0 with no error output; preserve the source and all other supplied files. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Whole output, status and every final file matter.",
+          "action": "Optional input details show the supplied arguments, variables, files and expected results. Compare them with your current run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "A useful script handles the full task across independent inputs.",
+          "action": "Write or repair the complete script, Run it, inspect a differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Validate arguments, mode and source existence before opening a publication destination.",
+        "Prepare all accepted records first; capture the helper status immediately and exit on failure.",
+        "Only after success choose preview or apply; preserve internal line breaks and do not add a final one to the publication."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pattern-Matching.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Evaluator8 native simulation only; no host commands or filesystem. Portable case core with active * and ? and first-match ;; only. C/POSIX byte matching, not Unicode-character matching; no bracket expressions, extglob, ;& or ;;&, whole-case redirects/pipelines or list-valued selector/patterns. Quotes make pattern wildcards literal; selector expansion is one scalar without splitting or filename expansion. Other syntax/utilities retain the documented bounded subset. Inputs use supplied flat canonical virtual filenames without aliases or leading hyphens; matching text names is not a general real-filesystem alias safeguard. Original Bash manual Edition5.3/SHA rechecked2026-10-23; live GNU pages timed out and POSIX page returned403, so no fresh successful web retrieval is claimed. Capability uses separately retained fixed Bash5.3.9 C-locale observations. Authored lesson outcomes and alternatives pass the registered evaluator8 checks. The three-lesson native flow passed on Fedora on2026-10-24. Supplied record inputs have no leading/trailing spaces or tabs; default-IFS read -r trims those edges. Backslashes and internal spaces remain text. Custom-IFS whitespace-preserving input is not taught here.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Validate every record before any publication or ledger change.\ncandidate=$(cat \"$2\")\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview without publishing",
+            "args": [
+              "preview",
+              "release.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/release.txt": "ready:Map\nhold:Frame\nready:Audio\n"
+            },
+            "stdout": "Plan: <ready:Map\nready:Audio>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/release.txt": "ready:Map\nhold:Frame\nready:Audio\n"
+            }
+          },
+          {
+            "name": "Apply literal text from a spaced filename",
+            "args": [
+              "apply",
+              "late release.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/late release.txt": "ready:100% ready\nready:*.txt\n\nhold:gone\nready:path\\name\n"
+            },
+            "stdout": "Applied: <ready:100% ready\nready:*.txt\nready:path\\name>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/published.txt": "ready:100% ready\nready:*.txt\nready:path\\name",
+              "/work/ledger.txt": "Earlier: floor\nSource: late release.txt\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/late release.txt": "ready:100% ready\nready:*.txt\n\nhold:gone\nready:path\\name\n"
+            }
+          },
+          {
+            "name": "An empty preview preserves existing files",
+            "args": [
+              "preview",
+              "empty.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/empty.txt": ""
+            },
+            "stdout": "Plan: <>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/empty.txt": ""
+            }
+          },
+          {
+            "name": "Applying an all-held plan produces an empty file",
+            "args": [
+              "apply",
+              "held.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/held.txt": "hold:Frame\n\nhold:\n"
+            },
+            "stdout": "Applied: <>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/published.txt": "",
+              "/work/ledger.txt": "Earlier: floor\nSource: held.txt\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/held.txt": "hold:Frame\n\nhold:\n"
+            }
+          },
+          {
+            "name": "Reject an empty ready label after valid data",
+            "args": [
+              "apply",
+              "invalid.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/invalid.txt": "ready:Map\nready:\nready:Later\n"
+            },
+            "stdout": "",
+            "stderr": "Bad entry: ready:\n",
+            "status": 1,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/invalid.txt": "ready:Map\nready:\nready:Later\n"
+            }
+          },
+          {
+            "name": "Reject an unknown prefix before a preview",
+            "args": [
+              "preview",
+              "review.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/review.txt": "review:manual\nready:Map\n"
+            },
+            "stdout": "",
+            "stderr": "Bad entry: review:manual\n",
+            "status": 1,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/review.txt": "review:manual\nready:Map\n"
+            }
+          },
+          {
+            "name": "Missing source preserves old publication",
+            "args": [
+              "apply",
+              "missing.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n"
+            },
+            "stdout": "",
+            "stderr": "Missing input: missing.txt\n",
+            "status": 1,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n"
+            }
+          },
+          {
+            "name": "Unknown mode is rejected",
+            "args": [
+              "remove",
+              "source.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/source.txt": "ready:Map\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: release preview|apply FILE\n",
+            "status": 2,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/source.txt": "ready:Map\n"
+            }
+          },
+          {
+            "name": "Extra arguments are rejected",
+            "args": [
+              "apply",
+              "source.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/source.txt": "ready:Map\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: release preview|apply FILE\n",
+            "status": 2,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/source.txt": "ready:Map\n"
+            }
+          },
+          {
+            "name": "Missing source argument",
+            "args": [
+              "apply"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: release preview|apply FILE\n",
+            "status": 2,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n"
+            }
+          },
+          {
+            "name": "Explicit empty source name",
+            "args": [
+              "preview",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: release preview|apply FILE\n",
+            "status": 2,
+            "after": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n"
+            }
+          },
+          {
+            "name": "Quoted wildcard-looking filename and final record",
+            "args": [
+              "apply",
+              "*.manifest"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/published.txt": "old publication\n",
+              "/work/ledger.txt": "Earlier: floor\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/*.manifest": "ready:Tail"
+            },
+            "stdout": "Applied: <ready:Tail>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/published.txt": "ready:Tail",
+              "/work/ledger.txt": "Earlier: floor\nSource: *.manifest\n",
+              "/work/sentinel.txt": "keep exactly\n",
+              "/work/other.manifest": "other input\n",
+              "/work/*.manifest": "ready:Tail"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 2 || test -z \"$2\"; then\n    printf 'Usage: release preview|apply FILE\\n' >&2\n    exit 2\nfi\ncase \"$1\" in\n    preview|apply) : ;;\n    *) printf 'Usage: release preview|apply FILE\\n' >&2; exit 2 ;;\nesac\nif test -f \"$2\"; then :; else\n    printf 'Missing input: %s\\n' \"$2\" >&2\n    exit 1\nfi\nbuild_plan() {\n    while read -r record || test -n \"$record\"; do\n        case \"$record\" in\n            ''|hold:*) : ;;\n            ready:?*) printf '%s\\n' \"$record\" ;;\n            *) printf 'Bad entry: %s\\n' \"$record\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ncandidate=$(build_plan \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$1\" in\n    preview) printf 'Plan: <%s>\\n' \"$candidate\" ;;\n    apply)\n        printf '%s' \"$candidate\" > published.txt\n        printf 'Source: %s\\n' \"$2\" >> ledger.txt\n        printf 'Applied: <%s>\\n' \"$candidate\"\n        ;;\nesac\n"
+      ],
+      "prerequisites": [
+        "shell-case-routing",
+        "shell-capture-decision",
+        "shell-scope-capstone"
+      ],
+      "retry_guidance": "Use the error path to test preservation. A partial candidate must not reach either preview or publication; a successful apply must append rather than replace the ledger.",
+      "explanation": "Preparation may print partial text before finding an error, so its status must be checked before any preview or file change. A successful candidate can be reviewed or published, and the ledger append is separate from replacing the publication. Behavior grading accepts supported alternatives, including variable buffering without capture or conditional dispatch without case.",
+      "teaching": {
+        "prerequisite_note": "Use “Route a prioritized work list without losing records” and the captured-status checks from “Investigate findings without losing their status”. “Repair a review that damages its inputs” explains function variables and early return.",
+        "concepts": [
+          {
+            "title": "Validate the whole plan before publishing",
+            "text": "A preview must not change publication files. Prepare a candidate in variables or captured text, and finish validation before replacing a file or appending the ledger. If a later record is invalid, earlier prepared text must not become a partial publication."
+          },
+          {
+            "title": "Capture output and status separately",
+            "text": "text=$(prepare \"$2\") stores printed text. Read status=$? immediately: it tells you whether preparation succeeded. A diagnostic is not the status, and a later printf would replace $?. An ordinary helper return 1 is a recoverable validation result here. Exit before printing or saving a failed candidate."
+          },
+          {
+            "title": "Use a nonempty prefix match",
+            "text": "ok:?* requires at least one byte after ok:. The final * allows the remaining text. An empty label falls through to the error arm. The wait:* arm skips held items. Empty lines have their own '' pattern. These prefixes belong to the example; the assignment uses ready: and hold:."
+          },
+          {
+            "title": "Choose review or save after validation",
+            "text": "The example reviews the captured text without writes. The save arm replaces the docket and appends one ledger line. Capture removes line breaks at the end, keeping spaces and line breaks inside; the saved docket therefore has no final line break. Restoring the review action restores a read-only operation."
+          }
+        ],
+        "example": "mode=$1\nprepare() {\n    while read -r item || test -n \"$item\"; do\n        case \"$item\" in\n            ''|wait:*) : ;;\n            ok:?*) printf '%s\\n' \"$item\" ;;\n            *) printf 'Bad loan: %s\\n' \"$item\" >&2; return 1 ;;\n        esac\n    done < \"$1\"\n    return 0\n}\ntext=$(prepare \"$2\")\nstatus=$?\nif test \"$status\" -ne 0; then exit \"$status\"; fi\ncase \"$mode\" in\n    review) printf 'Review <%s>\\n' \"$text\" ;;\n    save)\n        printf '%s' \"$text\" > docket.txt\n        printf 'Saved from %s\\n' \"$2\" >> 'loan ledger.txt'\n        printf 'Saved <%s>\\n' \"$text\"\n        ;;\n    *) printf 'Unknown action\\n' >&2; exit 2 ;;\nesac\n",
+        "inputs": "Arguments are review and requests.txt. The museum example has separate ok:/wait: records, a docket and loan ledger. Each Run starts with its own supplied file map. The records have no leading or trailing spaces or tabs: read -r trims those edges by default, while retaining backslashes and internal spaces. The supplied input filename differs from docket.txt and loan ledger.txt.",
+        "try_change": "Change only mode=$1 to mode=save and Run. Inspect the replaced docket and appended loan ledger. Restore mode=$1 to return to the read-only review.",
+        "fixture": {
+          "name": "Museum publication example",
+          "args": [
+            "review",
+            "requests.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/requests.txt": "ok:Guide\nwait:Map\nok:Stool\n",
+            "/work/docket.txt": "old docket\n",
+            "/work/loan ledger.txt": "Past\n",
+            "/work/keep.txt": "intact\n"
+          },
+          "stdout": "Review <ok:Guide\nok:Stool>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/requests.txt": "ok:Guide\nwait:Map\nok:Stool\n",
+            "/work/docket.txt": "old docket\n",
+            "/work/loan ledger.txt": "Past\n",
+            "/work/keep.txt": "intact\n"
+          }
+        }
+      }
+    }
+  ]
+}
