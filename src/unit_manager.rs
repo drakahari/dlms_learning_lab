@@ -103,10 +103,10 @@ fn text<'de, D: Deserializer<'de>, const N: usize>(d: D) -> std::result::Result<
     }
     d.deserialize_str(Text::<N>)
 }
-fn text128<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<String, D::Error> {
+pub(crate) fn text128<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<String, D::Error> {
     text::<D, 128>(d)
 }
-fn text256<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<String, D::Error> {
+pub(crate) fn text256<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<String, D::Error> {
     text::<D, 256>(d)
 }
 fn source<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<String, D::Error> {
@@ -146,7 +146,9 @@ fn map<'de, D: Deserializer<'de>, V: Deserialize<'de>, const N: usize>(
     }
     d.deserialize_map(Map::<V, N>(std::marker::PhantomData))
 }
-fn names<'de, D: Deserializer<'de>>(d: D) -> std::result::Result<BTreeSet<String>, D::Error> {
+pub(crate) fn names<'de, D: Deserializer<'de>>(
+    d: D,
+) -> std::result::Result<BTreeSet<String>, D::Error> {
     struct Names;
     impl<'de> Visitor<'de> for Names {
         type Value = BTreeSet<String>;
@@ -186,12 +188,12 @@ impl<'de> Deserialize<'de> for Config {
         config(d).map(Self)
     }
 }
-fn documents<'de, D: Deserializer<'de>>(
+pub(crate) fn documents<'de, D: Deserializer<'de>>(
     d: D,
 ) -> std::result::Result<BTreeMap<String, String>, D::Error> {
     map::<D, Source, MAX_UNITS>(d).map(|m| m.into_iter().map(|(k, v)| (k, v.0)).collect())
 }
-fn configurations<'de, D: Deserializer<'de>>(
+pub(crate) fn configurations<'de, D: Deserializer<'de>>(
     d: D,
 ) -> std::result::Result<BTreeMap<String, String>, D::Error> {
     map::<D, Config, MAX_CONFIGS>(d).map(|m| m.into_iter().map(|(k, v)| (k, v.0)).collect())
@@ -952,6 +954,24 @@ fn precedes(before: &str, after: &str, edges: &Edges) -> bool {
     }
     false
 }
+/// Ordering edges induced by the jobs of one freshly derived start transaction.
+/// Constructed only by this module; neither serialized reports nor layer positions
+/// can manufacture an ordering path.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct StartOrdering {
+    nodes: BTreeSet<String>,
+    edges: Edges,
+}
+impl StartOrdering {
+    pub fn contains(&self, unit: &str) -> bool {
+        self.nodes.contains(unit)
+    }
+    pub fn precedes(&self, before: &str, after: &str) -> bool {
+        self.nodes.contains(before)
+            && self.nodes.contains(after)
+            && precedes(before, after, &self.edges)
+    }
+}
 fn known_report(requested: Option<String>, layers: Vec<Vec<String>>, jobs: Vec<Job>) -> Report {
     Report {
         requested,
@@ -1318,8 +1338,11 @@ impl State {
             .map(|(id, a)| (id.clone(), a.value.0.clone()))
             .collect()
     }
-    fn start(&mut self, id: &str) -> Result<Report> {
-        let definitions = self.parse_sources(&self.loaded)?;
+    fn start_ordering(
+        &self,
+        id: &str,
+        definitions: &BTreeMap<String, Definition>,
+    ) -> StartOrdering {
         let mut nodes = BTreeSet::new();
         let mut pending = vec![id.to_owned()];
         while let Some(unit) = pending.pop() {
@@ -1333,11 +1356,23 @@ impl State {
         }
         // A path through an unstarted unit cannot order this transaction's jobs.
         // Use the same induced graph for both scheduling and failed-Requires gates.
-        let order = edges(&definitions, &self.boot_links)
+        let order = edges(definitions, &self.boot_links)
             .into_iter()
             .filter(|(before, after)| nodes.contains(before) && nodes.contains(after))
             .collect();
-        let schedule = layers(&nodes, &order)?;
+        StartOrdering {
+            nodes,
+            edges: order,
+        }
+    }
+    fn start(&mut self, id: &str) -> Result<Report> {
+        self.start_inspected(id).map(|(report, _)| report)
+    }
+    fn start_inspected(&mut self, id: &str) -> Result<(Report, StartOrdering)> {
+        let definitions = self.parse_sources(&self.loaded)?;
+        let ordering = self.start_ordering(id, &definitions);
+        let order = &ordering.edges;
+        let schedule = layers(&ordering.nodes, order)?;
         let mut completed = BTreeMap::<String, JobResult>::new();
         let mut jobs = vec![];
         for wave in &schedule {
@@ -1368,7 +1403,7 @@ impl State {
                     continue;
                 }
                 if let Some(required) = d.requires.iter().find(|r| {
-                    precedes(r, unit, &order) && completed.get(*r).is_some_and(|j| !j.succeeded())
+                    precedes(r, unit, order) && completed.get(*r).is_some_and(|j| !j.succeeded())
                 }) {
                     effects.push((
                         unit.clone(),
@@ -1446,7 +1481,7 @@ impl State {
                 });
             }
         }
-        Ok(known_report(Some(id.into()), schedule, jobs))
+        Ok((known_report(Some(id.into()), schedule, jobs), ordering))
     }
     fn advance(&mut self) -> Result<Report> {
         let inputs = self.input_values();
@@ -1610,6 +1645,12 @@ impl State {
         Ok(report)
     }
     pub fn fresh_session(&self) -> Result<(Self, Report)> {
+        self.fresh_session_inspected()
+            .map(|(state, report, _)| (state, report))
+    }
+    /// Same fresh session as `fresh_session`, plus the exact induced graph used
+    /// for its jobs. The caller still initializes simple programs explicitly.
+    pub fn fresh_session_inspected(&self) -> Result<(Self, Report, StartOrdering)> {
         self.validate()?;
         self.parse_sources(&self.documents)?;
         let mut next = self.clone();
@@ -1617,9 +1658,37 @@ impl State {
         next.artifacts.clear();
         next.loaded = next.documents.clone();
         let target = next.default_target.clone();
-        let report = next.start(&target)?;
+        let (report, ordering) = next.start_inspected(&target)?;
         next.validate()?;
-        Ok((next, report))
+        Ok((next, report, ordering))
+    }
+    /// Save all bounded raw editor slots atomically, without parsing, reloading
+    /// or starting them. Malformed text remains useful learner work.
+    pub fn replace_saved(
+        &mut self,
+        documents: &BTreeMap<String, String>,
+        configuration: &BTreeMap<String, String>,
+    ) -> Result<()> {
+        self.validate()?;
+        if documents.len() != self.inventory.units.len()
+            || configuration.len() != self.inventory.config_paths.len()
+            || documents
+                .iter()
+                .any(|(id, text)| !self.inventory.units.contains(id) || text.len() > MAX_UNIT_BYTES)
+            || configuration.iter().any(|(id, text)| {
+                !self.inventory.config_paths.contains(id) || text.len() > MAX_CONFIG_BYTES
+            })
+        {
+            return Err(invalid(
+                "Editor slots differ from the fixed inventory or exceed text limits",
+            ));
+        }
+        let mut next = self.clone();
+        next.documents.clone_from(documents);
+        next.configuration.clone_from(configuration);
+        next.validate()?;
+        *self = next;
+        Ok(())
     }
     /// Inspect a path in the complete declared graph, including inactive units.
     /// This is not a guarantee that a particular start transaction includes that

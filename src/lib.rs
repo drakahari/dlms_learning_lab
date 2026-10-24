@@ -82,3 +82,5 @@ pub mod unit_manager;
 
 pub mod ospf_teaching;
 pub mod ospf_workspace;
+pub mod unit_manager_workspace;
+pub mod unit_manager_teaching;

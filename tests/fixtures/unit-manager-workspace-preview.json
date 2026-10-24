@@ -1,0 +1,700 @@
+{
+  "schema_version": 1,
+  "development_only": true,
+  "objective": "Repair the virtual application to use prepared data and port8088. Keep the observer at6060, preserve the named target/configuration slots, and make both run now and in a fresh work.target session. This fixture is not bundled curriculum.",
+  "definition": {
+    "initial": {
+      "schema_version": 1,
+      "inventory": {
+        "schema_version": 1,
+        "fixture": "work-manager-example",
+        "units": [
+          "work-application.service",
+          "work-observer.service",
+          "work-prepare.service",
+          "work-spare.target",
+          "work.target"
+        ],
+        "config_paths": [
+          "/etc/work/application.conf",
+          "/etc/work/observer.conf",
+          "/etc/work/prepare.conf"
+        ],
+        "artifact_ids": [
+          "work-prepared"
+        ],
+        "programs": {
+          "/sim/bin/work-prepare": {
+            "kind": "ValueTask",
+            "config": "/etc/work/prepare.conf",
+            "key": "VALUE",
+            "artifact": "work-prepared",
+            "prerequisite": null
+          },
+          "/sim/bin/work-application": {
+            "kind": "PortDaemon",
+            "config": "/etc/work/application.conf",
+            "key": "PORT",
+            "prerequisite": {
+              "artifact": "work-prepared",
+              "value": "ready"
+            }
+          },
+          "/sim/bin/work-observer": {
+            "kind": "PortDaemon",
+            "config": "/etc/work/observer.conf",
+            "key": "PORT",
+            "prerequisite": null
+          }
+        }
+      },
+      "documents": {
+        "work-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/work-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=work.target\n",
+        "work-application.service": "[Unit]\nDescription=Virtual application\nRequires=work-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/work-application\n[Install]\nWantedBy=work.target\n",
+        "work-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/work-observer\n[Install]\nWantedBy=work.target\n",
+        "work.target": "[Unit]\nDescription=Selected practice target\n",
+        "work-spare.target": "[Unit]\nDescription=Separate spare target\n"
+      },
+      "configuration": {
+        "/etc/work/prepare.conf": "VALUE=ready\n",
+        "/etc/work/application.conf": "PORT=not-a-number\n",
+        "/etc/work/observer.conf": "PORT=6060\n"
+      },
+      "loaded": {
+        "work-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/work-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=work.target\n",
+        "work-application.service": "[Unit]\nDescription=Virtual application\nRequires=work-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/work-application\n[Install]\nWantedBy=work.target\n",
+        "work-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/work-observer\n[Install]\nWantedBy=work.target\n",
+        "work.target": "[Unit]\nDescription=Selected practice target\n",
+        "work-spare.target": "[Unit]\nDescription=Separate spare target\n"
+      },
+      "runtime": {},
+      "artifacts": {},
+      "boot_links": {
+        "work.target": [
+          "work-observer.service"
+        ]
+      },
+      "default_target": "work-spare.target"
+    },
+    "requirements": [
+      {
+        "kind": "SavedConfigurationValid"
+      },
+      {
+        "kind": "LoadedCurrent",
+        "unit": "work-application.service"
+      },
+      {
+        "kind": "Runtime",
+        "unit": "work-application.service",
+        "phase": "Running",
+        "port": 8088,
+        "value": null
+      },
+      {
+        "kind": "ExecutionCurrent",
+        "unit": "work-application.service"
+      },
+      {
+        "kind": "Runtime",
+        "unit": "work-observer.service",
+        "phase": "Running",
+        "port": 6060,
+        "value": null
+      },
+      {
+        "kind": "ExecutionCurrent",
+        "unit": "work-observer.service"
+      },
+      {
+        "kind": "Artifact",
+        "artifact": "work-prepared",
+        "producer": "work-prepare.service",
+        "value": "ready",
+        "current_inputs": true
+      },
+      {
+        "kind": "InstallLink",
+        "target": "work.target",
+        "unit": "work-application.service",
+        "present": true
+      },
+      {
+        "kind": "DefaultTarget",
+        "target": "work.target"
+      },
+      {
+        "kind": "Dependency",
+        "unit": "work-application.service",
+        "dependency": "Requires",
+        "target": "work-prepare.service",
+        "present": true
+      }
+    ],
+    "fresh": {
+      "requirements": [
+        {
+          "kind": "Runtime",
+          "unit": "work-application.service",
+          "phase": "Running",
+          "port": 8088,
+          "value": null
+        },
+        {
+          "kind": "ExecutionCurrent",
+          "unit": "work-application.service"
+        },
+        {
+          "kind": "Runtime",
+          "unit": "work-observer.service",
+          "phase": "Running",
+          "port": 6060,
+          "value": null
+        },
+        {
+          "kind": "ExecutionCurrent",
+          "unit": "work-observer.service"
+        },
+        {
+          "kind": "Artifact",
+          "artifact": "work-prepared",
+          "producer": "work-prepare.service",
+          "value": "ready",
+          "current_inputs": true
+        }
+      ],
+      "started": [
+        "work-application.service",
+        "work-observer.service",
+        "work-prepare.service",
+        "work.target"
+      ],
+      "ordering": [
+        {
+          "before": "work-prepare.service",
+          "after": "work-application.service"
+        }
+      ]
+    },
+    "preservation": {
+      "unit_documents": [
+        "work-observer.service",
+        "work-spare.target",
+        "work.target"
+      ],
+      "configuration": [
+        "/etc/work/observer.conf",
+        "/etc/work/prepare.conf"
+      ],
+      "preserve_other_boot_links": true,
+      "editable_boot_links": [
+        {
+          "target": "work.target",
+          "unit": "work-application.service"
+        }
+      ],
+      "default_target": false
+    }
+  },
+  "lesson": {
+    "prerequisite_note": "You can edit text and distinguish saved work from running state. This separate example introduces unit dependencies and future-session enablement.",
+    "concepts": [
+      {
+        "title": "Saved text, manager definitions and running programs",
+        "text": "Saving changes the editor file. Manager reload reads unit definitions; it does not restart a program. Application configuration is consumed when that fictional program initializes."
+      },
+      {
+        "title": "Bring it in, then put it in order",
+        "text": "Requires asks for another unit to start. After says to wait for its start job. A successful prepare oneshot supplies data; starting a simple service still needs its separate simulated initialization event."
+      },
+      {
+        "title": "Now and next session are separate",
+        "text": "Start affects current runtime. Enable adds a future target link; selecting the default chooses which target a fresh-session test starts. None of these actions changes your real machine."
+      }
+    ],
+    "example_description": "Repair the sample application to consume prepared sample data at port7077. Keep its observer at5050 and the existing target/configuration intact; enable it for sample.target and verify both current and fresh-session behavior. Interface ports here are stored metadata, not real listeners.",
+    "definition": {
+      "initial": {
+        "schema_version": 1,
+        "inventory": {
+          "schema_version": 1,
+          "fixture": "sample-manager-example",
+          "units": [
+            "sample-application.service",
+            "sample-observer.service",
+            "sample-prepare.service",
+            "sample-spare.target",
+            "sample.target"
+          ],
+          "config_paths": [
+            "/etc/sample/application.conf",
+            "/etc/sample/observer.conf",
+            "/etc/sample/prepare.conf"
+          ],
+          "artifact_ids": [
+            "sample-prepared"
+          ],
+          "programs": {
+            "/sim/bin/sample-prepare": {
+              "kind": "ValueTask",
+              "config": "/etc/sample/prepare.conf",
+              "key": "VALUE",
+              "artifact": "sample-prepared",
+              "prerequisite": null
+            },
+            "/sim/bin/sample-application": {
+              "kind": "PortDaemon",
+              "config": "/etc/sample/application.conf",
+              "key": "PORT",
+              "prerequisite": {
+                "artifact": "sample-prepared",
+                "value": "sample-ready"
+              }
+            },
+            "/sim/bin/sample-observer": {
+              "kind": "PortDaemon",
+              "config": "/etc/sample/observer.conf",
+              "key": "PORT",
+              "prerequisite": null
+            }
+          }
+        },
+        "documents": {
+          "sample-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/sample-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=sample.target\n",
+          "sample-application.service": "[Unit]\nDescription=Virtual application\nRequires=sample-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/sample-application\n[Install]\nWantedBy=sample.target\n",
+          "sample-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/sample-observer\n[Install]\nWantedBy=sample.target\n",
+          "sample.target": "[Unit]\nDescription=Selected practice target\n",
+          "sample-spare.target": "[Unit]\nDescription=Separate spare target\n"
+        },
+        "configuration": {
+          "/etc/sample/prepare.conf": "VALUE=sample-ready\n",
+          "/etc/sample/application.conf": "PORT=not-a-number\n",
+          "/etc/sample/observer.conf": "PORT=5050\n"
+        },
+        "loaded": {
+          "sample-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/sample-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=sample.target\n",
+          "sample-application.service": "[Unit]\nDescription=Virtual application\nRequires=sample-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/sample-application\n[Install]\nWantedBy=sample.target\n",
+          "sample-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/sample-observer\n[Install]\nWantedBy=sample.target\n",
+          "sample.target": "[Unit]\nDescription=Selected practice target\n",
+          "sample-spare.target": "[Unit]\nDescription=Separate spare target\n"
+        },
+        "runtime": {},
+        "artifacts": {},
+        "boot_links": {
+          "sample.target": [
+            "sample-observer.service"
+          ]
+        },
+        "default_target": "sample-spare.target"
+      },
+      "requirements": [
+        {
+          "kind": "SavedConfigurationValid"
+        },
+        {
+          "kind": "LoadedCurrent",
+          "unit": "sample-application.service"
+        },
+        {
+          "kind": "Runtime",
+          "unit": "sample-application.service",
+          "phase": "Running",
+          "port": 7077,
+          "value": null
+        },
+        {
+          "kind": "ExecutionCurrent",
+          "unit": "sample-application.service"
+        },
+        {
+          "kind": "Runtime",
+          "unit": "sample-observer.service",
+          "phase": "Running",
+          "port": 5050,
+          "value": null
+        },
+        {
+          "kind": "ExecutionCurrent",
+          "unit": "sample-observer.service"
+        },
+        {
+          "kind": "Artifact",
+          "artifact": "sample-prepared",
+          "producer": "sample-prepare.service",
+          "value": "sample-ready",
+          "current_inputs": true
+        },
+        {
+          "kind": "InstallLink",
+          "target": "sample.target",
+          "unit": "sample-application.service",
+          "present": true
+        },
+        {
+          "kind": "DefaultTarget",
+          "target": "sample.target"
+        },
+        {
+          "kind": "Dependency",
+          "unit": "sample-application.service",
+          "dependency": "Requires",
+          "target": "sample-prepare.service",
+          "present": true
+        }
+      ],
+      "fresh": {
+        "requirements": [
+          {
+            "kind": "Runtime",
+            "unit": "sample-application.service",
+            "phase": "Running",
+            "port": 7077,
+            "value": null
+          },
+          {
+            "kind": "ExecutionCurrent",
+            "unit": "sample-application.service"
+          },
+          {
+            "kind": "Runtime",
+            "unit": "sample-observer.service",
+            "phase": "Running",
+            "port": 5050,
+            "value": null
+          },
+          {
+            "kind": "ExecutionCurrent",
+            "unit": "sample-observer.service"
+          },
+          {
+            "kind": "Artifact",
+            "artifact": "sample-prepared",
+            "producer": "sample-prepare.service",
+            "value": "sample-ready",
+            "current_inputs": true
+          }
+        ],
+        "started": [
+          "sample-application.service",
+          "sample-observer.service",
+          "sample-prepare.service",
+          "sample.target"
+        ],
+        "ordering": [
+          {
+            "before": "sample-prepare.service",
+            "after": "sample-application.service"
+          }
+        ]
+      },
+      "preservation": {
+        "unit_documents": [
+          "sample-observer.service",
+          "sample-spare.target",
+          "sample.target"
+        ],
+        "configuration": [
+          "/etc/sample/observer.conf",
+          "/etc/sample/prepare.conf"
+        ],
+        "preserve_other_boot_links": true,
+        "editable_boot_links": [
+          {
+            "target": "sample.target",
+            "unit": "sample-application.service"
+          }
+        ],
+        "default_target": false
+      }
+    },
+    "solution": [
+      {
+        "kind": "Save",
+        "draft": {
+          "version": 1,
+          "documents": {
+            "sample-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/sample-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=sample.target\n",
+            "sample-application.service": "[Unit]\nDescription=Virtual application\nRequires=sample-prepare.service\nAfter=sample-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/sample-application\n[Install]\nWantedBy=sample.target\n",
+            "sample-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/sample-observer\n[Install]\nWantedBy=sample.target\n",
+            "sample.target": "[Unit]\nDescription=Selected practice target\n",
+            "sample-spare.target": "[Unit]\nDescription=Separate spare target\n"
+          },
+          "configuration": {
+            "/etc/sample/prepare.conf": "VALUE=sample-ready\n",
+            "/etc/sample/application.conf": "PORT=7077\n",
+            "/etc/sample/observer.conf": "PORT=5050\n"
+          },
+          "selected_unit": "sample-application.service",
+          "selected_config": "/etc/sample/application.conf"
+        }
+      },
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "DaemonReload"
+        }
+      },
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "Enable",
+          "unit": "sample-application.service"
+        }
+      },
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "SetDefault",
+          "target": "sample.target"
+        }
+      },
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "Start",
+          "unit": "sample.target"
+        }
+      },
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "AdvancePrograms"
+        }
+      }
+    ],
+    "example_actions": [
+      {
+        "title": "Save edited source and input",
+        "explanation": "Save this different example: add explicit ordering to the application and use port7077. Saving changes raw text only.",
+        "action": {
+          "kind": "Save",
+          "draft": {
+            "version": 1,
+            "documents": {
+              "sample-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/sample-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=sample.target\n",
+              "sample-application.service": "[Unit]\nDescription=Virtual application\nRequires=sample-prepare.service\nAfter=sample-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/sample-application\n[Install]\nWantedBy=sample.target\n",
+              "sample-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/sample-observer\n[Install]\nWantedBy=sample.target\n",
+              "sample.target": "[Unit]\nDescription=Selected practice target\n",
+              "sample-spare.target": "[Unit]\nDescription=Separate spare target\n"
+            },
+            "configuration": {
+              "/etc/sample/prepare.conf": "VALUE=sample-ready\n",
+              "/etc/sample/application.conf": "PORT=7077\n",
+              "/etc/sample/observer.conf": "PORT=5050\n"
+            },
+            "selected_unit": "sample-application.service",
+            "selected_config": "/etc/sample/application.conf"
+          }
+        }
+      },
+      {
+        "title": "Reload manager definitions",
+        "explanation": "Load the saved unit definitions. Loaded text matching saved text shows coherence, not evidence of a particular action history.",
+        "action": {
+          "kind": "Manager",
+          "action": {
+            "kind": "DaemonReload"
+          }
+        }
+      },
+      {
+        "title": "Enable for a future session",
+        "explanation": "Add the example application to its target. Enable also performs an implicit manager reload here, but does not start a program.",
+        "action": {
+          "kind": "Manager",
+          "action": {
+            "kind": "Enable",
+            "unit": "sample-application.service"
+          }
+        }
+      },
+      {
+        "title": "Select the future default",
+        "explanation": "Choose sample.target for a future simulated session. The current running set stays unchanged.",
+        "action": {
+          "kind": "Manager",
+          "action": {
+            "kind": "SetDefault",
+            "target": "sample.target"
+          }
+        }
+      },
+      {
+        "title": "Start the practice target",
+        "explanation": "Start the target and its installed dependencies. Requires pulls in the prepare task; After supplies the separate ordering guarantee.",
+        "action": {
+          "kind": "Manager",
+          "action": {
+            "kind": "Start",
+            "unit": "sample.target"
+          }
+        }
+      },
+      {
+        "title": "Initialize dispatched programs",
+        "explanation": "Complete the simulator's pending simple-program initialization event. A successful simple start job alone was not readiness.",
+        "action": {
+          "kind": "Manager",
+          "action": {
+            "kind": "AdvancePrograms"
+          }
+        }
+      }
+    ],
+    "try_change": "After the example passes, Stop sample-application.service. It is still enabled for a fresh session, but no longer running now. Start it and initialize pending programs to repair.",
+    "try_actions": [
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "Stop",
+          "unit": "sample-application.service"
+        }
+      }
+    ],
+    "try_outcomes": [
+      {
+        "kind": "Runtime",
+        "unit": "sample-application.service",
+        "phase": "Inactive",
+        "port": null,
+        "value": null
+      }
+    ],
+    "repair": [
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "Start",
+          "unit": "sample-application.service"
+        }
+      },
+      {
+        "kind": "Manager",
+        "action": {
+          "kind": "AdvancePrograms"
+        }
+      }
+    ]
+  },
+  "solution": [
+    {
+      "kind": "Save",
+      "draft": {
+        "version": 1,
+        "documents": {
+          "work-prepare.service": "[Unit]\nDescription=Prepare supplied data\n[Service]\nType=oneshot\nExecStart=/sim/bin/work-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=work.target\n",
+          "work-application.service": "[Unit]\nDescription=Virtual application\nRequires=work-prepare.service\nAfter=work-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/work-application\n[Install]\nWantedBy=work.target\n",
+          "work-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/work-observer\n[Install]\nWantedBy=work.target\n",
+          "work.target": "[Unit]\nDescription=Selected practice target\n",
+          "work-spare.target": "[Unit]\nDescription=Separate spare target\n"
+        },
+        "configuration": {
+          "/etc/work/prepare.conf": "VALUE=ready\n",
+          "/etc/work/application.conf": "PORT=8088\n",
+          "/etc/work/observer.conf": "PORT=6060\n"
+        },
+        "selected_unit": "work-application.service",
+        "selected_config": "/etc/work/application.conf"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "DaemonReload"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "Enable",
+        "unit": "work-application.service"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "SetDefault",
+        "target": "work.target"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "Start",
+        "unit": "work.target"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "AdvancePrograms"
+      }
+    }
+  ],
+  "alternate": [
+    {
+      "kind": "Save",
+      "draft": {
+        "version": 1,
+        "documents": {
+          "work-prepare.service": "[Unit]\nDescription=Prepare supplied data\nBefore=work-application.service\n[Service]\nType=oneshot\nExecStart=/sim/bin/work-prepare\nRemainAfterExit=yes\n[Install]\nWantedBy=work.target\n",
+          "work-application.service": "[Unit]\nDescription=Virtual application\nRequires=work-prepare.service\n[Service]\nType=simple\nExecStart=/sim/bin/work-application\n[Install]\nWantedBy=work.target\n",
+          "work-observer.service": "[Unit]\nDescription=Unaffected observer\n[Service]\nType=simple\nExecStart=/sim/bin/work-observer\n[Install]\nWantedBy=work.target\n",
+          "work.target": "[Unit]\nDescription=Selected practice target\n",
+          "work-spare.target": "[Unit]\nDescription=Separate spare target\n"
+        },
+        "configuration": {
+          "/etc/work/prepare.conf": "VALUE=ready\n",
+          "/etc/work/application.conf": "PORT=8088\n",
+          "/etc/work/observer.conf": "PORT=6060\n"
+        },
+        "selected_unit": "work-application.service",
+        "selected_config": "/etc/work/application.conf"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "DaemonReload"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "Enable",
+        "unit": "work-application.service"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "SetDefault",
+        "target": "work.target"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "Start",
+        "unit": "work.target"
+      }
+    },
+    {
+      "kind": "Manager",
+      "action": {
+        "kind": "AdvancePrograms"
+      }
+    }
+  ],
+  "names": {
+    "app": "work-application.service",
+    "prep": "work-prepare.service",
+    "observer": "work-observer.service",
+    "target": "work.target",
+    "spare": "work-spare.target",
+    "app_config": "/etc/work/application.conf",
+    "prepare_config": "/etc/work/prepare.conf",
+    "artifact": "work-prepared",
+    "port": 8088
+  }
+}
