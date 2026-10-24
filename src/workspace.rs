@@ -72,6 +72,10 @@ pub struct WorkspaceData {
     pub switching_draft: Option<crate::switching_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub switching_learning: Option<crate::switching_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mac_draft: Option<crate::mac_learning_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub mac_learning: Option<crate::mac_learning_teaching::Learning>,
     pub command: String,
     pub service_port: Option<String>,
     pub dns_address: Option<String>,
@@ -105,6 +109,8 @@ impl WorkspaceData {
                 .is_none_or(|l| l.valid())
             && self.acl_draft.as_ref().is_none_or(|d| d.valid())
             && self.acl_learning.as_ref().is_none_or(|l| l.valid())
+            && self.mac_draft.as_ref().is_none_or(|d| d.valid())
+            && self.mac_learning.as_ref().is_none_or(|l| l.valid())
             && self.switching_draft.as_ref().is_none_or(|d| d.valid())
             && self.switching_learning.as_ref().is_none_or(|l| l.valid())
             && self.script_learning.as_ref().is_none_or(|l| l.valid())
@@ -225,6 +231,13 @@ pub fn prepare(a: &mut Attempt) {
         && w.dns_draft.is_none()
     {
         w.dns_draft = Some(crate::dns_workspace::Draft::new(server));
+    }
+    if let State::MacLearning { simulation } = &a.state
+        && w.mac_draft.is_none()
+    {
+        w.mac_draft = Some(
+            crate::mac_learning_workspace::Draft::new(simulation).expect("validated MAC state"),
+        );
     }
     if let State::Switching { fabric } = &a.state
         && w.switching_draft.is_none()

@@ -60,6 +60,8 @@ pub struct Scenario {
     pub dns_teaching: Option<crate::dns_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub mac_teaching: Option<crate::mac_learning_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -185,6 +187,47 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 .any(|a| !a.cidr.is_empty() && engine::cidr(&a.cidr).is_none())
         {
             return Err("Invalid initial subnet allocation".into());
+        }
+        if let State::MacLearning { simulation } = &s.initial {
+            let Goal::MacLearning {
+                initial,
+                requirements,
+            } = &s.goal
+            else {
+                return Err("MAC objectives need the matching state".into());
+            };
+            let Some(lesson) = &s.mac_teaching else {
+                return Err("MAC activities need a separate introduction and practice".into());
+            };
+            if initial != simulation
+                || !crate::mac_learning_workspace::valid_requirements(requirements, initial)
+            {
+                return Err("Invalid or unpinned MAC objectives".into());
+            }
+            lesson.validate()?;
+            if s.guide.iter().any(|step| !step.commands.is_empty()) {
+                return Err(
+                    "MAC walkthroughs use native-action prose, not terminal commands".into(),
+                );
+            }
+            if simulation
+                .fabric()
+                .hosts
+                .keys()
+                .any(|h| lesson.fixture.fabric().hosts.contains_key(h))
+                || simulation.fabric().hosts.keys().any(|h| {
+                    lesson
+                        .fixture
+                        .fabric()
+                        .hosts
+                        .keys()
+                        .any(|other| simulation.address(h) == lesson.fixture.address(other))
+                })
+            {
+                return Err("MAC practice must use different workstation IDs and addresses".into());
+            }
+        } else if s.mac_teaching.is_some() || matches!(s.goal, Goal::MacLearning { .. }) {
+            return Err("MAC metadata attached to another activity".into());
         }
         if let Some(lesson) = &s.switching_teaching {
             if !matches!(s.initial, State::Switching { .. }) {
@@ -549,6 +592,7 @@ pub fn validate_state(s: &State) -> Result<(), String> {
         State::Discovery { simulation } => simulation.validate().is_ok(),
         State::Processes { table } => table.valid(),
         State::AuthoritativeDns { server } => server.validate().is_ok(),
+        State::MacLearning { simulation } => simulation.validate().is_ok(),
         State::Switching { fabric } => fabric.validate().is_ok(),
         State::Ipv6 { topology } => topology.valid(),
         State::Ipv4Routing { topology } => topology.valid(),

@@ -295,6 +295,29 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
         return false;
     }
 
+    if let State::MacLearning { simulation } = &a.state {
+        let (
+            State::MacLearning {
+                simulation: initial,
+            },
+            crate::engine::Goal::MacLearning {
+                initial: goal_initial,
+                ..
+            },
+        ) = (&s.initial, &s.goal)
+        else {
+            return false;
+        };
+        if initial != goal_initial
+            || !crate::mac_learning_workspace::same_problem(simulation, initial)
+            || a.workspace
+                .as_ref()
+                .and_then(|w| w.mac_draft.as_ref())
+                .is_some_and(|d| !d.matches(simulation))
+        {
+            return false;
+        }
+    }
     if let State::Switching { fabric } = &a.state
         && a.workspace
             .as_ref()
@@ -464,6 +487,26 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved process identities differ from this assignment; original retained".into(),
             );
+        }
+        validate_mac_workspace(a)?;
+        if let (
+            State::MacLearning { simulation },
+            State::MacLearning {
+                simulation: initial,
+            },
+        ) = (&a.state, &s.initial)
+            && !crate::mac_learning_workspace::same_problem(simulation, initial)
+        {
+            return Err(
+                "Saved MAC identities differ from this assignment; original retained".into(),
+            );
+        }
+        if let Some(l) = a.workspace.as_ref().and_then(|w| w.mac_learning.as_ref())
+            && s.mac_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        {
+            return Err("Saved MAC example belongs to another lesson; original retained".into());
         }
         if let (State::Switching { fabric }, State::Switching { fabric: initial }) =
             (&a.state, &s.initial)
@@ -860,6 +903,23 @@ fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_mac_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else { return Ok(()) };
+    if w.mac_draft.is_none() && w.mac_learning.is_none() {
+        return Ok(());
+    }
+    let State::MacLearning { simulation } = &a.state else {
+        return Err("MAC metadata on another activity; original retained".into());
+    };
+    if w.mac_draft
+        .as_ref()
+        .is_some_and(|d| !d.same_shape(simulation))
+        || w.mac_learning.as_ref().is_some_and(|l| !l.valid())
+    {
+        return Err("Invalid MAC draft or practice; original retained".into());
+    }
+    Ok(())
+}
 #[derive(Debug)]
 pub struct Saved {
     pub durability_warning: Option<String>,
@@ -871,6 +931,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     validate_provenance(p)?;
     for a in p.attempts.values() {
         crate::pack::validate_state(&a.state)?;
+        validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
         validate_accounts_workspace(a)?;
         validate_ospf_workspace(a)?;

@@ -66,7 +66,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::UnitManager { .. }) {
+            if matches!(s.initial, State::MacLearning { .. }) {
+                self.mac_learning_workspace(ui, i);
+            } else if matches!(s.initial, State::UnitManager { .. }) {
                 self.unit_manager_workspace(ui, i);
             } else if matches!(s.initial, State::Ospf { .. }) {
                 self.ospf_workspace(ui, i);
@@ -145,7 +147,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::UnitManager { .. }) {
+            let show_help = if matches!(s.initial, State::MacLearning { .. }) {
+                self.mac_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::UnitManager { .. }) {
                 self.unit_manager_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::Ospf { .. }) {
                 self.ospf_view(i) == teaching::View::Assignment
@@ -718,6 +722,7 @@ impl LabApp {
                         if matches!(
                             a.state,
                             State::Discovery { .. }
+                                | State::MacLearning { .. }
                                 | State::AuthoritativeDns { .. }
                                 | State::Ipv6 { .. }
                                 | State::Ipv4Routing { .. }

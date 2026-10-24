@@ -115,6 +115,7 @@ impl LabApp {
                     &mut learning.draft,
                     &mut self.metrics,
                     &mut self.focus_input,
+                    "Practice draft · Apply and test example uses these edits",
                 );
                 if learning.draft != old {
                     self.dirty = true;
@@ -172,6 +173,7 @@ impl LabApp {
                     &mut draft,
                     &mut self.metrics,
                     &mut self.focus_input,
+                    "Draft changes · Check configuration applies and tests them",
                 );
                 if before != draft {
                     self.dirty = true;
@@ -305,7 +307,8 @@ fn outcome_feedback(
     });
 }
 
-fn configuration_editor(
+#[allow(clippy::too_many_arguments)]
+pub(super) fn configuration_editor(
     ui: &mut egui::Ui,
     index: usize,
     practice: bool,
@@ -313,14 +316,13 @@ fn configuration_editor(
     draft: &mut Draft,
     metrics: &mut Metrics,
     focus: &mut bool,
+    pending_help: &str,
 ) {
     ui.label(
         RichText::new(if draft.matches(fabric) {
             "Applied settings · simulated switches"
-        } else if practice {
-            "Practice draft · Apply and test example uses these edits"
         } else {
-            "Draft changes · Check configuration applies and tests them"
+            pending_help
         })
         .small()
         .color(palette(ui).muted),
@@ -533,6 +535,7 @@ fn compact_field(
     name_control(&r, label);
     metrics.inputs.push(r.rect);
     metrics.vlan_fields.push((r.id, r.rect));
+    metrics.vlan_field_enabled.push((r.id, r.enabled()));
     metrics.focus.get_or_insert(r.id);
     if *focus && !ui.input(|i| i.pointer.any_pressed() || i.pointer.any_released()) {
         r.request_focus();

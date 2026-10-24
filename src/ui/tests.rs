@@ -1,5 +1,6 @@
 use super::*;
 use engine::State;
+mod mac_learning;
 mod ospf;
 fn app() -> (egui::Context, LabApp) {
     let ctx = egui::Context::default();
@@ -715,6 +716,7 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             | State::Accounts { .. }
             | State::Discovery { .. }
             | State::AuthoritativeDns { .. }
+            | State::MacLearning { .. }
             | State::Switching { .. }
             | State::Ipv6 { .. }
             | State::Ipv4Routing { .. }
