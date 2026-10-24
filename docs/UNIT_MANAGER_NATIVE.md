@@ -145,3 +145,47 @@ wide split and narrow stacked, with the measured viewport used for scrolling and
 clicks. Record scoped PASS only after all assertions; reject partial/timed-out
 runs and stale binaries. Actual Windows/macOS, full accessibility and novice
 acceptance remain separate. No actual native run has happened for this workspace yet.
+
+## Optional live inspector — headless-verified enhancement
+
+Following the accepted143-check workspace checkpoint9711c8a, the collapsed
+Loaded definition and current inputs inspector exposes only the selected unit's
+actual saved/loaded source, loaded virtual program descriptor and its current
+saved configuration, runtime source/program, consumed configuration/prerequisite,
+and derived result. It does not read the grader's expected values or worked
+reference. The compact summary includes the current derived port/value and marks
+earlier execution inputs. It introduces no new Linux command or show property.
+The introduction teaches where to open this read-only view. The sixth UI test
+checks distinct saved-new/loaded-old/runtime-old program identities, reloaded-
+program/current-input mismatch, default-closed/actual header opening and no
+mutation by inspection. It passes; actual Fedora rendering remains pending.
+
+## App-only native smoke plan — compiled, not executed
+
+The reviewed proposal now has a source implementation in
+`src/ui/smoke/unit_manager.rs`, reached only with `--ui-smoke` and the invocation-
+local `DLMS_SMOKE_STAGE=unit-manager-workspace`. Stage12000 appends the private
+fixture only to that smoke app; the normal catalog remains unchanged. Its bounded
+plan uses real measured picker options, editor clicks and typed input, Save,
+terminal Run/Enter, Check, optional inspector, Reset/Cancel/Confirm and Challenge.
+It never installs a reference State. Authored reference/alternative values target
+only bounded editor input events, and all claimed outcomes are asserted from the
+actual current simulation, draft, Session or persisted profile reader.
+
+The source plan covers initial failed initialization/journal diagnosis, partial
+unit/policy repair while config remains wrong, full repair, valid Before ordering,
+read-only status preserving success, a loaded-versus-running wrong-program
+inspection, real state/edit invalidation, isolated context Undo, unfinished
+assignment/example file and command drafts with active editor kind, exact real
+save/reload, example-only reset, selected Reset with cancellation and another lab
+preserved, and light150/dark200 stacked Challenge feedback. Screenshots are
+requested only from actual frames. The PASS branch is after every assertion;
+partial/timeout runs are not acceptance. The plan has an additional bounds/private-fixture test. All7 focused tests
+(the6 manager UI checks plus that plan test) passed, and all-target Clippy with
+warnings denied and full formatting checks pass. The first Clippy reported2
+nested-if style warnings in the inspector; equivalent let chains fixed them and
+the focused tests were rerun. No behavioral/model change was needed. The5 prior
+UI checks are repeated regressions, not5 more new tests. Actual native execution,
+final merged-catalog regression and screenshot inspection remain mandatory before
+claiming Fedora acceptance. No native run was performed on this earlier98-lab
+worktree; the root agent will run the final merged application.

@@ -17,8 +17,12 @@ impl LabApp {
                     .color(palette(ui).accent),
             );
             let before = challenge;
-            ui.selectable_value(&mut challenge, false, "Learn");
-            ui.selectable_value(&mut challenge, true, "Challenge");
+            let learn = ui.selectable_value(&mut challenge, false, "Learn");
+            let independent = ui.selectable_value(&mut challenge, true, "Challenge");
+            if matches!(s.initial, State::UnitManager { .. }) {
+                self.metrics.manager_learn = Some(learn.rect);
+                self.metrics.manager_challenge = Some(independent.rect);
+            }
             if before != challenge {
                 self.progress.attempts.get_mut(&s.id).unwrap().challenge = challenge;
                 self.help_open = false;
@@ -50,7 +54,9 @@ impl LabApp {
                 if r.clicked() {
                     self.reset_attempt(i);
                 }
-                if ui.add(button("Cancel")).clicked() {
+                let cancel = ui.add(button("Cancel"));
+                self.metrics.reset_cancel = Some(cancel.rect);
+                if cancel.clicked() {
                     self.reset_pending = false;
                 }
             });

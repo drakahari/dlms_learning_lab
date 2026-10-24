@@ -93,6 +93,7 @@ impl LabApp {
                 ui.label(RichText::new("A separate example to investigate").strong());
                 ui.label(&lesson.example_description);
                 ui.label("Edit only the supplied virtual files. Save updates the text; type commands in the virtual terminal and press Enter or Run command to investigate and apply changes.");
+                ui.label("Open Loaded definition and current inputs below the editor to inspect the loaded virtual program and the data actually consumed by its current run. This read-only view does not apply your edits.");
                 if let Some(unit) = lesson
                     .definition
                     .initial
@@ -360,6 +361,21 @@ fn panel(
     if let Some(message) = controls.notice.as_ref() {
         ui.label(message);
     }
+    let inspector = egui::CollapsingHeader::new("Loaded definition and current inputs")
+        .id_salt(("manager-input-inspector", scope))
+        .show(ui, |ui| {
+            controls.metrics.manager_inspector_open = true;
+            ui.label("Read-only virtual inspection. Saved text, loaded definitions and previously consumed runtime inputs are separate; opening this does not reload or run anything.");
+            let height = ui.text_style_height(&egui::TextStyle::Monospace) * 8.;
+            egui::ScrollArea::both().id_salt(("manager-inspector-scroll", scope))
+                .max_height(height).min_scrolled_height(height).auto_shrink([false, false]).show(ui, |ui| {
+                    for (label, text) in inspection_rows(state, &draft.selected_unit) {
+                        ui.label(RichText::new(label).strong());
+                        ui.add(egui::Label::new(RichText::new(text).monospace()).extend().selectable(true));
+                    }
+                });
+        });
+    controls.metrics.manager_inspector = Some(inspector.header_response.rect);
     effects
 }
 
@@ -384,8 +400,30 @@ fn summary(ui: &mut egui::Ui, state: &core::State, draft: &Draft) {
         state.runtime().get(selected),
         Some(Runtime::Running { .. } | Runtime::Exited { .. } | Runtime::Failed { .. })
     ) && state.execution_differs(selected).unwrap_or(false);
+    let observed = state
+        .result(selected)
+        .ok()
+        .flatten()
+        .map(|result| {
+            if let Some(port) = result.port {
+                format!(" · virtual port {port}")
+            } else if let Some(value) = result.value {
+                let preview: String = value.chars().take(48).collect();
+                format!(
+                    " · value {preview}{}",
+                    if preview.len() < value.len() {
+                        "… (inspect inputs)"
+                    } else {
+                        ""
+                    }
+                )
+            } else {
+                String::new()
+            }
+        })
+        .unwrap_or_default();
     let phase = format!(
-        "{phase}{}",
+        "{phase}{observed}{}",
         if stale {
             " · earlier execution inputs"
         } else {
@@ -417,9 +455,11 @@ fn editor(
     let mut configuration = draft.editing_configuration;
     let old_mode = configuration;
     ui.horizontal_wrapped(|ui| {
-        ui.selectable_value(&mut configuration, false, "Unit file");
+        let unit = ui.selectable_value(&mut configuration, false, "Unit file");
+        metrics.manager_kind.push((false, unit.rect));
         ui.add_enabled_ui(!draft.configuration.is_empty(), |ui| {
-            ui.selectable_value(&mut configuration, true, "Application configuration");
+            let config = ui.selectable_value(&mut configuration, true, "Application configuration");
+            metrics.manager_kind.push((true, config.rect));
         });
     });
     if configuration != old_mode {
@@ -445,7 +485,8 @@ fn editor(
             .selected_text(selected.as_str())
             .show_ui(ui, |ui| {
                 for name in choices {
-                    ui.selectable_value(selected, name.clone(), name);
+                    let option = ui.selectable_value(selected, name.clone(), name);
+                    metrics.manager_items.push((name.clone(), option.rect));
                 }
             });
         metrics.manager_slot = Some(r.response.rect);
@@ -692,4 +733,89 @@ fn diagnostic_name(kind: terminal::DiagnosticKind) -> &'static str {
         terminal::DiagnosticKind::Limit => "Simulator resource limit · narrow the request",
         terminal::DiagnosticKind::Model => "Virtual manager validation problem",
     }
+}
+
+fn program_config(program: &core::Program) -> &str {
+    match program {
+        core::Program::ValueTask { config, .. } | core::Program::PortDaemon { config, .. } => {
+            config
+        }
+    }
+}
+/// Pure selected-unit observation; no load, program advancement or grading.
+pub(super) fn inspection_rows(state: &core::State, unit: &str) -> Vec<(String, String)> {
+    if state.validate().is_err() || !state.inventory().units.contains(unit) {
+        return vec![(
+            "Virtual inspection unavailable".into(),
+            "Invalid activity context; work is retained".into(),
+        )];
+    }
+    let mut rows = vec![("Saved unit source".into(), state.documents()[unit].clone())];
+    if let Some(source) = state.loaded_sources().get(unit) {
+        rows.push(("Loaded unit source".into(), source.clone()));
+        if let Ok(definition) = core::parse_unit(state.inventory(), unit, source)
+            && let core::UnitType::Service { exec, .. } = definition.kind
+        {
+            rows.push(("Loaded virtual program".into(), exec.clone()));
+            let config = program_config(&state.inventory().programs[&exec]);
+            rows.push((
+                "Current saved application input".into(),
+                format!("{config}\n{}", state.configuration()[config]),
+            ));
+        }
+    } else {
+        rows.push(("Loaded unit source".into(), "No definition loaded".into()));
+    }
+    match state.runtime().get(unit) {
+        Some(
+            Runtime::Running { snapshot }
+            | Runtime::Exited { snapshot }
+            | Runtime::Failed { snapshot },
+        ) => {
+            rows.push((
+                "Unit source used by current runtime".into(),
+                snapshot.unit_source.clone(),
+            ));
+            if let Ok(definition) = core::parse_unit(state.inventory(), unit, &snapshot.unit_source)
+                && let core::UnitType::Service { exec, .. } = definition.kind
+            {
+                let config = program_config(&state.inventory().programs[&exec]);
+                rows.push(("Runtime virtual program".into(), exec));
+                rows.push((
+                    "Application input consumed by runtime".into(),
+                    format!("{config}\n{}", snapshot.configuration),
+                ));
+            }
+            rows.push((
+                "Prerequisite value consumed by runtime".into(),
+                snapshot
+                    .artifact_input
+                    .as_ref()
+                    .map_or("None", |v| v.as_str())
+                    .into(),
+            ));
+            let outcome = match state.result(unit) {
+                Ok(Some(result)) => if let Some(port) = result.port { format!("Successful virtual program · port {port}; no real listener") }
+                    else { format!("Successful virtual program · value {}", result.value.unwrap_or_default()) },
+                _ => "Failed virtual initialization using these captured inputs; read its retained journal for the recorded cause".into(),
+            };
+            rows.push(("Derived current runtime outcome".into(), outcome));
+        }
+        Some(Runtime::Dispatched { unit_source }) => {
+            rows.push(("Dispatched virtual source".into(), unit_source.clone()));
+            rows.push((
+                "Derived current runtime outcome".into(),
+                "Start job completed; virtual program has not initialized".into(),
+            ));
+        }
+        Some(Runtime::TargetActive {}) => rows.push((
+            "Derived current runtime outcome".into(),
+            "Active virtual target · no program or application input".into(),
+        )),
+        _ => rows.push((
+            "Derived current runtime outcome".into(),
+            "Stopped · no current program execution snapshot".into(),
+        )),
+    }
+    rows
 }

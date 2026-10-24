@@ -75,6 +75,13 @@ struct Metrics {
     manager_file: Option<egui::Rect>,
     manager_run: Option<egui::Rect>,
     manager_diagnostics: Vec<(egui::Rect, f32)>,
+    manager_inspector: Option<egui::Rect>,
+    manager_inspector_open: bool,
+    manager_kind: Vec<(bool, egui::Rect)>,
+    manager_items: Vec<(String, egui::Rect)>,
+    manager_challenge: Option<egui::Rect>,
+    manager_learn: Option<egui::Rect>,
+    reset_cancel: Option<egui::Rect>,
     accounts_output_scroll: Option<(f32, egui::Rect)>,
     accounts_latest_output: Option<egui::Rect>,
     output: Option<egui::Rect>,
@@ -282,8 +289,10 @@ impl LabApp {
             smoke,
             started: Instant::now(),
             smoke_stage: if smoke
-                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-layout")
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("unit-manager-workspace")
             {
+                12000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-layout") {
                 11500
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("ospf-unit") {
                 11000

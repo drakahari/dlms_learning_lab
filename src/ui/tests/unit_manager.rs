@@ -345,3 +345,81 @@ fn unit_manager_long_diagnostic_prose_wraps_to_finite_viewport_despite_wide_comm
         assert!(limit < ctx.content_rect().width());
     }
 }
+
+#[test]
+fn unit_manager_read_only_inspector_distinguishes_saved_loaded_and_actual_running_program_inputs() {
+    use dlms_learning_lab::unit_manager::Action;
+    let (ctx, mut a, i) = manager_app(teaching::View::Assignment);
+    let s = a.scenarios[i].clone();
+    for command in &s.solution {
+        engine::execute_for_goal(
+            &mut a.progress.attempts.get_mut(&s.id).unwrap().state,
+            &s.goal,
+            command,
+        )
+        .unwrap();
+    }
+    let State::UnitManager { simulation } = &mut a.progress.attempts.get_mut(&s.id).unwrap().state
+    else {
+        panic!()
+    };
+    let selected = "work-application.service";
+    let changed = simulation.documents()[selected]
+        .replace("/sim/bin/work-application", "/sim/bin/work-observer");
+    simulation
+        .apply(&Action::SaveUnit {
+            unit: selected.into(),
+            text: changed,
+        })
+        .unwrap();
+    let before = simulation.clone();
+    let rows = crate::ui::unit_manager_workspace::inspection_rows(simulation, selected);
+    assert_eq!(*simulation, before);
+    let text = |label: &str| {
+        rows.iter()
+            .find(|(key, _)| key == label)
+            .unwrap()
+            .1
+            .as_str()
+    };
+    assert!(text("Saved unit source").contains("/sim/bin/work-observer"));
+    assert_eq!(text("Loaded virtual program"), "/sim/bin/work-application");
+    assert_eq!(text("Runtime virtual program"), "/sim/bin/work-application");
+    assert!(text("Derived current runtime outcome").contains("8088"));
+    simulation.apply(&Action::DaemonReload {}).unwrap();
+    let before = simulation.clone();
+    let rows = crate::ui::unit_manager_workspace::inspection_rows(simulation, selected);
+    assert_eq!(*simulation, before);
+    let text = |label: &str| {
+        rows.iter()
+            .find(|(key, _)| key == label)
+            .unwrap()
+            .1
+            .as_str()
+    };
+    assert_eq!(text("Loaded virtual program"), "/sim/bin/work-observer");
+    assert_eq!(text("Runtime virtual program"), "/sim/bin/work-application");
+    assert!(text("Current saved application input").contains("PORT=6060"));
+    assert!(text("Application input consumed by runtime").contains("PORT=8088"));
+    let draft = manager::Draft::new(simulation).unwrap();
+    a.progress
+        .attempts
+        .get_mut(&s.id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .unit_manager_draft = Some(manager::Draft {
+        selected_unit: selected.into(),
+        ..draft
+    });
+    draw(&ctx, &mut a);
+    assert!(!a.metrics.manager_inspector_open);
+    accounts_ui_click(&ctx, &mut a, |m| m.manager_inspector);
+    draw(&ctx, &mut a);
+    assert!(a.metrics.manager_inspector_open);
+    let State::UnitManager { simulation } = &a.progress.attempts[&s.id].state else {
+        panic!()
+    };
+    assert_eq!(*simulation, before);
+}
