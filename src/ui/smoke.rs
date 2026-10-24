@@ -14,6 +14,27 @@ pub(super) mod reopen;
 mod substitution;
 mod unit_manager;
 mod unit_manager_lessons;
+
+/// Native input targets may straddle a rounded clip edge by one physical pixel.
+/// Their click center must still be inside the actual, unexpanded viewport.
+fn smoke_control_visible(target: egui::Rect, visible: egui::Rect, pixels_per_point: f32) -> bool {
+    if !pixels_per_point.is_finite() || pixels_per_point <= 0. {
+        return false;
+    }
+    let tolerance = 1. / pixels_per_point;
+    if !tolerance.is_finite()
+        || [target, visible].into_iter().any(|r| {
+            ![r.min.x, r.min.y, r.max.x, r.max.y]
+                .into_iter()
+                .all(f32::is_finite)
+                || r.width() <= 0.
+                || r.height() <= 0.
+        })
+    {
+        return false;
+    }
+    visible.contains(target.center()) && visible.expand(tolerance).contains_rect(target)
+}
 impl LabApp {
     fn storage_reference_action(
         &mut self,
@@ -122,12 +143,17 @@ impl LabApp {
                 ctx.input(|i| i.raw_scroll_delta)
             );
         }
+        if smoke_control_visible(r, visible, ctx.pixels_per_point()) {
+            return true;
+        }
         let delta = if r.bottom() > bottom {
             bottom - r.bottom()
         } else if r.top() < top {
             top - r.top()
         } else {
-            return true;
+            // Horizontal clipping cannot be repaired by this vertical scroller.
+            // Keep the bounded failure path; never queue a click outside visibility.
+            0.
         };
         let id = egui::Id::new(("bounded-native-scroll", self.smoke_stage));
         let tries = ctx.data_mut(|d| {
@@ -6885,5 +6911,116 @@ impl LabApp {
         }
         self.smoke_stage += 1;
         self.started = Instant::now();
+    }
+}
+
+#[cfg(test)]
+mod visibility_tests {
+    use super::*;
+
+    #[test]
+    fn reopen_visibility_accepts_measured_fractional_clip_rounding() {
+        let visible =
+            egui::Rect::from_min_max(egui::pos2(0., 116.6875), egui::pos2(845.3333, 421.3333));
+        let back = egui::Rect::from_min_max(egui::pos2(18., 116.6667), egui::pos2(142.9, 151.7));
+        assert!(smoke_control_visible(back, visible, 1.5));
+        assert!(visible.contains(back.center()));
+    }
+
+    #[test]
+    fn reopen_visibility_tolerance_is_one_physical_pixel_on_each_edge() {
+        let visible = egui::Rect::from_min_max(egui::pos2(16., 32.), egui::pos2(320., 256.));
+        for pixels_per_point in [1., 1.5, 2.] {
+            let pixel = 1. / pixels_per_point;
+            for edge in 0..4 {
+                let target = |overhang: f32| {
+                    let mut r = visible.shrink(16.);
+                    match edge {
+                        0 => r.min.x = visible.min.x - overhang,
+                        1 => r.min.y = visible.min.y - overhang,
+                        2 => r.max.x = visible.max.x + overhang,
+                        _ => r.max.y = visible.max.y + overhang,
+                    }
+                    r
+                };
+                assert!(smoke_control_visible(
+                    target(pixel),
+                    visible,
+                    pixels_per_point
+                ));
+                assert!(!smoke_control_visible(
+                    target(pixel * 1.125),
+                    visible,
+                    pixels_per_point
+                ));
+            }
+        }
+    }
+
+    #[test]
+    fn reopen_visibility_never_expands_the_real_center_hit_region() {
+        let visible = egui::Rect::from_min_max(egui::pos2(16., 32.), egui::pos2(320., 256.));
+        for pixels_per_point in [1., 1.5, 2.] {
+            let pixel = 1. / pixels_per_point;
+            let clipped = egui::Rect::from_center_size(
+                egui::pos2(visible.left() - pixel * 0.25, 64.),
+                egui::vec2(pixel * 0.5, 8.),
+            );
+            assert!(visible.expand(pixel).contains_rect(clipped));
+            assert!(!smoke_control_visible(clipped, visible, pixels_per_point));
+            assert!(!smoke_control_visible(
+                visible.translate(egui::vec2(1000., 0.)),
+                visible,
+                pixels_per_point
+            ));
+        }
+        for scale in [0., -1., f32::INFINITY, f32::NAN] {
+            assert!(!smoke_control_visible(visible, visible, scale));
+        }
+        for bad in [
+            egui::Rect::from_min_max(egui::pos2(f32::NAN, 40.), egui::pos2(30., 60.)),
+            egui::Rect::from_min_size(egui::pos2(20., 40.), egui::Vec2::ZERO),
+        ] {
+            assert!(!smoke_control_visible(bad, visible, 1.5));
+        }
+    }
+
+    #[test]
+    fn reopen_offscreen_controls_cannot_queue_clicks_and_keep_bounded_reveal_failure() {
+        let ctx = egui::Context::default();
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(800., 600.),
+                )),
+                ..Default::default()
+            },
+            |_| {},
+        );
+        let mut app = LabApp::from_context(&ctx, true, false);
+        app.smoke = false;
+        app.smoke_stage = 17090;
+        let visible = egui::Rect::from_min_max(egui::pos2(0., 100.), egui::pos2(800., 600.));
+        app.metrics.main_viewport = Some(visible);
+        let target = egui::Rect::from_min_size(egui::pos2(820., 120.), egui::vec2(60., 30.));
+        for _ in 0..20 {
+            assert!(!app.click_visible_smoke_control(&ctx, Some(target)));
+            assert!(
+                app.pending_events
+                    .iter()
+                    .all(|event| !matches!(event, egui::Event::PointerButton { .. }))
+            );
+            app.pending_events.clear();
+        }
+        let rejected = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            app.click_visible_smoke_control(&ctx, Some(target))
+        }));
+        assert!(rejected.is_err());
+        assert!(app.pending_events.is_empty());
+        assert!(
+            ctx.data(|d| d.get_temp::<u8>(egui::Id::new(("native-click-phases", 17090))))
+                .is_none()
+        );
     }
 }
