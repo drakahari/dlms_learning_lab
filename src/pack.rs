@@ -39,6 +39,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub accounts_teaching: Option<crate::accounts_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub unit_manager_teaching: Option<crate::unit_manager_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub ospf_teaching: Option<crate::ospf_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub discovery_teaching: Option<crate::discovery_teaching::Lesson>,
@@ -150,6 +152,8 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                     || v.len()
                         > if matches!(s.initial, State::Ipv4Acl { .. }) {
                             crate::acl_editor::MAX_JSON + 64
+                        } else if matches!(s.initial, State::UnitManager { .. }) {
+                            crate::unit_manager_workspace::MAX_ACTION_BYTES
                         } else {
                             4000
                         }
@@ -219,6 +223,28 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("DNS example must use a different zone from the assignment".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let State::UnitManager { simulation } = &s.initial {
+            let Goal::UnitManager { definition } = &s.goal else {
+                return Err("Virtual unit state requires matching fixed objectives".into());
+            };
+            definition.validate()?;
+            if simulation != &definition.initial {
+                return Err(
+                    "Virtual unit objectives must pin the exact authored original state".into(),
+                );
+            }
+            let lesson = s.unit_manager_teaching.as_ref().ok_or(
+                "Virtual unit activities need prerequisites and an isolated practice fixture",
+            )?;
+            lesson.validate()?;
+            if !lesson.distinct_from(simulation) {
+                return Err("Virtual unit practice needs distinct immutable origin, units and configuration paths".into());
+            }
+        } else if s.unit_manager_teaching.is_some() || matches!(s.goal, Goal::UnitManager { .. }) {
+            return Err(
+                "Virtual unit teaching/objectives belong only to their own workspace".into(),
+            );
         }
         if let State::Ospf { simulation } = &s.initial {
             let Goal::Ospf {
@@ -515,6 +541,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::UnitManager { simulation } => simulation.validate().is_ok(),
         State::Ospf { simulation } => simulation.valid(),
         State::Ipv4Acl { network } => crate::acl_workspace::valid_network(network).is_ok(),
         State::Accounts { simulation } => simulation.valid(),

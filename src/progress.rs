@@ -100,6 +100,30 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if let State::UnitManager { simulation } = &a.state {
+        let (
+            State::UnitManager {
+                simulation: authored,
+            },
+            crate::engine::Goal::UnitManager { definition },
+        ) = (&s.initial, &s.goal)
+        else {
+            return false;
+        };
+        if authored != &definition.initial || !definition.same_assignment(simulation) {
+            return false;
+        }
+        if let Some(draft) = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.unit_manager_draft.as_ref())
+        {
+            return crate::unit_manager_workspace::solved(definition, simulation, draft);
+        }
+        return crate::unit_manager_workspace::Draft::new(simulation).is_ok_and(|draft| {
+            crate::unit_manager_workspace::solved(definition, simulation, &draft)
+        });
+    }
     if let State::Ospf { simulation } = &a.state {
         let (
             State::Ospf {
@@ -304,6 +328,33 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         }
         validate_accounts_workspace(a)?;
         validate_ospf_workspace(a)?;
+        validate_unit_manager_workspace(a)?;
+        if let State::UnitManager { simulation } = &a.state {
+            let (
+                State::UnitManager {
+                    simulation: initial,
+                },
+                crate::engine::Goal::UnitManager { definition },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err(
+                    "Saved virtual units belong to another activity; original retained".into(),
+                );
+            };
+            if initial != &definition.initial || !definition.same_assignment(simulation) {
+                return Err("Saved unit inventory/descriptor context differs from this activity; original retained".into());
+            }
+            if let Some(l) = a
+                .workspace
+                .as_ref()
+                .and_then(|w| w.unit_manager_learning.as_ref())
+                && s.unit_manager_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            {
+                return Err("Saved unit practice origin differs from its authored fixture; original retained".into());
+            }
+        }
         if let State::Ospf { simulation } = &a.state {
             let State::Ospf {
                 simulation: initial,
@@ -566,6 +617,37 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
     }
     Ok(p)
 }
+fn validate_unit_manager_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else {
+        return Ok(());
+    };
+    match &a.state {
+        State::UnitManager { simulation } => {
+            if w.unit_manager_draft
+                .as_ref()
+                .is_some_and(|d| !d.same_shape(simulation))
+                || w.unit_manager_learning.as_ref().is_some_and(|l| {
+                    !l.valid()
+                        || l.fixture.inventory().fixture == simulation.inventory().fixture
+                        || l.fixture.inventory().units == simulation.inventory().units
+                        || l.fixture.inventory().config_paths == simulation.inventory().config_paths
+                })
+            {
+                return Err(
+                    "Invalid unit-manager draft/example context; previous progress retained".into(),
+                );
+            }
+        }
+        _ if w.unit_manager_draft.is_some() || w.unit_manager_learning.is_some() => {
+            return Err(
+                "Unit-manager metadata belongs to another activity; previous progress retained"
+                    .into(),
+            );
+        }
+        _ => {}
+    }
+    Ok(())
+}
 fn validate_ospf_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else {
         return Ok(());
@@ -741,6 +823,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         validate_acl_workspace(a)?;
         validate_accounts_workspace(a)?;
         validate_ospf_workspace(a)?;
+        validate_unit_manager_workspace(a)?;
         validate_storage_workspace(a)?;
         validate_discovery_workspace(a)?;
         validate_process_workspace(a)?;

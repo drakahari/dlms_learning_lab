@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    UnitManager {
+        simulation: crate::unit_manager::State,
+    },
     Ospf {
         simulation: crate::ospf::State,
     },
@@ -121,6 +124,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    UnitManager {
+        definition: Box<crate::unit_manager_workspace::Definition>,
+    },
     Ospf {
         initial: crate::ospf::State,
         #[serde(deserialize_with = "crate::ospf_workspace::requirements")]
@@ -257,6 +263,12 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::UnitManager { simulation }, Goal::UnitManager { definition }) => {
+            match crate::unit_manager_workspace::Draft::new(simulation) {
+                Ok(draft) => crate::unit_manager_workspace::checks(definition, simulation, &draft),
+                Err(_) => vec![(false, "Invalid virtual unit-manager state".into())],
+            }
+        }
         (
             State::Ospf { simulation },
             Goal::Ospf {
@@ -540,6 +552,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::UnitManager { .. } => crate::unit_manager_workspace::HELP,
         State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
         State::Ospf { .. } => crate::ospf_workspace::HELP,
         State::Accounts { .. } => crate::accounts_teaching::HELP,
@@ -593,6 +606,23 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::UnitManager { simulation } = s {
+        let Goal::UnitManager { definition } = goal else {
+            return Err("Virtual unit actions require a matching fixed assignment".into());
+        };
+        if !definition.same_assignment(simulation) {
+            return Err(
+                "Invalid or foreign virtual unit goal/state; previous work retained".into(),
+            );
+        }
+        if input.len() > crate::unit_manager_workspace::MAX_ACTION_BYTES {
+            return Err("Virtual unit authoring action exceeds its bounded size".into());
+        }
+        if matches!(input.trim(), "help" | "show") {
+            return execute(s, input);
+        }
+        return crate::unit_manager_workspace::adapter(&definition.initial, simulation, input);
+    }
     if let State::Ospf { simulation } = s {
         let Goal::Ospf {
             initial,
@@ -628,6 +658,16 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::UnitManager { .. }) {
+        if input.len() > crate::unit_manager_workspace::MAX_ACTION_BYTES {
+            return Err("Virtual unit input exceeds its bounded size".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::unit_manager_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("Use native virtual unit controls; this workspace does not execute systemctl, shell commands or host services".into()),
+        };
+    }
     if matches!(s, State::Ospf { .. }) {
         return match input.trim() { "help" => Ok(crate::ospf_workspace::HELP.into()), "show" => Ok(describe(s)), _ => Err("OSPF mutations require immutable goal context; use native typed settings, not IOS commands".into()) };
     }
@@ -720,7 +760,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Ospf { .. }
+        State::UnitManager { .. }
+        | State::Ospf { .. }
         | State::Ipv4Acl { .. }
         | State::Accounts { .. }
         | State::PersistentMounts { .. }
@@ -1159,6 +1200,11 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::UnitManager { simulation } => format!(
+            "Virtual unit manager · {} supplied units · {} loaded definitions · current runtime and future-session enablement are separate; no host systemd or boot",
+            simulation.inventory().units.len(),
+            simulation.loaded_sources().len()
+        ),
         State::Ospf { simulation } => format!(
             "OSPFv2 derived P2P compatibility · {} virtual routers · no observed Full adjacency or packet forwarding",
             simulation.configuration().routers.len()

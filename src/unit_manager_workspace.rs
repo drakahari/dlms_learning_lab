@@ -11,6 +11,7 @@ use std::{
 
 pub const MAX_REQUIREMENTS: usize = 48;
 pub const MAX_ACTIONS: usize = 32;
+pub const MAX_ACTION_BYTES: usize = 1_572_864;
 pub const HELP: &str = "Edit the supplied virtual unit or application configuration. Save only updates raw text; manager reload, program start/initialization and enable/default policy are separate simulator actions. No host systemd, shell, network or boot is used.";
 
 pub(crate) fn sequence<'de, D: Deserializer<'de>, T: Deserialize<'de>, const N: usize>(
@@ -212,8 +213,27 @@ impl Draft {
                 .unwrap_or_default(),
         })
     }
-    pub fn same_shape(&self, state: &State) -> bool {
+    pub fn valid(&self) -> bool {
         self.version == 1
+            && !self.documents.is_empty()
+            && self.documents.len() <= core::MAX_UNITS
+            && self.configuration.len() <= core::MAX_CONFIGS
+            && self
+                .documents
+                .iter()
+                .all(|(k, v)| !k.is_empty() && k.len() <= 64 && v.len() <= core::MAX_UNIT_BYTES)
+            && self
+                .configuration
+                .iter()
+                .all(|(k, v)| !k.is_empty() && k.len() <= 128 && v.len() <= core::MAX_CONFIG_BYTES)
+            && self.selected_unit.len() <= 64
+            && self.documents.contains_key(&self.selected_unit)
+            && self.selected_config.len() <= 128
+            && (self.configuration.contains_key(&self.selected_config)
+                || (self.configuration.is_empty() && self.selected_config.is_empty()))
+    }
+    pub fn same_shape(&self, state: &State) -> bool {
+        self.valid()
             && state.validate().is_ok()
             && self.documents.len() == state.inventory().units.len()
             && self.configuration.len() == state.inventory().config_paths.len()
@@ -764,4 +784,20 @@ pub fn checks(def: &Definition, state: &State, draft: &Draft) -> Vec<(bool, Stri
 }
 pub fn solved(def: &Definition, state: &State, draft: &Draft) -> bool {
     checks(def, state, draft).iter().all(|c| c.0)
+}
+
+/// Pack authoring/reachability data only. It is not taught systemctl or shell syntax.
+pub fn adapter(initial: &State, state: &mut State, input: &str) -> Result<String, String> {
+    if input.len() > MAX_ACTION_BYTES {
+        return Err("Virtual unit authoring action exceeds 1.5 MiB".into());
+    }
+    let raw = input
+        .strip_prefix("unit-manager ")
+        .ok_or("Use native virtual unit controls; this data adapter is authoring-only")?;
+    let action: EditAction = serde_json::from_str(raw)
+        .map_err(|_| "Invalid bounded virtual unit action data".to_owned())?;
+    match apply(state, initial, &action)? {
+        None => Ok("Virtual raw source saved; manager definitions, runtime and enablement remain separate.".into()),
+        Some(report) => Ok(format!("Virtual manager action returned {} jobs ({} failed); inspect current state and future-session policy separately.", report.jobs.len(), report.jobs.iter().filter(|j| !j.result.succeeded()).count())),
+    }
 }

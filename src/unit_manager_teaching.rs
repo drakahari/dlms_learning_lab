@@ -266,16 +266,20 @@ impl Learning {
             checked: false,
         })
     }
-    pub fn valid_for(&self, lesson: &Lesson) -> bool {
+    pub fn valid(&self) -> bool {
         self.version == 1
             && self.transcript.len() <= 100
-            && lesson.validate_bounds().is_ok()
+            && self.selected_action < 8
             && self.fixture.validate().is_ok()
-            && self.fixture == lesson.definition.initial
             && self.state.same_context(&self.fixture)
             && self.draft.same_shape(&self.state)
-            && self.selected_action < lesson.example_actions.len()
             && self.transcript.iter().all(|m| m.text.len() <= 256)
+    }
+    pub fn valid_for(&self, lesson: &Lesson) -> bool {
+        self.valid()
+            && lesson.validate_bounds().is_ok()
+            && self.fixture == lesson.definition.initial
+            && self.selected_action < lesson.example_actions.len()
     }
     /// Fill only the example editor with worked saved source. No action is run in
     /// the learner's example State, and no assignment object is accepted here.
@@ -348,4 +352,35 @@ impl Learning {
         }
         workspace::checks(&lesson.definition, &self.state, &self.draft)
     }
+}
+
+/// Prepare optional metadata without changing another kind or replacing saved work.
+pub fn prepare(
+    attempt: &mut crate::progress::Attempt,
+    lesson: &Lesson,
+    new_attempt: bool,
+) -> Result<(), String> {
+    let crate::engine::State::UnitManager { simulation } = &attempt.state else {
+        return Err("Virtual unit practice belongs only to its own workspace".into());
+    };
+    lesson.validate_bounds()?;
+    if !lesson.distinct_from(simulation) {
+        return Err("Virtual unit assignment/example origins are not separate".into());
+    }
+    let workspace = attempt
+        .workspace
+        .as_mut()
+        .ok_or("Prepare the workspace before its unit-manager example")?;
+    if let Some(learning) = &workspace.unit_manager_learning {
+        if !learning.valid_for(lesson) {
+            return Err("Saved unit-manager practice origin differs; work retained".into());
+        }
+    } else {
+        let mut learning = Learning::new(lesson)?;
+        if !new_attempt {
+            learning.view = View::Assignment;
+        }
+        workspace.unit_manager_learning = Some(learning);
+    }
+    Ok(())
 }

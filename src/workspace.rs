@@ -10,6 +10,10 @@ use serde::{Deserialize, Serialize};
 pub struct WorkspaceData {
     pub version: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub unit_manager_draft: Option<crate::unit_manager_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unit_manager_learning: Option<crate::unit_manager_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub ospf_draft: Option<crate::ospf_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub ospf_learning: Option<crate::ospf_teaching::Learning>,
@@ -79,6 +83,11 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.unit_manager_draft.as_ref().is_none_or(|d| d.valid())
+            && self
+                .unit_manager_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
             && self.acl_draft.as_ref().is_none_or(|d| d.valid())
             && self.acl_learning.as_ref().is_none_or(|l| l.valid())
             && self.switching_draft.as_ref().is_none_or(|d| d.valid())
@@ -170,6 +179,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::UnitManager { simulation } = &a.state
+        && w.unit_manager_draft.is_none()
+    {
+        w.unit_manager_draft = crate::unit_manager_workspace::Draft::new(simulation).ok();
+    }
     if let State::Ospf { simulation } = &a.state
         && w.ospf_draft.is_none()
     {

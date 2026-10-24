@@ -1,10 +1,12 @@
 # Multi-unit workspace — backend adapter draft
 
-Source-only2026-10-23. New pure workspace/teaching modules, not registered in
-State/Goal/pack/progress/native UI, not bundled curriculum or objective coverage.
-Guarded first compilation passes47 library,16 core and14 adapter tests plus
-all-target Clippy. These standalone tests do not establish shared-hook progress
-compatibility or native acceptance. Existing single-service labs, progress,
+Foundation checked2026-10-23; no bundled curriculum or objective coverage.
+Guarded standalone compilation passed47 library,16 core and14 adapter tests plus
+all-target Clippy. State/Goal/pack/progress hooks are reviewed in
+[UNIT_MANAGER_INTEGRATION.md](UNIT_MANAGER_INTEGRATION.md); their isolated135-check
+gate and all-target Clippy now pass. No native renderer is wired. The standalone
+foundation tests alone did not establish shared-hook compatibility; the new
+profile/backup/history tests provide that scoped evidence, not native acceptance. Existing single-service labs, progress,
 shell evaluator and migration receipts are untouched.
 
 ## Editing and fixed context
@@ -83,13 +85,16 @@ initialization and Check remain separate explicit actions. Clean draft source ca
 synchronize after typed actions without losing selected document; unsaved edits
 remain untouched. Example reset replaces only Learning.
 
-The eventual engine/progress adapter must validate State/Goal kind pairing,
-original assignment equality, Inventory pinning and Learning's exact authored
-fixture on import/save. Evolving examples need not retain disjoint namespaces.
+The proposed engine/progress hooks validate State/Goal kind pairing, original
+assignment equality and Inventory pinning; catalog-aware import additionally pins
+Learning's exact authored fixture. Their isolated execution/compatibility gate
+now passes, while native acceptance remains pending. Evolving examples need not retain disjoint namespaces.
 Optional fields belong to existing workspace version1; no old Service migration
-or shell evaluator bump. Current modules cannot access an assignment Attempt or
-modify progress. Existing progress/history/export/reset compatibility still needs
-the later shared-hook tests; it is not claimed by these standalone modules.
+or shell evaluator bump. Workspace grading and example actions cannot alter assignment work. The new
+teaching prepare helper writes only this kind's optional example metadata in an
+Attempt; it never replaces saved valid example data. Existing progress/history/
+export/reset compatibility is covered by the new shared-hook tests and was not
+inferred from the standalone foundation.
 
 Collections/maps use bounded duplicate-rejecting visitors. Borrowed
 Lesson::validate_bounds checks action counts, fixed context, fields and Draft
