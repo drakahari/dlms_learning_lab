@@ -29,12 +29,20 @@ Never pass learner-supplied scripts to host tools. The reference tools retain
 their fixed, disposable development-fixture restrictions.
 
 For a same-project worktree, invoke the main runner with `--cwd WORKTREE` before
-the action. Its default target is `.build-artifacts/targets/WORKTREE-NAME` in the
-main checkout. An existing disk target may be selected with `--target-dir PATH`;
-the runner rejects targets outside the main project. Example structure:
+the action. Each canonical checkout now has an exclusive Cargo target. Main
+keeps `target/`; a worktree uses `.build-artifacts/targets/NAME-PATHHASH` on the
+main project disk. The runner prints the exact path. Do not share a target even
+when builds are serial: Cargo can reuse a newer same-package library from a
+different worktree, combining a new test executable with the wrong bundled data.
+An actual comparison caught this on2026-10-23 before producing results. Old
+shared targets and failed diagnostics remain untouched. `--target-dir` only
+accepts requests resolving to the automatically selected path; the target
+namespace itself cannot be a symlink alias. Cross-worktree/main overrides are
+refused. Candidate builds run only from main and keep their
+separate packaging target. The common heavy-work lock still serializes ALL targets.
 
 ```sh
-python3 /path/to/dlms_learning_lab/tools/dev.py --cwd /path/to/worktree --target-dir /path/to/dlms_learning_lab/target/acl-foundation test --offline --test acl
+python3 /path/to/dlms_learning_lab/tools/dev.py --cwd /path/to/worktree test --offline --test acl
 ```
 
 `.cargo/config.toml` sets build.jobs=2 and separately supplies
@@ -78,7 +86,7 @@ use. Normal builds reuse these local copies and operate offline. No packages or
 new dependencies are installed by this change.
 
 The candidate script also takes the shared lock when invoked directly, passes
-`--jobs 2`, stages on the common project disk even from a worktree, and hashes
+`--jobs 2`, stages on the common project disk from the main checkout, and hashes
 large artifacts in1MiB chunks. It refuses a dirty release identity as before.
 It does not publish a release. Existing candidates are preserved.
 

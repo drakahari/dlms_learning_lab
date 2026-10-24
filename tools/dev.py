@@ -1,12 +1,34 @@
 #!/usr/bin/env python3
 """Serial, two-job project builds/tests with disk-backed temporary files and memory evidence."""
 import argparse
+import hashlib
 import os
 from pathlib import Path
 import shutil
 import sys
 
 from build_safety import JOBS, TEST_THREADS, project_root, disk_directory, owned_directory, workflow
+
+
+def build_target(root, cwd, requested=None):
+    """A Cargo target belongs to one canonical checkout, even under a shared lock.
+
+    Serial use alone does not prevent Cargo from reusing a newer same-package
+    library compiled from another worktree. Never alternate worktrees in a target.
+    Keep the existing main target; use a new path-derived namespace for worktrees.
+    Old shared targets/evidence are retained, never cleaned automatically.
+    """
+    root, cwd = Path(root).resolve(), Path(cwd).resolve()
+    if cwd == root:
+        expected = root / 'target'
+    else:
+        identity = hashlib.sha256(os.fsencode(cwd)).hexdigest()[:16]
+        expected = root / '.build-artifacts/targets' / f'{cwd.name}-{identity}'
+    if expected.resolve() != expected:
+        raise RuntimeError('Exclusive Cargo target cannot alias another directory through a symlink')
+    if requested is not None and Path(requested).resolve() != expected:
+        raise RuntimeError(f'Cargo target must belong exclusively to this checkout: {expected}; old shared targets are preserved')
+    return expected
 
 
 def validate_cargo_args(arguments):
@@ -51,6 +73,8 @@ def main():
     root = project_root(args.cwd)
     if root != project_root(Path(__file__).resolve().parents[1]):
         raise RuntimeError('The selected worktree must belong to this project')
+    if args.action == 'candidate' and args.cwd.resolve() != root:
+        raise RuntimeError('Build candidates from the main checkout, whose source and dedicated packaging target are identified together')
     cache = owned_directory(root, root / '.build-artifacts/toolchains')
     cargo_home, rustup_home = cache / 'cargo', cache / 'rustup'
     if (cache / 'READY.json').is_file() and cargo_home.is_dir() and rustup_home.is_dir():
@@ -59,7 +83,7 @@ def main():
     elif args.action not in ['python-tests', 'native', 'tool']:
         raise RuntimeError('Prepare the disk-backed toolchain cache described in docs/BUILD_WORKFLOW.md first')
     with workflow(args.cwd, args.action) as session:
-        target = (args.target_dir or (root / 'target' if args.cwd.resolve() == root else root / '.build-artifacts/targets' / args.cwd.name)).resolve()
+        target = build_target(root, args.cwd, args.target_dir)
         if not target.is_relative_to(root):
             raise RuntimeError('Build target must stay in this project on its verified disk volume')
         disk_directory(target)

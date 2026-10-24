@@ -11,6 +11,10 @@ old-project edits, desktop/GPU/swap/service/model changes or public release.
   worktrees. It owns one shared OS lock across this repository's worktrees.
   Never run a second memory-heavy build/test invocation alongside it. A busy
   lock means retry later; do not bypass it or interrupt another agent/application.
+- Each checkout has an exclusive Cargo target selected by the runner. Never
+  alternate worktrees in a shared target, even serially: Cargo can reuse the wrong
+  library/catalog. Omit --target-dir for worktrees; the old shared target is retained.
+  Build candidates only from main.
 - Cargo maximum is **2 jobs**. Rust test maximum is **2 runtime threads**;
   Cargo jobs do not limit test parallelism. Do not override either upward.
 - Future large build/cache/package/test data belongs on the verified disk volume:

@@ -31,6 +31,44 @@ class BuildSafety(unittest.TestCase):
         self.assertEqual(config['build']['jobs'], 2)
         self.assertEqual(config['env']['RUST_TEST_THREADS'], {'value': '2', 'force': True})
 
+    def test_target_namespace_is_stable_exclusive_and_rejects_shared_overrides(self):
+        import dev
+        main = self.fixture
+        a = main / '.build-artifacts/worktrees/a'
+        b = main / '.build-artifacts/worktrees/b'
+        self.assertEqual(dev.build_target(main, main), main / 'target')
+        target_a = dev.build_target(main, a)
+        target_b = dev.build_target(main, b)
+        self.assertNotEqual(target_a, target_b)
+        self.assertEqual(dev.build_target(main, a, target_a), target_a)
+        self.assertEqual(dev.build_target(main, a / '..' / 'a'), target_a)
+        for cwd, requested in [(a, target_b), (b, target_a), (a, main / 'target'),
+                               (a, main / 'target/acl-foundation'),
+                               (main, target_a), (main, Path('/tmp/target'))]:
+            with self.subTest(cwd=cwd, requested=requested):
+                with self.assertRaisesRegex(RuntimeError, 'exclusively'):
+                    dev.build_target(main, cwd, requested)
+        self.assertFalse(target_a.exists(), 'Selection itself must not touch artifacts')
+
+    def test_equal_worktree_basenames_and_symlink_aliases_do_not_mix_caches(self):
+        import dev
+        main = self.fixture
+        a, b = main / 'first/same', main / 'second/same'
+        a.mkdir(parents=True)
+        b.mkdir(parents=True)
+        self.assertNotEqual(dev.build_target(main, a), dev.build_target(main, b))
+        alias = main / 'alias'
+        try:
+            alias.symlink_to(a, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            self.skipTest('Native symlink privilege unavailable')
+        self.assertEqual(dev.build_target(main, alias), dev.build_target(main, a))
+        selected = dev.build_target(main, a)
+        selected.parent.mkdir(parents=True)
+        selected.symlink_to(b, target_is_directory=True)
+        with self.assertRaisesRegex(RuntimeError, 'symlink'):
+            dev.build_target(main, a)
+
     def test_artifact_volume_is_verified_and_tmpfs_is_refused(self):
         if not Path('/proc/self/mountinfo').exists():
             self.skipTest('Linux filesystem observation')
