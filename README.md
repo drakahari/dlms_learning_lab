@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **106 authored assignments:** 31 CCNA,21 LPIC-1,17 LPIC-2 and37 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **109 authored assignments:** 31 CCNA,21 LPIC-1,17 LPIC-2 and40 Bash/Shell. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the Fedora development build
 
@@ -67,6 +67,8 @@ The **VLAN groups, trunks and handover** unit adds four [native switching assign
 The new **Bash/Shell** track teaches reliable output, quoted arguments, input, guards/status, report redirection, multi-file loops and a safe-report capstone, followed by separate output channels, intersecting pipeline filters, end-of-input repair resilient batch auditing, reusable functions, per-item return status, argument consumption and a preflight bundle capstone. Scripts are written in a native editor and run against 3–12 deterministic sets of sample inputs with output/file-state grading. Run/Stop, case inspection and specific retry feedback stay together. Learn/Challenge retain the same assignments. Learn adds a skippable, reopenable introduction and a separately saved **Try example** workspace, with different example values and no completion credit. Challenge opens independent assignment work. Walkthroughs, progressive hints and worked solutions remain optional. See the [foundations teaching audit](docs/SCRIPT_TEACHING.md) and [composition content review](docs/SHELL_COMPOSITION.md) and [reusable-interface unit](docs/SHELL_REUSABLE.md). Drafts survive resume; edits invalidate old results. Tab indents the code editor, Escape releases its focus, and Ctrl+Enter runs.
 
 The **Command output, reliable decisions and report previews** unit adds four [capture assignments](docs/SHELL_CAPTURE_LESSONS.md): intact multiline lists, preserved evidence, meaningful helper status and a guarded preview/save report with an inspection ledger. Separate examples teach before full editor tasks; multiple behavioral cases accept equivalent supported solutions. A nonzero result can correctly mean that an investigation found a problem. Captures remain bounded simulated execution; the terminal does not gain shell expansion.
+
+The **Clear dispatch and safe publication** unit adds three [case-dispatch assignments](docs/SHELL_CASE_LESSONS.md): a reliable report-mode interface, prioritized record routing and a validated preview/apply publication. Separate examples teach first-match decisions and error handling before complete editor assignments. Multiple output, exit-status and virtual-file cases accept supported alternatives, including conditional solutions.
 
 The in-process interpreter implements a documented [shell subset](docs/SHELL_SUBSET.md), with a real lexer/parser/VM, virtual files and bounded cooperative execution. It never passes learner input to Bash, a subprocess, the host filesystem or network. Real Bash appears **only** in the disposable development-oracle fixtures. No new dependencies were added.
 

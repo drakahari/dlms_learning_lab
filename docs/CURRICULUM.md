@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **106 authored assignments in25 units:31CCNA,21LPIC-1,17LPIC-2 and37Bash/Shell**. The scripting path has nine units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Delivered content is **109 authored assignments in26 units:31CCNA,21LPIC-1,17LPIC-2 and40Bash/Shell**. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -117,3 +117,6 @@ Four original [P2P OSPF assignments](OSPF_LESSONS.md) add explicit identity/proc
 
 
 M70 adds four [service definition/dependency/handover assignments](UNIT_MANAGER_LESSONS.md) in a coherent LPIC-2 unit, with separate worked systems, full editors/terminals, active-preparation retry, alternate solutions and current plus next-session outcomes. Normal catalog106/25units:31CCNA/21LPIC-1/17LPIC-2/37Bash. Official current LPIC-2v4.5/202.1 sources were rechecked2026-10-23. Only existing Partial202.1/K1/T4 evidence strengthens; SysV/LSB/real boot/readiness/full systemd and most curriculum stay unfinished. No new objective status counts or exam-completion claim.
+
+
+M77 adds three case-dispatch assignments: an argument interface, prioritized full-record routing and a validate-before-publication capstone. Separate examples,31 deterministic assignment cases and alternate conditional solutions are verified in the bounded simulator and actual native Fedora flow. LPIC-1 105.2 remains narrow Partial reinforcement; mail, real interpreter selection/permissions and wider shell semantics remain absent. Native light150%/dark200% editing and save/readback/reset pass; cold-process reopen, novice, screen-reader and other-platform acceptance are not established by that flow. See SHELL_CASE_LESSONS.md.
