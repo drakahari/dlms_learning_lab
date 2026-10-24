@@ -38,6 +38,20 @@ pub(super) fn check_static_word(word: &Word) -> Result<(), String> {
     Ok(())
 }
 
+/// Case patterns have no ordinary-test-word [ / ] exception. Statically bare
+/// brackets fail compilation even in a later arm; parameter brackets are skipped.
+pub(super) fn check_static_pattern(word: &Word) -> Result<(), String> {
+    for part in &word.0 {
+        if part.quote == Quote::Bare
+            && let Some(text) = part.text()
+            && values::bracket_glob(text)?
+        {
+            return Err("Unsupported bracket case pattern; quote literal brackets".into());
+        }
+    }
+    Ok(())
+}
+
 struct Scalar {
     parts: std::vec::IntoIter<Part>,
     text: String,
@@ -122,6 +136,21 @@ struct Matcher {
 }
 impl Matcher {
     fn validate(vm: &Vm, pattern: &Scalar) -> Result<(), String> {
+        // Same precedence as the existing filename guard, without changing its
+        // diagnostic or timing. Check only after a reached pattern expands:
+        // selector/pattern capture effects remain, but no selected body runs.
+        let locale = vm.scalar("LC_ALL").filter(|value| !value.is_empty());
+        let non_c = if let Some(value) = locale {
+            !matches!(value, "C" | "POSIX")
+        } else {
+            ["LC_COLLATE", "LC_CTYPE", "LANG"].iter().any(|key| {
+                vm.scalar(key)
+                    .is_some_and(|value| !value.is_empty() && !matches!(value, "C" | "POSIX"))
+            })
+        };
+        if non_c {
+            return Err("Unsupported case-matching locale; this simulator supports C/POSIX byte matching only".into());
+        }
         vm.charge_expansion(pattern.text.len())?;
         for (i, &byte) in pattern.text.as_bytes().iter().enumerate() {
             if pattern.active[i] == 0 {

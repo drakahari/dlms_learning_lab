@@ -887,7 +887,8 @@ impl Parser<'_> {
                         return Err("Case arm needs a pattern before )".into());
                     };
                     let pattern = pattern.clone();
-                    self.note_word(&pattern)?;
+                    case::check_static_pattern(&pattern)?;
+                    self.note_scalar(&pattern)?;
                     patterns.push(pattern);
                     self.pos += 1;
                     alternatives += 1;
@@ -1146,6 +1147,16 @@ impl Parser<'_> {
                 }
                 _ => break,
             }
+        }
+        // compound() owns reserved case syntax. Subsequent pipeline stages and
+        // leading redirects must not disguise a bare reserved head as a simple
+        // command. Quotes/escapes/expansion and later arguments remain data.
+        if words
+            .first()
+            .and_then(Word::literal)
+            .is_some_and(|head| matches!(head, "case" | "esac"))
+        {
+            return Err("Unsupported case/esac command head; case compounds cannot be pipeline stages or follow leading redirects".into());
         }
         if words.is_empty() && redirects.is_empty() {
             return Err("Expected a command".into());

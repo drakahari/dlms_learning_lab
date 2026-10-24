@@ -1,7 +1,7 @@
 # Bounded case implementation — isolated revision8, migration pending
 
 Focused implementation checkpoint, 2026-10-23. The guarded first compile passed,
-with13 case integration tests and37 shell unit tests passing, all-target Clippy
+with18 case integration tests and37 shell unit tests passing, all-target Clippy
 with warnings denied, and scoped formatting checks. No native or revision8 migration
 acceptance is claimed. It is not activated in the main application or curriculum. Revision8 is explicit in the isolated branch
 because new case support and some static diagnostics change public7 outcomes.
@@ -33,6 +33,14 @@ bare `?` consumes one byte. Quoted and bare fragments may be mixed. The entire
 selector must match. Slash, leading dot and newline are ordinary bytes. C-byte
 semantics make UTF8 literals exact but do not make `?` a Unicode-character match.
 Repeated active stars are supported without recursive-directory semantics.
+
+Matching supports C/POSIX requests only, following the existing filename
+locale policy: nonempty LC_ALL overrides LC_COLLATE/LC_CTYPE/LANG; otherwise any
+nonempty non-C/POSIX value in those categories is rejected. The guard runs after
+the first reached pattern expands, before matching/body entry. Earlier selector
+and pattern capture effects remain; no body runs on rejection. Skipped cases and
+empty cases perform no pattern matching and do not invoke this guard. This does
+not emulate Unicode/locale matching.
 
 No match and selected empty bodies return0. Nonempty bodies return their last
 command's status. Entry and successful matching do not reset `$?`: a previous
@@ -110,3 +118,27 @@ explicit new-support deltas;37 authored scripts/215 cases and37 examples;
 actual6+7 multihistory/Reset/practice-only/first-before8 exact target backup,
 conflict/failure/cancel/recovery/portable receipt tests; normal regression and
 native Run/Stop/history/restore acceptance. No new lesson or coverage is claimed.
+
+## Reviewed follow-up after the first focused gate
+
+Commit27d0a0e passed the50 focused tests above. Subsequent independent source
+review found three boundaries needing correction; the guarded follow-up passed
+18 integration tests and37 shell unit tests (55 total), all-target Clippy with
+warnings denied and scoped formatting checks. The capture delimiter now recognizes the
+existing command-position literal `name=(...)` grammar as array data. Bare array
+elements named case/in/esac cannot open/close case frames; nested `$(...)` retains
+its own command domain. Real case after array assignment and function-body cases
+retain their command roles. New tests cover empty, quoted, multiline/commented,
+nested-capture and function-contained arrays. Pattern-specific static bracket
+validation removes ordinary `[`/`]` command-word exceptions only in patterns,
+preserving ordinary test commands and quoted literals. The locale guard above
+makes requested unsupported matching explicit. No original observed goldens,
+parser/VM budgets, profile bytes, historical revisions or main source changed.
+
+The combined source follow-up also rejects a simple command whose first word
+is the bare literal case/esac, including later pipeline stages or after leading
+redirects. That closes a compile-first diagnostic bypass without reinterpreting
+quoted/escaped/expanded command heads, later arguments or assignment prefixes.
+This additional correction and its timing regressions passed the same55-check
+focused gate. Full actual7/8 comparison, migration and native acceptance remain
+separate pending gates.

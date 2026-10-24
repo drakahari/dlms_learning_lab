@@ -101,6 +101,10 @@ fn malformed_or_excluded_static_grammar_fails_before_any_effect() {
         "case x in x) :;; esac;; printf bad",
         "if true; then case x in esac; else fi",
         "esac",
+        "printf x | case x",
+        "printf x | esac",
+        "printf x | > keep.txt case x",
+        "> keep.txt esac",
         "case x in x) :;; esac )",
     ] {
         let source = format!("printf changed > keep.txt; {source}");
@@ -429,4 +433,215 @@ fn captures_in_case_preserve_shared_finite_input_and_active_source_write_guards(
         result.files.get("/work/source.txt"),
         case.files.get("/work/source.txt")
     );
+}
+
+#[test]
+fn capture_delimiter_keeps_array_elements_as_data_and_reenters_real_commands_afterwards() {
+    for (source, expected) in [
+        (
+            r#"value=$(items=(case x in); printf '%s' "${items[0]}"); printf '%s' "$value""#,
+            "case",
+        ),
+        (
+            r#"value=$(items=(); printf '%s' "${#items[@]}"); printf '%s' "$value""#,
+            "0",
+        ),
+        (
+            r#"value=$(items=('case' "x" 'in' 'esac' ')'); printf '%s:%s' "${items[0]}" "${items[4]}"); printf '%s' "$value""#,
+            "case:)",
+        ),
+        (
+            r#"value=$(items=("$(case x in x) printf inner;; esac)" case in esac); printf '%s:%s' "${items[0]}" "${items[1]}"); printf '%s' "$value""#,
+            "inner:case",
+        ),
+        (
+            r#"value=$(case x in x) items=(case x in esac); printf '%s' "${items[0]}";; esac); printf '%s' "$value""#,
+            "case",
+        ),
+        (
+            r#"value=$(items=(case x in); case "${items[1]}" in x) printf real;; esac); printf '%s' "$value""#,
+            "real",
+        ),
+        (
+            "value=$(items=(# case esac ) ignored comment\ncase x in\n); case x in x) printf '%s' \"${items[0]}\";; esac); printf '%s' \"$value\"",
+            "case",
+        ),
+        (
+            r#"value=$(f() { items=(case x in); case x in x) printf '%s' "${items[0]}";; esac; }; f); printf '%s' "$value""#,
+            "case",
+        ),
+    ] {
+        for slice in [1, 16, 32, 64] {
+            let result = sliced(source, &fixture(), slice);
+            assert_eq!(result.error, None, "{source}");
+            assert_eq!(result.stdout, expected, "{source}");
+        }
+    }
+}
+
+#[test]
+fn static_case_brackets_fail_before_effects_without_changing_ordinary_test_words() {
+    for pattern in ["[", "]", "[ab]"] {
+        for source in [
+            format!("printf changed > keep.txt; case x in {pattern}) :;; esac"),
+            format!("printf changed > keep.txt; case good in good) :;; {pattern}) :;; esac"),
+        ] {
+            assert!(Vm::new(&source, &fixture()).is_err());
+            let result = shell::run(&source, &fixture());
+            assert_eq!(result.status, 2);
+            assert!(
+                result
+                    .error
+                    .as_deref()
+                    .is_some_and(|error| error.contains("Unsupported bracket case pattern"))
+            );
+            assert_eq!(result.files, fixture().files);
+            assert!(result.stdout.is_empty());
+        }
+    }
+    let ordinary = shell::run("if [ x = x ]; then printf yes; fi", &fixture());
+    assert_eq!(ordinary.error, None);
+    assert_eq!(ordinary.stdout, "yes");
+    for source in [
+        "case '[' in '[') printf literal;; esac",
+        "case ']' in ']') printf literal;; esac",
+    ] {
+        let result = shell::run(source, &fixture());
+        assert_eq!(result.error, None);
+        assert_eq!(result.stdout, "literal");
+    }
+    for pattern in ["[", "]"] {
+        let mut case = fixture();
+        case.env.insert("p".into(), pattern.into());
+        let result = shell::run(
+            "case good in good) printf selected;; $p) printf wrong;; esac",
+            &case,
+        );
+        assert_eq!(result.error, None);
+        assert_eq!(result.stdout, "selected");
+        let result = shell::run(
+            "printf before > marker.txt; case x in $p) printf wrong > keep.txt;; esac",
+            &case,
+        );
+        assert_eq!(result.status, 2);
+        assert!(
+            result
+                .error
+                .as_deref()
+                .is_some_and(|error| error.contains("Unsupported"))
+        );
+        assert_eq!(
+            result.files.get("/work/keep.txt"),
+            case.files.get("/work/keep.txt")
+        );
+        assert_eq!(
+            result.files.get("/work/marker.txt").map(String::as_str),
+            Some("before")
+        );
+    }
+}
+#[test]
+fn case_matching_rejects_non_c_locale_and_obeys_lc_all_precedence() {
+    let source = "case é in ?) printf character;; *) printf bytes;; esac";
+    for category in ["LC_ALL", "LC_COLLATE", "LC_CTYPE", "LANG"] {
+        let mut case = fixture();
+        case.env.insert(category.into(), "C.UTF-8".into());
+        let result = shell::run(source, &case);
+        assert_eq!(result.status, 2);
+        assert_eq!(
+            result.error.as_deref(),
+            Some(
+                "Unsupported case-matching locale; this simulator supports C/POSIX byte matching only"
+            )
+        );
+        assert!(result.stdout.is_empty());
+        assert_eq!(result.files, case.files);
+    }
+    for locale in ["C", "POSIX"] {
+        let mut case = fixture();
+        for category in ["LC_COLLATE", "LC_CTYPE", "LANG"] {
+            case.env.insert(category.into(), "C.UTF-8".into());
+        }
+        case.env.insert("LC_ALL".into(), locale.into());
+        let result = shell::run(source, &case);
+        assert_eq!(result.error, None);
+        assert_eq!(result.stdout, "bytes");
+    }
+    let mut case = fixture();
+    case.env.insert("LC_ALL".into(), String::new());
+    case.env.insert("LANG".into(), "C.UTF-8".into());
+    assert!(
+        shell::run(source, &case)
+            .error
+            .as_deref()
+            .is_some_and(|error| error.contains("Unsupported case-matching locale"))
+    );
+    // Neither skipped cases nor an empty case perform a pattern match.
+    assert_eq!(
+        shell::run("false && case x in x) :;; esac", &case).error,
+        None
+    );
+    assert_eq!(shell::run("case x in esac", &case).error, None);
+}
+#[test]
+fn locale_guard_keeps_prior_selector_and_pattern_capture_effects_but_never_enters_a_body() {
+    let mut case = fixture();
+    case.env.insert("LC_ALL".into(), "C.UTF-8".into());
+    let source = r#"case "$(printf selector > selector.txt; printf x)" in "$(printf pattern > pattern.txt; printf x)") printf wrong > keep.txt;; esac"#;
+    for slice in [1, 16, 32, 64] {
+        let result = sliced(source, &case, slice);
+        assert_eq!(result.status, 2);
+        assert!(
+            result
+                .error
+                .as_deref()
+                .is_some_and(|error| error.contains("Unsupported case-matching locale"))
+        );
+        assert_eq!(
+            result.files.get("/work/keep.txt"),
+            case.files.get("/work/keep.txt")
+        );
+        assert_eq!(
+            result.files.get("/work/selector.txt").map(String::as_str),
+            Some("selector")
+        );
+        assert_eq!(
+            result.files.get("/work/pattern.txt").map(String::as_str),
+            Some("pattern")
+        );
+        assert!(result.stdout.is_empty());
+    }
+}
+
+#[test]
+fn reserved_pipeline_heads_are_static_only_when_first_bare_literal_words() {
+    let result = shell::run("printf case; printf '%s' esac", &fixture());
+    assert_eq!(result.error, None);
+    assert_eq!(result.stdout, "caseesac");
+    for keyword in ["case", "esac"] {
+        for head in [
+            format!("\"{keyword}\""),
+            format!("\\{keyword}"),
+            "\"$head\"".into(),
+        ] {
+            let source = format!("head={keyword}; printf changed > keep.txt; printf x | {head} x");
+            assert!(
+                Vm::new(&source, &fixture()).is_ok(),
+                "quoted/escaped/expanded head is runtime data: {source}"
+            );
+            let result = shell::run(&source, &fixture());
+            assert_eq!(result.status, 2);
+            assert!(result.error.is_some());
+            assert_eq!(
+                result.files.get("/work/keep.txt").map(String::as_str),
+                Some("changed"),
+                "prior command must execute: {source}"
+            );
+        }
+    }
+    // A leading assignment-looking word is not the bare reserved head. Existing
+    // command preparation owns its support/error timing; this patch does not
+    // reinterpret the second word as compound syntax.
+    assert!(Vm::new("tag=value case x", &fixture()).is_ok());
+    assert!(Vm::new("tag=value esac", &fixture()).is_ok());
 }

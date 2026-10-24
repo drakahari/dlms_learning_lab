@@ -65,6 +65,7 @@ struct Delimiter {
     bare: bool,
     started: bool,
     redirect: bool,
+    array_depth: Option<usize>,
 }
 impl Delimiter {
     fn new() -> Self {
@@ -75,6 +76,7 @@ impl Delimiter {
             bare: true,
             started: false,
             redirect: false,
+            array_depth: None,
         }
     }
     fn opaque(&mut self) {
@@ -83,6 +85,13 @@ impl Delimiter {
     }
     fn word(&mut self) -> Result<(), String> {
         if !self.started {
+            return Ok(());
+        }
+        // Array elements are data even when their bare spelling is a keyword.
+        if self.array_depth.is_some() {
+            self.word.clear();
+            self.started = false;
+            self.bare = true;
             return Ok(());
         }
         if std::mem::take(&mut self.redirect) {
@@ -202,6 +211,7 @@ pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, S
         if c.is_ascii_whitespace() {
             scan.word()?;
             if c == '\n'
+                && scan.array_depth.is_none()
                 && !matches!(
                     scan.cases.last(),
                     Some(CasePhase::Selector | CasePhase::In | CasePhase::Pattern(_))
@@ -213,7 +223,48 @@ pub(super) fn end(chars: &[char], start: usize, depth: usize) -> Result<usize, S
             continue;
         }
         if matches!(c, '(' | ')' | ';' | '|' | '&' | '<' | '>') {
+            // Same lexical boundary as the supported dense array grammar:
+            // one literal name=( at command position, with no intervening space.
+            let array_open = c == '('
+                && scan.command
+                && scan.started
+                && scan.bare
+                && !scan.redirect
+                && scan.array_depth.is_none()
+                && !matches!(
+                    scan.cases.last(),
+                    Some(CasePhase::Selector | CasePhase::In | CasePhase::Pattern(_))
+                )
+                && scan.word.strip_suffix('=').is_some_and(super::name);
             scan.word()?;
+            if let Some(array_depth) = scan.array_depth {
+                if c == '(' {
+                    parens += 1;
+                    if parens > 24 {
+                        return Err("Syntax nesting exceeds 24 levels".into());
+                    }
+                } else if c == ')' {
+                    if parens == array_depth {
+                        scan.array_depth = None;
+                    }
+                    parens -= 1;
+                }
+                // Unsupported raw operators/nested parentheses still go to the
+                // real Parser, but cannot turn array data into a case frame.
+                scan.command = false;
+                i += 1;
+                continue;
+            }
+            if array_open {
+                parens += 1;
+                if parens > 24 {
+                    return Err("Syntax nesting exceeds 24 levels".into());
+                }
+                scan.array_depth = Some(parens);
+                scan.command = false;
+                i += 1;
+                continue;
+            }
             if matches!(c, '<' | '>') {
                 scan.redirect = true;
             }
