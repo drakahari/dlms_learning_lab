@@ -3,8 +3,8 @@ use super::*;
 use engine::State;
 const START: usize = 16000;
 const ID: &str = "development-mac-learning";
-#[derive(Clone)]
-enum Control {
+#[derive(Clone, Debug, PartialEq)]
+pub(super) enum Control {
     Try,
     Assignment,
     Insert,
@@ -185,7 +185,7 @@ fn plan(s: &Scenario) -> Vec<Step> {
     ]);
     p
 }
-fn ctrl_a() -> Vec<egui::Event> {
+pub(super) fn ctrl_a() -> Vec<egui::Event> {
     [true, false]
         .into_iter()
         .map(|pressed| egui::Event::Key {
@@ -202,7 +202,7 @@ fn ctrl_a() -> Vec<egui::Event> {
         .collect()
 }
 impl LabApp {
-    fn mac_native_click(&mut self, ctx: &egui::Context, target: &Control) -> bool {
+    pub(super) fn mac_native_click(&mut self, ctx: &egui::Context, target: &Control) -> bool {
         let rect = match target {
             Control::Try => self.metrics.example_action,
             Control::Assignment => self.metrics.assignment_action,
@@ -236,10 +236,65 @@ impl LabApp {
             Control::Challenge => self.metrics.mode_challenge,
         };
         if matches!(target, Control::Action(_) | Control::Source(_)) {
-            self.click_smoke_control(ctx, rect)
+            let clip = if matches!(target, Control::Action(_)) {
+                self.metrics.mac_action_popup
+            } else {
+                self.metrics.mac_source_popup
+            };
+            self.mac_popup_choice(ctx, rect, clip)
         } else {
             self.click_visible_smoke_control(ctx, rect)
         }
+    }
+    /// Scroll only this actual popup; never click a clipped/offscreen choice.
+    pub(in crate::ui) fn mac_popup_choice(
+        &mut self,
+        ctx: &egui::Context,
+        target: Option<egui::Rect>,
+        popup: Option<egui::Rect>,
+    ) -> bool {
+        let key = egui::Id::new(("native-click-phases", self.smoke_stage));
+        if ctx.data(|d| d.get_temp::<u8>(key)).unwrap_or(0) >= 2 {
+            return self.click_smoke_control(ctx, None);
+        }
+        let target = target.expect("actual popup choice before click");
+        let visible = popup
+            .expect("actual popup clip before click")
+            .intersect(ctx.content_rect());
+        if smoke_control_visible(target, visible, ctx.pixels_per_point()) {
+            return self.click_smoke_control(ctx, Some(target));
+        }
+        let count = ctx.data_mut(|d| {
+            let key = egui::Id::new(("mac-popup-scroll", self.smoke_stage));
+            let n = d.get_temp::<u8>(key).unwrap_or(0) + 1;
+            d.insert_temp(key, n);
+            n
+        });
+        assert!(
+            count <= 20,
+            "popup choice must become visible; target={target:?} actualpopup={visible:?}"
+        );
+        assert!(
+            visible.is_finite() && visible.width() > 0. && visible.height() > 0.,
+            "valid actual popup clip"
+        );
+        let delta = if target.bottom() > visible.bottom() {
+            visible.bottom() - target.bottom()
+        } else if target.top() < visible.top() {
+            visible.top() - target.top()
+        } else {
+            0.
+        };
+        self.pending_events
+            .push(egui::Event::PointerMoved(visible.center()));
+        self.pending_events.push(egui::Event::MouseWheel {
+            unit: egui::MouseWheelUnit::Point,
+            delta: egui::vec2(0., delta.clamp(-200., 200.)),
+            modifiers: egui::Modifiers::default(),
+        });
+        self.started = Instant::now();
+        ctx.request_repaint();
+        false
     }
     fn mac_native_other_unchanged(&self, ctx: &egui::Context) {
         let (other, value) = ctx

@@ -122,6 +122,11 @@ struct Metrics {
     routing_load_example: Option<egui::Rect>,
     routing_router_options: Option<egui::Rect>,
     mac_source: Option<egui::Rect>,
+    mac_inspect: Option<egui::Rect>,
+    mac_source_popup: Option<egui::Rect>,
+    mac_action_popup: Option<egui::Rect>,
+    mac_clear_popup: Option<egui::Rect>,
+    vlan_switch_popup: Option<egui::Rect>,
     mac_sources: Vec<(String, egui::Rect)>,
     mac_destination: Option<egui::Rect>,
     mac_time: Option<egui::Rect>,
@@ -129,6 +134,12 @@ struct Metrics {
     mac_settings: Option<egui::Rect>,
     mac_lifetime: Option<egui::Rect>,
     mac_aging: Option<egui::Rect>,
+    mac_clear_switch: Option<egui::Rect>,
+    mac_clear_choices: Vec<(String, egui::Rect)>,
+    mac_clear_vlan: Option<egui::Rect>,
+    vlan_switch_picker: Option<egui::Rect>,
+    vlan_switch_choices: Vec<(String, egui::Rect)>,
+    vlan_named_fields: Vec<(String, String, &'static str, egui::Rect)>,
     mac_example_action: Option<egui::Rect>,
     mac_example_choices: Vec<(usize, egui::Rect)>,
     mac_send: Option<egui::Rect>,
@@ -334,6 +345,15 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-layout") {
+                20000
+            } else if smoke
+                && matches!(
+                    std::env::var("DLMS_SMOKE_STAGE").as_deref(),
+                    Ok("mac-lessons") | Ok("mac-handover")
+                )
+            {
+                18000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-learning") {
                 16000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-history") {
