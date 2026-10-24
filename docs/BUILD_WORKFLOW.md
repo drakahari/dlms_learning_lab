@@ -28,6 +28,13 @@ Set a smoke-stage environment variable only for that invocation when needed.
 Never pass learner-supplied scripts to host tools. The reference tools retain
 their fixed, disposable development-fixture restrictions.
 
+Native capture code must not call other egui Context methods from inside
+`ctx.data` or `ctx.data_mut` closures. Read geometry, zoom and pixels-per-point
+first, then store only the precomputed values. Context re-entry has caused two
+capture-only lock failures; it is separate from the historical Wayland callback
+issue. Exercise actual capture-phase code in a regression, not only its case
+list, before running a new native measurement stage.
+
 For a same-project worktree, invoke the main runner with `--cwd WORKTREE` before
 the action. Each canonical checkout now has an exclusive Cargo target. Main
 keeps `target/`; a worktree uses `.build-artifacts/targets/NAME-PATHHASH` on the
