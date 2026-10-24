@@ -426,12 +426,11 @@ impl LabApp {
                 started.elapsed().as_secs() < 15,
                 "native lesson geometry did not settle"
             );
-            let count =
-                if previous == Some(current) && (zoom - self.scale).abs() < 0.01 {
-                    count + 1
-                } else {
-                    0
-                };
+            let count = if previous == Some(current) && (zoom - self.scale).abs() < 0.01 {
+                count + 1
+            } else {
+                0
+            };
             d.insert_temp(key, (Some(current), count, started));
             count >= 2
         });
