@@ -60,3 +60,12 @@ M65 adds four local-account lifecycle assignments after access foundations. Rech
 
 
 M70 strengthens only the already Partial LPIC-2v4.5 202.1/K1/T4 rows with four actual service-definition, preparation/ordering, optional-failure and target-handover assignments. Current and separate next-session outcomes, preserved context and alternate solutions are tested. No new row is promoted; SysV/LSB/full boot and unimplemented exact terms remain Open. The original official fingerprints are unchanged; scoped sources checked2026-10-23. See UNIT_MANAGER_LESSONS.md.
+
+
+M76 adds a tested MAC-learning library foundation only. Current CCNA1.13 and
+its four lettered entries remain Open because native instruction and practice
+are not accepted yet. The gap descriptions now distinguish the implemented
+source/VLAN/table/aging model from the absent learner workspace and curriculum.
+No status, authored-ID, objective-source fingerprint or count changes. Primary
+Cisco v1.1/MAC references rechecked2026-10-24; full inventory remains2026-10-22.
+See MAC_LEARNING_SUBSET.md.
