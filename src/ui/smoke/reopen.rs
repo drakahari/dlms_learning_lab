@@ -955,14 +955,20 @@ mod tests {
     #[test]
     fn contained_profile_paths_reject_parent_escape_symlinks_and_nonordinary_files() {
         let root = tempfile::tempdir().unwrap();
-        // Canonicalize only this known freshly created fixture base. macOS may
-        // expose its temp directory through /var -> /private/var; production
-        // containment still refuses all symlink components without normalization.
+        // Canonicalize this fresh Unix fixture to avoid macOS /var aliases.
+        // On Windows canonicalize introduces verbatim path semantics; retain
+        // the original ordinary temp path used by the previously passing test.
+        // The developer reopen entry point remains Linux-only and unchanged.
+        #[cfg(not(windows))]
         let base = fs::canonicalize(root.path()).unwrap();
+        #[cfg(windows)]
+        let base = root.path().to_path_buf();
         let data = base.join("data");
         fs::create_dir(&data).unwrap();
-        assert!(contained_path(&data.join("future/progress-v1.json"), &data).is_ok());
-        assert!(contained_path(&data.join("../outside"), &data).is_err());
+        let future = data.join("future").join("progress-v1.json");
+        let result = contained_path(&future, &data);
+        assert!(result.is_ok(), "fresh fixture {future:?}: {result:?}");
+        assert!(contained_path(&data.join("..").join("outside"), &data).is_err());
         assert!(contained_path(&base.join("outside"), &data).is_err());
         #[cfg(unix)]
         {

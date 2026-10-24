@@ -914,3 +914,32 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
 - Independent read-only source review finds no material issue: only explicit
   drafts invalidate, comparisons match the existing editors, missing legacy
   values retain credit and wrong applied values still fail the original goals.
+
+
+### M88–M89 source and integration work in progress
+
+- Three distinct Find-content proposals pass55 targeted checks/Clippy before
+  registration. Normal116 helper integration then passes903 model checks/85
+  targets; main still113 pending integration. Exact inventory, owner500/700
+  alternatives, partial search and scoped private handover are actual outcomes,
+  not find-command history credentials. The first backup-inspect test failure
+  is retained; its exact expected projection changes only the separately rerun
+  practice result/revision, retaining all other fields and genuine6/7 history.
+- Client teaching d403077 integrates through7809b5f after70 scoped gates. No count,
+  model State/Goal/version/evaluator/dependency change. Main combined/native gates
+  remain pending. Root's independent source review added supplied-context pinning
+  and font-derived Run sizing before acceptance. See CLIENT_TEACHING.md.
+- CI40120315031 finishes Ubuntu PASS and macOS tests/release compile PASS. Windows
+  has one developer-fixture failure; no actual desktop failure is inferred.
+  Rust1.99.1 documents Windows canonicalize extended-length paths and verbatim
+  separator differences: https://doc.rust-lang.org/std/fs/fn.canonicalize.html
+  and https://doc.rust-lang.org/std/path/enum.Prefix.html (checked2026-10-24).
+  Root prepares test-only fresh-fixture correction with all assertions intact;
+  production reopen prefix remains exact28148b37…. New Windows gate is pending.
+- Find actual-egui Enter reproduction catches a pending practice command running
+  while reset confirmation is open. R1 retains4pass/1fail; narrow fix/regression
+  underway before native acceptance. Native controller/phase and font-fit checks
+  are not a novice, physical keyboard, screen-reader or other-platform study.
+- Test-only Windows fixture correction passes the focused Fedora regression;
+  production-prefix bytes remain identical. MAIN merged client/DNS/Mount/backup
+  checks pass22; Windows execution of the correction still needs fresh CI.

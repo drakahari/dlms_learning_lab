@@ -4,6 +4,44 @@ Updated2026-10-24 during authorized continuation. **The application is not compl
 Ordinary implementation remains authorized; no public release is authorized.
 Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference runs.
 
+## Active continuation state (M87–M89)
+
+- Main7809b5f integrates reviewed client teaching d403077 after70 scoped gates.
+  It preserves the original client State/Goal/version/solutions, adds independent
+  practice and atomic native fields, pins supplied router/LAN/target context and
+  derives Run width from text. Merge conflict retains BOTH root DNS/Mount pending
+  guard and client checks. Main combined regression/native acceptance is pending.
+  Source count is still113/27. Root0f5bed0 feedback fix and8a21899 delivery evidence
+  are pushed;7809b5f is not yet pushed. Main has a test-only Windows CI fixture fix
+  pending targeted gate. Do not claim these newer changes are in73777e0 candidate.
+- Find content61c03e7 passes55 targeted checks/Clippy, remains source-reviewed.
+  Helper filesystem-find-lessons worktree has normal116/28 registration + native
+  controller21000..21999 uncommitted. Its903 model/integration checks across85
+  targets pass after correcting only a stale current-context101→104 expectation.
+  Original113/frozen109/106/6/7 data remain unchanged. Current normal-main count
+  does not increase until integration; no find authored coverage promotion yet.
+- Find focused UI R1 passes4/5, including36 actual painted Run-text configurations
+  and real capture-geometry execution. The fifth reproduces Enter executing a
+  practice command behind reset confirmation. Helper owns the sole heavy slot
+  for narrow inactive execution/disabled-Run/focus fix and unchanged modal
+  regression, then affected UI/Clippy/build. No actual Find native run yet.
+- Client helper has finished70 gates, source committed d403077 and is writing a
+  separate actual-native driver23000..23999, source-only. It must be reviewed/
+  gated before running. No successful State/engine execution injection permitted.
+- CI40120315031 at73777e0 is COMPLETE: Ubuntu tests/Clippy/candidate PASS;
+  macOS tests/Clippy/release compile PASS (archive still notice-gated); Windows
+  fails one contained-profile-path test (156pass/1fail UI). Root retrieved the
+  safe viewer log m87-windows-737-ci-step.log. The known fresh macOS-fixture
+  canonicalization introduced Windows verbatim path semantics. Source-only test
+  correction retains ordinary Windows temp paths and component-wise joins;
+  all assertions and production guard bytes are unchanged (prefix28148b37…).
+  Exact correction passes its focused Fedora test; production prefix is byte-
+  identical. MAIN merged client/seed pending guards and backup pass22 checks.
+  Verify the correction in new Windows CI before claiming it passes there.
+- MAIN latest accepted package is113/73777e0: full4MAC57captures, alignment72,
+  quiet Wayland10/10 and strict two-process cold reopen9captures PASS. Exact
+  launch and checksums below. Historical startup cause remains unresolved.
+
 ## Current source and actual coverage
 
 - Normal catalog: **113 authored labs /27 units:35CCNA,21LPIC-1,17LPIC-2,40Bash/Shell**.
@@ -20,9 +58,10 @@ Read AGENTS.md and BUILD_WORKFLOW.md before builds, tests or native/reference ru
   completion percentage. Most certification and advanced shell work remains
   unfinished. Source versions/fingerprints stay unchanged; future blueprints
   remain separate. See COMPLETION.md and OBJECTIVE_MAPPING.md.
-- Expanded units have separate introductions/examples/assignments. Three legacy
-  seeds (gateway, DNS, storage) still lack the newer teaching metadata; a
-  source-only audit is underway. Do not claim every unit meets that standard.
+- Expanded units have separate introductions/examples/assignments. The gateway
+  teaching adapter is now integrated after scoped gates, awaiting combined/native
+  acceptance. Two legacy seeds (DNS and storage) still lack newer teaching
+  metadata. Do not claim every unit meets that standard.
 
 ## Current integration gates and native evidence
 
