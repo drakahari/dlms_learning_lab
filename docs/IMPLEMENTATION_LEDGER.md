@@ -1000,3 +1000,38 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   review;21 prospective tests are unrun. Getopts is a researched capability
   contract only, not an implemented builtin or authored curriculum. Source-only
   parallel review never launches a second heavy command.
+
+
+### M91 safe pause — owner request, 2026-10-24
+
+- Code milestone deb55b92a2407a0068b8ba83dff9b71568562893 is pushed. Full174 UI,
+  all-target Clippy/fmt/diff pass. Source models/Goals/evaluator remain unchanged.
+- Clean deb55 Fedora116/28 candidate built; actual identified1608 upgrade,
+  outside-checkout identity/content/hash/desktop, uninstall/reinstall and exact
+  original-nine synthetic bytes pass. ArchiveSHA256
+  c12be61f95c506a455dcc534e533894fa0700ce1600fd9fb54c15bf94aa033df;
+  binarySHA256f3e6bd5110a1962b590bd1236e59abb7b24179e7f4b0d2e8adc45d09c21000f5.
+- Exact installed client full flow23 captures (run-aeptboln) and Find3 full flow46
+  (run-2z9qjy5k) PASS. Root inspected actual task opening, compact topology,
+  feedback and Light150/Dark200 fields. Before run-9i7bn02d/after run-2z9qjy5k
+  show task restored at the top and stable smaller terminal. Wrong/partial/
+  alternative/current-invalidation, separate drafts, save/readback/resume,
+  selected reset/cancel and Challenge exercised with actual native injected input.
+- New deb55 shared72-view alignment, repeated quiet startup and strict two-process
+  cold reopen remain pending. Earlier113 acceptance and1608 quiet10/10/protocol
+  evidence stay separately identified. Historical callback cause unresolved.
+- CI40128237589 at1608a18 now passes all3 native runners. Unsigned Windows116
+  archive retained and independently verified:27 embedded source packs exact,
+ 137 dependency packages,391 notice/source hashes and Rust standard-library
+  notice. No Windows/macOS desktop execution; deb55's later UI fix is not inside
+  that archive. macOS compile passed, packaging still notice-gated.
+- Source-reviewed legacy teaching R4 (17paths/21unrun checks) and NoAnswer R1
+  (4paths/12unrun) remain frozen in private worktrees/archived snapshots. Getopts
+  remains research plus50 proposed cases; its clean worktree has no implementation.
+  None is counted as delivered content or objective coverage. Matrix remains
+ 133Partial/1Supporting/1106Open; narrow Find reporting update is pending.
+- Owner requested pause. The already-running finite Find check finished and was
+  reaped; both helpers stopped, no active/unfinished command markers remain, and
+  no new heavy command launched after the request. Main reporting checkpoint is
+  docs/CHECKPOINT.md. Private receipt m91-paused-status SHA256
+ 39665eec28bd96f1bf1d051f529d3cf8e0780abe849dbfb50ce667312c37de46.

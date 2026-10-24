@@ -545,3 +545,33 @@ remain pending. The historical Wayland stall remains unreproduced, not diagnosed
 macOS dispatch notice/signing gates remain; no installer security setting is bypassed,
 no credentials generated and no public release published. Later source-only seed
 pending-draft feedback refinements are not inside this immutable candidate.
+
+
+### M91 paused owner-test milestone (116 labs, 28 units)
+
+Clean Fedora source `deb55b92a2407a0068b8ba83dff9b71568562893`:
+
+```sh
+./dist/dlms-learning-lab-0.1.0-gdeb55b92a240-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Archive SHA256 `c12be61f95c506a455dcc534e533894fa0700ce1600fd9fb54c15bf94aa033df`;
+binary SHA256 `f3e6bd5110a1962b590bd1236e59abb7b24179e7f4b0d2e8adc45d09c21000f5`.
+Actual installed upgrade/lifecycle/exact synthetic progress checks pass. Full
+installed gateway23 and Find46 captures pass, including alternative/incorrect/
+partial/current-state results, independent drafts and Light150/Dark200 input.
+Shared174 UI regressions and Clippy/fmt pass. Exact deb55 native72-view alignment,
+repeated quiet starts and strict two-process cold reopen remain pending at the
+owner-requested pause; earlier identities are not relabeled. The historical
+intermittent Wayland callback cause remains unresolved. These checks do not
+establish novice, physical keyboard, screen-reader or other-platform acceptance.
+
+CI40128237589 at prior source1608a18 passes Ubuntu/Windows/macOS tests and
+applicable compile/candidate steps. Downloaded unsigned Windows116 candidate:
+`dist/native-ci-1608a18/windows/dlms-learning-lab-0.1.0-g1608a18b0aa0-x86_64-pc-windows-msvc-windows-candidate.zip`,
+archiveSHA256 `f2ea12b08eecfe16294cf9f07df45f7c0962ab8bcc6122949e6fc848c14c1503`.
+All27 source packs embedded in its PE match exact Git bytes/manifests;137 package
+notices/source archives and the Rust standard-library notice were verified. It
+predates deb55's scroll correction and has NOT run on a Windows desktop. macOS
+compiled but packaging still requires the unresolved original dispatch notice.
+No release was published. Detailed resume state is in CHECKPOINT.md.
