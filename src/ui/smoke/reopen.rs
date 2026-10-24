@@ -40,8 +40,37 @@ struct Marker {
 struct Observed {
     progress_path: String,
     preferences_path: String,
+    // Existing Progress serialization is the portable learning projection.
     progress: serde_json::Value,
+    // Preserve EVERY main-file field and separately observed loaded provenance.
+    raw_progress: serde_json::Value,
+    migration_receipts: serde_json::Value,
     preferences: serde_json::Value,
+}
+fn observation_views(
+    path: &Path,
+    raw: &[u8],
+    progress: &Progress,
+    preferences: &theme::Preferences,
+) -> Result<Observed, String> {
+    if raw.len() > 16_000_000 {
+        return Err("Private raw profile ceiling".into());
+    }
+    Ok(Observed {
+        progress_path: path.to_str().ok_or("Private path must be UTF8")?.into(),
+        preferences_path: path
+            .with_file_name("preferences-v1.json")
+            .to_str()
+            .ok_or("Private path must be UTF8")?
+            .into(),
+        progress: serde_json::to_value(progress).map_err(|_| "Cannot observe loaded progress")?,
+        raw_progress: serde_json::from_slice(raw)
+            .map_err(|_| "Cannot observe full raw progress")?,
+        migration_receipts: serde_json::to_value(&progress.migration_receipts)
+            .map_err(|_| "Cannot observe loaded migration receipts")?,
+        preferences: serde_json::to_value(preferences)
+            .map_err(|_| "Cannot observe loaded preferences")?,
+    })
 }
 fn bounded_file(path: &Path, limit: usize) -> Result<Vec<u8>, String> {
     let ceiling = u64::try_from(limit)
@@ -277,10 +306,8 @@ impl Session {
         }
         Ok(())
     }
-    fn write(&self, name: &str, value: &impl Serialize) -> Result<(), String> {
-        let bytes =
-            serde_json::to_vec_pretty(value).map_err(|_| "Cannot encode private observation")?;
-        if bytes.len() > JSON_CAP {
+    fn write_raw(&self, name: &str, bytes: &[u8], limit: usize) -> Result<(), String> {
+        if bytes.len() > limit {
             return Err("Private observation ceiling".into());
         }
         let path = self.root.join(name);
@@ -294,32 +321,34 @@ impl Session {
         let mut f = options
             .open(&path)
             .map_err(|_| "Private observation already exists or cannot be created")?;
-        f.write_all(&bytes)
+        f.write_all(bytes)
             .and_then(|_| f.sync_all())
             .map_err(|_| "Cannot persist private observation".to_string())
     }
-    fn observed(&self, app: &LabApp) -> Observed {
+    fn write(&self, name: &str, value: &impl Serialize) -> Result<(), String> {
+        let bytes =
+            serde_json::to_vec_pretty(value).map_err(|_| "Cannot encode private observation")?;
+        self.write_raw(name, &bytes, JSON_CAP)
+    }
+    fn observed(&self, app: &LabApp) -> (Observed, Vec<u8>, Vec<u8>) {
         self.verify_profile_paths(&app.path)
             .expect("private normal path");
-        let disk = progress::load(&app.path, &app.scenarios).expect("actual normal saved progress");
-        let preferences = theme::Preferences::load(&app.path.with_file_name("preferences-v1.json"))
-            .expect("actual saved appearance");
+        // One actual raw snapshot feeds the same decoder used by normal load.
+        let raw = bounded_file(&app.path, 16_000_000).expect("actual saved raw progress");
+        let disk = progress::decode(&raw, &app.scenarios).expect("actual normal decoded progress");
+        let preferences_path = app.path.with_file_name("preferences-v1.json");
+        let raw_preferences =
+            bounded_file(&preferences_path, 4096).expect("actual saved raw appearance");
+        let preferences =
+            theme::Preferences::load(&preferences_path).expect("actual normal saved appearance");
         assert_eq!(
             serde_json::to_value(&disk.attempts).unwrap(),
             serde_json::to_value(&app.progress.attempts).unwrap()
         );
         assert_eq!(disk.favorites, app.progress.favorites);
-        Observed {
-            progress_path: app.path.to_str().unwrap().into(),
-            preferences_path: app
-                .path
-                .with_file_name("preferences-v1.json")
-                .to_str()
-                .unwrap()
-                .into(),
-            progress: serde_json::to_value(disk).unwrap(),
-            preferences: serde_json::to_value(preferences).unwrap(),
-        }
+        let views = observation_views(&app.path, &raw, &disk, &preferences)
+            .expect("actual raw and loaded observation");
+        (views, raw, raw_preferences)
     }
 }
 impl LabApp {
@@ -390,6 +419,52 @@ impl LabApp {
             "fixed item must be visible in the popup"
         );
         self.click_smoke_control(ctx, Some(rect))
+    }
+    fn reopen_start_card(&mut self, ctx: &egui::Context, id: &str) -> bool {
+        let target = self
+            .scenarios
+            .iter()
+            .position(|s| s.id == id)
+            .expect("fixed existing lab");
+        let key = egui::Id::new(("native-click-phases", self.smoke_stage));
+        let phase = ctx.data(|d| d.get_temp::<u8>(key)).unwrap_or(0);
+        if phase >= 2 {
+            // The actual click may already have replaced the library with a workspace.
+            let done = self.click_visible_smoke_control(ctx, None);
+            assert_eq!(
+                self.selected,
+                Some(target),
+                "actual Start must open the requested lab"
+            );
+            return done;
+        }
+        assert!(
+            self.selected.is_none(),
+            "Start requires the current library"
+        );
+        let exactly_target = {
+            let mut matches = self.scenarios.iter().filter(|s| {
+                let attempt = self.progress.attempts.get(&s.id);
+                catalog::matches(
+                    s,
+                    &self.filter,
+                    attempt.is_some(),
+                    attempt.is_some_and(|a| progress::current_solved(a, s)),
+                    self.progress.favorites.contains(&s.id),
+                )
+            });
+            matches.next().is_some_and(|s| s.id == id) && matches.next().is_none()
+        };
+        assert!(
+            exactly_target,
+            "library must match exactly the requested real lab"
+        );
+        assert_eq!(
+            self.metrics.card_actions.len(),
+            1,
+            "one real target card must be rendered before clicking"
+        );
+        self.click_visible_smoke_control(ctx, self.metrics.card_actions.first().map(|r| r.0))
     }
     fn reopen_filter(&mut self, id: &str) {
         let title = self
@@ -512,10 +587,7 @@ impl LabApp {
                 }
                 2 => {
                     assert!(self.progress.favorites.contains(COMPLETE_LAB));
-                    if !self.click_visible_smoke_control(
-                        ctx,
-                        self.metrics.card_actions.first().map(|r| r.0),
-                    ) {
+                    if !self.reopen_start_card(ctx, COMPLETE_LAB) {
                         return;
                     }
                 }
@@ -553,11 +625,7 @@ impl LabApp {
                 }
                 9 => self.reopen_filter(DRAFT_LAB),
                 10 => {
-                    assert_eq!(self.metrics.card_actions.len(), 1);
-                    if !self.click_visible_smoke_control(
-                        ctx,
-                        self.metrics.card_actions.first().map(|r| r.0),
-                    ) {
+                    if !self.reopen_start_card(ctx, DRAFT_LAB) {
                         return;
                     }
                 }
@@ -653,7 +721,14 @@ impl LabApp {
                     self.reopen_assert_state();
                     self.save();
                     assert!(!self.dirty && self.storage_error.is_none());
-                    let observed = session.observed(self);
+                    let (observed, raw, raw_preferences) = session.observed(self);
+                    // BEFORE exit, preserve exact bytes independently of portable serialization.
+                    session
+                        .write_raw("writer-progress.raw", &raw, 16_000_000)
+                        .unwrap();
+                    session
+                        .write_raw("writer-preferences.raw", &raw_preferences, 4096)
+                        .unwrap();
                     session.write("writer-observed.json", &observed).unwrap();
                     println!(
                         "PASS native reopen writer: actual VM completion and independent unfinished drafts saved with favorite and appearance"
@@ -693,28 +768,21 @@ impl LabApp {
                         expected.preferences
                     );
                     self.reopen_assert_state();
-                    let loaded = Observed {
-                        progress_path: self.path.to_str().unwrap().into(),
-                        preferences_path: self
-                            .path
-                            .with_file_name("preferences-v1.json")
-                            .to_str()
-                            .unwrap()
-                            .into(),
-                        progress: serde_json::to_value(&self.progress).unwrap(),
-                        preferences: serde_json::json!({"version":1,"theme":self.theme_id,"text_scale":self.scale}),
+                    let raw = bounded_file(&self.path, 16_000_000).unwrap();
+                    let preferences = theme::Preferences {
+                        version: 1,
+                        theme: self.theme_id.clone(),
+                        text_scale: self.scale,
                     };
+                    let loaded =
+                        observation_views(&self.path, &raw, &self.progress, &preferences).unwrap();
                     assert_eq!(loaded, expected);
                     session.write("reader-loaded.json", &loaded).unwrap();
                     shot = Some("reopen-read-loaded-library");
                 }
                 1 => self.reopen_filter(DRAFT_LAB),
                 2 => {
-                    assert_eq!(self.metrics.card_actions.len(), 1);
-                    if !self.click_visible_smoke_control(
-                        ctx,
-                        self.metrics.card_actions.first().map(|r| r.0),
-                    ) {
+                    if !self.reopen_start_card(ctx, DRAFT_LAB) {
                         return;
                     }
                 }
@@ -742,10 +810,7 @@ impl LabApp {
                 }
                 7 => self.reopen_filter(COMPLETE_LAB),
                 8 => {
-                    if !self.click_visible_smoke_control(
-                        ctx,
-                        self.metrics.card_actions.first().map(|r| r.0),
-                    ) {
+                    if !self.reopen_start_card(ctx, COMPLETE_LAB) {
                         return;
                     }
                 }
@@ -1051,5 +1116,218 @@ mod context_tests {
         fs::rename(&marker, &saved).unwrap();
         std::os::unix::fs::symlink(&saved, &marker).unwrap();
         assert!(Session::from_config(false, true, &env, &cwd).is_err());
+    }
+}
+
+#[cfg(test)]
+mod navigation_tests {
+    use super::*;
+    fn app() -> (egui::Context, LabApp) {
+        let ctx = egui::Context::default();
+        // Existing fresh synthetic test path only; never normal/personal progress.
+        let mut app = LabApp::from_context(&ctx, true, false);
+        app.smoke = false;
+        (ctx, app)
+    }
+    fn frame(ctx: &egui::Context, app: &mut LabApp) {
+        let events = std::mem::take(&mut app.pending_events);
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1200., 850.),
+                )),
+                events,
+                ..Default::default()
+            },
+            |ctx| app.render(ctx),
+        );
+    }
+    fn draw(ctx: &egui::Context, app: &mut LabApp) {
+        for _ in 0..3 {
+            frame(ctx, app);
+        }
+    }
+    fn actual_start_and_complete_after_workspace_render(
+        ctx: &egui::Context,
+        app: &mut LabApp,
+        id: &str,
+        stage: usize,
+    ) {
+        app.smoke_stage = stage;
+        assert_eq!(app.metrics.card_actions.len(), 1);
+        for _ in 0..32 {
+            if app.selected.is_some() {
+                break;
+            }
+            assert!(!app.reopen_start_card(ctx, id));
+            frame(ctx, app); // bounded reveal/hover/actual press-release frames
+        }
+        assert!(
+            app.selected.is_some(),
+            "the actual card must have opened a workspace"
+        );
+        frame(ctx, app); // actual workspace has replaced the library
+        assert!(app.selected.is_some());
+        assert!(app.metrics.card_actions.is_empty());
+        assert!(app.reopen_start_card(ctx, id)); // completes the click without requiring a vanished card
+        assert!(
+            ctx.data(|d| d.get_temp::<u8>(egui::Id::new(("native-click-phases", stage))))
+                .is_none()
+        );
+    }
+    #[test]
+    fn reopen_real_start_back_filter_and_second_start_finish_after_card_metrics_disappear() {
+        let (ctx, mut app) = app();
+        app.reopen_filter(COMPLETE_LAB);
+        draw(&ctx, &mut app);
+        actual_start_and_complete_after_workspace_render(&ctx, &mut app, COMPLETE_LAB, 17002);
+        app.smoke_stage = 17008;
+        let mut back = false;
+        for _ in 0..30 {
+            let target = app.metrics.back;
+            if app.click_visible_smoke_control(&ctx, target) {
+                back = true;
+                break;
+            }
+            frame(&ctx, &mut app);
+        }
+        assert!(
+            back && app.selected.is_none(),
+            "actual Back must return to the library"
+        );
+        app.reopen_filter(DRAFT_LAB);
+        draw(&ctx, &mut app);
+        actual_start_and_complete_after_workspace_render(&ctx, &mut app, DRAFT_LAB, 17010);
+        let target = app
+            .scenarios
+            .iter()
+            .position(|s| s.id == DRAFT_LAB)
+            .unwrap();
+        assert_eq!(app.selected, Some(target));
+        assert_eq!(
+            app.progress.attempts[DRAFT_LAB].state,
+            app.scenarios[target].initial
+        );
+        assert!(!progress::current_solved(
+            &app.progress.attempts[DRAFT_LAB],
+            &app.scenarios[target]
+        ));
+    }
+    fn rejected_before_any_start(search: &str) {
+        let (ctx, mut app) = app();
+        app.filter.search = search.into();
+        draw(&ctx, &mut app);
+        app.smoke_stage = 17010;
+        let rejected = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            app.reopen_start_card(&ctx, DRAFT_LAB)
+        }));
+        assert!(rejected.is_err());
+        assert!(app.pending_events.is_empty());
+        assert!(app.selected.is_none());
+        assert!(app.progress.attempts.is_empty());
+    }
+    #[test]
+    fn reopen_no_matching_card_cannot_be_treated_as_a_start() {
+        rejected_before_any_start("no-such-fixed-lab");
+    }
+    #[test]
+    fn reopen_multiple_real_cards_cannot_be_treated_as_a_start() {
+        rejected_before_any_start("");
+    }
+}
+
+#[cfg(test)]
+mod observation_tests {
+    use super::*;
+    #[test]
+    fn normal_save_load_preserves_raw_receipts_separately_from_portable_progress_and_detects_valid_mutation()
+     {
+        let root = tempfile::tempdir().unwrap();
+        let path = root.path().join("progress-v1.json");
+        let progress = Progress {
+            schema_version: 1,
+            ..Default::default()
+        };
+        progress::save(&path, &progress).unwrap();
+        let preferences = theme::Preferences::default();
+        preferences
+            .save(&path.with_file_name("preferences-v1.json"))
+            .unwrap();
+        let raw = bounded_file(&path, 16_000_000).unwrap();
+        // Real standard saver/loader; no Record or completion is manufactured.
+        let loaded = progress::load(&path, &[]).unwrap();
+        let original = observation_views(&path, &raw, &loaded, &preferences).unwrap();
+        assert!(original.progress.get("migration_receipts").is_none());
+        assert_eq!(
+            original.raw_progress["migration_receipts"],
+            original.migration_receipts
+        );
+        assert_eq!(
+            original.migration_receipts["shell"],
+            serde_json::json!([shell::EVALUATOR_REVISION])
+        );
+        assert!(
+            original.progress["attempts"]
+                .as_object()
+                .unwrap()
+                .is_empty()
+        );
+        assert!(loaded.migration_receipts.is_some());
+        let mut changed = original.raw_progress.clone();
+        let workspace = changed["migration_receipts"]["workspace"]
+            .as_bool()
+            .unwrap();
+        changed["migration_receipts"]["workspace"] = serde_json::Value::Bool(!workspace);
+        let changed_raw = serde_json::to_vec(&changed).unwrap();
+        let changed_loaded = progress::decode(&changed_raw, &[])
+            .expect("receipt-only change remains structurally valid");
+        let changed_observation =
+            observation_views(&path, &changed_raw, &changed_loaded, &preferences).unwrap();
+        assert_eq!(
+            changed_observation.progress, original.progress,
+            "portable view alone misses this change"
+        );
+        assert_ne!(changed_observation.raw_progress, original.raw_progress);
+        assert_ne!(
+            changed_observation.migration_receipts,
+            original.migration_receipts
+        );
+        assert_ne!(
+            changed_observation, original,
+            "full observation must preserve provenance too"
+        );
+        assert_eq!(
+            bounded_file(&path, 16_000_000).unwrap(),
+            raw,
+            "mutation probe must not rewrite actual saved bytes"
+        );
+    }
+    #[test]
+    fn writer_raw_snapshots_are_exact_finite_and_never_replace_an_occupied_path() {
+        let root = tempfile::tempdir().unwrap();
+        let session = Session {
+            root: root.path().into(),
+            role: Role::Write,
+        };
+        let data = b"{\"migration_receipts\":{\"workspace\":true,\"shell\":[8]}}\n";
+        session
+            .write_raw("writer-progress.raw", data, 16_000_000)
+            .unwrap();
+        assert_eq!(
+            bounded_file(&root.path().join("writer-progress.raw"), 16_000_000).unwrap(),
+            data
+        );
+        assert!(
+            session
+                .write_raw("writer-progress.raw", b"replace", 16_000_000)
+                .is_err()
+        );
+        assert_eq!(
+            fs::read(root.path().join("writer-progress.raw")).unwrap(),
+            data
+        );
+        assert!(session.write_raw("over-limit", b"12345", 4).is_err());
+        assert!(!root.path().join("over-limit").exists());
     }
 }

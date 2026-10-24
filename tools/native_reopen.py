@@ -248,6 +248,19 @@ def inventory(session):
     return dict(sorted(files.items()))
 
 
+def verify_writer_saved_bytes(expected, raw, preferences, snapshot, preferences_snapshot):
+    """Compare full raw data, not Progress's intentionally nonportable projection.
+    Byte identity catches late writes/format changes; no fields are ignored.
+    """
+    require(raw == snapshot, 'Writer progress bytes changed after the pre-exit snapshot')
+    require(preferences == preferences_snapshot, 'Writer appearance bytes changed after the pre-exit snapshot')
+    raw_json = json.loads(raw)
+    require(raw_json == expected['raw_progress'], 'Full raw writer JSON differs from observation')
+    require(raw_json.get('migration_receipts') == expected['migration_receipts'],
+            'Loaded provenance differs from full raw main-file provenance')
+    require(json.loads(preferences) == expected['preferences'], 'Saved writer appearance differs')
+
+
 def publish_manifest(session, report):
     exclusive(session / 'MANIFEST.json', json_bytes(report))
     # Prepare/fsync first; publishing the hard link is the no-clobber commit boundary.
@@ -309,10 +322,9 @@ def main():
             require(preferences_path == progress_path.with_name('preferences-v1.json'), 'Unexpected preferences path')
             raw = read_bytes(progress_path, PROFILE_CAP)
             prefs = read_bytes(preferences_path, 4096)
-            require(json.loads(raw) == expected['progress'], 'Saved writer progress differs from observed state')
-            require(json.loads(prefs) == expected['preferences'], 'Saved writer appearance differs')
-            exclusive(session / 'writer-progress.raw', raw)
-            exclusive(session / 'writer-preferences.raw', prefs)
+            snapshot = read_bytes(session / 'writer-progress.raw', PROFILE_CAP)
+            preferences_snapshot = read_bytes(session / 'writer-preferences.raw', 4096)
+            verify_writer_saved_bytes(expected, raw, prefs, snapshot, preferences_snapshot)
         else:
             loaded = json.loads(read_bytes(session / 'reader-loaded.json', JSON_CAP))
             require(loaded == expected, 'Second process did not load the exact writer observation')

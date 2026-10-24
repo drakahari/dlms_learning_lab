@@ -1,5 +1,6 @@
 """SOURCE ONLY guard tests. No subprocess, Bash, GUI or compiler is started here."""
 import importlib.util
+import copy
 from contextlib import contextmanager
 import io
 import stat
@@ -222,6 +223,56 @@ class FixedCaptureGuards(unittest.TestCase):
             root = Path(temporary); (root / 'COMPLETE').write_bytes(b'preserve existing')
             with self.assertRaises(FileExistsError): reopen.publish_manifest(root, {'passed': True})
             self.assertEqual((root / 'COMPLETE').read_bytes(), b'preserve existing')
+
+
+class RawObservationGuards(unittest.TestCase):
+    @staticmethod
+    def fixture():
+        # Hand-authored pending-only synthetic wire data: no successful Record/credit.
+        portable = {'schema_version': 1, 'clock': 1, 'favorites': [], 'attempts': {
+            'shell-case-publication': {'scenario_version': 1, 'state': {'kind': 'Script', 'source': "printf 'unfinished", 'run': None},
+                'step': 0, 'challenge': False, 'hints': 0, 'transcript': [], 'visited': 1}}}
+        receipts = {'workspace': True, 'shell': [8]}
+        raw_json = copy.deepcopy(portable)
+        raw_json['migration_receipts'] = copy.deepcopy(receipts)
+        preferences = {'version': 1, 'theme': 'dlms-light', 'text_scale': 1.5}
+        observed = {'progress': portable, 'raw_progress': raw_json,
+                    'migration_receipts': receipts, 'preferences': preferences}
+        raw = json.dumps(raw_json, separators=(',', ':')).encode()
+        prefs = json.dumps(preferences).encode()
+        return observed, raw, prefs
+
+    def test_full_raw_and_explicit_receipts_succeed_despite_portable_serialization_omission(self):
+        expected, raw, prefs = self.fixture()
+        self.assertNotIn('migration_receipts', expected['progress'])
+        self.assertIn('migration_receipts', json.loads(raw))
+        reopen.verify_writer_saved_bytes(expected, raw, prefs, raw, prefs)
+        self.assertEqual(json.loads(raw)['migration_receipts'], expected['migration_receipts'])
+
+    def test_every_post_exit_byte_change_in_provenance_drafts_identity_format_or_preferences_fails(self):
+        expected, raw, prefs = self.fixture()
+        receipt = json.loads(raw); receipt['migration_receipts']['workspace'] = False
+        draft = json.loads(raw); draft['attempts']['shell-case-publication']['state']['source'] += 'changed'
+        identity = json.loads(raw); identity['favorites'] = ['shell-case-interface']
+        for changed in [json.dumps(receipt).encode(), json.dumps(draft).encode(), json.dumps(identity).encode(), raw + b'\n']:
+            with self.assertRaises(reopen.ReopenError): reopen.verify_writer_saved_bytes(expected, changed, prefs, raw, prefs)
+        changed_prefs = dict(expected['preferences'], text_scale=2.0)
+        with self.assertRaises(reopen.ReopenError): reopen.verify_writer_saved_bytes(expected, raw, json.dumps(changed_prefs).encode(), raw, prefs)
+        self.assertEqual(json.loads(raw), expected['raw_progress'])
+
+    def test_full_json_and_loaded_receipt_checks_cannot_be_masked_by_matching_snapshot_bytes(self):
+        expected, raw, prefs = self.fixture()
+        receipt = json.loads(raw); receipt['migration_receipts']['workspace'] = False
+        extra = json.loads(raw); extra['unknown_new_field'] = True
+        draft = json.loads(raw); draft['attempts']['shell-case-publication']['state']['source'] += 'changed'
+        for changed in [receipt, extra, draft]:
+            both = json.dumps(changed).encode()
+            with self.assertRaises(reopen.ReopenError): reopen.verify_writer_saved_bytes(expected, both, prefs, both, prefs)
+        mismatched = copy.deepcopy(expected); mismatched['migration_receipts']['workspace'] = False
+        self.assertEqual(json.loads(raw), mismatched['raw_progress'], 'full raw guard must already pass in this independent receipt check')
+        with self.assertRaises(reopen.ReopenError): reopen.verify_writer_saved_bytes(mismatched, raw, prefs, raw, prefs)
+        changed_prefs = json.dumps(dict(expected['preferences'], text_scale=2.0)).encode()
+        with self.assertRaises(reopen.ReopenError): reopen.verify_writer_saved_bytes(expected, raw, changed_prefs, raw, changed_prefs)
 
 
 if __name__ == '__main__':
