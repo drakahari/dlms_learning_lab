@@ -592,7 +592,7 @@ pub(crate) fn check_requirement(state: &State, r: &Requirement) -> (bool, String
                     return (
                         false,
                         format!(
-                            "{unit}: its consumed application input produced a different result. Inspect configuration, then stop/start and initialize where needed."
+                            "{unit}: its previous run produced a different result. Check the application settings, then stop and start the service to use the saved values."
                         ),
                     );
                 }
@@ -609,7 +609,7 @@ pub(crate) fn check_requirement(state: &State, r: &Requirement) -> (bool, String
             (
                 fresh,
                 format!(
-                    "{unit}: successful execution must use current saved/loaded unit text, application configuration and prerequisite data"
+                    "{unit}: the last successful run must use the current unit file, application settings and prepared data. Reload changed unit files, then stop and start the service"
                 ),
             )
         }

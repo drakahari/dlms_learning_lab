@@ -189,3 +189,26 @@ UI checks are repeated regressions, not5 more new tests. Actual native execution
 final merged-catalog regression and screenshot inspection remain mandatory before
 claiming Fedora acceptance. No native run was performed on this earlier98-lab
 worktree; the root agent will run the final merged application.
+
+
+## Merged Fedora native verification — M69
+
+Merged main102-catalog development app passes the private fixture's actual-input
+plan in m69-manager-native-r1.log (17captures, native-runs/run-erni39j9). Root
+reviewed the real assignment, loaded/current-program mismatch and large dark
+layout. Actual menus, whole-file text editing/Save, command Run/Enter, example
+isolation, partial/failure/repair, Before alternative, current/fresh completion,
+query retention, state/edit invalidation, exact separate command/file/history/
+editor-kind resume and Reset/Cancel pass. Light150/Dark200 Check/scroll/layout
+views pass; native field typing at those larger scales is reserved for the
+upcoming authored-unit flow. Headless scaled editing/focus tests already pass,
+which is a separate kind of evidence. No authored unit-manager task is bundled
+or counted yet. No novice, physical-device, screen-reader, full-systemd or
+Windows/macOS runtime acceptance is inferred.
+
+Root main750library/integration and117distinct UIchecks pass combined after the
+separately recorded narrow OSPF heading correction; all-target Clippy/fmt pass.
+The earlier failed wrapper is preserved, not relabeled as green. A final two-string
+feedback refinement removes the hidden initialization instruction and developer
+jargon;65core/workspace/integration/terminal/session checks pass afterward, and
+the actual native flow above uses that final text.
