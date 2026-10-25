@@ -6,6 +6,23 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M100 Stop native retry
+
+- e850d47b02f950a83bb351ec0aa2b1c8b2d94082 candidate/lifecycle119/29 PASS;
+  privateprefixverified-e850d47b02f9-g0u1_2w5, archive
+  e5e943fd0271f0022b0a293fd1d6c265ed16d611e2b6d60b7e084120dd7323be,
+  binary49df9c8780cbc42d2223242377ce996e849eb62741d7169e64e7049b13abd6b2.
+  ActualdefaultWayland arrays-stop R1 FAILexit101 at4925 job stillSome; retained
+  logm100-installed-array-stop-r1, run-795ep_9g. NOT accepted.
+- Root fixes only harness click: newly visibleStop requires previous-frame hitmap
+  settling, so4924 uses sharedcompletion-first hover/click helper. Consecutive
+  Stop phases retained. Newtest drives EXACTrealRender/keyboardRun/controller
+  phases fromjust-createdbutton, assertsstage4926+jobNone+noRecord; PASS. Existing
+ 3StopUI regressions PASS; finalClippy running. No simulation/Stopproduct change.
+- Next commit smallharness correction/report, cleanGit-derived candidatebuild,
+  upgradee850, realarrays-stop retry then72alignment/defaultWaylandquiet/cold
+  checks asneeded. Keep allfailures. Root owns soleheavy, no worker grant.
+
 ## Active M100 normal-policy results / final RunStop next
 
 - Clean source11811b76aca48eb87c9232871614334002e59452 pushed. Candidate

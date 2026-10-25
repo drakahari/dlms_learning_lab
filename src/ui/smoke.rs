@@ -2199,8 +2199,11 @@ impl LabApp {
             }
             4923 | 4929 => self.pending_events = vec![key(egui::Key::Enter, true)],
             4924 => {
-                assert!(self.script_job.is_some());
-                self.pending_events = click(self.metrics.stop.unwrap());
+                // Stop appears only after Run: settle its real previous-frame
+                // hit map, and allow completion when Stop has disappeared.
+                if !self.click_visible_smoke_control(ctx, self.metrics.stop) {
+                    return;
+                }
             }
             4925 => {
                 assert!(self.script_job.is_none());
@@ -7091,5 +7094,92 @@ mod visibility_tests {
             ctx.data(|d| d.get_temp::<u8>(egui::Id::new(("native-click-phases", 17090))))
                 .is_none()
         );
+    }
+    #[test]
+    fn array_stop_native_phase_clicks_new_control_before_grading_and_cannot_advance_early() {
+        let ctx = egui::Context::default();
+        let mut app = LabApp::from_context(&ctx, true, false);
+        app.smoke = false;
+        let i = app
+            .scenarios
+            .iter()
+            .position(|s| s.id == "shell-array-intake")
+            .unwrap();
+        assert_eq!(i, 70);
+        app.launch_assignment_fixture(i);
+        app.set_script_view(i, teaching::View::Assignment);
+        let frame = |app: &mut LabApp, mut events: Vec<egui::Event>, drive: bool| {
+            events.extend(std::mem::take(&mut app.pending_events));
+            let modifiers = events
+                .iter()
+                .rev()
+                .find_map(|e| {
+                    if let egui::Event::Key { modifiers, .. } = e {
+                        Some(*modifiers)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or_default();
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1268., 1600.),
+                    )),
+                    events,
+                    modifiers,
+                    ..Default::default()
+                },
+                |ctx| {
+                    app.render(ctx);
+                    if drive {
+                        app.smoke_tick(ctx);
+                    }
+                },
+            );
+        };
+        let key = |key| egui::Event::Key {
+            key,
+            physical_key: None,
+            pressed: true,
+            repeat: false,
+            modifiers: egui::Modifiers {
+                ctrl: true,
+                command: true,
+                ..Default::default()
+            },
+        };
+        frame(&mut app, vec![], false);
+        frame(
+            &mut app,
+            vec![
+                key(egui::Key::A),
+                egui::Event::Text(
+                    "queue=(one two); while true; do queue=(\"${queue[@]}\"); done".into(),
+                ),
+            ],
+            false,
+        );
+        frame(&mut app, vec![key(egui::Key::Enter)], false);
+        assert!(app.script_job.is_some());
+        app.smoke_stage = 4924;
+        app.started = Instant::now();
+        for _ in 0..16 {
+            frame(&mut app, vec![], true);
+            if app.smoke_stage == 4926 {
+                break;
+            }
+        }
+        assert_eq!(
+            app.smoke_stage, 4926,
+            "real consecutive Stop phases must complete"
+        );
+        assert!(app.script_job.is_none());
+        let engine::State::Script { run, .. } = &app.progress.attempts["shell-array-intake"].state
+        else {
+            panic!()
+        };
+        assert!(run.is_none(), "cancelled work must not publish any grade");
     }
 }

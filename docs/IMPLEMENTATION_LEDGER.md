@@ -1231,3 +1231,11 @@ remains byID. Strengthened originalorder+PTR+course16checks pass. Stop4924/4925
 now run in consecutive frames like existing cancellation probes; scripting Stop3UI
 regressions pass. Actual corrected-package arrayStop/shared alignment are next.
 No grading model, learner answer, theme, dependency or desktop setting changes.
+
+
+M100 arrayStop native R1 on installede850 FAILS at4925: job still active, so the
+raw click on newly appeared Stop did not cancel. Root replaces only the harness
+click with shared completion-first hover/click settling. A new exact real-egui
+production-phase regression types/Run/drives4924/4925 and proves no gradedRecord;
+it passes, as do3 existingStopUI checks. Failed native artifacts remain. No
+product simulation behavior change; actual newcandidate retry is still required.
