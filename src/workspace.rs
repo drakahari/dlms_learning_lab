@@ -19,6 +19,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_learning: Option<crate::debian_packages_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub spanning_tree_draft: Option<crate::spanning_tree_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub spanning_tree_learning: Option<crate::spanning_tree_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dhcpv4_draft: Option<crate::dhcpv4_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dhcpv4_learning: Option<crate::dhcpv4_teaching::Learning>,
@@ -157,6 +161,11 @@ impl WorkspaceData {
             && self.terminal_learning.as_ref().is_none_or(|l| l.valid())
             && self.process_learning.as_ref().is_none_or(|l| l.valid())
             && self.accounts_learning.as_ref().is_none_or(|l| l.valid())
+            && self.spanning_tree_draft.as_ref().is_none_or(|d| d.valid())
+            && self
+                .spanning_tree_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
             && self.ospf_draft.as_ref().is_none_or(|d| d.valid())
             && self.ospf_learning.as_ref().is_none_or(|l| l.valid())
             && self.discovery_draft.as_ref().is_none_or(|d| d.valid())
@@ -255,6 +264,11 @@ pub fn prepare(a: &mut Attempt) {
         && w.unit_manager_draft.is_none()
     {
         w.unit_manager_draft = crate::unit_manager_workspace::Draft::new(simulation).ok();
+    }
+    if let State::SpanningTree { simulation } = &a.state
+        && w.spanning_tree_draft.is_none()
+    {
+        w.spanning_tree_draft = crate::spanning_tree_workspace::Draft::new(simulation).ok();
     }
     if let State::Ospf { simulation } = &a.state
         && w.ospf_draft.is_none()

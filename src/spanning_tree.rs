@@ -802,7 +802,7 @@ impl Action {
             _ => Ok(()),
         }
     }
-    fn validate_for(&self, t: &Topology) -> Result<()> {
+    pub(crate) fn validate_for(&self, t: &Topology) -> Result<()> {
         self.validate_shape()?;
         match self {
             Self::Reconfigure { configuration } => configuration.validate_for(t),

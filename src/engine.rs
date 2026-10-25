@@ -29,6 +29,9 @@ pub enum State {
     DebianPackages {
         simulation: crate::debian_packages::State,
     },
+    SpanningTree {
+        simulation: crate::spanning_tree::State,
+    },
     DhcpV4 {
         simulation: crate::dhcpv4::State,
     },
@@ -135,6 +138,11 @@ pub enum State {
 pub enum Goal {
     DebianPackages {
         definition: Box<crate::debian_packages_workspace::Definition>,
+    },
+    SpanningTree {
+        initial: crate::spanning_tree::State,
+        #[serde(deserialize_with = "crate::spanning_tree_workspace::requirements")]
+        requirements: Vec<crate::spanning_tree_workspace::Requirement>,
     },
     DhcpV4 {
         initial: crate::dhcpv4::State,
@@ -290,6 +298,13 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
         (State::DebianPackages { simulation }, Goal::DebianPackages { definition }) => {
             definition.checks(simulation)
         }
+        (
+            State::SpanningTree { simulation },
+            Goal::SpanningTree {
+                initial,
+                requirements,
+            },
+        ) => crate::spanning_tree_workspace::checks(initial, simulation, requirements),
         (
             State::DhcpV4 { simulation },
             Goal::DhcpV4 {
@@ -595,6 +610,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 pub fn help(s: &State) -> &'static str {
     match s {
         State::DebianPackages { .. } => crate::debian_packages_terminal::HELP,
+        State::SpanningTree { .. } => crate::spanning_tree_workspace::HELP,
         State::DhcpV4 { .. } => crate::dhcpv4_workspace::HELP,
         State::MacLearning { .. } => crate::mac_learning_workspace::HELP,
         State::UnitManager { .. } => crate::unit_manager_workspace::HELP,
@@ -676,6 +692,32 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
             crate::debian_packages_terminal::execute(definition, simulation, input),
         );
     }
+    if let State::SpanningTree { simulation } = s {
+        if input.len()
+            > crate::spanning_tree_workspace::PREFIX.len() + crate::spanning_tree::MAX_ACTION_BYTES
+        {
+            return Err("Spanning-tree typed input exceeds64KiB plus its fixed prefix".into());
+        }
+        let Goal::SpanningTree {
+            initial,
+            requirements,
+        } = goal
+        else {
+            return Err("Spanning-tree changes require fixed assignment context".into());
+        };
+        if !crate::spanning_tree_workspace::valid_requirements(initial, requirements)
+            || !crate::spanning_tree_workspace::same_context(initial, simulation)
+        {
+            return Err(
+                "Invalid or foreign spanning-tree state/objectives; prior state retained".into(),
+            );
+        }
+        if matches!(input.trim(), "help" | "show") {
+            return execute(s, input);
+        }
+        return crate::spanning_tree_workspace::execute(initial, simulation, input);
+    }
+
     if let State::DhcpV4 { simulation } = s {
         if input.len() > crate::dhcpv4_workspace::MAX_ACTION_BYTES {
             return Err("DHCP authoring action exceeds256KiB".into());
@@ -763,6 +805,15 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
             ),
         };
     }
+    if matches!(s, State::SpanningTree { .. }) {
+        if input.len()
+            > crate::spanning_tree_workspace::PREFIX.len() + crate::spanning_tree::MAX_ACTION_BYTES
+        {
+            return Err("Spanning-tree input exceeds64KiB plus its fixed prefix".into());
+        }
+        return match input.trim() { "help"=>Ok(crate::spanning_tree_workspace::HELP.into()), "show"=>Ok(describe(s)), _=>Err("Spanning-tree mutations require fixed goal context; use typed native settings, not IOS or a shell".into()) };
+    }
+
     if matches!(s, State::DhcpV4 { .. }) {
         if input.len() > crate::dhcpv4_workspace::MAX_ACTION_BYTES {
             return Err("DHCP input exceeds256KiB".into());
@@ -875,6 +926,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     }
     match s {
         State::DebianPackages { .. }
+        | State::SpanningTree { .. }
         | State::DhcpV4 { .. }
         | State::UnitManager { .. }
         | State::Ospf { .. }
@@ -1322,6 +1374,11 @@ pub fn describe(s: &State) -> String {
             simulation.runtime().records.len(),
             simulation.runtime().files.len(),
             simulation.runtime().cached.as_deref().unwrap_or("absent")
+        ),
+        State::SpanningTree { simulation } => format!(
+            "Ideal P2P steady-state spanning tree: {} supplied bridges, {} physical links. No BPDUs, convergence timing, packets or PVST/guard claim",
+            simulation.topology().bridges.len(),
+            simulation.topology().links.len()
         ),
         State::DhcpV4 { simulation } => crate::dhcpv4_workspace::describe(simulation),
         State::UnitManager { simulation } => format!(

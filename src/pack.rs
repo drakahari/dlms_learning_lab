@@ -5,6 +5,8 @@ use std::collections::BTreeSet;
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spanning_tree_teaching: Option<crate::spanning_tree_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dhcpv4_teaching: Option<crate::dhcpv4_teaching::Lesson>,
     pub id: String,
     pub version: u32,
@@ -170,6 +172,9 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                             crate::acl_editor::MAX_JSON + 64
                         } else if matches!(s.initial, State::DebianPackages { .. }) {
                             crate::debian_packages_workspace::MAX_ACTION_BYTES
+                        } else if matches!(s.initial, State::SpanningTree { .. }) {
+                            crate::spanning_tree_workspace::PREFIX.len()
+                                + crate::spanning_tree::MAX_ACTION_BYTES
                         } else if matches!(s.initial, State::DhcpV4 { .. }) {
                             crate::dhcpv4_workspace::MAX_ACTION_BYTES
                         } else if matches!(s.initial, State::UnitManager { .. }) {
@@ -360,6 +365,36 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             }
         } else if s.dhcpv4_teaching.is_some() || matches!(s.goal, Goal::DhcpV4 { .. }) {
             return Err("DHCP objectives/teaching attached to another activity".into());
+        }
+
+        if let State::SpanningTree { simulation } = &s.initial {
+            let Goal::SpanningTree {
+                initial,
+                requirements,
+            } = &s.goal
+            else {
+                return Err("Spanning-tree state needs matching fixed-context goals".into());
+            };
+            if simulation != initial
+                || !crate::spanning_tree_workspace::valid_requirements(initial, requirements)
+            {
+                return Err("Spanning-tree objectives must pin the initial graph, declared availability and positive connected behavior".into());
+            }
+            if let Some(lesson) = &s.spanning_tree_teaching {
+                lesson.validate()?;
+                if !lesson.separate_from(initial) {
+                    return Err(
+                        "Spanning-tree practice needs separate fixed bridge/link IDs and MACs"
+                            .into(),
+                    );
+                }
+                if lesson.prerequisites != s.prerequisites {
+                    return Err("Spanning-tree lesson prerequisites must match the scenario's real prerequisite IDs".into());
+                }
+            }
+        } else if s.spanning_tree_teaching.is_some() || matches!(s.goal, Goal::SpanningTree { .. })
+        {
+            return Err("Spanning-tree teaching/goals attached to another activity".into());
         }
         if let State::UnitManager { simulation } = &s.initial {
             let Goal::UnitManager { definition } = &s.goal else {
@@ -689,6 +724,7 @@ pub fn validate_state(s: &State) -> Result<(), String> {
         State::DebianPackages { simulation } => {
             crate::debian_packages_workspace::admitted(simulation)
         }
+        State::SpanningTree { simulation } => simulation.validate().is_ok(),
         State::DhcpV4 { simulation } => simulation.validate().is_ok(),
         State::UnitManager { simulation } => simulation.validate().is_ok(),
         State::Ospf { simulation } => simulation.valid(),

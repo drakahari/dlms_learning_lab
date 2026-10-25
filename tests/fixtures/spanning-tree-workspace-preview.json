@@ -1,0 +1,588 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-spanning-tree-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ideal P2P spanning-tree backend preview",
+      "unit": "",
+      "title": "Development spanning-tree workspace",
+      "summary": "Private typed backend fixture; no curriculum or protocol-conformance claim.",
+      "objective": "Elect core as the current root, use west/core as a root port and east/west as Alternate, with the west-to-east tree path through core. Keep every supplied bridge, port and link online/up. Priorities and costs may vary when these explicit results still hold.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied graph",
+        "Apply bridge and port configuration",
+        "Check current root, roles and tree path"
+      ],
+      "guide": [],
+      "explanation": "The desired root wins by composite bridge identity. Each nonroot adds its local rootward port cost. The alternate port stays operational but discards in this ideal steady state. Physical availability is an explicit requirement.",
+      "hints": [
+        "Compare bridge priority before MAC.",
+        "Do not disable another bridge or link to win an election.",
+        "A current tree path must use links where both ends forward."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      ],
+      "simplifications": "Unbundled backend development fixture,2026-10-25. Fixed ideal point-to-point steady-state calculation only; no BPDUs, timers, convergence, packets, VLAN/PVST, PortFast or guards. Typed spanning-tree JSON actions are internal authoring data, not IOS commands.",
+      "initial": {
+        "kind": "SpanningTree",
+        "simulation": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "east": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "core-west": {
+                "a": {
+                  "bridge": "core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "core"
+                }
+              },
+              "core-east": {
+                "a": {
+                  "bridge": "core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "east",
+                  "port": "core"
+                }
+              },
+              "east-west": {
+                "a": {
+                  "bridge": "east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-west": true,
+              "core-east": true,
+              "east-west": true
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SpanningTree",
+        "initial": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "east": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "core-west": {
+                "a": {
+                  "bridge": "core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "core"
+                }
+              },
+              "core-east": {
+                "a": {
+                  "bridge": "core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "east",
+                  "port": "core"
+                }
+              },
+              "east-west": {
+                "a": {
+                  "bridge": "east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-west": true,
+              "core-east": true,
+              "east-west": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "core": {
+                  "online": true,
+                  "ports": {
+                    "west": true,
+                    "east": true
+                  }
+                },
+                "west": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "east": true
+                  }
+                },
+                "east": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "west": true
+                  }
+                }
+              },
+              "links": {
+                "core-west": true,
+                "core-east": true,
+                "east-west": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "core",
+              "west",
+              "east"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "west",
+            "root": "core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "west",
+              "port": "core"
+            }
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "east",
+              "port": "west"
+            },
+            "role": "Alternate"
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "west",
+            "to": "east",
+            "expected_links": [
+              "core-west",
+              "core-east"
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "spanning-tree {\"kind\":\"BridgePriority\",\"bridge\":\"core\",\"priority\":0}"
+      ],
+      "prerequisites": [],
+      "spanning_tree_teaching": {
+        "prerequisites": [],
+        "prerequisite_note": "Private backend fixture only. Inspect the separate bridge identities and configuration before applying a change.",
+        "concepts": [
+          {
+            "title": "Ideal steady state",
+            "text": "This calculation elects one root in each online point-to-point component. It does not send BPDUs or measure convergence."
+          },
+          {
+            "title": "Priorities and paths",
+            "text": "Lower composite bridge identity wins. A root port adds its local cost; root and designated ports forward while alternate ports discard in this stable result."
+          }
+        ],
+        "fixture": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "sample-core": {
+                "mac": "02:00:00:00:00:11",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "sample-west": {
+                "mac": "02:00:00:00:00:12",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "sample-east": {
+                "mac": "02:00:00:00:00:13",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "sample-core-west": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "core"
+                }
+              },
+              "sample-core-east": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "sample-east",
+                  "port": "core"
+                }
+              },
+              "sample-east-west": {
+                "a": {
+                  "bridge": "sample-east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "sample-core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "sample-core-west": true,
+              "sample-core-east": true,
+              "sample-east-west": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "sample-core": {
+                  "online": true,
+                  "ports": {
+                    "west": true,
+                    "east": true
+                  }
+                },
+                "sample-west": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "east": true
+                  }
+                },
+                "sample-east": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "west": true
+                  }
+                }
+              },
+              "links": {
+                "sample-core-west": true,
+                "sample-core-east": true,
+                "sample-east-west": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "sample-core",
+              "sample-west",
+              "sample-east"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-west",
+            "root": "sample-core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "sample-west",
+              "port": "core"
+            }
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "sample-east",
+              "port": "west"
+            },
+            "role": "Alternate"
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "sample-west",
+            "to": "sample-east",
+            "expected_links": [
+              "sample-core-west",
+              "sample-core-east"
+            ]
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Choose the sample root",
+            "explanation": "Set sample-core bridge priority to0, Apply and inspect the current root and port roles. Other legal winning priorities may also satisfy these outcomes.",
+            "action": {
+              "kind": "BridgePriority",
+              "bridge": "sample-core",
+              "priority": 0
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Raise sample-core priority to61440, Apply and inspect the different root and tree path.",
+          "actions": [
+            {
+              "kind": "BridgePriority",
+              "bridge": "sample-core",
+              "priority": 61440
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "BridgePriority",
+            "bridge": "sample-core",
+            "priority": 0
+          }
+        ]
+      }
+    }
+  ]
+}

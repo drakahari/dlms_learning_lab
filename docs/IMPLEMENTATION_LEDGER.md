@@ -1650,3 +1650,33 @@ test. Native package workbench and authored unit remain separate gates: normal
 catalog stays125/31 (38/24/20/43), coverage136Partial/1Supporting/1103Open unchanged.
 No actual dpkg/APT reference observation, new curriculum credit or release claim.
 Continue native package work, reviewed STP adapter and Apache foundation.
+
+## 2026-10-25 — M111: reviewed spanning-tree adapter and static HTTP foundation
+
+Integrated the bounded STP adapter/teaching metadata over both existing package
+and DHCP hooks using exact frozen bases and explicit three-way conflict review.
+Fresh root/port-role/cost/path predicates, complete physical-availability and
+positive-connectivity guards reject isolation shortcuts. Raw numeric drafts stay
+atomic; pending mismatches clear current success. Separate fixture identity,
+practice, actual historical progress and selected reset are checked. The only
+pure STP API change exposes its unchanged action validator within this crate,
+so teaching admission checks borrowed fields before serialization.
+
+Added independently reviewed pure Apache2.4 static-serving subset: closed vhost/
+Directory parser, saved-versus-active configuration, live virtual file contents,
+name/default selection, typed GET/HEAD/status/redirect observations and strict
+limits. No app adapter, HTTP connection, server, TLS/proxy or curriculum credit.
+Source review corrected duplicate raw-slash normalization, case-insensitive sole
+DirectoryIndex disabled, and duplicate-map test isolation before first execution.
+
+First guarded gate passes68 library/20 STP core/18 STP adapter/20 Apache checks;
+all-target ClippyR1 passes, then8 existing integration targets pass80 checks.
+Formatter/diff pass. Initial integration formatter caught an export placed before
+crate inner documentation; moved the export below crate attributes before any
+compilation, retaining forbid(unsafe_code). First run min19.26GiB available,
+PSIavg10zero and OOM counter unchanged. Source/merge independently reviewed.
+Native package and STP contracts accepted for isolated implementation. Four
+distinct package assignments are drafted privately for review, unregistered and
+uncredited. Normal catalog stays125/31 and objective matrix unchanged. Continue
+native workbenches and substantive reviewed curriculum; Fedora candidate remains
+14cf248, not this newer source. No release or platform/novice acceptance claim.

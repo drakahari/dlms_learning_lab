@@ -197,6 +197,57 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     ));
     rows
 }
+/// Current applied draft/context first; snapshot predicates are derived once per batch.
+pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |m: &str| vec![(false, crate::spanning_tree_workspace::notice(m))];
+    if let Err(e) = validate_spanning_tree_workspace(a) {
+        return fail(&e);
+    }
+    let (
+        State::SpanningTree { simulation },
+        State::SpanningTree {
+            simulation: authored,
+        },
+        crate::engine::Goal::SpanningTree {
+            initial,
+            requirements,
+        },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return fail("Spanning-tree assignment kind/context differs");
+    };
+    if authored != initial || !crate::spanning_tree_workspace::same_context(initial, simulation) {
+        return fail("Spanning-tree fixed topology differs from the authored assignment");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.spanning_tree_learning.as_ref())
+        .is_some_and(|l| {
+            s.spanning_tree_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        })
+    {
+        return fail("Spanning-tree practice differs from its authored fixture");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.spanning_tree_draft.as_ref())
+        .is_some_and(|d| !d.matches(simulation))
+    {
+        return fail("Apply the pending spanning-tree configuration before checking work");
+    }
+    let mut rows = vec![(
+        true,
+        "Current spanning-tree configuration is applied".into(),
+    )];
+    rows.extend(crate::spanning_tree_workspace::checks(
+        initial,
+        simulation,
+        requirements,
+    ));
+    rows
+}
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
     if validate_debian_packages_workspace(a).is_err() {
         return false;
@@ -227,6 +278,13 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
         }
         return definition.checks(simulation).iter().all(|row| row.0);
     }
+    if matches!(a.state, State::SpanningTree { .. }) {
+        return current_spanning_tree_checks(a, s).iter().all(|r| r.0);
+    }
+    if validate_spanning_tree_workspace(a).is_err() {
+        return false;
+    }
+
     if matches!(a.state, State::DhcpV4 { .. }) {
         return current_dhcpv4_checks(a, s).iter().all(|row| row.0);
     }
@@ -530,6 +588,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         validate_accounts_workspace(a)?;
         validate_legacy_teaching_workspace(a)?;
         validate_ospf_workspace(a)?;
+        validate_spanning_tree_workspace(a)?;
         validate_unit_manager_workspace(a)?;
         if a.workspace
             .as_ref()
@@ -634,6 +693,40 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
                     .is_none_or(|lesson| !l.valid_for(lesson))
             {
                 return Err("Saved unit practice origin differs from its authored fixture; original retained".into());
+            }
+        }
+
+        if let State::SpanningTree { simulation } = &a.state {
+            let (
+                State::SpanningTree {
+                    simulation: authored,
+                },
+                crate::engine::Goal::SpanningTree { initial, .. },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err(
+                    "Spanning-tree state belongs to a different activity; original retained".into(),
+                );
+            };
+            if authored != initial
+                || !crate::spanning_tree_workspace::same_context(initial, simulation)
+            {
+                return Err(
+                    "Saved spanning-tree immutable graph differs; original retained".into(),
+                );
+            }
+            if a.workspace
+                .as_ref()
+                .and_then(|w| w.spanning_tree_learning.as_ref())
+                .is_some_and(|l| {
+                    s.spanning_tree_teaching
+                        .as_ref()
+                        .is_none_or(|lesson| !l.valid_for(lesson))
+                })
+            {
+                return Err(
+                    "Saved spanning-tree practice fixture differs; original retained".into(),
+                );
             }
         }
         if let State::Ospf { simulation } = &a.state {
@@ -1011,6 +1104,48 @@ fn validate_unit_manager_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_spanning_tree_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else {
+        return Ok(());
+    };
+    match &a.state {
+        State::SpanningTree { simulation } => {
+            if w.spanning_tree_draft
+                .as_ref()
+                .is_some_and(|d| !d.valid_for(simulation))
+                || w.spanning_tree_learning.as_ref().is_some_and(|l| {
+                    !l.valid()
+                        || !l
+                            .fixture
+                            .topology()
+                            .bridges
+                            .keys()
+                            .all(|k| !simulation.topology().bridges.contains_key(k))
+                        || !l
+                            .fixture
+                            .topology()
+                            .links
+                            .keys()
+                            .all(|k| !simulation.topology().links.contains_key(k))
+                        || l.fixture.topology().bridges.values().any(|b| {
+                            simulation
+                                .topology()
+                                .bridges
+                                .values()
+                                .any(|o| b.mac == o.mac)
+                        })
+                })
+            {
+                return Err("Invalid spanning-tree draft or separate fixed practice context; original retained".into());
+            }
+        }
+        _ if w.spanning_tree_draft.is_some() || w.spanning_tree_learning.is_some() => {
+            return Err("Spanning-tree metadata on another activity; original retained".into());
+        }
+        _ => {}
+    }
+    Ok(())
+}
 fn validate_ospf_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else {
         return Ok(());
@@ -1328,6 +1463,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         validate_accounts_workspace(a)?;
         validate_legacy_teaching_workspace(a)?;
         validate_ospf_workspace(a)?;
+        validate_spanning_tree_workspace(a)?;
         validate_unit_manager_workspace(a)?;
         validate_storage_workspace(a)?;
         validate_discovery_workspace(a)?;

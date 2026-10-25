@@ -1,5 +1,6 @@
 //! Offline simulation, declarative content validation, catalog, and local persistence.
 #![forbid(unsafe_code)]
+pub mod apache_static;
 pub mod catalog;
 pub mod client_teaching;
 pub mod debian_packages;
@@ -108,3 +109,6 @@ pub mod dhcpv4_teaching;
 pub mod dhcpv4_workspace;
 
 pub mod spanning_tree;
+
+pub mod spanning_tree_teaching;
+pub mod spanning_tree_workspace;
