@@ -2,6 +2,7 @@
 #![forbid(unsafe_code)]
 pub mod catalog;
 pub mod client_teaching;
+pub mod debian_packages;
 pub mod engine;
 pub mod filesystem;
 pub mod pack;

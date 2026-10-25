@@ -169,3 +169,36 @@ novice acceptance pending. Older unsignedWindows116CI artifact at1608 exists,
 NOT validation ofnewsource. macOS package gate: unavailable originaldispatch0.2.0
 license notice. MIT original code/curriculum explicitly ownerapproved; thirdparty
 notices retained, no inventednotices or security bypass. No public release.
+
+## Current continuation update — M106/M107 active
+
+M105component e3f2203 committed/pushed; backend8a53854 also pushed. No heavy
+active at this write. M107pureDebian5paths integrated, first68lib/18of19core
+passed; unit-variant unknownfieldbug fixed as emptystructRefreshIndex{} with
+identicalJSON. All19+68libPASS, alltargetClippyR2/fmtPASS; sourcepeeraccepted.
+Only style predicate-preserving nestedif followed. Optionaldpkg absent; no
+reference/packageinstall/run. Commit exactpure5paths+ledger/checkpoint ifdirty,
+leavingDHCPcontentuntracked for its coherent unit milestone.
+
+M106R4 first13content11PASS2FAIL: offer-negative wronglyDiscoveredheldclient and
+assumedeligibleearlyRenewretainedoldparameters. Corecorrect/RFC2131§4.3.2/4.4.5
+openedbyroot10-25 permitsrenewbeforeT1. R5sourcefreeze
+be5a4f81d1083b578fe51401ba68a6f1ab4e772e6ccc0999cf797d62333d63a4
+nowMAIN5paths. R5onlyprose/testsetupcorrected; Goals/initial/reference/expected
+experimenttables unchanged. R5testprecheck incorrectlyassumedrangeend12 vs
+authored13; rootexplicitlynarrowedonlyindependentdeclined-testpolicyto12after
+assertingactual13, retains2eligiblefreshaddresses. All13PASS m106-dhcp-content-r3.
+Peer acceptedrenewalfixexceptcaughtsameprecheck, rootfixprecise. Purecore and
+contentfailurelogsretained. Countnormal122;3DHCPstillunregistered.
+
+NEXT: moveproposalpack toscenarios/dhcpv4-client-v1.json canonical, append to
+bundledENDpreservingold122order, addunit dhcpv4-client-foundations afterold30
+(no reorderoldunits). Update13tests toactualbundledpath/notduplicatelabs. Then
+integrate7-pathnativecontrollerR2 byexactbasechecks; mergeONLYpassivehooks into
+compactMAINdhcpworkspace (precompactbasearchivedatnative-main-gates-r1/before-compact-
+dhcpv4_workspace.rs hashb9f076...). Keepnewscopeargumentwhenmerginglistfields.
+Controllercfgtestinclude mustpointcanonicalpack; all4testsUNRUN. Gate13+4native,
+fixgenuinebugs/capturevisibility, scopedoldcatalogregressions/Clippy; actualall3
+normalnativeflows and screenshotreview beforecalling125accepted/mapping.
+Package125+native startup/reopen/lifecycle aftercleancommit; acceptedcd31/122
+remainscurrentexactownerbuild. Continueothertracks, notstopatpackage.

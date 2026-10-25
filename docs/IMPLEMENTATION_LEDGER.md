@@ -1468,3 +1468,22 @@ Development ELFaa0254ec2e11957ba876861cf3d274b65c6473316688133ab234ce7446a9c038.
 No packaged/cold/novice/physical-device/screen-reader/other-platform acceptance
 from this component. Catalog122 and objective statuses unchanged. Continue the
 reviewed three authored DHCP tasks, then remaining Linux/network/shell gaps.
+
+## 2026-10-25 — M107: bounded Debian package foundation
+
+A reviewed pure module separates published/cached metadata, local archives,
+installed records, ownership and actual virtual payload text. Debian version
+ordering, transitive ANDed dependencies, repair, retained configuration, exact
+removal/purge and protected unmanaged paths are modeled for a closed script-free
+subset. Logical operations are not real dpkg transactions/APT resolver/RPM
+behavior; no command alias, host operation, State/Goal/UI/pack/progress or
+curriculum credit is added. Primary references/limitations accompany the module.
+
+First guarded gate:68libPASS/18of19corePASS. The failed unknown-field assertion
+found serde's internally tagged unit variant accepting extra fields. Empty
+struct RefreshIndex retains identical JSON but rejects extras; original negative
+assertion retained, positive/duplicate-tag/all5variant negatives added. All19
+and68lib then PASS (m106-m107-content-core-r2); alltargetClippyR2/fmt/diff pass
+after a predicate-preserving nested-if style correction. Optional development
+dpkg is absent, so no host comparisons are claimed and no package was installed
+or run. No new dependency. Catalog stays122 until separate DHCP integration.
