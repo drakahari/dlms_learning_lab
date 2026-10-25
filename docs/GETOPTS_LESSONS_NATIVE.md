@@ -4,8 +4,8 @@ Source gates updated2026-10-25. Five actual-egui controller checks pass after
 correcting test preconditions, related search-result selection and aggregate
 frame budgeting. Production VM limits and15s native deadlines are unchanged.
 The16 whole-catalog layout checks and original7 history/one case-plan regressions
-also pass with122 normal labs/30units. Actual installed three-lesson/native
-acceptance remains pending; the verified119 evaluator9 artifact is separate.
+also pass with122 normal labs/30units. Actual installed three-lesson/native acceptance now passes atcd31af6,51frames/
+clean exit. The preceding119 evaluator9 migration artifact remains separate.
 
 The closed `DLMS_SMOKE_STAGE=getopts-lessons` selector enters the existing
 7200-phase script-lesson family. A small typed mode specializes the already used

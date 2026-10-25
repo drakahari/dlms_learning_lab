@@ -3,10 +3,9 @@
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
 **122 authored assignments/30 units:35CCNA,24LPIC-1,20LPIC-2,43Bash/Shell**.
-The new three-task option-interface unit passes model/content and native-component
-source gates; installed native acceptance is pending. The verified119-lab Fedora
-candidate atb5f5f83 passes evaluator9 migration,11 startups and real two-process
-reopen. Shared alignment was accepted onca1929b. The scripting path has eleven
+The new three-task option-interface unit passes model/content and all3 installed
+native flows. The verified122-lab Fedora candidate atcd31af6 passes11 startups
+and real two-process reopen; evaluator9 migration was accepted atb5f5f83. Shared alignment was accepted onca1929b. The scripting path has eleven
 units. Original nine IDs/progress remain; numerical practice and900 synthetic
 catalog previews are not authored labs. Planned assignments do not become cards.
 See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
@@ -48,7 +47,7 @@ Each row records credited scenario IDs (or None), a distinct proposed assignment
 
 | `shell-streams`, `shell-pipelines`, `shell-eof`, `shell-batch-audit` | Separate channels, pipeline intersection/status, EOF repair and resilient batches | No complete shell option parser or broader utility suite; functions are taught in the next unit |
 
-| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | This unit does not assess arrays, substitution or option parsing; later units teach arrays, capture and Bash scope, while the bounded getopts core is accepted and its three source-gated assignments await installed native acceptance |
+| `shell-functions`, `shell-return`, `shell-shift`, `shell-bundle` | Reuse, return vs exit, consume arguments, preflight and preserve output | This unit does not assess arrays, substitution or option parsing; later units teach arrays, capture and Bash scope, while the bounded getopts core is accepted and its three assignments pass installed native acceptance |
 
 ## Learning order and capability gates
 
@@ -66,7 +65,7 @@ The first fifteen shell labs and four text-processing labs use **portable shell 
 | --- | --- | --- | --- |
 | 1. Foundations | **Implemented:** reliable handover; supplied-file labels; input without losing backslashes; missing-destination guard; incident report; multi-file handover; safe-report capstone | Listed preceding lab in the unit, advisory rather than a lock | Scalars, quoting, positional arguments, read, printf, status, test/if, redirects, for, literal grep/cat. Portable subset; 3–5 deterministic cases per assignment |
 | 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x` and pipefail remain unsupported; Bash local is taught in the following scope unit |
-| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Source-gated, native pending:** short-option report, independent job parsers and validated batch publication. **Planned:** streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. Bounded command-output capture now has its own taught unit (SHELL_CAPTURE_LESSONS.md). The bounded getopts extension and its three source-gated projects are documented in SHELL_GETOPTS_LESSONS.md; compound/function-call redirects and parameter defaults remain unsupported |
+| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Implemented with installed native acceptance:** short-option report, independent job parsers and validated batch publication. **Planned:** streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. Bounded command-output capture now has its own taught unit (SHELL_CAPTURE_LESSONS.md). The bounded getopts extension and its three source-gated projects are documented in SHELL_GETOPTS_LESSONS.md; compound/function-call redirects and parameter defaults remain unsupported |
 | 4. Structured Bash | **Implemented:** exact dispatch lists, whole-list mutation repair, grouped package inventory and preview/save handover. **Planned:** associative lookup, command construction and regex validation | Reusable functions, scope and filename selection | Bounded Bash-specific dense indexed arrays/counts/quoted @ implemented and taught. No associative/sparse arrays, computed indices/index writes, `[[ ]]`, `=~` or full Bash arrays. Portable arithmetic remains a separate counters unit. |
 | 5. Text and data | **Implemented:** inventory field extraction, unique manifests, grouped location counts and a duplicate-ID audit. **Planned:** regex audit, snapshot comparison and broader malformed-row recovery | Streams, conditions and functions | Bounded C-locale sort/uniq/cut models and four reviewed assignments implemented; broader sed/awk/regex/locale behavior still needed. Distinguish shell language from external utility semantics |
 | 6. Safe automation projects | **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |

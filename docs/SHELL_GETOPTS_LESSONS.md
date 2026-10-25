@@ -2,8 +2,7 @@
 
 M104 source integration,2026-10-25. Three version1 script assignments are bundled
 in the normal app and advisory unit `shell-option-interfaces`. Source catalog122
-labs/30units includes43 Bash assignments; the accepted installed candidate still
-contains119 pending this unit's installed native gate. Previous119 definitions,
+labs/30units includes43 Bash assignments; the accepted installed candidate contains all122. Previous119 definitions,
 versions, ordering and historical progress remain intact. Prerequisites are
 advisory; experienced learners may skip and reopen introductions.
 
@@ -11,9 +10,10 @@ All10 content tests pass: references and two supported alternatives against36
 independent cases at three tick slices, real example/change/repair, partial/wrong/
 hardcoded/damaged results, source invalidation, isolated drafts and reset/resume/
 export/restore. Five actual-egui native-controller regressions, current-history
-checks and the16 catalog-wide layout checks pass. These are technical source
-gates, not installed native, novice or other-platform acceptance. The normal
-installed three-lesson flow is the next required gate. No objective is promoted.
+checks and the16 catalog-wide layout checks pass. All3 normal installed native flows now pass, with51 captured frames, actual
+typing/Run, partial/wrong/alternate/current-retry, separate drafts/Continue/Reset,
+Light150 andDark200. This is technical acceptance, not a novice study or other-
+platform acceptance. No objective is promoted.
 
 | Project | Distinct work | Declared cases |
 | --- | --- | --- |
@@ -102,3 +102,21 @@ Bourne Shell Builtins/getopts, Bash Variables/OPTIND/OPTARG/OPTERR, dynamic func
 scope and arrays. Source research checked2026-10-25. This content draft performed
 no new Bash/reference execution or successful POSIX retrieval and claims no new
 certification objective coverage.
+
+## Accepted Fedora candidate and task readability
+
+Source cd31af6e78e66c44b5f4fffeeaf65016e625a6ac, archive SHA256
+b738abf1db9dbc44c772e150b357f8423367c559ff31f2d080201cd453aaecbc,
+ELF abceac7b97072a8e6628f0e4dafcc3b2fd7499583a2e8dff8e889196e74514b1.
+122/30 installed upgrade/uninstall/reinstall and exact synthetic original-nine
+progress retention pass. All3 native flows pass with51 frames and clean exit,
+plus11 Wayland starts and strict two-process NORMAL-profile reopen. Runtime
+uses isolated synthetic profiles and never host script execution.
+
+Actual946×929 render review found the original capstone task hid the editor.
+Task wording is now grouped and condensed, preserving every rule/format/case;
+its approximately200 words leave the editor visible in the opening view. Advanced
+tasks still scroll at narrow sizes and large text; text is not shrunk. Original
+before and accepted after captures remain local/ignored. Multiple representative
+frames were reviewed, not every51frame or a physical-device/novice study. Other
+widths have headless catalog checks and the previous native shared-control matrix.

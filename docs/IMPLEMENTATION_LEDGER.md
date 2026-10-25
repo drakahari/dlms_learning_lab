@@ -1397,3 +1397,17 @@ restored explicit one-line/one-argument and literal quotes/backslashes wording.
 Content10 and actual-egui5 tests pass. A new identified installed native render
 retry is required before calling the compact version accepted. This is not a
 new scenario, solution simplification, UI redesign or release.
+
+### M104 compact candidate accepted
+
+Candidatecd31af6 upgrades the earlier122 build and passes lifecycle122/30 with
+exact original-nine synthetic bytes. All3 normal getopts flows pass again,51
+captured frames/clean exit. Actual task/feedback/readability review confirms the
+more compact default assignments and visible editor, including Light150/Dark200
+output/controls.11 Wayland startups and strict two-process NORMAL-private-profile
+reopen pass. Local corrected audit0a7b87a3531db278f693c231d9ab0d6e7dd3e5e7245b9a2d6948b544e71db940
+pins the51 images, binary/archive and startup/cold evidence; initial derived
+metadata's57-frame typo is retained/corrected explicitly, no raw observation
+changed. The catalog is now accepted122/30=35/24/20/43. Objective statuses remain
+134Partial/1Supporting/1105Open. Continue with reviewed DHCPbackend gate and
+remaining curriculum; do not equate this candidate with completion.

@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **119 verified authored assignments in the prepared Fedora candidate:** 35 CCNA,24 LPIC-1,20 LPIC-2 and40 Bash/Shell. The verified Fedora candidate below contains119 in29 units. Three additional scripting projects are source-gated and registered (122 total/30 units), pending their installed native review. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **122 verified authored assignments:** 35 CCNA,24 LPIC-1,20 LPIC-2 and43 Bash/Shell, organized into30 units. The prepared Fedora candidate includes all122; its three new option-interface projects pass their complete installed native flows. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 If your terminal is in your home directory, first enter this repository directory:
 
 ```sh
-./dist/dlms-learning-lab-0.1.0-gb5f5f83508a3-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+./dist/dlms-learning-lab-0.1.0-gcd31af6e78e6-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -45,7 +45,7 @@ Four [Ethernet learning and recovery assignments](docs/MAC_LESSONS.md) now follo
 VLAN foundations: build directed paths, repair an older table, reason about
 source refresh/expiry and hand over two groups across three switches. Each has
 an introduction, separate runnable practice and a full native assignment.
-Those four flows were accepted in earlier installed milestones. The current119-
+Those four flows were accepted in earlier installed milestones. The current122-
 lab Fedora candidate preserves them and adds the accepted Find and reverse-DNS
 units. Its installed upgrade/uninstall/reinstall preserves synthetic progress;
 normal Wayland migration, Run/Stop,11 startups and real two-process reopen pass.
@@ -55,9 +55,10 @@ those native controls remain unchanged. See
 scoped application policy and evidence limits. Windows CI produced an unsigned
 116-lab candidate; actual Windows/macOS desktop acceptance remains pending.
 
-The bounded `getopts` engine is accepted in the119-lab candidate. Its three new
-practical assignments are in the source122 catalog and still need installed
-native acceptance. Their addition implies no complete exam coverage. This is a verified milestone, not complete curriculum or
+The bounded `getopts` engine and its three practical assignments are accepted in
+the122-lab candidate: a flexible report interface, independent job parsers, and
+a validate-all preview/publish capstone. Their addition implies no complete exam
+coverage. See [the unit guide](docs/SHELL_GETOPTS_LESSONS.md). This is a verified milestone, not complete curriculum or
 a public release.
 
 

@@ -646,3 +646,18 @@ This is scoped Fedora44 acceptance, not a general driver cure. The subsequent
 source-only original-order/arrayStop harness correction requires its own identified
 candidate before arrayStop acceptance; normal app progress/IDs/content unchanged.
 No release is published. Windows/macOS runtime/novice/screen-reader stay pending.
+
+## Current122-lab Fedora milestone — 2026-10-25
+
+Candidate sourcecd31af6e78e66c44b5f4fffeeaf65016e625a6ac:
+`dist/dlms-learning-lab-0.1.0-gcd31af6e78e6-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+Archive SHA256 `b738abf1db9dbc44c772e150b357f8423367c559ff31f2d080201cd453aaecbc`;
+executable SHA256 `abceac7b97072a8e6628f0e4dafcc3b2fd7499583a2e8dff8e889196e74514b1`.
+Upgrade from1e7, private installation, uninstall/reinstall and exact original-nine
+synthetic progress retention pass. All3 new option-interface native flows pass
+with51frames;11 native Wayland startup checks and two-process normal-private-XDG
+reopen pass. No diagnostic interval override or personal profile is used. Native
+render review includes narrow100%, Light150 andDark200; current controls retain
+prior shared native wide/narrow alignment evidence. This is scoped122-lab
+technical acceptance, not complete curriculum, physical/assistive/novice testing,
+Windows/macOS desktop acceptance or a public release.

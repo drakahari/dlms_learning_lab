@@ -161,9 +161,9 @@ After root grants the sole slot, with debug info 0/incremental 0 and automatic e
 worktree target, serialize:
 
 ```
-python3 /home/drak/Documents/dlms_learning_lab/tools/dev.py --cwd WORKTREE python-tests
-python3 /home/drak/Documents/dlms_learning_lab/tools/dev.py --cwd WORKTREE test --offline --example getopts_before9_capture
-python3 /home/drak/Documents/dlms_learning_lab/tools/dev.py --cwd WORKTREE clippy --offline --all-targets -- -D warnings
+python3 /path/to/dlms_learning_lab/tools/dev.py --cwd WORKTREE python-tests
+python3 /path/to/dlms_learning_lab/tools/dev.py --cwd WORKTREE test --offline --example getopts_before9_capture
+python3 /path/to/dlms_learning_lab/tools/dev.py --cwd WORKTREE clippy --offline --all-targets -- -D warnings
 ```
 
 The example's tests exercise bounded writer/fixed unobserved data/missing guard and
