@@ -1162,3 +1162,15 @@ platform/novice claim. See INSTALLATION.md for immutable identity/checksums.
 - No objective promotion yet; matrix134Partial/1Supporting/1105Open remains.
   Latest scoped installed candidate116 at30d75e7; new119 and original terminal
   teaching still require actual native screens/flows and their own candidate.
+
+
+### M97 finite shell-scope reference collector
+
+A second peer-reviewed developer-only fixed collector admits five builtin sources,
+with no source/path/binary/profile input or VM/history/catalog dispatch. Exact
+same-FD Bash/manual/source pins, explicit preparation versus approval, MAIN shared
+guard,2s/process30s whole bound, capped raw evidence, closed environment, quiescent
+rehash and no-clobber COMPLETE preserve the existing safety boundary. All15new
+unit guards pass within144Python; initial mocked checked_pins root-signature error
+is corrected with an explicit root assertion. Actual capture remains pending,
+expectations null, no getopts/revision9/current mastery or extra authored lab.

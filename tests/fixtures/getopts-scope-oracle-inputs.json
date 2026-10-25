@@ -1,0 +1,81 @@
+{
+  "schema_version": 1,
+  "purpose": "Fixed getopts local scanner and clustered-error followup; actual observations remain separate. No VM/history/baseline claim.",
+  "cases": [
+    {
+      "id": "local-different-offset-fallthrough",
+      "purpose": "Different parent offset2 and child offset1; discriminate restoration from coincident offsets.",
+      "source": "getopts abc opt -abc; getopts abc opt -abc; rc=$?; printf 'parent-before|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND=1; local opt; getopts xyz opt -xyz; rc=$?; printf 'child|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; f; getopts abc opt -abc; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "actual_bash": null,
+      "expected": null
+    },
+    {
+      "id": "local-different-offset-return",
+      "purpose": "Same unequal offsets with explicit return3; discriminate scope-exit paths.",
+      "source": "getopts abc opt -abc; getopts abc opt -abc; rc=$?; printf 'parent-before|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND=1; local opt; getopts xyz opt -xyz; rc=$?; printf 'child|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; return 3; }; f; printf 'function-status=%s\\n' \"$?\"; getopts abc opt -abc; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "actual_bash": null,
+      "expected": null
+    },
+    {
+      "id": "local-repeat-declaration-one-frame",
+      "purpose": "Repeated local reset should not assume a second saved-parent snapshot; observe actual behavior first.",
+      "source": "getopts abc opt -abc; getopts abc opt -abc; rc=$?; printf 'parent-before|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND=1; local opt; getopts xy opt -xy; rc=$?; printf 'child-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; local OPTIND=1; getopts xy opt -xy; rc=$?; printf 'child-reset|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; f; getopts abc opt -abc; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "actual_bash": null,
+      "expected": null
+    },
+    {
+      "id": "local-dynamic-helper-sharing",
+      "purpose": "An unlocalized called helper should use nearest local scanner; parent has different offset.",
+      "source": "helper() { getopts xyz opt -xyz; rc=$?; printf 'helper|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; getopts abc opt -abc; getopts abc opt -abc; rc=$?; printf 'parent-before|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND=1; local opt; getopts xyz opt -xyz; rc=$?; printf 'child-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; helper; getopts xyz opt -xyz; rc=$?; printf 'child-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; f; getopts abc opt -abc; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "actual_bash": null,
+      "expected": null
+    },
+    {
+      "id": "unknown-within-cluster-progress",
+      "purpose": "Unknown option between recognized flags; retain separate status/OPTIND/OPTARG for each call.",
+      "source": "OPTERR=0; getopts ab opt -azb; rc=$?; printf 'first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -azb; rc=$?; printf 'unknown|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -azb; rc=$?; printf 'last|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -azb; rc=$?; printf 'end|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "actual_bash": null,
+      "expected": null
+    }
+  ]
+}

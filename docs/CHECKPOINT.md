@@ -120,12 +120,13 @@ env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET ./dist/dlms-learning-lab-0.1.0-g30d75e7
   discriminate unequal offsets, return, repeated-local, dynamic owner and unknown
   clustered option behavior. R3 decoded sources exactly match R2; apparent extra
   escapes were tool JSON display, not a source bug. Expectations remain null.
-- Fixed5 collector frozen in getopts-scope-oracle worktree/branch from30d75e7:
+- Fixed5 collector integrated from getopts-scope-oracle worktree/branch30d75e7:
   reviews/getopts/scope-collector-source-r1/SOURCE-READY.json SHA
   f5a67a1eb30c1cb7e1f970179d4602358efbd3508cd6d58221bbf6bfb6802ba7.
-  Five paths,15prospective guard tests, peer source review accepts admission/
-  same-FD/env/2s+30s/caps/quiescence/no-clobber semantics. Not integrated/tested/
-  prepared/executed yet. No VM/progress/history change. MAIN runner only after
+  Five paths,15guard tests PASS within144Python, peer source review accepts admission/
+  same-FD/env/2s+30s/caps/quiescence/no-clobber semantics. Not prepared/executed yet.
+  Initial unit double lacked root parameter; corrected signature/root assertion
+  retains both integrity-failure checks, full144Python R2 passes. No VM/progress/history change. MAIN runner only after
   root integration/test/commit/pin review and explicit sole-slot capture grant.
 
 ## Frozen source identities / integration scope
