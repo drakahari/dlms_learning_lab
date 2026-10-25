@@ -94,32 +94,31 @@ separate. All curriculum/platform completion remains Open.
 
 ## Immediate next actions — continue implementation
 
-No heavy command active at this write. Independent read-only scope/privacy review accepts the2 promoted rows/docs;
-two stale historical prose claims corrected. Commit/push bookkeeping only.
-Then integrate/gate reviewed package backendR3+terminalR2 incrementally (20+15
-UNRUN), preserving MAIN STP export/newer UI/data and explicitly reconciling only
-3 M106 explanation paragraphs in the pre-commit125 metadata fixture. No history/
-Goal/case regeneration. Native package workspace before substantive content.
-Gate STP backendR2 after peer checking its new borrowed-action preflight fix; Apache pure core
-20 after peer review. No new count/credit from capabilities. Continue remaining
-four-track curriculum, not just another package/status report.
+No heavy command active at this write. Acceptance bookkeeping2bbe1cd pushed.
+MAIN package backendR3+terminalR2 integrated incrementally; all source hashes and
+base receipts retained. Three old metadata completion paragraphs reconciled ONLY
+to current125 prose. First gate68lib/19core/15terminal pass; adapter19/20 then20/20
+after independent Remove setup for ConfigFiles query. Additional8 targets77 pass,
+all-target ClippyR3/fmt/diff pass. Min19.48GiB/PSImax0.3/OOMdelta0, no sustained
+pressure. Review final narrow integration delta, commit/push M110.
+
+Native package contract being prepared: real closed command console + optional
+virtual conffile editor, separate bounded assignment/example sessions; typed
+internal action drafts remain off the normal UI. No native/content/count credit.
+Root staged STP backendR2 in reviews/spanning-tree-foundation/main-app-integration-r2;
+no MAIN writes yet. Both family hooks preserved in resolved three-way conflicts.
+First preflight refused older Git pack base because125 overlay snapshot differs;
+use exact hashed backend-base-r1/files, retained failed staging. Gate18 adapter
+checks after integration. Apache sourceR2 peer accepts fixes; gate20 pure groups
+next. Continue substantive remaining four-track content, not a package endpoint.
 
 ## Queued reviewed work — no count/coverage credit
 
-Package backendR3: reviews/package-management/backend-source-r3/SOURCE-READY.json
-SHA72e9ca0556e598a53e5294d2f5f7c92e78d590b23e9807ff5b8d1631eab84099;
-12paths/20tests UNRUN. Root has pure core19+68lib PASS at2b777f6. No dpkg utility
-installed/run; manual-derived vectors are not actual package observations.
-TerminalR2: reviews/package-management/terminal-source-r2/SOURCE-READY.json
-SHA5452e8fca36e68020b76c0ee66311f75b0ba06d3a98c1803c8eca84cc16bfadb;
-5incrementalpaths onbackendR3/15tests UNRUN, peer accepted. Real closed argv,
-computed queries and explicitly simulated Plan summaries, no fake audit/APT
-resolver. Guards distinguish package NAME+/- from valid version1.0+ and require
-ALL installed dependency health for exact-current reinstall. Integrate together
-incrementally after all hashes; preserve MAIN STP export/current UI hooks.
-Original125 source-metadata fixture predates ONLY the3 M106 completion paragraph
-updates: reconcile those explicitly, retain frozen original; don't regenerate
-history/Goals/expected cases. Stage1 UI renderer/content remains separate.
+Package integrated source receipts backendR3 SHA72e9ca0556e598a53e5294d2f5f7c92e78d590b23e9807ff5b8d1631eab84099
+and terminalR2 SHA5452e8fca36e68020b76c0ee66311f75b0ba06d3a98c1803c8eca84cc16bfadb.
+Current125 specs/order/genuine6/7/8 preserved. Frozen original retains earlier
+completion paragraphs; no test outcomes/history regenerated. Native/content
+gates remain pending.
 
 STP backendR1: reviews/spanning-tree-foundation/backend-source-r1/SOURCE-READY.json
 SHA8fc92d06254335ad14c2c6f37ea377d69d890afcc20aa0bc37cf7e9b0c698f43;
@@ -128,13 +127,14 @@ R2 manifest12761fb8cc96c8d8514c18baf4772afc032bdfb49b59132a9932ae86d585042b.
 Peer found Action was
 serialized before cheap borrowed field/shape validation. Root ACK minimal existing
 core Action::validate_for→pub(crate) (same body), call before counter serialization;
-author froze R2/direct oversize negatives; peer recheck pending. SourceR1 retained. Availability+
+author froze R2/direct oversize negatives; independent source recheck accepts. SourceR1 retained. Availability+
 positive Connected/root/role/path guards, fresh snapshot, separate fixture and
 restore-before-reset accepted otherwise. No native/STP authored credit yet.
 
-Apache pure core sourceR1: reviews/apache-static/source-r1/SOURCE-READY.json
-SHAb1dc272985181e576fd55e7d452ec49b991de3e39886c8d766fd192c35e0a26c;
-4paths/20groups UNRUN and not yet peer-reviewed. Accepted contract51460cf7…:
+Apache pure core sourceR2: reviews/apache-static/source-r2/SOURCE-READY.json
+SHA30f872fb6a0cc41c4dfb8763a24ecef60ce13262170cfe0359888fb4cac07e9e;
+4paths/20groups UNRUN; independent source review accepts R2 raw-slash, case-folded
+DirectoryIndex disabled and duplicate-map test fixes. Accepted contract51460cf7…:
 one Listen/equal-port wildcard-vhost closure, explicit root baseline, saved vs
 active config/live virtual contents, canonical paths, typed redirect/HEAD/status,
 no real server/HTTP wire/TLS/proxy. Unknown valid Host/path forms Unsupported;

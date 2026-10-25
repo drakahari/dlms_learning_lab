@@ -74,6 +74,8 @@ pub struct Scenario {
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub mac_teaching: Option<crate::mac_learning_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub debian_packages_teaching: Option<crate::debian_packages_teaching::Lesson>,
 }
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -166,6 +168,8 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                     || v.len()
                         > if matches!(s.initial, State::Ipv4Acl { .. }) {
                             crate::acl_editor::MAX_JSON + 64
+                        } else if matches!(s.initial, State::DebianPackages { .. }) {
+                            crate::debian_packages_workspace::MAX_ACTION_BYTES
                         } else if matches!(s.initial, State::DhcpV4 { .. }) {
                             crate::dhcpv4_workspace::MAX_ACTION_BYTES
                         } else if matches!(s.initial, State::UnitManager { .. }) {
@@ -304,6 +308,32 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("DNS example must use a different zone from the assignment".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let State::DebianPackages { simulation } = &s.initial {
+            let Goal::DebianPackages { definition } = &s.goal else {
+                return Err("Logical package state needs matching fixed goals".into());
+            };
+            if simulation != &definition.initial || definition.validate().is_err() {
+                return Err(
+                    "Package goals must pin the exact admitted initial state/catalog".into(),
+                );
+            }
+            if s.guide.iter().any(|step| !step.commands.is_empty()) {
+                return Err(
+                    "Logical package guidance cannot advertise unsupported terminal commands"
+                        .into(),
+                );
+            }
+            if let Some(lesson) = &s.debian_packages_teaching {
+                lesson.validate()?;
+                if !lesson.separate_from(simulation) {
+                    return Err("Package practice must use separate catalogs, package/artifact/index and path identities".into());
+                }
+            }
+        } else if s.debian_packages_teaching.is_some()
+            || matches!(s.goal, Goal::DebianPackages { .. })
+        {
+            return Err("Package teaching/objectives on another activity".into());
         }
         if let State::DhcpV4 { simulation } = &s.initial {
             let Goal::DhcpV4 {
@@ -656,6 +686,9 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::DebianPackages { simulation } => {
+            crate::debian_packages_workspace::admitted(simulation)
+        }
         State::DhcpV4 { simulation } => simulation.validate().is_ok(),
         State::UnitManager { simulation } => simulation.validate().is_ok(),
         State::Ospf { simulation } => simulation.valid(),

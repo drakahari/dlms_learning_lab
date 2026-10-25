@@ -198,6 +198,35 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if validate_debian_packages_workspace(a).is_err() {
+        return false;
+    }
+    if let State::DebianPackages { simulation } = &a.state {
+        let (
+            State::DebianPackages {
+                simulation: authored,
+            },
+            crate::engine::Goal::DebianPackages { definition },
+        ) = (&s.initial, &s.goal)
+        else {
+            return false;
+        };
+        if authored != &definition.initial {
+            return false;
+        }
+        if a.workspace
+            .as_ref()
+            .and_then(|w| w.debian_packages_learning.as_ref())
+            .is_some_and(|l| {
+                s.debian_packages_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            })
+        {
+            return false;
+        }
+        return definition.checks(simulation).iter().all(|row| row.0);
+    }
     if matches!(a.state, State::DhcpV4 { .. }) {
         return current_dhcpv4_checks(a, s).iter().all(|row| row.0);
     }
@@ -496,6 +525,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        validate_debian_packages_workspace(a)?;
         validate_dhcpv4_workspace(a)?;
         validate_accounts_workspace(a)?;
         validate_legacy_teaching_workspace(a)?;
@@ -521,6 +551,33 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if let State::DebianPackages { simulation } = &a.state {
+            let (
+                State::DebianPackages {
+                    simulation: authored,
+                },
+                crate::engine::Goal::DebianPackages { definition },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err("Package state belongs to another activity".into());
+            };
+            if authored != &definition.initial || !definition.same_assignment(simulation) {
+                return Err(
+                    "Saved package catalog/initial assignment differs; original retained".into(),
+                );
+            }
+            if a.workspace
+                .as_ref()
+                .and_then(|w| w.debian_packages_learning.as_ref())
+                .is_some_and(|l| {
+                    s.debian_packages_teaching
+                        .as_ref()
+                        .is_none_or(|lesson| !l.valid_for(lesson))
+                })
+            {
+                return Err("Saved package practice fixture differs; original retained".into());
+            }
         }
         if let State::DhcpV4 { simulation } = &a.state {
             let (
@@ -1168,6 +1225,35 @@ fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_debian_packages_workspace(a: &Attempt) -> Result<(), String> {
+    let metadata = a
+        .workspace
+        .as_ref()
+        .is_some_and(|w| w.debian_packages_draft.is_some() || w.debian_packages_learning.is_some());
+    let State::DebianPackages { simulation } = &a.state else {
+        return if metadata {
+            Err("Package metadata on another activity; original retained".into())
+        } else {
+            Ok(())
+        };
+    };
+    if !crate::debian_packages_workspace::admitted(simulation) {
+        return Err("Saved package state exceeds app admission".into());
+    }
+    if let Some(w) = &a.workspace
+        && (w
+            .debian_packages_draft
+            .as_ref()
+            .is_some_and(|d| !d.valid_for(simulation))
+            || w.debian_packages_learning.as_ref().is_some_and(|l| {
+                !l.valid()
+                    || !crate::debian_packages_teaching::separate_contexts(&l.context, simulation)
+            }))
+    {
+        return Err("Invalid package draft/practice context; original retained".into());
+    }
+    Ok(())
+}
 fn validate_dhcpv4_workspace(a: &Attempt) -> Result<(), String> {
     let metadata = a
         .workspace
@@ -1237,6 +1323,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
+        validate_debian_packages_workspace(a)?;
         validate_dhcpv4_workspace(a)?;
         validate_accounts_workspace(a)?;
         validate_legacy_teaching_workspace(a)?;

@@ -15,6 +15,10 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub debian_packages_draft: Option<crate::debian_packages_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub debian_packages_learning: Option<crate::debian_packages_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub dhcpv4_draft: Option<crate::dhcpv4_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dhcpv4_learning: Option<crate::dhcpv4_teaching::Learning>,
@@ -114,6 +118,14 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self
+                .debian_packages_draft
+                .as_ref()
+                .is_none_or(|d| d.valid())
+            && self
+                .debian_packages_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
             && self.dhcpv4_draft.as_ref().is_none_or(|d| d.valid())
             && self.dhcpv4_learning.as_ref().is_none_or(|l| l.valid())
             && self
@@ -229,6 +241,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::DebianPackages { simulation } = &a.state
+        && w.debian_packages_draft.is_none()
+    {
+        w.debian_packages_draft = crate::debian_packages_workspace::Draft::new(simulation).ok();
+    }
     if let State::DhcpV4 { simulation } = &a.state
         && w.dhcpv4_draft.is_none()
     {

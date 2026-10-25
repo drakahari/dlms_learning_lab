@@ -1622,3 +1622,31 @@ overlapping references, not completion percentage. No DNS resolver, IOS, actual
 packet/client protocol, LPIC-2 daemon or exact OS-tool credit. Installed candidate
 is a usable scoped milestone, not complete curriculum or other-platform/novice/
 assistive-technology acceptance. Continue package, STP and Apache capability gates.
+
+## 2026-10-25 — M110: bounded Debian package application and command adapter
+
+Integrated independently reviewed backendR3/terminalR2 over the pure package
+model. Optional family metadata, immutable assignment context, fresh installed/
+config-files/absent and virtual-file predicates, isolated practice/drafts and
+validated backup/reset remain within existing pack/profile caps. No host package
+program, archive, download or maintainer script is used. Literal supported
+dpkg-query/APT/dpkg spellings parse into typed operations; query output is derived
+from current records and mutation output explicitly identifies simulation.
+Unsupported shell syntax/selectors and excessive input/output fail honestly.
+
+First guarded run:68 library+19 core+15 command checks pass;19/20 adapter checks
+pass. The remaining test had expected ConfigFiles for an initially Installed
+record. It now independently performs Remove before pinning the query baseline;
+all20 adapter checks pass on retry. Initial state/Goals/expected predicates were
+not changed. Eight additional progress/backup/workspace/content/history targets
+pass77 checks. All-target ClippyR3/formatter/diff pass after two semantics-neutral
+style fixes. Three older125 metadata completion paragraphs were explicitly
+reconciled to committed M106 prose; no history, authored outcomes or unit order
+regenerated. Frozen source receipts and initial failure remain private.
+
+First ordinary gate min19.48GiB available, max memory PSIavg10 some/full0.3/0.3,
+OOM counter unchanged; no sustained pressure, extra heavy invocation or stress
+test. Native package workbench and authored unit remain separate gates: normal
+catalog stays125/31 (38/24/20/43), coverage136Partial/1Supporting/1103Open unchanged.
+No actual dpkg/APT reference observation, new curriculum credit or release claim.
+Continue native package work, reviewed STP adapter and Apache foundation.

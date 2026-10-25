@@ -3,6 +3,9 @@
 pub mod catalog;
 pub mod client_teaching;
 pub mod debian_packages;
+pub mod debian_packages_teaching;
+pub mod debian_packages_terminal;
+pub mod debian_packages_workspace;
 pub mod engine;
 pub mod filesystem;
 pub mod pack;

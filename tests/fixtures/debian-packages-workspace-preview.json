@@ -1,0 +1,839 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "development-debian-packages",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Logical package administration foundation",
+      "unit": "",
+      "title": "Inspect and repair a supplied logical package",
+      "summary": "Unbundled developer fixture for current package outcomes and explicit preservation.",
+      "objective": "Restore museum-report ordinary payload with installed version1.0-1. Preserve its customized configuration, museum-lib/viewer/retired records, the named library/viewer/retired configuration files, /work/note.txt, cached old metadata and available report-1 artifact. Keep every installed Depends satisfied. This technical fixture uses logical script-free actions, not real package-manager commands.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "retry_guidance": "Inspect the database record, recorded owner, local artifact and ordinary payload findings separately.",
+      "steps": [
+        "Inspect the supplied sources of package information.",
+        "Perform an explicit logical repair.",
+        "Check current outcomes and named preservation."
+      ],
+      "guide": [],
+      "hints": [
+        "An installed record does not prove intact ordinary payload.",
+        "Reinstall uses the exact installed artifact and preserves unchanged local conffile policy."
+      ],
+      "sources": [
+        "https://www.debian.org/doc/debian-policy/ch-controlfields.html#version",
+        "https://manpages.debian.org/trixie/dpkg/dpkg.1.en.html"
+      ],
+      "simplifications": "Unbundled technical backend fixture only. Script-free declared regular text payloads; no host packages, archive execution, CLI aliases, intermediate unpacked/configured states, real transaction/rollback, automatic dependency alternatives, RPM or curriculum acceptance. Proposed action/query drafts do not change current outcomes.",
+      "initial": {
+        "kind": "DebianPackages",
+        "simulation": {
+          "catalog": {
+            "architecture": "amd64",
+            "repository_reachable": true,
+            "published": "current",
+            "archives": {
+              "lib-1": {
+                "name": "museum-lib",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/museum/library.txt": {
+                    "contents": "library 1\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "lib-2": {
+                "name": "museum-lib",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/lib/museum/library.txt": {
+                    "contents": "library 2\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "report-1": {
+                "name": "museum-report",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "museum-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/museum-report": {
+                    "contents": "report one\n",
+                    "conffile": false
+                  },
+                  "/etc/museum/report.conf": {
+                    "contents": "style=plain\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "report-2": {
+                "name": "museum-report",
+                "version": "2.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "museum-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "2.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/museum-report": {
+                    "contents": "report two\n",
+                    "conffile": false
+                  },
+                  "/etc/museum/report.conf": {
+                    "contents": "style=bright\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "viewer-1": {
+                "name": "museum-viewer",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [
+                  {
+                    "name": "museum-lib",
+                    "constraint": {
+                      "relation": "Ge",
+                      "version": "1.0"
+                    }
+                  }
+                ],
+                "files": {
+                  "/usr/bin/museum-viewer": {
+                    "contents": "viewer\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "retired-1": {
+                "name": "museum-retired",
+                "version": "1.0-1",
+                "architecture": "amd64",
+                "depends": [],
+                "files": {
+                  "/usr/bin/museum-retired": {
+                    "contents": "retired\n",
+                    "conffile": false
+                  },
+                  "/etc/museum/retired.conf": {
+                    "contents": "retain=yes\n",
+                    "conffile": true
+                  }
+                }
+              },
+              "foreign-1": {
+                "name": "museum-foreign",
+                "version": "1.0-1",
+                "architecture": "arm64",
+                "depends": [],
+                "files": {
+                  "/usr/bin/museum-foreign": {
+                    "contents": "foreign\n",
+                    "conffile": false
+                  }
+                }
+              },
+              "common-1": {
+                "name": "museum-common",
+                "version": "1.0-1",
+                "architecture": "all",
+                "depends": [],
+                "files": {
+                  "/usr/share/museum/common.txt": {
+                    "contents": "shared\n",
+                    "conffile": false
+                  }
+                }
+              }
+            },
+            "publications": {
+              "old": {
+                "candidates": {
+                  "museum-lib": "lib-1",
+                  "museum-report": "report-1",
+                  "museum-viewer": "viewer-1",
+                  "museum-retired": "retired-1",
+                  "museum-foreign": "foreign-1",
+                  "museum-common": "common-1"
+                }
+              },
+              "current": {
+                "candidates": {
+                  "museum-lib": "lib-2",
+                  "museum-report": "report-2",
+                  "museum-viewer": "viewer-1",
+                  "museum-retired": "retired-1",
+                  "museum-foreign": "foreign-1",
+                  "museum-common": "common-1"
+                }
+              }
+            },
+            "extra_paths": [
+              "/work/note.txt"
+            ]
+          },
+          "runtime": {
+            "cached": "old",
+            "local_archives": [
+              "lib-1",
+              "report-1",
+              "viewer-1",
+              "retired-1"
+            ],
+            "records": {
+              "museum-lib": {
+                "archive": "lib-1",
+                "status": "Installed"
+              },
+              "museum-report": {
+                "archive": "report-1",
+                "status": "Installed"
+              },
+              "museum-viewer": {
+                "archive": "viewer-1",
+                "status": "Installed"
+              },
+              "museum-retired": {
+                "archive": "retired-1",
+                "status": "Installed"
+              }
+            },
+            "files": {
+              "/usr/lib/museum/library.txt": "library 1\n",
+              "/usr/bin/museum-report": "damaged\n",
+              "/etc/museum/report.conf": "style=local\n",
+              "/usr/bin/museum-viewer": "viewer\n",
+              "/usr/bin/museum-retired": "retired\n",
+              "/etc/museum/retired.conf": "retain=yes\n",
+              "/work/note.txt": "keep this note\n"
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DebianPackages",
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "current",
+              "archives": {
+                "lib-1": {
+                  "name": "museum-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/museum/library.txt": {
+                      "contents": "library 1\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "lib-2": {
+                  "name": "museum-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/lib/museum/library.txt": {
+                      "contents": "library 2\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "report-1": {
+                  "name": "museum-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "museum-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/museum-report": {
+                      "contents": "report one\n",
+                      "conffile": false
+                    },
+                    "/etc/museum/report.conf": {
+                      "contents": "style=plain\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "report-2": {
+                  "name": "museum-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "museum-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/museum-report": {
+                      "contents": "report two\n",
+                      "conffile": false
+                    },
+                    "/etc/museum/report.conf": {
+                      "contents": "style=bright\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "viewer-1": {
+                  "name": "museum-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "museum-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/usr/bin/museum-viewer": {
+                      "contents": "viewer\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "retired-1": {
+                  "name": "museum-retired",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/usr/bin/museum-retired": {
+                      "contents": "retired\n",
+                      "conffile": false
+                    },
+                    "/etc/museum/retired.conf": {
+                      "contents": "retain=yes\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "foreign-1": {
+                  "name": "museum-foreign",
+                  "version": "1.0-1",
+                  "architecture": "arm64",
+                  "depends": [],
+                  "files": {
+                    "/usr/bin/museum-foreign": {
+                      "contents": "foreign\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "common-1": {
+                  "name": "museum-common",
+                  "version": "1.0-1",
+                  "architecture": "all",
+                  "depends": [],
+                  "files": {
+                    "/usr/share/museum/common.txt": {
+                      "contents": "shared\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "old": {
+                  "candidates": {
+                    "museum-lib": "lib-1",
+                    "museum-report": "report-1",
+                    "museum-viewer": "viewer-1",
+                    "museum-retired": "retired-1",
+                    "museum-foreign": "foreign-1",
+                    "museum-common": "common-1"
+                  }
+                },
+                "current": {
+                  "candidates": {
+                    "museum-lib": "lib-2",
+                    "museum-report": "report-2",
+                    "museum-viewer": "viewer-1",
+                    "museum-retired": "retired-1",
+                    "museum-foreign": "foreign-1",
+                    "museum-common": "common-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/work/note.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "old",
+              "local_archives": [
+                "lib-1",
+                "report-1",
+                "viewer-1",
+                "retired-1"
+              ],
+              "records": {
+                "museum-lib": {
+                  "archive": "lib-1",
+                  "status": "Installed"
+                },
+                "museum-report": {
+                  "archive": "report-1",
+                  "status": "Installed"
+                },
+                "museum-viewer": {
+                  "archive": "viewer-1",
+                  "status": "Installed"
+                },
+                "museum-retired": {
+                  "archive": "retired-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/usr/lib/museum/library.txt": "library 1\n",
+                "/usr/bin/museum-report": "damaged\n",
+                "/etc/museum/report.conf": "style=local\n",
+                "/usr/bin/museum-viewer": "viewer\n",
+                "/usr/bin/museum-retired": "retired\n",
+                "/etc/museum/retired.conf": "retain=yes\n",
+                "/work/note.txt": "keep this note\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": "museum-report",
+              "constraint": {
+                "relation": "Eq",
+                "version": "1.0-1"
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "museum-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/etc/museum/report.conf"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "museum-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/lib/museum/library.txt"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "museum-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/museum-viewer"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "museum-retired"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/etc/museum/retired.conf"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/work/note.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/usr/bin/museum-retired"
+            },
+            {
+              "kind": "Cached",
+              "snapshot": "old"
+            },
+            {
+              "kind": "ArchiveAvailable",
+              "archive": "report-1",
+              "available": true
+            }
+          ]
+        }
+      },
+      "solution": [
+        "packages {\"kind\":\"Reinstall\",\"name\":\"museum-report\"}"
+      ],
+      "prerequisites": [],
+      "debian_packages_teaching": {
+        "definition": {
+          "initial": {
+            "catalog": {
+              "architecture": "amd64",
+              "repository_reachable": true,
+              "published": "gallery-current",
+              "archives": {
+                "gallery-lib-1": {
+                  "name": "gallery-lib",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/practice/gallery/usr/lib/museum/library.txt": {
+                      "contents": "library 1\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-lib-2": {
+                  "name": "gallery-lib",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/practice/gallery/usr/lib/museum/library.txt": {
+                      "contents": "library 2\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-report-1": {
+                  "name": "gallery-report",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/practice/gallery/usr/bin/museum-report": {
+                      "contents": "report one\n",
+                      "conffile": false
+                    },
+                    "/practice/gallery/etc/museum/report.conf": {
+                      "contents": "style=plain\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "gallery-report-2": {
+                  "name": "gallery-report",
+                  "version": "2.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "2.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/practice/gallery/usr/bin/museum-report": {
+                      "contents": "report two\n",
+                      "conffile": false
+                    },
+                    "/practice/gallery/etc/museum/report.conf": {
+                      "contents": "style=bright\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "gallery-viewer-1": {
+                  "name": "gallery-viewer",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [
+                    {
+                      "name": "gallery-lib",
+                      "constraint": {
+                        "relation": "Ge",
+                        "version": "1.0"
+                      }
+                    }
+                  ],
+                  "files": {
+                    "/practice/gallery/usr/bin/museum-viewer": {
+                      "contents": "viewer\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-retired-1": {
+                  "name": "gallery-retired",
+                  "version": "1.0-1",
+                  "architecture": "amd64",
+                  "depends": [],
+                  "files": {
+                    "/practice/gallery/usr/bin/museum-retired": {
+                      "contents": "retired\n",
+                      "conffile": false
+                    },
+                    "/practice/gallery/etc/museum/retired.conf": {
+                      "contents": "retain=yes\n",
+                      "conffile": true
+                    }
+                  }
+                },
+                "gallery-foreign-1": {
+                  "name": "gallery-foreign",
+                  "version": "1.0-1",
+                  "architecture": "arm64",
+                  "depends": [],
+                  "files": {
+                    "/practice/gallery/usr/bin/museum-foreign": {
+                      "contents": "foreign\n",
+                      "conffile": false
+                    }
+                  }
+                },
+                "gallery-common-1": {
+                  "name": "gallery-common",
+                  "version": "1.0-1",
+                  "architecture": "all",
+                  "depends": [],
+                  "files": {
+                    "/practice/gallery/usr/share/museum/common.txt": {
+                      "contents": "shared\n",
+                      "conffile": false
+                    }
+                  }
+                }
+              },
+              "publications": {
+                "gallery-old": {
+                  "candidates": {
+                    "gallery-lib": "gallery-lib-1",
+                    "gallery-report": "gallery-report-1",
+                    "gallery-viewer": "gallery-viewer-1",
+                    "gallery-retired": "gallery-retired-1",
+                    "gallery-foreign": "gallery-foreign-1",
+                    "gallery-common": "gallery-common-1"
+                  }
+                },
+                "gallery-current": {
+                  "candidates": {
+                    "gallery-lib": "gallery-lib-2",
+                    "gallery-report": "gallery-report-2",
+                    "gallery-viewer": "gallery-viewer-1",
+                    "gallery-retired": "gallery-retired-1",
+                    "gallery-foreign": "gallery-foreign-1",
+                    "gallery-common": "gallery-common-1"
+                  }
+                }
+              },
+              "extra_paths": [
+                "/practice/gallery/work/note.txt"
+              ]
+            },
+            "runtime": {
+              "cached": "gallery-old",
+              "local_archives": [
+                "gallery-lib-1",
+                "gallery-report-1",
+                "gallery-viewer-1",
+                "gallery-retired-1"
+              ],
+              "records": {
+                "gallery-lib": {
+                  "archive": "gallery-lib-1",
+                  "status": "Installed"
+                },
+                "gallery-report": {
+                  "archive": "gallery-report-1",
+                  "status": "Installed"
+                },
+                "gallery-viewer": {
+                  "archive": "gallery-viewer-1",
+                  "status": "Installed"
+                },
+                "gallery-retired": {
+                  "archive": "gallery-retired-1",
+                  "status": "Installed"
+                }
+              },
+              "files": {
+                "/practice/gallery/usr/lib/museum/library.txt": "library 1\n",
+                "/practice/gallery/etc/museum/report.conf": "style=gallery-local\n",
+                "/practice/gallery/usr/bin/museum-viewer": "viewer\n",
+                "/practice/gallery/usr/bin/museum-retired": "retired\n",
+                "/practice/gallery/etc/museum/retired.conf": "retain=yes\n",
+                "/practice/gallery/work/note.txt": "keep this note\n"
+              }
+            }
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": "gallery-report",
+              "constraint": {
+                "relation": "Eq",
+                "version": "1.0-1"
+              }
+            },
+            {
+              "kind": "PayloadIntact",
+              "package": "gallery-report"
+            },
+            {
+              "kind": "DependenciesSatisfied"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/etc/museum/report.conf"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-lib"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/usr/lib/museum/library.txt"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-viewer"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/usr/bin/museum-viewer"
+            },
+            {
+              "kind": "PackagePreserved",
+              "package": "gallery-retired"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/etc/museum/retired.conf"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/work/note.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/usr/bin/museum-retired"
+            },
+            {
+              "kind": "Cached",
+              "snapshot": "gallery-old"
+            },
+            {
+              "kind": "ArchiveAvailable",
+              "archive": "gallery-report-1",
+              "available": true
+            }
+          ]
+        },
+        "prerequisite_note": "Developer-only separate logical package practice. Read installed records, cached metadata and supplied artifacts separately.",
+        "concepts": [
+          {
+            "title": "The database is not the file",
+            "text": "An installed record may still exist when an ordinary virtual file is absent or damaged. Recorded owner and payload inspection answer different questions."
+          },
+          {
+            "title": "A logical repair has a declared boundary",
+            "text": "Reinstall restores ordinary payload from the exact installed artifact. It preserves customized configuration in this script-free model. This is not a real dpkg transaction or rollback guarantee."
+          },
+          {
+            "title": "Drafts and queries do not install anything",
+            "text": "Filling proposed action fields changes only those fields. Explicitly perform the logical operation. Read-only queries and unused action drafts do not change current package outcomes."
+          }
+        ],
+        "example_description": "In the separate gallery catalog, gallery-report is recorded as installed but its ordinary command text is missing. Preserve its customized configuration, peers, note and cached metadata while restoring the ordinary payload.",
+        "example_actions": [
+          {
+            "action": {
+              "kind": "Reinstall",
+              "name": "gallery-report"
+            },
+            "explanation": "Fill the logical Reinstall target gallery-report. Inspect its local installed artifact and recorded file owner, then explicitly perform the logical action; Fill alone does not restore the file."
+          }
+        ],
+        "try_change": {
+          "description": "After the example passes, logically Remove gallery-report. The configuration remains but the installed/payload checks fail. Install the same package from the existing cached snapshot to repair.",
+          "actions": [
+            {
+              "kind": "Remove",
+              "name": "gallery-report"
+            }
+          ],
+          "expected": [
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Install",
+            "packages": [
+              {
+                "name": "gallery-report",
+                "version": null
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ]
+}

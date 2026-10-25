@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    DebianPackages {
+        simulation: crate::debian_packages::State,
+    },
     DhcpV4 {
         simulation: crate::dhcpv4::State,
     },
@@ -130,6 +133,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    DebianPackages {
+        definition: Box<crate::debian_packages_workspace::Definition>,
+    },
     DhcpV4 {
         initial: crate::dhcpv4::State,
         #[serde(deserialize_with = "crate::dhcpv4_workspace::requirements")]
@@ -281,6 +287,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::DebianPackages { simulation }, Goal::DebianPackages { definition }) => {
+            definition.checks(simulation)
+        }
         (
             State::DhcpV4 { simulation },
             Goal::DhcpV4 {
@@ -585,6 +594,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::DebianPackages { .. } => crate::debian_packages_terminal::HELP,
         State::DhcpV4 { .. } => crate::dhcpv4_workspace::HELP,
         State::MacLearning { .. } => crate::mac_learning_workspace::HELP,
         State::UnitManager { .. } => crate::unit_manager_workspace::HELP,
@@ -641,6 +651,31 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::DebianPackages { simulation } = s {
+        if input.len() > crate::debian_packages_workspace::MAX_ACTION_BYTES {
+            return Err("Package authoring input exceeds16KiB".into());
+        }
+        if !input.starts_with("packages ")
+            && input.len() > crate::debian_packages_terminal::MAX_COMMAND_BYTES
+        {
+            return Err("Package command exceeds2048 UTF8 bytes".into());
+        }
+        let Goal::DebianPackages { definition } = goal else {
+            return Err("Logical package actions need immutable assignment context".into());
+        };
+        if !definition.same_assignment(simulation) {
+            return Err("Foreign/oversized package assignment; original retained".into());
+        }
+        if matches!(input.trim(), "show" | "help") {
+            return execute(s, input);
+        }
+        if input.starts_with("packages ") {
+            return crate::debian_packages_workspace::execute(definition, simulation, input);
+        }
+        return crate::debian_packages_terminal::output_text(
+            crate::debian_packages_terminal::execute(definition, simulation, input),
+        );
+    }
     if let State::DhcpV4 { simulation } = s {
         if input.len() > crate::dhcpv4_workspace::MAX_ACTION_BYTES {
             return Err("DHCP authoring action exceeds256KiB".into());
@@ -716,6 +751,18 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::DebianPackages { .. }) {
+        if input.len() > crate::debian_packages_workspace::MAX_ACTION_BYTES {
+            return Err("Package authoring input exceeds16KiB".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::debian_packages_terminal::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Package commands need fixed goal context; no host package program is run".into(),
+            ),
+        };
+    }
     if matches!(s, State::DhcpV4 { .. }) {
         if input.len() > crate::dhcpv4_workspace::MAX_ACTION_BYTES {
             return Err("DHCP input exceeds256KiB".into());
@@ -827,7 +874,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::DhcpV4 { .. }
+        State::DebianPackages { .. }
+        | State::DhcpV4 { .. }
         | State::UnitManager { .. }
         | State::Ospf { .. }
         | State::Ipv4Acl { .. }
@@ -1269,6 +1317,12 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::DebianPackages { simulation } => format!(
+            "Logical script-free Debian packages: {} database records, {} virtual text files, cached metadata {}. No real package transaction, archive or host utility",
+            simulation.runtime().records.len(),
+            simulation.runtime().files.len(),
+            simulation.runtime().cached.as_deref().unwrap_or("absent")
+        ),
         State::DhcpV4 { simulation } => crate::dhcpv4_workspace::describe(simulation),
         State::UnitManager { simulation } => format!(
             "Virtual unit manager · {} supplied units · {} loaded definitions · current runtime and future-session enablement are separate; no host systemd or boot",
