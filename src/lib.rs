@@ -103,3 +103,5 @@ pub mod dhcpv4;
 
 pub mod dhcpv4_teaching;
 pub mod dhcpv4_workspace;
+
+pub mod spanning_tree;

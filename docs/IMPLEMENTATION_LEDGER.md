@@ -1487,3 +1487,22 @@ and68lib then PASS (m106-m107-content-core-r2); alltargetClippyR2/fmt/diff pass
 after a predicate-preserving nested-if style correction. Optional development
 dpkg is absent, so no host comparisons are claimed and no package was installed
 or run. No new dependency. Catalog stays122 until separate DHCP integration.
+
+## 2026-10-25 — M108: pure steady-state spanning-tree foundation
+
+The independently reviewed module calculates one supplied P2P instance with
+bounded composite identifiers, receiving-port costs, deterministic root/port
+selection, down/disconnected components and fresh forwarding-tree paths. A
+separate forest check validates every result. There are no protocol packets,
+PVST/VLAN instances, convergence, PortFast or guard claims, no State/Goal/native
+workspace or new authored lab/coverage credit. Shared MAC representation only;
+no dependency or host network execution.
+
+All20 core checks and68 library checks PASS after exact four-path source/base
+preflight (m106-reconciled-targets-m108-stp-r1). The tests include256 independent
+small-graph/cost/root configurations, path enumeration and a separate cycle
+oracle, asymmetric/tie/disconnected/down/maximal cases, malformed input and
+atomic rejection. All-target ClippyR3/fmt/diff PASS after two identical-predicate
+if-let-chain style fixes; its R2 warning evidence is retained. No real equipment
+or rendered STP lesson acceptance follows from this pure foundation. The normal
+source catalog's pending DHCP125 milestone remains separately gated.
