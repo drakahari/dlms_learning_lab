@@ -5,6 +5,50 @@ Root owns the sole heavy slot for the next combined reviewed-source gates.
 Helpers are source-only; no heavy grant. The application is not complete. No public release
 is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
 
+## Active M94 follow-through
+
+- Installed97b default Wayland stalls localized by live EGL stack/protocol0of1;
+  XWayland startup1of1 passes. Whole two-seed XWayland33capture run reaches both
+  final goals but FAILS exit101 AFTER PASS text: close was asynchronous and next
+  frame indexed past plan473. Never mark that run accepted. Logs retained.
+- Source final-step hold +repeated close-phase regression PASS. Render review
+  adds clear false practice diagnoses and removes duplicateBIND warning; no bool/
+  guard/fixture/command/Goal/layout change. Scoped9UI/controller +16models PASS;
+  all-targetClippy/fmt final PASS. Next clean candidate must repeat native2flow.
+- GetoptsR2 integrated uncommitted, peer reviewed +aggregate actual-size correction;
+  17newPython safety +4Rust example tests PASS (129totalPython). No producer/VM/
+  Bash reference/version command or captured outcomes yet. Original37/6/7/core8
+  pins exact;105-source closure includes both seed modules. Clippy clone assertion
+  corrected without loosening solution equality. Tool commit/capture gate next.
+- Root sole heavy slot, currently idle after checks; all helpers source-only.
+  Source-only Unix/Logs adapter implementation stays isolated; do not integrate
+  those future modules until fixed before9 baseline captured/reviewed.
+
+## Active native startup investigation (2026-10-25)
+
+- Clean code97b90923eb7c8a51f14510419d42d866ef816f58 is committed/pushed.
+  Candidate builds; lifecycle R2 upgrades deb55, validates116/28 and preserves
+  exact original-nine bytes. R1 used a mistaken candidate suffix, failed before
+  install and is retained; R2 uses exact Git-derived identity.
+- Default native seed flow stalls BEFORE controller output. Root captured own live
+  main-thread stack in Mesa eglSwapBuffers -> Wayland dispatch ->ppoll, then
+  terminated only verified own synthetic child via pidfd/SIGTERM and reaped it.
+  audits/m93-startup-stall-r1 retains stack/ownership/evidence hashes.
+- Separate existing bounded protocol startup probe FAIL0/1 at15s: app ready,
+  update0+1 complete, first callback53 requested/committed, no done beforedeadline;
+  debugger independently shows same EGL wait. This reproduces the historical
+  failure location, not its underlying cause. No app/controller lock is observed
+  in that stack, no compositor/GPU/theme/security/service setting changed.
+- Same installed ELF process-local XWayland startup PASS1/1 (5.236s inclpacing,
+  not a benchmark). Root sole heavy slot now full seed teaching XWayland flow,
+  logm93-installed-seed-teaching-xwayland-r1. Default Wayland acceptance remains
+  FAILED/pending; no fallback result proves a cure. Helpers source/research only.
+- Helper independent reviews pinned toolkit/protocol/live evidence for narrow
+  app-only diagnosis; no code/dependency/native run. Getopts toolR2 peer review
+  accepts actual-size aggregate fix/105-source closure;21 tests UNRUN, tool not
+  yet in MAIN. PTR3 unregistered source/tests UNRUN; original Unix/Logs teaching
+  gaps remain open. Consult active markers before any heavy invocation.
+
 ## Active M93 integration
 
 - M92 reporting423029c is pushed; exact deb55 installed acceptance completed.

@@ -100,3 +100,16 @@ for the zone/file arguments. Existing original scenario references and teaching
 limitations remain. No upstream code or manual prose is copied. This adds no
 claim of complete BIND, Linux storage, LPIC coverage, novice, accessibility or
 Windows/macOS acceptance.
+
+
+M94 rendered follow-through: installed97b's full XWayland flow reached both
+Finish checks and33 captures but exited101 because the controller advanced past
+its final step before native close completed. The failed run is retained, not
+accepted from its earlier PASS text. A terminal-step hold and repeated actual
+close-phase regression fix the controller only. Nine scoped UI/controller checks
+pass; all16 model tests pass with stronger negative-feedback assertions.
+Actual screens also exposed duplicate BIND disclosure and positive-goal wording
+after Needs attention. The fixed caption remains, outer action explanation now
+teaches validation purpose; false practice rows diagnose current saved/serving/
+serial or capacity/device/mount problems. Engine booleans, guards and passing
+messages are unchanged. New actual native acceptance remains pending.

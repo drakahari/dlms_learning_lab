@@ -1083,3 +1083,26 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
 - Reverse-DNS three-task data and fixed getopts oracle sources remain unregistered/
   unrun worktree handoffs. No shell revision/default change or host learner
   execution. Next is a clean candidate and actual DNS/Mount screen/flow review.
+
+
+### M94 actual native review corrections and startup evidence
+
+- Installed97b lifecycle R2 PASS; R1 mistaken directory suffix failed before
+  install and is retained. Default native attempt stalls; own live bounded stack
+  and separate15s protocol probe localize Mesa EGL swap/Wayland dispatch waiting
+  after updates0/1 and a committed callback request without observed completion.
+  Underlying cause remains unproven. Only own synthetic child closed/reaped; no
+  GPU/theme/compositor/security/service change. Docs NATIVE_STARTUP.md records it.
+- Same ELF process-local XWayland startup PASS1/1. Full seed flow reaches all
+  two-lesson checks/33 captures then FAILS exit101 at asynchronous close: final
+  step incorrectly advanced outside plan. No clean-exit acceptance is claimed.
+- Controller now holds final step; repeated real close-phase test passes. Nine
+  focused UI/controller checks pass;16 DNS/Mount model checks pass. A first scoped
+  command filtered backend names with seed_ and ran only1 of16; the unfiltered
+  R2 backend run explicitly passes all16. No inflated totals.
+- Actual render review removes duplicated BIND disclosure and gives specific
+  negative practice diagnoses instead of positive-goal labels. All grading bools,
+  passing messages, context/pending guards, fixtures/commands/Goals remain exact.
+  Capture reveals the whole practice-feedback block; no product layout change.
+- All-target Clippy/fmt final PASS. New native rerun still required; Wayland
+  failed/pending is separate from XWayland teaching acceptance. Catalog116/28.

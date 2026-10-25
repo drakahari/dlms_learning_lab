@@ -40,6 +40,22 @@ fn reference(l: &mut Learning, lesson: &dns::Lesson) {
         lesson.example_actions.iter().map(|a| a.action.clone()),
     );
 }
+fn assert_feedback_keeps_engine_truth(l: &Learning, lesson: &dns::Lesson) {
+    let expected = engine::checks(&l.current.state().unwrap(), &lesson.goal().unwrap());
+    let actual = l.checks(lesson);
+    assert_eq!(
+        actual.iter().map(|c| c.0).collect::<Vec<_>>(),
+        expected.iter().map(|c| c.0).collect::<Vec<_>>()
+    );
+    for ((pass, message), (_, original)) in actual.iter().zip(expected) {
+        assert!(!message.is_empty() && message.len() <= 512);
+        if *pass {
+            assert_eq!(message, &original);
+        } else {
+            assert_ne!(message, &original);
+        }
+    }
+}
 #[test]
 fn dns_worked_example_and_saved_versus_serving_experiment_are_real_and_independent() {
     let s = scenario();
@@ -47,9 +63,30 @@ fn dns_worked_example_and_saved_versus_serving_experiment_are_real_and_independe
     assert!(lesson.valid_for(&s.initial, &s.goal));
     let mut l = Learning::new(lesson).unwrap();
     assert!(l.checks(lesson).iter().any(|c| !c.0));
+    let initial = l.checks(lesson);
+    assert!(initial[0].1.contains("Saved address 198.51.100.4 differs"));
+    assert!(
+        initial[1]
+            .1
+            .contains("Serving address 198.51.100.4 differs")
+    );
+    assert_feedback_keeps_engine_truth(&l, lesson);
     reference(&mut l, lesson);
     assert!(l.checks(lesson).iter().all(|c| c.0));
     assert_eq!((l.current.serial, l.current.loaded_serial), (42, 42));
+    assert_feedback_keeps_engine_truth(&l, lesson);
+    let mut absent = l.clone();
+    absent.current.served = None;
+    assert!(absent.checks(lesson)[1].1.contains("No answer is loaded"));
+    assert_feedback_keeps_engine_truth(&absent, lesson);
+    let mut wrong_answer = l.clone();
+    wrong_answer.current.served = Some("198.51.100.46".parse().unwrap());
+    assert!(
+        wrong_answer.checks(lesson)[1]
+            .1
+            .contains("Serving address 198.51.100.46 differs")
+    );
+    assert_feedback_keeps_engine_truth(&wrong_answer, lesson);
     perform(&mut l, lesson, lesson.try_actions.clone());
     assert_eq!(l.current.saved.to_string(), "198.51.100.45");
     assert_eq!(l.current.served.unwrap().to_string(), "198.51.100.44");
@@ -57,7 +94,22 @@ fn dns_worked_example_and_saved_versus_serving_experiment_are_real_and_independe
     let checks = l.checks(lesson);
     assert_eq!(checks.len(), 2);
     assert!(checks.iter().all(|c| !c.0));
+    assert!(checks[0].1.contains("Saved address 198.51.100.45 differs"));
+    assert!(
+        checks[1]
+            .1
+            .contains("Serving serial 42 differs from saved serial 43")
+    );
+    assert_feedback_keeps_engine_truth(&l, lesson);
     assert!(l.transcript.last().unwrap().contains("198.51.100.44"));
+    let before_validation = l.current.clone();
+    l.command = "named-checkzone lab.test".into();
+    l.submit(lesson).unwrap();
+    assert_eq!(
+        l.current, before_validation,
+        "Validation does not activate the saved record"
+    );
+    assert_feedback_keeps_engine_truth(&l, lesson);
     perform(&mut l, lesson, lesson.repair_actions.clone());
     assert!(l.checks(lesson).iter().all(|c| c.0));
     assert_eq!(scenario().initial, s.initial);
@@ -98,6 +150,11 @@ fn dns_insert_only_and_atomic_invalid_save_preserve_raw_drafts_and_allow_current
     l.checked = true;
     l.draft.serial = "unsaved".into();
     assert!(l.checks(lesson).iter().all(|c| !c.0));
+    assert!(
+        l.checks(lesson)[0]
+            .1
+            .starts_with("Unsaved example settings")
+    );
     l.draft = dns::Draft::new(&l.current);
     assert!(l.checks(lesson).iter().all(|c| c.0));
     // Existing goals grade current values, not proof of a new reload event.
@@ -170,6 +227,10 @@ fn dns_learning_decode_bounds_and_fixture_pins_reject_foreign_context_without_re
     foreign.fixture.serial += 1;
     assert!(foreign.valid());
     assert!(!foreign.valid_for(lesson));
+    assert_eq!(
+        foreign.checks(lesson),
+        [(false, "Invalid or foreign DNS example".into())]
+    );
     assert!(foreign.submit(lesson).is_err());
     let mut oversized = lesson.fixture.clone();
     oversized.name = "x".repeat(254);

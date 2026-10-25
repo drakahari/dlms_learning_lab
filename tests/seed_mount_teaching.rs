@@ -35,12 +35,37 @@ fn reference(l: &mut Learning, lesson: &mount::Lesson) {
         lesson.example_actions.iter().map(|a| a.action.clone()),
     );
 }
+fn assert_feedback_keeps_engine_truth(l: &Learning, lesson: &mount::Lesson) {
+    let expected = engine::checks(&l.current.state().unwrap(), &lesson.goal().unwrap());
+    let actual = l.checks(lesson);
+    assert_eq!(
+        actual.iter().map(|c| c.0).collect::<Vec<_>>(),
+        expected.iter().map(|c| c.0).collect::<Vec<_>>()
+    );
+    for ((pass, message), (_, original)) in actual.iter().zip(expected) {
+        assert!(!message.is_empty() && message.len() <= 512);
+        if *pass {
+            assert_eq!(message, &original);
+        } else {
+            assert_ne!(message, &original);
+        }
+    }
+}
 #[test]
 fn mount_example_math_unmount_experiment_and_real_repair_use_original_current_goal() {
     let s = scenario();
     let lesson = s.seed_mount_teaching.as_ref().unwrap();
     assert!(lesson.valid_for(&s.initial, &s.goal));
     let mut l = Learning::new(lesson).unwrap();
+    let initial = l.checks(lesson);
+    assert!(initial[0].1.contains("1850 of 2000 MiB, above the 80%"));
+    assert!(
+        initial[1]
+            .1
+            .contains("saved mount entry points to a different device")
+    );
+    assert!(initial[2].1.contains("mounted read-only"));
+    assert_feedback_keeps_engine_truth(&l, lesson);
     reference(&mut l, lesson);
     assert_eq!(
         (l.current.capacity, l.current.used, l.current.cache),
@@ -51,6 +76,7 @@ fn mount_example_math_unmount_experiment_and_real_repair_use_original_current_go
         70
     );
     assert!(l.checks(lesson).iter().all(|c| c.0));
+    assert_feedback_keeps_engine_truth(&l, lesson);
     perform(&mut l, lesson, lesson.try_actions.clone());
     let checks = l.checks(lesson);
     assert_eq!(
@@ -58,6 +84,9 @@ fn mount_example_math_unmount_experiment_and_real_repair_use_original_current_go
         [true, true, false]
     );
     assert!(!l.current.mounted && !l.current.writable);
+    assert!(checks[2].1.contains("not mounted"));
+    assert!(!checks[2].1.contains("read-only"));
+    assert_feedback_keeps_engine_truth(&l, lesson);
     assert_eq!(l.current.used, 1400);
     perform(&mut l, lesson, lesson.repair_actions.clone());
     assert!(l.checks(lesson).iter().all(|c| c.0));
@@ -130,6 +159,12 @@ fn mount_terminal_keeps_legacy_token_acceptance_and_refreshes_only_clean_drafts(
     l.submit(lesson).unwrap();
     assert_eq!(l.current.configured_device, "wrong");
     assert_eq!(l.draft.device, "wrong");
+    assert!(
+        l.checks(lesson)[1]
+            .1
+            .contains("saved mount entry points to a different device")
+    );
+    assert_feedback_keeps_engine_truth(&l, lesson);
     assert!(l.save(lesson).is_err());
     l.draft.device = "unfinished draft".into();
     l.command = "config set device /dev/vde2".into();
@@ -137,6 +172,11 @@ fn mount_terminal_keeps_legacy_token_acceptance_and_refreshes_only_clean_drafts(
     assert_eq!(l.current.configured_device, "/dev/vde2");
     assert_eq!(l.draft.device, "unfinished draft");
     assert!(l.checks(lesson).iter().all(|c| !c.0));
+    assert!(
+        l.checks(lesson)[0]
+            .1
+            .starts_with("Unsaved example settings")
+    );
     l.draft = mount::Draft::new(&l.current).unwrap();
     l.command = "mount /data".into();
     l.submit(lesson).unwrap();
@@ -178,6 +218,12 @@ fn mount_decode_bounds_prevent_foreign_state_and_roundtrip_worst_legal_escaping(
     let s = scenario();
     let lesson = s.seed_mount_teaching.as_ref().unwrap();
     let mut l = Learning::new(lesson).unwrap();
+    let mut long_device = l.clone();
+    long_device.current.configured_device = "é".repeat(128);
+    long_device.draft = mount::Draft::new(&long_device.current).unwrap();
+    assert!(long_device.valid_for(lesson));
+    assert_feedback_keeps_engine_truth(&long_device, lesson);
+    assert!(!long_device.checks(lesson)[1].1.contains('é'));
     let mut value = serde_json::to_value(&l).unwrap();
     value["current"] = serde_json::json!({"kind":"Script","source":"ignored","run":null});
     assert!(serde_json::from_value::<Learning>(value).is_err());

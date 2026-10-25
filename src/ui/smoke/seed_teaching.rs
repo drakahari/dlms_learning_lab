@@ -895,8 +895,9 @@ impl LabApp {
                 } else if *feedback {
                     self.metrics
                         .seed_feedback
-                        .first()
+                        .iter()
                         .map(|(_, r)| *r)
+                        .reduce(|a, b| a.union(b))
                         .or_else(|| {
                             self.metrics.feedback.map(|r| {
                                 egui::Rect::from_min_size(
@@ -931,6 +932,9 @@ impl LabApp {
                     "PASS two original DNS/storage native teaching flows: actual inputs, separate examples, wrong/partial/alternate/current checks, exact drafts/save/readback/navigation resume/reset and Light150/Dark200. No cold-process, novice or cross-platform claim."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                // Closing is asynchronous: keep this terminal step until the
+                // native event loop processes the request, even on another frame.
+                return (false, None);
             }
         }
         (true, None)
@@ -1019,6 +1023,44 @@ mod tests {
             draw(ctx, a);
         }
         panic!("real control must be reachable: {target:?}");
+    }
+    #[test]
+    fn seed_native_finish_waits_for_asynchronous_close_without_advancing() {
+        let ctx = egui::Context::default();
+        let mut a = LabApp::from_context(&ctx, true, false);
+        a.smoke = false;
+        // Test setup uses the ordinary virtual command handler; the native
+        // controller still has no path for publishing a reference state.
+        for id in IDS {
+            let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
+            a.launch(i);
+            for command in a.scenarios[i].solution.clone() {
+                a.input = command;
+                a.submit(i);
+            }
+            assert!(progress::current_solved(
+                &a.progress.attempts[id],
+                &a.scenarios[i]
+            ));
+        }
+        let last = START + plan(&a.scenarios).len() - 1;
+        a.smoke_stage = last;
+        for _ in 0..2 {
+            let mut result = (true, None);
+            let output = ctx.run(egui::RawInput::default(), |ctx| {
+                result = a.seed_teaching_native(ctx, a.smoke_stage);
+            });
+            assert_eq!(result, (false, None));
+            assert!(
+                output.viewport_output[&egui::ViewportId::ROOT]
+                    .commands
+                    .contains(&egui::ViewportCommand::Close)
+            );
+            if result.0 {
+                a.smoke_stage += 1;
+            }
+            assert_eq!(a.smoke_stage, last);
+        }
     }
     #[test]
     fn seed_native_plan_is_bounded_fixed_and_has_no_simulation_publish_path() {

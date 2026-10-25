@@ -591,6 +591,32 @@ impl Learning {
             &self.current.state().expect("validated DNS example"),
             &l.goal().expect("bounded lesson"),
         )
+        .into_iter()
+        .enumerate()
+        .map(|(index, (pass, message))| {
+            if pass {
+                return (pass, message);
+            }
+            let diagnosis = match index {
+                0 => format!(
+                    "Saved address {} differs from the practice task. Inspect the saved record.",
+                    self.current.saved
+                ),
+                1 => match self.current.served {
+                    None => "No answer is loaded for this name. Inspect the saved record and serving copy.".into(),
+                    Some(address) if address != l.required_address => format!(
+                        "Serving address {address} differs from the practice task. Inspect the saved record and whether its changes are active."
+                    ),
+                    Some(_) => format!(
+                        "Serving serial {} differs from saved serial {}. The saved and serving copies are not synchronized.",
+                        self.current.loaded_serial, self.current.serial
+                    ),
+                },
+                _ => message,
+            };
+            (pass, limits::message(&diagnosis))
+        })
+        .collect()
     }
 }
 pub fn prepare(a: &mut Attempt, l: &Lesson, new_attempt: bool) -> Result<(), String> {

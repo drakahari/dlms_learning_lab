@@ -417,6 +417,25 @@ impl Learning {
             &self.current.state().expect("validated mount example"),
             &l.goal().expect("bounded lesson"),
         )
+        .into_iter()
+        .enumerate()
+        .map(|(index, (pass, message))| {
+            if pass {
+                return (pass, message);
+            }
+            let diagnosis = match index {
+                0 => format!(
+                    "Used space is {} of {} MiB, above the 80% practice limit. Inspect the space usage.",
+                    self.current.used, self.current.capacity
+                ),
+                1 => "The saved mount entry points to a different device from the supplied data device. Inspect the persistent entry.".into(),
+                2 if !self.current.mounted => "The data filesystem is not mounted. Inspect its current mount state and saved device.".into(),
+                2 => "The data filesystem is mounted read-only. Inspect the mount mode before changing files.".into(),
+                _ => message,
+            };
+            (pass, limits::message(&diagnosis))
+        })
+        .collect()
     }
 }
 pub fn prepare(a: &mut Attempt, l: &Lesson, new_attempt: bool) -> Result<(), String> {

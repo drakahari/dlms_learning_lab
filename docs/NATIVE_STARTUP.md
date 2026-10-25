@@ -63,3 +63,27 @@ new screenshot-harness geometry by reading zoom inside a context-data lock;
 that recursive read was moved outside the lock and actual native checks pass.
 It is not evidence about the historical Wayland startup stall. No compositor,
 backend, theme, security or other desktop setting changed.
+
+
+## M93 live stalled-process capture (2026-10-25)
+
+Actual installed97b90923eb7c native seed flow stalls before controller diagnostics.
+A bounded same-user GDB attachment (init/autoload/debuginfod disabled) captures
+main thread inside Mesa26.2.5 eglSwapBuffers/dri2_wl_swap_buffers_with_damage,
+loader_wayland_dispatch, wl_display_dispatch_queue and ppoll. The verified own
+synthetic child is then closed via pidfd/SIGTERM, reaped normally by its guard;
+no other app/agent or system setting is touched. Evidence stays ignored/private.
+
+An independent existing15s startup/protocol probe reproduces the same wait:
+creation/application-ready and update0/1 finish, callback53 requested on surface38
+and buffer committed, but no callback done before deadline. Keyboard enters then
+leaves. Main stack again shows EGL/Wayland dispatch. This establishes an observed
+blocking location for the historical pattern; it does not establish why the
+callback was absent or blame focus, occlusion, compositor, driver or application.
+It is distinct from earlier capture-only Context reentry deadlocks.
+
+The same ELF passes one process-local XWayland startup/readback after only
+omitting WAYLAND_DISPLAY for that child. No desktop/backend global setting is
+changed. Full teaching verification continues on that supported native path;
+default Wayland reliability/acceptance remains failed/pending. Earlier deb55's
+10/10 passes remain true for their scope, not proof that later stalls cannot occur.
