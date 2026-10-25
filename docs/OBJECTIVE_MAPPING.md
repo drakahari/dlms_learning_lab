@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are133 narrowly evidenced Partial practice rows, one Supporting explanation row and1106 Open rows; no full-objective completion is asserted. The catalog contains113 authored assignments/twenty-seven units.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are134 narrowly evidenced Partial practice rows, one Supporting explanation row and1105 Open rows; no full-objective completion is asserted. The catalog contains116 authored assignments/twenty-eight units.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -91,3 +91,14 @@ STP/ARP/real packet/IOS/equipment or security guarantee is inherited. Source
 fingerprints remain unchanged; scoped sources checked2026-10-24. See MAC_LESSONS.md.
 The overlapping totals133Partial/1Supporting/1106Open are bookkeeping, not a
 completion percentage. Find/PTR library foundations gain no authored credit yet.
+
+
+M92 verifies the installed116 Find unit and promotes only current LPIC-1 v5.0
+103.3.K5 to narrow Partial practice, strengthening existing103.3/K1/T2 evidence.
+The three actual tasks use bounded name/type/depth searches, incomplete-search
+permission diagnosis and requested literal-path actions with preserved data/access.
+Size/time predicates, -exec/-delete, Boolean/links/recursive operations and full
+GNU syntax remain absent. Quoted find patterns do not imply shell-globbing or
+104.7 FHS/command-discovery coverage. LPI5.0/103.3 rechecked2026-10-25; all
+1240 source fingerprints/positions remain unchanged. Totals134Partial/1Supporting/
+1105Open overlap and are not a completion percentage. See FIND_LESSONS.md.

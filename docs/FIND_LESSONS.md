@@ -1,11 +1,10 @@
 # Search, investigate and hand over files
 
-Original three-lesson addition, checked2026-10-24. Registration is integrated in normal source (116 lessons/28 units); the
-last accepted installed Fedora package remains113 until the first new-unit
-installed native run passes. Unit `linux-file-search`
-follows `linux-file-access` and precedes `linux-processes`, without changing the
-relative order of existing units. No coverage promotion or native acceptance is
-claimed here.
+Original three-lesson addition, source checked2026-10-24 and LPI5.0 scope rechecked
+2026-10-25. Normal source and installed Fedora deb55b9 contain116 labs/28units.
+Unit `linux-file-search` follows `linux-file-access` and precedes `linux-processes`
+without changing their relative order. Installed three-lesson interaction and
+render review pass; narrow103.3.K5 gains Partial practice, not complete coverage.
 
 The lessons use the existing in-process filesystem terminal and separate editable
 practice trees. Nothing executes host commands or accesses host learner files.
@@ -113,3 +112,16 @@ incompatible metadata is rejected. The corrected9 IPv6 checks plus10 Find and11
 client content checks pass. Permission-number spacing is prose-only: all3 Find
 initials, goals, solutions, practice fixtures/outcomes and command sequences
 remain exact. Main final UI and installed native gates remain pending.
+
+
+Current acceptance M92: full installed deb55b9 Find3 flow passes46 captures
+(run-2z9qjy5k), with actual Intro/isolated example/experiment/repair, full
+assignment wrong/partial/reference/manual alternates, current invalidation/repair,
+exact drafts/save/readback/resume/reset/cancel/Challenge and Light150/Dark200 input.
+Actual screen review corrected opening auto-scroll and scroll-dependent blank
+output growth; run-9i7bn02d before and run-2z9qjy5k after remain retained.
+The same installed ELF passes72 shared IPv4/VLAN views (run-80rrah26), quiet
+10/10 and strict real two-process cold9 (native-reopen-m92-installed-r1).
+Source full174UI/Clippy/fmt pass. No novice study, physical keyboard, screen reader
+or Windows/macOS desktop acceptance is inferred. Earlier pending gate entries
+above are retained history, superseded by this identified installed result.

@@ -1,10 +1,11 @@
 # Implementation continuation checkpoint
 
-Updated 2026-10-24. **PAUSED at the owner's explicit request.** Do not resume
-implementation until asked. The application is not complete. No public release
+Updated 2026-10-25. **ACTIVE: owner resumed implementation.** Installed deb55 alignment72, quiet10/10 and strict cold two-process9 now pass.
+Root owns the sole heavy slot for the next combined reviewed-source gates.
+Helpers are source-only; no heavy grant. The application is not complete. No public release
 is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
 
-## Safe stop state
+## Preserved prior safe stop state (2026-10-24)
 
 - Main code milestone `deb55b92a2407a0068b8ba83dff9b71568562893` is committed and
   pushed. This checkpoint/reporting commit changes documentation only.
@@ -15,9 +16,9 @@ is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
   17 LPIC-2, 40 Bash/Shell**. All original scenario IDs/versions/initial states/
   goals, 28 themes and existing progress remain. Generated variants, synthetic
   navigation data, library capabilities and source-only proposals are not labs.
-- Matrix remains **133 Partial / 1 Supporting / 1106 Open across 1240 overlapping
+- Matrix remains **134 Partial / 1 Supporting / 1105 Open across 1240 overlapping
   references**, not a completion percentage. Find's reviewed narrow103.3.K5
-  promotion is still a reporting followup; no untested PTR coverage is claimed.
+  promotion is now recorded after installed acceptance; no PTR coverage is claimed.
 
 ## Latest Fedora build to open
 
@@ -46,13 +47,13 @@ Clean source deb55b92a2407a0068b8ba83dff9b71568562893:
   reset/cancel and Challenge, Light150/Dark200 typing. Root inspected actual task,
   feedback and scaled screens. These are injected native inputs, not a novice
   study, physical-device or screen-reader acceptance.
-- **Still pending on this exact deb55 build:** shared72-view IPv4/VLAN alignment
-  matrix, repeated quiet startup and strict real two-process cold reopen. Do not
-  relabel older evidence. All174 UI regressions, including field/placeholder
+- **Completed on this exact deb55 build:** shared72-view IPv4/VLAN alignment
+  (run-80rrah26), quiet10/10 and strict two-process cold9
+  (native-reopen-m92-installed-r1, manifestf40fb92c...). Do not relabel older evidence. All174 UI regressions, including field/placeholder
   alignment and resizing/scaling, pass; native installed evidence is distinct.
 - Historical intermittent Wayland EGL-frame-callback cause remains unresolved.
   Source1608's installed quiet10/10 and one protocol/lifecycle probe PASS, with
-  no stall; this does not prove a cure or substitute for deb55 repeated starts.
+  no stall. Deb55 now also passes10/10 quiet starts; no cure is established.
 
 ## What changed and was verified
 
@@ -128,14 +129,12 @@ Clean source deb55b92a2407a0068b8ba83dff9b71568562893:
    ordinary/unset, so activation requires evaluator9 and actual8-before9/history/
    exact-backup evidence. No Bash/VM/reference/compiler/native execution occurred.
 
-## Next serial actions AFTER owner resumes
+## Active next serial actions
 
-1. Finish exact installed deb55 alignment72, quiet launches and strict two-process
-   cold reopening; retain current69 successful native screenshots/receipts. Do
-   not duplicate all174 UI without a new change/failure. Follow up the Find matrix
-   only with narrow independently reviewed103.3.K5 Open->Partial and stronger
-   existing103.3/K1/T2 evidence; keep104.7Open and every source fingerprint.
-   Expected totals134Partial/1Supporting/1105Open, still not full coverage.
+1. Completed exact installed deb55 alignment72, quiet10/10 and strict cold9;
+   source174UI remain passed. Scope-only Find promotion validated134Partial/
+   1Supporting/1105Open. Root reviewed actual blank/populated feedback, stacked
+   VLAN and cold-loaded separate example; all source fingerprints preserved.
 2. Integrate source-reviewed legacy teaching R4 and NoAnswer R1 into MAIN for one
    combined guarded backend/affected-UI gate, avoiding redundant cold worktree
    builds. Verify frozen hashes, preserve root shared opening/compact topology
@@ -170,11 +169,12 @@ PESHA25673562e65ddbe642c44505834573d89e7741c8a64a1442ecfdaed2d0e9a04d73b.
 All27 embedded source packs match1608 Git bytes/manifests;137 dependency packages,
 391notice/source hashes and Rust standard-library notice verified. Not run here.
 
-Last fully broad-accepted Fedora113 remains73777e0: actual lifecycle/full4MAC57,
+Previous broad-accepted Fedora113/73777e0 is retained: actual lifecycle/full4MAC57,
 IPv4/VLAN72 alignment, quiet10/10 and strict real two-process cold9 PASS. Its
 immutable candidate/evidence and earlier109 packages remain untouched. Full details
 are in INSTALLATION.md and IMPLEMENTATION_LEDGER.md; do not replace their identities
-with the new116 build.
+with the accepted116 build. Current deb55 package now passes the corresponding
+shared alignment/startup/cold checks plus gateway/Find flows; no full-product claim.
 
 Actual Windows/macOS desktop install/reopen/upgrade/uninstall, physical keyboard,
 screen reader and novice comprehension remain pending. MIT original code/content

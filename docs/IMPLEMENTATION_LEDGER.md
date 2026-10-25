@@ -1035,3 +1035,24 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   no new heavy command launched after the request. Main reporting checkpoint is
   docs/CHECKPOINT.md. Private receipt m91-paused-status SHA256
  39665eec28bd96f1bf1d051f529d3cf8e0780abe849dbfb50ce667312c37de46.
+
+
+### M92 resumed installed116 acceptance and narrow Find evidence
+
+- Owner resumed2026-10-25. Exact installed deb55b92a240 source/binary unchanged.
+  Shared72-view alignment PASS(run-80rrah26), quiet Wayland10/10 PASS and strict
+  real two-process cold reopening9 PASS(native-reopen-m92-installed-r1,
+  manifestf40fb92c1ffb57282ffb24e0c1990e82258cfdb1f024aca24e070afc2ad61238).
+  Root reviewed actual100/150/200 fields/placeholders/feedback/VLAN columns and
+  cold-loaded separate practice. Historical Wayland cause remains unresolved.
+- Actual installed gateway23/Find46 flows from M91 retain their identity.
+  Scoped package acceptance is now116/28,35CCNA/24LPIC1/17LPIC2/40Bash, not
+  complete curriculum or physical-device/accessibility/novice/other-OS acceptance.
+- Official LPIC-1v5.0/103.3 rechecked2026-10-25. Only103.3.K5 gains narrow
+  Partial; existing103.3/K1/T2 evidence strengthens. Size/time/exec/delete/links/
+  full find/FHS104.7 remain unimplemented;1240 source fingerprints untouched.
+  Coverage validator PASS134Partial/1Supporting/1105Open.
+- Private acceptance receiptc1d1a6f5993cb1c2d82d53de6f736145d366c667a096d76722662cce8ff78482.
+  All builds/runs serialized through MAIN runner,2jobs/2testthreads, disk artifacts.
+  Next source integration is reviewed legacy teaching R4 and NoAnswer R1; their
+  prospective checks remain unrun at this reporting commit. Helpers source-only.

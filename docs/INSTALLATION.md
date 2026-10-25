@@ -575,3 +575,12 @@ notices/source archives and the Rust standard-library notice were verified. It
 predates deb55's scroll correction and has NOT run on a Windows desktop. macOS
 compiled but packaging still requires the unresolved original dispatch notice.
 No release was published. Detailed resume state is in CHECKPOINT.md.
+
+
+M92 follow-through2026-10-25: the exact deb55 candidate above now also passes
+72 shared native alignment captures,10/10 quiet Wayland starts and strict two
+real-process cold reopening9 captures. Root reviewed actual blank/populated fields,
+feedback, stacked VLAN controls and cold-loaded independent practice. This
+supersedes the pending scoped checks above without relabeling any earlier build.
+Historical startup cause and physical-device/screen-reader/novice/Windows/macOS
+desktop acceptance remain open. Catalog remains116/28; no new public release.
