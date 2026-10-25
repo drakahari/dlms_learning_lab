@@ -1174,3 +1174,12 @@ rehash and no-clobber COMPLETE preserve the existing safety boundary. All15new
 unit guards pass within144Python; initial mocked checked_pins root-signature error
 is corrected with an explicit root assertion. Actual capture remains pending,
 expectations null, no getopts/revision9/current mastery or extra authored lab.
+
+
+M97 actual follow-through: fixed5 capture ated8b1f2 COMPLETE with manifest
+f15f29582e1302622f444e2ae5c7df72fa2e6bc9dbcdaef6a55dd92276dea19a;
+root rehashed26 outputs. Actual unequal local scanner offsets restore parent c
+after b in all four scope variations, and unknown clustered option advances
+without a permanent end latch. No expected VM result/source-ID implementation,
+new before9 baseline, learner credit or curriculum count is inferred. Controlled
+reference Bash remains entirely separate from learner execution.

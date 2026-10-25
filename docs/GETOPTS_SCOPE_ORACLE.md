@@ -1,7 +1,7 @@
 # Fixed getopts scope followup
 
 Implemented and source-reviewed2026-10-25; all15 new guard tests pass within
-the full144-Python workflow gate. Actual metadata preparation/capture are pending. This does not change
+the full144-Python workflow gate. Actual fixed5 capture ated8b1f2 completed successfully. This does not change
 the evaluator, catalog or progress and does not claim another before9 baseline.
 The accepted original50 inputs/capture, actual8 Records and genuine6/7 histories
 remain untouched. No application/learner dispatch reaches this developer tool.
@@ -74,3 +74,16 @@ full144-test run passes. No collector subprocess or actual Bash observation ran
 in those unit tests; mocked outcomes are not evidence. Original50/core/history
 remain untouched. Fixed capture must follow commit and independent actual pin
 review, and failures must retain their no-COMPLETE evidence.
+
+
+Actual fixed5 capture (2026-10-25) COMPLETE at sourceed8b1f2, manifest
+`f15f29582e1302622f444e2ae5c7df72fa2e6bc9dbcdaef6a55dd92276dea19a`;
+root independently rehashed all26 output files. All four unequal-offset local
+traces resume parent parsing at c after its earlier b, across fallthrough,
+return3, repeated local reset and dynamically called helper. The clustered
+unknown option advances a/?/b/end with OPTIND1/1/2/2, normal unset OPTARG and
+OPTERR0 suppression. These are actual Bash5.3.9 observations, not future VM
+expectations or complete Bash conformance. Existing fixed50/actual8 histories
+remain unchanged. Private evidence stays under
+`.build-artifacts/reviews/getopts/scope-oracle/captures/scope-fixed5-m97-r1`.
+No evaluator9/getopts capability or authored-course addition is claimed yet.

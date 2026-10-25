@@ -18,14 +18,12 @@ private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
   ID/version/initial/Goal/solution changed; only authorized traversal objective
   prose is clarified. Optional progress fields preserve missing legacy metadata
   and old first-open Assignment. Existing shared controls/28themes remain.
+- M96 source commit68a8b3f is pushed; collector commit ed8b1f2 is ready to push.
 - Root sole heavy slot: consult `.build-artifacts/active-command.json` and live
   session before any next command. Latest repeated legacy4 UI
   gate `m96-legacy-ui-r2.log` after false-feedback wording correction PASS. Helpers have
   NO heavy grant. Their frozen source worktrees stay isolated.
-- Next: commit/push coherent M96 after passing scoped UI/fmt/Clippy gates;
-  integrate peer-reviewed fixed5 developer collector, run guard tests, commit,
-  prepare/review actual pins and perform only its fixed bounded reference capture.
-  Then build a Git-derived clean MAIN candidate, upgrade actual30d installation,
+- Next: build a Git-derived clean MAIN candidate, upgrade actual30d installation,
   run/review all3 normal PTR native flows and original access/log teaching flows.
   Do not guess candidate suffixes or count a PASS line before clean process exit.
 - Continue actual getopts9 implementation only after corrected contract/followups
@@ -124,7 +122,10 @@ env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET ./dist/dlms-learning-lab-0.1.0-g30d75e7
   reviews/getopts/scope-collector-source-r1/SOURCE-READY.json SHA
   f5a67a1eb30c1cb7e1f970179d4602358efbd3508cd6d58221bbf6bfb6802ba7.
   Five paths,15guard tests PASS within144Python, peer source review accepts admission/
-  same-FD/env/2s+30s/caps/quiescence/no-clobber semantics. Not prepared/executed yet.
+  same-FD/env/2s+30s/caps/quiescence/no-clobber semantics. Actual fixed5 capture COMPLETE ated8b1f2, manifest
+  f15f29582e1302622f444e2ae5c7df72fa2e6bc9dbcdaef6a55dd92276dea19a;
+  root independently rehashed26outputs. Four unequal local offsets all restore
+  parent b->c; unknown cluster a/?/b/end hasIND1/1/2/2. No VM9 yet.
   Initial unit double lacked root parameter; corrected signature/root assertion
   retains both integrity-failure checks, full144Python R2 passes. No VM/progress/history change. MAIN runner only after
   root integration/test/commit/pin review and explicit sole-slot capture grant.
@@ -168,3 +169,11 @@ env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET ./dist/dlms-learning-lab-0.1.0-g30d75e7
   all sources/diagnostics/baselines/worktrees/private drafts/evidence/candidates;
   no wildcard cleanup/cargo clean. /tmp is RAM-backed; newlarge data only ignored
   project NVMe directories. No other-project/desktop/GPU/swap/model/service edits.
+
+
+Active source-only workers: ccna_discovery implements reviewed bounded getopts9
+capability in a new worktree fromed8b1f2, using actual55 reference observations,
+actual8 migration/history and prospective VM/resource/unsupported tests. No heavy
+or authoring grant. independent_review builds the compact original3 terminal
+teaching native controller fromed8b1f2; no model/UI redesign or heavy grant. Root
+owns sole heavy candidate/PTR gate. Freeze/review all overlays before integration.
