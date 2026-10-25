@@ -165,3 +165,14 @@ false messages to blocked access/public access/empty/extra/incomplete log
 explanations, keeping exact grading booleans and passing labels. The strengthened
 15 model checks pass; repeated four UI checks pass; actual native review remains pending. Original116 Goals/States/solutions/versions stay exact; only the
 already authorized traversal objective prose is clarified.
+
+
+M98 actual installedc799 native follow-through: all3 original terminal tasks exit0
+with43captures on Wayland using the isolated interval0 diagnostic. Actual library
+Start/Continue, Introductions, Insert-only practice, typed Run/reference/experiment/
+repair, wrong/partial/alternate/current invalidation, readonly queries, independent
+unfinished command drafts/save/readback/navigation resume/reset/Challenge and
+light150/dark200 wide/narrow inputs pass. Root reviewed permission Introduction;
+additional representative render review and normal-policy candidate checks remain.
+Private audit0e20d4265c1d9640919ec6fbfd73924054fc2ccd2fbfcf1319943b6c7858475c
+pins43captures and same-binary startup results. No novice/physical acceptance.

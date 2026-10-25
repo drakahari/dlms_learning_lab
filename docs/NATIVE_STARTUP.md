@@ -102,3 +102,31 @@ Compare default versus requested no-vsync startup probes on the same identified
 candidate and preserve both results/stacks. A swap-interval request does not
 prove the driver honored it or explain an absent compositor callback. Native
 acceptance and underlying Wayland cause remain separate.
+
+
+## M99 Linux Wayland application policy
+
+Same installedc799 ELF: default interval1 startup times out0/1 with tracing;
+requested interval0 succeeds3/3. Quiet interval0 succeeds10/10, then quiet
+interval1 fails0/1 after warm-up, with the same owned EGL/Wayland wait. This
+supports an interval-dependent stall on this host, not its exact driver cause.
+The full original-three terminal teaching flow passes on native Wayland with
+that diagnostic request,43captures and clean exit. No host setting changes.
+
+Independent pinned-source review confirms eframe0.33.3 requests Wait(1) versus
+DontWait, glutin0.32.3 maps them to EGLSwapInterval1/0, and swaps still occur.
+The event loop remains Wait/WaitUntil unless a redraw is requested, so disabling
+the interval does not itself create an idle polling loop. Active redraw bursts
+can run faster and interval-setting remains best effort, not driver confirmation.
+
+The application now requests interval0 when Linux's pinnedwinit0.30.13 selection
+rule chooses Wayland: nonempty Unicode WAYLAND_DISPLAY or WAYLAND_SOCKET. It
+has no forced-backend hook; XDG_SESSION_TYPE alone is not used. X11, Windows and
+macOS keep their existing defaults. Empty/nonUnicode signals and cross-platform
+options have pure regression coverage. This is a pre-loop backend-selection
+policy, not inspection of an already-created native handle. No toolkit/dependency,
+desktop theme, compositor/GPU/service/swap or global environment change.
+
+Three options tests, all-targetClippy and fmt pass. Actual production-policy
+candidate startup, normal-private-profile reopening and Run/Stop are next;
+no normal-policy runtime acceptance is inferred from diagnostic runs alone.

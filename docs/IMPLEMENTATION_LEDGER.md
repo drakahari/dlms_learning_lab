@@ -1202,3 +1202,17 @@ exactenv no-vsync diagnostic leaves normal options unchanged; its options test
 passes.199distinct UI tests accounted across prior full/scoped evidence, not a
 new full199 pass. All-targetClippy/fmt and coverage validator pass. No normal
 Wayland fix, real network/process learner execution, new dependency or release.
+
+
+### M99 application-only Wayland presentation policy
+
+Installedc799 lifecycle119/29 passes upgrade72f and exact original-nine progress.
+SameELF interval1 fails two separate15s starts, before and after interval0 warm-up;
+requested interval0 passes3protocol+10quiet starts. Owned stacks retain the EGL/
+Wayland dispatch wait. Full3legacy terminal teaching passes43captures/cleanexit
+on diagnostic Wayland. This evidence motivates requesting interval0 on Linux
+Wayland while preserving other-backend defaults, not claiming universal driver
+repair. Pinned source confirms event-driven idle and best-effort interval setter.
+Three exact environment/backend policy tests pass; all-targetClippy/fmt pass.
+201distinct UI tests accounted across full/scoped evidence; no new full201run.
+New normal-policy package/startup/cold/RunStop gates remain pending.

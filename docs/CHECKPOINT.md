@@ -6,6 +6,34 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M99 production-policy verification next
+
+- Installedc799d5b6d6cf47ad9f953a46c90a4a0a246478da passes119/29 lifecycle,
+  upgrade72f and exact original-nine retention. Full3legacy terminal teaching
+  diagnosticWayland run exits0,43captures run-hnkemnsi. Audit
+ 0e20d4265c1d9640919ec6fbfd73924054fc2ccd2fbfcf1319943b6c7858475c.
+- SAMEELF defaultWayland fails0/1 traced and0/1quiet afterwarmup; requested
+  interval0 passes3/3traced+10/10quiet. No exactdrivercause claim. Source peer
+  review pins eframe/glutin event-driven behavior and winit backend selection;
+  receipt reviews/wayland-vsync-source-review-r1/SOURCE-REVIEW.json
+ 60dbfc8bf79f0d320fc44ee8064042bf4f12126410c1eb7ed8f0b1b3ad41521c.
+- MAIN now requests interval0 for Linux nonemptyUnicode WAYLAND_DISPLAY or
+  WAYLAND_SOCKET selection, keeping X11/Windows/macOS defaults. Pure3options
+  tests and all-targetClippy/fmt PASS. No normalpolicy runtime claim yet.
+- Next commit cleanpolicy, build Git-derived candidate, upgradec799, repeat
+  defaultWayland startups with DIAGNOSTICENVUNSET, normalprivateprofile/cold
+  reopen and scriptRunStop. Review actual renders/idle behavior. No desktop/
+  GPU/swap/service/model/security settings change; twojobs/twothreads/oneheavy.
+- getoptsR2 source frozen reviews/getopts/foundation-source-r2/SOURCE-READY.json
+  fb029195ef46e1e0989d257108b70ac00ea4efc7beffe24fb77f1355ffea8089,
+ 21paths,24newprospectivetests UNRUN. Fixes actual256ordinary-name compatibility
+  plus3bounded specialslots, memory/work unchanged, real6/7/8 immutable. Peer
+  reviewer independent_review auditing before integration; NO evaluator9 MAIN.
+- DHCP4path source frozen reviews/dhcpv4/source-r1/SOURCE-READY.json
+ 28d669ff292be0134a1f1fe40663c6dede195a2f6f062bcbb9584dc01ea2cfb1,
+  puretyped library+24prospectivetests UNRUN; ccna_discovery independently reviews.
+  No State/Goal/UI/content/coverage change or heavy grant. Preserve both overlays.
+
 ## Active M98 follow-through
 
 - Installed source72fca8dfb165db576e1c6c329b4ad9809d37055d now passes119/29

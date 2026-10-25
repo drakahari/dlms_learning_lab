@@ -48,14 +48,20 @@ fn main() -> eframe::Result<()> {
         );
         std::process::exit(2);
     }
-    // Development-only A/B probe: never changes a normal learner launch.
+    // Mirror pinned winit's backend selection before it creates the loop.
+    // Linux Wayland requests interval 0 to avoid the observed EGL wait; other
+    // backends retain the default. This is not a claim of a universal driver fix.
+    let display = std::env::var_os("WAYLAND_DISPLAY");
+    let socket = std::env::var_os("WAYLAND_SOCKET");
+    let wayland = wayland_env_selected(display.as_deref(), socket.as_deref());
     let diagnostic = std::env::var_os("DLMS_SMOKE_NO_VSYNC");
-    let vsync = smoke_vsync(
+    let vsync = native_vsync(
         args.iter().any(|a| a == "--ui-smoke"),
         diagnostic.as_deref(),
+        wayland,
     );
     if !vsync {
-        startup_trace::mark("diagnostic-smoke-vsync-disabled");
+        startup_trace::mark("app-swapinterval-zero-requested");
     }
     let options = eframe::NativeOptions {
         vsync,
@@ -82,25 +88,67 @@ fn main() -> eframe::Result<()> {
     )
 }
 
-/// Linux synthetic-profile diagnostic only. Default/normal launches retain the
-/// pinned eframe default; no global environment, driver or desktop setting changes.
-fn smoke_vsync(smoke: bool, diagnostic: Option<&std::ffi::OsStr>) -> bool {
-    !(cfg!(target_os = "linux") && smoke && diagnostic == Some(std::ffi::OsStr::new("1")))
+/// winit0.30.13 selects Wayland for either nonempty Unicode variable. This app
+/// has no forced-backend hook. Session type alone does not select its backend.
+fn wayland_env_selected(
+    display: Option<&std::ffi::OsStr>,
+    socket: Option<&std::ffi::OsStr>,
+) -> bool {
+    [display, socket]
+        .into_iter()
+        .flatten()
+        .any(|value| value.to_str().is_some_and(|s| !s.is_empty()))
+}
+fn native_vsync(smoke: bool, diagnostic: Option<&std::ffi::OsStr>, wayland: bool) -> bool {
+    !(cfg!(target_os = "linux")
+        && (wayland || (smoke && diagnostic == Some(std::ffi::OsStr::new("1")))))
 }
 
 #[cfg(test)]
 mod startup_options_tests {
     use super::*;
     #[test]
-    fn vsync_probe_is_exact_linux_smoke_only_and_normal_launch_stays_default() {
+    fn vsync_policy_preserves_other_backends_and_exact_smoke_override() {
         for value in [None, Some(""), Some("0"), Some("1"), Some("true")] {
             let value = value.map(std::ffi::OsStr::new);
-            assert!(smoke_vsync(false, value));
+            assert!(native_vsync(false, value, false));
             assert_eq!(
-                smoke_vsync(true, value),
+                native_vsync(true, value, false),
                 !(cfg!(target_os = "linux") && value == Some(std::ffi::OsStr::new("1")))
             );
+            for smoke in [false, true] {
+                assert_eq!(native_vsync(smoke, value, true), !cfg!(target_os = "linux"));
+            }
         }
         assert!(eframe::NativeOptions::default().vsync);
+    }
+    #[test]
+    fn wayland_selection_matches_pinned_nonempty_unicode_rule() {
+        let empty = std::ffi::OsStr::new("");
+        let display = std::ffi::OsStr::new("wayland-0");
+        let socket = std::ffi::OsStr::new("3");
+        assert!(!wayland_env_selected(None, None));
+        assert!(!wayland_env_selected(Some(empty), Some(empty)));
+        for (a, b) in [
+            (Some(display), None),
+            (None, Some(socket)),
+            (Some(empty), Some(socket)),
+            (Some(display), Some(empty)),
+        ] {
+            assert!(wayland_env_selected(a, b));
+        }
+        assert!(wayland_env_selected(Some(std::ffi::OsStr::new(" ")), None));
+    }
+    #[cfg(unix)]
+    #[test]
+    fn nonunicode_signal_is_not_wayland_selection() {
+        use std::os::unix::ffi::OsStrExt;
+        let invalid = std::ffi::OsStr::from_bytes(b"\xff");
+        assert!(!wayland_env_selected(Some(invalid), None));
+        assert!(!wayland_env_selected(None, Some(invalid)));
+        assert!(wayland_env_selected(
+            Some(invalid),
+            Some(std::ffi::OsStr::new("3"))
+        ));
     }
 }
