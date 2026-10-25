@@ -451,6 +451,12 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                 })
                 .expect("authored source-learning tasks require a learned row");
             simulation.clear_dynamic(switch, Some(vlan)).unwrap();
+        } else if let State::DhcpV4 { simulation } = &mut a.state {
+            // Reachable wrong policy, retaining the exact supplied topology.
+            // DHCP mutations deliberately cannot use the context-free wrapper.
+            let mut policy = simulation.policy().clone();
+            policy.server_enabled = false;
+            simulation.replace_policy(policy).unwrap();
         } else if let State::Filesystem { tree } = &mut a.state {
             for text in tree.files.values_mut() {
                 text.push_str("changed");

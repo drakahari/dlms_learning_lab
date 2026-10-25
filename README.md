@@ -1,14 +1,14 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **122 verified authored assignments:** 35 CCNA,24 LPIC-1,20 LPIC-2 and43 Bash/Shell, organized into30 units. The prepared Fedora candidate includes all122; its three new option-interface projects pass their complete installed native flows. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **125 authored assignments in source:**38 CCNA,24 LPIC-1,20 LPIC-2 and43 Bash/Shell, organized into31 units. The three new DHCP tasks have passing model and native interaction checks; rendered and packaged acceptance is tracked separately. The last accepted Fedora candidate contains122 labs, including the three option-interface projects with complete installed native checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
 From this checkout, no build tools are needed to open the prepared candidate.
-If your terminal is in your home directory, first enter this repository directory:
+This absolute command also works when your terminal is in your home directory:
 
 ```sh
-./dist/dlms-learning-lab-0.1.0-gcd31af6e78e6-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gcd31af6e78e6-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate

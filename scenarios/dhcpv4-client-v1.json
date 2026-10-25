@@ -1,0 +1,2948 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-dhcp-held-options",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "DHCP client configuration and relay diagnosis",
+      "unit": "dhcpv4-client-foundations",
+      "title": "Replace held options without disturbing the monitor",
+      "summary": "Replace older client-held options and distinguish policy, offers and renewal.",
+      "objective": "The desk-editor client on 192.0.2.0/24 still holds the old router and DNS options. Finish with a current usable lease on that /24, router 192.0.2.1 and DNS address 203.0.113.53, with at least 40 simulated seconds remaining. Make applied policy serve the same correct parameters to both desk-editor and desk-visitor together in either request order; their assigned addresses may vary.\n\nPreserve the complete desk-office pool and its absent relay setting, and preserve desk-monitor's original server grant and client-held state. Keep that monitor currently configured and the server enabled. Repair policy and obtain current client parameters using the controls; Apply or an acknowledgement alone is not proof that options changed.",
+      "difficulty": "Beginner",
+      "minutes": 18,
+      "retry_guidance": "Read current client-held parameters separately from policy and pending offers. Inspect individual current and new-client rows after Check work.",
+      "steps": [
+        "Inspect the supplied clients, policy and held state.",
+        "Apply the required policy and carry out actual client exchanges.",
+        "Check current clients, independent new requests and named preservation."
+      ],
+      "guide": [],
+      "explanation": "Applying policy changes what the server will supply next; it does not rewrite a lease already held by desk-editor. Renewing an eligible lease, or releasing and requesting a new one, obtains the corrected router and DNS options. Check the client-held values and remaining time, then test both new clients together. Preserving the office pool and monitor shows the repair did not disturb the healthy segment. Receiving a DNS address does not itself prove name resolution works.",
+      "hints": [
+        "Start with the named client and compare its physical segment, held parameters and selected pool.",
+        "Apply changes policy, not current client options. An offer alone does not configure a client.",
+        "Preserve the named monitor and office policy; then inspect which current or new-client row still fails."
+      ],
+      "sources": [
+        "https://www.rfc-editor.org/rfc/rfc2131.html",
+        "https://www.rfc-editor.org/rfc/rfc2132.html",
+        "https://www.rfc-editor.org/rfc/rfc1542.html",
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Original bounded offline DHCPv4 exercise: one logical server, supplied transport facts, explicit time and no automatic retries/renewal. Native typed fields/actions are not IOS/Linux commands or packet capture. Only DHCP parameters are checked; no routed connectivity, DNS lookup, authentication, snooping or multi-server/failover claim. New-client tests reset separate contexts and do not change current leases. Exclusions/reservations follow the documented local simulator policy. CCNA v1.1 4.3/4.6 slice only, with no full-objective or forthcoming-blueprint credit. Source-only proposal checked2026-10-25; runtime/native acceptance pending.",
+      "initial": {
+        "kind": "DhcpV4",
+        "simulation": {
+          "topology": {
+            "server": "192.0.2.1",
+            "segments": {
+              "desk-scope": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "192.0.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "desk-office": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.18.1.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "desk-editor": {
+                "segment": "desk-scope"
+              },
+              "desk-visitor": {
+                "segment": "desk-scope"
+              },
+              "desk-monitor": {
+                "segment": "desk-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "desk-scope": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "first": "192.0.2.10",
+                "last": "192.0.2.13",
+                "excluded": [],
+                "reservations": {},
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              },
+              "desk-office": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "first": "198.18.1.30",
+                "last": "198.18.1.31",
+                "excluded": [],
+                "reservations": {
+                  "desk-monitor": "198.18.1.30"
+                },
+                "router": "198.18.1.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {}
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "desk-monitor": {
+              "pool": "desk-office",
+              "address": "198.18.1.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "router": "198.18.1.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "desk-editor": {
+              "pool": "desk-scope",
+              "address": "192.0.2.10",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "desk-monitor": {
+              "pool": "desk-office",
+              "address": "198.18.1.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "router": "198.18.1.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "desk-editor": {
+              "pool": "desk-scope",
+              "address": "192.0.2.10",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpV4",
+        "initial": {
+          "topology": {
+            "server": "192.0.2.1",
+            "segments": {
+              "desk-scope": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "192.0.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "desk-office": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.18.1.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "desk-editor": {
+                "segment": "desk-scope"
+              },
+              "desk-visitor": {
+                "segment": "desk-scope"
+              },
+              "desk-monitor": {
+                "segment": "desk-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "desk-scope": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "first": "192.0.2.10",
+                "last": "192.0.2.13",
+                "excluded": [],
+                "reservations": {},
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              },
+              "desk-office": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "first": "198.18.1.30",
+                "last": "198.18.1.31",
+                "excluded": [],
+                "reservations": {
+                  "desk-monitor": "198.18.1.30"
+                },
+                "router": "198.18.1.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {}
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "desk-monitor": {
+              "pool": "desk-office",
+              "address": "198.18.1.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "router": "198.18.1.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "desk-editor": {
+              "pool": "desk-scope",
+              "address": "192.0.2.10",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "desk-monitor": {
+              "pool": "desk-office",
+              "address": "198.18.1.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.1.0",
+                  "prefix": 24
+                },
+                "router": "198.18.1.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "desk-editor": {
+              "pool": "desk-scope",
+              "address": "192.0.2.10",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "desk-editor",
+              "subnet": {
+                "network": "192.0.2.0",
+                "prefix": 24
+              },
+              "router": "192.0.2.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "desk-monitor",
+              "subnet": {
+                "network": "198.18.1.0",
+                "prefix": 24
+              },
+              "router": "198.18.1.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.18.1.30"
+            }
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "desk-office"
+          },
+          {
+            "kind": "BindingPreserved",
+            "client": "desk-monitor"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "desk-office"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "desk-editor",
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "desk-visitor",
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "desk-visitor",
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "desk-editor",
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "dhcpv4 {\"kind\":\"ApplyPolicy\",\"policy\":{\"server_enabled\":true,\"pools\":{\"desk-scope\":{\"subnet\":{\"network\":\"192.0.2.0\",\"prefix\":24},\"first\":\"192.0.2.10\",\"last\":\"192.0.2.13\",\"excluded\":[],\"reservations\":{},\"router\":\"192.0.2.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":96},\"desk-office\":{\"subnet\":{\"network\":\"198.18.1.0\",\"prefix\":24},\"first\":\"198.18.1.30\",\"last\":\"198.18.1.31\",\"excluded\":[],\"reservations\":{\"desk-monitor\":\"198.18.1.30\"},\"router\":\"198.18.1.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":1024}},\"relays\":{}}}",
+        "dhcpv4 {\"kind\":\"Advance\",\"seconds\":32}",
+        "dhcpv4 {\"kind\":\"Renew\",\"client\":\"desk-editor\"}"
+      ],
+      "prerequisites": [
+        "ccna-gateway"
+      ],
+      "dhcpv4_teaching": {
+        "prerequisite_note": "After “Reconnect the office client”, distinguish an IPv4 subnet, router and DNS address.",
+        "concepts": [
+          {
+            "title": "Policy, offers and a client lease",
+            "text": "Dynamic Host Configuration Protocol (DHCP) supplies a client address, subnet mask and options such as a router and DNS-server addresses. Applied policy describes future offers. Discover asks for an offer; Request accepts that delivered offer. An offer alone does not configure the client. Inspect the client-held lease separately from the server binding."
+          },
+          {
+            "title": "Apply is not a renewal",
+            "text": "Apply changes policy only. A client can still hold its older router and DNS values. A manual Renew can take current policy even before the usual T1 time when the held address remains eligible. If the server cannot extend that address under current policy, it can acknowledge the old grant without changing its options or expiry. Inspect the actual result."
+          },
+          {
+            "title": "Renew or obtain a new grant",
+            "text": "T1 marks the usual scheduled renewal time. Advance changes the explicit simulated clock only; it never sends a request. The worked example waits until T1 and chooses Renew using supplied unicast reachability. A manual earlier Renew is also valid when the address remains eligible. Alternatively Release stops client use, then Discover and Request obtain a new grant. Expiry also ends client use."
+          },
+          {
+            "title": "Check current work and new requests",
+            "text": "Check work inspects current leases and also tests new requests against applied policy in separate reset contexts. These new-client tests do not alter your leases. No particular assigned address is required unless the task names a reservation. Different safe action orders are accepted. Router and DNS options are data here: receiving them does not prove routed connectivity or a working resolver."
+          }
+        ],
+        "example_description": "Separate gallery example. Work through the annotated actions, inspect held parameters and Check work.\n\nThe gallery-desk-editor client on 198.51.100.0/24 still holds the old router and DNS options. Finish with a current usable lease on that /24, router 198.51.100.1 and DNS address 198.51.100.53, with at least 40 simulated seconds remaining. Make applied policy serve the same correct parameters to both gallery-desk-editor and gallery-desk-visitor together in either request order; their assigned addresses may vary.\n\nPreserve the complete gallery-desk-office pool and its absent relay setting, and preserve gallery-desk-monitor's original server grant and client-held state. Keep that monitor currently configured and the server enabled. Repair policy and obtain current client parameters using the controls; Apply or an acknowledgement alone is not proof that options changed.",
+        "fixture": {
+          "topology": {
+            "server": "198.51.100.1",
+            "segments": {
+              "gallery-desk-scope": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.51.100.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "gallery-desk-office": {
+                "subnet": {
+                  "network": "198.19.1.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.19.1.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "gallery-desk-editor": {
+                "segment": "gallery-desk-scope"
+              },
+              "gallery-desk-visitor": {
+                "segment": "gallery-desk-scope"
+              },
+              "gallery-desk-monitor": {
+                "segment": "gallery-desk-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "gallery-desk-scope": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "first": "198.51.100.10",
+                "last": "198.51.100.13",
+                "excluded": [],
+                "reservations": {},
+                "router": "198.51.100.254",
+                "dns": [
+                  "198.51.100.99"
+                ],
+                "lease_seconds": 64
+              },
+              "gallery-desk-office": {
+                "subnet": {
+                  "network": "198.19.1.0",
+                  "prefix": 24
+                },
+                "first": "198.19.1.30",
+                "last": "198.19.1.31",
+                "excluded": [],
+                "reservations": {
+                  "gallery-desk-monitor": "198.19.1.30"
+                },
+                "router": "198.19.1.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {}
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "gallery-desk-monitor": {
+              "pool": "gallery-desk-office",
+              "address": "198.19.1.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.19.1.0",
+                  "prefix": 24
+                },
+                "router": "198.19.1.1",
+                "dns": [
+                  "198.51.100.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "gallery-desk-editor": {
+              "pool": "gallery-desk-scope",
+              "address": "198.51.100.10",
+              "parameters": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.254",
+                "dns": [
+                  "198.51.100.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "gallery-desk-monitor": {
+              "pool": "gallery-desk-office",
+              "address": "198.19.1.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.19.1.0",
+                  "prefix": 24
+                },
+                "router": "198.19.1.1",
+                "dns": [
+                  "198.51.100.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "gallery-desk-editor": {
+              "pool": "gallery-desk-scope",
+              "address": "198.51.100.10",
+              "parameters": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.254",
+                "dns": [
+                  "198.51.100.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-desk-editor",
+              "subnet": {
+                "network": "198.51.100.0",
+                "prefix": 24
+              },
+              "router": "198.51.100.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-desk-monitor",
+              "subnet": {
+                "network": "198.19.1.0",
+                "prefix": 24
+              },
+              "router": "198.19.1.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.19.1.30"
+            }
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "gallery-desk-office"
+          },
+          {
+            "kind": "BindingPreserved",
+            "client": "gallery-desk-monitor"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "gallery-desk-office"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "gallery-desk-editor",
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "gallery-desk-visitor",
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "gallery-desk-visitor",
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "gallery-desk-editor",
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "ApplyPolicy",
+              "policy": {
+                "server_enabled": true,
+                "pools": {
+                  "gallery-desk-scope": {
+                    "subnet": {
+                      "network": "198.51.100.0",
+                      "prefix": 24
+                    },
+                    "first": "198.51.100.10",
+                    "last": "198.51.100.13",
+                    "excluded": [],
+                    "reservations": {},
+                    "router": "198.51.100.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 96
+                  },
+                  "gallery-desk-office": {
+                    "subnet": {
+                      "network": "198.19.1.0",
+                      "prefix": 24
+                    },
+                    "first": "198.19.1.30",
+                    "last": "198.19.1.31",
+                    "excluded": [],
+                    "reservations": {
+                      "gallery-desk-monitor": "198.19.1.30"
+                    },
+                    "router": "198.19.1.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 1024
+                  }
+                },
+                "relays": {}
+              }
+            },
+            "explanation": "Insert the policy into the draft, inspect the changed pool/relay fields and choose Apply policy. This does not send any client request. Set gallery-desk-scope router to 198.51.100.1, DNS to 198.51.100.53 and lease length to 96 seconds."
+          },
+          {
+            "action": {
+              "kind": "Advance",
+              "seconds": 32
+            },
+            "explanation": "Advance 32 seconds to reach the supplied 64-second grant’s T1 renewal window; no request is sent by the clock."
+          },
+          {
+            "action": {
+              "kind": "Renew",
+              "client": "gallery-desk-editor"
+            },
+            "explanation": "Select this client and choose Renew to request current policy during the renewal window."
+          }
+        ],
+        "try_change": {
+          "description": "After the example passes, change only the gallery-desk-scope pool DNS option to 203.0.113.201 and Apply policy. Check work: the current held client should still be correct while new-client tests fail. Restore DNS 198.51.100.53 and Apply policy to repair.",
+          "actions": [
+            {
+              "kind": "ApplyPolicy",
+              "policy": {
+                "server_enabled": true,
+                "pools": {
+                  "gallery-desk-scope": {
+                    "subnet": {
+                      "network": "198.51.100.0",
+                      "prefix": 24
+                    },
+                    "first": "198.51.100.10",
+                    "last": "198.51.100.13",
+                    "excluded": [],
+                    "reservations": {},
+                    "router": "198.51.100.1",
+                    "dns": [
+                      "203.0.113.201"
+                    ],
+                    "lease_seconds": 96
+                  },
+                  "gallery-desk-office": {
+                    "subnet": {
+                      "network": "198.19.1.0",
+                      "prefix": 24
+                    },
+                    "first": "198.19.1.30",
+                    "last": "198.19.1.31",
+                    "excluded": [],
+                    "reservations": {
+                      "gallery-desk-monitor": "198.19.1.30"
+                    },
+                    "router": "198.19.1.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 1024
+                  }
+                },
+                "relays": {}
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "ApplyPolicy",
+            "policy": {
+              "server_enabled": true,
+              "pools": {
+                "gallery-desk-scope": {
+                  "subnet": {
+                    "network": "198.51.100.0",
+                    "prefix": 24
+                  },
+                  "first": "198.51.100.10",
+                  "last": "198.51.100.13",
+                  "excluded": [],
+                  "reservations": {},
+                  "router": "198.51.100.1",
+                  "dns": [
+                    "198.51.100.53"
+                  ],
+                  "lease_seconds": 96
+                },
+                "gallery-desk-office": {
+                  "subnet": {
+                    "network": "198.19.1.0",
+                    "prefix": 24
+                  },
+                  "first": "198.19.1.30",
+                  "last": "198.19.1.31",
+                  "excluded": [],
+                  "reservations": {
+                    "gallery-desk-monitor": "198.19.1.30"
+                  },
+                  "router": "198.19.1.1",
+                  "dns": [
+                    "198.51.100.53"
+                  ],
+                  "lease_seconds": 1024
+                }
+              },
+              "relays": {}
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-dhcp-relay-scope",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "DHCP client configuration and relay diagnosis",
+      "unit": "dhcpv4-client-foundations",
+      "title": "Repair a relay and the selected client subnet",
+      "summary": "Diagnose a remote relay and an answering pool with the wrong subnet.",
+      "objective": "The annex-branch and annex-visitor clients belong to 10.44.0.0/24 behind the supplied relay interface 10.44.0.1. Diagnose delivery to server 198.18.2.1 and the selected pool. Finish with both clients holding usable /24 leases, router 10.44.0.1, DNS address 203.0.113.53 and at least 40 simulated seconds remaining. Applied policy must support both new clients in either request order.\n\nExclude 10.44.0.11 in the annex-scope pool. Preserve the complete annex-office pool, that segment's absent relay setting and annex-monitor's original grant/client-held state; finish with the monitor configured and the server enabled. No particular assigned address is required. A delivered offer with a broad mask, or repair of only the relay, is incomplete.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "retry_guidance": "Read current client-held parameters separately from policy and pending offers. Inspect individual current and new-client rows after Check work.",
+      "steps": [
+        "Inspect the supplied clients, policy and held state.",
+        "Apply the required policy and carry out actual client exchanges.",
+        "Check current clients, independent new requests and named preservation."
+      ],
+      "guide": [],
+      "explanation": "Two separate repairs are needed: the relay must deliver requests to the supplied server, and the answering pool must describe the clients' physical /24 subnet. A successful acknowledgement with a /16 mask still configures the clients incorrectly. The exclusion keeps .11 out of new allocations. Current leases show what these clients hold; the independent request orders check that the applied policy can serve both newcomers without relying on the current bindings. The office monitor is a preservation check, not a routing test.",
+      "hints": [
+        "Start with the named client and compare its physical segment, held parameters and selected pool.",
+        "Apply changes policy, not current client options. An offer alone does not configure a client.",
+        "Preserve the named monitor and office policy; then inspect which current or new-client row still fails."
+      ],
+      "sources": [
+        "https://www.rfc-editor.org/rfc/rfc2131.html",
+        "https://www.rfc-editor.org/rfc/rfc2132.html",
+        "https://www.rfc-editor.org/rfc/rfc1542.html",
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Original bounded offline DHCPv4 exercise: one logical server, supplied transport facts, explicit time and no automatic retries/renewal. Native typed fields/actions are not IOS/Linux commands or packet capture. Only DHCP parameters are checked; no routed connectivity, DNS lookup, authentication, snooping or multi-server/failover claim. New-client tests reset separate contexts and do not change current leases. Exclusions/reservations follow the documented local simulator policy. CCNA v1.1 4.3/4.6 slice only, with no full-objective or forthcoming-blueprint credit. Source-only proposal checked2026-10-25; runtime/native acceptance pending.",
+      "initial": {
+        "kind": "DhcpV4",
+        "simulation": {
+          "topology": {
+            "server": "198.18.2.1",
+            "segments": {
+              "annex-scope": {
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 24
+                },
+                "server_interface": null,
+                "relay_interface": "10.44.0.1",
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "annex-office": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.18.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "annex-branch": {
+                "segment": "annex-scope"
+              },
+              "annex-visitor": {
+                "segment": "annex-scope"
+              },
+              "annex-monitor": {
+                "segment": "annex-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "annex-scope": {
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 16
+                },
+                "first": "10.44.0.10",
+                "last": "10.44.0.13",
+                "excluded": [],
+                "reservations": {},
+                "router": "10.44.0.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 80
+              },
+              "annex-office": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "first": "198.18.2.30",
+                "last": "198.18.2.31",
+                "excluded": [],
+                "reservations": {
+                  "annex-monitor": "198.18.2.30"
+                },
+                "router": "198.18.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {
+              "annex-scope": {
+                "enabled": true,
+                "target": "198.18.2.99",
+                "giaddr": "10.44.0.1"
+              }
+            }
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "annex-monitor": {
+              "pool": "annex-office",
+              "address": "198.18.2.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "router": "198.18.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            }
+          },
+          "leases": {
+            "annex-monitor": {
+              "pool": "annex-office",
+              "address": "198.18.2.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "router": "198.18.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpV4",
+        "initial": {
+          "topology": {
+            "server": "198.18.2.1",
+            "segments": {
+              "annex-scope": {
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 24
+                },
+                "server_interface": null,
+                "relay_interface": "10.44.0.1",
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "annex-office": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.18.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "annex-branch": {
+                "segment": "annex-scope"
+              },
+              "annex-visitor": {
+                "segment": "annex-scope"
+              },
+              "annex-monitor": {
+                "segment": "annex-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "annex-scope": {
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 16
+                },
+                "first": "10.44.0.10",
+                "last": "10.44.0.13",
+                "excluded": [],
+                "reservations": {},
+                "router": "10.44.0.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 80
+              },
+              "annex-office": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "first": "198.18.2.30",
+                "last": "198.18.2.31",
+                "excluded": [],
+                "reservations": {
+                  "annex-monitor": "198.18.2.30"
+                },
+                "router": "198.18.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {
+              "annex-scope": {
+                "enabled": true,
+                "target": "198.18.2.99",
+                "giaddr": "10.44.0.1"
+              }
+            }
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "annex-monitor": {
+              "pool": "annex-office",
+              "address": "198.18.2.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "router": "198.18.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            }
+          },
+          "leases": {
+            "annex-monitor": {
+              "pool": "annex-office",
+              "address": "198.18.2.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.2.0",
+                  "prefix": 24
+                },
+                "router": "198.18.2.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "annex-branch",
+              "subnet": {
+                "network": "10.44.0.0",
+                "prefix": 24
+              },
+              "router": "10.44.0.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "annex-visitor",
+              "subnet": {
+                "network": "10.44.0.0",
+                "prefix": 24
+              },
+              "router": "10.44.0.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "annex-monitor",
+              "subnet": {
+                "network": "198.18.2.0",
+                "prefix": 24
+              },
+              "router": "198.18.2.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.18.2.30"
+            }
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "annex-office"
+          },
+          {
+            "kind": "BindingPreserved",
+            "client": "annex-monitor"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "annex-office"
+          },
+          {
+            "kind": "Excluded",
+            "pool": "annex-scope",
+            "address": "10.44.0.11"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "annex-branch",
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 24
+                },
+                "router": "10.44.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "annex-visitor",
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 24
+                },
+                "router": "10.44.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "annex-visitor",
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 24
+                },
+                "router": "10.44.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "annex-branch",
+                "subnet": {
+                  "network": "10.44.0.0",
+                  "prefix": 24
+                },
+                "router": "10.44.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "dhcpv4 {\"kind\":\"ApplyPolicy\",\"policy\":{\"server_enabled\":true,\"pools\":{\"annex-scope\":{\"subnet\":{\"network\":\"10.44.0.0\",\"prefix\":24},\"first\":\"10.44.0.10\",\"last\":\"10.44.0.13\",\"excluded\":[\"10.44.0.11\"],\"reservations\":{},\"router\":\"10.44.0.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":80},\"annex-office\":{\"subnet\":{\"network\":\"198.18.2.0\",\"prefix\":24},\"first\":\"198.18.2.30\",\"last\":\"198.18.2.31\",\"excluded\":[],\"reservations\":{\"annex-monitor\":\"198.18.2.30\"},\"router\":\"198.18.2.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":1024}},\"relays\":{\"annex-scope\":{\"enabled\":true,\"target\":\"198.18.2.1\",\"giaddr\":\"10.44.0.1\"}}}}",
+        "dhcpv4 {\"kind\":\"Discover\",\"client\":\"annex-branch\"}",
+        "dhcpv4 {\"kind\":\"Request\",\"client\":\"annex-branch\",\"token\":1}",
+        "dhcpv4 {\"kind\":\"Discover\",\"client\":\"annex-visitor\"}",
+        "dhcpv4 {\"kind\":\"Request\",\"client\":\"annex-visitor\",\"token\":2}"
+      ],
+      "prerequisites": [
+        "ccna-dhcp-held-options"
+      ],
+      "dhcpv4_teaching": {
+        "prerequisite_note": "After “Replace held options without disturbing the monitor”, use applied policy, current offers and client-held leases separately.",
+        "concepts": [
+          {
+            "title": "A relay selects a remote client subnet",
+            "text": "A client broadcast does not cross an arbitrary router in this exercise. The supplied relay must be enabled, target this logical DHCP server and identify its client-facing interface. That relay address selects a pool by subnet containment. It is different from the router option sent to clients."
+          },
+          {
+            "title": "A reply can contain wrong parameters",
+            "text": "A broad pool can answer the relay yet supply a mask that is wrong for the physical segment. Inspect the actual held address, mask, router and DNS values. Repair both delivery and the pool; a successful offer or acknowledgement alone is not enough."
+          },
+          {
+            "title": "Capacity and exclusion",
+            "text": "The range is inclusive. An excluded address is unavailable for new grants under this exercise policy; known occupied and infrastructure addresses are also unavailable. Separate new-client tests request in different orders, so a one-client workaround cannot hide insufficient capacity."
+          },
+          {
+            "title": "Use the actual exchange controls",
+            "text": "Edit the selected pool or selected client segment relay, then Apply policy. Discover records a delivered offer. Request uses that current offer. Release and reacquire if a client already holds bad options. Check work tests current clients and new requests; it does not send requests on your behalf."
+          }
+        ],
+        "example_description": "Separate gallery example. Work through the annotated actions, inspect held parameters and Check work.\n\nThe gallery-annex-branch and gallery-annex-visitor clients belong to 10.55.0.0/24 behind the supplied relay interface 10.55.0.1. Diagnose delivery to server 198.19.2.1 and the selected pool. Finish with both clients holding usable /24 leases, router 10.55.0.1, DNS address 198.51.100.53 and at least 40 simulated seconds remaining. Applied policy must support both new clients in either request order.\n\nExclude 10.55.0.11 in the gallery-annex-scope pool. Preserve the complete gallery-annex-office pool, that segment's absent relay setting and gallery-annex-monitor's original grant/client-held state; finish with the monitor configured and the server enabled. No particular assigned address is required. A delivered offer with a broad mask, or repair of only the relay, is incomplete.",
+        "fixture": {
+          "topology": {
+            "server": "198.19.2.1",
+            "segments": {
+              "gallery-annex-scope": {
+                "subnet": {
+                  "network": "10.55.0.0",
+                  "prefix": 24
+                },
+                "server_interface": null,
+                "relay_interface": "10.55.0.1",
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "gallery-annex-office": {
+                "subnet": {
+                  "network": "198.19.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.19.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "gallery-annex-branch": {
+                "segment": "gallery-annex-scope"
+              },
+              "gallery-annex-visitor": {
+                "segment": "gallery-annex-scope"
+              },
+              "gallery-annex-monitor": {
+                "segment": "gallery-annex-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "gallery-annex-scope": {
+                "subnet": {
+                  "network": "10.55.0.0",
+                  "prefix": 16
+                },
+                "first": "10.55.0.10",
+                "last": "10.55.0.13",
+                "excluded": [],
+                "reservations": {},
+                "router": "10.55.0.254",
+                "dns": [
+                  "198.51.100.99"
+                ],
+                "lease_seconds": 80
+              },
+              "gallery-annex-office": {
+                "subnet": {
+                  "network": "198.19.2.0",
+                  "prefix": 24
+                },
+                "first": "198.19.2.30",
+                "last": "198.19.2.31",
+                "excluded": [],
+                "reservations": {
+                  "gallery-annex-monitor": "198.19.2.30"
+                },
+                "router": "198.19.2.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {
+              "gallery-annex-scope": {
+                "enabled": true,
+                "target": "198.19.2.99",
+                "giaddr": "10.55.0.1"
+              }
+            }
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "gallery-annex-monitor": {
+              "pool": "gallery-annex-office",
+              "address": "198.19.2.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.19.2.0",
+                  "prefix": 24
+                },
+                "router": "198.19.2.1",
+                "dns": [
+                  "198.51.100.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            }
+          },
+          "leases": {
+            "gallery-annex-monitor": {
+              "pool": "gallery-annex-office",
+              "address": "198.19.2.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.19.2.0",
+                  "prefix": 24
+                },
+                "router": "198.19.2.1",
+                "dns": [
+                  "198.51.100.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-annex-branch",
+              "subnet": {
+                "network": "10.55.0.0",
+                "prefix": 24
+              },
+              "router": "10.55.0.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-annex-visitor",
+              "subnet": {
+                "network": "10.55.0.0",
+                "prefix": 24
+              },
+              "router": "10.55.0.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-annex-monitor",
+              "subnet": {
+                "network": "198.19.2.0",
+                "prefix": 24
+              },
+              "router": "198.19.2.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.19.2.30"
+            }
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "gallery-annex-office"
+          },
+          {
+            "kind": "BindingPreserved",
+            "client": "gallery-annex-monitor"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "gallery-annex-office"
+          },
+          {
+            "kind": "Excluded",
+            "pool": "gallery-annex-scope",
+            "address": "10.55.0.11"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "gallery-annex-branch",
+                "subnet": {
+                  "network": "10.55.0.0",
+                  "prefix": 24
+                },
+                "router": "10.55.0.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "gallery-annex-visitor",
+                "subnet": {
+                  "network": "10.55.0.0",
+                  "prefix": 24
+                },
+                "router": "10.55.0.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "gallery-annex-visitor",
+                "subnet": {
+                  "network": "10.55.0.0",
+                  "prefix": 24
+                },
+                "router": "10.55.0.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "gallery-annex-branch",
+                "subnet": {
+                  "network": "10.55.0.0",
+                  "prefix": 24
+                },
+                "router": "10.55.0.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "ApplyPolicy",
+              "policy": {
+                "server_enabled": true,
+                "pools": {
+                  "gallery-annex-scope": {
+                    "subnet": {
+                      "network": "10.55.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.55.0.10",
+                    "last": "10.55.0.13",
+                    "excluded": [
+                      "10.55.0.11"
+                    ],
+                    "reservations": {},
+                    "router": "10.55.0.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 80
+                  },
+                  "gallery-annex-office": {
+                    "subnet": {
+                      "network": "198.19.2.0",
+                      "prefix": 24
+                    },
+                    "first": "198.19.2.30",
+                    "last": "198.19.2.31",
+                    "excluded": [],
+                    "reservations": {
+                      "gallery-annex-monitor": "198.19.2.30"
+                    },
+                    "router": "198.19.2.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 1024
+                  }
+                },
+                "relays": {
+                  "gallery-annex-scope": {
+                    "enabled": true,
+                    "target": "198.19.2.1",
+                    "giaddr": "10.55.0.1"
+                  }
+                }
+              }
+            },
+            "explanation": "Insert the policy into the draft, inspect the changed pool/relay fields and choose Apply policy. This does not send any client request. Set gallery-annex-scope router to 10.55.0.1, DNS to 198.51.100.53 and lease length to 80 seconds. Use 10.55.0.0/24, exclude 10.55.0.11 and target relay requests at 198.19.2.1."
+          },
+          {
+            "action": {
+              "kind": "Discover",
+              "client": "gallery-annex-branch"
+            },
+            "explanation": "Select this client and choose Discover; inspect the offered parameters before accepting."
+          },
+          {
+            "action": {
+              "kind": "Request",
+              "client": "gallery-annex-branch",
+              "token": 1
+            },
+            "explanation": "Choose Request for the selected client’s current offer; inspect the actual client lease afterwards."
+          },
+          {
+            "action": {
+              "kind": "Discover",
+              "client": "gallery-annex-visitor"
+            },
+            "explanation": "Select this client and choose Discover; inspect the offered parameters before accepting."
+          },
+          {
+            "action": {
+              "kind": "Request",
+              "client": "gallery-annex-visitor",
+              "token": 2
+            },
+            "explanation": "Choose Request for the selected client’s current offer; inspect the actual client lease afterwards."
+          }
+        ],
+        "try_change": {
+          "description": "After the worked example passes, select gallery-annex-branch and Release it. Predict which current-client row fails, then Check work; new-client tests should still pass. Repair by Discover and Request for that client.",
+          "actions": [
+            {
+              "kind": "Release",
+              "client": "gallery-annex-branch"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Discover",
+            "client": "gallery-annex-branch"
+          },
+          {
+            "kind": "Request",
+            "client": "gallery-annex-branch",
+            "token": 3
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-dhcp-lease-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "DHCP client configuration and relay diagnosis",
+      "unit": "dhcpv4-client-foundations",
+      "title": "Hand over a small lease pool safely",
+      "summary": "Retire an old client and provide enough eligible addresses around an exclusion and kiosk reservation.",
+      "objective": "Retire handover-retired so it no longer holds a client lease. Hand over 172.20.5.0/24 to handover-staff, handover-kiosk, handover-visitor: all three must hold usable leases with router 172.20.5.1, DNS address 203.0.113.53 and at least 40 simulated seconds remaining. In the handover-scope pool, reserve 172.20.5.12 for handover-kiosk and configure that client at the reserved address. Exclude retired address 172.20.5.10 in that pool.\n\nApplied policy must serve all three new clients together in either tested request order. Provide enough eligible addresses for all three clients. Additional valid per-client reservations are allowed; other assigned addresses, range choices and lease lengths may vary.\n\nPreserve the complete handover-office pool and its absent relay setting, plus handover-monitor's original grant and client-held state. Finish with that monitor configured and the server enabled. Retirement by Release or expiry is acceptable; the task does not assert server notification or a working router/DNS service.",
+      "difficulty": "Intermediate",
+      "minutes": 26,
+      "retry_guidance": "Read current client-held parameters separately from policy and pending offers. Inspect individual current and new-client rows after Check work.",
+      "steps": [
+        "Inspect the supplied clients, policy and held state.",
+        "Apply the required policy and carry out actual client exchanges.",
+        "Check current clients, independent new requests and named preservation."
+      ],
+      "guide": [],
+      "explanation": "Release or expiry stops the retired client from holding a usable lease; excluding .10 also keeps that address out of future allocations. The kiosk reservation directs .12 to its named client, while the remaining eligible addresses or additional valid reservations must serve staff and visitor together. Current success alone could hide an exhausted or wrongly reserved pool, so the new-client tests start separately in both request orders. The original monitor and office settings verify that the handover preserved the healthy segment.",
+      "hints": [
+        "Start with the named client and compare its physical segment, held parameters and selected pool.",
+        "Apply changes policy, not current client options. An offer alone does not configure a client.",
+        "Preserve the named monitor and office policy; then inspect which current or new-client row still fails."
+      ],
+      "sources": [
+        "https://www.rfc-editor.org/rfc/rfc2131.html",
+        "https://www.rfc-editor.org/rfc/rfc2132.html",
+        "https://www.rfc-editor.org/rfc/rfc1542.html",
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf"
+      ],
+      "simplifications": "Original bounded offline DHCPv4 exercise: one logical server, supplied transport facts, explicit time and no automatic retries/renewal. Native typed fields/actions are not IOS/Linux commands or packet capture. Only DHCP parameters are checked; no routed connectivity, DNS lookup, authentication, snooping or multi-server/failover claim. New-client tests reset separate contexts and do not change current leases. Exclusions/reservations follow the documented local simulator policy. CCNA v1.1 4.3/4.6 slice only, with no full-objective or forthcoming-blueprint credit. Source-only proposal checked2026-10-25; runtime/native acceptance pending.",
+      "initial": {
+        "kind": "DhcpV4",
+        "simulation": {
+          "topology": {
+            "server": "198.18.3.1",
+            "segments": {
+              "handover-scope": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "server_interface": "172.20.5.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "handover-office": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.18.3.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "handover-staff": {
+                "segment": "handover-scope"
+              },
+              "handover-kiosk": {
+                "segment": "handover-scope"
+              },
+              "handover-visitor": {
+                "segment": "handover-scope"
+              },
+              "handover-retired": {
+                "segment": "handover-scope"
+              },
+              "handover-monitor": {
+                "segment": "handover-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "handover-scope": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "first": "172.20.5.10",
+                "last": "172.20.5.12",
+                "excluded": [],
+                "reservations": {},
+                "router": "172.20.5.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              },
+              "handover-office": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "first": "198.18.3.30",
+                "last": "198.18.3.31",
+                "excluded": [],
+                "reservations": {
+                  "handover-monitor": "198.18.3.30"
+                },
+                "router": "198.18.3.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {}
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "handover-monitor": {
+              "pool": "handover-office",
+              "address": "198.18.3.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "router": "198.18.3.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "handover-retired": {
+              "pool": "handover-scope",
+              "address": "172.20.5.10",
+              "parameters": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "handover-monitor": {
+              "pool": "handover-office",
+              "address": "198.18.3.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "router": "198.18.3.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "handover-retired": {
+              "pool": "handover-scope",
+              "address": "172.20.5.10",
+              "parameters": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpV4",
+        "initial": {
+          "topology": {
+            "server": "198.18.3.1",
+            "segments": {
+              "handover-scope": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "server_interface": "172.20.5.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "handover-office": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.18.3.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "handover-staff": {
+                "segment": "handover-scope"
+              },
+              "handover-kiosk": {
+                "segment": "handover-scope"
+              },
+              "handover-visitor": {
+                "segment": "handover-scope"
+              },
+              "handover-retired": {
+                "segment": "handover-scope"
+              },
+              "handover-monitor": {
+                "segment": "handover-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "handover-scope": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "first": "172.20.5.10",
+                "last": "172.20.5.12",
+                "excluded": [],
+                "reservations": {},
+                "router": "172.20.5.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              },
+              "handover-office": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "first": "198.18.3.30",
+                "last": "198.18.3.31",
+                "excluded": [],
+                "reservations": {
+                  "handover-monitor": "198.18.3.30"
+                },
+                "router": "198.18.3.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {}
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "handover-monitor": {
+              "pool": "handover-office",
+              "address": "198.18.3.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "router": "198.18.3.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "handover-retired": {
+              "pool": "handover-scope",
+              "address": "172.20.5.10",
+              "parameters": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "handover-monitor": {
+              "pool": "handover-office",
+              "address": "198.18.3.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.18.3.0",
+                  "prefix": 24
+                },
+                "router": "198.18.3.1",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "handover-retired": {
+              "pool": "handover-scope",
+              "address": "172.20.5.10",
+              "parameters": {
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.254",
+                "dns": [
+                  "203.0.113.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "handover-staff",
+              "subnet": {
+                "network": "172.20.5.0",
+                "prefix": 24
+              },
+              "router": "172.20.5.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "handover-kiosk",
+              "subnet": {
+                "network": "172.20.5.0",
+                "prefix": 24
+              },
+              "router": "172.20.5.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 40,
+              "address": "172.20.5.12"
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "handover-visitor",
+              "subnet": {
+                "network": "172.20.5.0",
+                "prefix": 24
+              },
+              "router": "172.20.5.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "handover-monitor",
+              "subnet": {
+                "network": "198.18.3.0",
+                "prefix": 24
+              },
+              "router": "198.18.3.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.18.3.30"
+            }
+          },
+          {
+            "kind": "NoClientLease",
+            "client": "handover-retired"
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "handover-office"
+          },
+          {
+            "kind": "BindingPreserved",
+            "client": "handover-monitor"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "handover-office"
+          },
+          {
+            "kind": "Excluded",
+            "pool": "handover-scope",
+            "address": "172.20.5.10"
+          },
+          {
+            "kind": "Reserved",
+            "pool": "handover-scope",
+            "client": "handover-kiosk",
+            "address": "172.20.5.12"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "handover-staff",
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "handover-kiosk",
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": "172.20.5.12"
+              },
+              {
+                "client": "handover-visitor",
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "handover-visitor",
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "handover-kiosk",
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": "172.20.5.12"
+              },
+              {
+                "client": "handover-staff",
+                "subnet": {
+                  "network": "172.20.5.0",
+                  "prefix": 24
+                },
+                "router": "172.20.5.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "dhcpv4 {\"kind\":\"ApplyPolicy\",\"policy\":{\"server_enabled\":true,\"pools\":{\"handover-scope\":{\"subnet\":{\"network\":\"172.20.5.0\",\"prefix\":24},\"first\":\"172.20.5.10\",\"last\":\"172.20.5.13\",\"excluded\":[\"172.20.5.10\"],\"reservations\":{\"handover-kiosk\":\"172.20.5.12\"},\"router\":\"172.20.5.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":96},\"handover-office\":{\"subnet\":{\"network\":\"198.18.3.0\",\"prefix\":24},\"first\":\"198.18.3.30\",\"last\":\"198.18.3.31\",\"excluded\":[],\"reservations\":{\"handover-monitor\":\"198.18.3.30\"},\"router\":\"198.18.3.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":1024}},\"relays\":{}}}",
+        "dhcpv4 {\"kind\":\"Release\",\"client\":\"handover-retired\"}",
+        "dhcpv4 {\"kind\":\"Discover\",\"client\":\"handover-staff\"}",
+        "dhcpv4 {\"kind\":\"Request\",\"client\":\"handover-staff\",\"token\":1}",
+        "dhcpv4 {\"kind\":\"Discover\",\"client\":\"handover-kiosk\"}",
+        "dhcpv4 {\"kind\":\"Request\",\"client\":\"handover-kiosk\",\"token\":2}",
+        "dhcpv4 {\"kind\":\"Discover\",\"client\":\"handover-visitor\"}",
+        "dhcpv4 {\"kind\":\"Request\",\"client\":\"handover-visitor\",\"token\":3}"
+      ],
+      "prerequisites": [
+        "ccna-dhcp-relay-scope"
+      ],
+      "dhcpv4_teaching": {
+        "prerequisite_note": "After “Repair a relay and the selected client subnet”, use applied policy, current offers and client-held leases separately.",
+        "concepts": [
+          {
+            "title": "Retirement and server ownership",
+            "text": "A client lease and the server binding are separate. Release stops the client immediately; the server frees its binding only when the notification can arrive. Otherwise it holds the address until expiry. This task checks that the retired client no longer holds a lease. Release or expiry may achieve that result."
+          },
+          {
+            "title": "Reserve and exclude deliberately",
+            "text": "A reservation supplies an address for a named client. Clients without a reservation use the dynamic range. This exercise excludes addresses from all new grants, including reservations. Reserve the kiosk address and exclude the retired address without excluding the kiosk. Reservations do not automatically configure clients."
+          },
+          {
+            "title": "Prove a handover, not one lucky allocation",
+            "text": "Provide enough eligible addresses for all named clients together. Check work uses independent new-client request orders in addition to current leases. Preserve the explicitly named monitor grant, client-held state and office policy. Other work-pool choices may differ if they meet the task."
+          },
+          {
+            "title": "Repair a policy without refreshing old evidence",
+            "text": "Applying policy does not rewrite existing offers or leases. Stale options, an offer alone and an expired lease cannot pass the current-client checks. Use actual Request, Renew or Release/reacquire where appropriate. Advance never auto-renews. A received router or DNS address remains a parameter, not a tested network service."
+          }
+        ],
+        "example_description": "Separate gallery example. Work through the annotated actions, inspect held parameters and Check work.\n\nRetire gallery-handover-retired so it no longer holds a client lease. Hand over 172.22.6.0/24 to gallery-handover-staff, gallery-handover-kiosk, gallery-handover-visitor: all three must hold usable leases with router 172.22.6.1, DNS address 198.51.100.53 and at least 40 simulated seconds remaining. In the gallery-handover-scope pool, reserve 172.22.6.12 for gallery-handover-kiosk and configure that client at the reserved address. Exclude retired address 172.22.6.10 in that pool.\n\nApplied policy must serve all three new clients together in either tested request order. Provide enough eligible addresses for all three clients. Additional valid per-client reservations are allowed; other assigned addresses, range choices and lease lengths may vary.\n\nPreserve the complete gallery-handover-office pool and its absent relay setting, plus gallery-handover-monitor's original grant and client-held state. Finish with that monitor configured and the server enabled. Retirement by Release or expiry is acceptable; the task does not assert server notification or a working router/DNS service.",
+        "fixture": {
+          "topology": {
+            "server": "198.19.3.1",
+            "segments": {
+              "gallery-handover-scope": {
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "server_interface": "172.22.6.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              },
+              "gallery-handover-office": {
+                "subnet": {
+                  "network": "198.19.3.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.19.3.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "gallery-handover-staff": {
+                "segment": "gallery-handover-scope"
+              },
+              "gallery-handover-kiosk": {
+                "segment": "gallery-handover-scope"
+              },
+              "gallery-handover-visitor": {
+                "segment": "gallery-handover-scope"
+              },
+              "gallery-handover-retired": {
+                "segment": "gallery-handover-scope"
+              },
+              "gallery-handover-monitor": {
+                "segment": "gallery-handover-office"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "gallery-handover-scope": {
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "first": "172.22.6.10",
+                "last": "172.22.6.12",
+                "excluded": [],
+                "reservations": {},
+                "router": "172.22.6.254",
+                "dns": [
+                  "198.51.100.99"
+                ],
+                "lease_seconds": 64
+              },
+              "gallery-handover-office": {
+                "subnet": {
+                  "network": "198.19.3.0",
+                  "prefix": 24
+                },
+                "first": "198.19.3.30",
+                "last": "198.19.3.31",
+                "excluded": [],
+                "reservations": {
+                  "gallery-handover-monitor": "198.19.3.30"
+                },
+                "router": "198.19.3.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "lease_seconds": 1024
+              }
+            },
+            "relays": {}
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "gallery-handover-monitor": {
+              "pool": "gallery-handover-office",
+              "address": "198.19.3.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.19.3.0",
+                  "prefix": 24
+                },
+                "router": "198.19.3.1",
+                "dns": [
+                  "198.51.100.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "gallery-handover-retired": {
+              "pool": "gallery-handover-scope",
+              "address": "172.22.6.10",
+              "parameters": {
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.254",
+                "dns": [
+                  "198.51.100.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "gallery-handover-monitor": {
+              "pool": "gallery-handover-office",
+              "address": "198.19.3.30",
+              "parameters": {
+                "subnet": {
+                  "network": "198.19.3.0",
+                  "prefix": 24
+                },
+                "router": "198.19.3.1",
+                "dns": [
+                  "198.51.100.53"
+                ]
+              },
+              "granted_seconds": 1024,
+              "acquired_at": 0,
+              "renew_at": 512,
+              "rebind_at": 896,
+              "expires_at": 1024
+            },
+            "gallery-handover-retired": {
+              "pool": "gallery-handover-scope",
+              "address": "172.22.6.10",
+              "parameters": {
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.254",
+                "dns": [
+                  "198.51.100.99"
+                ]
+              },
+              "granted_seconds": 64,
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-handover-staff",
+              "subnet": {
+                "network": "172.22.6.0",
+                "prefix": 24
+              },
+              "router": "172.22.6.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-handover-kiosk",
+              "subnet": {
+                "network": "172.22.6.0",
+                "prefix": 24
+              },
+              "router": "172.22.6.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 40,
+              "address": "172.22.6.12"
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-handover-visitor",
+              "subnet": {
+                "network": "172.22.6.0",
+                "prefix": 24
+              },
+              "router": "172.22.6.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 40,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "gallery-handover-monitor",
+              "subnet": {
+                "network": "198.19.3.0",
+                "prefix": 24
+              },
+              "router": "198.19.3.1",
+              "dns": [
+                "198.51.100.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.19.3.30"
+            }
+          },
+          {
+            "kind": "NoClientLease",
+            "client": "gallery-handover-retired"
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "gallery-handover-office"
+          },
+          {
+            "kind": "BindingPreserved",
+            "client": "gallery-handover-monitor"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "gallery-handover-office"
+          },
+          {
+            "kind": "Excluded",
+            "pool": "gallery-handover-scope",
+            "address": "172.22.6.10"
+          },
+          {
+            "kind": "Reserved",
+            "pool": "gallery-handover-scope",
+            "client": "gallery-handover-kiosk",
+            "address": "172.22.6.12"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "gallery-handover-staff",
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "gallery-handover-kiosk",
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": "172.22.6.12"
+              },
+              {
+                "client": "gallery-handover-visitor",
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "gallery-handover-visitor",
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              },
+              {
+                "client": "gallery-handover-kiosk",
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": "172.22.6.12"
+              },
+              {
+                "client": "gallery-handover-staff",
+                "subnet": {
+                  "network": "172.22.6.0",
+                  "prefix": 24
+                },
+                "router": "172.22.6.1",
+                "dns": [
+                  "198.51.100.53"
+                ],
+                "minimum_remaining": 40,
+                "address": null
+              }
+            ]
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "ApplyPolicy",
+              "policy": {
+                "server_enabled": true,
+                "pools": {
+                  "gallery-handover-scope": {
+                    "subnet": {
+                      "network": "172.22.6.0",
+                      "prefix": 24
+                    },
+                    "first": "172.22.6.10",
+                    "last": "172.22.6.13",
+                    "excluded": [
+                      "172.22.6.10"
+                    ],
+                    "reservations": {
+                      "gallery-handover-kiosk": "172.22.6.12"
+                    },
+                    "router": "172.22.6.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 96
+                  },
+                  "gallery-handover-office": {
+                    "subnet": {
+                      "network": "198.19.3.0",
+                      "prefix": 24
+                    },
+                    "first": "198.19.3.30",
+                    "last": "198.19.3.31",
+                    "excluded": [],
+                    "reservations": {
+                      "gallery-handover-monitor": "198.19.3.30"
+                    },
+                    "router": "198.19.3.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 1024
+                  }
+                },
+                "relays": {}
+              }
+            },
+            "explanation": "Insert the policy into the draft, inspect the changed pool/relay fields and choose Apply policy. This does not send any client request. Set gallery-handover-scope router to 172.22.6.1, DNS to 198.51.100.53 and lease length to 96 seconds. Use range 172.22.6.10 through 172.22.6.13, exclude 172.22.6.10 and reserve 172.22.6.12 for gallery-handover-kiosk."
+          },
+          {
+            "action": {
+              "kind": "Release",
+              "client": "gallery-handover-retired"
+            },
+            "explanation": "Select the retiring client and choose Release. It stops using its grant."
+          },
+          {
+            "action": {
+              "kind": "Discover",
+              "client": "gallery-handover-staff"
+            },
+            "explanation": "Select this client and choose Discover; inspect the offered parameters before accepting."
+          },
+          {
+            "action": {
+              "kind": "Request",
+              "client": "gallery-handover-staff",
+              "token": 1
+            },
+            "explanation": "Choose Request for the selected client’s current offer; inspect the actual client lease afterwards."
+          },
+          {
+            "action": {
+              "kind": "Discover",
+              "client": "gallery-handover-kiosk"
+            },
+            "explanation": "Select this client and choose Discover; inspect the offered parameters before accepting."
+          },
+          {
+            "action": {
+              "kind": "Request",
+              "client": "gallery-handover-kiosk",
+              "token": 2
+            },
+            "explanation": "Choose Request for the selected client’s current offer; inspect the actual client lease afterwards."
+          },
+          {
+            "action": {
+              "kind": "Discover",
+              "client": "gallery-handover-visitor"
+            },
+            "explanation": "Select this client and choose Discover; inspect the offered parameters before accepting."
+          },
+          {
+            "action": {
+              "kind": "Request",
+              "client": "gallery-handover-visitor",
+              "token": 3
+            },
+            "explanation": "Choose Request for the selected client’s current offer; inspect the actual client lease afterwards."
+          }
+        ],
+        "try_change": {
+          "description": "After the example passes, additionally exclude the kiosk reservation 172.22.6.12 and Apply policy. Current clients still hold their grants, but each new-client test should fail for gallery-handover-kiosk. Remove only that additional exclusion and Apply policy to repair.",
+          "actions": [
+            {
+              "kind": "ApplyPolicy",
+              "policy": {
+                "server_enabled": true,
+                "pools": {
+                  "gallery-handover-scope": {
+                    "subnet": {
+                      "network": "172.22.6.0",
+                      "prefix": 24
+                    },
+                    "first": "172.22.6.10",
+                    "last": "172.22.6.13",
+                    "excluded": [
+                      "172.22.6.10",
+                      "172.22.6.12"
+                    ],
+                    "reservations": {
+                      "gallery-handover-kiosk": "172.22.6.12"
+                    },
+                    "router": "172.22.6.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 96
+                  },
+                  "gallery-handover-office": {
+                    "subnet": {
+                      "network": "198.19.3.0",
+                      "prefix": 24
+                    },
+                    "first": "198.19.3.30",
+                    "last": "198.19.3.31",
+                    "excluded": [],
+                    "reservations": {
+                      "gallery-handover-monitor": "198.19.3.30"
+                    },
+                    "router": "198.19.3.1",
+                    "dns": [
+                      "198.51.100.53"
+                    ],
+                    "lease_seconds": 1024
+                  }
+                },
+                "relays": {}
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "ApplyPolicy",
+            "policy": {
+              "server_enabled": true,
+              "pools": {
+                "gallery-handover-scope": {
+                  "subnet": {
+                    "network": "172.22.6.0",
+                    "prefix": 24
+                  },
+                  "first": "172.22.6.10",
+                  "last": "172.22.6.13",
+                  "excluded": [
+                    "172.22.6.10"
+                  ],
+                  "reservations": {
+                    "gallery-handover-kiosk": "172.22.6.12"
+                  },
+                  "router": "172.22.6.1",
+                  "dns": [
+                    "198.51.100.53"
+                  ],
+                  "lease_seconds": 96
+                },
+                "gallery-handover-office": {
+                  "subnet": {
+                    "network": "198.19.3.0",
+                    "prefix": 24
+                  },
+                  "first": "198.19.3.30",
+                  "last": "198.19.3.31",
+                  "excluded": [],
+                  "reservations": {
+                    "gallery-handover-monitor": "198.19.3.30"
+                  },
+                  "router": "198.19.3.1",
+                  "dns": [
+                    "198.51.100.53"
+                  ],
+                  "lease_seconds": 1024
+                }
+              },
+              "relays": {}
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

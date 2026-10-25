@@ -341,7 +341,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 30);
+    assert_eq!(units.len(), 31);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -350,6 +350,17 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
             .count(),
         1
     );
-    units.retain(|u| u["id"] != "dns-reverse" && u["id"] != "shell-option-interfaces");
+    assert_eq!(
+        units
+            .iter()
+            .filter(|u| u["id"] == "dhcpv4-client-foundations")
+            .count(),
+        1
+    );
+    units.retain(|u| {
+        u["id"] != "dns-reverse"
+            && u["id"] != "shell-option-interfaces"
+            && u["id"] != "dhcpv4-client-foundations"
+    });
     assert_eq!(current, old["units"]);
 }

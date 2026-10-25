@@ -128,7 +128,7 @@ impl LabApp {
                     .unwrap();
                 let before = l.clone();
                 let old_action = l.selected_action;
-                controls::dropdown(ui, ("dhcp-example-action", &s.id), 360.)
+                let action_picker = controls::dropdown(ui, ("dhcp-example-action", &s.id), 360.)
                     .selected_text(action_label(
                         &lesson.example_actions[l.selected_action].action,
                     ))
@@ -141,7 +141,13 @@ impl LabApp {
                             );
                             self.metrics.dhcp_example_actions.push((n, r.rect));
                         }
+                        self.metrics.dhcp_popup = Some(controls::popup_content_clip(ui));
                     });
+                self.metrics.dhcp_controls.push((
+                    "example-action-menu".into(),
+                    action_picker.response.rect,
+                    ui.is_enabled(),
+                ));
                 if old_action != l.selected_action {
                     if let Some(client) =
                         action_client(&lesson.example_actions[l.selected_action].action)
@@ -222,7 +228,7 @@ impl LabApp {
                                 "Example checks pass · No assignment credit",
                             );
                         }
-                        result_rows(ui, &checks);
+                        self.metrics.dhcp_result_summary = Some(result_rows(ui, &checks));
                     }
                 });
                 self.metrics.feedback = Some(results.response.rect);
@@ -307,31 +313,39 @@ impl LabApp {
                     self.dirty = true;
                 }
                 self.checked = checked;
-                let feedback = controls::feedback(ui, requested || edit.attempted, |ui| {
-                    if let Some(n) = &self.notice {
-                        let r = ui.add(egui::Label::new(n).wrap());
-                        self.metrics.dhcp_notice = Some(r.rect);
-                    }
-                    if checked {
-                        let rows =
-                            progress::current_dhcpv4_checks(&self.progress.attempts[&s.id], &s);
-                        let complete = rows.iter().all(|row| row.0);
-                        self.metrics.completion = complete;
-                        if complete {
-                            ui.colored_label(
+                let feedback =
+                    controls::feedback(ui, requested || edit.attempted, |ui| {
+                        if let Some(n) = &self.notice {
+                            let r = ui.add(egui::Label::new(n).wrap());
+                            self.metrics.dhcp_notice = Some(r.rect);
+                        }
+                        if checked {
+                            let rows =
+                                progress::current_dhcpv4_checks(&self.progress.attempts[&s.id], &s);
+                            let complete = rows.iter().all(|row| row.0);
+                            self.metrics.completion = complete;
+                            let completed = if complete {
+                                Some(ui.colored_label(
                                 palette(ui).success,
                                 "Objective complete · Current clients and new-client checks pass.",
-                            );
-                        }
-                        result_rows(ui, &rows);
-                        if complete {
-                            if !self.progress.attempts[&s.id].challenge {
-                                ui.label(&s.explanation);
+                            ).rect)
+                            } else {
+                                None
+                            };
+                            let summary = result_rows(ui, &rows);
+                            self.metrics.dhcp_result_summary =
+                                Some(completed.map_or(summary, |rect| rect.union(summary)));
+                            if complete {
+                                if !self.progress.attempts[&s.id].challenge {
+                                    egui::CollapsingHeader::new("Why this configuration works")
+                                        .show(ui, |ui| {
+                                            ui.label(&s.explanation);
+                                        });
+                                }
+                                self.next_unit_lab(ui, i);
                             }
-                            self.next_unit_lab(ui, i);
                         }
-                    }
-                });
+                    });
                 self.metrics.feedback = Some(feedback.response.rect);
             }
         }
@@ -410,9 +424,11 @@ fn check_key(ui: &egui::Ui, metrics: &Metrics) -> bool {
             .any(|(_, _, id)| ui.memory(|m| m.has_focus(*id)))
         && ui.input_mut(|i| i.consume_key(egui::Modifiers::CTRL, egui::Key::Enter))
 }
-fn result_rows(ui: &mut egui::Ui, rows: &[(bool, String)]) {
+fn result_rows(ui: &mut egui::Ui, rows: &[(bool, String)]) -> egui::Rect {
     let pass = rows.iter().filter(|r| r.0).count();
-    ui.label(format!("{pass} of {} checks pass.", rows.len()));
+    let summary = ui
+        .label(format!("{pass} of {} checks pass.", rows.len()))
+        .rect;
     for (ok, message) in rows.iter().filter(|r| !r.0) {
         ui.add(
             egui::Label::new(
@@ -432,6 +448,7 @@ fn result_rows(ui: &mut egui::Ui, rows: &[(bool, String)]) {
             }
         });
     }
+    summary
 }
 #[derive(Default)]
 struct Edit {
@@ -458,6 +475,7 @@ fn field(
             );
             name_control(&response, label);
             metrics.dhcp_fields.push((key.into(), response.rect, id));
+            metrics.dhcp_field_clips.insert(key.into(), ui.clip_rect());
             metrics.inputs.push(response.rect);
             if *focus && ui.is_enabled() {
                 if ui.input(|i| i.pointer.any_down()) {
@@ -477,6 +495,11 @@ fn toggle(ui: &mut egui::Ui, key: &str, label: &str, value: &mut bool, metrics: 
     metrics
         .dhcp_controls
         .push((key.into(), r.rect, ui.is_enabled()));
+}
+fn focus_new_field(ui: &mut egui::Ui, scope: egui::Id, key: &str) {
+    let id = scope.with(("value", key));
+    ui.memory_mut(|m| m.request_focus(id));
+    ui.ctx().request_repaint();
 }
 fn action_button(
     ui: &mut egui::Ui,
@@ -601,132 +624,139 @@ fn client_panel(
     notice: &mut Option<String>,
     metrics: &mut Metrics,
 ) -> Edit {
-    let client = draft.selected_client.clone();
-    let status = ui.vertical(|ui| {
-        ui.label(format!("Simulated time: {} seconds", sim.now()));
-        binding(
-            ui,
-            "Client-held lease",
-            sim.leases().get(&client),
-            sim.now(),
-        );
-        if let Some(o) = sim.offers().get(&client) {
-            ui.label(format!(
-                "Offer only: {} · expires in {}s · lease {}s",
-                o.address,
-                o.expires_at.saturating_sub(sim.now()),
-                o.lease_seconds
-            ));
-            ui.label(format!(
-                "Offered subnet {}/{} · router {} · DNS {}",
-                o.parameters.subnet.network,
-                o.parameters.subnet.prefix,
-                option_ip(o.parameters.router),
-                ips(&o.parameters.dns)
-            ));
-        } else {
-            ui.label("No pending offer");
-        }
-        egui::CollapsingHeader::new("Inspect server binding").show(ui, |ui| {
-            binding(ui, "Server binding", sim.bindings().get(&client), sim.now());
-        });
-    });
-    metrics.dhcp_status = Some(status.response.rect);
-    ui.label(
-        RichText::new("Client actions · Explicit exchanges using the applied policy").strong(),
-    );
-    // Keep one action queue for the actual frame; no automatic request/renewal.
-    let mut chosen = None;
-    let mut attempted = false;
-    let mut clock_focus = false;
-    ui.horizontal_wrapped(|ui| {
-        let held = sim.leases().contains_key(&client);
-        action_button(
-            ui,
-            "discover",
-            "Discover",
-            !held,
-            Action::Discover {
-                client: client.clone(),
-            },
-            metrics,
-            &mut chosen,
-        );
-        let offer = sim.offers().get(&client);
-        action_button(
-            ui,
-            "request",
-            "Request",
-            offer.is_some(),
-            Action::Request {
-                client: client.clone(),
-                token: offer.map_or(0, |o| o.token),
-            },
-            metrics,
-            &mut chosen,
-        );
-        action_button(
-            ui,
-            "renew",
-            "Renew",
-            held,
-            Action::Renew {
-                client: client.clone(),
-            },
-            metrics,
-            &mut chosen,
-        );
-        action_button(
-            ui,
-            "rebind",
-            "Rebind",
-            matches!(sim.window(&client), Ok(Window::Rebinding)),
-            Action::Rebind {
-                client: client.clone(),
-            },
-            metrics,
-            &mut chosen,
-        );
-        action_button(
-            ui,
-            "release",
-            "Release",
-            held,
-            Action::Release {
-                client: client.clone(),
-            },
-            metrics,
-            &mut chosen,
-        );
-    });
-    field(
-        ui,
-        scope,
-        "time",
-        "Advance seconds",
-        &mut draft.advance_seconds,
-        metrics,
-        &mut clock_focus,
-    );
-    ui.horizontal_wrapped(|ui| {
-        let r = ui.add(button("Advance time"));
-        metrics
-            .dhcp_controls
-            .push(("advance".into(), r.rect, ui.is_enabled()));
-        if r.clicked() && ui.is_enabled() {
-            attempted = true;
-            match draft.seconds() {
-                Ok(seconds) => chosen = Some(Action::Advance { seconds }),
-                Err(e) => *notice = Some(work::notice(e)),
+    ui.scope_builder(
+        egui::UiBuilder::new().id(scope.with("client-tools")),
+        |ui| {
+            let client = draft.selected_client.clone();
+            let status = ui.vertical(|ui| {
+                ui.label(format!("Simulated time: {} seconds", sim.now()));
+                binding(
+                    ui,
+                    "Client-held lease",
+                    sim.leases().get(&client),
+                    sim.now(),
+                );
+                if let Some(o) = sim.offers().get(&client) {
+                    ui.label(format!(
+                        "Offer only: {} · expires in {}s · lease {}s",
+                        o.address,
+                        o.expires_at.saturating_sub(sim.now()),
+                        o.lease_seconds
+                    ));
+                    ui.label(format!(
+                        "Offered subnet {}/{} · router {} · DNS {}",
+                        o.parameters.subnet.network,
+                        o.parameters.subnet.prefix,
+                        option_ip(o.parameters.router),
+                        ips(&o.parameters.dns)
+                    ));
+                } else {
+                    ui.label("No pending offer");
+                }
+                egui::CollapsingHeader::new("Inspect server binding").show(ui, |ui| {
+                    binding(ui, "Server binding", sim.bindings().get(&client), sim.now());
+                });
+            });
+            metrics.dhcp_status = Some(status.response.rect);
+            ui.label(
+                RichText::new("Client actions · Explicit exchanges using the applied policy")
+                    .strong(),
+            );
+            // Keep one action queue for the actual frame; no automatic request/renewal.
+            let mut chosen = None;
+            let mut attempted = false;
+            let mut clock_focus = false;
+            ui.horizontal_wrapped(|ui| {
+                let held = sim.leases().contains_key(&client);
+                action_button(
+                    ui,
+                    "discover",
+                    "Discover",
+                    !held,
+                    Action::Discover {
+                        client: client.clone(),
+                    },
+                    metrics,
+                    &mut chosen,
+                );
+                let offer = sim.offers().get(&client);
+                action_button(
+                    ui,
+                    "request",
+                    "Request",
+                    offer.is_some(),
+                    Action::Request {
+                        client: client.clone(),
+                        token: offer.map_or(0, |o| o.token),
+                    },
+                    metrics,
+                    &mut chosen,
+                );
+                action_button(
+                    ui,
+                    "renew",
+                    "Renew",
+                    held,
+                    Action::Renew {
+                        client: client.clone(),
+                    },
+                    metrics,
+                    &mut chosen,
+                );
+                action_button(
+                    ui,
+                    "rebind",
+                    "Rebind",
+                    matches!(sim.window(&client), Ok(Window::Rebinding)),
+                    Action::Rebind {
+                        client: client.clone(),
+                    },
+                    metrics,
+                    &mut chosen,
+                );
+                action_button(
+                    ui,
+                    "release",
+                    "Release",
+                    held,
+                    Action::Release {
+                        client: client.clone(),
+                    },
+                    metrics,
+                    &mut chosen,
+                );
+            });
+            field(
+                ui,
+                scope,
+                "time",
+                "Advance seconds",
+                &mut draft.advance_seconds,
+                metrics,
+                &mut clock_focus,
+            );
+            ui.horizontal_wrapped(|ui| {
+                let r = ui.add(button("Advance time"));
+                metrics
+                    .dhcp_controls
+                    .push(("advance".into(), r.rect, ui.is_enabled()));
+                if r.clicked() && ui.is_enabled() {
+                    attempted = true;
+                    match draft.seconds() {
+                        Ok(seconds) => chosen = Some(Action::Advance { seconds }),
+                        Err(e) => *notice = Some(work::notice(e)),
+                    }
+                }
+                ui.label("Clock only; no automatic requests.");
+            });
+            Edit {
+                attempted: attempted || chosen.is_some(),
+                action: chosen,
+                ..Default::default()
             }
-        }
-        ui.label("Clock only; no automatic requests.");
-    });
-    Edit {
-        attempted: attempted || chosen.is_some(),
-        action: chosen,
-        ..Default::default()
-    }
+        },
+    )
+    .inner
 }
 
 fn policy_panel(
@@ -737,319 +767,368 @@ fn policy_panel(
     metrics: &mut Metrics,
     focus: &mut bool,
 ) -> Edit {
-    let segment_id = draft.context.clients[&draft.selected_client]
-        .segment
-        .clone();
-    let mut chosen = None;
-    let mut attempted = false;
-    ui.label(RichText::new("Policy draft · Apply does not update held leases").strong());
-    toggle(
-        ui,
-        "server-enabled",
-        "Enable DHCP server",
-        &mut draft.server_enabled,
-        metrics,
-    );
-    ui.horizontal_wrapped(|ui| {
-        ui.label("Pool");
-        let response = controls::dropdown(ui, "dhcp-pool", 280.)
-            .selected_text(draft.selected_pool.as_deref().unwrap_or("No pool selected"))
-            .show_ui(ui, |ui| {
-                for id in draft.pools.keys() {
-                    let r = ui.selectable_value(&mut draft.selected_pool, Some(id.clone()), id);
-                    metrics.dhcp_pools.push((id.clone(), r.rect));
-                }
-                metrics.dhcp_popup = Some(controls::popup_content_clip(ui));
-            });
-        metrics.dhcp_pool = Some(response.response.rect);
-        let add = ui.add_enabled(draft.pools.len() < net::MAX_POOLS, button("Add pool"));
-        if add.clicked() {
-            let id = (1..=9)
-                .map(|n| format!("pool-{n}"))
-                .find(|id| !draft.pools.contains_key(id))
-                .unwrap();
-            draft.pools.insert(
-                id.clone(),
-                PoolDraft {
-                    network: String::new(),
-                    prefix: String::new(),
-                    first: String::new(),
-                    last: String::new(),
-                    excluded: vec![],
-                    reservations: vec![],
-                    router: String::new(),
-                    dns: vec![],
-                    lease_seconds: String::new(),
-                },
-            );
-            draft.selected_pool = Some(id);
-            *focus = true;
-        }
-    });
-    if let Some(pool) = draft.selected_pool.clone() {
-        let mut remove_pool = false;
-        ui.push_id(&pool, |ui| {
-            let scope = scope.with(("pool", &pool));
-            let p = draft.pools.get_mut(&pool).unwrap();
-            field(
+    ui.scope_builder(
+        egui::UiBuilder::new().id(scope.with("policy-tools")),
+        |ui| {
+            let segment_id = draft.context.clients[&draft.selected_client]
+                .segment
+                .clone();
+            let mut chosen = None;
+            let mut attempted = false;
+            ui.label(RichText::new("Policy draft · Apply does not update held leases").strong());
+            toggle(
                 ui,
-                scope,
-                "network",
-                "Pool network",
-                &mut p.network,
+                "server-enabled",
+                "Enable DHCP server",
+                &mut draft.server_enabled,
                 metrics,
-                focus,
             );
-            field(
-                ui,
-                scope,
-                "prefix",
-                "Prefix length",
-                &mut p.prefix,
-                metrics,
-                focus,
-            );
-            field(
-                ui,
-                scope,
-                "first",
-                "Range first address",
-                &mut p.first,
-                metrics,
-                focus,
-            );
-            field(
-                ui,
-                scope,
-                "last",
-                "Range last address",
-                &mut p.last,
-                metrics,
-                focus,
-            );
-            field(
-                ui,
-                scope,
-                "router",
-                "Router option (optional)",
-                &mut p.router,
-                metrics,
-                focus,
-            );
-            field(
-                ui,
-                scope,
-                "lease-seconds",
-                "Lease seconds",
-                &mut p.lease_seconds,
-                metrics,
-                focus,
-            );
-            let dns = egui::CollapsingHeader::new(format!("DNS servers ({})", p.dns.len())).show(
-                ui,
-                |ui| {
-                    let mut remove = None;
-                    for (n, value) in p.dns.iter_mut().enumerate() {
-                        field(
-                            ui,
-                            scope,
-                            &format!("dns-{n}"),
-                            "DNS address",
-                            value,
-                            metrics,
-                            focus,
-                        );
-                        if ui.add(button("Remove this DNS server")).clicked() {
-                            remove = Some(n);
+            ui.horizontal_wrapped(|ui| {
+                ui.label("Pool");
+                let response = controls::dropdown(ui, "dhcp-pool", 280.)
+                    .selected_text(draft.selected_pool.as_deref().unwrap_or("No pool selected"))
+                    .show_ui(ui, |ui| {
+                        for id in draft.pools.keys() {
+                            let r =
+                                ui.selectable_value(&mut draft.selected_pool, Some(id.clone()), id);
+                            metrics.dhcp_pools.push((id.clone(), r.rect));
                         }
-                    }
-                    if let Some(n) = remove {
-                        p.dns.remove(n);
-                    }
-                    if ui
-                        .add_enabled(p.dns.len() < 4, button("Add DNS server"))
-                        .clicked()
-                    {
-                        p.dns.push(String::new());
-                    }
-                },
-            );
-            metrics.dhcp_controls.push((
-                "dns-header".into(),
-                dns.header_response.rect,
-                ui.is_enabled(),
-            ));
-            egui::CollapsingHeader::new(format!("Excluded addresses ({})", p.excluded.len())).show(
-                ui,
-                |ui| {
-                    egui::ScrollArea::vertical()
-                        .id_salt("excluded")
-                        .max_height(controls::height(ui) * 5.)
+                        metrics.dhcp_popup = Some(controls::popup_content_clip(ui));
+                    });
+                metrics.dhcp_pool = Some(response.response.rect);
+                let add = ui.add_enabled(draft.pools.len() < net::MAX_POOLS, button("Add pool"));
+                if add.clicked() {
+                    let id = (1..=9)
+                        .map(|n| format!("pool-{n}"))
+                        .find(|id| !draft.pools.contains_key(id))
+                        .unwrap();
+                    draft.pools.insert(
+                        id.clone(),
+                        PoolDraft {
+                            network: String::new(),
+                            prefix: String::new(),
+                            first: String::new(),
+                            last: String::new(),
+                            excluded: vec![],
+                            reservations: vec![],
+                            router: String::new(),
+                            dns: vec![],
+                            lease_seconds: String::new(),
+                        },
+                    );
+                    draft.selected_pool = Some(id);
+                    *focus = true;
+                }
+            });
+            if let Some(pool) = draft.selected_pool.clone() {
+                let mut remove_pool = false;
+                ui.push_id(&pool, |ui| {
+                    let scope = scope.with(("pool", &pool));
+                    let p = draft.pools.get_mut(&pool).unwrap();
+                    field(
+                        ui,
+                        scope,
+                        "network",
+                        "Pool network",
+                        &mut p.network,
+                        metrics,
+                        focus,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "prefix",
+                        "Prefix length",
+                        &mut p.prefix,
+                        metrics,
+                        focus,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "first",
+                        "Range first address",
+                        &mut p.first,
+                        metrics,
+                        focus,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "last",
+                        "Range last address",
+                        &mut p.last,
+                        metrics,
+                        focus,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "router",
+                        "Router option (optional)",
+                        &mut p.router,
+                        metrics,
+                        focus,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "lease-seconds",
+                        "Lease seconds",
+                        &mut p.lease_seconds,
+                        metrics,
+                        focus,
+                    );
+                    let dns = egui::CollapsingHeader::new(format!("DNS servers ({})", p.dns.len()))
+                        .id_salt("dhcp-dns")
                         .show(ui, |ui| {
                             let mut remove = None;
-                            for (n, value) in p.excluded.iter_mut().enumerate() {
+                            for (n, value) in p.dns.iter_mut().enumerate() {
                                 field(
                                     ui,
                                     scope,
-                                    &format!("excluded-{n}"),
-                                    "Excluded address",
+                                    &format!("dns-{n}"),
+                                    "DNS address",
                                     value,
                                     metrics,
                                     focus,
                                 );
-                                if ui.add(button("Remove this exclusion")).clicked() {
+                                if ui.add(button("Remove this DNS server")).clicked() {
                                     remove = Some(n);
                                 }
                             }
                             if let Some(n) = remove {
-                                p.excluded.remove(n);
+                                p.dns.remove(n);
+                            }
+                            if ui
+                                .add_enabled(p.dns.len() < 4, button("Add DNS server"))
+                                .clicked()
+                            {
+                                p.dns.push(String::new());
+                                focus_new_field(ui, scope, &format!("dns-{}", p.dns.len() - 1));
                             }
                         });
-                    if ui
-                        .add_enabled(
+                    metrics.dhcp_controls.push((
+                        "dns-header".into(),
+                        dns.header_response.rect,
+                        ui.is_enabled(),
+                    ));
+                    let exclusions = egui::CollapsingHeader::new(format!(
+                        "Excluded addresses ({})",
+                        p.excluded.len()
+                    ))
+                    .id_salt("dhcp-exclusions")
+                    .show(ui, |ui| {
+                        egui::ScrollArea::vertical()
+                            .id_salt("excluded")
+                            .max_height(controls::height(ui) * 5.)
+                            .show(ui, |ui| {
+                                let mut remove = None;
+                                for (n, value) in p.excluded.iter_mut().enumerate() {
+                                    field(
+                                        ui,
+                                        scope,
+                                        &format!("excluded-{n}"),
+                                        "Excluded address",
+                                        value,
+                                        metrics,
+                                        focus,
+                                    );
+                                    let r = ui.add(button("Remove this exclusion"));
+                                    metrics.dhcp_controls.push((
+                                        format!("remove-exclusion-{n}"),
+                                        r.rect,
+                                        ui.is_enabled(),
+                                    ));
+                                    if r.clicked() {
+                                        remove = Some(n);
+                                    }
+                                }
+                                if let Some(n) = remove {
+                                    p.excluded.remove(n);
+                                }
+                            });
+                        let r = ui.add_enabled(
                             p.excluded.len() < net::MAX_RANGE,
                             button("Add excluded address"),
-                        )
-                        .clicked()
-                    {
-                        p.excluded.push(String::new());
-                    }
-                },
-            );
-            egui::CollapsingHeader::new(format!("Reservations ({})", p.reservations.len())).show(
-                ui,
-                |ui| {
-                    egui::ScrollArea::vertical()
-                        .id_salt("reservations")
-                        .max_height(controls::height(ui) * 6.)
-                        .show(ui, |ui| {
-                            let mut remove = None;
-                            for (n, value) in p.reservations.iter_mut().enumerate() {
-                                field(
-                                    ui,
-                                    scope,
-                                    &format!("reserved-client-{n}"),
-                                    "Supplied client ID",
-                                    &mut value.client,
-                                    metrics,
-                                    focus,
-                                );
-                                field(
-                                    ui,
-                                    scope,
-                                    &format!("reserved-address-{n}"),
-                                    "Reserved address",
-                                    &mut value.address,
-                                    metrics,
-                                    focus,
-                                );
-                                if ui.add(button("Remove this reservation")).clicked() {
-                                    remove = Some(n);
+                        );
+                        metrics.dhcp_controls.push((
+                            "add-exclusion".into(),
+                            r.rect,
+                            ui.is_enabled() && p.excluded.len() < net::MAX_RANGE,
+                        ));
+                        if r.clicked() {
+                            p.excluded.push(String::new());
+                            focus_new_field(
+                                ui,
+                                scope,
+                                &format!("excluded-{}", p.excluded.len() - 1),
+                            );
+                        }
+                    });
+                    metrics.dhcp_controls.push((
+                        "excluded-header".into(),
+                        exclusions.header_response.rect,
+                        ui.is_enabled(),
+                    ));
+                    let reservations = egui::CollapsingHeader::new(format!(
+                        "Reservations ({})",
+                        p.reservations.len()
+                    ))
+                    .id_salt("dhcp-reservations")
+                    .show(ui, |ui| {
+                        egui::ScrollArea::vertical()
+                            .id_salt("reservations")
+                            .max_height(controls::height(ui) * 6.)
+                            .show(ui, |ui| {
+                                let mut remove = None;
+                                for (n, value) in p.reservations.iter_mut().enumerate() {
+                                    field(
+                                        ui,
+                                        scope,
+                                        &format!("reserved-client-{n}"),
+                                        "Supplied client ID",
+                                        &mut value.client,
+                                        metrics,
+                                        focus,
+                                    );
+                                    field(
+                                        ui,
+                                        scope,
+                                        &format!("reserved-address-{n}"),
+                                        "Reserved address",
+                                        &mut value.address,
+                                        metrics,
+                                        focus,
+                                    );
+                                    let r = ui.add(button("Remove this reservation"));
+                                    metrics.dhcp_controls.push((
+                                        format!("remove-reservation-{n}"),
+                                        r.rect,
+                                        ui.is_enabled(),
+                                    ));
+                                    if r.clicked() {
+                                        remove = Some(n);
+                                    }
                                 }
-                            }
-                            if let Some(n) = remove {
-                                p.reservations.remove(n);
-                            }
-                        });
-                    if ui
-                        .add_enabled(
+                                if let Some(n) = remove {
+                                    p.reservations.remove(n);
+                                }
+                            });
+                        let r = ui.add_enabled(
                             p.reservations.len() < net::MAX_CLIENTS,
                             button("Add reservation"),
-                        )
-                        .clicked()
-                    {
-                        p.reservations.push(ReservationDraft {
-                            client: String::new(),
-                            address: String::new(),
-                        });
-                    }
-                },
-            );
-            remove_pool = ui.add(button("Remove selected pool")).clicked();
-        });
-        if remove_pool {
-            draft.pools.remove(&pool);
-            draft.selected_pool = draft.pools.keys().next().cloned();
-        }
-    }
-    ui.label(RichText::new(format!("Relay policy · {segment_id}")).strong());
-    let supplied = &draft.context.segments[&segment_id];
-    ui.label(format!(
-        "Supplied receiving interface: {} · client-facing relay address: {}",
-        option_ip(supplied.server_interface),
-        option_ip(supplied.relay_interface)
-    ));
-    ui.label(format!(
-        "Supplied relay path: {} · client unicast path: {}",
-        if supplied.relay_to_server {
-            "Available"
-        } else {
-            "Unavailable"
-        },
-        if supplied.client_unicast_to_server {
-            "Available"
-        } else {
-            "Unavailable"
-        }
-    ));
-    ui.push_id(("relay-record", &segment_id), |ui| {
-        let scope = scope.with(("relay", &segment_id));
-        if let Some(relay) = draft.relays.get_mut(&segment_id) {
-            toggle(
-                ui,
-                "relay-enabled",
-                "Enable this relay",
-                &mut relay.enabled,
-                metrics,
-            );
-            field(
-                ui,
-                scope,
-                "relay-target",
-                "Relay server target",
-                &mut relay.target,
-                metrics,
-                focus,
-            );
-            field(
-                ui,
-                scope,
-                "relay-giaddr",
-                "Relay client-facing address",
-                &mut relay.giaddr,
-                metrics,
-                focus,
-            );
-            if ui.add(button("Remove relay policy")).clicked() {
-                draft.relays.remove(&segment_id);
+                        );
+                        metrics.dhcp_controls.push((
+                            "add-reservation".into(),
+                            r.rect,
+                            ui.is_enabled() && p.reservations.len() < net::MAX_CLIENTS,
+                        ));
+                        if r.clicked() {
+                            p.reservations.push(ReservationDraft {
+                                client: String::new(),
+                                address: String::new(),
+                            });
+                            focus_new_field(
+                                ui,
+                                scope,
+                                &format!("reserved-client-{}", p.reservations.len() - 1),
+                            );
+                        }
+                    });
+                    metrics.dhcp_controls.push((
+                        "reservations-header".into(),
+                        reservations.header_response.rect,
+                        ui.is_enabled(),
+                    ));
+                    remove_pool = ui.add(button("Remove selected pool")).clicked();
+                });
+                if remove_pool {
+                    draft.pools.remove(&pool);
+                    draft.selected_pool = draft.pools.keys().next().cloned();
+                }
             }
-        } else if ui.add(button("Add relay policy")).clicked() {
-            draft.relays.insert(
-                segment_id.clone(),
-                RelayDraft {
-                    enabled: false,
-                    target: String::new(),
-                    giaddr: String::new(),
+            ui.label(RichText::new(format!("Relay policy · {segment_id}")).strong());
+            let supplied = &draft.context.segments[&segment_id];
+            ui.label(format!(
+                "Supplied receiving interface: {} · client-facing relay address: {}",
+                option_ip(supplied.server_interface),
+                option_ip(supplied.relay_interface)
+            ));
+            ui.label(format!(
+                "Supplied relay path: {} · client unicast path: {}",
+                if supplied.relay_to_server {
+                    "Available"
+                } else {
+                    "Unavailable"
                 },
-            );
-        }
-    });
-    let r = ui.add(button("Apply policy"));
-    metrics
-        .dhcp_controls
-        .push(("apply".into(), r.rect, ui.is_enabled()));
-    if r.clicked() && ui.is_enabled() {
-        attempted = true;
-        match draft.snapshot() {
-            Ok(policy) => chosen = Some(Action::ApplyPolicy { policy }),
-            Err(e) => *notice = Some(work::notice(e)),
-        }
-    }
-    Edit {
-        attempted: attempted || chosen.is_some(),
-        action: chosen,
-        ..Default::default()
-    }
+                if supplied.client_unicast_to_server {
+                    "Available"
+                } else {
+                    "Unavailable"
+                }
+            ));
+            ui.push_id(("relay-record", &segment_id), |ui| {
+                let scope = scope.with(("relay", &segment_id));
+                if let Some(relay) = draft.relays.get_mut(&segment_id) {
+                    toggle(
+                        ui,
+                        "relay-enabled",
+                        "Enable this relay",
+                        &mut relay.enabled,
+                        metrics,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "relay-target",
+                        "Relay server target",
+                        &mut relay.target,
+                        metrics,
+                        focus,
+                    );
+                    field(
+                        ui,
+                        scope,
+                        "relay-giaddr",
+                        "Relay client-facing address",
+                        &mut relay.giaddr,
+                        metrics,
+                        focus,
+                    );
+                    if ui.add(button("Remove relay policy")).clicked() {
+                        draft.relays.remove(&segment_id);
+                    }
+                } else if ui.add(button("Add relay policy")).clicked() {
+                    draft.relays.insert(
+                        segment_id.clone(),
+                        RelayDraft {
+                            enabled: false,
+                            target: String::new(),
+                            giaddr: String::new(),
+                        },
+                    );
+                }
+            });
+            let r = ui.add(button("Apply policy"));
+            metrics
+                .dhcp_controls
+                .push(("apply".into(), r.rect, ui.is_enabled()));
+            if r.clicked() && ui.is_enabled() {
+                attempted = true;
+                match draft.snapshot() {
+                    Ok(policy) => chosen = Some(Action::ApplyPolicy { policy }),
+                    Err(e) => *notice = Some(work::notice(e)),
+                }
+            }
+            Edit {
+                attempted: attempted || chosen.is_some(),
+                action: chosen,
+                ..Default::default()
+            }
+        },
+    )
+    .inner
 }
 
 fn option_ip(address: Option<std::net::Ipv4Addr>) -> String {

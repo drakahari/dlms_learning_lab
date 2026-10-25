@@ -275,10 +275,46 @@ def publish_manifest(session, report):
     os.link(ready, session / 'COMPLETE', follow_symlinks=False)
 
 
+def session_marker(session, temporary, nonce, case='script'):
+    require(case in ('script', 'dhcpv4'), 'Fixed script/dhcpv4 case only')
+    require(re.fullmatch(r'[0-9a-f]{32}', nonce) is not None, 'Fixed marker nonce')
+    marker = {'version': 1, 'purpose': PURPOSE, 'root': str(session),
+              'temporary_root': str(temporary), 'nonce': nonce}
+    # Preserve the exact legacy marker shape when the new case is not requested.
+    if case == 'dhcpv4':
+        marker['case'] = 'dhcpv4'
+    return marker
+
+
+def verify_repaired_reader(session, writer):
+    expected = json.loads(read_bytes(session / 'reader-repaired.json', JSON_CAP))
+    require(set(expected) == set(writer), 'Repaired reader observation shape differs')
+    # MainProgress flattens the identical Progress serialization and adds ONLY
+    # this documented nonportable field; no learning field may be ignored.
+    require(isinstance(expected['raw_progress'], dict), 'Repaired raw progress must be an object')
+    portable = dict(expected['raw_progress'])
+    portable.pop('migration_receipts', None)
+    require(expected['progress'] == portable, 'Repaired portable progress differs from raw projection')
+    for key in ('progress_path', 'preferences_path'):
+        require(expected[key] == writer[key], 'Repaired reader changed private paths')
+    path = Path(writer['progress_path'])
+    preferences = Path(writer['preferences_path'])
+    require(path.is_relative_to(session / 'data') and path.name == 'progress-v1.json',
+            'Repaired reader profile escaped private XDG')
+    require(preferences == path.with_name('preferences-v1.json'),
+            'Repaired reader preferences path differs')
+    verify_writer_saved_bytes(expected, read_bytes(path, PROFILE_CAP),
+                              read_bytes(preferences, 4096),
+                              read_bytes(session / 'reader-progress.raw', PROFILE_CAP),
+                              read_bytes(session / 'reader-preferences.raw', 4096))
+    return expected
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--app', required=True, type=Path)
     parser.add_argument('--output', type=Path)
+    parser.add_argument('--case', choices=('script', 'dhcpv4'), default='script')
     args = parser.parse_args()
     require(os.name == 'posix' and Path('/proc/self/fd').is_dir(), 'Fixed Linux native acceptance only')
     temporary = checked_directory(Path(os.environ.get('TMPDIR', '')))
@@ -297,8 +333,7 @@ def main():
     session = fresh_directory(output)
     for name in ('data', 'config', 'cache', 'write', 'read'):
         fresh_directory(session / name)
-    marker = {'version': 1, 'purpose': PURPOSE, 'root': str(session),
-              'temporary_root': str(temporary), 'nonce': os.urandom(16).hex()}
+    marker = session_marker(session, temporary, os.urandom(16).hex(), args.case)
     exclusive(session / MARKER, json_bytes(marker))
     exclusive(session / 'STARTED.json', json_bytes({'binary': before, 'marker': marker}))
     version = capture(app, 'version', session / 'version.log', session,
@@ -328,11 +363,19 @@ def main():
         else:
             loaded = json.loads(read_bytes(session / 'reader-loaded.json', JSON_CAP))
             require(loaded == expected, 'Second process did not load the exact writer observation')
+            if args.case == 'dhcpv4':
+                verify_repaired_reader(session, expected)
     require(len(phases) == 2 and phases[0]['pid'] != phases[1]['pid'], 'Expected two distinct GUI processes')
     require(pin(app, BINARY_CAP) == before, 'Executable changed during native acceptance')
     files = inventory(session)
     report = {'purpose': PURPOSE, 'binary': before, 'version': version, 'phases': phases,
               'files': files, 'scope': 'Two real GUI processes share a tool-created private synthetic profile; actual UI/VM completion, unfinished assignment/example drafts, favorite and appearance. Not novice/accessibility/other-platform acceptance.'}
+    if args.case == 'dhcpv4':
+        report['case'] = 'dhcpv4'
+        report['scope'] = ('Two real normal GUI processes share one fresh private XDG profile. '
+                           'Actual DHCP assignment/example exchanges, distinct unfinished policy drafts, '
+                           'current leases, favorite and appearance survive cold load, then actual field repairs '
+                           'and checks. No injected State, host DHCP, novice or other-platform acceptance.')
     publish_manifest(session, report)
     try:
         print(f'PASS native cold-process reopen: {session}', flush=True)

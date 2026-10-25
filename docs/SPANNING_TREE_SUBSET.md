@@ -4,7 +4,7 @@ Contract fixed BEFORE implementation, checked2026-10-25. This is an original
 in-process calculation, not STP/RSTP/PVST protocol execution. No code or lesson is
 counted as practical coverage. All20 core tests and68 library tests pass the first guarded gate, including an
 independent256-graph oracle. All-target Clippy passes after two predicate-preserving
-nested-if style corrections; the core gate precedes those style-only changes. No existing switching, VLAN, MAC, packet, engine, progress, UI,
+nested-if style corrections; a final core-only retry also passes all20 checks after those style-only changes. No existing switching, VLAN, MAC, packet, engine, progress, UI,
 scenario, unit, dependency or coverage model is changed.
 
 ## Supplied graph and supported identifiers

@@ -105,9 +105,9 @@ fn three_projects_are_normally_bundled_with_real_prerequisites_and_one_unit() {
         assert!(shell::EVALUATOR_REVISION >= 9);
     }
     let all = catalog();
-    assert_eq!(all.len(), 122);
+    assert_eq!(all.len(), 125);
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 30);
+    assert_eq!(units.len(), 31);
     let proposed: course::Unit =
         serde_json::from_str(include_str!("fixtures/shell-getopts-unit-proposal.json")).unwrap();
     assert!(
@@ -121,7 +121,7 @@ fn three_projects_are_normally_bundled_with_real_prerequisites_and_one_unit() {
         authored().iter().map(|s| s.id.clone()).collect::<Vec<_>>()
     );
     assert_eq!(
-        serde_json::to_value(units.last().unwrap()).unwrap(),
+        serde_json::to_value(units.iter().find(|u| u.id == proposed.id).unwrap()).unwrap(),
         serde_json::to_value(proposed).unwrap()
     );
     for s in authored() {
@@ -427,7 +427,7 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     assert_eq!(baseline.len(), 119);
     assert_eq!(
         old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
-        122
+        125
     );
     // The119 metadata fixture is sorted by source filename, not app order.
     // Preserve actual order using the immutable original116 snapshot plus PTR3.
@@ -454,6 +454,7 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     assert_eq!(
         old.iter()
             .skip(119)
+            .take(3)
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
         [

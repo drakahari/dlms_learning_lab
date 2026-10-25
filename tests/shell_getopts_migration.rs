@@ -134,7 +134,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 122);
+    assert_eq!(all.len(), 125);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -187,6 +187,9 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "shell-options-report",
             "shell-options-jobs",
             "shell-options-publication",
+            "ccna-dhcp-held-options",
+            "ccna-dhcp-relay-scope",
+            "ccna-dhcp-lease-handover",
         ])
     ); // Later tasks remain absent and ungraded; no invented contexts.
     let original_histories = with_main_records(&p);

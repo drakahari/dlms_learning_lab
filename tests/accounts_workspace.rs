@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 122);
+    assert_eq!(all.len(), 125);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -407,11 +407,14 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         .unwrap()
         .into_iter()
         // This regression compares the original pre-context-wrapper kinds.
-        // OSPF and multi-unit services require pinned goals and have dedicated parity/regression tests.
+        // OSPF, multi-unit services and DHCP require pinned goals and have dedicated regression tests.
         .filter(|s| {
             !matches!(
                 s.initial,
-                State::Accounts { .. } | State::Ospf { .. } | State::UnitManager { .. }
+                State::Accounts { .. }
+                    | State::Ospf { .. }
+                    | State::UnitManager { .. }
+                    | State::DhcpV4 { .. }
             )
         })
         .collect::<Vec<_>>();

@@ -2,6 +2,7 @@ use super::*;
 use engine::State;
 mod client_learning;
 mod dhcpv4;
+mod dhcpv4_lessons;
 mod getopts_history;
 mod getopts_lessons;
 mod mac_learning;
@@ -462,6 +463,9 @@ fn accounts_native_long_transcripts_follow_the_latest_error_in_both_terminals() 
 }
 fn open_assignment(a: &mut LabApp, i: usize) {
     a.launch(i);
+    if a.scenarios[i].dhcpv4_teaching.is_some() {
+        a.set_dhcpv4_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].unit_manager_teaching.is_some() {
         a.set_unit_manager_view(i, teaching::View::Assignment);
     }

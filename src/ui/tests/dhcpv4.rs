@@ -645,6 +645,56 @@ fn dhcp_native_long_selected_pool_and_raw_values_fit_without_truncating_saved_te
         &a.scenarios[i]
     ));
 }
+#[test]
+fn dhcp_native_added_rows_stay_open_focus_new_text_and_survive_reflow_without_applying() {
+    let (ctx, mut a, _) = opened(teaching::View::Assignment);
+    let before = live(&a).clone();
+    control(&ctx, &mut a, "excluded-header");
+    control(&ctx, &mut a, "add-exclusion");
+    let field_id = |a: &LabApp, key: &str| {
+        a.metrics
+            .dhcp_fields
+            .iter()
+            .find(|(k, _, _)| k == key)
+            .unwrap()
+            .2
+    };
+    assert!(ctx.memory(|m| m.has_focus(field_id(&a, "excluded-0"))));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("10.20.0.18".into())],
+    );
+    draw(&ctx, &mut a);
+    control(&ctx, &mut a, "add-exclusion");
+    let id = field_id(&a, "excluded-1");
+    assert!(ctx.memory(|m| m.has_focus(id)));
+    a.scale = 1.5;
+    for _ in 0..6 {
+        frame(&ctx, &mut a, 720., 850., vec![]);
+    }
+    assert_eq!(field_id(&a, "excluded-1"), id);
+    assert!(ctx.memory(|m| m.has_focus(id)));
+    assert_eq!(draft(&a).pools["remote"].excluded, ["10.20.0.18", ""]);
+    a.scale = 1.;
+    draw(&ctx, &mut a);
+    control(&ctx, &mut a, "reservations-header");
+    control(&ctx, &mut a, "add-reservation");
+    let id = field_id(&a, "reserved-client-0");
+    assert!(ctx.memory(|m| m.has_focus(id)));
+    frame(
+        &ctx,
+        &mut a,
+        1200.,
+        850.,
+        vec![egui::Event::Text("branch".into())],
+    );
+    draw(&ctx, &mut a);
+    assert_eq!(draft(&a).pools["remote"].reservations[0].client, "branch");
+    assert_eq!(live(&a), &before, "adding and typing rows is not Apply");
+}
 // Exercise actual capture-phase code with a real egui Context. Do not call any
 // Context API while another Context data guard is held.
 fn native_tick(ctx: &egui::Context, a: &mut LabApp) {

@@ -1523,3 +1523,48 @@ authored scripting tasks and genuine6/7/8 history checks retain their exact
 expected cases. All-target ClippyR3/fmt/diff PASS. No host Bash or learner-host
 command was run. The subset guide also reconciles its stale getopts source-only
 status with actual installed122-lab revision9 acceptance.
+
+## 2026-10-25 — M106: registered DHCP unit and acceptance tooling
+
+Three distinct normal assignments now teach held-option repair, relay/wrong-mask
+diagnosis and a constrained lease-pool handover. Each has prerequisite teaching,
+a different runnable example/experiment/repair, the full native configuration
+assignment and alternate valid policies/action orders. Current clients plus
+independent new-client orders are graded; extra valid reservations are accepted.
+Normal source125/31=38CCNA/24LPIC-1/20LPIC-2/43Bash. The old122 complete source
+specifications/order and30-unit prefix remain exact; no old attempt is invented.
+
+All13 content checks PASS. Initial content failures exposed an invalid
+Discover-while-held setup and incorrect teaching about early renewal; RFC2131
+was rechecked and only procedural/prose assumptions corrected, not Goals/core or
+expected experiment tables. Three post-completion explanations now give distinct
+reasoning. All prior actual6/7/8 records remain exact. The full100-target model
+run passed1081/1088; seven old integration assumptions then corrected and their
+seven complete targets passed74 checks. Explicit DHCP context handling preserves
+raw mutation refusal; the old116-attempt fixture must still lack all9 later IDs.
+This is a full run plus targeted retry, not a full green rerun. Ordinary run
+memory minimum22.76GiB, zero max PSIavg10/OOM increase, jobs2/testthreads2.
+
+Current23 DHCP/cold-controller tests PASS, including all3 flows at observed
+946x929/density1.15 geometry. Count-dependent headers now keep stable identities
+and Add focuses the new field without Apply; scopes preserve text/Undo across
+reflow. All125 assignments pass200% horizontal-control/VLAN-reflow checks at
+1920/720 widths, plus4 shared font/library/course/filter checks.149 Python guards,
+alltargetClippyR3/fmt/diff and palette/coverage integrity pass. No full237 UI
+suite is claimed; the older full225 run preceded compact refinements.
+
+Actual native R2 passed first2 full lessons and reached correct capstone200%
+state, then rejected an oversized whole-panel capture target. Optional worked
+explanation and an explicit result-to-navigation geometry target keep normal
+large-text scrolling; no font shrink, grading weakening or hidden failing rows.
+Native R1/R2 failures/screens retained. The final installed R3 flow, startup and
+cold-process acceptance are still pending; last accepted package remainscd31/122.
+Source registration is not objective credit:134Partial/1Supporting/1105Open stays.
+
+The closed cold tool adds a real normal-private-XDG DHCP case with actual controls,
+full raw/portable/provenance/draft comparison before navigation, real repairs,
+private safe writes and exact default-script wire preservation. Peer review caught
+a missing portable-projection check and an unchanged test tamper; both corrected
+with meaningful negative guards before execution. Three Rust/six Python new
+checks pass. Real two-process/GPU evidence remains a separate pending gate.
+No new dependency, host command, release or novice/other-platform acceptance.

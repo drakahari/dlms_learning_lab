@@ -2,7 +2,10 @@
 
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
-**122 authored assignments/30 units:35CCNA,24LPIC-1,20LPIC-2,43Bash/Shell**.
+**125 authored assignments/31 units:38CCNA,24LPIC-1,20LPIC-2,43Bash/Shell**.
+Three DHCP lessons are registered with passing model and interaction checks;
+rendered/package acceptance is tracked separately in CHECKPOINT.md.
+The last accepted installed catalog remains122/30 until those gates pass.
 The new three-task option-interface unit passes model/content and all3 installed
 native flows. The verified122-lab Fedora candidate atcd31af6 passes11 startups
 and real two-process reopen; evaluator9 migration was accepted atb5f5f83. Shared alignment was accepted onca1929b. The scripting path has eleven

@@ -1,5 +1,6 @@
 //! Fixed developer-only two-process reopen. Normal startup does all persistence.
 use super::*;
+mod dhcpv4;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -21,10 +22,18 @@ enum Role {
     Write,
     Read,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+enum Case {
+    #[serde(rename = "script")]
+    Script,
+    #[serde(rename = "dhcpv4")]
+    DhcpV4,
+}
 #[derive(Clone)]
 pub(crate) struct Session {
     root: PathBuf,
     role: Role,
+    case: Case,
 }
 #[derive(Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -34,6 +43,8 @@ struct Marker {
     root: PathBuf,
     temporary_root: PathBuf,
     nonce: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    case: Option<Case>,
 }
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -290,7 +301,11 @@ impl Session {
             let _ = bounded_file(&root.join("writer-preferences.raw"), 4096)?;
             let _ = bounded_file(&root.join("writer-observed.json"), JSON_CAP)?;
         }
-        Ok(Some(Self { root, role }))
+        Ok(Some(Self {
+            root,
+            role,
+            case: marker.case.unwrap_or(Case::Script),
+        }))
     }
     pub(crate) fn verify_profile_paths(&self, path: &Path) -> Result<(), String> {
         if path.file_name() != Some(std::ffi::OsStr::new("progress-v1.json")) {
@@ -547,6 +562,10 @@ impl LabApp {
             return;
         }
         let session = self.reopen.as_ref().unwrap().clone();
+        if session.case == Case::DhcpV4 {
+            self.reopen_dhcpv4_tick(ctx, &session);
+            return;
+        }
         let phase = self.smoke_stage - 17000;
         let mut shot = None;
         let mut close = false;
@@ -868,7 +887,11 @@ impl LabApp {
                     .as_ref()
                     .and_then(|d| d.downcast_ref::<String>())
                     .expect("fixed private capture name");
-                assert!(NAMES.contains(&name.as_str()));
+                let session = self.reopen.as_ref().unwrap();
+                assert!(match session.case {
+                    Case::Script => NAMES.contains(&name.as_str()),
+                    Case::DhcpV4 => dhcpv4::CAPTURES.contains(&name.as_str()),
+                });
                 assert!(
                     image
                         .width()
@@ -985,6 +1008,7 @@ mod tests {
         let session = Session {
             root: root.path().into(),
             role: Role::Write,
+            case: Case::Script,
         };
         let path = root.path().join("known");
         fs::write(&path, b"keep").unwrap();
@@ -1041,6 +1065,7 @@ mod context_tests {
             root: root.path().into(),
             temporary_root: tmp.clone(),
             nonce: "a".repeat(32),
+            case: None,
         };
         let path = root.path().join("REOPEN-SESSION.json");
         fs::write(&path, serde_json::to_vec(&marker).unwrap()).unwrap();
@@ -1067,6 +1092,223 @@ mod context_tests {
         ]);
         let cwd = root.path().join("write");
         (root, env, cwd)
+    }
+    #[test]
+    fn reopen_dhcp_case_is_closed_and_omitted_marker_retains_script_wire() {
+        let (root, env, cwd) = context();
+        let path = root.path().join("REOPEN-SESSION.json");
+        let original = fs::read(&path).unwrap();
+        let marker: Marker = serde_json::from_slice(&original).unwrap();
+        assert!(marker.case.is_none());
+        assert!(serde_json::to_value(&marker).unwrap().get("case").is_none());
+        assert_eq!(
+            Session::from_config(false, true, &env, &cwd)
+                .unwrap()
+                .unwrap()
+                .case,
+            Case::Script
+        );
+        let mut value: serde_json::Value = serde_json::from_slice(&original).unwrap();
+        value["case"] = "dhcpv4".into();
+        fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert_eq!(
+            Session::from_config(false, true, &env, &cwd)
+                .unwrap()
+                .unwrap()
+                .case,
+            Case::DhcpV4
+        );
+        for bad in [
+            serde_json::json!("arbitrary"),
+            serde_json::json!(1),
+            serde_json::json!({}),
+        ] {
+            value["case"] = bad;
+            fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+            assert!(Session::from_config(false, true, &env, &cwd).is_err());
+            assert!(
+                fs::read_dir(root.path().join("data"))
+                    .unwrap()
+                    .next()
+                    .is_none()
+            );
+        }
+        // Neither an admitted case nor a well-formed marker permits normal or
+        // --ui-smoke startup to bypass the existing private developer guard.
+        value["case"] = "dhcpv4".into();
+        fs::write(&path, serde_json::to_vec(&value).unwrap()).unwrap();
+        assert!(Session::from_config(false, false, &env, &cwd).is_err());
+        assert!(Session::from_config(true, true, &env, &cwd).is_err());
+    }
+
+    fn dhcp_app(ctx: &egui::Context, session: &Session) -> (LabApp, Option<tempfile::TempDir>) {
+        // from_context(true, false) creates ONLY a disposable test profile.
+        // Move to the validated synthetic root explicitly, without changing
+        // process XDG/HOME or calling the normal personal-profile entry point.
+        let mut a = LabApp::from_context(ctx, true, false);
+        let old_profile = a._smoke_profile.take();
+        a.smoke = false;
+        a.path = session.root.join("data/dlmslearninglab/progress-v1.json");
+        session.verify_profile_paths(&a.path).unwrap();
+        a.profile_lock = Some(progress::lock_profile(&a.path).unwrap());
+        a.reopen = Some(session.clone());
+        a.smoke_stage = 17000;
+        (a, old_profile)
+    }
+    fn dhcp_frame(ctx: &egui::Context, a: &mut LabApp) -> bool {
+        let events = std::mem::take(&mut a.pending_events);
+        let modifiers = events
+            .iter()
+            .find_map(|e| match e {
+                egui::Event::Key { modifiers, .. } => Some(*modifiers),
+                _ => None,
+            })
+            .unwrap_or_default();
+        let scale = a.scale;
+        let out = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1200. / scale, 850. / scale),
+                )),
+                events,
+                modifiers,
+                ..Default::default()
+            },
+            |ctx| {
+                a.render(ctx);
+                a.save();
+                a.started = Instant::now() - std::time::Duration::from_secs(1);
+                a.reopen_tick(ctx); // exact Case dispatch, geometry, phase and GUI actions
+            },
+        );
+        let shot = a.capture_pending;
+        if shot {
+            assert!(out.viewport_output.values().any(|v| {
+                v.commands
+                    .iter()
+                    .any(|c| matches!(c, egui::ViewportCommand::Screenshot(_)))
+            }));
+            // Acknowledge ONLY the requested transport in this headless test.
+            // No PNG/renderer or actual native/cold-process claim is made.
+            a.capture_pending = false;
+        }
+        shot
+    }
+    fn dhcp_until(ctx: &egui::Context, a: &mut LabApp, stage: usize) -> usize {
+        let mut shots = 0;
+        for _ in 0..1800 {
+            if a.smoke_stage == stage {
+                return shots;
+            }
+            assert!(a.smoke_stage < stage, "closed phase must not skip target");
+            shots += usize::from(dhcp_frame(ctx, a));
+        }
+        panic!("bounded DHCP reopen phase {} -> {stage}", a.smoke_stage);
+    }
+    #[test]
+    fn reopen_dhcp_actual_ui_writer_separate_drafts_normal_save_load_and_reader_repair() {
+        let (root, env, cwd) = context();
+        let marker_path = root.path().join("REOPEN-SESSION.json");
+        let mut marker: Marker = serde_json::from_slice(&fs::read(&marker_path).unwrap()).unwrap();
+        marker.case = Some(Case::DhcpV4);
+        fs::write(&marker_path, serde_json::to_vec(&marker).unwrap()).unwrap();
+        let session = Session::from_config(false, true, &env, &cwd)
+            .unwrap()
+            .unwrap();
+        let ctx = egui::Context::default();
+        let (mut writer, _old_writer_profile) = dhcp_app(&ctx, &session);
+        assert_eq!(writer.scenarios.len(), 125);
+        let captures = dhcp_until(&ctx, &mut writer, 17028);
+        assert_eq!(captures, 7);
+        for _ in 0..2 {
+            dhcp_frame(&ctx, &mut writer);
+            assert_eq!(
+                writer.smoke_stage, 17028,
+                "Close acknowledgement must hold Finish"
+            );
+        }
+        let path = writer.path.clone();
+        let before = bounded_file(&path, 16_000_000).unwrap();
+        let snapshot = bounded_file(&root.path().join("writer-progress.raw"), 16_000_000).unwrap();
+        assert_eq!(before, snapshot);
+        let expected: Observed = serde_json::from_slice(
+            &bounded_file(&root.path().join("writer-observed.json"), JSON_CAP).unwrap(),
+        )
+        .unwrap();
+        assert!(
+            expected.progress["attempts"]["ccna-dhcp-held-options"]["state"]
+                .get("run")
+                .is_none(),
+            "no invented shell Record or getopts history"
+        );
+        drop(writer); // actual lock release before next synthetic app
+        let mut read_env = env.clone();
+        read_env.insert("DLMS_NATIVE_REOPEN_PHASE".into(), "read".into());
+        let read_session = Session::from_config(false, true, &read_env, &root.path().join("read"))
+            .unwrap()
+            .unwrap();
+        let next = egui::Context::default();
+        let (mut reader, _old_reader_profile) = dhcp_app(&next, &read_session);
+        reader.progress = progress::load(&path, &reader.scenarios).unwrap();
+        let prefs = theme::Preferences::load(&path.with_file_name("preferences-v1.json")).unwrap();
+        reader.theme_id = prefs.theme;
+        reader.scale = prefs.text_scale;
+        assert_eq!(bounded_file(&path, 16_000_000).unwrap(), before);
+        assert_eq!(dhcp_until(&next, &mut reader, 17014), 5);
+        for _ in 0..2 {
+            dhcp_frame(&next, &mut reader);
+            assert_eq!(reader.smoke_stage, 17014);
+        }
+        let loaded: Observed = serde_json::from_slice(
+            &bounded_file(&root.path().join("reader-loaded.json"), JSON_CAP).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            loaded, expected,
+            "full raw/portable/receipts/preferences cold input proof"
+        );
+        let repaired: Observed = serde_json::from_slice(
+            &bounded_file(&root.path().join("reader-repaired.json"), JSON_CAP).unwrap(),
+        )
+        .unwrap();
+        assert_ne!(
+            repaired.progress, expected.progress,
+            "actual repairs must change drafts"
+        );
+        assert_eq!(repaired.migration_receipts, expected.migration_receipts);
+        assert_eq!(repaired.preferences, expected.preferences);
+        assert_eq!(
+            bounded_file(&root.path().join("writer-progress.raw"), 16_000_000).unwrap(),
+            before
+        );
+    }
+    #[test]
+    fn reopen_dhcp_geometry_capture_wait_and_closed_phase_fail_before_any_action() {
+        let (root, env, cwd) = context();
+        let mut session = Session::from_config(false, true, &env, &cwd)
+            .unwrap()
+            .unwrap();
+        session.case = Case::DhcpV4;
+        let ctx = egui::Context::default();
+        let (mut a, _old_profile) = dhcp_app(&ctx, &session);
+        a.capture_pending = true;
+        a.started = Instant::now() - std::time::Duration::from_secs(1);
+        a.reopen_tick(&ctx);
+        assert_eq!(a.smoke_stage, 17000);
+        assert!(a.progress.attempts.is_empty() && a.pending_events.is_empty());
+        a.capture_pending = false;
+        // The first actual geometry frame must defer, without nested Context
+        // access or a premature click/State publication.
+        dhcp_frame(&ctx, &mut a);
+        assert_eq!(a.smoke_stage, 17000);
+        assert!(a.progress.attempts.is_empty() && a.pending_events.is_empty());
+        a.smoke_stage = 17029;
+        let rejected =
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| dhcp_frame(&ctx, &mut a)));
+        assert!(rejected.is_err());
+        assert!(a.progress.attempts.is_empty() && a.pending_events.is_empty());
+        assert!(!root.path().join("writer-observed.json").exists());
     }
     #[test]
     fn valid_private_context_uses_only_the_normal_contained_profile_names() {
@@ -1339,6 +1581,7 @@ mod observation_tests {
         let session = Session {
             root: root.path().into(),
             role: Role::Write,
+            case: Case::Script,
         };
         let data = b"{\"migration_receipts\":{\"workspace\":true,\"shell\":[8]}}\n";
         session

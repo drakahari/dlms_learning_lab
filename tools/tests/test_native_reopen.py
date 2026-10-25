@@ -275,5 +275,93 @@ class RawObservationGuards(unittest.TestCase):
         with self.assertRaises(reopen.ReopenError): reopen.verify_writer_saved_bytes(expected, raw, changed_prefs, raw, changed_prefs)
 
 
+class DhcpCaseGuards(unittest.TestCase):
+    def test_default_marker_is_old_wire_and_only_closed_dhcp_case_adds_one_field(self):
+        root = Path('/controlled/.build-artifacts/tmp/native-reopen-case')
+        expected = {'version': 1, 'purpose': reopen.PURPOSE, 'root': str(root),
+                    'temporary_root': str(root.parent), 'nonce': 'a' * 32}
+        self.assertEqual(reopen.session_marker(root, root.parent, 'a' * 32), expected)
+        self.assertEqual(reopen.session_marker(root, root.parent, 'a' * 32, 'script'), expected)
+        self.assertEqual(reopen.session_marker(root, root.parent, 'a' * 32, 'dhcpv4'),
+                         dict(expected, case='dhcpv4'))
+        for case, nonce in [('arbitrary', 'a' * 32), ('dhcpv4', 'short')]:
+            with self.assertRaises(reopen.ReopenError):
+                reopen.session_marker(root, root.parent, nonce, case)
+
+    def test_unknown_or_abbreviated_case_starts_no_child_and_creates_no_evidence(self):
+        for args in [['--case', 'arbitrary'], ['--cas', 'dhcpv4']]:
+            with patch('sys.argv', ['native_reopen.py', '--app', '/fixed'] + args), patch.object(reopen.subprocess, 'Popen') as popen, patch.object(reopen, 'fresh_directory') as fresh:
+                with self.assertRaises(SystemExit): reopen.main()
+                popen.assert_not_called()
+                fresh.assert_not_called()
+
+    def prepared(self, session):
+        observed, raw, prefs = RawObservationGuards.fixture()
+        data = session / 'data' / 'dlmslearninglab'; data.mkdir(parents=True)
+        observed['progress_path'] = str(data / 'progress-v1.json')
+        observed['preferences_path'] = str(data / 'preferences-v1.json')
+        (data / 'progress-v1.json').write_bytes(raw)
+        (data / 'preferences-v1.json').write_bytes(prefs)
+        (session / 'reader-progress.raw').write_bytes(raw)
+        (session / 'reader-preferences.raw').write_bytes(prefs)
+        (session / 'reader-repaired.json').write_text(json.dumps(observed))
+        return observed, raw, prefs
+
+    def test_reader_post_exit_keeps_all_raw_fields_receipts_and_exact_snapshot_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            writer, raw, prefs = self.prepared(root)
+            original_observation = (root / 'reader-repaired.json').read_bytes()
+            self.assertEqual(reopen.verify_repaired_reader(root, writer), writer)
+            path = Path(writer['progress_path'])
+            for key in ['migration_receipts', 'attempts']:
+                changed = json.loads(raw)
+                changed[key] = {} if key == 'attempts' else {'workspace': False, 'shell': [8]}
+                path.write_text(json.dumps(changed))
+                with self.assertRaises(reopen.ReopenError): reopen.verify_repaired_reader(root, writer)
+                path.write_bytes(raw)
+            path.write_bytes(raw + b'\n')
+            with self.assertRaises(reopen.ReopenError): reopen.verify_repaired_reader(root, writer)
+            path.write_bytes(raw)
+            Path(writer['preferences_path']).write_bytes(prefs + b'\n')
+            with self.assertRaises(reopen.ReopenError): reopen.verify_repaired_reader(root, writer)
+            self.assertEqual((root / 'reader-repaired.json').read_bytes(), original_observation)
+
+    def test_repaired_portable_projection_cannot_be_changed_without_raw_bytes(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); writer, raw, prefs = self.prepared(root)
+            # Only MainProgress's documented top-level receipt is nonportable.
+            portable = json.loads(raw); del portable['migration_receipts']
+            self.assertEqual(portable, writer['progress'])
+            self.assertEqual(reopen.verify_repaired_reader(root, writer), writer)
+            for key in ['clock', 'attempts', 'favorites', 'unknown_new_field']:
+                tampered = copy.deepcopy(writer)
+                tampered['progress'][key] = ['shell-case-publication'] if key == 'favorites' else 'changed-only-portable'
+                self.assertNotEqual(tampered['progress'], writer['progress'], 'negative must actually change portable data')
+                (root / 'reader-repaired.json').write_text(json.dumps(tampered))
+                with self.assertRaises(reopen.ReopenError): reopen.verify_repaired_reader(root, writer)
+                self.assertEqual(Path(writer['progress_path']).read_bytes(), raw)
+                self.assertEqual((root / 'reader-progress.raw').read_bytes(), raw)
+                self.assertEqual(Path(writer['preferences_path']).read_bytes(), prefs)
+            (root / 'reader-repaired.json').write_text(json.dumps(writer))
+            self.assertEqual(reopen.verify_repaired_reader(root, writer), writer)
+
+    def test_repaired_observation_cannot_drop_keys_change_private_identity_or_escape_paths(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary); writer, raw, prefs = self.prepared(root)
+            original = copy.deepcopy(writer)
+            candidates = []
+            missing = copy.deepcopy(writer); del missing['migration_receipts']; candidates.append(missing)
+            extra = copy.deepcopy(writer); extra['ignore_me'] = True; candidates.append(extra)
+            moved = copy.deepcopy(writer); moved['progress_path'] = str(root / 'outside'); candidates.append(moved)
+            changed = copy.deepcopy(writer); changed['raw_progress']['unknown'] = True; candidates.append(changed)
+            for bad in candidates:
+                (root / 'reader-repaired.json').write_text(json.dumps(bad))
+                with self.assertRaises(reopen.ReopenError): reopen.verify_repaired_reader(root, writer)
+            self.assertEqual(writer, original)
+            self.assertEqual(Path(writer['progress_path']).read_bytes(), raw)
+            self.assertEqual(Path(writer['preferences_path']).read_bytes(), prefs)
+
+
 if __name__ == '__main__':
     unittest.main()

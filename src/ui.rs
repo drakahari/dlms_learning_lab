@@ -130,6 +130,7 @@ struct Metrics {
     dns_notice: Option<egui::Rect>,
     dns_result: Option<egui::Rect>,
     dhcp_fields: Vec<(String, egui::Rect, egui::Id)>,
+    dhcp_field_clips: std::collections::BTreeMap<String, egui::Rect>,
     dhcp_controls: Vec<(String, egui::Rect, bool)>,
     dhcp_clients: Vec<(String, egui::Rect)>,
     dhcp_pools: Vec<(String, egui::Rect)>,
@@ -140,6 +141,7 @@ struct Metrics {
     dhcp_topology: Option<egui::Rect>,
     dhcp_status: Option<egui::Rect>,
     dhcp_notice: Option<egui::Rect>,
+    dhcp_result_summary: Option<egui::Rect>,
     discovery_send: Vec<(dlms_learning_lab::discovery::Endpoint, egui::Rect)>,
     discovery_toggles: Vec<(String, egui::Rect)>,
     discovery_time: Option<egui::Rect>,
@@ -401,6 +403,9 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
             {
                 23000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dhcpv4-lessons")
+            {
+                31000
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dhcpv4-workspace")
             {
