@@ -1440,3 +1440,31 @@ Native R2's11 interaction proposals and actual renderer acceptance remain next.
 Normal catalog stays122/30=35/24/20/43; no implementation credit from a fixture.
 All-target ClippyR2/fmt/diff pass; R1 flagged one nested-if style warning, fixed
 without altering the validation predicate.
+
+### M105 native DHCP component and actual render refinement
+
+The incremental component keeps the full task, optional introduction/separate
+practice, native pool/relay editor, topology and explicit client/time actions.
+One fresh result vector drives completion and feedback. Initial focused11 and
+full225 application UI checks pass; the full run observed minimum23.74GiB
+available, zero some/full PSI avg10 and no OOM increase. The full225 was before
+the visual refinement, not relabeled as a full current228 run.
+
+Actual first native flow passed17 frames, but review found repeated binding
+details and a sequential editor unnecessarily far down. Compact policy/client
+columns now stack on narrow views; server detail is optional and Apply is
+secondary. Shared reserved label/value rows and remaining-width dropdowns fix
+narrow overflow and Grid's invisible measurement focus loss. Explicit field IDs
+keep Undo across reflow. Current14 focused checks/alltargetClippy/fmt/diff pass;
+no old bounds/modal assertions were relaxed. Additional tests cover real focus/
+Undo across resize and long48-byte names/64-byte values at six sizes.
+
+Actual compact normal-Wayland flow again passes17 captures/exit0. Reviewed
+Intro/practice, the100% split,150Light and200Dark feedback/fields; actual window
+946×929, not the requested1200×850. Current/wrong/partial/pending/offer-only,
+practice separation, actual typed changes, explicit clock, save/readback, warm
+resume and selected Reset pass. Receipt0102502fffdffcb657464a665668eeb98499710ff3e8c25144e4e250974f3099.
+Development ELFaa0254ec2e11957ba876861cf3d274b65c6473316688133ab234ce7446a9c038.
+No packaged/cold/novice/physical-device/screen-reader/other-platform acceptance
+from this component. Catalog122 and objective statuses unchanged. Continue the
+reviewed three authored DHCP tasks, then remaining Linux/network/shell gaps.

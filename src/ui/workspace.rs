@@ -66,7 +66,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::MacLearning { .. }) {
+            if matches!(s.initial, State::DhcpV4 { .. }) {
+                self.dhcpv4_workspace(ui, i);
+            } else if matches!(s.initial, State::MacLearning { .. }) {
                 self.mac_learning_workspace(ui, i);
             } else if matches!(s.initial, State::UnitManager { .. }) {
                 self.unit_manager_workspace(ui, i);
@@ -153,7 +155,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::MacLearning { .. }) {
+            let show_help = if matches!(s.initial, State::DhcpV4 { .. }) {
+                self.dhcpv4_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::MacLearning { .. }) {
                 self.mac_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::UnitManager { .. }) {
                 self.unit_manager_view(i) == teaching::View::Assignment
@@ -210,7 +214,11 @@ impl LabApp {
                     self.help_open = !self.help_open;
                 }
                 if self.help_open {
-                    if matches!(s.initial, State::UnitManager { .. }) {
+                    if matches!(s.initial, State::DhcpV4 { .. }) {
+                        ui.push_id(("dhcp-help", &s.id, challenge), |ui| {
+                            self.dhcpv4_help(ui, i)
+                        });
+                    } else if matches!(s.initial, State::UnitManager { .. }) {
                         self.unit_manager_help(ui, i);
                     } else if matches!(s.initial, State::Ospf { .. }) {
                         ui.push_id(("ospf-help", &s.id, challenge), |ui| self.ospf_help(ui, i));

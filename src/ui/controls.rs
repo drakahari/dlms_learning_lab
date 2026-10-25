@@ -47,6 +47,13 @@ pub fn singleline<'a>(ui: &egui::Ui, value: &'a mut dyn egui::TextBuffer) -> egu
         .vertical_align(egui::Align::Center)
         .min_size(egui::vec2(0., height(ui)))
 }
+/// Fit a dropdown in the remaining part of a wrapped row, including long values.
+/// available_width() permits a fresh whole row and can overrun adjacent labels.
+pub fn dropdown(ui: &egui::Ui, id: impl std::hash::Hash, maximum: f32) -> egui::ComboBox {
+    egui::ComboBox::from_id_salt(id)
+        .width(ui.available_size_before_wrap().x.min(maximum).max(0.))
+        .wrap_mode(egui::TextWrapMode::Truncate)
+}
 pub fn cell<R>(
     ui: &mut egui::Ui,
     width: f32,
@@ -74,6 +81,33 @@ pub fn label(ui: &mut egui::Ui, text: impl Into<egui::WidgetText>, width: f32) {
     cell(ui, width, |ui| {
         ui.add(egui::Label::new(text).wrap());
     });
+}
+/// Reserve the label column, then give the value the actual remaining space.
+/// Unlike a stateful Grid for each single row, this layout needs no invisible
+/// measurement pass when columns reflow, so it does not surrender field focus.
+pub fn form_row<R>(
+    ui: &mut egui::Ui,
+    text: impl Into<egui::WidgetText>,
+    value: impl FnOnce(&mut egui::Ui, f32) -> R,
+) -> egui::InnerResponse<R> {
+    let right = ui.next_widget_position().x + ui.available_width();
+    let labels = form_label_width(ui);
+    let minimum_value = ui.text_style_height(&egui::TextStyle::Body) * 6. + 2. * PAD_X as f32;
+    if ui.available_width() < labels + ui.spacing().item_spacing.x + minimum_value {
+        ui.vertical(|ui| {
+            ui.add(egui::Label::new(text).wrap());
+            value(ui, ui.available_width())
+        })
+    } else {
+        ui.horizontal(|ui| {
+            label(ui, text, labels);
+            let width = ui
+                .available_width()
+                .min(right - ui.next_widget_position().x)
+                .max(1.);
+            value(ui, width)
+        })
+    }
 }
 /// Read-only table cells keep body text readable without reserving an input's click target.
 pub fn table_height(ui: &egui::Ui) -> f32 {

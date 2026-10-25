@@ -17,7 +17,8 @@ mutation requires explicit absolute cwd (a corrected setup slip is documented).
 ## Accepted current build — M104
 
 Last code/candidate source cd31af6e78e66c44b5f4fffeeaf65016e625a6ac, pushed;
-HEAD may be a subsequent documentation commit: inspect Git. Catalog122/30 =
+HEAD includes later backend/component work: inspect Git; the packaged acceptance
+below applies only to this exact source. Catalog122/30 =
 35CCNA/24LPIC1/20LPIC2/43Bash. All28themes and original progress preserved.
 
 Open from any terminal directory:
@@ -67,48 +68,82 @@ originalcaseplan1,finalcontent10/fmt/diff/alltargetClippyR2/coveragevalidator PA
 Compact task wording reran content10+native5; its first lost literal-format phrase
 guard failed then exact grammar wording restored. All failures retained.
 
-## M105 backend integrated; native integration next
+## M105 backend committed; native component integration active
 
-Backend12 paths integrated through preflighted three-way merge preserving122
-content/current M104/history UI. Initial68lib+24 adapter PASS. Full97 targets
-PASS1051 with no failures (logs/m105-all-models-r1.log). Max4contexts×8clients
-clone+check13.972ms/coreJSON58476bytes; not a runtime guarantee. Memory minimum
-22.74GiB/PSI avg10zero/OOMdelta0. Narrow 'New-client test' wording replaces jargon.
+Backend commit8a53854 pushed. Reviewed12-path merge preserves122/history. Initial
+68lib+24 adapter PASS; full97 targets1051PASS/no failures (m105-all-models-r1).
+Max4contexts×8clients clone+check13.972ms/coreJSON58476bytes, no latency guarantee.
+Memory minimum22.74GiB/PSI avg10zero/OOMdelta0. Human 'New-client test' label.
+Shared fresh current_dhcpv4_checks retains all context/draft guards, rejects
+pending before probes, no grade cache. Added25th adapter +lib/progress/workspaces/
+backup PASS113 (m105-current-results-r2); full97 preceded refinement. R1test shadow
+compile and Clippy nested-if warning corrected/retained. ClippyR2/fmt/diffPASS.
 
-Peer review found duplicate proposed native grading. Shared fresh
-progress::current_dhcpv4_checks retains all context/metadata/draft guards, rejects
-pending drafts before probes and supplies one result vector, no persistent cache.
-Its added25th adapter regression +lib/progress/workspaces/backup PASS113 checks
-(m105-current-results-r2). R1 test compile shadow failure retained/corrected.
-Full97-run preceded helper; not claimed rerun. All-target ClippyR2/fmt/diff PASS;
-R1 style-only collapsible-if warning was corrected without changing predicates.
-Commit/push backend checkpoint next if dirty; no heavy active at this write.
+Native R2 eight paths preflighted against exact current hashes then integrated
+uncommitted. Source manifest962a56de3bf0f6db85fbf68e383bca4c6d02cad5eb8e2216a7c7cb1d0a8ad974.
+Assignment now one current_dhcpv4_checks vector for feedback/completion/frame.
+R1 compile fixed private fixture helper (pub in crate::ui) and unused import.
+R2 9/11 passed: narrow720/200field overflow plus Undo expectation failure.
+Shared controls::form_row now computes value width AFTER actual Grid label,
+bounded by intended row right; no font shrink/pixeloffset/test tolerance change.
+Copied eguiUndoer diagnostic proved cursor-only snapshot before original text;
+regression uses at most3 actual Undo events and requires original text +other
+relay unchanged eachframe. No product Undo change. Focused11 PASSR3, including
+all18 width/scale/view cases and actual capturegeometry/Finish/modal guards.
 
-Next integrate ONLY8 native R2 paths after backend checkpoint, preserving current
-UI. Frozen reviews/dhcpv4/native-source-r2/SOURCE-READY.json SHA
-962a56de3bf0f6db85fbf68e383bca4c6d02cad5eb8e2216a7c7cb1d0a8ad974.
-All4 existing UI bases exactly matched MAIN at preflight;4 new files absent.
-Replace duplicate current_solved/work::checks in assignment feedback with one
-current_dhcpv4_checks call and derive completion from that vector.11 prospective
-UI checks UNRUN. Gate actual phases/layout/Clippy then actual identified native
-fixture30000..30095; no authored count. Retain Appearance guard/per-segment Undo
-fixes, shared fields and existing Context reentry prohibition.
+Full225 application UI PASS (m105-all-native-egui-r1,1018.97s), no failures,
+minimum23.74GiB/PSIavg10zero/OOMdelta0. Actual nativeR1PASS17shots/exit0 but
+visualreview rejected repeateddetails/sequentialeditor. Compact policy/client
+columns nowstacknarrow; serverdetailoptional/Applysecondary. ExplicitfieldIDs
+pinpre-layoutscope. SharedpairrowdoesnotuseGrid'sinvisiblemeasurement (caused
+focusloss); actualremainingwidth +remaining-before-wrap/truncateddropdowns fix
+overflow without offsets/fontshrink/modalbypass. Current14UIchecksPASSR10
+(m105-dhcp-native-egui-r10-compact) incl18views,adjacency/stack,retainedfocusUndo,
+long48Bpool/64Braw6sizes+realedit. Nooldassertionrelaxed. AlltargetClippy/fmt/diff
+PASS (m105-compact-native-clippy-r1). Full225 precededcompact, notclaimedrerun.
 
-After actual native capability acceptance integrate meaningful DHCP content,
-not the technical fixture. ccna_discovery is authoring3 distinct tasks in isolated
-dhcpv4-content, no heavy grant/count credit. Continue other tracks.
+Actual compact nativeR2PASS17shots/exit0, reviewed100split+150Light/200Dark.
+Run-rb7cor7p (before run-lxuijxnw), actual946×929 notrequested1200×850, normal
+Wayland/no diagnosticoverride. Source+ELFreceipt reviews/dhcpv4/native-main-gates-r2/
+SOURCE.json; NATIVE-RESULT.json SHA0102502fffdffcb657464a665668eeb98499710ff3e8c25144e4e250974f3099.
+ELFaa0254ec2e11957ba876861cf3d274b65c6473316688133ab234ce7446a9c038.
+No native heavy active at this write. Commit/push component ifdirty, then13
+content tests. Current accepted runnable package remainscd31/122; no new
+packaged, cold, novice or other-OS claim from this private technicalcomponent.
+
+Three authored DHCP tasks reviewedR4, still UNREGISTERED/UNRUN. Frozen
+reviews/dhcpv4-content/source-r4/SOURCE-READY.json SHA
+e3db8696df4a0359308236b598a3db31b46bcc88246065437fccb5d25ee3f860.
+R1 peer found all3 worked-example DNS policy defaults differed from declared
+separate-example DNS. Generator argument corrected, six policy leaves only;
+assignment/goals/expectedtables/fourotherfiles exact. R1retained. R2 peeraccepted.
+R3 minor jargon; R4 wording explicitly permits extra valid reservations because
+the goal grades eligible total capacity, not dynamic-only capacity. New13th
+prospective check locks this legitimate alternative; no goals/expectedtables
+changed. R4 independently sourceaccepted. Gate13 prospective content tests ONLY
+after native capability acceptance, then
+register coherent3/unit preserving old122order/specs/units; not before. Root read
+all assignments/intro texts; minor developer jargon prose followup with author.
+No count credit until runtime/native acceptance. Continue other tracks.
 
 ## Existing agents — source only, no heavy grants/new spawn
 
-ccna_discovery: source-only DHCP content worktree atb08+exactbackend prerequisites;
-3 distinct direct held-option/relay diagnosis/policy handover tasks proposed.
-No compiler/VM/UI/count. Also accepted Debian core source read-only.
-independent_review: DHCP backend/current-helper/native R2 source accepted. Pure
-Debian5-path freeze reviews/package-management/core-source-r1/SOURCE-READY.json
-SHAf440acedc551d579ea2479650929dc9493e45621b28b544e84a302bd70e4dd5e.
-Basecd31;19 tests UNRUN. Version/dependency/ownership/repair/removal/config-retain/
-purge logical script-free subset, no dpkg rollback/APT/RPM claim. Peer accepted.
-Gate after current serial work; no MAIN copy without hash/base checks.
+ccna_discovery: DHCP3contentR4 frozen/peeraccepted. NativecontrollerR2 frozen
+reviews/dhcpv4-content/native-source-r2/SOURCE-READY.json SHA
+d23b1a3af82dde8fa9dd7b145872684fa8c3fbc50401daa1074f42e994ded7b4.
+7incrementalpaths onprecompactUIbase; MERGEONLYpassivehooks, nevercopyoldwhole
+workspace. Closed31000..31246 actual3flows/4prospectivetestsUNRUN. R2 checks
+exactraw/applieddurations+heldleasesunchangedbefore150/200shots, geometryactual
+logged. Independentsourceaccepted; runtimefeedbackfit/per-stage20scrollbudget
+mayneedordinarycapturefixes, notgradingweakening. No heavygrants/newspawn.
+independent_review: accepted backend/helper/compactnative +contentR4/controllerR2.
+Dispatchnotice research733c17190e43bd38029bd78261c7f7244c4b1ab1467faafa180467228348bc4b
+provesexactcrate/upstream lackoriginalnotice; issue18closedwithoutnotice. Gate
+remains; docs/decisions/LICENSE.md records, no inventednotice/dependencychange.
+Pure Debian5-path freeze reviews/package-management/core-source-r1/SOURCE-READY.json
+SHAf440acedc551d579ea2479650929dc9493e45621b28b544e84a302bd70e4dd5e,
+basecd31/19tests UNRUN. Peer sourceaccepted. Gate after current serial work; no
+MAIN integration without full hash/base preflight. No CLI/native/coverage yet.
 
 ## Remaining acceptance and evidence boundaries
 

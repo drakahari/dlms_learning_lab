@@ -1,6 +1,7 @@
 use super::*;
 use engine::State;
 mod client_learning;
+mod dhcpv4;
 mod getopts_history;
 mod getopts_lessons;
 mod mac_learning;

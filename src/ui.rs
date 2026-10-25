@@ -13,6 +13,7 @@ mod address_learning;
 mod client_learning;
 mod controls;
 mod data;
+mod dhcpv4_workspace;
 mod discovery_workspace;
 mod dns_workspace;
 mod legacy_learning;
@@ -128,6 +129,17 @@ struct Metrics {
     dns_choices: Vec<(String, egui::Rect)>,
     dns_notice: Option<egui::Rect>,
     dns_result: Option<egui::Rect>,
+    dhcp_fields: Vec<(String, egui::Rect, egui::Id)>,
+    dhcp_controls: Vec<(String, egui::Rect, bool)>,
+    dhcp_clients: Vec<(String, egui::Rect)>,
+    dhcp_pools: Vec<(String, egui::Rect)>,
+    dhcp_example_actions: Vec<(usize, egui::Rect)>,
+    dhcp_client: Option<egui::Rect>,
+    dhcp_pool: Option<egui::Rect>,
+    dhcp_popup: Option<egui::Rect>,
+    dhcp_topology: Option<egui::Rect>,
+    dhcp_status: Option<egui::Rect>,
+    dhcp_notice: Option<egui::Rect>,
     discovery_send: Vec<(dlms_learning_lab::discovery::Endpoint, egui::Rect)>,
     discovery_toggles: Vec<(String, egui::Rect)>,
     discovery_time: Option<egui::Rect>,
@@ -390,6 +402,10 @@ impl LabApp {
             {
                 23000
             } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dhcpv4-workspace")
+            {
+                30000
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("legacy-terminal-teaching")
             {
                 28000
@@ -634,6 +650,13 @@ impl LabApp {
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.dhcpv4_teaching {
+            dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated DHCP teaching");
+            if new_attempt {
+                Self::dhcpv4_initial_selection(a, s);
+            }
+        }
         if let Some(lesson) = &s.ospf_teaching {
             dlms_learning_lab::ospf_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated OSPF lesson");
@@ -782,6 +805,11 @@ impl LabApp {
         }
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.dhcpv4_teaching {
+            dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, true)
+                .expect("validated DHCP teaching");
+            Self::dhcpv4_initial_selection(a, s);
         }
         if let Some(lesson) = &s.ospf_teaching {
             dlms_learning_lab::ospf_teaching::prepare(a, lesson, true)
