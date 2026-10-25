@@ -93,6 +93,19 @@ pub struct Command {
     family: Family,
     kind: Kind,
 }
+/// Admit only the disclosed parser subset in optional authored guidance.
+/// A simulator helper must be labeled even when its name was quoted.
+pub fn validate_guidance(input: &str, simulator_only: bool) -> Result<()> {
+    let command = parse(input)?;
+    if matches!(command.kind, Kind::Help) && !simulator_only {
+        return Err(error(
+            DiagnosticKind::Unsupported,
+            2,
+            "Label package-console help as a simulator-only helper",
+        ));
+    }
+    Ok(())
+}
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Output {
     pub stdout: String,

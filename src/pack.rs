@@ -323,9 +323,17 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                     "Package goals must pin the exact admitted initial state/catalog".into(),
                 );
             }
-            if s.guide.iter().any(|step| !step.commands.is_empty()) {
+            if s.guide.iter().any(|step| {
+                step.commands.iter().any(|command| {
+                    crate::debian_packages_terminal::validate_guidance(
+                        &command.command,
+                        command.simulator_only,
+                    )
+                    .is_err()
+                })
+            }) {
                 return Err(
-                    "Logical package guidance cannot advertise unsupported terminal commands"
+                    "Package guidance needs supported literal commands and labeled simulator helpers"
                         .into(),
                 );
             }

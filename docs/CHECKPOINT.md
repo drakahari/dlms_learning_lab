@@ -16,10 +16,9 @@ absolute cwd. No Context calls inside ctx.data closures. Workers NO heavy grants
 
 ## Current source and accepted candidate
 
-CodeHEAD14cf24839d3ca2223d2b47e888bda4b3a35b51ea pushed, after86ca DHCP unit,
-cc3fd8a elif diagnostic, f096b57 pure STP,2b777f6 pure Debian core, e3f2203 DHCP
-native and8a53854 adapter. Acceptance docs/coverage are reviewed; inspect Git for the subsequent
-bookkeeping commit. No Rust/data diff from accepted14cf.
+Source HEAD61262bf pushed (M110 package adapter/terminal and M111 STP adapter/
+Apache core), after accepted native14cf248. New source capabilities are NOT
+installed-candidate acceptance. Accepted candidate stays the exact14cf ELF below.
 
 Accepted scoped Fedora125 labs/31 units =38CCNA/24LPIC-1/20LPIC-2/43Bash,
 all28 themes, old122 specs/order/30-unit prefix and genuine writer6/7/8 preserved.
@@ -94,35 +93,39 @@ separate. All curriculum/platform completion remains Open.
 
 ## Immediate next actions — continue implementation
 
-No heavy run active at this write. Reviewed package adapter620b918 committed and
-pushed. Subsequent STP adapterR2 and Apache coreR2 integrated in MAIN, all hashes
-verified. STP13paths resolved preserving BOTH package and STP hooks; exact
-backend-base-r1/files is the base (older Git commit lacks125 overlay). Retained
-failed staging, no silent baseline replacement. Source/merge independently reviewed.
+No ordinary heavy slot grant to workers. Root sole guarded slot. M110620b918 and
+M11161262bf committed/pushed. Package content M1128groups PASS, broader148PASS,
+ClippyR1/fmt; commit/push exact source/docs next. Four authored package tasks are
+unbundled: install, metadata/dependency upgrade, same-version payload repair,
+remove-vs-purge retention capstone. Independent review accepts; optional native
+command annotations retained privately until new API lands. No count/credit.
 
-M111 first guarded gate:68lib+20STPcore+18STPadapter+20Apache PASS. All-target
-ClippyR1 passes;8 existing regressions80 pass (package backend/terminal,backup,
-progress sequences,workspaces,integrity,DHCP content,getopts history). Fmt/diff
-pass. Min19.26GiB available, PSIavg10zero, OOMdelta0. Commit/push M111 next.
-No new normal registration/count/coverage; current125/31 unchanged.
+STP native UI R2 integrated UNCOMMITTED5paths, source66aa4669…; all10headless
+checks PASS after3 canonical Mac.text() call fixes. Root review caught secondApply
+not dirty after autosaved raw edit; author corrected unconditional dirty on actual
+Apply + save/reload regression, separate Learn/Challenge worked-header IDs.
+Separate controllerR1 4f31793f… integrated UNCOMMITTED4paths, one compile fix
+State→engine::State; all12headless UI/controller groups PASS R2 incl actual
+render+SmokeTick opening/geometry/firstexample/heldFinish. No actual native yet.
+Next guarded alltargetClippy/build then native fixed spanning-tree-workspace flow
+and inspect actual images. No real protocol/packets or cold-process claim.
 
-Native package contractR1 f808a803… approved: optional independent bounded
-command Sessions, faithful command→typed-action/effect annotations, actual closed
-terminal and read-only virtual-file inspector. No conffile edit (core has no
-WriteFile), phony Linux helper or JSON form. independent_review implementing
-SOURCE-ONLY isolated; no heavy grant. Native STP contractR1 deaeddbd… approved:
-meaningful graph/configuration assignment, real bridge/port/link fields, derived
-root/role/path beside controls, secondary Apply/primary Check, isolated practice,
-current+pending invalidation and modal/focus/reflow guards. ccna_discovery
-implementing SOURCE-ONLY isolated after quick package content review; no heavy.
+Four additional unbundled STP tasks in scenarios/spanning-tree-v1.json and
+tests/spanning_tree_content.rs: root selection, local cost, parallel sender-port
+tie,4bridge handover. Source reviewed. Initial prerequisite metadata mismatch
+corrected to exact scenario IDs; next run5PASS1test-prefix fail. Learning.checks
+adds draft row; test now separately asserts it and compares remaining rows to
+UNCHANGED authored expected vectors. Combined20core18adapter6content gate next.
+No count/coverage promotion before registration/native acceptance. Private author
+drafts retained in reviews/spanning-tree-content/draft-r1/r2/r3.
 
-Root privately authored4 distinct package drafts in
-reviews/debian-packages-content/draft-r1/debian-packages-v1.json: install requested
-version, refresh+dependency upgrade, repair ordinary payload preserving conffile,
-and remove-versus-purge retirement capstone. Not bundled, validated or counted.
-Await optional annotations from native package stage; add independent behavioral/
-wrong/partial/alternate/lifecycle tests, content review and actual native flows
-before coverage promotion. Continue all four tracks; not another package endpoint.
+independent_review implementing native package SOURCE ONLY: bounded independent
+Sessions, faithful optional command annotations, real closed terminal and readonly
+virtualfile inspector. No coreWriteFile invented. ccna_discovery finished STP
+controller/source reviews, preparing Apache app adapter contract SOURCE ONLY.
+No worker heavy grants. Finish native package integration, annotate+register
+authored units without regenerating old history, substantive native flows, then
+continue Apache/remaining all-four-track curriculum. Do not stop at125 package.
 
 ## Source receipts and retained gates
 

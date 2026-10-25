@@ -1680,3 +1680,30 @@ distinct package assignments are drafted privately for review, unregistered and
 uncredited. Normal catalog stays125/31 and objective matrix unchanged. Continue
 native workbenches and substantive reviewed curriculum; Fedora candidate remains
 14cf248, not this newer source. No release or platform/novice acceptance claim.
+
+## 2026-10-25 — M112: four authored Debian package tasks and honest guidance
+
+Authored distinct installation, stale-metadata/dependency upgrade, damaged-payload
+repair and remove-versus-purge handover tasks, with prerequisite introductions,
+different practice catalogs/paths and explicitly authored experiment outcomes.
+They remain UNBUNDLED until native command sessions/annotations and content flows
+are accepted. No lab-count/objective promotion. Reference solutions use supported
+real command spellings; no internal author-action JSON is taught as Linux syntax.
+
+The legacy backend pack policy still rejected every guide command after the
+terminal capability landed. It now validates optional guide examples through the
+actual closed parser, requiring even quoted help to be labeled a simulator helper.
+Unknown commands, shell operators/selectors and author-action JSON still reject.
+This changes content admission, not package execution or objective predicates.
+
+Eight substantive content groups pass, including legitimate dependency-first,
+multi-package and reverse-order alternatives, partial/no-op/query-only negatives,
+stale metadata, purge losing local settings, current success invalidation/repair,
+independent fill-only examples and exact experiment vectors, unsupported-input
+atomicity, all-four reset/resume. Broader gate68library+80integration PASS; all-
+target ClippyR1/format pass. Independent source review accepts final data/tests/
+guard. Initial errors retained: wrong practice paths, missing positive installed
+keeper, guide/step cardinality, old reject-all policy, one test-format compile typo.
+Validators, old authored outcomes and expected experiment vectors were not weakened.
+Min22.16GiB available, max PSIavg10some/full0.36/0.36, OOMdelta0; no sustained
+pressure or stress test. See DEBIAN_PACKAGE_LESSONS.md. Continue native work.
