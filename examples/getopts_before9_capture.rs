@@ -116,6 +116,49 @@ struct Old {
     id: String,
     record: Record,
 }
+const STOP_SOURCE: &str = "held=$(printf entered > case-child.txt; while true; do printf ''; done)";
+fn observe_stop(slice: usize, deadline: Instant) -> (Outcome, usize) {
+    let stop_case = Case {
+        name: "fixed-stop-capture".into(),
+        args: vec![],
+        stdin: String::new(),
+        env: BTreeMap::new(),
+        files: BTreeMap::new(),
+        stdout: String::new(),
+        stderr: String::new(),
+        status: 0,
+        after: BTreeMap::new(),
+    };
+    let mut vm = Vm::new(STOP_SOURCE, &stop_case).unwrap();
+    let mut ticks = 0;
+    while vm
+        .outcome
+        .files
+        .get("/work/case-child.txt")
+        .is_none_or(|v| v != "entered")
+    {
+        before(deadline);
+        assert!(!vm.done());
+        vm.tick(slice);
+        ticks += 1;
+        assert!(ticks < 256);
+    }
+    assert!(ticks > 0);
+    vm.stop();
+    let actual = vm.outcome.clone();
+    assert!(
+        actual
+            .error
+            .as_deref()
+            .is_some_and(|e| e.starts_with("Stopped"))
+    );
+    for _ in 0..8 {
+        vm.tick(slice);
+        assert_eq!(vm.outcome, actual);
+        assert!(vm.done());
+    }
+    (actual, ticks)
+}
 fn before(deadline: Instant) {
     assert!(Instant::now() < deadline, "Fixed VM capture deadline");
 }
@@ -610,50 +653,11 @@ fn main() {
             deadline,
         );
     }
-    let stop_case = Case {
-        name: "fixed-stop-capture".into(),
-        args: vec![],
-        stdin: String::new(),
-        env: BTreeMap::new(),
-        files: BTreeMap::new(),
-        stdout: String::new(),
-        stderr: String::new(),
-        status: 0,
-        after: BTreeMap::new(),
-    };
-    let stop_source = "held=$(printf entered > case-child.txt; while true; do printf ''; done)";
     for slice in SLICES {
-        let mut vm = Vm::new(stop_source, &stop_case).unwrap();
-        let mut ticks = 0;
-        while vm
-            .outcome
-            .files
-            .get("case-child.txt")
-            .is_none_or(|v| v != "entered")
-        {
-            before(deadline);
-            assert!(!vm.done());
-            vm.tick(slice);
-            ticks += 1;
-            assert!(ticks < 256);
-        }
-        assert!(ticks > 0);
-        vm.stop();
-        let actual = vm.outcome.clone();
-        assert!(
-            actual
-                .error
-                .as_deref()
-                .is_some_and(|e| e.starts_with("Stopped"))
-        );
-        for _ in 0..8 {
-            vm.tick(slice);
-            assert_eq!(vm.outcome, actual);
-            assert!(vm.done());
-        }
+        let (actual, ticks) = observe_stop(slice, deadline);
         row(
             &mut out,
-            &json!({"kind":"stopped-ungraded","slice":slice,"ticks_before_stop":ticks,"source":stop_source,"actual":actual,"record_created":false}),
+            &json!({"kind":"stopped-ungraded","slice":slice,"ticks_before_stop":ticks,"source":STOP_SOURCE,"actual":actual,"record_created":false}),
         );
     }
     profile(&mut out, &dir, &labs, &records, deadline);
@@ -666,6 +670,15 @@ fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn exact_capture_stop_path_observes_absolute_virtual_file_and_cannot_resume() {
+        for slice in SLICES {
+            let (actual, ticks) = observe_stop(slice, Instant::now() + Duration::from_secs(5));
+            assert!(ticks > 0);
+            assert_eq!(actual.files.get("/work/case-child.txt").unwrap(), "entered");
+            assert!(actual.error.as_deref().unwrap().starts_with("Stopped"));
+        }
+    }
     #[test]
     fn limited_writer_rejects_before_allocating_or_writing_excess() {
         let mut w = Limited {

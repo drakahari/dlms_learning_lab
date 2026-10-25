@@ -5,6 +5,19 @@ Root owns the sole heavy slot for the next combined reviewed-source gates.
 Helpers are source-only; no heavy grant. The application is not complete. No public release
 is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
 
+## Active M95 baseline capture
+
+- Commits ba86f55 (feedback/close) and2c89bb9 (guarded collector) are pushed.
+- Fixed before9-m95-r1 capture aborted at its Stop-helper tick assertion: it
+  looked up relative case-child.txt, while public outcomes use /work/case-child.txt.
+  Raw actual8 partial evidence is retained; no COMPLETE, accepted baseline,
+  host Bash capture, profile migration acceptance or evaluator9 claim.
+- Corrected developer-only lookup and extracted exact helper for a four-slice
+  regression, all five example tests PASS. Engine/inputs/limits are unchanged.
+  New source commit, build, independently reviewed pins and fresh R2 are next.
+- No new authored labs:116/28 (35CCNA,24LPIC1,17LPIC2,40Bash). Default Wayland
+  failure remains documented; clean packaged XWayland two-seed rerun still pending.
+
 ## Active M94 follow-through
 
 - Installed97b default Wayland stalls localized by live EGL stack/protocol0of1;
@@ -15,7 +28,7 @@ is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
   adds clear false practice diagnoses and removes duplicateBIND warning; no bool/
   guard/fixture/command/Goal/layout change. Scoped9UI/controller +16models PASS;
   all-targetClippy/fmt final PASS. Next clean candidate must repeat native2flow.
-- GetoptsR2 integrated uncommitted, peer reviewed +aggregate actual-size correction;
+- GetoptsR2 committed2c89bb9 and pushed, peer reviewed +aggregate actual-size correction;
   17newPython safety +4Rust example tests PASS (129totalPython). No producer/VM/
   Bash reference/version command or captured outcomes yet. Original37/6/7/core8
   pins exact;105-source closure includes both seed modules. Clippy clone assertion

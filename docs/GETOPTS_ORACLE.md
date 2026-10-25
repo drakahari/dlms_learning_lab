@@ -1,8 +1,12 @@
 # Fixed getopts observations before a possible evaluator9
 
-Implemented and source-reviewed 2026-10-25. All17 Python safety checks and four
+Implemented and source-reviewed 2026-10-25. All17 Python safety checks and five
 Rust example tests pass; full workflow129Python and all-targetClippy/fmt pass.
-No producer, VM/Bash/version/reference capture or actual outcomes run yet. No new getopts
+Actual capture R1 stopped before Bash/profile capture because its Stop fixture
+looked up a relative key instead of the absolute simulated path. Partial raw
+public8 outcomes are retained without COMPLETE and are not an accepted baseline.
+The corrected exact capture/Stop helper passes its new four-slice regression;
+a fresh source-pinned R2 capture remains pending. No new getopts
 capability, evaluator revision/default, State/Goal, learner path, dependency,
 mastery, curriculum count or objective status is changed. The old 37-case tool
 and its exact input bytes remain unchanged.
