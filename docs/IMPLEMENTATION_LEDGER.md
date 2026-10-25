@@ -1378,3 +1378,22 @@ audit is411e34d50c069b27dcd7769c2f73d141f5e4342e56c6164a09a45cbd0eebee8e.
 This122 source batch now requires its own installed three-lesson native review.
 DHCPbackend and Debian package management remain separate source/research work,
 not playable credit. No public release or new dependency.
+
+### M104 installed122 verification and visual refinement
+
+Source1e7c0eb candidate passes122/30 lifecycle, b5 upgrade, exact original-nine
+bytes and all3 actual native getopts flows at normal Wayland with no diagnostic
+override. Real Intro/practice/experiment/repair, wrong/partial feedback, references
+and manual alternatives, edits/current retry,150Light/200Dark, separate unfinished
+drafts/real Continue and selected ResetCancelConfirm pass with clean exit.11
+startups and two-process NORMAL-private-profile reopening also pass.
+
+Actual visual review found the capstone's310-word task consumed the initial
+946×929 view. The approved workspace and complete assignment are retained; only
+task/guide wording is grouped and reduced (roughly150/180/200words). All conditions,
+formats, state expectations, references, cases and grammar remain unchanged.
+The text guard correctly caught lost literal-format phrasing on the first retry;
+restored explicit one-line/one-argument and literal quotes/backslashes wording.
+Content10 and actual-egui5 tests pass. A new identified installed native render
+retry is required before calling the compact version accepted. This is not a
+new scenario, solution simplification, UI redesign or release.

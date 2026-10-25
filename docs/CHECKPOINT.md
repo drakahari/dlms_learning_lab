@@ -36,6 +36,37 @@ No learner-host execution, network, old-project edits, new dependencies or relea
 - Earlierca1929b also passed Stop2, shared IPv4/VLAN alignment72 at100/150/200,
   wide/narrow Light/Dark,11startups and cold9. Do not relabel ca frames asb5.
 
+## Active M104b — native122 functional pass; compact task text retry next
+
+- Source1e7c0ebd1a4ed33c50dcb0cf25703b75bc81fe26 committed/pushed. Candidate
+  dist/dlms-learning-lab-0.1.0-g1e7c0ebd1a4e-x86_64-unknown-linux-gnu-fedora-44-candidate,
+  archive92b51904f4599eb7473c41fe858d96e88247b43a66ef29825a81e7354e915e26,
+  ELF7c2f7a37be5dd128f400360013d7c9f547d1d36a3ba49b7b99be3fcc8f2aeeb2,
+  installedprefixverified-1e7c0ebd1a4e-9_p47p2n.122/30 lifecycle/upgradeb5 PASS.
+- ActualnormalWayland getopts-lessons PASS ALL3 fullflows/exit0 run-dnj2azma:
+  Intro/ready-onlypractice/Run/experiment/repair,fulltask,wrong/partial/reference/
+  manualalt/editretry,Light150/Dark200actualtypingRun,separatedrafts/realContinue,
+  ResetCancelConfirm/otherattempts/favorites.1protocol+10quiet starts and strict
+  two-process NORMAL-private-XDG reopen PASS. Exact count of PNGs can derive
+  fromrun directory; preserve source1e7 before frames. Not novice/physical/otherOS.
+- Root reviewed actual frames: functionality is correct, but capstone310-word
+  default task pushed editor below initial946x929 view. NEW wording-only change
+  compacts all3 task/guide0 texts (about150/180/200words), preserving EVERY Goal,
+  initial/source/case/expectedmap and requirement. NO layout/engine/control change.
+  Firstretry9PASS/1textguard failure, retained; restored exact key grammar phrases
+  one line is exactly one argument / Quotes and backslashes are literal data.
+  Corrected content10 and actual-egui native5 PASS m104-compact-task-*-r2.
+- Next commit/push compact text+thisreport, cleanGit-derived candidate, upgrade1e7
+  expected122/30, actual getopts-lessons again and visually compare newcapstone
+  firstview/editor visibility. Do not call textready solelyfromtests. Then update
+  README/CURRICULUM/coverage inventory to accepted122/sourceidentity screenshots.
+  Source122 count =35/24/20/43; objective statuses134/1/1105 unchanged.
+- No heavy currentlyactive. Backendstage1 peeraccepted12sourcepaths/24UNRUN at
+  reviews/dhcpv4/backend-source-r1 (78191a43...), peer5c9f502d... . Integrate/compile
+  afterthis122nativegate, preservecurrentcode/datasets via incremental merge.
+  ccna_discovery drafts isolatednativeUI stage2 withoutcontent/registry; usecurrent
+  MAIN UIbase. Package researchdebian design is source-only, notcapability.
+
 ## Active M104 — three option-interface projects
 
 - MAIN has uncommitted source122 labs/30units:35/24/20/43. New3 IDs:
