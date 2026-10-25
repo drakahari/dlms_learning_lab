@@ -614,3 +614,19 @@ PSIavg10 some/full0%, OOM delta0. These scoped checks do not establish a complet
 curriculum or novice/accessibility/other-OS acceptance. New source119/29 PTR
 integration requires its own candidate and native checks; this116 artifact is
 immutable. No public release is published.
+
+
+## M97 installed119 reverse-DNS milestone
+
+Source72fca8dfb165db576e1c6c329b4ad9809d37055d,119 labs/29 units;
+`dist/dlms-learning-lab-0.1.0-g72fca8dfb165-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+Archive SHA25677502d07df25523d853daa2cfc3d1e0dfed66abe41dd261b2fe44614b7469a59;
+binary af2b32ff7be898effe72bced2560c03cccc31564d5fa1ba3a2d20264cb2ee5ab.
+Actual private prefix verified-72fca8dfb165-_hn0ykib passes30d upgrade,
+identity/content/desktop/hash/uninstall/reinstall and exact original-nine
+synthetic progress retention. All three normal reverse-DNS native flows exit0
+with50captures; actual controls, wrong/partial/alternate/current states, separate
+practice/drafts/resume/reset/Challenge, light150/dark200 inputs and fullscreen150
+are reviewed. This was process-local XWayland; current default Wayland reliability
+and new original-terminal native teaching are still pending. Earlier30d startup
+0/1Wayland and10/10XWayland evidence is not relabeled as72f evidence. No release.

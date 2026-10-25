@@ -10,6 +10,7 @@ mod case_history;
 mod client_learning;
 mod dns_reverse;
 mod find_lessons;
+mod legacy_terminal;
 mod mac_layout;
 mod mac_learning;
 mod mac_lessons;
@@ -362,6 +363,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 28000..=28999 => {
+                let (advance, capture) = self.legacy_terminal_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 27000..=27999 => {
                 let (advance, capture) = self.dns_reverse_native(ctx, n);
                 if !advance {

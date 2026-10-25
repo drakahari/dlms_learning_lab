@@ -48,7 +48,17 @@ fn main() -> eframe::Result<()> {
         );
         std::process::exit(2);
     }
+    // Development-only A/B probe: never changes a normal learner launch.
+    let diagnostic = std::env::var_os("DLMS_SMOKE_NO_VSYNC");
+    let vsync = smoke_vsync(
+        args.iter().any(|a| a == "--ui-smoke"),
+        diagnostic.as_deref(),
+    );
+    if !vsync {
+        startup_trace::mark("diagnostic-smoke-vsync-disabled");
+    }
     let options = eframe::NativeOptions {
+        vsync,
         viewport: eframe::egui::ViewportBuilder::default()
             .with_app_id("org.dlms.LearningLab")
             .with_inner_size([1200., 850.])
@@ -70,4 +80,27 @@ fn main() -> eframe::Result<()> {
             Ok(Box::new(app))
         }),
     )
+}
+
+/// Linux synthetic-profile diagnostic only. Default/normal launches retain the
+/// pinned eframe default; no global environment, driver or desktop setting changes.
+fn smoke_vsync(smoke: bool, diagnostic: Option<&std::ffi::OsStr>) -> bool {
+    !(cfg!(target_os = "linux") && smoke && diagnostic == Some(std::ffi::OsStr::new("1")))
+}
+
+#[cfg(test)]
+mod startup_options_tests {
+    use super::*;
+    #[test]
+    fn vsync_probe_is_exact_linux_smoke_only_and_normal_launch_stays_default() {
+        for value in [None, Some(""), Some("0"), Some("1"), Some("true")] {
+            let value = value.map(std::ffi::OsStr::new);
+            assert!(smoke_vsync(false, value));
+            assert_eq!(
+                smoke_vsync(true, value),
+                !(cfg!(target_os = "linux") && value == Some(std::ffi::OsStr::new("1")))
+            );
+        }
+        assert!(eframe::NativeOptions::default().vsync);
+    }
 }

@@ -6,13 +6,40 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M98 follow-through
+
+- Installed source72fca8dfb165db576e1c6c329b4ad9809d37055d now passes119/29
+  lifecycle/30d upgrade/progress retention and all3 normal PTR native flows:
+ 50captures, exit0, private run-lw9mqa1e. Root reviewed actual assignment/errors/
+ 150light/200dark/fullscreen150. Audit f8c44b9caa688426493c4408959840c1ad7565cfb11c6776d5979f3a97969819.
+- Track count35CCNA/24LPIC1/20LPIC2/40Bash. Seven already Partial207.2 rows
+  strengthened after native acceptance;1240 totals134Partial/1Supporting/1105Open
+  unchanged, source fingerprints exact. No complete-objective/preparation claim.
+- MAIN now stages original3-terminal controller5paths and Linux smoke-only exact
+  env DLMS_SMOKE_NO_VSYNC=1 diagnostic. Normal launches still vsync=true, including
+  when env present. New5controller+1options tests PASS, all-targetClippy/fmt and
+  coverage validator PASS. Failed geometryR1 retained; testwarm-up fixes deferred
+  zoom sampling without weakening production30attempt/sample guards.
+- Next commit/push this scoped UI/diagnostic/reporting batch, derive new candidate
+  identity from Git (never guess), build/install upgrade72f. Compare bounded
+  default/no-vsync startup on SAMEELF and run actual3 original terminal teaching
+  flows through new controller. Old72f installed executable lacks newcontroller.
+  Do not claim unresolved Wayland cured or any cross-platform/novice acceptance.
+- Root sole heavy slot currently free after gates; inspect active/unfinished
+  markers before starting anything. No helper has a heavy grant.
+- Source-only workers: ccna_discovery implements getopts9 in getopts-foundation
+  fromed8b1f2 (actual55 references, genuine8->9 migration/VM/resource tests pending);
+  independent_review implements small DHCPv4 typed library/clock/relay foundation
+  after primary-source contract review. No new labs, engine/Goal integration,
+  native feature/coverage credit or heavy grant for DHCP. Freeze/review/gate first.
+
 ## Current source and immediate next work
 
 - Installed reference source30d75e743ac9a4dc289fbae43e26675dbecfc055.
   MAIN integrates reviewed M96 source: normal119 labs/29 units,
   **35CCNA,24LPIC-1,20LPIC-2,40Bash/Shell**. The three new PTR tasks have passing
-  model/content gates, but actual native acceptance is pending. Last scoped
-  installed candidate is116/28 at30d75e7; packaging is not curriculum completion.
+  model/content gates, and actual installed PTR native acceptance now passes. Scoped installed
+  candidate119/29 is72fca8d; packaging is not curriculum completion.
 - M96 also teaches the original permissions/traversal/log assignments through
   Introduction, isolated terminal example and full Assignment. No existing
   ID/version/initial/Goal/solution changed; only authorized traversal objective
@@ -55,7 +82,7 @@ private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
   were style-only errors, corrected without allow/expectation weakening. Final
   fmt/diff checks PASS. New native evidence is still pending.
 
-## Latest scoped installed Fedora candidate:30d75e7,116/28
+## Preserved M95 scoped installed Fedora candidate:30d75e7,116/28
 
 From the repository folder (use its full absolute executable path from elsewhere):
 

@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are134 narrowly evidenced Partial practice rows, one Supporting explanation row and1105 Open rows; no full-objective completion is asserted. The catalog contains116 authored assignments/twenty-eight units.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are134 narrowly evidenced Partial practice rows, one Supporting explanation row and1105 Open rows; no full-objective completion is asserted. The catalog contains119 authored assignments/twenty-nine units.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -102,3 +102,13 @@ GNU syntax remain absent. Quoted find patterns do not imply shell-globbing or
 104.7 FHS/command-discovery coverage. LPI5.0/103.3 rechecked2026-10-25; all
 1240 source fingerprints/positions remain unchanged. Totals134Partial/1Supporting/
 1105Open overlap and are not a completion percentage. See FIND_LESSONS.md.
+
+
+M98 strengthens seven already Partial LPIC-2v4.5 207.2/K1–K4/T2/T3 rows after
+installed72f three-task reverse-DNS acceptance (50nativecaptures, cleanexit).
+IPv4 owner/type, full IPv6 nibble and multi-PTR/retirement/two-copy practice now
+have independent examples, alternatives and negative/current-state evidence.
+No new status or objective source fingerprint is promoted.134Partial/1Supporting/
+1105Open remains overlapping bookkeeping, not percentage complete. Native
+lookups do not add dig/host/nslookup commands, full BIND configuration, paired
+forward/reverse consistency, delegation/RFC2317, transfers, recursion or security.

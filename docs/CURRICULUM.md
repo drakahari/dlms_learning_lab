@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Source inventory is **119 authored assignments in29 units:35CCNA,24LPIC-1,20LPIC-2 and40Bash/Shell**. The three new reverse-DNS tasks have passed model/content gates; actual native acceptance is pending. The installed116 Fedora candidate passes gateway/Find native flows,72 alignment captures,10 quiet starts and strict real two-process cold reopening. These are scoped milestone checks, not full-product or other-platform acceptance. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Source inventory is **119 authored assignments in29 units:35CCNA,24LPIC-1,20LPIC-2 and40Bash/Shell**. The three reverse-DNS tasks have passed model/content gates and installed native flows at72fca8d. The installed116 Fedora candidate passes gateway/Find native flows,72 alignment captures,10 quiet starts and strict real two-process cold reopening. These are scoped milestone checks, not full-product or other-platform acceptance. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -149,3 +149,9 @@ permissions/traversal/log tasks now have source-tested introductions and separat
 terminal examples; new actual native review is still required. See
 DNS_REVERSE_LESSONS.md and LEGACY_ACCESS_LOGS_TEACHING.md. No new getopts or full
 certification/curriculum claim.
+
+
+M98 installed72f119/29 passes all3 actual reverse-DNS flows (50captures, clean
+exit) and identified30d upgrade/progress retention. Seven already Partial207.2
+rows strengthen narrowly; counts remain134Partial/1Supporting/1105Open. Original
+three terminal teaching source is verified; its actual native acceptance is next.

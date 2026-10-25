@@ -87,3 +87,18 @@ omitting WAYLAND_DISPLAY for that child. No desktop/backend global setting is
 changed. Full teaching verification continues on that supported native path;
 default Wayland reliability/acceptance remains failed/pending. Earlier deb55's
 10/10 passes remain true for their scope, not proof that later stalls cannot occur.
+
+
+## M98 bounded same-binary diagnostic (not a normal launch change)
+
+Linux `--ui-smoke` can request no vsync with the exact process-local environment
+value `DLMS_SMOKE_NO_VSYNC=1`. It still uses its isolated synthetic profile.
+Normal launches always retain pinned eframe0.33.3's vsync=true, even with that
+variable present. Other values/platforms retain the default. A pure options
+regression verifies this boundary without changing process/global environment.
+No driver, compositor, desktop theme, service or model setting is changed.
+This is an investigation hook, not an accepted learner workaround or cure.
+Compare default versus requested no-vsync startup probes on the same identified
+candidate and preserve both results/stacks. A swap-interval request does not
+prove the driver honored it or explain an absent compositor callback. Native
+acceptance and underlying Wayland cause remain separate.

@@ -78,6 +78,7 @@ struct Metrics {
     seed_summary: Option<egui::Rect>,
     seed_explanation: Option<egui::Rect>,
     seed_feedback: Vec<(bool, egui::Rect)>,
+    legacy_feedback: Option<egui::Rect>,
     vlan_fields: Vec<(egui::Id, egui::Rect)>,
     vlan_field_enabled: Vec<(egui::Id, bool)>,
     terminal: Option<egui::Rect>,
@@ -374,6 +375,10 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
             {
                 23000
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("legacy-terminal-teaching")
+            {
+                28000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-reverse") {
                 27000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("seed-teaching") {

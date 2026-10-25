@@ -692,11 +692,14 @@ impl LabApp {
         let now = progress::current_solved(a, s);
         self.metrics.completion = now;
         if now {
-            ui.label(
+            let r = ui.label(
                 RichText::new("Objective complete · All current checks pass.")
                     .strong()
                     .color(palette(ui).success),
             );
+            if s.legacy_access_teaching.is_some() || s.legacy_logs_teaching.is_some() {
+                self.metrics.legacy_feedback = Some(r.rect);
+            }
             self.next_unit_lab(ui, i);
         } else if matches!(a.state, State::Vlsm { .. }) && ui.available_width() < 640. {
             let State::Vlsm { allocations, .. } = &a.state else {
@@ -710,7 +713,11 @@ impl LabApp {
             }
         } else if !matches!(a.state, State::Vlsm { .. }) {
             for issue in model::issues(&a.state, &s.goal) {
-                ui.add(egui::Label::new(RichText::new(issue).color(palette(ui).error)).wrap());
+                let r =
+                    ui.add(egui::Label::new(RichText::new(issue).color(palette(ui).error)).wrap());
+                if s.legacy_access_teaching.is_some() || s.legacy_logs_teaching.is_some() {
+                    self.metrics.legacy_feedback.get_or_insert(r.rect);
+                }
             }
         }
     }

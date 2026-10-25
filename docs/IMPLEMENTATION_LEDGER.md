@@ -1183,3 +1183,22 @@ after b in all four scope variations, and unknown clustered option advances
 without a permanent end latch. No expected VM result/source-ID implementation,
 new before9 baseline, learner credit or curriculum count is inferred. Controlled
 reference Bash remains entirely separate from learner execution.
+
+
+### M98 installed PTR acceptance and terminal/native diagnostic gates
+
+Installed72f119/29 lifecycle passes30d upgrade and exact original-nine retention.
+Actual three-task PTR run exits0 with50captures; root reviewed relevant normal,
+150light,200dark and fullscreen150 screens. Reference inputs, separate practice,
+wrong/partial/alternate/current models, negative secondary query, malformed Save,
+draft separation/readback/Continue/reset/Challenge all pass. Seven existing
+Partial207.2 rows strengthen only; counts/fingerprints remain134/1/1105.
+
+A fixed original-three terminal native controller is staged with passive feedback
+geometry only. Five phase/typing/Run/Close tests pass; initial geometry test sampled
+before deferred zoom settled, corrected with warm-up while preserving strict
+actual sample/30-attempt guards. Actual native flow pending. A Linux smoke-only
+exactenv no-vsync diagnostic leaves normal options unchanged; its options test
+passes.199distinct UI tests accounted across prior full/scoped evidence, not a
+new full199 pass. All-targetClippy/fmt and coverage validator pass. No normal
+Wayland fix, real network/process learner execution, new dependency or release.

@@ -2,8 +2,8 @@
 
 Original source authored and independently reviewed 2026-10-25. Three distinct
 assignments are integrated into `scenarios/dns-reverse-v1.json` for validation.
-The eleven model/content tests pass; actual native flows remain pending.
-Source inventory is119/29; the last scoped installed artifact remains116/28.
+The eleven model/content tests pass; actual installed native flows now pass on72fca8d.
+Source and scoped installed inventory are119/29.
 The frozen source proposal/review tables and original116 snapshot remain under
 `tests/fixtures/` for provenance and preservation checks. No coverage promotion
 or capability change is claimed by source integration alone.
@@ -140,3 +140,19 @@ removed test-fixture constant; it now reads the actual bundled pack. The next
 run stopped at an old live-catalog104-kind count, now107 because three actual
 DNS tasks were added. Failed logs are retained. Five real-egui controller tests
 pass after correcting its Confirm metric field name; actual native run pending.
+
+
+Installed72fca8dfb165 native follow-through exits0 with50 captures, after real
+library Start/Continue, separate practice Fill/Save/Reload/Check/experiment/repair,
+initial/saved-only/current/alternate outcomes, PTR/secondary/retired queries,
+malformed pending serial/error/typed retry, exact independent drafts/save/readback/
+resume/selected Reset Cancel/Confirm/Challenge and light150/dark200 typing.
+Root reviewed actual assignment, specific false feedback, windowed150/200 and
+fullscreen150 captures. Injected reference inputs are not novice acceptance.
+The lifecycle fixture upgrades30d, validates119/29, uninstalls/reinstalls and keeps
+exact original-nine synthetic progress. Private audit
+`m97-installed-ptr-acceptance.json` SHA256
+f8c44b9caa688426493c4408959840c1ad7565cfb11c6776d5979f3a97969819
+pins all50 PNGs and installer identity. Seven already Partial207.2 rows are
+strengthened for this narrow reverse scope; no status/source fingerprint changes,
+134Partial/1Supporting/1105Open remain. No BIND/real DNS/full-objective claim.
