@@ -1506,3 +1506,20 @@ atomic rejection. All-target ClippyR3/fmt/diff PASS after two identical-predicat
 if-let-chain style fixes; its R2 warning evidence is retained. No real equipment
 or rendered STP lesson acceptance follows from this pure foundation. The normal
 source catalog's pending DHCP125 milestone remains separately gated.
+
+## 2026-10-25 — M109: honest excluded-clause diagnostic
+
+Bare unquoted `elif` in a command-head position now reports Unsupported with a
+nested-if suggestion during whole-script parsing, before virtual writes. It is
+still excluded syntax. Quoted/escaped/expanded command names, comments, ordinary
+arguments, file names, variables and loop/case data retain their existing roles.
+No evaluator revision, new syntax acceptance, reference observation, history or
+mastery is invented.
+
+The independently prepared three-path change was root-reviewed and integrated
+only after exact base/source/34 historical-module and fixture hash checks. All4
+new diagnostic/data-role tests PASS in the full library/integration R2; all43
+authored scripting tasks and genuine6/7/8 history checks retain their exact
+expected cases. All-target ClippyR3/fmt/diff PASS. No host Bash or learner-host
+command was run. The subset guide also reconciles its stale getopts source-only
+status with actual installed122-lab revision9 acceptance.

@@ -1176,6 +1176,14 @@ impl Parser<'_> {
                 _ => break,
             }
         }
+        // An unquoted reserved elif at a command head is excluded syntax, not
+        // an executable command. Quoted/escaped/expanded heads and later words
+        // keep their data roles, including redirection filenames.
+        if words.first().and_then(Word::literal) == Some("elif") {
+            return Err(
+                "Unsupported elif clause; use nested if/else blocks in this simulator".into(),
+            );
+        }
         // compound() owns reserved case syntax. Subsequent pipeline stages and
         // leading redirects must not disguise a bare reserved head as a simple
         // command. Quotes/escapes/expansion and later arguments remain data.

@@ -18,6 +18,19 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 
 Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, `set`, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
+Diagnostic clarification (2026-10-25): `elif` clauses remain unsupported. Use
+nested `if`/`else` blocks. A bare unquoted `elif` command head, including a pipeline
+stage or after leading redirects, receives an explicit Unsupported diagnostic
+while compiling the whole script, before any commands or virtual writes run.
+Comments, quoted/escaped/expanded words, ordinary arguments, redirection
+filenames, loop/case data and keyword-named variables keep their existing roles.
+This changes only the excluded-syntax diagnostic; no `elif` semantics, evaluator
+revision, history migration or reference observations are added. GNU Bash itself
+supports `elif`; see its primary [conditional constructs](https://www.gnu.org/software/bash/manual/html_node/Conditional-Constructs.html)
+and [reserved-word recognition](https://www.gnu.org/software/bash/manual/html_node/Reserved-Words.html)
+references (checked2026-10-25). All four diagnostic regression tests pass in the guarded full model run. They
+cover static rejection before writes and preservation of quoted/data roles.
+
 ## Bounded execution
 
 Maximum source 16 KiB; 4096 tokens; 24 levels of syntax nesting; 128 words/arguments and 64 redirects per command; 16 pipeline stages; 256 ordinary variable names across active scopes (including unset declarations); 64 files; 256 KiB aggregate virtual text/variables, including names, finite input and saved local shadows; 32 KiB captured output per case; 2,000 VM instructions per case. Shared word expansion retains at most128 fields/256KiB before concatenation; the complete command has the same aggregate bounds. Each VM additionally has a cumulative1,000,000-byte expansion-work budget across source scans, parameter copies, text appends and field processing, including functions/pipelines/loops/ticks. UI advances a bounded instruction slice per frame and offers Stop; interruption discards the current grading run. There is no wall-clock wait, sleep or blocking input. Input comes only from a finite fixture. Resource/unsupported diagnostics invalidate success. A stopped or edited script cannot retain current success. These are educational limits, not OS resource accounting.
@@ -128,7 +141,7 @@ Only a current explicit Run or confirmed restore recheck can establish current
 success. Examples remain independent and ungraded. See
 [PROGRESS_RECOVERY.md](PROGRESS_RECOVERY.md) before downgrading an existing profile.
 
-## Getopts — evaluator9 source extension (acceptance pending)
+## Getopts — evaluator9 bounded extension
 
 The isolated source milestone adds bounded `getopts OPTSTRING NAME [ARG...]`,
 cluster/required-value parsing, explicit OPTIND=1 reset and separate hidden cursor
@@ -139,8 +152,9 @@ reset. Uninitialized local OPTIND, arbitrary seeks, optional/long/non-ASCII opti
 declarations and special-variable output aliases are excluded. No host command
 is invoked. See [SHELL_GETOPTS.md](SHELL_GETOPTS.md) for the exact boundaries,
 actual55 reference observations, resource accounting and completed model/migration
-checks. Installed revision9 acceptance remains pending.
-This source milestone adds no curriculum. Only genuine current9 execution may
+checks. Installed revision9 acceptance passed on the122-lab Fedora candidate atcd31af6;
+its three practical assignments are documented in SHELL_GETOPTS_LESSONS.md.
+The evaluator extension alone does not establish curriculum coverage. Only genuine current9 execution may
 produce9 results; actual6/7/8 records and old backup bytes remain historical.
 The original256 ordinary-name allowance is preserved across current and hidden
 scopes, with at most three additional fixed getopts names (OPTIND/OPTERR/OPTARG).
