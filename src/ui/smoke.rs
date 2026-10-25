@@ -20,6 +20,7 @@ mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
 mod seed_teaching;
+pub(super) mod spanning_tree;
 mod substitution;
 mod unit_manager;
 mod unit_manager_lessons;
@@ -416,6 +417,13 @@ impl LabApp {
             }
             n @ 16000..=16399 => {
                 let (advance, capture) = self.mac_learning_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 33000..=spanning_tree::LAST => {
+                let (advance, capture) = self.spanning_tree_native(ctx, n);
                 if !advance {
                     return;
                 }

@@ -66,7 +66,9 @@ impl LabApp {
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
-            if matches!(s.initial, State::DhcpV4 { .. }) {
+            if matches!(s.initial, State::SpanningTree { .. }) {
+                self.spanning_tree_workspace(ui, i);
+            } else if matches!(s.initial, State::DhcpV4 { .. }) {
                 self.dhcpv4_workspace(ui, i);
             } else if matches!(s.initial, State::MacLearning { .. }) {
                 self.mac_learning_workspace(ui, i);
@@ -155,7 +157,9 @@ impl LabApp {
                     self.check_terminal_work(ui, i);
                 }
             }
-            let show_help = if matches!(s.initial, State::DhcpV4 { .. }) {
+            let show_help = if matches!(s.initial, State::SpanningTree { .. }) {
+                self.spanning_tree_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::DhcpV4 { .. }) {
                 self.dhcpv4_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::MacLearning { .. }) {
                 self.mac_view(i) == teaching::View::Assignment
@@ -214,7 +218,11 @@ impl LabApp {
                     self.help_open = !self.help_open;
                 }
                 if self.help_open {
-                    if matches!(s.initial, State::DhcpV4 { .. }) {
+                    if matches!(s.initial, State::SpanningTree { .. }) {
+                        ui.push_id(("stp-help", &s.id, challenge), |ui| {
+                            self.spanning_tree_help(ui, i)
+                        });
+                    } else if matches!(s.initial, State::DhcpV4 { .. }) {
                         ui.push_id(("dhcp-help", &s.id, challenge), |ui| {
                             self.dhcpv4_help(ui, i)
                         });

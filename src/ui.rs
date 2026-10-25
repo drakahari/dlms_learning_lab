@@ -23,6 +23,7 @@ mod script_learning;
 mod scripting;
 mod seed_learning;
 mod service_learning;
+mod spanning_tree_workspace;
 mod storage_workspace;
 mod terminal_learning;
 mod unit_manager_workspace;
@@ -51,6 +52,15 @@ struct Metrics {
     address_diagram: Option<egui::Rect>,
     acl_diagram: Option<egui::Rect>,
     acl_router: Option<egui::Rect>,
+    stp_bridge: Option<egui::Rect>,
+    stp_port: Option<egui::Rect>,
+    stp_link: Option<egui::Rect>,
+    stp_bridge_items: Vec<(String, egui::Rect)>,
+    stp_port_items: Vec<(String, egui::Rect)>,
+    stp_link_items: Vec<(String, egui::Rect)>,
+    stp_fields: Vec<(String, egui::Rect, egui::Id)>,
+    stp_toggles: Vec<(String, egui::Rect)>,
+    stp_apply: Option<egui::Rect>,
     ospf_router: Option<egui::Rect>,
     ospf_interface: Option<egui::Rect>,
     ospf_router_items: Vec<(String, egui::Rect)>,
@@ -401,6 +411,10 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("spanning-tree-workspace")
+            {
+                33000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
             {
                 23000
@@ -663,6 +677,13 @@ impl LabApp {
                 Self::dhcpv4_initial_selection(a, s);
             }
         }
+        if let Some(lesson) = &s.spanning_tree_teaching {
+            dlms_learning_lab::spanning_tree_teaching::prepare(a, lesson)
+                .expect("validated spanning-tree lesson");
+            if new_attempt {
+                Self::spanning_tree_initial_selection(a, s);
+            }
+        }
         if let Some(lesson) = &s.ospf_teaching {
             dlms_learning_lab::ospf_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated OSPF lesson");
@@ -816,6 +837,11 @@ impl LabApp {
             dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, true)
                 .expect("validated DHCP teaching");
             Self::dhcpv4_initial_selection(a, s);
+        }
+        if let Some(lesson) = &s.spanning_tree_teaching {
+            dlms_learning_lab::spanning_tree_teaching::prepare(a, lesson)
+                .expect("validated spanning-tree lesson");
+            Self::spanning_tree_initial_selection(a, s);
         }
         if let Some(lesson) = &s.ospf_teaching {
             dlms_learning_lab::ospf_teaching::prepare(a, lesson, true)

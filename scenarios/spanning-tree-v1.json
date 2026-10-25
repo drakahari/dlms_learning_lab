@@ -1,0 +1,2500 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-stp-root",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ideal spanning-tree root and path reasoning",
+      "unit": "spanning-tree-steady-state",
+      "title": "Choose the intended root without cutting links",
+      "summary": "Elect the core bridge while keeping the whole redundant topology available.",
+      "objective": "Make core the root seen by both west and east. Keep every supplied bridge, port and physical link available; do not disconnect a competitor. Any valid priorities meeting those outcomes are accepted.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied graph",
+        "Apply bridge and port configuration",
+        "Check current root, roles and tree path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A redundant network needs a consistent way to choose which paths to use. In this ideal calculation, bridges choose the lowest bridge identity as the root. All connected bridges agree on that root.",
+          "action": "Read the full assignment and inspect the current applied root, roles and physical links.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "Bridge identity compares priority plus the common system-ID extension, then MAC address. Lower numbers win. Set bridge priorities in steps of 4096; changing a label does not change identity. An isolated bridge declaring itself root is not a successful network repair.",
+          "action": "Edit only the needed native fields, Apply and compare current observations with the assignment.",
+          "commands": []
+        },
+        {
+          "title": "Verify the handover",
+          "why": "Current outcomes and physical availability matter, not a previously passing check or a specific click sequence.",
+          "action": "Use Check work, inspect each unmet result and retry. Keep the complete graph available.",
+          "commands": []
+        }
+      ],
+      "explanation": "Priority is compared before MAC. A suitable core priority wins without taking anything offline. Physical links can remain available even when some ports discard in the derived tree.",
+      "hints": [
+        "A redundant network needs a consistent way to choose which paths to use. In this ideal calculation, bridges choose the lowest bridge identity as the root. All connected bridges agree on that root.",
+        "Bridge identity compares priority plus the common system-ID extension, then MAC address. Lower numbers win. Set bridge priorities in steps of 4096; changing a label does not change identity. An isolated bridge declaring itself root is not a successful network repair."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      ],
+      "simplifications": "Original offline ideal point-to-point steady-state calculation. One supplied instance; no BPDUs, timers, measured convergence, packets, VLAN/PVST, PortFast, guards, traffic delivery or real switch CLI. Availability means physical availability. Typed JSON solution data is internal authoring information, not learner syntax. Cisco CCNA v1.1 2.5 is only partially supported; references checked 2026-10-25.",
+      "initial": {
+        "kind": "SpanningTree",
+        "simulation": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "east": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "core-west": {
+                "a": {
+                  "bridge": "core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "core"
+                }
+              },
+              "core-east": {
+                "a": {
+                  "bridge": "core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "east",
+                  "port": "core"
+                }
+              },
+              "east-west": {
+                "a": {
+                  "bridge": "east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-west": true,
+              "core-east": true,
+              "east-west": true
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SpanningTree",
+        "initial": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "east": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "core-west": {
+                "a": {
+                  "bridge": "core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "core"
+                }
+              },
+              "core-east": {
+                "a": {
+                  "bridge": "core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "east",
+                  "port": "core"
+                }
+              },
+              "east-west": {
+                "a": {
+                  "bridge": "east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-west": true,
+              "core-east": true,
+              "east-west": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "core": {
+                  "online": true,
+                  "ports": {
+                    "west": true,
+                    "east": true
+                  }
+                },
+                "west": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "east": true
+                  }
+                },
+                "east": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "west": true
+                  }
+                }
+              },
+              "links": {
+                "core-west": true,
+                "core-east": true,
+                "east-west": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "core",
+              "west",
+              "east"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "west",
+            "root": "core"
+          },
+          {
+            "kind": "Root",
+            "bridge": "east",
+            "root": "core"
+          }
+        ]
+      },
+      "solution": [
+        "spanning-tree {\"kind\":\"BridgePriority\",\"bridge\":\"core\",\"priority\":0}"
+      ],
+      "prerequisites": [],
+      "spanning_tree_teaching": {
+        "prerequisites": [],
+        "prerequisite_note": "The VLAN/data-path unit is useful background; this activity teaches its root-selection prerequisite here.",
+        "concepts": [
+          {
+            "title": "The idea",
+            "text": "A redundant network needs a consistent way to choose which paths to use. In this ideal calculation, bridges choose the lowest bridge identity as the root. All connected bridges agree on that root."
+          },
+          {
+            "title": "How to investigate",
+            "text": "Bridge identity compares priority plus the common system-ID extension, then MAC address. Lower numbers win. Set bridge priorities in steps of 4096; changing a label does not change identity. An isolated bridge declaring itself root is not a successful network repair."
+          },
+          {
+            "title": "What this model means",
+            "text": "Root and Designated ports forward; Alternate ports discard in this stable calculation. Discarding is not a physically broken link. Lower values win the relevant comparison. This does not send protocol messages or prove real-device convergence."
+          }
+        ],
+        "fixture": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "sample-core": {
+                "mac": "02:00:00:00:00:11",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "sample-west": {
+                "mac": "02:00:00:00:00:12",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "sample-east": {
+                "mac": "02:00:00:00:00:13",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "sample-core-west": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "core"
+                }
+              },
+              "sample-core-east": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "sample-east",
+                  "port": "core"
+                }
+              },
+              "sample-east-west": {
+                "a": {
+                  "bridge": "sample-east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "sample-core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "sample-core-west": true,
+              "sample-core-east": true,
+              "sample-east-west": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "sample-core": {
+                  "online": true,
+                  "ports": {
+                    "west": true,
+                    "east": true
+                  }
+                },
+                "sample-west": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "east": true
+                  }
+                },
+                "sample-east": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "west": true
+                  }
+                }
+              },
+              "links": {
+                "sample-core-west": true,
+                "sample-core-east": true,
+                "sample-east-west": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "sample-core",
+              "sample-west",
+              "sample-east"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-west",
+            "root": "sample-core"
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-east",
+            "root": "sample-core"
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Set sample-core settings",
+            "explanation": "Edit this practice field, then explicitly Apply. Bridge priority 0.",
+            "action": {
+              "kind": "BridgePriority",
+              "bridge": "sample-core",
+              "priority": 0
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Set sample-core priority to 0, Apply and inspect the root from another bridge. Then raise it to 61440 and inspect again; restore 0 to repair.",
+          "actions": [
+            {
+              "kind": "BridgePriority",
+              "bridge": "sample-core",
+              "priority": 61440
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "BridgePriority",
+            "bridge": "sample-core",
+            "priority": 0
+          }
+        ]
+      },
+      "retry_guidance": "Compare the named unmet root, port role or path with the applied result. Pending settings need Apply; taking a link down does not meet the availability requirement."
+    },
+    {
+      "id": "ccna-stp-local-cost",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ideal spanning-tree root and path reasoning",
+      "unit": "spanning-tree-steady-state",
+      "title": "Repair a rootward path using local costs",
+      "summary": "Diagnose a direct uplink that should yield to an indirect path.",
+      "objective": "Keep core as root. Make west use its east port as the root port, with west-to-core forwarding-tree path east-west then core-east. East must keep core as its root port and west/core must be Alternate. Keep every bridge, port and link available. Costs and priorities may vary if all these outcomes hold.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect the supplied graph",
+        "Apply bridge and port configuration",
+        "Check current root, roles and tree path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "After choosing the root, each nonroot bridge chooses its best rootward port. The total adds that bridge\u2019s local receiving-port cost to the neighbour\u2019s advertised cost. A lower total is preferred.",
+          "action": "Read the full assignment and inspect the current applied root, roles and physical links.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "The cost at the other end of the same wire is a different value. Here direct west/core costs 4; via east costs west/east 4 plus east/core 4, totaling 8. To prefer the indirect path, make the direct local total less attractive. This changes the tree, not physical availability.",
+          "action": "Edit only the needed native fields, Apply and compare current observations with the assignment.",
+          "commands": []
+        },
+        {
+          "title": "Verify the handover",
+          "why": "Current outcomes and physical availability matter, not a previously passing check or a specific click sequence.",
+          "action": "Use Check work, inspect each unmet result and retry. Keep the complete graph available.",
+          "commands": []
+        }
+      ],
+      "explanation": "An indirect path can win when its total is lower. The receiving bridge\u2019s own cost matters; changing an unrelated sending-end cost is not the same operation. The unused direct port remains physically up and Alternate/Discarding.",
+      "hints": [
+        "After choosing the root, each nonroot bridge chooses its best rootward port. The total adds that bridge\u2019s local receiving-port cost to the neighbour\u2019s advertised cost. A lower total is preferred.",
+        "The cost at the other end of the same wire is a different value. Here direct west/core costs 4; via east costs west/east 4 plus east/core 4, totaling 8. To prefer the indirect path, make the direct local total less attractive. This changes the tree, not physical availability."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      ],
+      "simplifications": "Original offline ideal point-to-point steady-state calculation. One supplied instance; no BPDUs, timers, measured convergence, packets, VLAN/PVST, PortFast, guards, traffic delivery or real switch CLI. Availability means physical availability. Typed JSON solution data is internal authoring information, not learner syntax. Cisco CCNA v1.1 2.5 is only partially supported; references checked 2026-10-25.",
+      "initial": {
+        "kind": "SpanningTree",
+        "simulation": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "east": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "core-west": {
+                "a": {
+                  "bridge": "core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "core"
+                }
+              },
+              "core-east": {
+                "a": {
+                  "bridge": "core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "east",
+                  "port": "core"
+                }
+              },
+              "east-west": {
+                "a": {
+                  "bridge": "east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-west": true,
+              "core-east": true,
+              "east-west": true
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SpanningTree",
+        "initial": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "east": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "core-west": {
+                "a": {
+                  "bridge": "core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "core"
+                }
+              },
+              "core-east": {
+                "a": {
+                  "bridge": "core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "east",
+                  "port": "core"
+                }
+              },
+              "east-west": {
+                "a": {
+                  "bridge": "east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-west": true,
+              "core-east": true,
+              "east-west": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "core": {
+                  "online": true,
+                  "ports": {
+                    "west": true,
+                    "east": true
+                  }
+                },
+                "west": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "east": true
+                  }
+                },
+                "east": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "west": true
+                  }
+                }
+              },
+              "links": {
+                "core-west": true,
+                "core-east": true,
+                "east-west": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "core",
+              "west",
+              "east"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "west",
+            "root": "core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "west",
+              "port": "east"
+            }
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "east",
+              "port": "core"
+            }
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "west",
+            "to": "core",
+            "expected_links": [
+              "east-west",
+              "core-east"
+            ]
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "west",
+              "port": "core"
+            },
+            "role": "Alternate"
+          }
+        ]
+      },
+      "solution": [
+        "spanning-tree {\"kind\":\"Port\",\"bridge\":\"west\",\"port\":\"core\",\"settings\":{\"priority\":128,\"cost\":20,\"up\":true}}"
+      ],
+      "prerequisites": [
+        "ccna-stp-root"
+      ],
+      "spanning_tree_teaching": {
+        "prerequisites": [
+          "ccna-stp-root"
+        ],
+        "prerequisite_note": "The preceding spanning-tree activity introduces the fields used here. You may revisit its introduction or go directly to the full assignment.",
+        "concepts": [
+          {
+            "title": "The idea",
+            "text": "After choosing the root, each nonroot bridge chooses its best rootward port. The total adds that bridge\u2019s local receiving-port cost to the neighbour\u2019s advertised cost. A lower total is preferred."
+          },
+          {
+            "title": "How to investigate",
+            "text": "The cost at the other end of the same wire is a different value. Here direct west/core costs 4; via east costs west/east 4 plus east/core 4, totaling 8. To prefer the indirect path, make the direct local total less attractive. This changes the tree, not physical availability."
+          },
+          {
+            "title": "What this model means",
+            "text": "Root and Designated ports forward; Alternate ports discard in this stable calculation. Discarding is not a physically broken link. Lower values win the relevant comparison. This does not send protocol messages or prove real-device convergence."
+          }
+        ],
+        "fixture": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "sample-core": {
+                "mac": "02:00:00:00:00:11",
+                "ports": {
+                  "west": 1,
+                  "east": 2
+                }
+              },
+              "sample-west": {
+                "mac": "02:00:00:00:00:12",
+                "ports": {
+                  "core": 1,
+                  "east": 2
+                }
+              },
+              "sample-east": {
+                "mac": "02:00:00:00:00:13",
+                "ports": {
+                  "core": 1,
+                  "west": 2
+                }
+              }
+            },
+            "links": {
+              "sample-core-west": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "core"
+                }
+              },
+              "sample-core-east": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "east"
+                },
+                "b": {
+                  "bridge": "sample-east",
+                  "port": "core"
+                }
+              },
+              "sample-east-west": {
+                "a": {
+                  "bridge": "sample-east",
+                  "port": "west"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "east"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "sample-core": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-west": {
+                "priority": 4096,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "east": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-east": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "west": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "sample-core-west": true,
+              "sample-core-east": true,
+              "sample-east-west": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "sample-core": {
+                  "online": true,
+                  "ports": {
+                    "west": true,
+                    "east": true
+                  }
+                },
+                "sample-west": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "east": true
+                  }
+                },
+                "sample-east": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "west": true
+                  }
+                }
+              },
+              "links": {
+                "sample-core-west": true,
+                "sample-core-east": true,
+                "sample-east-west": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "sample-core",
+              "sample-west",
+              "sample-east"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-west",
+            "root": "sample-core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "sample-west",
+              "port": "east"
+            }
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "sample-east",
+              "port": "core"
+            }
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "sample-west",
+            "to": "sample-core",
+            "expected_links": [
+              "sample-east-west",
+              "sample-core-east"
+            ]
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "sample-west",
+              "port": "core"
+            },
+            "role": "Alternate"
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Set sample-west / core settings",
+            "explanation": "Edit this practice field, then explicitly Apply. Port priority 128, local cost 20.",
+            "action": {
+              "kind": "Port",
+              "bridge": "sample-west",
+              "port": "core",
+              "settings": {
+                "priority": 128,
+                "cost": 20,
+                "up": true
+              }
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Set sample-west/core local cost to 20 and Apply. Compare the root port and path. Then reduce it to 1 to see why the direct path wins; restore 20.",
+          "actions": [
+            {
+              "kind": "Port",
+              "bridge": "sample-west",
+              "port": "core",
+              "settings": {
+                "priority": 128,
+                "cost": 1,
+                "up": true
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            false,
+            true,
+            false,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Port",
+            "bridge": "sample-west",
+            "port": "core",
+            "settings": {
+              "priority": 128,
+              "cost": 20,
+              "up": true
+            }
+          }
+        ]
+      },
+      "retry_guidance": "Compare the named unmet root, port role or path with the applied result. Pending settings need Apply; taking a link down does not meet the availability requirement."
+    },
+    {
+      "id": "ccna-stp-parallel",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ideal spanning-tree root and path reasoning",
+      "unit": "spanning-tree-steady-state",
+      "title": "Prefer the second of two parallel uplinks",
+      "summary": "Investigate equal-cost tie-breaks and choose the requested active uplink.",
+      "objective": "Keep core as root. Make west/b the root port, west/a Alternate, and uplink-b the west-to-core forwarding-tree path. Keep both links and all bridges/ports available. You may use priorities or costs; the goal is the requested current tree, not one prescribed number.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Inspect the supplied graph",
+        "Apply bridge and port configuration",
+        "Check current root, roles and tree path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Two parallel uplinks can lead to the same root with equal cost. The next comparisons use the sending bridge identity and sending port identity. A lower port priority wins before the port number.",
+          "action": "Read the full assignment and inspect the current applied root, roles and physical links.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "With the same core sender and equal costs, core/a initially advertises the lower port identity. Lowering core/b port priority can make west choose uplink-b. Lowering only west/b\u2019s receiving port priority does not overrule the earlier sending-port comparison. A different local cost can also validly choose the requested path.",
+          "action": "Edit only the needed native fields, Apply and compare current observations with the assignment.",
+          "commands": []
+        },
+        {
+          "title": "Verify the handover",
+          "why": "Current outcomes and physical availability matter, not a previously passing check or a specific click sequence.",
+          "action": "Use Check work, inspect each unmet result and retry. Keep the complete graph available.",
+          "commands": []
+        }
+      ],
+      "explanation": "Both uplinks stay available. A sending port\u2019s priority resolves this equal-cost, same-sender case before the receiving port identity. A legitimate cost-based alternative is also accepted because the assignment asks for the resulting tree.",
+      "hints": [
+        "Two parallel uplinks can lead to the same root with equal cost. The next comparisons use the sending bridge identity and sending port identity. A lower port priority wins before the port number.",
+        "With the same core sender and equal costs, core/a initially advertises the lower port identity. Lowering core/b port priority can make west choose uplink-b. Lowering only west/b\u2019s receiving port priority does not overrule the earlier sending-port comparison. A different local cost can also validly choose the requested path."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      ],
+      "simplifications": "Original offline ideal point-to-point steady-state calculation. One supplied instance; no BPDUs, timers, measured convergence, packets, VLAN/PVST, PortFast, guards, traffic delivery or real switch CLI. Availability means physical availability. Typed JSON solution data is internal authoring information, not learner syntax. Cisco CCNA v1.1 2.5 is only partially supported; references checked 2026-10-25.",
+      "initial": {
+        "kind": "SpanningTree",
+        "simulation": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "a": 1,
+                  "b": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "a": 1,
+                  "b": 2
+                }
+              }
+            },
+            "links": {
+              "uplink-a": {
+                "a": {
+                  "bridge": "core",
+                  "port": "a"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "a"
+                }
+              },
+              "uplink-b": {
+                "a": {
+                  "bridge": "core",
+                  "port": "b"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "b"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "a": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "b": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "a": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "b": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "uplink-a": true,
+              "uplink-b": true
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SpanningTree",
+        "initial": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "a": 1,
+                  "b": 2
+                }
+              },
+              "west": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "a": 1,
+                  "b": 2
+                }
+              }
+            },
+            "links": {
+              "uplink-a": {
+                "a": {
+                  "bridge": "core",
+                  "port": "a"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "a"
+                }
+              },
+              "uplink-b": {
+                "a": {
+                  "bridge": "core",
+                  "port": "b"
+                },
+                "b": {
+                  "bridge": "west",
+                  "port": "b"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "a": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "b": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "west": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "a": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "b": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "uplink-a": true,
+              "uplink-b": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "core": {
+                  "online": true,
+                  "ports": {
+                    "a": true,
+                    "b": true
+                  }
+                },
+                "west": {
+                  "online": true,
+                  "ports": {
+                    "a": true,
+                    "b": true
+                  }
+                }
+              },
+              "links": {
+                "uplink-a": true,
+                "uplink-b": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "core",
+              "west"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "west",
+            "root": "core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "west",
+              "port": "b"
+            }
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "west",
+              "port": "a"
+            },
+            "role": "Alternate"
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "west",
+            "to": "core",
+            "expected_links": [
+              "uplink-b"
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "spanning-tree {\"kind\":\"Port\",\"bridge\":\"core\",\"port\":\"b\",\"settings\":{\"priority\":64,\"cost\":4,\"up\":true}}"
+      ],
+      "prerequisites": [
+        "ccna-stp-local-cost"
+      ],
+      "spanning_tree_teaching": {
+        "prerequisites": [
+          "ccna-stp-local-cost"
+        ],
+        "prerequisite_note": "The preceding spanning-tree activity introduces the fields used here. You may revisit its introduction or go directly to the full assignment.",
+        "concepts": [
+          {
+            "title": "The idea",
+            "text": "Two parallel uplinks can lead to the same root with equal cost. The next comparisons use the sending bridge identity and sending port identity. A lower port priority wins before the port number."
+          },
+          {
+            "title": "How to investigate",
+            "text": "With the same core sender and equal costs, core/a initially advertises the lower port identity. Lowering core/b port priority can make west choose uplink-b. Lowering only west/b\u2019s receiving port priority does not overrule the earlier sending-port comparison. A different local cost can also validly choose the requested path."
+          },
+          {
+            "title": "What this model means",
+            "text": "Root and Designated ports forward; Alternate ports discard in this stable calculation. Discarding is not a physically broken link. Lower values win the relevant comparison. This does not send protocol messages or prove real-device convergence."
+          }
+        ],
+        "fixture": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "sample-core": {
+                "mac": "02:00:00:00:00:11",
+                "ports": {
+                  "a": 1,
+                  "b": 2
+                }
+              },
+              "sample-west": {
+                "mac": "02:00:00:00:00:12",
+                "ports": {
+                  "a": 1,
+                  "b": 2
+                }
+              }
+            },
+            "links": {
+              "sample-uplink-a": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "a"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "a"
+                }
+              },
+              "sample-uplink-b": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "b"
+                },
+                "b": {
+                  "bridge": "sample-west",
+                  "port": "b"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "sample-core": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "a": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "b": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-west": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "a": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "b": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "sample-uplink-a": true,
+              "sample-uplink-b": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "sample-core": {
+                  "online": true,
+                  "ports": {
+                    "a": true,
+                    "b": true
+                  }
+                },
+                "sample-west": {
+                  "online": true,
+                  "ports": {
+                    "a": true,
+                    "b": true
+                  }
+                }
+              },
+              "links": {
+                "sample-uplink-a": true,
+                "sample-uplink-b": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "sample-core",
+              "sample-west"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-west",
+            "root": "sample-core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "sample-west",
+              "port": "b"
+            }
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "sample-west",
+              "port": "a"
+            },
+            "role": "Alternate"
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "sample-west",
+            "to": "sample-core",
+            "expected_links": [
+              "sample-uplink-b"
+            ]
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Set sample-core / b settings",
+            "explanation": "Edit this practice field, then explicitly Apply. Port priority 64, local cost 4.",
+            "action": {
+              "kind": "Port",
+              "bridge": "sample-core",
+              "port": "b",
+              "settings": {
+                "priority": 64,
+                "cost": 4,
+                "up": true
+              }
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Lower sample-core/b port priority to 64 and Apply. Inspect sample-west/b. Restore it to 128 to reproduce the original tie-break, then repair with 64.",
+          "actions": [
+            {
+              "kind": "Port",
+              "bridge": "sample-core",
+              "port": "b",
+              "settings": {
+                "priority": 128,
+                "cost": 4,
+                "up": true
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            false,
+            false,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Port",
+            "bridge": "sample-core",
+            "port": "b",
+            "settings": {
+              "priority": 64,
+              "cost": 4,
+              "up": true
+            }
+          }
+        ]
+      },
+      "retry_guidance": "Compare the named unmet root, port role or path with the applied result. Pending settings need Apply; taking a link down does not meet the availability requirement."
+    },
+    {
+      "id": "ccna-stp-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Ideal spanning-tree root and path reasoning",
+      "unit": "spanning-tree-steady-state",
+      "title": "Hand over a redundant four-bridge network",
+      "summary": "Combine root election, local-path diagnosis and preservation in one handover.",
+      "objective": "Make core the root throughout the connected four-bridge network. Leaf must use upper as its root port and the path upper-leaf then core-upper to core; leaf/lower must be Alternate. Lower must retain core as its root and root port. Keep every bridge, port and link available. Choose any permitted priorities/costs that meet these results.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the supplied graph",
+        "Apply bridge and port configuration",
+        "Check current root, roles and tree path"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "A handover can contain more than one fault. Fixing the root election alone does not guarantee that each access bridge chooses the required path. Check root identity, root-port choice and the actual forwarding-tree path separately.",
+          "action": "Read the full assignment and inspect the current applied root, roles and physical links.",
+          "commands": []
+        },
+        {
+          "title": "Configure and investigate",
+          "why": "The supplied leaf has a low bridge priority and a costly upper-facing port. Find the current root first, then compare leaf\u2019s local totals through upper and lower. Do not hide a fault by disabling the lower path; the alternate physical path must remain available.",
+          "action": "Edit only the needed native fields, Apply and compare current observations with the assignment.",
+          "commands": []
+        },
+        {
+          "title": "Verify the handover",
+          "why": "Current outcomes and physical availability matter, not a previously passing check or a specific click sequence.",
+          "action": "Use Check work, inspect each unmet result and retry. Keep the complete graph available.",
+          "commands": []
+        }
+      ],
+      "explanation": "A root correction and a local-cost correction solve different problems. The leaf chooses upper while its lower port discards; lower itself remains connected through core. These are stable calculated paths, not a measured failover or packet-delivery result.",
+      "hints": [
+        "A handover can contain more than one fault. Fixing the root election alone does not guarantee that each access bridge chooses the required path. Check root identity, root-port choice and the actual forwarding-tree path separately.",
+        "The supplied leaf has a low bridge priority and a costly upper-facing port. Find the current root first, then compare leaf\u2019s local totals through upper and lower. Do not hide a fault by disabling the lower path; the alternate physical path must remain available."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      ],
+      "simplifications": "Original offline ideal point-to-point steady-state calculation. One supplied instance; no BPDUs, timers, measured convergence, packets, VLAN/PVST, PortFast, guards, traffic delivery or real switch CLI. Availability means physical availability. Typed JSON solution data is internal authoring information, not learner syntax. Cisco CCNA v1.1 2.5 is only partially supported; references checked 2026-10-25.",
+      "initial": {
+        "kind": "SpanningTree",
+        "simulation": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "upper": 1,
+                  "lower": 2
+                }
+              },
+              "upper": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "leaf": 2
+                }
+              },
+              "lower": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "leaf": 2
+                }
+              },
+              "leaf": {
+                "mac": "02:00:00:00:00:04",
+                "ports": {
+                  "upper": 1,
+                  "lower": 2
+                }
+              }
+            },
+            "links": {
+              "core-upper": {
+                "a": {
+                  "bridge": "core",
+                  "port": "upper"
+                },
+                "b": {
+                  "bridge": "upper",
+                  "port": "core"
+                }
+              },
+              "core-lower": {
+                "a": {
+                  "bridge": "core",
+                  "port": "lower"
+                },
+                "b": {
+                  "bridge": "lower",
+                  "port": "core"
+                }
+              },
+              "upper-leaf": {
+                "a": {
+                  "bridge": "upper",
+                  "port": "leaf"
+                },
+                "b": {
+                  "bridge": "leaf",
+                  "port": "upper"
+                }
+              },
+              "lower-leaf": {
+                "a": {
+                  "bridge": "lower",
+                  "port": "leaf"
+                },
+                "b": {
+                  "bridge": "leaf",
+                  "port": "lower"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "upper": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "lower": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "upper": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "leaf": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "lower": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "leaf": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "leaf": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "upper": {
+                    "priority": 128,
+                    "cost": 40,
+                    "up": true
+                  },
+                  "lower": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-upper": true,
+              "core-lower": true,
+              "upper-leaf": true,
+              "lower-leaf": true
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "SpanningTree",
+        "initial": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "core": {
+                "mac": "02:00:00:00:00:01",
+                "ports": {
+                  "upper": 1,
+                  "lower": 2
+                }
+              },
+              "upper": {
+                "mac": "02:00:00:00:00:02",
+                "ports": {
+                  "core": 1,
+                  "leaf": 2
+                }
+              },
+              "lower": {
+                "mac": "02:00:00:00:00:03",
+                "ports": {
+                  "core": 1,
+                  "leaf": 2
+                }
+              },
+              "leaf": {
+                "mac": "02:00:00:00:00:04",
+                "ports": {
+                  "upper": 1,
+                  "lower": 2
+                }
+              }
+            },
+            "links": {
+              "core-upper": {
+                "a": {
+                  "bridge": "core",
+                  "port": "upper"
+                },
+                "b": {
+                  "bridge": "upper",
+                  "port": "core"
+                }
+              },
+              "core-lower": {
+                "a": {
+                  "bridge": "core",
+                  "port": "lower"
+                },
+                "b": {
+                  "bridge": "lower",
+                  "port": "core"
+                }
+              },
+              "upper-leaf": {
+                "a": {
+                  "bridge": "upper",
+                  "port": "leaf"
+                },
+                "b": {
+                  "bridge": "leaf",
+                  "port": "upper"
+                }
+              },
+              "lower-leaf": {
+                "a": {
+                  "bridge": "lower",
+                  "port": "leaf"
+                },
+                "b": {
+                  "bridge": "leaf",
+                  "port": "lower"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "upper": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "lower": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "upper": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "leaf": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "lower": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "leaf": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "leaf": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "upper": {
+                    "priority": 128,
+                    "cost": 40,
+                    "up": true
+                  },
+                  "lower": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "core-upper": true,
+              "core-lower": true,
+              "upper-leaf": true,
+              "lower-leaf": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "core": {
+                  "online": true,
+                  "ports": {
+                    "upper": true,
+                    "lower": true
+                  }
+                },
+                "upper": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "leaf": true
+                  }
+                },
+                "lower": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "leaf": true
+                  }
+                },
+                "leaf": {
+                  "online": true,
+                  "ports": {
+                    "upper": true,
+                    "lower": true
+                  }
+                }
+              },
+              "links": {
+                "core-upper": true,
+                "core-lower": true,
+                "upper-leaf": true,
+                "lower-leaf": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "core",
+              "upper",
+              "lower",
+              "leaf"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "leaf",
+            "root": "core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "leaf",
+              "port": "upper"
+            }
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "leaf",
+              "port": "lower"
+            },
+            "role": "Alternate"
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "leaf",
+            "to": "core",
+            "expected_links": [
+              "upper-leaf",
+              "core-upper"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "lower",
+            "root": "core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "lower",
+              "port": "core"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "spanning-tree {\"kind\":\"BridgePriority\",\"bridge\":\"core\",\"priority\":0}",
+        "spanning-tree {\"kind\":\"Port\",\"bridge\":\"leaf\",\"port\":\"upper\",\"settings\":{\"priority\":128,\"cost\":4,\"up\":true}}"
+      ],
+      "prerequisites": [
+        "ccna-stp-parallel"
+      ],
+      "spanning_tree_teaching": {
+        "prerequisites": [
+          "ccna-stp-parallel"
+        ],
+        "prerequisite_note": "The preceding spanning-tree activity introduces the fields used here. You may revisit its introduction or go directly to the full assignment.",
+        "concepts": [
+          {
+            "title": "The idea",
+            "text": "A handover can contain more than one fault. Fixing the root election alone does not guarantee that each access bridge chooses the required path. Check root identity, root-port choice and the actual forwarding-tree path separately."
+          },
+          {
+            "title": "How to investigate",
+            "text": "The supplied leaf has a low bridge priority and a costly upper-facing port. Find the current root first, then compare leaf\u2019s local totals through upper and lower. Do not hide a fault by disabling the lower path; the alternate physical path must remain available."
+          },
+          {
+            "title": "What this model means",
+            "text": "Root and Designated ports forward; Alternate ports discard in this stable calculation. Discarding is not a physically broken link. Lower values win the relevant comparison. This does not send protocol messages or prove real-device convergence."
+          }
+        ],
+        "fixture": {
+          "topology": {
+            "system_id_extension": 1,
+            "bridges": {
+              "sample-core": {
+                "mac": "02:00:00:00:00:11",
+                "ports": {
+                  "upper": 1,
+                  "lower": 2
+                }
+              },
+              "sample-upper": {
+                "mac": "02:00:00:00:00:12",
+                "ports": {
+                  "core": 1,
+                  "leaf": 2
+                }
+              },
+              "sample-lower": {
+                "mac": "02:00:00:00:00:13",
+                "ports": {
+                  "core": 1,
+                  "leaf": 2
+                }
+              },
+              "sample-leaf": {
+                "mac": "02:00:00:00:00:14",
+                "ports": {
+                  "upper": 1,
+                  "lower": 2
+                }
+              }
+            },
+            "links": {
+              "sample-core-upper": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "upper"
+                },
+                "b": {
+                  "bridge": "sample-upper",
+                  "port": "core"
+                }
+              },
+              "sample-core-lower": {
+                "a": {
+                  "bridge": "sample-core",
+                  "port": "lower"
+                },
+                "b": {
+                  "bridge": "sample-lower",
+                  "port": "core"
+                }
+              },
+              "sample-upper-leaf": {
+                "a": {
+                  "bridge": "sample-upper",
+                  "port": "leaf"
+                },
+                "b": {
+                  "bridge": "sample-leaf",
+                  "port": "upper"
+                }
+              },
+              "sample-lower-leaf": {
+                "a": {
+                  "bridge": "sample-lower",
+                  "port": "leaf"
+                },
+                "b": {
+                  "bridge": "sample-leaf",
+                  "port": "lower"
+                }
+              }
+            }
+          },
+          "configuration": {
+            "bridges": {
+              "sample-core": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "upper": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "lower": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-upper": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "leaf": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-lower": {
+                "priority": 32768,
+                "online": true,
+                "ports": {
+                  "core": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  },
+                  "leaf": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              },
+              "sample-leaf": {
+                "priority": 0,
+                "online": true,
+                "ports": {
+                  "upper": {
+                    "priority": 128,
+                    "cost": 40,
+                    "up": true
+                  },
+                  "lower": {
+                    "priority": 128,
+                    "cost": 4,
+                    "up": true
+                  }
+                }
+              }
+            },
+            "links": {
+              "sample-core-upper": true,
+              "sample-core-lower": true,
+              "sample-upper-leaf": true,
+              "sample-lower-leaf": true
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "Availability",
+            "expected": {
+              "bridges": {
+                "sample-core": {
+                  "online": true,
+                  "ports": {
+                    "upper": true,
+                    "lower": true
+                  }
+                },
+                "sample-upper": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "leaf": true
+                  }
+                },
+                "sample-lower": {
+                  "online": true,
+                  "ports": {
+                    "core": true,
+                    "leaf": true
+                  }
+                },
+                "sample-leaf": {
+                  "online": true,
+                  "ports": {
+                    "upper": true,
+                    "lower": true
+                  }
+                }
+              },
+              "links": {
+                "sample-core-upper": true,
+                "sample-core-lower": true,
+                "sample-upper-leaf": true,
+                "sample-lower-leaf": true
+              }
+            }
+          },
+          {
+            "kind": "Connected",
+            "bridges": [
+              "sample-core",
+              "sample-upper",
+              "sample-lower",
+              "sample-leaf"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-leaf",
+            "root": "sample-core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "sample-leaf",
+              "port": "upper"
+            }
+          },
+          {
+            "kind": "PortRole",
+            "endpoint": {
+              "bridge": "sample-leaf",
+              "port": "lower"
+            },
+            "role": "Alternate"
+          },
+          {
+            "kind": "ForwardingPath",
+            "from": "sample-leaf",
+            "to": "sample-core",
+            "expected_links": [
+              "sample-upper-leaf",
+              "sample-core-upper"
+            ]
+          },
+          {
+            "kind": "Root",
+            "bridge": "sample-lower",
+            "root": "sample-core"
+          },
+          {
+            "kind": "RootPort",
+            "endpoint": {
+              "bridge": "sample-lower",
+              "port": "core"
+            }
+          }
+        ],
+        "example_actions": [
+          {
+            "title": "Set sample-core settings",
+            "explanation": "Edit this practice field, then explicitly Apply. Bridge priority 0.",
+            "action": {
+              "kind": "BridgePriority",
+              "bridge": "sample-core",
+              "priority": 0
+            }
+          },
+          {
+            "title": "Set sample-leaf / upper settings",
+            "explanation": "Edit this practice field, then explicitly Apply. Port priority 128, local cost 4.",
+            "action": {
+              "kind": "Port",
+              "bridge": "sample-leaf",
+              "port": "upper",
+              "settings": {
+                "priority": 128,
+                "cost": 4,
+                "up": true
+              }
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Set sample-core priority to 0 and sample-leaf/upper cost to 4, then Apply and inspect both leaf and lower. Restore leaf/upper cost 40 to recreate only the path fault; repair with 4.",
+          "actions": [
+            {
+              "kind": "Port",
+              "bridge": "sample-leaf",
+              "port": "upper",
+              "settings": {
+                "priority": 128,
+                "cost": 40,
+                "up": true
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            false,
+            false,
+            false,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "BridgePriority",
+            "bridge": "sample-core",
+            "priority": 0
+          },
+          {
+            "kind": "Port",
+            "bridge": "sample-leaf",
+            "port": "upper",
+            "settings": {
+              "priority": 128,
+              "cost": 4,
+              "up": true
+            }
+          }
+        ]
+      },
+      "retry_guidance": "Compare the named unmet root, port role or path with the applied result. Pending settings need Apply; taking a link down does not meet the availability requirement."
+    }
+  ]
+}

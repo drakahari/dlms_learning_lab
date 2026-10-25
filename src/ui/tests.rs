@@ -8,6 +8,7 @@ mod getopts_lessons;
 mod mac_learning;
 mod ospf;
 mod seed_learning;
+mod spanning_tree;
 #[test]
 fn opening_terminal_assignment_keeps_task_visible_and_scrolling_does_not_grow_output() {
     for scale in [1., 1.5, 2.] {

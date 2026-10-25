@@ -1707,3 +1707,40 @@ keeper, guide/step cardinality, old reject-all policy, one test-format compile t
 Validators, old authored outcomes and expected experiment vectors were not weakened.
 Min22.16GiB available, max PSIavg10some/full0.36/0.36, OOMdelta0; no sustained
 pressure or stress test. See DEBIAN_PACKAGE_LESSONS.md. Continue native work.
+
+## 2026-10-25 — M113/M114: native STP workbench and four authored graph tasks
+
+Native bridge/port/link settings, current root/role/cost/path observations, atomic
+Apply, one primary Check, optional help and separate practice integrate without
+IOS imitation. Root review caught repeated Apply failing to mark state dirty after
+an intervening autosave; fixed actual Apply dirty flag and added save/readback
+regression. Independent source review accepted. Three canonical MAC display calls
+and one smoke State qualification fixed first compilation, without model changes.
+
+Actual nativeR1/R2/R3 FAILED after4screens: practice feedback requested reveal on
+every checked frame, overriding wheel movement. Pointer-column targeting alone
+did not fix it. Event-only reveal plus idle-render regression fixes the actual
+UX; original outcomes/visibility checks retained. R4 reached14screens then caught
+a controller setup error: inserted favorite did not mark dirty after autosave.
+Corrected setup, aligned headless render→save→SmokeTick order, and added full
+controller regression. Final15headless groups PASS; ClippyR2/fmt/diff PASS.
+
+Final development-native R5 exits0 with16 actual946x929 screenshots, native
+density1.15,100/150/200%, Light/Dark, real fields/pickers/Apply/Check, isolated
+example experiment/repair, wrong/partial/reference/alternate/current invalidation,
+warm exact-attempt/favorite resume and ResetCancel/Confirm. Representative actual
+final images reviewed. ELF69bafc057c9eae362ebfc773b0580a9776f9bab177e11506827e89e0046748e5;
+private receipt reviews/spanning-tree-foundation/development-native-r5/RESULT.json.
+Min23.62GiB available/PSIavg10zero/OOMdelta0. Technical fixture only; not packaged,
+normal authored-unit, cold-process, actual Favorite-button, novice or other-OS
+acceptance. Earlier failures/evidence remain.
+
+Four distinct graph assignments authored separately: root election, receiving
+local cost, parallel sending-port tie and four-bridge handover. Six content groups
+PASS with20core/18adapter, including alternatives, plausible mistakes, all-link
+isolation refusal, partial repair, current invalidation, pending-draft resume and
+isolated exact experiment vectors. Fixed prerequisite metadata and test-only draft
+row offset; authored vectors unchanged. Source independently reviewed. Both this
+unit and four package tasks remain UNBUNDLED; normal125/31 and coverage unchanged.
+Continue package native integration/annotations, registration/native full-content
+flows and Apache/remaining four-track work. No release.

@@ -93,39 +93,39 @@ separate. All curriculum/platform completion remains Open.
 
 ## Immediate next actions — continue implementation
 
-No ordinary heavy slot grant to workers. Root sole guarded slot. M110620b918 and
-M11161262bf committed/pushed. Package content M1128groups PASS, broader148PASS,
-ClippyR1/fmt; commit/push exact source/docs next. Four authored package tasks are
-unbundled: install, metadata/dependency upgrade, same-version payload repair,
-remove-vs-purge retention capstone. Independent review accepts; optional native
-command annotations retained privately until new API lands. No count/credit.
+Root sole guarded slot; no heavy worker grants. Source8246971 M112 pushed after
+620b918 M110 and61262bf M111. Uncommitted M113/M114 now ready for commit/push:
+STPnative15headless groups PASS, alltargetClippyR2/fmt/diff, actual native R5 PASS
+16PNG at946x929 density1.15/100/150/200 Light/Dark, exact ELFSHA69bafc057c9eae362ebfc773b0580a9776f9bab177e11506827e89e0046748e5.
+Receipt reviews/spanning-tree-foundation/development-native-r5/RESULT.json;
+run-5to3l6jq, logm113-stp-native-fedora-r5. Representative final renders inspected.
+Warm technicalfixture only, no packaged/normalauthored/cold/novice/otherOS claim.
+R1-3 failedscrolllock: l.checked repeatedlytriggeredfeedbackreveal; rootfixed
+Check-event-onlyreveal+idleframes. Pointerfixalonewasinsufficient. R4favorite
+setupmissingdirtyfixedretainingassert; headless nowrender→save→SmokeTick like
+native, fullcontrollerpasses. Sourcepeeraccepts, outcomes/visibilitynotweakened.
 
-STP native UI R2 integrated UNCOMMITTED5paths, source66aa4669…; all10headless
-checks PASS after3 canonical Mac.text() call fixes. Root review caught secondApply
-not dirty after autosaved raw edit; author corrected unconditional dirty on actual
-Apply + save/reload regression, separate Learn/Challenge worked-header IDs.
-Separate controllerR1 4f31793f… integrated UNCOMMITTED4paths, one compile fix
-State→engine::State; all12headless UI/controller groups PASS R2 incl actual
-render+SmokeTick opening/geometry/firstexample/heldFinish. No actual native yet.
-Next guarded alltargetClippy/build then native fixed spanning-tree-workspace flow
-and inspect actual images. No real protocol/packets or cold-process claim.
+Four unbundled STP assignments +6content tests PASS alongside20core18adapter.
+Private drafts r1/r2/r3 retained; prereqmetadata/testdraftrow corrected, expected
+vectorsunchanged. Four package assignments +8tests/148broaderchecks/Clippy PASS
+and sourcecommitted8246971, but UNBUNDLED pending nativeAPI. No count/coverage.
 
-Four additional unbundled STP tasks in scenarios/spanning-tree-v1.json and
-tests/spanning_tree_content.rs: root selection, local cost, parallel sender-port
-tie,4bridge handover. Source reviewed. Initial prerequisite metadata mismatch
-corrected to exact scenario IDs; next run5PASS1test-prefix fail. Learning.checks
-adds draft row; test now separately asserts it and compares remaining rows to
-UNCHANGED authored expected vectors. Combined20core18adapter6content gate next.
-No count/coverage promotion before registration/native acceptance. Private author
-drafts retained in reviews/spanning-tree-content/draft-r1/r2/r3.
+Next integrate reviewed package nativeR1 af4d23d4…13paths,10session+8egui UNRUN.
+Root prepared reviewed-source/basehash staging at
+reviews/package-management/main-native-integration-r1. Sixconflicts resolved in
+progress/workspaceUI preserving BOTH full STP+packagechecks/dispatch. NoMAINwrites
+yet. Recheckbeforebytes, apply, solefirstgate. Preserve currentguideparserguard,
+STPfeedbackidlefix/controller and current125 content/history. Then add faithful
+optional command annotations (private draft-r4/ANNOTATIONS.json), register4+4 units
+withold125/31prefix/historyproof, actualnormalcontentflows beforecoverage.
 
-independent_review implementing native package SOURCE ONLY: bounded independent
-Sessions, faithful optional command annotations, real closed terminal and readonly
-virtualfile inspector. No coreWriteFile invented. ccna_discovery finished STP
-controller/source reviews, preparing Apache app adapter contract SOURCE ONLY.
-No worker heavy grants. Finish native package integration, annotate+register
-authored units without regenerating old history, substantive native flows, then
-continue Apache/remaining all-four-track curriculum. Do not stop at125 package.
+independent_review SOURCEONLY preparing package-lessons actualcontroller separate
+worktree/freeze: usesactualLibraryFavorite/BackContinue, render/save/idle/Tick.
+ccna_discovery SOURCEONLY implementing Apacheadapter contract8882c388… approved:
+current+singlefreshNextStart positiveHTTP200 checks, boundededitor/requestdrafts,
+readonlyrequestsnotpendingcredit, separatefixturepractice; exact coreRequestshape
+pub(crate) samebodyallowedifneeded. Noheavy/deps/normalcount/credit. Continueall
+fourtracks; do notstopatFedora package or125labs.
 
 ## Source receipts and retained gates
 
