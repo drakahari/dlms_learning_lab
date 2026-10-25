@@ -6,6 +6,37 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M100 normal-policy results / final RunStop next
+
+- Clean source11811b76aca48eb87c9232871614334002e59452 pushed. Candidate
+  dist/dlms-learning-lab-0.1.0-g11811b76aca4-x86_64-unknown-linux-gnu-fedora-44-candidate,
+  archivee33277ef72ce006e5f2cbe5f4aa1b809d11f25d0387448adba778ea7cfe725e5,
+  binarybca3c79a753b212588aeaf4ee0e86ad2771876708e6e58c217d77553583eb9fb.
+  Installedprefixverified-11811b76aca4-jqzlw650 passes upgradec799/lifecycle119/29
+  and exact original-nine retention. DefaultWayland with NO diagnostic flag passes
+ 1protocol+10quiet starts. Strict real two-process NORMAL-private-XDG cold reopen
+  passes9captures in tmp/native-reopen-m99-installed-r1. Source priorA/B retained.
+- Root found PTRpack insertion beforearrays shifted legacy numeric native-probe
+  indexes. MAIN moves ONLY its include to end, restoring original116 positions;
+  course/unit/IDs/content unchanged. Exactorder+all11PTR+course tests PASS16.
+  Root also makes arrayStop4924/4925 consecutive frames, as existing Stop probes,
+  so bounded fast execution is cancelled whileactive. Three scriptingStopUI
+  regressions PASS. All-targetClippy final queued; no new model/content behavior.
+- Next commit this small order/Stop correction and report, build cleanidentified
+  candidate/upgrade1181. Run actualarrays-stop on corrected pack under DEFAULT
+  Wayland, rerun shared alignment72 to inspect original fields/VLAN at100/150/200,
+  and collectbriefownedidle ifneeded. Do not run arrays-stop on1181: its old
+ 70index resolves PTR. Actualnormalapp uses IDs; no learner progressloss occurred.
+- No getopts9 MAIN activation: R2peer source accepted21paths/24prospectivetests,
+  hashesfb029195..., genuine8fixture88c07f20... exact. Source overlays isolated.
+  DHCPR2source4paths/25prospectivetests peeraccepted afterselectorcontainmentfix,
+  manifest0c546c2805814f4e01c8be6099aed7100722ec426d335d5fa8beb061a5a1dc22,
+  peerreceipt3b072b49a19504c7a0d42b2fe3d1986a7b1e8e48deda00a8bf45cc830bd60e49.
+  Neither compiled/tested/runtime yet. Rootintegrates/gates afternormalpolicychecks.
+- Slot: inspect active/unfinishedmarkers; root owns final Clippy. No worker heavy
+  grants. Catalog119/29,35CCNA/24LPIC1/20LPIC2/40Bash;134/1/1105coverage remains
+  partial/open. No completeproject, physical/screenreader/novice/otherOS claim.
+
 ## Active M99 production-policy verification next
 
 - Installedc799d5b6d6cf47ad9f953a46c90a4a0a246478da passes119/29 lifecycle,

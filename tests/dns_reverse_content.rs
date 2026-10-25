@@ -426,6 +426,28 @@ fn all_original116_specs_and_unit_order_remain_exact_with_typed_historical_goals
         serde_json::from_str(include_str!("fixtures/dns-reverse-original116.json")).unwrap();
     let all = pack::bundled().unwrap();
     assert_eq!(prior["original_scenarios"].as_array().unwrap().len(), 116);
+    // Preserve the full old catalog order too: older native probes and in-process
+    // contextual selections must not be redirected to a different activity.
+    let prior_ids: Vec<_> = prior["original_scenarios"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|s| s["id"].as_str().unwrap())
+        .collect();
+    assert_eq!(
+        all.iter()
+            .take(116)
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        prior_ids
+    );
+    assert_eq!(
+        all.iter()
+            .skip(116)
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        IDS
+    );
     for old in prior["original_scenarios"].as_array().unwrap() {
         let id = old["id"].as_str().unwrap();
         let s = all.iter().find(|s| s.id == id).unwrap();

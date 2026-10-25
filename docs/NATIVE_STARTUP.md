@@ -130,3 +130,13 @@ desktop theme, compositor/GPU/service/swap or global environment change.
 Three options tests, all-targetClippy and fmt pass. Actual production-policy
 candidate startup, normal-private-profile reopening and Run/Stop are next;
 no normal-policy runtime acceptance is inferred from diagnostic runs alone.
+
+
+Production-policy11811b7 installed follow-through:119/29 upgrade/lifecycle passes,
+then defaultWayland (diagnostic override absent) passes1/1 protocol/lifecycle and
+10/10quiet startup/readbacks. A strict two-process private NORMAL-profile reopen
+passes9captures through existing XDG-isolated developer acceptance; it does not
+use the smoke profile. Exact manifest/session receipt remains under
+`.build-artifacts/tmp/native-reopen-m99-installed-r1`. This verifies the scoped
+policy on Fedora44, not every Wayland driver or Windows/macOS runtime. Script
+Run/Stop/repair and quantitative idle observation remain separate gates.

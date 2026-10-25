@@ -1216,3 +1216,18 @@ repair. Pinned source confirms event-driven idle and best-effort interval setter
 Three exact environment/backend policy tests pass; all-targetClippy/fmt pass.
 201distinct UI tests accounted across full/scoped evidence; no new full201run.
 New normal-policy package/startup/cold/RunStop gates remain pending.
+
+
+### M100 normal Wayland follow-through and stable catalog probes
+
+Installed1181 passes119/29 lifecycle/defaultWayland1traced+10quiet launches without
+diagnostic override and strict two-process normalprivateprofile reopening9. The
+application-only policy avoids the observed interval-dependent wait on this host;
+no universaldriver/cross-platform/novice claim. All previousfailed controls remain.
+
+Review before scriptStop finds PTRinclude insertion shifted older native array
+probe indexes. Appending newpack restores exact old116 order while unit navigation
+remains byID. Strengthened originalorder+PTR+course16checks pass. Stop4924/4925
+now run in consecutive frames like existing cancellation probes; scripting Stop3UI
+regressions pass. Actual corrected-package arrayStop/shared alignment are next.
+No grading model, learner answer, theme, dependency or desktop setting changes.

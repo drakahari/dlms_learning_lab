@@ -630,3 +630,19 @@ practice/drafts/resume/reset/Challenge, light150/dark200 inputs and fullscreen15
 are reviewed. This was process-local XWayland; current default Wayland reliability
 and new original-terminal native teaching are still pending. Earlier30d startup
 0/1Wayland and10/10XWayland evidence is not relabeled as72f evidence. No release.
+
+
+## M99 default-Wayland scoped candidate
+
+Source11811b76aca48eb87c9232871614334002e59452,119labs/29units:
+`dist/dlms-learning-lab-0.1.0-g11811b76aca4-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+Archive SHA256e33277ef72ce006e5f2cbe5f4aa1b809d11f25d0387448adba778ea7cfe725e5;
+binary bca3c79a753b212588aeaf4ee0e86ad2771876708e6e58c217d77553583eb9fb.
+Installedprefixverified-11811b76aca4-jqzlw650 passes c799upgrade and the same
+identity/content/hash/desktop/uninstall/reinstall/original-nine retention gates.
+New normalLinuxWayland requestedinterval0 passes1protocol+10quiet startups and
+strict real two-process private NORMAL-profile reopen9, diagnostic override absent.
+This is scoped Fedora44 acceptance, not a general driver cure. The subsequent
+source-only original-order/arrayStop harness correction requires its own identified
+candidate before arrayStop acceptance; normal app progress/IDs/content unchanged.
+No release is published. Windows/macOS runtime/novice/screen-reader stay pending.

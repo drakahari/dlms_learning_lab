@@ -329,7 +329,7 @@ impl LabApp {
     pub(super) fn smoke_tick(&mut self, ctx: &egui::Context) {
         // Stop probes use consecutive frames so cancellation is checked during
         // execution rather than after the finite instruction budget finishes.
-        let immediate_stop = matches!(self.smoke_stage, 7012 | 7013 | 15014 | 15015);
+        let immediate_stop = matches!(self.smoke_stage, 4924 | 4925 | 7012 | 7013 | 15014 | 15015);
         if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;
         }
