@@ -1,15 +1,20 @@
 # Fixed getopts observations before a possible evaluator9
 
-Implemented and source-reviewed 2026-10-25. All17 Python safety checks and five
-Rust example tests pass; full workflow129Python and all-targetClippy/fmt pass.
-Actual capture R1 stopped before Bash/profile capture because its Stop fixture
-looked up a relative key instead of the absolute simulated path. Partial raw
-public8 outcomes are retained without COMPLETE and are not an accepted baseline.
-The corrected exact capture/Stop helper passes its new four-slice regression;
-a fresh source-pinned R2 capture remains pending. No new getopts
-capability, evaluator revision/default, State/Goal, learner path, dependency,
-mastery, curriculum count or objective status is changed. The old 37-case tool
-and its exact input bytes remain unchanged.
+Implemented and source-reviewed 2026-10-25. The guarded actual R2 capture at
+source2d484f9c17c64eec96f47e8d53c7a362ad13a9d5 completed successfully. Root
+independently checked all221 output hashes/sizes against manifest
+`d6b5777260f45c9551f1df013c531cbd0547b3f234edfa369e913c8b49cca827`.
+It records1391 VM rows,40 authored scripts/246 assignment cases/40 examples,
+50 fixed public8 inputs at four tick sizes, four actual Stop checks, exact
+synthetic progress/history/backup preservation, and50 actual Bash5.3.9 observations.
+Private evidence is under `.build-artifacts/reviews/getopts/captures/before9-m95-r2`.
+
+R1 stopped at an incorrect relative marker lookup in the developer Stop fixture;
+its partial raw outcomes remain without COMPLETE. R2 corrects only that lookup
+and tests the exact helper at all four tick sizes: five example tests pass,
+scoped Clippy/fmt pass, earlier129 Python safety checks remain passed. No learner
+engine/default/revision9 change or newly authored coverage is claimed. The50
+Bash/public8 differences remain unclassified evidence for a reviewed extension.
 
 This developer tool accepts only a simple capture ID and a mode. It cannot accept
 learner source, arbitrary arguments, imported packs, profiles, executables or

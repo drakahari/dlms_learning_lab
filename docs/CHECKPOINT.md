@@ -5,18 +5,22 @@ Root owns the sole heavy slot for the next combined reviewed-source gates.
 Helpers are source-only; no heavy grant. The application is not complete. No public release
 is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
 
-## Active M95 baseline capture
+## Active M95 baseline and packaged verification
 
-- Commits ba86f55 (feedback/close) and2c89bb9 (guarded collector) are pushed.
-- Fixed before9-m95-r1 capture aborted at its Stop-helper tick assertion: it
-  looked up relative case-child.txt, while public outcomes use /work/case-child.txt.
-  Raw actual8 partial evidence is retained; no COMPLETE, accepted baseline,
-  host Bash capture, profile migration acceptance or evaluator9 claim.
-- Corrected developer-only lookup and extracted exact helper for a four-slice
-  regression, all five example tests PASS. Engine/inputs/limits are unchanged.
-  New source commit, build, independently reviewed pins and fresh R2 are next.
-- No new authored labs:116/28 (35CCNA,24LPIC1,17LPIC2,40Bash). Default Wayland
-  failure remains documented; clean packaged XWayland two-seed rerun still pending.
+- Commits ba86f55 and2c89bb9 are pushed. Correction2d484f9 fixes only the
+  developer Stop-helper's virtual absolute filename; five exact example tests
+  and scoped Clippy/fmt pass. Failed R1 partial evidence remains without COMPLETE.
+- Actual before9-m95-r2 capture completed at exact2d484f9c17c64eec96f47e8d53c7a362ad13a9d5.
+  Manifest d6b5777260f45c9551f1df013c531cbd0547b3f234edfa369e913c8b49cca827;
+  root independently checked all221 output hashes/sizes.1391 VM rows cover all
+ 40/246 assignment cases,40 examples,50 fixed inputs at slices1/16/32/64 plus
+  actual Stop and synthetic progress/history/export/restore checks.50 real Bash
+ 5.3.9 comparisons complete in private fixtures. No evaluator9 capability yet.
+- No new authored labs:116/28 (35CCNA,24LPIC1,17LPIC2,40Bash). Source-only
+  Unix/Logs teaching adapters and PTR3 tasks await integration/gates. Root next
+  builds clean candidate and verifies native two-seed clean exit/screens.
+- Default Wayland EGL callback wait remains FAILED/pending; app-local XWayland
+  is a separate tested fallback, not a cure. All heavy commands stay serialized.
 
 ## Active M94 follow-through
 

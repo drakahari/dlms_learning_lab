@@ -1106,3 +1106,20 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   Capture reveals the whole practice-feedback block; no product layout change.
 - All-target Clippy/fmt final PASS. New native rerun still required; Wayland
   failed/pending is separate from XWayland teaching acceptance. Catalog116/28.
+
+
+### M95 actual shell baseline before further semantics
+
+- Fixed metadata/source-pinned collector committed2c89bb9; correction2d484f9
+  fixes a developer-only relative marker lookup, preserving the identical VM,
+  fixtures, deadline/tick limits and post-Stop immobility checks. Exact helper
+  regression passes at1/16/32/64; five Rust example tests and scoped Clippy/fmt pass.
+- R1 partial actual8 outcomes are retained as failed, no COMPLETE. R2 completed
+  at2d484f9 with manifest d6b5777260f45c9551f1df013c531cbd0547b3f234edfa369e913c8b49cca827.
+  Root independently rehashed221 outputs. Actual40scripts/246 assignment cases/
+ 40examples/50fixed inputs ran at all four slices, with measured Stop and genuine
+ 6/7 histories, exact old7 backup, real8 writes/export/restore/reset/conflict paths.
+-50 actual Bash5.3.9 fixed builtin comparisons completed in disposable project-disk
+  fixtures under closed environment and bounded guarded execution. Differences
+  remain unclassified before9. No new shell capability, evaluator9, learner-host
+  execution, curriculum count or objective promotion. Original116/28 unchanged.
