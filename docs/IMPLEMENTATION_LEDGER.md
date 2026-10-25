@@ -1411,3 +1411,32 @@ metadata's57-frame typo is retained/corrected explicitly, no raw observation
 changed. The catalog is now accepted122/30=35/24/20/43. Objective statuses remain
 134Partial/1Supporting/1105Open. Continue with reviewed DHCPbackend gate and
 remaining curriculum; do not equate this candidate with completion.
+
+## 2026-10-25 — M105: DHCP backend and progress gate
+
+The reviewed pure DHCP core now has a typed engine/Goal adapter, bounded raw policy
+drafts, isolated teaching/practice state, goal-aware actions and validated
+progress/export/restore. Applied policy, offers, server bindings and actual held
+client configuration remain distinct. Fresh allocation contexts use the learner's
+policy and real returned offer tokens, independently of current lease success.
+No terminal aliases, host network action, new curriculum count or objective credit.
+
+Initial68 library plus24 adapter checks pass. The full registered97-target
+library/integration run passes1051 checks with no failures, including current122
+content and real6/7/8 migration fixtures. Independent review then identified
+duplicate grading in the proposed native screen. A shared fresh current-result
+helper preserves all context/draft guards and rejects pending drafts before probes;
+no persisted success cache. Its new regression and four existing targets pass113
+checks after the refinement. The first refinement compile caught a test-only name
+shadow; corrected without changing expectations. Full97 targets were before that
+refinement, not represented as a second full run.
+
+One ordinary maximal4-context/32-total-client observation measured13.972ms
+clone+check in development,58476-byte core JSON. This is not a frame-latency
+guarantee. The full run observed minimum22.74GiB available, zero max some/full
+PSI avg10 and no OOM counter increase, with2 Cargo jobs/2 runtime threads; no
+stress test. Frozen backend and the helper received independent source review.
+Native R2's11 interaction proposals and actual renderer acceptance remain next.
+Normal catalog stays122/30=35/24/20/43; no implementation credit from a fixture.
+All-target ClippyR2/fmt/diff pass; R1 flagged one nested-if style warning, fixed
+without altering the validation predicate.

@@ -147,7 +147,63 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
                     .all(|(result, case)| case.accepts(result))
         })
 }
+/// Fresh assignment results shared by DHCP feedback and current completion.
+/// No result survives a state/draft change or becomes a persisted credential.
+/// Reject context and pending draft first; do not run new-client probes for them.
+pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |text: &str| vec![(false, text.to_owned())];
+    if let Err(error) = validate_dhcpv4_workspace(a) {
+        return fail(&error);
+    }
+    let (
+        State::DhcpV4 { simulation },
+        State::DhcpV4 {
+            simulation: authored,
+        },
+        crate::engine::Goal::DhcpV4 {
+            initial,
+            requirements,
+            probes,
+        },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return fail("DHCP assignment context differs; previous work retained");
+    };
+    if authored != initial || simulation.validate_context(initial.topology()).is_err() {
+        return fail("DHCP assignment context differs; previous work retained");
+    }
+    if a.workspace.as_ref().is_some_and(|w| {
+        w.dhcpv4_learning.as_ref().is_some_and(|l| {
+            s.dhcpv4_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        })
+    }) {
+        return fail("DHCP practice context differs; previous work retained");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.dhcpv4_draft.as_ref())
+        .is_some_and(|d| !d.matches(simulation))
+    {
+        return fail("Apply the pending policy draft before checking the assignment");
+    }
+    let mut rows = vec![(true, "Current policy draft is applied".to_owned())];
+    rows.extend(crate::dhcpv4_workspace::checks(
+        initial,
+        simulation,
+        requirements,
+        probes,
+    ));
+    rows
+}
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::DhcpV4 { .. }) {
+        return current_dhcpv4_checks(a, s).iter().all(|row| row.0);
+    }
+    if validate_dhcpv4_workspace(a).is_err() {
+        return false;
+    }
     if validate_legacy_teaching_workspace(a).is_err() {
         return false;
     }
@@ -440,6 +496,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        validate_dhcpv4_workspace(a)?;
         validate_accounts_workspace(a)?;
         validate_legacy_teaching_workspace(a)?;
         validate_ospf_workspace(a)?;
@@ -464,6 +521,37 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if let State::DhcpV4 { simulation } = &a.state {
+            let (
+                State::DhcpV4 {
+                    simulation: authored,
+                },
+                crate::engine::Goal::DhcpV4 { initial, .. },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err("DHCP state belongs to another activity; original retained".into());
+            };
+            if authored != initial || simulation.validate_context(initial.topology()).is_err() {
+                return Err(
+                    "Saved DHCP immutable topology differs from this assignment; original retained"
+                        .into(),
+                );
+            }
+            if a.workspace
+                .as_ref()
+                .and_then(|w| w.dhcpv4_learning.as_ref())
+                .is_some_and(|l| {
+                    s.dhcpv4_teaching
+                        .as_ref()
+                        .is_none_or(|lesson| !l.valid_for(lesson))
+                })
+            {
+                return Err(
+                    "Saved DHCP practice differs from its authored fixture; original retained"
+                        .into(),
+                );
+            }
         }
         if let State::UnitManager { simulation } = &a.state {
             let (
@@ -1080,6 +1168,45 @@ fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_dhcpv4_workspace(a: &Attempt) -> Result<(), String> {
+    let metadata = a
+        .workspace
+        .as_ref()
+        .is_some_and(|w| w.dhcpv4_draft.is_some() || w.dhcpv4_learning.is_some());
+    let State::DhcpV4 { simulation } = &a.state else {
+        return if metadata {
+            Err("DHCP editing metadata on another activity; original retained".into())
+        } else {
+            Ok(())
+        };
+    };
+    simulation
+        .validate()
+        .map_err(|_| "Invalid saved DHCP state; original retained".to_owned())?;
+    if let Some(w) = &a.workspace
+        && (w
+            .dhcpv4_draft
+            .as_ref()
+            .is_some_and(|d| !d.same_shape(simulation))
+            || w.dhcpv4_learning.as_ref().is_some_and(|l| {
+                !l.valid()
+                    || l.context.topology().server == simulation.topology().server
+                    || l.context
+                        .topology()
+                        .clients
+                        .keys()
+                        .any(|k| simulation.topology().clients.contains_key(k))
+                    || l.context
+                        .topology()
+                        .segments
+                        .keys()
+                        .any(|k| simulation.topology().segments.contains_key(k))
+            }))
+    {
+        return Err("Invalid DHCP editing/practice immutable context; original retained".into());
+    }
+    Ok(())
+}
 fn validate_mac_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else { return Ok(()) };
     if w.mac_draft.is_none() && w.mac_learning.is_none() {
@@ -1110,6 +1237,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
+        validate_dhcpv4_workspace(a)?;
         validate_accounts_workspace(a)?;
         validate_legacy_teaching_workspace(a)?;
         validate_ospf_workspace(a)?;

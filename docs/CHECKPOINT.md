@@ -67,46 +67,48 @@ originalcaseplan1,finalcontent10/fmt/diff/alltargetClippyR2/coveragevalidator PA
 Compact task wording reran content10+native5; its first lost literal-format phrase
 guard failed then exact grammar wording restored. All failures retained.
 
-## Immediate next — M105 backend gate (no heavy active at write)
+## M105 backend integrated; native integration next
 
-1. Commit/push this accepted122 reporting update if still dirty. Do not rebuild
-   merely for docs; keep exactcd31 usable milestone. Then integrate ONLY frozen
-   DHCPbackend12paths with current-main three-way merge. Current122packinclude,
-   compact wording, shared getopts/history controllers MUST stay intact.
-2. Backend manifest reviews/dhcpv4/backend-source-r1/SOURCE-READY.json SHA
-   78191a43a30d4a001a733cdf944a1ca09633f5cf8bef49fa0a2288483f458716;
-   baseb5f, worktree dhcpv4-backend. Purecore25alreadyPASS; new24prospective tests
-   UNRUN. Peer receipt5c9f502d5f80444e48eefe38a4513272fa182470af46e739e629c863fb45a09a
-   accepts source, not runtime.12paths add typedState/Goal, boundedworkspace/
-   optionalteaching/context/persistence; NO normalcontent/UI/countcredit.
-   First MAIN --lib --test dhcpv4_workspace gate. Measure actual worst32probe
-   clone/check cost before native use;4contexts×8concurrent, not32concurrent.
-   All original122/history/persistence regressions then Clippy/fmt asappropriate.
-3. Source UI R2 freeze reviews/dhcpv4/native-source-r2/SOURCE-READY.json SHA
-   962a56de3bf0f6db85fbf68e383bca4c6d02cad5eb8e2216a7c7cb1d0a8ad974,
-   worktree dhcpv4-native,8incremental paths on currentM104UI+backend base.
-   Peer accepted after Appearance activeguard + per-segment relayUndo namespace
-   fixes.11prospective tests UNRUN. Backend first, then incremental UI integration
-   preserving current source; native technicalfixture30000..30399 NOT authored lab.
-   Check readable statuses/current-held vs saved policy/fresh probes, no inferred
-   routed/DNS connectivity. Replace learner-facing 'Fresh context' jargon with
-   'New-client test' (narrow followup, no frozen source rewrite yet).
-4. Only after backend/UI actual gates author coherent distinct DHCP client/relay/
-   scope/handover practice with teaching; don't count technical fixture aslab.
-   Continue remaining Linux/network/Bash course; no stop at candidate packaging.
+Backend12 paths integrated through preflighted three-way merge preserving122
+content/current M104/history UI. Initial68lib+24 adapter PASS. Full97 targets
+PASS1051 with no failures (logs/m105-all-models-r1.log). Max4contexts×8clients
+clone+check13.972ms/coreJSON58476bytes; not a runtime guarantee. Memory minimum
+22.74GiB/PSI avg10zero/OOMdelta0. Narrow 'New-client test' wording replaces jargon.
+
+Peer review found duplicate proposed native grading. Shared fresh
+progress::current_dhcpv4_checks retains all context/metadata/draft guards, rejects
+pending drafts before probes and supplies one result vector, no persistent cache.
+Its added25th adapter regression +lib/progress/workspaces/backup PASS113 checks
+(m105-current-results-r2). R1 test compile shadow failure retained/corrected.
+Full97-run preceded helper; not claimed rerun. All-target ClippyR2/fmt/diff PASS;
+R1 style-only collapsible-if warning was corrected without changing predicates.
+Commit/push backend checkpoint next if dirty; no heavy active at this write.
+
+Next integrate ONLY8 native R2 paths after backend checkpoint, preserving current
+UI. Frozen reviews/dhcpv4/native-source-r2/SOURCE-READY.json SHA
+962a56de3bf0f6db85fbf68e383bca4c6d02cad5eb8e2216a7c7cb1d0a8ad974.
+All4 existing UI bases exactly matched MAIN at preflight;4 new files absent.
+Replace duplicate current_solved/work::checks in assignment feedback with one
+current_dhcpv4_checks call and derive completion from that vector.11 prospective
+UI checks UNRUN. Gate actual phases/layout/Clippy then actual identified native
+fixture30000..30095; no authored count. Retain Appearance guard/per-segment Undo
+fixes, shared fields and existing Context reentry prohibition.
+
+After actual native capability acceptance integrate meaningful DHCP content,
+not the technical fixture. ccna_discovery is authoring3 distinct tasks in isolated
+dhcpv4-content, no heavy grant/count credit. Continue other tracks.
 
 ## Existing agents — source only, no heavy grants/new spawn
 
-ccna_discovery: DHCPbackendR1 andnativeR2 frozen, idle after final. Independent
-review accepted both; next source authoring/review only when root assigns.
-independent_review: pure Debian package core WIP under isolatedcd31 worktree,
-module/libexport/controlled authored fixture/19prospective tests; docs/audit notyet
-frozen. No compiler, hostpackage commands or coverage. Debian version comparator
-(epoch/upstream/revision,tilde/nondigit), installed/cache/published/archive separation,
-ANDeddependency closure/ownership/repair/removal/config-retain/purge. Logical
-restricted script-free actions only; no fake dpkg rollback/APT or RPM parity.
-R1design62c65e5e..., WIPaff87f8a... under reviews/package-management. Explicitcwd
-for all mutations. No new deps/engine/UI/content/registry until first core gate.
+ccna_discovery: source-only DHCP content worktree atb08+exactbackend prerequisites;
+3 distinct direct held-option/relay diagnosis/policy handover tasks proposed.
+No compiler/VM/UI/count. Also accepted Debian core source read-only.
+independent_review: DHCP backend/current-helper/native R2 source accepted. Pure
+Debian5-path freeze reviews/package-management/core-source-r1/SOURCE-READY.json
+SHAf440acedc551d579ea2479650929dc9493e45621b28b544e84a302bd70e4dd5e.
+Basecd31;19 tests UNRUN. Version/dependency/ownership/repair/removal/config-retain/
+purge logical script-free subset, no dpkg rollback/APT/RPM claim. Peer accepted.
+Gate after current serial work; no MAIN copy without hash/base checks.
 
 ## Remaining acceptance and evidence boundaries
 

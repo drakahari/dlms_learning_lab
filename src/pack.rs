@@ -4,6 +4,8 @@ use std::collections::BTreeSet;
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dhcpv4_teaching: Option<crate::dhcpv4_teaching::Lesson>,
     pub id: String,
     pub version: u32,
     pub track: String,
@@ -164,6 +166,8 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                     || v.len()
                         > if matches!(s.initial, State::Ipv4Acl { .. }) {
                             crate::acl_editor::MAX_JSON + 64
+                        } else if matches!(s.initial, State::DhcpV4 { .. }) {
+                            crate::dhcpv4_workspace::MAX_ACTION_BYTES
                         } else if matches!(s.initial, State::UnitManager { .. }) {
                             crate::unit_manager_workspace::MAX_ACTION_BYTES
                         } else {
@@ -300,6 +304,32 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 return Err("DNS example must use a different zone from the assignment".into());
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if let State::DhcpV4 { simulation } = &s.initial {
+            let Goal::DhcpV4 {
+                initial,
+                requirements,
+                probes,
+            } = &s.goal
+            else {
+                return Err("DHCP state needs matching immutable objectives".into());
+            };
+            if simulation != initial
+                || !crate::dhcpv4_workspace::valid_goal(initial, requirements, probes)
+            {
+                return Err("DHCP objectives must pin initial context and bounded positive current/fresh behavior".into());
+            }
+            if let Some(lesson) = &s.dhcpv4_teaching {
+                lesson.validate()?;
+                if !lesson.separate_from(initial) {
+                    return Err(
+                        "DHCP practice needs separate immutable server/segment/client identities"
+                            .into(),
+                    );
+                }
+            }
+        } else if s.dhcpv4_teaching.is_some() || matches!(s.goal, Goal::DhcpV4 { .. }) {
+            return Err("DHCP objectives/teaching attached to another activity".into());
         }
         if let State::UnitManager { simulation } = &s.initial {
             let Goal::UnitManager { definition } = &s.goal else {
@@ -626,6 +656,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::DhcpV4 { simulation } => simulation.validate().is_ok(),
         State::UnitManager { simulation } => simulation.validate().is_ok(),
         State::Ospf { simulation } => simulation.valid(),
         State::Ipv4Acl { network } => crate::acl_workspace::valid_network(network).is_ok(),

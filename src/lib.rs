@@ -99,3 +99,6 @@ pub mod legacy_access_teaching;
 pub mod legacy_logs_teaching;
 
 pub mod dhcpv4;
+
+pub mod dhcpv4_teaching;
+pub mod dhcpv4_workspace;

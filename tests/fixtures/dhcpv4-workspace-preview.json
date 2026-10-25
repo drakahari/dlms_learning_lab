@@ -1,0 +1,785 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "dhcpv4-workspace-preview",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Private bounded DHCP adapter fixture",
+      "unit": "",
+      "title": "Private DHCP backend fixture",
+      "summary": "Technical fixture for current leases, fresh allocation and separate practice.",
+      "objective": "Repair the supplied remote policy, configure the remote client and preserve the named desk pool and healthy peer. Technical test fixture only.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "retry_guidance": "Inspect the actual current client lease separately from applied policy and a pending offer.",
+      "steps": [
+        "Apply a valid policy.",
+        "Discover a current offer.",
+        "Request that offer."
+      ],
+      "guide": [],
+      "explanation": "Typed simulator fixture; no IOS or Linux grammar.",
+      "hints": [
+        "Inspect policy and actual held parameters.",
+        "An offer is not a client lease.",
+        "Current and fresh policy results are separate."
+      ],
+      "sources": [
+        "https://www.rfc-editor.org/rfc/rfc2131.html"
+      ],
+      "simplifications": "Private unbundled backend fixture; logical DHCP only, no host packets, routed connectivity, resolver or curriculum credit.",
+      "initial": {
+        "kind": "DhcpV4",
+        "simulation": {
+          "topology": {
+            "server": "192.0.2.1",
+            "segments": {
+              "desk": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "192.0.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": [
+                  "192.0.2.200"
+                ]
+              },
+              "remote": {
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "server_interface": null,
+                "relay_interface": "10.20.0.1",
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "desktop": {
+                "segment": "desk"
+              },
+              "peer": {
+                "segment": "desk"
+              },
+              "branch": {
+                "segment": "remote"
+              },
+              "visitor": {
+                "segment": "remote"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "desk": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "first": "192.0.2.10",
+                "last": "192.0.2.12",
+                "excluded": [
+                  "192.0.2.11"
+                ],
+                "reservations": {
+                  "peer": "192.0.2.12"
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 64
+              },
+              "remote": {
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "first": "10.20.0.10",
+                "last": "10.20.0.12",
+                "excluded": [],
+                "reservations": {},
+                "router": "10.20.0.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              }
+            },
+            "relays": {
+              "remote": {
+                "enabled": true,
+                "target": "192.0.2.99",
+                "giaddr": "10.20.0.1"
+              }
+            }
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "peer": {
+              "granted_seconds": 64,
+              "pool": "desk",
+              "address": "192.0.2.12",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "peer": {
+              "granted_seconds": 64,
+              "pool": "desk",
+              "address": "192.0.2.12",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "DhcpV4",
+        "initial": {
+          "topology": {
+            "server": "192.0.2.1",
+            "segments": {
+              "desk": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "server_interface": "192.0.2.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": [
+                  "192.0.2.200"
+                ]
+              },
+              "remote": {
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "server_interface": null,
+                "relay_interface": "10.20.0.1",
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "desktop": {
+                "segment": "desk"
+              },
+              "peer": {
+                "segment": "desk"
+              },
+              "branch": {
+                "segment": "remote"
+              },
+              "visitor": {
+                "segment": "remote"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "desk": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "first": "192.0.2.10",
+                "last": "192.0.2.12",
+                "excluded": [
+                  "192.0.2.11"
+                ],
+                "reservations": {
+                  "peer": "192.0.2.12"
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 64
+              },
+              "remote": {
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "first": "10.20.0.10",
+                "last": "10.20.0.12",
+                "excluded": [],
+                "reservations": {},
+                "router": "10.20.0.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              }
+            },
+            "relays": {
+              "remote": {
+                "enabled": true,
+                "target": "192.0.2.99",
+                "giaddr": "10.20.0.1"
+              }
+            }
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "peer": {
+              "granted_seconds": 64,
+              "pool": "desk",
+              "address": "192.0.2.12",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "peer": {
+              "granted_seconds": 64,
+              "pool": "desk",
+              "address": "192.0.2.12",
+              "parameters": {
+                "subnet": {
+                  "network": "192.0.2.0",
+                  "prefix": 24
+                },
+                "router": "192.0.2.254",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "branch",
+              "subnet": {
+                "network": "10.20.0.0",
+                "prefix": 24
+              },
+              "router": "10.20.0.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "peer",
+              "subnet": {
+                "network": "192.0.2.0",
+                "prefix": 24
+              },
+              "router": "192.0.2.254",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "192.0.2.12"
+            }
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "desk"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "desk"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "branch",
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "router": "10.20.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              },
+              {
+                "client": "visitor",
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "router": "10.20.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "visitor",
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "router": "10.20.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              },
+              {
+                "client": "branch",
+                "subnet": {
+                  "network": "10.20.0.0",
+                  "prefix": 24
+                },
+                "router": "10.20.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "dhcpv4 {\"kind\":\"ApplyPolicy\",\"policy\":{\"server_enabled\":true,\"pools\":{\"desk\":{\"subnet\":{\"network\":\"192.0.2.0\",\"prefix\":24},\"first\":\"192.0.2.10\",\"last\":\"192.0.2.12\",\"excluded\":[\"192.0.2.11\"],\"reservations\":{\"peer\":\"192.0.2.12\"},\"router\":\"192.0.2.254\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":64},\"remote\":{\"subnet\":{\"network\":\"10.20.0.0\",\"prefix\":24},\"first\":\"10.20.0.10\",\"last\":\"10.20.0.12\",\"excluded\":[],\"reservations\":{},\"router\":\"10.20.0.1\",\"dns\":[\"203.0.113.53\"],\"lease_seconds\":64}},\"relays\":{\"remote\":{\"enabled\":true,\"target\":\"192.0.2.1\",\"giaddr\":\"10.20.0.1\"}}}}",
+        "dhcpv4 {\"kind\":\"Discover\",\"client\":\"branch\"}",
+        "dhcpv4 {\"kind\":\"Request\",\"client\":\"branch\",\"token\":1}"
+      ],
+      "prerequisites": [],
+      "dhcpv4_teaching": {
+        "prerequisite_note": "The private example uses different supplied server, segment and client identities.",
+        "concepts": [
+          {
+            "title": "Offers and leases differ",
+            "text": "Discover receives proposed settings. Request accepts a current offer and configures the client."
+          },
+          {
+            "title": "Policy and held parameters differ",
+            "text": "Apply changes policy. An existing client receives new parameters only through an actual supported exchange."
+          }
+        ],
+        "example_description": "Technical museum fixture: configure its remote client, release it as an experiment, then reacquire it.",
+        "fixture": {
+          "topology": {
+            "server": "198.51.100.1",
+            "segments": {
+              "museum-desk": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "server_interface": "198.51.100.1",
+                "relay_interface": null,
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": [
+                  "198.51.100.200"
+                ]
+              },
+              "museum-remote": {
+                "subnet": {
+                  "network": "10.30.0.0",
+                  "prefix": 24
+                },
+                "server_interface": null,
+                "relay_interface": "10.30.0.1",
+                "relay_to_server": true,
+                "client_unicast_to_server": true,
+                "occupied": []
+              }
+            },
+            "clients": {
+              "museum-desktop": {
+                "segment": "museum-desk"
+              },
+              "museum-peer": {
+                "segment": "museum-desk"
+              },
+              "museum-branch": {
+                "segment": "museum-remote"
+              },
+              "museum-visitor": {
+                "segment": "museum-remote"
+              }
+            }
+          },
+          "policy": {
+            "server_enabled": true,
+            "pools": {
+              "museum-desk": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "first": "198.51.100.10",
+                "last": "198.51.100.12",
+                "excluded": [
+                  "198.51.100.11"
+                ],
+                "reservations": {
+                  "museum-peer": "198.51.100.12"
+                },
+                "router": "198.51.100.254",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "lease_seconds": 64
+              },
+              "museum-remote": {
+                "subnet": {
+                  "network": "10.30.0.0",
+                  "prefix": 24
+                },
+                "first": "10.30.0.10",
+                "last": "10.30.0.12",
+                "excluded": [],
+                "reservations": {},
+                "router": "10.30.0.254",
+                "dns": [
+                  "203.0.113.99"
+                ],
+                "lease_seconds": 64
+              }
+            },
+            "relays": {
+              "museum-remote": {
+                "enabled": true,
+                "target": "198.51.100.99",
+                "giaddr": "10.30.0.1"
+              }
+            }
+          },
+          "now": 0,
+          "next_token": 0,
+          "offers": {},
+          "bindings": {
+            "museum-peer": {
+              "granted_seconds": 64,
+              "pool": "museum-desk",
+              "address": "198.51.100.12",
+              "parameters": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.254",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          },
+          "leases": {
+            "museum-peer": {
+              "granted_seconds": 64,
+              "pool": "museum-desk",
+              "address": "198.51.100.12",
+              "parameters": {
+                "subnet": {
+                  "network": "198.51.100.0",
+                  "prefix": 24
+                },
+                "router": "198.51.100.254",
+                "dns": [
+                  "203.0.113.53"
+                ]
+              },
+              "acquired_at": 0,
+              "renew_at": 32,
+              "rebind_at": 56,
+              "expires_at": 64
+            }
+          }
+        },
+        "requirements": [
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "museum-branch",
+              "subnet": {
+                "network": "10.30.0.0",
+                "prefix": 24
+              },
+              "router": "10.30.0.1",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": null
+            }
+          },
+          {
+            "kind": "ClientConfiguration",
+            "expected": {
+              "client": "museum-peer",
+              "subnet": {
+                "network": "198.51.100.0",
+                "prefix": 24
+              },
+              "router": "198.51.100.254",
+              "dns": [
+                "203.0.113.53"
+              ],
+              "minimum_remaining": 1,
+              "address": "198.51.100.12"
+            }
+          },
+          {
+            "kind": "PoolPreserved",
+            "pool": "museum-desk"
+          },
+          {
+            "kind": "RelayPreserved",
+            "segment": "museum-desk"
+          },
+          {
+            "kind": "ServerEnabled",
+            "enabled": true
+          }
+        ],
+        "probes": [
+          {
+            "clients": [
+              {
+                "client": "museum-branch",
+                "subnet": {
+                  "network": "10.30.0.0",
+                  "prefix": 24
+                },
+                "router": "10.30.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              },
+              {
+                "client": "museum-visitor",
+                "subnet": {
+                  "network": "10.30.0.0",
+                  "prefix": 24
+                },
+                "router": "10.30.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              }
+            ]
+          },
+          {
+            "clients": [
+              {
+                "client": "museum-visitor",
+                "subnet": {
+                  "network": "10.30.0.0",
+                  "prefix": 24
+                },
+                "router": "10.30.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              },
+              {
+                "client": "museum-branch",
+                "subnet": {
+                  "network": "10.30.0.0",
+                  "prefix": 24
+                },
+                "router": "10.30.0.1",
+                "dns": [
+                  "203.0.113.53"
+                ],
+                "minimum_remaining": 1,
+                "address": null
+              }
+            ]
+          }
+        ],
+        "example_actions": [
+          {
+            "action": {
+              "kind": "ApplyPolicy",
+              "policy": {
+                "server_enabled": true,
+                "pools": {
+                  "museum-desk": {
+                    "subnet": {
+                      "network": "198.51.100.0",
+                      "prefix": 24
+                    },
+                    "first": "198.51.100.10",
+                    "last": "198.51.100.12",
+                    "excluded": [
+                      "198.51.100.11"
+                    ],
+                    "reservations": {
+                      "museum-peer": "198.51.100.12"
+                    },
+                    "router": "198.51.100.254",
+                    "dns": [
+                      "203.0.113.53"
+                    ],
+                    "lease_seconds": 64
+                  },
+                  "museum-remote": {
+                    "subnet": {
+                      "network": "10.30.0.0",
+                      "prefix": 24
+                    },
+                    "first": "10.30.0.10",
+                    "last": "10.30.0.12",
+                    "excluded": [],
+                    "reservations": {},
+                    "router": "10.30.0.1",
+                    "dns": [
+                      "203.0.113.53"
+                    ],
+                    "lease_seconds": 64
+                  }
+                },
+                "relays": {
+                  "museum-remote": {
+                    "enabled": true,
+                    "target": "198.51.100.1",
+                    "giaddr": "10.30.0.1"
+                  }
+                }
+              }
+            },
+            "explanation": "Stage the corrected museum policy; Apply does not acquire a lease."
+          },
+          {
+            "action": {
+              "kind": "Discover",
+              "client": "museum-branch"
+            },
+            "explanation": "Discover an offer for the museum client."
+          },
+          {
+            "action": {
+              "kind": "Request",
+              "client": "museum-branch",
+              "token": 1
+            },
+            "explanation": "Request the current museum offer."
+          }
+        ],
+        "try_change": {
+          "description": "Release the museum client and observe its missing current lease while fresh policy still works.",
+          "actions": [
+            {
+              "kind": "Release",
+              "client": "museum-branch"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Discover",
+            "client": "museum-branch"
+          },
+          {
+            "kind": "Request",
+            "client": "museum-branch",
+            "token": 2
+          }
+        ]
+      }
+    }
+  ]
+}

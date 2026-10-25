@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    DhcpV4 {
+        simulation: crate::dhcpv4::State,
+    },
     MacLearning {
         simulation: crate::mac_learning::State,
     },
@@ -127,6 +130,13 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    DhcpV4 {
+        initial: crate::dhcpv4::State,
+        #[serde(deserialize_with = "crate::dhcpv4_workspace::requirements")]
+        requirements: Vec<crate::dhcpv4_workspace::Requirement>,
+        #[serde(deserialize_with = "crate::dhcpv4_workspace::probes")]
+        probes: Vec<crate::dhcpv4_workspace::Probe>,
+    },
     MacLearning {
         initial: crate::mac_learning::State,
         #[serde(deserialize_with = "crate::mac_learning_workspace::requirements")]
@@ -271,6 +281,14 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (
+            State::DhcpV4 { simulation },
+            Goal::DhcpV4 {
+                initial,
+                requirements,
+                probes,
+            },
+        ) => crate::dhcpv4_workspace::checks(initial, simulation, requirements, probes),
         (State::UnitManager { simulation }, Goal::UnitManager { definition }) => {
             match crate::unit_manager_workspace::Draft::new(simulation) {
                 Ok(draft) => crate::unit_manager_workspace::checks(definition, simulation, &draft),
@@ -567,6 +585,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::DhcpV4 { .. } => crate::dhcpv4_workspace::HELP,
         State::MacLearning { .. } => crate::mac_learning_workspace::HELP,
         State::UnitManager { .. } => crate::unit_manager_workspace::HELP,
         State::Ipv4Acl { .. } => crate::acl_workspace::HELP,
@@ -622,6 +641,29 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::DhcpV4 { simulation } = s {
+        if input.len() > crate::dhcpv4_workspace::MAX_ACTION_BYTES {
+            return Err("DHCP authoring action exceeds256KiB".into());
+        }
+        let Goal::DhcpV4 {
+            initial,
+            requirements,
+            probes,
+        } = goal
+        else {
+            return Err("DHCP mutations need immutable assignment context".into());
+        };
+        if !crate::dhcpv4_workspace::valid_goal(initial, requirements, probes) {
+            return Err("Invalid authored DHCP goals; state retained".into());
+        }
+        simulation
+            .validate_context(initial.topology())
+            .map_err(|e| crate::dhcpv4_workspace::notice(e.message))?;
+        if matches!(input.trim(), "help" | "show") {
+            return execute(s, input);
+        }
+        return crate::dhcpv4_workspace::execute(initial, simulation, input);
+    }
     if let State::UnitManager { simulation } = s {
         let Goal::UnitManager { definition } = goal else {
             return Err("Virtual unit actions require a matching fixed assignment".into());
@@ -674,6 +716,12 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::DhcpV4 { .. }) {
+        if input.len() > crate::dhcpv4_workspace::MAX_ACTION_BYTES {
+            return Err("DHCP input exceeds256KiB".into());
+        }
+        return match input.trim() {"help"=>Ok(crate::dhcpv4_workspace::HELP.into()),"show"=>Ok(describe(s)),_=>Err("Use native DHCP controls; mutations require immutable goal context, not Linux/IOS commands".into())};
+    }
     if matches!(s, State::UnitManager { .. }) {
         if input.len() > crate::unit_manager_workspace::MAX_ACTION_BYTES {
             return Err("Virtual unit input exceeds its bounded size".into());
@@ -779,7 +827,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::UnitManager { .. }
+        State::DhcpV4 { .. }
+        | State::UnitManager { .. }
         | State::Ospf { .. }
         | State::Ipv4Acl { .. }
         | State::Accounts { .. }
@@ -1220,6 +1269,7 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::DhcpV4 { simulation } => crate::dhcpv4_workspace::describe(simulation),
         State::UnitManager { simulation } => format!(
             "Virtual unit manager · {} supplied units · {} loaded definitions · current runtime and future-session enablement are separate; no host systemd or boot",
             simulation.inventory().units.len(),

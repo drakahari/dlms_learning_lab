@@ -14,6 +14,10 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dhcpv4_draft: Option<crate::dhcpv4_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dhcpv4_learning: Option<crate::dhcpv4_teaching::Learning>,
     pub version: u32,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub unit_manager_draft: Option<crate::unit_manager_workspace::Draft>,
@@ -110,6 +114,8 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.dhcpv4_draft.as_ref().is_none_or(|d| d.valid())
+            && self.dhcpv4_learning.as_ref().is_none_or(|l| l.valid())
             && self
                 .unit_manager_terminal
                 .as_ref()
@@ -223,6 +229,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::DhcpV4 { simulation } = &a.state
+        && w.dhcpv4_draft.is_none()
+    {
+        w.dhcpv4_draft = crate::dhcpv4_workspace::Draft::new(simulation).ok();
+    }
     if let State::UnitManager { simulation } = &a.state
         && w.unit_manager_draft.is_none()
     {
