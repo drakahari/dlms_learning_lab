@@ -3,6 +3,7 @@ use engine::State;
 mod client_learning;
 mod mac_learning;
 mod ospf;
+mod seed_learning;
 #[test]
 fn opening_terminal_assignment_keeps_task_visible_and_scrolling_does_not_grow_output() {
     for scale in [1., 1.5, 2.] {
@@ -484,6 +485,9 @@ fn open_assignment(a: &mut LabApp, i: usize) {
     }
     if a.scenarios[i].service_teaching.is_some() {
         a.set_service_view(i, teaching::View::Assignment);
+    }
+    if a.scenarios[i].seed_dns_teaching.is_some() || a.scenarios[i].seed_mount_teaching.is_some() {
+        a.set_seed_view(i, teaching::View::Assignment);
     }
     if a.scenarios[i].client_teaching.is_some() {
         a.set_client_view(i, teaching::View::Assignment);

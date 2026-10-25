@@ -5,6 +5,27 @@ Root owns the sole heavy slot for the next combined reviewed-source gates.
 Helpers are source-only; no heavy grant. The application is not complete. No public release
 is authorized. Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/run.
 
+## Active M93 integration
+
+- M92 reporting423029c is pushed; exact deb55 installed acceptance completed.
+- Reviewed legacy teaching R4 and NoAnswer R1 are integrated in MAIN uncommitted.
+ 20 paths merged directly/three-way; one tests.rs conflict resolved by retaining
+  BOTH root opening regression and new seed module/view helper. Existing compact
+  client/shared unscrolled terminal/active Run/context/pending guards retained.
+- Full combined model/integration gate PASS941 checks/89 targets, log
+  m93-combined-models-r1. Whole UI R1 finishes179pass/1fail (test clicked clipped popup). Stronger
+  selected-index repro retains failure; bounded popup scroll/click fix and worked
+  pre-experiment success assertion pass5 seed checks. Native R2 overlay integrates
+  cleanly,8 focused checks PASS (5seed+3controller).183 distinct UI accounted.
+  All-target Clippy R2/fmt pass after test-module placement-only correction.
+- Native R2 controller25000 and passive metrics are integrated and scoped-tested;
+  actual native run pending. Helper ccna froze three unregistered PTR tasks/11
+  prospective tests, now source-reviews getopts tool; no heavy grant. Independent reviewer source-only implements fixed
+  getopts collector/probe/safety tests; no VM/default/evaluator changes or actual
+  observations yet. Both must freeze source before integration/gates.
+- Source catalog116/28 unchanged. New teaching now needs actual native
+  acceptance; NoAnswer is capability only, no new lab/coverage. Do not publish.
+
 ## Preserved prior safe stop state (2026-10-24)
 
 - Main code milestone `deb55b92a2407a0068b8ba83dff9b71568562893` is committed and
@@ -199,3 +220,10 @@ legacy histories and uncertain evidence remain. No wildcard cleanup/cargo clean.
 Evaluator8 actual-before7/after8 evidence retains4124 outcomes/3968 unchanged/
 156declared changes and genuine6/7 records; all earlier failures are preserved.
 Generated measurements, profiles, recordings, archives and PNGs remain ignored.
+
+
+M93 continuation: source audit found three additional original teaching gaps
+(permissions/traversal/logs use Unix/Logs primitives without separate examples).
+Do not claim DNS/Mount adapters finish all nine patterns. Before next expansion,
+review their own bounded teaching adapters while preserving original models/goals.
+Root next builds clean M93 candidate for actual two-seed flow; no helper heavy grant.

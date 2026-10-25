@@ -1056,3 +1056,30 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   All builds/runs serialized through MAIN runner,2jobs/2testthreads, disk artifacts.
   Next source integration is reviewed legacy teaching R4 and NoAnswer R1; their
   prospective checks remain unrun at this reporting commit. Helpers source-only.
+
+
+### M93 original DNS/storage teaching and honest negative DNS outcomes
+
+- Integrates reviewed R4 teaching and NoAnswer R1, preserving original116 IDs,
+  versions/initials/Goals/solutions/unit order,28themes and saved drafts/histories.
+  New attempts get separate Introduction/practice/full assignment; legacy attempts
+  first reopen their assignment. Existing pending/context guards stay intact.
+- Combined941 model/integration checks across89targets PASS. Full UI R1 finishes
+ 179pass/1fail: the new test directly clicked offscreen popup choices. A stronger
+  selection assertion reproduces wrong index4 vs5; original logs retained. Actual
+  clipped-popup scroll/click correction +pre-experiment success assertion pass all
+ 5 seed checks. Reviewed native controller adds3 passing focused checks,8 total;
+ 183distinct UI checks accounted without calling the original full run all-green.
+- Clippy R1 reports items-after-test-module only; relocating the new test module
+  preserves code/expectations and all-target-Dwarnings R2 passes. fmt/diff pass.
+- Native controller25000 uses actual Start/Insert-only/Save/Run/Check/typed fields,
+  exact serving/saved experiment observations, distinct drafts/reset/resume and
+  scaled light/dark input; tests are not actual native acceptance yet. No engine
+  or reference State publication. New NoAnswer adds no authored coverage/count.
+- Source audit corrects a prior incomplete teaching-gap report: original Unix
+  permissions/traversal and Logs still have optional guides but no independent
+  Introduction/practice metadata. They remain real working tasks; adapting their
+  teaching is still open. Do not claim all original nine meet the full pattern.
+- Reverse-DNS three-task data and fixed getopts oracle sources remain unregistered/
+  unrun worktree handoffs. No shell revision/default change or host learner
+  execution. Next is a clean candidate and actual DNS/Mount screen/flow review.

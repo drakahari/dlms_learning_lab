@@ -257,6 +257,13 @@ pub enum Requirement {
         record_type: QueryType,
         data: Vec<Data>,
     },
+    /// A completed authoritative query with no data of the requested type.
+    /// This says nothing about whether another copy is synchronized.
+    NoAnswer {
+        copy: Snapshot,
+        name: String,
+        record_type: QueryType,
+    },
     TargetAddress {
         copy: Snapshot,
         owner: String,
@@ -282,6 +289,7 @@ impl Requirement {
                 .is_some_and(|(n, o)| n == o || n.ends_with(&format!(".{o}")))
         };
         match self {
+            Self::NoAnswer { copy, name, .. } => *copy != Snapshot::Configured && inside(name),
             Self::AliasTo {
                 copy,
                 owner,
@@ -340,6 +348,65 @@ impl Requirement {
             );
         }
         match self {
+            Self::NoAnswer {
+                copy,
+                name,
+                record_type,
+            } => {
+                let zone = copy.zone(server);
+                let origin = dns::canonical_name(&zone.origin).unwrap();
+                // Query exactly once. Only CNAME targets are walked names;
+                // an external PTR target is returned data, not recursion.
+                let (pass, reason) = match zone.query(name, *record_type) {
+                    Err(_) => (false, "could not complete a valid authoritative query"),
+                    Ok(answer)
+                        if !answer.authoritative
+                            || !matches!(answer.code, dns::Code::Noerror | dns::Code::Nxdomain) =>
+                    {
+                        (
+                            false,
+                            "needs a completed authoritative answer, not a refusal or query failure",
+                        )
+                    }
+                    Ok(answer) => {
+                        let leaves_zone = answer.records.iter().any(|record| {
+                            if let Data::Cname { target } = &record.data {
+                                dns::canonical_name(target).is_ok_and(|target| {
+                                    target != origin && !target.ends_with(&format!(".{origin}"))
+                                })
+                            } else {
+                                false
+                            }
+                        });
+                        if leaves_zone {
+                            (
+                                false,
+                                "cannot prove absence through an alias outside this zone",
+                            )
+                        } else if answer
+                            .records
+                            .iter()
+                            .any(|r| r.data.query_type() == *record_type)
+                        {
+                            (
+                                false,
+                                "still returns data of this type; inspect the served copy and any alias path",
+                            )
+                        } else {
+                            (true, "authoritatively returns no data of this type")
+                        }
+                    }
+                };
+                (
+                    pass,
+                    format!(
+                        "{}: {} {} {reason}",
+                        copy.label(),
+                        name,
+                        type_text(*record_type)
+                    ),
+                )
+            }
             Self::AliasTo {
                 copy,
                 owner,

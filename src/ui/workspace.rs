@@ -82,6 +82,8 @@ impl LabApp {
                 self.discovery_learning_workspace(ui, i);
             } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_workspace(ui, i);
+            } else if s.seed_dns_teaching.is_some() || s.seed_mount_teaching.is_some() {
+                self.seed_learning_workspace(ui, i);
             } else if s.client_teaching.is_some() {
                 self.client_learning_workspace(ui, i);
             } else if s.service_teaching.is_some() {
@@ -165,6 +167,8 @@ impl LabApp {
                 self.discovery_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::AuthoritativeDns { .. }) {
                 self.dns_view(i) == teaching::View::Assignment
+            } else if s.seed_dns_teaching.is_some() || s.seed_mount_teaching.is_some() {
+                self.seed_view(i) == teaching::View::Assignment
             } else if s.client_teaching.is_some() {
                 self.client_view(i) == teaching::View::Assignment
             } else if s.service_teaching.is_some() {
@@ -210,6 +214,8 @@ impl LabApp {
                         ui.push_id(("acl-help", &s.id, challenge), |ui| self.acl_help(ui, i));
                     } else if matches!(s.initial, State::Accounts { .. }) {
                         ui.push_id(("accounts-help", &s.id, challenge), |ui| self.help(ui, i));
+                    } else if s.seed_dns_teaching.is_some() || s.seed_mount_teaching.is_some() {
+                        ui.push_id(("seed-help", &s.id, challenge), |ui| self.help(ui, i));
                     } else {
                         self.help(ui, i);
                     }
@@ -915,6 +921,17 @@ pub(super) fn editor_row(
         );
         name_control(&r, accessible_name);
         metrics.inputs.push(r.rect);
+        if matches!(
+            id,
+            "dns-address"
+                | "dns-serial"
+                | "mount-device"
+                | "seed-dns-address"
+                | "seed-dns-serial"
+                | "seed-mount-device"
+        ) {
+            metrics.seed_fields.push((id.into(), r.rect, r.id));
+        }
         if focus {
             r.request_focus();
         }

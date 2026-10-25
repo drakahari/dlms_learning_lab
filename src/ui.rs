@@ -19,6 +19,7 @@ mod ospf_workspace;
 mod process_learning;
 mod script_learning;
 mod scripting;
+mod seed_learning;
 mod service_learning;
 mod storage_workspace;
 mod terminal_learning;
@@ -72,6 +73,10 @@ struct Metrics {
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
     inputs: Vec<egui::Rect>,
+    seed_fields: Vec<(String, egui::Rect, egui::Id)>,
+    seed_summary: Option<egui::Rect>,
+    seed_explanation: Option<egui::Rect>,
+    seed_feedback: Vec<(bool, egui::Rect)>,
     vlan_fields: Vec<(egui::Id, egui::Rect)>,
     vlan_field_enabled: Vec<(egui::Id, bool)>,
     terminal: Option<egui::Rect>,
@@ -361,6 +366,8 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
             {
                 23000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("seed-teaching") {
+                25000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("find-lessons") {
                 21000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-layout") {
@@ -567,6 +574,14 @@ impl LabApp {
             dlms_learning_lab::client_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated client teaching");
         }
+        if let Some(lesson) = &s.seed_dns_teaching {
+            dlms_learning_lab::seed_dns_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated seed DNS teaching");
+        }
+        if let Some(lesson) = &s.seed_mount_teaching {
+            dlms_learning_lab::seed_mount_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated seed mount teaching");
+        }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, new_attempt);
         }
@@ -699,6 +714,14 @@ impl LabApp {
         if let Some(lesson) = &s.client_teaching {
             dlms_learning_lab::client_teaching::prepare(a, lesson, true)
                 .expect("validated client teaching");
+        }
+        if let Some(lesson) = &s.seed_dns_teaching {
+            dlms_learning_lab::seed_dns_teaching::prepare(a, lesson, true)
+                .expect("validated seed DNS teaching");
+        }
+        if let Some(lesson) = &s.seed_mount_teaching {
+            dlms_learning_lab::seed_mount_teaching::prepare(a, lesson, true)
+                .expect("validated seed mount teaching");
         }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, true);

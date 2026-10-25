@@ -15,6 +15,7 @@ mod mac_lessons;
 mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
+mod seed_teaching;
 mod substitution;
 mod unit_manager;
 mod unit_manager_lessons;
@@ -191,6 +192,11 @@ impl LabApp {
         if self.scenarios[i].service_teaching.is_some() {
             self.set_service_view(i, teaching::View::Assignment);
         }
+        if self.scenarios[i].seed_dns_teaching.is_some()
+            || self.scenarios[i].seed_mount_teaching.is_some()
+        {
+            self.set_seed_view(i, teaching::View::Assignment);
+        }
         if self.scenarios[i].client_teaching.is_some() {
             self.set_client_view(i, teaching::View::Assignment);
         }
@@ -350,6 +356,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 25000..=25999 => {
+                let (advance, capture) = self.seed_teaching_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 23000..=23999 => {
                 let (advance, capture) = self.client_learning_native(ctx, n);
                 if !advance {

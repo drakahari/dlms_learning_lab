@@ -980,7 +980,7 @@
         "https://wiki.lpi.org/wiki/LPIC-2_Objectives_V4.5",
         "https://bind9.readthedocs.io/en/latest/chapter3.html"
       ],
-      "simplifications": "One authoritative A-record map, no recursion, TTL cache, DNSSEC, secondary servers or serial wrap arithmetic. dns set is a teaching editor, not a BIND CLI.",
+      "simplifications": "One authoritative A-record map, no recursion, TTL cache, DNSSEC, secondary servers or serial wrap arithmetic. dns set is a teaching editor, not a BIND CLI. The seed uses supplied lowercase literal keys although real DNS name matching ignores ASCII case. named-checkzone lab.test is an abbreviated simulator-only check; real BIND needs a zone-file argument. Teaching practice is independent and ungraded.",
       "guide": [
         {
           "title": "Compare disk and loaded answers",
@@ -1029,7 +1029,165 @@
         }
       ],
       "explanation": "The saved A record must be 192.0.2.80. Increasing the serial and reloading named moves it into the loaded authoritative zone. dig queries that loaded state; merely editing the record does not change its answer. Serial values above the loaded one are accepted.",
-      "unit": "linux-service-recovery"
+      "unit": "linux-service-recovery",
+      "seed_dns_teaching": {
+        "prerequisite_note": "Use the saved-versus-running idea from Bring the service back. This example has a different name, address and serial from your assignment.",
+        "concepts": [
+          {
+            "title": "A name and its A record",
+            "text": "An A record associates a supplied host name with an IPv4 address. Here the authoritative answer is the value held by the serving copy of this one-record zone. There is no recursive lookup or cache."
+          },
+          {
+            "title": "Saved is not yet serving",
+            "text": "Editing fields changes only an unsaved draft. Save configuration changes the saved record and serial. Queries still read the serving copy until you explicitly reload named. A validation result does not activate the change."
+          },
+          {
+            "title": "A larger serial before reload",
+            "text": "A serial is a whole number from 0 through 4,294,967,295. You can save any value in that range, but this simplified exercise requires one larger than the loaded serial before reload. It does not model serial wrap arithmetic or secondary servers."
+          },
+          {
+            "title": "Read, save, validate, reload, query",
+            "text": "cat /etc/named/lab.zone reads the saved record. dig asks for the serving answer. named-checkzone lab.test is a simulator-only abbreviated check; real BIND also needs a zone-file argument. systemctl reload named activates the saved example."
+          },
+          {
+            "title": "Use the supplied lowercase name",
+            "text": "Real DNS name comparisons ignore ASCII letter case. This simplified exercise instead uses the supplied lowercase names as literal keys. Use mirror.lab.test in practice and the given assignment name later; this is a disclosed simulator limitation."
+          }
+        ],
+        "example_description": "Repair mirror.lab.test from 198.51.100.4 to 198.51.100.44. It begins with saved and serving serial 41. Use the explained actions below; inserting settings or a command does not execute it.",
+        "fixture": {
+          "name": "mirror.lab.test",
+          "saved": "198.51.100.4",
+          "served": "198.51.100.4",
+          "serial": 41,
+          "loaded_serial": 41
+        },
+        "required_address": "198.51.100.44",
+        "example_actions": [
+          {
+            "title": "Read the saved record",
+            "explanation": "Compare the saved address and serial before changing them.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "cat /etc/named/lab.zone",
+                "explanation": "Reads the saved example record and serial.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Query the serving record",
+            "explanation": "A query reads what is currently served, not unsaved input or a merely saved change.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "dig mirror.lab.test",
+                "explanation": "Queries the example’s loaded authoritative answer.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Prepare the requested answer",
+            "explanation": "Insert fills the example address 198.51.100.44 and serial 42. Save configuration is a separate action.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "address": "198.51.100.44",
+                "serial": "42"
+              }
+            }
+          },
+          {
+            "title": "Validate the saved example",
+            "explanation": "This abbreviated command is simulator-only. Real BIND also requires a zone-file argument.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "named-checkzone lab.test",
+                "explanation": "Simulator-only abbreviated validation of the saved in-memory example; not complete real BIND syntax.",
+                "simulator_only": true
+              }
+            }
+          },
+          {
+            "title": "Activate the saved answer",
+            "explanation": "Reload requires a serial larger than the currently loaded serial in this small model.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "systemctl reload named",
+                "explanation": "Copies the saved example zone into the serving zone.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Verify the serving answer",
+            "explanation": "Confirm the requested address is now returned.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "dig mirror.lab.test",
+                "explanation": "Reads the newly loaded example answer.",
+                "simulator_only": false
+              }
+            }
+          }
+        ],
+        "try_change": "After the example works, Save address 198.51.100.45 with serial 43, then query without reloading. The saved record is wrong while the old serving answer still looks correct. Repair by saving 198.51.100.44 with a serial larger than 42, validating and reloading, then query again.",
+        "try_actions": [
+          {
+            "kind": "Save",
+            "draft": {
+              "address": "198.51.100.45",
+              "serial": "43"
+            }
+          },
+          {
+            "kind": "Command",
+            "command": {
+              "command": "dig mirror.lab.test",
+              "explanation": "The serving copy still returns .44 before another reload.",
+              "simulator_only": false
+            }
+          }
+        ],
+        "repair_actions": [
+          {
+            "kind": "Save",
+            "draft": {
+              "address": "198.51.100.44",
+              "serial": "44"
+            }
+          },
+          {
+            "kind": "Command",
+            "command": {
+              "command": "named-checkzone lab.test",
+              "explanation": "Simulator-only abbreviated validation; real BIND needs a zone-file argument.",
+              "simulator_only": true
+            }
+          },
+          {
+            "kind": "Command",
+            "command": {
+              "command": "systemctl reload named",
+              "explanation": "Activates the repaired example.",
+              "simulator_only": false
+            }
+          },
+          {
+            "kind": "Command",
+            "command": {
+              "command": "dig mirror.lab.test",
+              "explanation": "Verifies the serving answer.",
+              "simulator_only": false
+            }
+          }
+        ]
+      }
     },
     {
       "id": "lpic2-storage",
@@ -1075,7 +1233,7 @@
         "https://www.kernel.org/doc/html/latest/filesystems/ext4/index.html",
         "https://github.com/util-linux/util-linux/blob/master/sys-utils/mount.8.adoc"
       ],
-      "simplifications": "Integer MiB capacity model, one filesystem, no inodes, UUID resolution, reserved blocks, open files or real devices. rm accepts only the explicitly disposable cache.",
+      "simplifications": "Integer MiB capacity model, one filesystem, no inodes, UUID resolution, reserved blocks, open files or real devices. rm accepts only the explicitly disposable cache. Independent teaching practice uses a different device/capacity; its70% result does not change the existing80% goal. Unmount/mount is useful verification, not a grading-history requirement.",
       "guide": [
         {
           "title": "Separate space from mounting",
@@ -1140,7 +1298,187 @@
         }
       ],
       "explanation": "The correct persistent data device is /dev/vdb1. A read-write mount permits removal of the 300 MiB disposable cache, leaving 650/1000 MiB used (65%). A successful unmount/mount cycle exercises the repaired fstab entry. Unmounting again makes the current objective incomplete.",
-      "unit": "linux-service-recovery"
+      "unit": "linux-service-recovery",
+      "seed_mount_teaching": {
+        "prerequisite_note": "Use the inspect, edit and verify method from Bring the service back. This example has a different known device and capacity from your assignment.",
+        "concepts": [
+          {
+            "title": "Volume, device and mountpoint",
+            "text": "A volume is the supplied block of simulated storage. Its known device identifies it; /data is the place where it is mounted. This example never opens a real device or changes your computer."
+          },
+          {
+            "title": "Used capacity versus disposable cache",
+            "text": "df -h reports the total and used MiB. du -sh /data/cache reports the only explicitly disposable data here. Removing 450 MiB from 1850 leaves 1400/2000 MiB, or 70%; the objective accepts usage at most 80%."
+          },
+          {
+            "title": "Saved pointer versus current mount",
+            "text": "Save configuration edits only the simulated /etc/fstab pointer. It does not mount the volume or make it writable. Read cat /etc/fstab to compare that saved pointer with the supplied known device."
+          },
+          {
+            "title": "Cleanup needs read-write access",
+            "text": "The current example begins mounted read-only. mount -o remount,rw /data makes that mount writable; then rm -r /data/cache can remove only the marked cache. No other deletion is supported."
+          },
+          {
+            "title": "Verify the saved entry and current state",
+            "text": "umount /data makes the current volume unavailable. mount /data uses the saved device and restores read-write access if it is correct. This cycle is useful verification, not required to pass; the assignment is checked from its current state."
+          }
+        ],
+        "example_description": "Recover the separate 2000 MiB example: known device /dev/vde2, saved wrong pointer /dev/vdf2, 1850 MiB used and 450 MiB disposable cache. Finish with the correct saved pointer, mounted read-write and no more than 80% used.",
+        "fixture": {
+          "capacity": 2000,
+          "used": 1850,
+          "cache": 450,
+          "mounted": true,
+          "device": "/dev/vde2",
+          "configured_device": "/dev/vdf2",
+          "writable": false
+        },
+        "example_actions": [
+          {
+            "title": "Inspect capacity",
+            "explanation": "The used amount and current mount/read-write flags are separate facts.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "df -h",
+                "explanation": "Shows the supplied example volume and current used/total MiB.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Inspect disposable space",
+            "explanation": "Only the marked cache is disposable in this activity.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "du -sh /data/cache",
+                "explanation": "Reports 450 MiB of explicitly disposable example cache.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Inspect the saved pointer",
+            "explanation": "Compare the saved entry with the supplied known data device.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "cat /etc/fstab",
+                "explanation": "Shows the example saved pointer and known device.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Prepare the known device",
+            "explanation": "Insert fills /dev/vde2 only. Save configuration writes the example’s saved pointer.",
+            "action": {
+              "kind": "Save",
+              "draft": {
+                "device": "/dev/vde2"
+              }
+            }
+          },
+          {
+            "title": "Permit cleanup on the current mount",
+            "explanation": "The volume is already mounted but read-only. Remount makes it writable.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "mount -o remount,rw /data",
+                "explanation": "Makes the current mounted example writable.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Remove only marked cache",
+            "explanation": "1850 minus 450 leaves 1400 MiB used: 70% of 2000 MiB.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "rm -r /data/cache",
+                "explanation": "Removes only the explicitly disposable example cache.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Unmount the example",
+            "explanation": "Unmounting makes the current objective incomplete until it is mounted again.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "umount /data",
+                "explanation": "Unmounts the single simulated example volume.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Test the saved pointer",
+            "explanation": "Mount reads the saved correct device and returns the volume read-write.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "mount /data",
+                "explanation": "Mounts the example using its saved entry.",
+                "simulator_only": false
+              }
+            }
+          },
+          {
+            "title": "Verify current capacity and mount",
+            "explanation": "Expect 1400/2000 MiB used and a mounted writable example.",
+            "action": {
+              "kind": "Command",
+              "command": {
+                "command": "df -h",
+                "explanation": "Inspects the final example state.",
+                "simulator_only": false
+              }
+            }
+          }
+        ],
+        "try_change": "After success, unmount /data and inspect df -h: used space stays at 1400 MiB out of a 2000 MiB capacity but the current mount objective fails. Repair with mount /data using the saved correct pointer, then inspect again.",
+        "try_actions": [
+          {
+            "kind": "Command",
+            "command": {
+              "command": "umount /data",
+              "explanation": "Makes the current example unmounted.",
+              "simulator_only": false
+            }
+          },
+          {
+            "kind": "Command",
+            "command": {
+              "command": "df -h",
+              "explanation": "Shows that space and mount state are separate facts.",
+              "simulator_only": false
+            }
+          }
+        ],
+        "repair_actions": [
+          {
+            "kind": "Command",
+            "command": {
+              "command": "mount /data",
+              "explanation": "Uses the saved example device to mount read-write.",
+              "simulator_only": false
+            }
+          },
+          {
+            "kind": "Command",
+            "command": {
+              "command": "df -h",
+              "explanation": "Verifies current usage and mount flags.",
+              "simulator_only": false
+            }
+          }
+        ]
+      }
     }
   ]
 }

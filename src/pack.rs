@@ -59,6 +59,10 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub client_teaching: Option<crate::client_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed_dns_teaching: Option<crate::seed_dns_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub seed_mount_teaching: Option<crate::seed_mount_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dns_teaching: Option<crate::dns_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
@@ -257,6 +261,18 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
                 );
             }
             lesson.validate().map_err(|e| format!("{}: {e}", s.id))?;
+        }
+        if s.seed_dns_teaching
+            .as_ref()
+            .is_some_and(|lesson| !lesson.valid_for(&s.initial, &s.goal))
+        {
+            return Err("Seed DNS teaching requires a distinct bounded one-record example".into());
+        }
+        if s.seed_mount_teaching
+            .as_ref()
+            .is_some_and(|lesson| !lesson.valid_for(&s.initial, &s.goal))
+        {
+            return Err("Seed mount teaching requires distinct fixed capacity and device".into());
         }
         if let Some(lesson) = &s.dns_teaching {
             let State::AuthoritativeDns { server } = &s.initial else {

@@ -292,6 +292,16 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
     {
         return false;
     }
+    if s.seed_dns_teaching.is_some()
+        && !crate::seed_dns_teaching::assignment_context(&a.state, &s.initial)
+    {
+        return false;
+    }
+    if s.seed_mount_teaching.is_some()
+        && !crate::seed_mount_teaching::assignment_context(&a.state, &s.initial)
+    {
+        return false;
+    }
     if crate::client_teaching::pending_draft(a) {
         return false;
     }
@@ -607,6 +617,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         }
         validate_service_workspace(a)?;
         validate_client_workspace(a)?;
+        validate_seed_workspace(a)?;
         if let Some(current) = crate::client_teaching::Client::from_state(&a.state)
             && crate::client_teaching::Client::from_state(&s.initial)
                 .is_none_or(|initial| !current.same_problem(&initial))
@@ -623,6 +634,46 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
                 .is_none_or(|lesson| !l.valid_for(lesson))
         {
             return Err("Saved client example differs from this lesson; original retained".into());
+        }
+        if s.seed_dns_teaching.is_some()
+            && !crate::seed_dns_teaching::assignment_context(&a.state, &s.initial)
+        {
+            return Err(
+                "Saved seed DNS record names differ from this assignment; original retained".into(),
+            );
+        }
+        if s.seed_mount_teaching.is_some()
+            && !crate::seed_mount_teaching::assignment_context(&a.state, &s.initial)
+        {
+            return Err(
+                "Saved seed mount capacity or known device differ; original retained".into(),
+            );
+        }
+        if a.workspace
+            .as_ref()
+            .and_then(|w| w.seed_dns_learning.as_ref())
+            .is_some_and(|l| {
+                s.seed_dns_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            })
+        {
+            return Err(
+                "Saved seed DNS example differs from this lesson; original retained".into(),
+            );
+        }
+        if a.workspace
+            .as_ref()
+            .and_then(|w| w.seed_mount_learning.as_ref())
+            .is_some_and(|l| {
+                s.seed_mount_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            })
+        {
+            return Err(
+                "Saved seed mount example differs from this lesson; original retained".into(),
+            );
         }
         validate_discovery_workspace(a)?;
         if let (
@@ -890,6 +941,31 @@ fn validate_dns_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_seed_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else { return Ok(()) };
+    if let Some(l) = &w.seed_dns_learning {
+        let State::Dns { records, .. } = &a.state else {
+            return Err("Seed DNS metadata on another activity; original retained".into());
+        };
+        if !l.valid() || records.len() != 1 || records.contains_key(&l.fixture.name) {
+            return Err("Invalid or assignment-context seed DNS example; original retained".into());
+        }
+    }
+    if let Some(l) = &w.seed_mount_learning {
+        let State::Mount {
+            capacity, device, ..
+        } = &a.state
+        else {
+            return Err("Seed mount metadata on another activity; original retained".into());
+        };
+        if !l.valid() || l.fixture.capacity == *capacity || l.fixture.device == *device {
+            return Err(
+                "Invalid or assignment-context seed mount example; original retained".into(),
+            );
+        }
+    }
+    Ok(())
+}
 fn validate_client_workspace(a: &Attempt) -> Result<(), String> {
     if let Some(w) = &a.workspace {
         if (w.client_draft.is_some() || w.client_learning.is_some())
@@ -986,6 +1062,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         validate_dns_workspace(a)?;
         validate_service_workspace(a)?;
         validate_client_workspace(a)?;
+        validate_seed_workspace(a)?;
         validate_address_workspace(a)?;
         validate_routing_workspace(a)?;
         if let State::Switching { fabric } = &a.state

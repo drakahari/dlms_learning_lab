@@ -10,6 +10,7 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | `ipv4_routing.rs`, `ipv4_routing_workspace.rs`, `ipv4_routing_teaching.rs` | Bounded IPv4 static forwarding, endpoint-bound requirements, atomic native drafts and isolated saved practice; six authored route/recovery tasks |
 | `switching.rs`, `switching_workspace.rs`, `switching_teaching.rs` | Bounded VLAN broadcast data plane, atomic native port drafts and isolated practice; no IOS interpreter or control protocols |
 | `ipv6.rs` | Bounded prefix math, static forwarding/return paths and typed behavioral requirements |
+| `seed_dns_teaching.rs`, `seed_mount_teaching.rs`, `ui/seed_learning.rs` | Explicit bounded scalar practice for the original DNS/mount models; separate raw drafts, immutable fixtures and legacy first-open compatibility, retaining original State/Goal/commands |
 | `service_teaching.rs`, `ui/service_learning.rs` | Single-service beginner teaching, separate bounded editor/terminal practice, current checks and namespace isolation |
 | `address_teaching.rs`, `ui/address_learning.rs` | Bounded subnet/VLSM introductions and isolated native examples, current-state checks and immutable supplied problems |
 | `ipv4.rs` | Boundary math, host validation, numerical variants and retained legacy lesson/sandbox metadata |
@@ -177,3 +178,10 @@ No original project VM architecture or dynamic executable plugin is imported.
 The shell engine remains revision7. Proposed case/esac work requires an actual
 unchanged7 baseline and explicit multirevision progress preservation before
 activation; source proposals are not implemented capability or mastery.
+
+
+`dns_workspace::Requirement::NoAnswer` is current selected-copy authoritative
+absence within the bounded zone. It rejects failed/incomplete external-alias
+walks; it is not a synchronization or event-history credential. Author handovers
+with positive required answers and Published plus both serving-copy negatives.
+See DNS_NO_ANSWER_SUBSET.md. This capability introduces no new State or curriculum.

@@ -288,6 +288,10 @@ fn needs_secondary(requirements: &[Requirement]) -> bool {
                     copy: Snapshot::Secondary,
                     ..
                 }
+                | Requirement::NoAnswer {
+                    copy: Snapshot::Secondary,
+                    ..
+                }
                 | Requirement::TargetAddress {
                     copy: Snapshot::Secondary,
                     ..
@@ -511,4 +515,24 @@ fn configuration(
         metrics.output = Some(r.inner_rect);
     }
     previous != (draft.serial.clone(), draft.text.clone(), server.clone())
+}
+
+#[cfg(test)]
+mod no_answer_tests {
+    use super::*;
+
+    #[test]
+    fn negative_secondary_outcome_exposes_selected_copy_controls() {
+        let negative = |copy| Requirement::NoAnswer {
+            copy,
+            name: "retired.example.test.".into(),
+            record_type: QueryType::Ptr,
+        };
+        assert!(!needs_secondary(&[negative(Snapshot::Primary)]));
+        assert!(needs_secondary(&[negative(Snapshot::Secondary)]));
+        assert!(needs_secondary(&[
+            Requirement::Published { secondary: false },
+            negative(Snapshot::Secondary),
+        ]));
+    }
 }
