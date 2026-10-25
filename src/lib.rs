@@ -97,3 +97,5 @@ pub mod seed_mount_teaching;
 
 pub mod legacy_access_teaching;
 pub mod legacy_logs_teaching;
+
+pub mod dhcpv4;

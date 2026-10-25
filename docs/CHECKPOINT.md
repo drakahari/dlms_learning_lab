@@ -6,6 +6,30 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M102 — pure DHCP foundation tested; native9 controller pending
+
+- Exact peer-reviewed DHCP R2 four paths integrated without changing old source.
+  MAIN lib exports pure dhcpv4 module; no engine State/Goal, progress, pack, UI,
+  assignment or coverage integration. Gate m102-dhcp-foundation-r1 PASS25 DHCP
+  plus68 library checks; m102-dhcp-clippy-r1 all-target PASS, fmt/diff PASS.
+  Model includes bounded offers/bindings/client leases, relay selection, renew/
+  rebind/release/expiry, current copied options and strict finite import checks.
+- M101 committed/pushed d221362: bounded getopts9 source gate992model/content +
+ 202UI + Clippy/fmt, genuine6/7/8 retained. Native8→9 acceptance still pending,
+  helper ccna_discovery prepares isolated four-path smoke controller and exact
+  opening/RunStop phases; source-only, no heavy grant. Independent_review authors
+  three practical option-interface tasks in isolation; no credit/registration yet.
+- Root currently running installedca1929b quiet10 DEFAULT Wayland launches via
+  MAIN runner, m102-ca-startup-quiet-r1, no diagnostic interval override. Inspect
+  completion/active marker before another heavy command. Then strict two-process
+  cold reopen asneeded. Same installed ca baseline already passed lifecycle,
+  Stop2 and sharedalignment72. New source9 has no accepted candidate yet.
+- Next freeze/review/integrate native8→9 controller, scoped exactphase regressions,
+  finalClippy, clean identified candidate, installed lifecycle and actual RunStop/
+  migration/export/restore/Challenge flows. Then reviewed getopts unit and DHCP
+  typed/native teaching adapters followed by substantive labs, never credit a
+  pure model as practical coverage. Counts119/29 and matrix134/1/1105 unchanged.
+
 ## Active M101 — shell9 source gate accepted; native migration next
 
 - Source ca1929b7397529853573b432a16b4757ead2d13a candidate installed lifecycle

@@ -1298,3 +1298,23 @@ points to the accepted119-lab ca1929b Fedora build, which still uses evaluator8.
 Next: genuine8→9 actual installed native acceptance, reviewed scripting projects,
 and guarded pure DHCPv4 foundation tests. Windows/macOS, physical accessibility,
 novice acceptance and substantial remaining curriculum stay open. No release.
+
+## 2026-10-25 — M102: pure bounded DHCPv4 foundation gate
+
+Integrated the independently reviewed R2 single-logical-server model. It keeps
+pending offers, server bindings and client-held leases separate; allocates within
+finite ranges with reservations/exclusions, selects direct or relay scope, retains
+actual granted options, and distinguishes new/current/renewed acknowledgements,
+transport silence, NAK and release. Explicit clock advancement never invents
+traffic. Collection, import, token/time and cross-octet arithmetic limits are
+tested. Foreign copied-subnet/segment snapshots are rejected without freezing
+valid wrong policy values needed for troubleshooting.
+
+Guarded pure-module gate passes25 DHCP and68 library checks, including malformed
+input, duplicate ownership, removed-original foreign copies, resource bounds and
+atomic errors. All-target Clippy and formatting pass. RFC2131/2132/1542 and vendor
+selection references, exact educational policies and fidelity exclusions are in
+DHCPV4_SUBSET.md. No wire protocol, full server syntax, host networking, dependency,
+engine State/Goal, scenario, UI or progress changes. Catalog119 and coverage counts
+remain unchanged. Native adapters and authored practice are the next independent
+implementation work, not presumed complete because this library passes tests.
