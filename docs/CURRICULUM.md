@@ -3,14 +3,11 @@
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
 **125 authored assignments/31 units:38CCNA,24LPIC-1,20LPIC-2,43Bash/Shell**.
-Three DHCP lessons are registered with passing model and interaction checks;
-rendered/package acceptance is tracked separately in CHECKPOINT.md.
-The last accepted installed catalog remains122/30 until those gates pass.
-The new three-task option-interface unit passes model/content and all3 installed
-native flows. The verified122-lab Fedora candidate atcd31af6 passes11 startups
-and real two-process reopen; evaluator9 migration was accepted atb5f5f83. Shared alignment was accepted onca1929b. The scripting path has eleven
-units. Original nine IDs/progress remain; numerical practice and900 synthetic
-catalog previews are not authored labs. Planned assignments do not become cards.
+The three-task DHCP unit passes model/content and complete installed native
+flows. The125-lab Fedora candidate at14cf248 passes normal startup and real
+process-reopen checks. Original IDs/progress remain; numerical practice and900
+synthetic catalog previews are not authored labs. Planned assignments do not
+become cards. The scripting path has eleven units.
 See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
 
 ## Primary sources and version boundaries
@@ -54,7 +51,7 @@ Each row records credited scenario IDs (or None), a distinct proposed assignment
 
 ## Learning order and capability gates
 
-CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. Integrated dual-stack diagnosis, STP, LACP, DHCP and FHRP still require additional models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
+CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. DHCP client/relay practice now has three accepted assignments. The pure single-instance steady-state spanning-tree core is implemented; its app adapter, native teaching and authored unit remain pending. Integrated dual-stack diagnosis, LACP, FHRP and broader protocol behavior still require models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
 
 LPIC-1 progresses through terminal/files → permissions/accounts → packages/processes → storage/boot → shell/scheduling → networking/services/security. Hardware probing, bootloaders, real package transactions, locale behavior, accessibility and cryptography require new evidence/state models; existing tests do not establish those capabilities. A visual configuration exercise must identify what it models and what it cannot execute.
 
@@ -223,5 +220,19 @@ administration remain outside this practice.
 
 A Partial parent does not automatically credit its lettered subobjectives, knowledge
 areas or terms. Consult the granular row for each claimed skill and its evidence.
-DHCP/getopts source foundations and other proposed tasks are not new playable
+Unintegrated capability foundations and other proposed tasks are not new playable
 assignments or coverage merely because a related model or parent is mentioned.
+
+## M106 DHCP client and relay unit — accepted scoped practice
+
+Three distinct configuration/investigation tasks add narrow current CCNAv1.1
+4.3/4.6 Partial evidence: held options versus policy, wrong relay plus pool mask,
+and reservation/exclusion/capacity handover. All three complete installed Fedora
+flows pass through actual native fields/buttons, including practice, wrong/partial
+work, alternatives, current invalidation, resume/reset and light/dark large text.
+The models prove their current typed state and fresh-client outcomes only; they
+do not prove actual IOS commands, packets, automatic clients, routing or DNS
+service. Current objective/technical sources checked2026-10-25, source inventory
+fingerprints remain2026-10-22, futureCCNAv2 uncredited.136Partial/1Supporting/
+1103Open overlapping references are not a completion percentage. See
+DHCPV4_LESSONS.md and INSTALLATION.md for exact scope and evidence.

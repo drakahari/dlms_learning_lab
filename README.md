@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **125 authored assignments in source:**38 CCNA,24 LPIC-1,20 LPIC-2 and43 Bash/Shell, organized into31 units. The three new DHCP tasks have passing model and native interaction checks; rendered and packaged acceptance is tracked separately. The last accepted Fedora candidate contains122 labs, including the three option-interface projects with complete installed native checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **125 authored assignments:**38 CCNA,24 LPIC-1,20 LPIC-2 and43 Bash/Shell in31 units. The current Fedora candidate passes installed lifecycle, all three new DHCP learning flows, normal Wayland startup and real process-reopen checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh
-$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gcd31af6e78e6-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g14cf24839d3c-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -41,26 +41,22 @@ The checked-in Cargo.lock pins dependencies. First-time builds need crates.io ac
 
 ## This milestone
 
-Four [Ethernet learning and recovery assignments](docs/MAC_LESSONS.md) now follow
-VLAN foundations: build directed paths, repair an older table, reason about
-source refresh/expiry and hand over two groups across three switches. Each has
-an introduction, separate runnable practice and a full native assignment.
-Those four flows were accepted in earlier installed milestones. The current122-
-lab Fedora candidate preserves them and adds the accepted Find and reverse-DNS
-units. Its installed upgrade/uninstall/reinstall preserves synthetic progress;
-normal Wayland migration, Run/Stop,11 startups and real two-process reopen pass.
-Shared72-field alignment captures were accepted on the preceding ca1929b build;
-those native controls remain unchanged. See
-[NATIVE_STARTUP.md](docs/NATIVE_STARTUP.md) for the reproduced swap-interval wait,
-scoped application policy and evidence limits. Windows CI produced an unsigned
-116-lab candidate; actual Windows/macOS desktop acceptance remains pending.
+The three [DHCP client and relay assignments](docs/DHCPV4_LESSONS.md) teach
+applied policy versus held options, relay/wrong-mask diagnosis and a safe
+reservation/exclusion handover. Each has an introduction, separate runnable
+practice and a complete configuration assignment. Different valid policies and
+action orders pass; current clients and independent new-client tests are graded.
+These are logical offline models, with no actual packets, routed connectivity
+or DNS-service proof.
 
-The bounded `getopts` engine and its three practical assignments are accepted in
-the122-lab candidate: a flexible report interface, independent job parsers, and
-a validate-all preview/publish capstone. Their addition implies no complete exam
-coverage. See [the unit guide](docs/SHELL_GETOPTS_LESSONS.md). This is a verified milestone, not complete curriculum or
-a public release.
-
+The125-lab Fedora candidate at14cf248 passes all three installed native flows,
+including incorrect/partial/alternate work, invalidation, resume/reset and
+Light150/Dark200 editing. Startup and progress evidence are recorded in
+[INSTALLATION.md](docs/INSTALLATION.md). The source also has reviewed pure Debian
+package and steady-state spanning-tree foundations; those add no authored labs
+until their workspaces and teaching are accepted. Remaining objective gaps stay
+explicit in the [coverage ledger](docs/OBJECTIVE_MAPPING.md). This is a tested
+milestone, not complete curriculum or a public release.
 
 The [OSPF settings and route-cost unit](docs/OSPF_LESSONS.md) adds four native
 configuration assignments: repair router identities/process enablement, match

@@ -4,6 +4,20 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
+Current scoped Fedora candidate: **14cf24839d3c**,125 authored labs/31 units
+(38CCNA,24LPIC-1,20LPIC-2,43Bash). Open directly from any terminal directory:
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g14cf24839d3c-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+This build passed installed lifecycle/upgrade, all3 new DHCP native learning
+flows,11 normal Wayland startups, both real process-reopen cases and72 shared
+alignment captures. Normal Wayland needs no diagnostic/X11 override. Exact
+checksums and acceptance limits are in the M106 entry below. It remains an
+unsigned development milestone with incomplete curriculum/platform acceptance.
+
+
 Extract the candidate archive. Open a terminal in its extracted folder and run:
 
 ```sh
@@ -256,7 +270,7 @@ Fedora binary SHA-256 `7b3fc774608c1e8e415a0334fbcf31e290478aa5f277c74462ea82830
 
 The installed executable then completed the all-six authored DNS native flow outside the checkout using its isolated smoke profile, with introductions/examples, actual Save/reload/update/Check controls, disclosed reference-populated assignments, initial incorrect feedback, completion/invalidation, exact resume, selected resets and the normal unit library. `/tmp/dlms-m40-installed-native.log` closes PASS. Representative installed captures live under `/tmp/dlms-m40-install-acceptance/screenshots/workspaces`. This adds installed runtime evidence to M36/M37/M39 native control/teaching checks; it is not fresh installed acceptance of every lab/theme/scale. The XWayland command prefix `env -u WAYLAND_DISPLAY` was used locally. Default-Wayland intermittent startup investigation stays Open; no desktop/compositor/security setting was changed.
 
-From the checkout, the current development launch is `env -u WAYLAND_DISPLAY ./target/debug/dlms-learning-lab`. For the candidate, extract the Fedora archive and run its executable directly, or use the install.sh instructions above. No Rust/toolchain is required by candidate users. Candidates are unsigned development builds, no public release; full curriculum, actual Windows/macOS install/reopen/upgrade/uninstall, signing/notarization and owner release acceptance remain Open. Preserve OS security checks.
+The historical development workaround for this earlier build was `env -u WAYLAND_DISPLAY ./target/debug/dlms-learning-lab`. Current normal Wayland instructions appear at the top; no override is required. For the candidate, extract the Fedora archive and run its executable directly, or use the install.sh instructions above. No Rust/toolchain is required by candidate users. Candidates are unsigned development builds, no public release; full curriculum, actual Windows/macOS install/reopen/upgrade/uninstall, signing/notarization and owner release acceptance remain Open. Preserve OS security checks.
 
 ### M44 Fedora indexed-list candidate and exact acceptance limits
 
@@ -661,3 +675,47 @@ render review includes narrow100%, Light150 andDark200; current controls retain
 prior shared native wide/narrow alignment evidence. This is scoped122-lab
 technical acceptance, not complete curriculum, physical/assistive/novice testing,
 Windows/macOS desktop acceptance or a public release.
+
+## M106 accepted125-lab Fedora candidate
+
+Source14cf24839d3ca2223d2b47e888bda4b3a35b51ea,31units and all28themes.
+Candidate directory `dist/dlms-learning-lab-0.1.0-g14cf24839d3c-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+
+| Artifact | SHA-256 |
+| --- | --- |
+| Fedora `.tar.gz` | `8e556d5813de3945dd8cd56fa923725a5f7626f5ff65bb4249d84df34f6f555b` |
+| Installed ELF | `d873a1879e76d6bc2c1104e03751a9218e6946a4ef14aad4eecdec5ad217f2c1` |
+
+Actual private installed lifecycle passes125/31: upgrade from86ca, outside-checkout
+identity/content/hash/desktop validation, uninstall/reinstall and exact original-
+nine synthetic progress-byte retention. Release build stayed above22.13GiB
+available memory with zero sampled PSIavg10/OOM increase; two jobs, project-disk
+temporary files, no stress test or guarantee under other workloads.
+
+All3 authored DHCP tasks pass the complete installed normal native flow through
+actual controls: teaching/separate practice, wrong/partial/reference/alternate,
+current invalidation, explicit exchanges, actual150Light/200Dark typing, warm
+readback/resume/Reset/Challenge.63 actual PNGs, clean exit0. Earlier failed
+86ca capstone capture/inner-list click attempts are retained; the corrected
+driver requires real inner visibility and exact list-change acknowledgement.
+No simulation/Goal/layout/data weakening.
+
+1 protocol+10 quiet normal-Wayland launches pass~0.8–0.9seconds, no diagnostic
+override. Both real2-process normal-private-XDG cases pass: DHCP and unchanged
+scripting. Full raw/portable/receipts/independent drafts/favorite/appearance are
+compared before navigation, then repaired through native controls. This verifies
+synthetic progress and actual process reopening, not personal learner data.
+
+72 actual IPv4/VLAN alignment images cover100/150/200% and light/dark:36 at
+1920x1080 fullscreen,36 at946x929 tiled. The requested1100x820 tile was not
+honored. Representative placeholder/populated text, label/number columns, focus
+and narrow stacking were reviewed; not every image was individually inspected.
+Private acceptance receipt42db18ec35daa435700d3e86fc537360cc8db77f9700bfa302961f253f31fd53
+pins archive/ELF/lifecycle/startup/cold manifests/63+72images. No screenshots or
+synthetic progress files are published in Git.
+
+Current scoped coverage becomes136Partial/1Supporting/1103Open of1240 overlapping
+references, not percent complete. Actual Windows/macOS runtime, signing and
+notarization, physical-device keyboard/screen-reader/novice comprehension remain
+pending. Linux notices were collected; the separate macOS dispatch original-
+notice gate remains unresolved. No public release or full-product claim.

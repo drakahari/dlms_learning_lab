@@ -1602,3 +1602,23 @@ checks pass R12, including3 new real clipped-button/fault-injection groups.
 All-target ClippyR5/fmt/diff pass after one identical-predicate style change.
 A fresh identified candidate and complete installed unit retry remain required;
 no objective-status promotion, release or full-product claim.
+
+### M106 final installed acceptance —14cf248
+
+The corrected clean125/31 candidate passes installed upgrade/lifecycle, all3
+complete DHCP native learning flows (63actual PNGs),11 normal-Wayland startups,
+both real2-process DHCP/default-script cold cases and72 IPv4/VLAN alignment
+views on that SAME ELF. Actual wide1920x1080/tiled946x929,100/150/200%, light/dark,
+representative fields/focus/feedback/completion reviewed. All grading and policy
+assertions retained; formerly clipped Remove now uses actual inner scrolling and
+its exact list-change acknowledgement. Earlier failures/evidence remain.
+
+Archive8e556d5813de3945dd8cd56fa923725a5f7626f5ff65bb4249d84df34f6f555b;
+ELFd873a1879e76d6bc2c1104e03751a9218e6946a4ef14aad4eecdec5ad217f2c1;
+private accepted receipt42db18ec35daa435700d3e86fc537360cc8db77f9700bfa302961f253f31fd53.
+Only current CCNAv1.1 parents4.3/4.6 gain Partial practice; complete source
+fingerprints/future version rows unchanged.136Partial/1Supporting/1103Open are
+overlapping references, not completion percentage. No DNS resolver, IOS, actual
+packet/client protocol, LPIC-2 daemon or exact OS-tool credit. Installed candidate
+is a usable scoped milestone, not complete curriculum or other-platform/novice/
+assistive-technology acceptance. Continue package, STP and Apache capability gates.

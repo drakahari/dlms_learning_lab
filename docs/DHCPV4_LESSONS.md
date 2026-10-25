@@ -3,8 +3,9 @@
 Original authorship, checked2026-10-25. Three assignments are registered in the
 normal catalog, bringing source content to125 labs/31 units. All13 content tests
 pass, including the unchanged original122-specification/unit prefix. Native
-interaction tests pass separately; actual rendered and packaged acceptance must
-be recorded before expanding the coverage claim. No progress schema is changed.
+interaction tests and all3 actual installed Fedora flows pass. Lifecycle,11
+startups, both real process-reopen cases and72 shared alignment renders also
+pass; only narrow CCNA4.3/4.6 Partial evidence is credited. No progress schema is changed.
 
 The bundled pack is `scenarios/dhcpv4-client-v1.json`. The other
 owned paths are `tests/dhcpv4_content.rs`, the review-action fixture,
@@ -116,8 +117,17 @@ passing and2 failing tests. The failures were an invalid Discover-while-held
 setup and an incorrect assumption that eligible early Renew keeps old parameters.
 The core and Goals were unchanged. Corrected content passes all13 checks, both
 before and after normal registration (`m106-dhcp-content-r3` and
-`m106-registered-dhcp-content-r1`). The current19 native-egui interaction checks
-also pass; actual rendered, cold-reopen and packaged acceptance are separate
-gates. No host reference command or real DHCP service was used. Model and
+`m106-registered-dhcp-content-r1`). The earlier19 native-egui interaction checks
+also passed at that historical checkpoint; final installed acceptance is recorded
+below. No host reference command or real DHCP service was used. Model and
 interaction passes do not prove novice comprehension, physical-device keyboard
 or screen-reader acceptance, or Windows/macOS runtime behavior.
+
+### Installed acceptance at14cf248
+
+All3 full normal native lesson flows PASS,63 actual screenshots/exit0 after the
+inner-list automation correction, with strict policy equality/grade assertions
+retained. Field/feedback/completion views at150Light/200Dark were inspected.
+Current125/31 package lifecycle,11 normal Wayland startups, real2-process DHCP
+and scripting resume plus72 original IPv4/VLAN alignment views pass. See
+INSTALLATION.md. No novice/physical-device/screen-reader/other-OS claim follows.

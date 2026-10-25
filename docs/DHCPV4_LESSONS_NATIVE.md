@@ -140,3 +140,10 @@ new regressions force clipped Remove/wheel/Apply and dropped-click faults. All26
 DHCP/controller checks pass; the final actual installed all3 flow is still due.
 86ca lifecycle,11 startups, both real cold cases and72 shared alignment renders
 pass independently. No source change to simulation, goals or saved work.
+
+Final corrected installed14cf248 flow PASS: all3 authored activities,63 actual
+PNGs/exit0, including the formerly clipped capstone Remove and full Apply/equality
+verification. Representative real input/feedback/completion images reviewed at
+100%,150Light/200Dark. Lifecycle125/31,11 normal Wayland startups, both real cold
+cases and72 shared IPv4/VLAN native views pass on that identity. No full240 UI
+suite, novice study, physical-device, screen-reader or other-OS claim.

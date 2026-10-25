@@ -73,3 +73,10 @@ focused Rust, Clippy/fmt/build; inspect failures without loosening exact data or
 visibility assertions. Actual cold acceptance requires the root to run the fixed
 tool on an identified candidate, inspect real images and preserve failures. No
 novice, accessibility, Windows/macOS or host DHCP/network behavior is implied.
+
+Actual installed14cf248 acceptance now passes the closed DHCP case with two
+real normal-startup processes, exact pre-navigation persisted fields/receipts and
+12 native screenshots, followed by actual policy repairs. The unchanged default
+scripting case also passes on the same ELF. Guarded evidence stays on project
+disk in private fresh sessions; no personal profile was accessed. See
+INSTALLATION.md for build identity and limits.
