@@ -893,17 +893,32 @@ fn policy_panel(
                                     metrics,
                                     focus,
                                 );
-                                if ui.add(button("Remove this DNS server")).clicked() {
+                                let r = ui.add(button("Remove this DNS server"));
+                                metrics.dhcp_controls.push((
+                                    format!("remove-dns-{n}"),
+                                    r.rect,
+                                    ui.is_enabled(),
+                                ));
+                                metrics
+                                    .dhcp_control_clips
+                                    .insert(format!("remove-dns-{n}"), ui.clip_rect());
+                                if r.clicked() {
                                     remove = Some(n);
                                 }
                             }
                             if let Some(n) = remove {
                                 p.dns.remove(n);
                             }
-                            if ui
-                                .add_enabled(p.dns.len() < 4, button("Add DNS server"))
-                                .clicked()
-                            {
+                            let r = ui.add_enabled(p.dns.len() < 4, button("Add DNS server"));
+                            metrics.dhcp_controls.push((
+                                "add-dns".into(),
+                                r.rect,
+                                ui.is_enabled() && p.dns.len() < 4,
+                            ));
+                            metrics
+                                .dhcp_control_clips
+                                .insert("add-dns".into(), ui.clip_rect());
+                            if r.clicked() {
                                 p.dns.push(String::new());
                                 focus_new_field(ui, scope, &format!("dns-{}", p.dns.len() - 1));
                             }
@@ -940,6 +955,9 @@ fn policy_panel(
                                         r.rect,
                                         ui.is_enabled(),
                                     ));
+                                    metrics
+                                        .dhcp_control_clips
+                                        .insert(format!("remove-exclusion-{n}"), ui.clip_rect());
                                     if r.clicked() {
                                         remove = Some(n);
                                     }
@@ -957,6 +975,9 @@ fn policy_panel(
                             r.rect,
                             ui.is_enabled() && p.excluded.len() < net::MAX_RANGE,
                         ));
+                        metrics
+                            .dhcp_control_clips
+                            .insert("add-exclusion".into(), ui.clip_rect());
                         if r.clicked() {
                             p.excluded.push(String::new());
                             focus_new_field(
@@ -1007,6 +1028,9 @@ fn policy_panel(
                                         r.rect,
                                         ui.is_enabled(),
                                     ));
+                                    metrics
+                                        .dhcp_control_clips
+                                        .insert(format!("remove-reservation-{n}"), ui.clip_rect());
                                     if r.clicked() {
                                         remove = Some(n);
                                     }
@@ -1024,6 +1048,9 @@ fn policy_panel(
                             r.rect,
                             ui.is_enabled() && p.reservations.len() < net::MAX_CLIENTS,
                         ));
+                        metrics
+                            .dhcp_control_clips
+                            .insert("add-reservation".into(), ui.clip_rect());
                         if r.clicked() {
                             p.reservations.push(ReservationDraft {
                                 client: String::new(),

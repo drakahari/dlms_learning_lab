@@ -30,6 +30,103 @@ struct Queue {
     field_phase: u8,
     started: Instant,
     frames: usize,
+    list_change: Option<ListChange>,
+}
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum ListValue {
+    Dns(Vec<String>),
+    Excluded(Vec<String>),
+    Reserved(Vec<(String, String)>),
+}
+#[derive(Clone)]
+struct ListChange {
+    pool: String,
+    before: ListValue,
+    expected: ListValue,
+}
+impl ListChange {
+    fn new(d: &Draft, key: &str) -> Option<Self> {
+        let selected = d.selected_pool.as_ref()?;
+        let p = &d.pools[selected];
+        let before = if key == "add-dns" || key.starts_with("remove-dns-") {
+            ListValue::Dns(p.dns.clone())
+        } else if key == "add-exclusion" || key.starts_with("remove-exclusion-") {
+            ListValue::Excluded(p.excluded.clone())
+        } else if key == "add-reservation" || key.starts_with("remove-reservation-") {
+            ListValue::Reserved(
+                p.reservations
+                    .iter()
+                    .map(|r| (r.client.clone(), r.address.clone()))
+                    .collect(),
+            )
+        } else {
+            return None;
+        };
+        let changed_text = |v: &Vec<String>| {
+            let mut n = v.clone();
+            if key.starts_with("add-") {
+                n.push(String::new());
+            } else {
+                let index = key
+                    .rsplit('-')
+                    .next()
+                    .unwrap()
+                    .parse::<usize>()
+                    .expect("closed list index");
+                assert!(index < n.len());
+                n.remove(index);
+            }
+            n
+        };
+        let expected = match &before {
+            ListValue::Dns(v) => ListValue::Dns(changed_text(v)),
+            ListValue::Excluded(v) => ListValue::Excluded(changed_text(v)),
+            ListValue::Reserved(v) => {
+                let mut n = v.clone();
+                if key.starts_with("add-") {
+                    n.push((String::new(), String::new()));
+                } else {
+                    let index = key
+                        .rsplit('-')
+                        .next()
+                        .unwrap()
+                        .parse::<usize>()
+                        .expect("closed list index");
+                    assert!(index < n.len());
+                    n.remove(index);
+                }
+                ListValue::Reserved(n)
+            }
+        };
+        Some(Self {
+            pool: selected.clone(),
+            before,
+            expected,
+        })
+    }
+    fn verify(&self, d: &Draft, key: &str) {
+        assert_eq!(
+            d.selected_pool.as_ref(),
+            Some(&self.pool),
+            "list control changed selected pool"
+        );
+        let p = &d.pools[&self.pool];
+        let actual = match &self.before {
+            ListValue::Dns(_) => ListValue::Dns(p.dns.clone()),
+            ListValue::Excluded(_) => ListValue::Excluded(p.excluded.clone()),
+            ListValue::Reserved(_) => ListValue::Reserved(
+                p.reservations
+                    .iter()
+                    .map(|r| (r.client.clone(), r.address.clone()))
+                    .collect(),
+            ),
+        };
+        assert!(
+            actual == self.expected,
+            "Native {key} acknowledged without the exact raw list change in {}",
+            self.pool
+        );
+    }
 }
 fn simulation(s: &engine::State) -> &Simulation {
     let engine::State::DhcpV4 { simulation } = s else {
@@ -287,18 +384,84 @@ impl LabApp {
         }
         self.click_visible_smoke_control(ctx, Some(rect))
     }
+    fn dhcp_lessons_reveal_target(
+        &mut self,
+        ctx: &egui::Context,
+        key: &str,
+        rect: egui::Rect,
+        inner: egui::Rect,
+    ) -> bool {
+        let root = self
+            .metrics
+            .main_viewport
+            .unwrap()
+            .intersect(ctx.content_rect());
+        let clip = inner.intersect(root);
+        let ppp = ctx.pixels_per_point();
+        if !self.dhcp_lessons_target_stable(ctx, key, rect, clip) {
+            return false;
+        }
+        if !smoke_control_visible(rect, root, ppp) {
+            self.reveal_smoke_control(ctx, rect);
+            return false;
+        }
+        let inner_key = egui::Id::new(("dhcp-lessons-inner-scroll", self.smoke_stage, key));
+        if !smoke_control_visible(rect, clip, ppp) {
+            if clip.height() < rect.height() {
+                ctx.request_repaint();
+                return false;
+            }
+            let tries = ctx.data_mut(|d| {
+                let n = d.get_temp::<usize>(inner_key).unwrap_or(0) + 1;
+                d.insert_temp(inner_key, n);
+                n
+            });
+            assert!(
+                tries <= 20,
+                "DHCP inner target did not become visible: {key} rect={rect:?} clip={clip:?} stage={}",
+                self.smoke_stage
+            );
+            let delta = if rect.bottom() > clip.bottom() {
+                clip.bottom() - rect.bottom()
+            } else {
+                clip.top() - rect.top()
+            };
+            self.pending_events.extend([
+                egui::Event::PointerMoved(egui::pos2(rect.center().x, clip.center().y)),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., delta.clamp(-200., 200.)),
+                    modifiers: Default::default(),
+                },
+            ]);
+            ctx.request_repaint();
+            return false;
+        }
+        ctx.data_mut(|d| d.remove::<usize>(inner_key));
+        true
+    }
     fn dhcp_lessons_control(&mut self, ctx: &egui::Context, key: &str) -> bool {
         if click_phase(ctx, self.smoke_stage) >= 2 {
-            return self.dhcp_lessons_click(ctx, None);
+            return self.click_visible_smoke_control(ctx, None);
         }
-        let (_, r, enabled) = self
+        let (_, rect, enabled) = self
             .metrics
             .dhcp_controls
             .iter()
             .find(|(k, _, _)| k == key)
             .unwrap_or_else(|| panic!("actual DHCP control {key}"));
         assert!(*enabled, "actual DHCP control is enabled: {key}");
-        self.dhcp_lessons_click(ctx, Some(*r))
+        let rect = *rect;
+        let clip = self
+            .metrics
+            .dhcp_control_clips
+            .get(key)
+            .copied()
+            .unwrap_or_else(|| self.metrics.main_viewport.unwrap());
+        if !self.dhcp_lessons_reveal_target(ctx, &format!("control:{key}"), rect, clip) {
+            return false;
+        }
+        self.click_smoke_control(ctx, Some(rect))
     }
     pub(in crate::ui::smoke) fn dhcp_lessons_field(
         &mut self,
@@ -321,56 +484,14 @@ impl LabApp {
             );
             return self.click_visible_smoke_control(ctx, None);
         }
-        let root = self
-            .metrics
-            .main_viewport
-            .unwrap()
-            .intersect(ctx.content_rect());
-        let clip = self.metrics.dhcp_field_clips[key].intersect(root);
-        if !self.dhcp_lessons_target_stable(ctx, "field", rect, clip) {
+        if !self.dhcp_lessons_reveal_target(
+            ctx,
+            &format!("field:{key}"),
+            rect,
+            self.metrics.dhcp_field_clips[key],
+        ) {
             return false;
         }
-        if !smoke_control_visible(rect, root, ctx.pixels_per_point()) {
-            self.reveal_smoke_control(ctx, rect);
-            return false;
-        }
-        let inner_key = egui::Id::new(("dhcp-lessons-inner-scroll", self.smoke_stage, key));
-        if !smoke_control_visible(rect, clip, ctx.pixels_per_point()) {
-            // Rows inside exclusion/reservation lists need their own real wheel
-            // target; a visible outer rectangle does not prove an editable row.
-            if clip.height() < rect.height() {
-                ctx.request_repaint();
-                return false;
-            }
-            let tries = ctx.data_mut(|d| {
-                let n = d.get_temp::<usize>(inner_key).unwrap_or(0) + 1;
-                d.insert_temp(inner_key, n);
-                n
-            });
-            assert!(
-                tries <= 20,
-                "DHCP inner field did not become visible: {key} rect={rect:?} clip={clip:?} stage={}",
-                self.smoke_stage
-            );
-            let delta = if rect.bottom() > clip.bottom() {
-                clip.bottom() - rect.bottom()
-            } else {
-                clip.top() - rect.top()
-            };
-            self.pending_events.extend([
-                // A vertical area's painter clip may span the full outer UI.
-                // Aim at this field's column, not the space between columns.
-                egui::Event::PointerMoved(egui::pos2(rect.center().x, clip.center().y)),
-                egui::Event::MouseWheel {
-                    unit: egui::MouseWheelUnit::Point,
-                    delta: egui::vec2(0., delta.clamp(-200., 200.)),
-                    modifiers: Default::default(),
-                },
-            ]);
-            ctx.request_repaint();
-            return false;
-        }
-        ctx.data_mut(|d| d.remove::<usize>(inner_key));
         self.click_smoke_control(ctx, Some(rect))
     }
     pub(in crate::ui::smoke) fn dhcp_lessons_type(&mut self, text: &str) {
@@ -518,6 +639,7 @@ impl LabApp {
             field_phase: 0,
             started: Instant::now(),
             frames: 0,
+            list_change: None,
         });
         q.frames += 1;
         assert!(
@@ -536,7 +658,22 @@ impl LabApp {
             Op::Client(_) | Op::Pool(_) | Op::Annotation(_) => {
                 self.dhcp_lessons_picker(ctx, i, practice, &op, q.next)
             }
-            Op::Control(k) => self.dhcp_lessons_control(ctx, k),
+            Op::Control(k) => {
+                if q.list_change.is_none() {
+                    q.list_change = ListChange::new(
+                        draft(&self.progress.attempts[&self.scenarios[i].id], practice),
+                        k,
+                    );
+                }
+                let done = self.dhcp_lessons_control(ctx, k);
+                if done && let Some(change) = &q.list_change {
+                    change.verify(
+                        draft(&self.progress.attempts[&self.scenarios[i].id], practice),
+                        k,
+                    );
+                }
+                done
+            }
             Op::Header(header, child) => {
                 if click_phase(ctx, self.smoke_stage) >= 2 {
                     self.dhcp_lessons_click(ctx, None)
@@ -599,6 +736,7 @@ impl LabApp {
             }
         };
         if done {
+            q.list_change = None;
             q.next += 1;
             // This stage contains multiple verified operations. Keep the shared
             // twenty-scroll limit per completed target, plus the queue's fixed
@@ -1250,5 +1388,325 @@ impl LabApp {
             _ => unreachable!("closed DHCP lesson phase"),
         }
         (true, shot)
+    }
+}
+
+#[cfg(test)]
+mod control_visibility_tests {
+    use super::*;
+    const POOL: &str = "gallery-handover-scope";
+    fn frame(
+        ctx: &egui::Context,
+        a: &mut LabApp,
+        i: usize,
+        ops: Option<&[Op]>,
+        salt: usize,
+    ) -> bool {
+        let events = std::mem::take(&mut a.pending_events);
+        let modifiers = events
+            .iter()
+            .find_map(|e| match e {
+                egui::Event::Key { modifiers, .. } => Some(*modifiers),
+                _ => None,
+            })
+            .unwrap_or_default();
+        let mut done = false;
+        let _ = ctx.run(
+            egui::RawInput {
+                screen_rect: Some(egui::Rect::from_min_size(
+                    egui::Pos2::ZERO,
+                    egui::vec2(1400., 2400.),
+                )),
+                events,
+                modifiers,
+                ..Default::default()
+            },
+            |ctx| {
+                a.render(ctx);
+                if let Some(ops) = ops {
+                    done = a.dhcp_lessons_ops(ctx, i, true, ops.to_vec(), salt);
+                }
+            },
+        );
+        done
+    }
+    fn pump(ctx: &egui::Context, a: &mut LabApp, i: usize, ops: &[Op], salt: usize) {
+        for _ in 0..600 {
+            if frame(ctx, a, i, Some(ops), salt) {
+                return;
+            }
+        }
+        panic!("bounded list-control queue did not finish");
+    }
+    fn opened(kind: &str) -> (egui::Context, LabApp, usize) {
+        let ctx = egui::Context::default();
+        let mut a = LabApp::from_context(&ctx, true, false);
+        a.smoke = false;
+        let i = a.scenarios.iter().position(|s| s.id == IDS[2]).unwrap();
+        a.launch(i);
+        a.set_dhcpv4_view(i, teaching::View::Example);
+        a.smoke_stage = FIRST;
+        // Deliberately long RAW editor lists force an inner clip; no reference
+        // State, result or applied policy is installed by the test fixture.
+        let l = a
+            .progress
+            .attempts
+            .get_mut(IDS[2])
+            .unwrap()
+            .workspace
+            .as_mut()
+            .unwrap()
+            .dhcpv4_learning
+            .as_mut()
+            .unwrap();
+        l.draft.selected_pool = Some(POOL.into());
+        l.draft.selected_client = "gallery-handover-staff".into();
+        let p = l.draft.pools.get_mut(POOL).unwrap();
+        match kind {
+            "exclusion" => p.excluded = (200..204).map(|n| format!("172.22.6.{n}")).collect(),
+            "reservation" => {
+                p.reservations = ["staff", "kiosk", "visitor", "retired"]
+                    .into_iter()
+                    .enumerate()
+                    .map(
+                        |(n, c)| dlms_learning_lab::dhcpv4_workspace::ReservationDraft {
+                            client: format!("gallery-handover-{c}"),
+                            address: format!("172.22.6.{}", 20 + n),
+                        },
+                    )
+                    .collect()
+            }
+            "dns" => p.dns = (1..5).map(|n| format!("198.51.100.{n}")).collect(),
+            _ => panic!(),
+        }
+        assert!(l.draft.valid());
+        let before = l.simulation.clone();
+        for _ in 0..4 {
+            frame(&ctx, &mut a, i, None, 0);
+        }
+        let (header, child) = match kind {
+            "exclusion" => ("excluded-header", "remove-exclusion-3"),
+            "reservation" => ("reservations-header", "remove-reservation-3"),
+            _ => ("dns-header", "remove-dns-3"),
+        };
+        pump(&ctx, &mut a, i, &[Op::Header(header, child)], 0);
+        for _ in 0..16 {
+            frame(&ctx, &mut a, i, None, 0);
+        }
+        assert_eq!(
+            a.progress.attempts[IDS[2]]
+                .workspace
+                .as_ref()
+                .unwrap()
+                .dhcpv4_learning
+                .as_ref()
+                .unwrap()
+                .simulation,
+            before
+        );
+        a.smoke_stage += 1;
+        (ctx, a, i)
+    }
+    fn current(a: &LabApp) -> &Simulation {
+        &a.progress.attempts[IDS[2]]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .dhcpv4_learning
+            .as_ref()
+            .unwrap()
+            .simulation
+    }
+    fn actual_list(a: &LabApp, key: &str) -> ListValue {
+        let p = &draft(&a.progress.attempts[IDS[2]], true).pools[POOL];
+        if key.contains("exclusion") {
+            ListValue::Excluded(p.excluded.clone())
+        } else if key.contains("reservation") {
+            ListValue::Reserved(
+                p.reservations
+                    .iter()
+                    .map(|r| (r.client.clone(), r.address.clone()))
+                    .collect(),
+            )
+        } else {
+            ListValue::Dns(p.dns.clone())
+        }
+    }
+    #[test]
+    fn dhcp_native_inner_clipped_remove_controls_scroll_own_column_before_click_then_apply() {
+        for kind in ["exclusion", "reservation"] {
+            let (ctx, mut a, i) = opened(kind);
+            let key = format!("remove-{kind}-3");
+            let rect = a
+                .metrics
+                .dhcp_controls
+                .iter()
+                .find(|(k, _, _)| k == &key)
+                .unwrap()
+                .1;
+            let root = a
+                .metrics
+                .main_viewport
+                .unwrap()
+                .intersect(ctx.content_rect());
+            let clip = a.metrics.dhcp_control_clips[&key].intersect(root);
+            assert!(
+                smoke_control_visible(rect, root, ctx.pixels_per_point()),
+                "fixture must be outer-visible: {kind} {rect:?} {root:?}"
+            );
+            assert!(
+                !smoke_control_visible(rect, clip, ctx.pixels_per_point()),
+                "fixture must be genuinely inner-clipped: {kind} {rect:?} {clip:?}"
+            );
+            let before = actual_list(&a, &key);
+            let state = current(&a).clone();
+            let expected = ListChange::new(draft(&a.progress.attempts[IDS[2]], true), &key)
+                .unwrap()
+                .expected;
+            let ops = [Op::Control(key.clone())];
+            let mut observed_inner_wheel = false;
+            for _ in 0..12 {
+                assert!(!frame(&ctx, &mut a, i, Some(&ops), 1));
+                assert!(
+                    !a.pending_events
+                        .iter()
+                        .any(|e| matches!(e, egui::Event::PointerButton { .. })),
+                    "clipped control must not queue a press or release"
+                );
+                assert_eq!(actual_list(&a, &key), before);
+                if a.pending_events
+                    .iter()
+                    .any(|e| matches!(e, egui::Event::MouseWheel { .. }))
+                {
+                    let point = a
+                        .pending_events
+                        .iter()
+                        .find_map(|e| {
+                            if let egui::Event::PointerMoved(p) = e {
+                                Some(*p)
+                            } else {
+                                None
+                            }
+                        })
+                        .unwrap();
+                    assert!(
+                        (point.x - rect.center().x).abs() < 1.0,
+                        "wheel must target the actual control column"
+                    );
+                    observed_inner_wheel = true;
+                    break;
+                }
+            }
+            assert!(
+                observed_inner_wheel,
+                "must exercise real inner-wheel route, not mere row listing"
+            );
+            pump(&ctx, &mut a, i, &ops, 1);
+            assert_eq!(actual_list(&a, &key), expected);
+            assert_eq!(
+                *current(&a),
+                state,
+                "Remove changes raw list only before Apply"
+            );
+            let wanted = draft(&a.progress.attempts[IDS[2]], true)
+                .snapshot()
+                .unwrap();
+            a.smoke_stage += 1;
+            pump(
+                &ctx,
+                &mut a,
+                i,
+                &[Op::Control("apply".into()), Op::Policy(wanted.clone())],
+                2,
+            );
+            assert_eq!(current(&a).policy(), &wanted);
+            assert_eq!(
+                current(&a).leases(),
+                state.leases(),
+                "Apply must not fabricate lease refresh"
+            );
+        }
+    }
+    #[test]
+    fn dhcp_native_dns_remove_uses_passive_clip_and_verifies_exact_raw_delta() {
+        let (ctx, mut a, i) = opened("dns");
+        let key = "remove-dns-3";
+        assert!(a.metrics.dhcp_control_clips.contains_key(key));
+        let before = current(&a).clone();
+        let expected = ListChange::new(draft(&a.progress.attempts[IDS[2]], true), key)
+            .unwrap()
+            .expected;
+        pump(&ctx, &mut a, i, &[Op::Control(key.into())], 1);
+        assert_eq!(actual_list(&a, key), expected);
+        assert_eq!(*current(&a), before);
+    }
+    #[test]
+    fn dhcp_native_list_click_ack_without_actual_remove_or_add_cannot_advance() {
+        for key in [
+            "remove-exclusion-3",
+            "add-exclusion",
+            "remove-reservation-3",
+            "add-reservation",
+            "remove-dns-3",
+            "add-dns",
+        ] {
+            let kind = if key.contains("exclusion") {
+                "exclusion"
+            } else if key.contains("reservation") {
+                "reservation"
+            } else {
+                "dns"
+            };
+            let (ctx, mut a, i) = opened(kind);
+            if key == "add-dns" {
+                a.progress
+                    .attempts
+                    .get_mut(IDS[2])
+                    .unwrap()
+                    .workspace
+                    .as_mut()
+                    .unwrap()
+                    .dhcpv4_learning
+                    .as_mut()
+                    .unwrap()
+                    .draft
+                    .pools
+                    .get_mut(POOL)
+                    .unwrap()
+                    .dns
+                    .truncate(3);
+                for _ in 0..4 {
+                    frame(&ctx, &mut a, i, None, 0);
+                }
+            }
+            assert!(
+                a.metrics
+                    .dhcp_controls
+                    .iter()
+                    .find(|(k, _, _)| k == key)
+                    .unwrap()
+                    .2,
+                "fault precondition must describe a real enabled control"
+            );
+            let before = actual_list(&a, key);
+            let state = current(&a).clone();
+            // Fault injection ONLY: a completed input acknowledgement with no
+            // corresponding UI event must fail closed before queue advance.
+            let stage = a.smoke_stage;
+            ctx.data_mut(|d| d.insert_temp(egui::Id::new(("native-click-phases", stage)), 2_u8));
+            let rejected = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                frame(&ctx, &mut a, i, Some(&[Op::Control(key.into())]), 3)
+            }));
+            assert!(
+                rejected.is_err(),
+                "a pulse acknowledgement is not a list-change proof: {key}"
+            );
+            assert_eq!(actual_list(&a, key), before);
+            assert_eq!(*current(&a), state);
+            assert!(
+                ctx.data(|d| d.get_temp::<Queue>(egui::Id::new(("dhcp-lessons-ops", stage, 3))))
+                    .is_none_or(|q| q.next == 0)
+            );
+        }
     }
 }

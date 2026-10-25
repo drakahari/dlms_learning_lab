@@ -1,207 +1,171 @@
 # Implementation continuation checkpoint
 
-2026-10-25. ACTIVE owner-authorized full application build; NOT complete.
-Continue ordinary reviewed milestones without routine approval. No public release.
+2026-10-25. ACTIVE full application build, not complete. Continue reviewed ordinary
+milestones without routine approval; no public release. Owner approved MIT.
 
 ## Mandatory safety
 
-Read AGENTS.md and BUILD_WORKFLOW.md before any build/test/reference/native run.
-Use MAIN tools/dev.py only: one shared OS heavy-work lock across worktrees,
-exclusive automatic Cargo targets,2 build jobs AND2 Rust runtime-test threads.
-Inspect/reap active commands or unfinished markers before another heavy run.
-Large data stays on project NVMe Btrfs .build-artifacts/target/dist, never RAM/tmp.
-Do not clean artifacts without exact approval or interrupt unrelated workloads.
-No desktop/GPU/swap/service/model changes. Native Rust, offline, in-process
-simulation only; no learner-host commands/network, old-project edits, new
-dependencies or public release. Worktree mutations require explicit absolute cwd.
-Never reenter Context methods inside ctx.data/data_mut; precompute first.
+Read AGENTS.md and BUILD_WORKFLOW.md. MAIN tools/dev.py only for every heavy
+build/test/reference/native run; shared OS lock across worktrees, exclusive
+automatic targets,2 Cargo jobs AND2 Rust runtime threads. Inspect/reap sessions
+or unfinished markers before another run; never bypass them. Disk-backed project
+NVMe Btrfs .build-artifacts/target/dist only, not RAM/tmp. No unapproved cleanup,
+other application/agent interruption, desktop/GPU/swap/service/model changes,
+learner-host execution/network, old-project edits, dependencies or release.
+Explicit absolute cwd for worktree mutations. No Context calls inside ctx.data
+closures: precompute geometry/zoom/frame first. Workers have NO heavy grants.
 
-## Current source and authored inventory
+## Current main and count
 
-HEADcc3fd8a pushed: excluded-elif diagnostic; preceding f096b57 pushed: pure
-spanning-tree foundation. Earlier2b777f6 is the pure Debian package foundation. Earlier DHCP adapter8a53854 and compact native component e3f2203
-also pushed. Inspect Git for subsequent commits; the following unit is currently
-a coherent UNCOMMITTED milestone.
+HEAD86ca1cbd7074ba05304c5e0d3b9320fdbac10f5b committed/pushed normal DHCP unit.
+Earlier cc3fd8a shell elif diagnostic, f096b57 pure spanning tree,2b777f6 pure
+Debian core, e3f2203 DHCP native component and8a53854 adapter are pushed.
+Normal source125/31=38CCNA/24LPIC-1/20LPIC-2/43Bash. Old122 complete specs/order
+and30-unit prefix unchanged. All28 themes and actual writer6/7/8 preserved.
+Uncommitted3-path developer control-clip correction is currently being gated;
+inspect Git for subsequent commits. No model/Goal/layout/IDs/data change.
 
-Normal source125 labs/31 units =38CCNA/24LPIC-1/20LPIC-2/43Bash. Three DHCP labs
-are appended to canonical scenarios/dhcpv4-client-v1.json and one unit appended
-after the original30. All original122 specifications/order/unit prefix are
-checked unchanged. Source registration is not packaged or objective acceptance.
-All28 themes, separate practice, progress and genuine writer6/7/8 fixtures remain.
+## Candidate86ca: partial acceptance, not full unit acceptance
 
-## M106 current verification and next serial actions
+Exact candidate:
+$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g86ca1cbd7074-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+Archive SHA c8ce64a093041f62ceb05742f950a18a122888827dd3a342bc25b27f2d0393d6;
+ELF7eadafee389f51afd8326ace77f1248ceffa1a1fab1f00ea94c5bc76e42fbdd4.
+Actual private installation verified-86ca1cbd7074-xtj1vh9d/application binary.
+Lifecycle125/31 upgradecd31, desktop metadata/outside-checkout identity/content,
+uninstall/reinstall/exact original-nine synthetic bytes PASS. Build memory
+min22.16GiB/PSIavg10zero/OOMdelta0; no stress test or memory guarantee.
 
-Three distinct tasks: held-option repair without disturbing a monitor; relay plus
-wrong-mask diagnosis; safe lease-pool handover with exclusion/reservation/capacity.
-No fake IOS/Linux command aliases. Goals grade resulting current clients plus
-fresh client orders; additional valid reservations and manual early eligible
-renewal are accepted. No real packets, routed/DNS-service or LPIC-2 DHCP credit.
+Installed11 default Wayland startups PASS:1 protocol0.819s +10 quiet~0.865s,
+no diagnostic override. Normal-private-XDG real2-process DHCP cold reopen PASS:
+tmp/native-reopen-dhcp-86ca-r1 (37.674s writer/14.699s reader,12 PNGs), both complete
+Attempt worlds/distinct malformed drafts/favorite/Light150/exact raw+portable+
+receipts+preferences before navigation, then real field/Apply/Check repair.
+Default SCRIPT cold case also PASS tmp/native-reopen-script-86ca-r1. First cold
+command refused output outside runner TMPDIR BEFORE child creation; corrected
+path, guard unchanged, failure retained. Inspect MANIFEST.json for exact pins.
 
-All13 registered content tests PASS (m106-registered-dhcp-content-r1). The initial
-R4 gate's11PASS/2FAIL exposed invalid Discover-while-held test setup and teaching
-that incorrectly treated T1 as a mandatory manual-renew gate. RFC2131 sections
-4.3.2/4.4.5 reviewed; core/Goals/reference/expected tables unchanged. R5 plus an
-explicit independent test-pool narrowing corrects those assumptions. Frozen
-sources and all failure logs retained, no golden answers regenerated from runs.
+Installed alignment PASS72 images run-6nsmvlnf: actual36at1920x1080(fullscreen),
+36at946x929(tiled),100/150/200%, light/dark, IPv4 blank/populated/feedback and
+VLAN fields/check. Root reviewed representative views: native vertical centering,
+label/value columns, wrapping/focus and stacked narrow VLAN rows. Requested
+1100x820 tile is actually946x929; do not relabel requested size as measured.
+Private partial evidence receipt reviews/dhcpv4-content/installed-86ca-acceptance-r1/
+RESULT.json pins archive/ELF/startups/cold/72images and FAILED complete-flow log.
 
-All20 current native-egui checks PASS m106-dhcp-native-actual-density-r9:
-15 workspace plus5 lesson controllers. Tests exercise actual menus/typing,
-Add/removal, partial/wrong/reference/alternate, invalidation, separate practice,
-warm save/resume/reset, reflow/focus/Undo/long raw values and text scales.
-All-target Clippy PASS m106-all-target-clippy-r1; debug build PASS
-m106-registered-native-build-r1. Earlier full225 UI run preceded compact changes;
-no full234 post-change UI rerun is claimed.
+Actual installed all3 DHCP flow R3 FAILED at capstone separate-example repair:
+Remove-exclusion-1 was outer-visible but clipped by its INNER list. Developer
+helper acknowledged a missed click; complete Policy equality correctly caught
+extra excluded .12. First2 full flows passed, capstone experiment passed; do NOT
+claim all3 passed. Native run-i0xumn5o/log m106-installed-three-lessons-native-r3.
+Older R1/R2 capture-target failures and images retained. They are distinct from
+startup and not simulator failures. R2 had reached correct capstone200% state.
 
-Real bugs fixed: count-dependent collapsing headers closed when adding rows;
-stable header/global policy/client UI identities now survive list changes and
-split/stack reflow. Add focuses its new field without applying policy. Shared
-single-line font-metric alignment/dropdowns/fields/topology are retained.
-Developer-only event driver waits for actual rect/clip stability, one input batch
-per frame, and routes inner scrolling through the actual field column. It does
-not set ScrollState, apply model actions or inject successful state.
+## Current correction and immediate next steps
 
-Current23 DHCP/cold native-egui checks PASS m106-dhcp-and-cold-native-egui-r11,
-including all3 full observed-viewport flows and the3 new cold controller checks.
-All149 Python tooling checks PASS m106-cold-python-guards-r1 (6 new cold guards).
-All-target ClippyR3/fmt/diff PASS. Catalog-wide actual-egui125 assignments at
-200%,1920/720 widths plus VLAN typing/reflow PASS190.64s
-(m106-current-catalog-layout-r1). That command also selected spanning_tree, but
-its UI-name filter ran ZERO STP checks; do not count it as a core rerun.
-No heavy command active at this write. Final20 STP checks PASS
-m108-spanning-tree-final-r2, four shared library/font/course/filter checks PASS
-m106-shared-library-layout-r1, palette/coverage guards PASS. No final native
-R3/package/cold process result yet. Cold R3 source independently accepted and
-integrated as5 exact files+4 restricted helper visibility declarations; MAIN
-later geometry/focus/wording retained. Receipt dhcpv4-cold-reopen/main-integration-r3.
+Three reviewed paths source freeze reviews/dhcpv4-control-visibility/source-r1/
+SOURCE-READY.json SHA73898f427df76841d1236758f024e57986ad93ef73e3aba114995db5262989ae.
+All source/base/7-prerequisite hashes verified then exact integration. Passive
+Add/Remove clips cover actual DNS/exclusion/reservation viewports; shared bounded
+outer+inner reveal aims at control-column X. Queue requires exact selected-pool
+raw-vector change before acknowledging Add/Remove; full Policy check unchanged.
+New regressions force outer-visible/inner-clipped Remove, actual wheel/Remove/
+Apply, DNS removal and6 pulse-only lost-click negatives. No solved-state injection.
+All26 DHCP/controller/cold headless checks PASS m106-inner-control-clips-egui-r12.
+All-target ClippyR4 found one nested-if style; identical predicate changed to
+if-let chain. ClippyR5/fmt/diff PASS; final3 clipped-control regression groups
+also PASS R13 after that style change. No heavy command active at this write.
+NEXT is commit this correction and build a new clean candidate; inspect Git for
+its actual identity, never invent the SHA.
 
-Actual normal native R2 reached both first2 complete flows and capstone200% but
-failed its capture target: complete panel282logicalhigh vs actual usable~274.
-No application/grade failure. Complete results/count/navigation are now a passive
-separate geometry target when the older operation notice plus panel cannot fit;
-normal scrolling remains, failure rows/grade assertions unchanged. R10 all3
-observed-viewport regressions pass. New150/200 focused-field captures added for
-actual editing review. Actual complete R3 and packaged acceptance are still due.
-R2 run-w22i17if and R1 run-ksw23tcd retained. R2 source/ELF receipt
-normal-native-main-r2/SOURCE.json pins ELF16e685d2506ee9c1f7884399a080abc152b9fd95e1a97441c810286f977947a5.
-It predates later elif/STP integration, not relabeled as current build.
+NEXT: once Clippy/fmt/diff pass, commit/push this narrow correction +updated
+evidence docs. Build clean candidate from MAIN. Verify actual installed upgrade
+from86ca/lifecycle125/31, then all3 normal native DHCP flows with source current
+fixed helper; retain strict policy/grade/visibility assertions. Inspect focused
+150/200 fields, wrong/partial/reference/alternate, warm resume/Reset/Challenge and
+capstone completion. Then final identified startup/cold checks, record hashes/
+launch command. Only after full actual unit acceptance promote narrow CCNA4.3/
+4.6 Partial rows (likely136Partial/1Supporting/1103Open; inspect first). Current
+status remains134/1/1105; descriptions acknowledge model/pending acceptance.
+A candidate is not completion; proceed with queued package/STP/Apache work.
 
-The full library+99 integration-target R2 ran1088 checks:1081PASS/7 old
-integration assumptions failed. All7 targets now PASS74 checks after exact
-catalog/unit counts, explicit new context-bound DHCP branch and expected missing
-new IDs in the actual116-attempt history were corrected. Full frozen history,
-old122 prefix and Goals remain unchanged. No fabricated new attempts. Logs
-m106-all-models-r2 and m106-reconciled-targets-m108-stp-r1. This is coverage across
-fullR2+targeted retry, not a full green rerun. Memory min22.76GiB, PSIavg10zero,
-OOMdelta0. Three post-completion explanation strings are now scenario-specific;
-peer accepted. No other authored field/Goal/initial/reference changed.
+## Verified source gates
 
-NEXT: commit/push coherent125 code/controller/docs after privacy review, then
-build a clean Fedora candidate from MAIN. Prefer the final actual three-lesson
-R3 flow on its INSTALLED binary (avoid duplicate debug/native rerun). Verify
-installed upgrade fromcd31/lifecycle125/31, actual3 complete flows with focused
-150/200 fields,11 normal Wayland launches, real normal-private-XDG cold DHPC
-`native_reopen.py --case dhcpv4` and existing default script cold guard as needed.
-Inspect actual screenshots. If any fail, retain evidence and fix/reidentify; do
-not count pending runs. Only then promote narrow CCNA4.3/4.6 partial evidence and
-update owner launch/checksums. CurrentCSV gap wording now acknowledges the model
-and pending acceptance instead of wrongly saying no capability exists. No
-coverage-status credit yet. Keep other platform/novice/accessibility pending.
-Continue package/backend/terminal and STP adapter after this candidate; a package
-is not completion. All ordinary implementation remains authorized.
+Three distinct DHCP tasks: applied vs held options, relay+wrong mask, safe
+reservation/exclusion/capacity handover preserving monitor.13 registered content
+checks PASS, alternate reservations/early eligible Renew accepted. Initial two
+content failures were procedural assumptions, corrected after RFC2131 review;
+core/Goals/expected outcome tables unchanged. Three post-completion explanations
+were improved separately; no other authored field changed. Full library+99
+integration R2:1081PASS/7 stale integration failures; corrected seven targets
+PASS74. No new attempts invented in actual116-attempt history; all9 later IDs
+must remain absent. This is fullR2+scoped retry, not a full green rerun.
 
-## Last accepted owner-openable Fedora candidate —122, not current125 source
+23 pre-clipfix DHCP/cold UI checks,149 Python guards, alltargetClippyR3, palette
+provenance/coverage/fmt/diff pass. Catalog-wide125 Challenge assignments at200%
+1920/720 horizontal bounds+VLAN typing/reflow PASS190.64s, plus4 shared font/
+course/filter tests. That combined command filtered STP to ZERO tests; separately
+m108-spanning-tree-final-r2 passes all20 core checks after style fixes. Old full225
+UI preceded compact work; no full240 current UI suite is claimed.
 
-Source cd31af6e78e66c44b5f4fffeeaf65016e625a6ac;122/30=35/24/20/43.
-Absolute launch (works from the home directory):
+## Queued reviewed work — no count/coverage credit
+
+Package backendR3: reviews/package-management/backend-source-r3/SOURCE-READY.json
+SHA72e9ca0556e598a53e5294d2f5f7c92e78d590b23e9807ff5b8d1631eab84099;
+12paths/20tests UNRUN. Root has pure core19+68lib PASS at2b777f6. No dpkg utility
+installed/run; manual-derived vectors are not actual package observations.
+TerminalR2: reviews/package-management/terminal-source-r2/SOURCE-READY.json
+SHA5452e8fca36e68020b76c0ee66311f75b0ba06d3a98c1803c8eca84cc16bfadb;
+5incrementalpaths onbackendR3/15tests UNRUN, peer accepted. Real closed argv,
+computed queries and explicitly simulated Plan summaries, no fake audit/APT
+resolver. Guards distinguish package NAME+/- from valid version1.0+ and require
+ALL installed dependency health for exact-current reinstall. Integrate together
+incrementally after all hashes; preserve MAIN STP export/current UI hooks.
+Original125 source-metadata fixture predates ONLY the3 M106 completion paragraph
+updates: reconcile those explicitly, retain frozen original; don't regenerate
+history/Goals/expected cases. Stage1 UI renderer/content remains separate.
+
+STP backendR1: reviews/spanning-tree-foundation/backend-source-r1/SOURCE-READY.json
+SHA8fc92d06254335ad14c2c6f37ea377d69d890afcc20aa0bc37cf7e9b0c698f43;
+12paths/17tests UNRUN,35 current125 prerequisites pinned. Peer found Action was
+serialized before cheap borrowed field/shape validation. Root ACK minimal existing
+core Action::validate_for→pub(crate) (same body), call before counter serialization;
+author preparing R2/direct oversize negatives. SourceR1 retained. Availability+
+positive Connected/root/role/path guards, fresh snapshot, separate fixture and
+restore-before-reset accepted otherwise. No native/STP authored credit yet.
+
+Apache pure core sourceR1: reviews/apache-static/source-r1/SOURCE-READY.json
+SHAb1dc272985181e576fd55e7d452ec49b991de3e39886c8d766fd192c35e0a26c;
+4paths/20groups UNRUN and not yet peer-reviewed. Accepted contract51460cf7…:
+one Listen/equal-port wildcard-vhost closure, explicit root baseline, saved vs
+active config/live virtual contents, canonical paths, typed redirect/HEAD/status,
+no real server/HTTP wire/TLS/proxy. Unknown valid Host/path forms Unsupported;
+denied+missing status precedence deliberately Unsupported until pinned. No
+existing Service/UnitManager behavior changes, dependencies or coverage credit.
+
+Existing agents source-only/no heavy grants: ccna_discovery authored clipfix/STP,
+preparing borrowed-action preflight R2; independent_review accepted clipfix,
+reviewing STP and froze Apache source; package terminalR2 peer accepted. No spawn.
+
+## Broader limits and last fully accepted build
+
+Full inventory2026-10-22/scoped primary references2026-10-25: CCNAv1.1,
+LPIC-1v5.0/LPIC-2v4.5; future CCNAv2 separate/uncredited.1240 overlapping references
+134Partial/1Supporting/1105Open, not a completion percentage. Many practical
+capabilities/units remain. Existing Bash9/getopts55 controlled actual observations,
+genuine6/7/8 and old256+3 variables remain; elif diagnostic only, no new semantics.
+
+Last FULL accepted package remains cd31af6e78e6/122 labs/30 units:
 $HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gcd31af6e78e6-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+Archiveb738abf1db9dbc44c772e150b357f8423367c559ff31f2d080201cd453aaecbc;
+ELFabceac7b97072a8e6628f0e4dafcc3b2fd7499583a2e8dff8e889196e74514b1.
+51 installed getopts frames/lifecycle/11 startups/normal2-process cold PASS.
 
-Archive SHA b738abf1db9dbc44c772e150b357f8423367c559ff31f2d080201cd453aaecbc;
-ELF abceac7b97072a8e6628f0e4dafcc3b2fd7499583a2e8dff8e889196e74514b1.
-Private verified installation verified-cd31af6e78e6-_8pkbpt_.122/30 lifecycle,
-upgrade1e7, uninstall/reinstall/exact original-nine synthetic bytes PASS.
-All3 installed getopts flows PASS51 actual captures/exit0 run-75n0wzy9; actual
-946x929, Light150/Dark200. Corrected audit m104-compact-native-acceptance-r2.json
-SHA0a7b87a3531db278f693c231d9ab0d6e7dd3e5e7245b9a2d6948b544e71db940:
-initial derived metadata said57; actual files/array51, raw observations retained.
-11 default-Wayland startups and NORMAL-private-XDG real two-process reopen PASS;
-cold manifest227ae2e854ded6d6a741092220a319a81096db416293a3f31d2153b758a291d2.
-Old72-field shared alignment acceptance atca1929b remains that source's evidence.
-
-## Other reviewed capability work — continue after current unit gates
-
-Debian pure foundation committed2b777f6: typed published/cache/archive/installed/
-virtual-payload distinction, bounded script-free dependency closure, version
-comparison, conffile preservation/remove/purge.68 library+19 core checks PASS;
-all-target Clippy/fmt PASS. Unknown JSON field rejection fixed with empty struct
-RefreshIndex{} (same wire). Optional dpkg absent; no actual host package command,
-install or external oracle was run. No new lab/coverage from this library.
-
-Package backend R3 source-only,12 owned paths,20 tests UNRUN:
-reviews/package-management/backend-source-r3/SOURCE-READY.json
-SHA72e9ca0556e598a53e5294d2f5f7c92e78d590b23e9807ff5b8d1631eab84099.
-Worktree debian-packages-backend at2b777f6 plus pinned125 metadata prerequisites.
-Peer accepted productionR2 and R3 test/doc restore fix: compare full selected
-Attempt BEFORE Reset, distinct malformed raw drafts/separate practice, preserve
-other attempts/favorites. Preflight every source/base hash, merge incrementally;
-never overwrite newer MAIN UI/pack/progress. Gate20 first, then native logical
-package workspace before authoring scenarios. No fake dpkg/APT aliases.
-
-Pure spanning-tree R1,4 owned paths integrated after exact base/hash preflight;
-68 library+20 core tests PASS m106-reconciled-targets-m108-stp-r1:
-reviews/spanning-tree-foundation/source-r1/SOURCE-READY.json
-SHA85e73e4d5e74a318eb4fba5cd2cb37932f1e4f59a7d4a66d368a98079f8d3b90.
-Independent source accepted. One ideal steady-state P2P instance,12 bridges x8
-ports/48 links, receiving local path cost, advertised designated cost and exact
-lexicographic identifiers; disconnected/down/asymmetric/tie cases and independent
-256-graph oracle. No PVST/BPDUs/timers/convergence/guard/device/packet claims.
-The pure module/export are committed/pushed atf096b57. State/UI/content/coverage
-remain separate; All-target ClippyR3 PASS after two identical-predicate style fixes. CCNA2.5a-d still Open.
-
-Existing agents only, SOURCE ONLY/no heavy grants:
-ccna_discovery: coldR3 peer accepted/integrated; now source-only STP backend
-(contract9e3db739… root acknowledged) in isolated worktree; paused at safe source
-boundary to peer-review package terminalR1. No heavy grants.
-independent_review: accepted MAIN DHCP integration and optional completion help.
-PackagebackendR3 authored/frozen. Authentic closed package CLI contractR2
-acknowledged with APT selector/all-installed dependency guards. Terminal5-path
-R1 source8e5d4a27…/14 tests UNRUN; peer found whole-NAME=VERSION suffix guard
-incorrectly rejects valid1.0+ version. Author preparing narrow R2 fix and positive
-exact-version install/reinstall; no main integration until reviewed/gated. Also froze narrow excluded-elif diagnostic at
-reviews/shell-elif-diagnostic/source-r1/SOURCE-READY.json, SHA
-edcef758964e6763e61d9ecd1d7b6aa9039c00e920096b4e753b061a96462061.
-Only shell.rs command-head guard,4 tests, subset note; all4 PASS in full modelR2.
-Quoted/escaped/expanded heads and data roles unchanged; revision9/34 historical
-module-fixture hashes exact. Root exact3-path integration complete; alltargetClippyR3 PASS; committed/pushed
-cc3fd8a. All34 core/history
-source pins checked unchanged. No new spawn needed.
-
-## Completion and acceptance limits
-
-1240 overlapping objective references:134Partial/1Supporting/1105Open, not a
-completion percentage. Full objective inventory2026-10-22; scoped references
-2026-10-25. Current CCNAv1.1, LPIC-1v5.0, LPIC-2v4.5; futureCCNAv2 separately
-planned/uncredited. Large simulator/curriculum gaps remain across all tracks.
-See COMPLETION.md, CURRICULUM.csv, SKILL_COVERAGE.csv and implementation ledger.
-
-Wayland interval1 EGL/dispatch wait reproduced onMesa26.2.5; driver cause remains
-unproved. Linux Wayland-specific interval0 policy uses pinned winit environment
-selection; X11/Windows/macOS defaults unchanged. Accepted runs use no diagnostic
-override. Startup evidence is scoped, not a universal cure/power measurement.
-Separate capture-only Context reentry deadlocks were fixed; no reentry in helpers.
-
-Bash core9/getopts55 fixed disposable actual Bash observations and real writer6/7/8
-histories remain exact. Excluded elif can still report Syntax instead of
-Unsupported was corrected in the reviewed narrow command-head guard; four
-negative/data-role tests PASS, revision9/history bytes unchanged. Commit pending. No authored
-elif alternatives remain and no learner-host reference engine exists.
-
-Owner approved MIT for originals. Third-party notices retained. macOS dispatch0.2.0
-original notice is unavailable: exact10229B crate bd0c93bb4b0c6d9b77f4435b0ae98c24d17f1c45b2ff844c6151a07256ca923b,
-upstream82d6c7a5b75dc0c71c3f46f87bb6c16a476f7748 checked; complete payload/tree
-has MIT metadata but no original notice. Issue18 closed without supplying one;
-research manifest733c17190e43bd38029bd78261c7f7244c4b1ab1467faafa180467228348bc4b.
-Do not invent text or call the macOS candidate redistributable. Genuine notice or
-separately reviewed dependency/distribution decision required; independent work
-continues. Actual Windows/macOS desktop/signing/notarization, screen-reader,
-physical-device keyboard and novice acceptance remain pending. CI/cross builds,
-headless tests and automated native events do not prove them. No public release.
+Wayland interval1 EGL/dispatch stall reproduced onMesa26.2.5; exact driver cause
+unproved. Scoped Linux Wayland interval0 selection unchanged, no global changes.
+Normal accepted checks use no diagnostic override; no universal cure/power claim.
+Windows/macOS runtime/signing/notarization, screen-reader/physical-keyboard/novice
+acceptance pending. macOS redistribution blocked by unavailable original notice
+in exact dispatch0.2.0 (bd0c93bb… upstream82d6c7a5…); issue18 closed without notice.
+Research733c1719… retained; no invented notice or security bypass. MIT originals
+approved; third-party obligations stay. No release publication.

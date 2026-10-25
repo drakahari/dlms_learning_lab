@@ -1568,3 +1568,37 @@ a missing portable-projection check and an unchanged test tamper; both corrected
 with meaningful negative guards before execution. Three Rust/six Python new
 checks pass. Real two-process/GPU evidence remains a separate pending gate.
 No new dependency, host command, release or novice/other-platform acceptance.
+
+### M106 installed candidate86ca and clipped-control correction
+
+Clean86ca Fedora candidate passes installed125/31 upgrade/lifecycle and exact
+synthetic progress retention. Archive c8ce64a093041f62ceb05742f950a18a122888827dd3a342bc25b27f2d0393d6;
+ELF7eadafee389f51afd8326ace77f1248ceffa1a1fab1f00ea94c5bc76e42fbdd4.
+1 protocol+10 quiet normal Wayland startups pass~0.8–0.9s without a diagnostic
+override. Both actual normal-private-profile two-process cold cases pass:
+DHCP writer37.674s/reader14.699s with12 captures and unchanged default scripting
+case. Full raw/portable/receipts/drafts/favorite/appearance are checked before
+navigation; actual repair follows. First wrongly placed cold output was refused
+before child launch, then corrected to the required disk TMPDIR; guard retained.
+
+Installed native alignment passes72 captures:36 at actual1920x1080 fullscreen,
+36 at946x929 tiled,100/150/200%, light/dark. Representative IPv4 placeholders,
+populated errors/topology, VLAN numeric columns/stacking and focus were reviewed.
+These are86ca renders, not screenshots from a later identity. The requested
+1100x820 tile was not honored; actual dimensions are recorded.
+
+The complete installed DHCP unit flow R3 still FAILED: first2 full lessons
+passed, then capstone practice repair's Remove was visible in the outer viewport
+but clipped by its inner list. A missed automated click left the extra exclusion;
+the strict full-policy assertion correctly failed. This does not establish
+complete native unit acceptance. All failed evidence remains.
+
+The independently reviewed three-path correction records actual collection
+control clips and shares bounded stable inner/outer scrolling with fields. It
+requires exact selected-pool raw Add/Remove vector changes before acknowledging
+a click, retaining the full applied-policy assertion. No product layout/IDs,
+model, Goal, authored data or progress wire changes. All26 DHCP/controller/cold
+checks pass R12, including3 new real clipped-button/fault-injection groups.
+All-target ClippyR5/fmt/diff pass after one identical-predicate style change.
+A fresh identified candidate and complete installed unit retry remain required;
+no objective-status promotion, release or full-product claim.

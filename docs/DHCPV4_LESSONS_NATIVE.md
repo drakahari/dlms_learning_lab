@@ -130,3 +130,13 @@ All149 Python tooling guards and all-target Clippy pass. The catalog-wide actual
 egui check covers all125 assignments at200% text/1920 and720 widths plus VLAN
 typing/reflow (190.64seconds); four focused course/filter/font-metric checks also
 pass. These are headless geometry/input checks, not new native PNG evidence.
+
+Installed86ca R3 found a separate inner-list control issue in the developer
+driver: a Remove button was inside the outer workspace but outside its real
+scroll clip. Exact policy equality caught the missed action. Passive collection
+button clips now use the same bounded visibility discipline as fields, and
+queue acknowledgement verifies the exact selected-pool raw list change. Three
+new regressions force clipped Remove/wheel/Apply and dropped-click faults. All26
+DHCP/controller checks pass; the final actual installed all3 flow is still due.
+86ca lifecycle,11 startups, both real cold cases and72 shared alignment renders
+pass independently. No source change to simulation, goals or saved work.

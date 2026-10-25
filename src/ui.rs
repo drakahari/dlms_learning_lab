@@ -132,6 +132,7 @@ struct Metrics {
     dhcp_fields: Vec<(String, egui::Rect, egui::Id)>,
     dhcp_field_clips: std::collections::BTreeMap<String, egui::Rect>,
     dhcp_controls: Vec<(String, egui::Rect, bool)>,
+    dhcp_control_clips: std::collections::BTreeMap<String, egui::Rect>,
     dhcp_clients: Vec<(String, egui::Rect)>,
     dhcp_pools: Vec<(String, egui::Rect)>,
     dhcp_example_actions: Vec<(usize, egui::Rect)>,
