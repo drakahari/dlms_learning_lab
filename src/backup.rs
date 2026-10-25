@@ -409,12 +409,14 @@ mod cancellation_tests {
 }
 
 #[cfg(test)]
-mod revision8_capture_cancellation_acceptance {
+mod current_revision_capture_cancellation_acceptance {
     use super::*;
     #[test]
     fn actual7_profile_preview_cancelled_inside_child_retains_every_input_target_and_history_byte()
     {
-        assert_eq!(shell::EVALUATOR_REVISION, 8);
+        const {
+            assert!(shell::EVALUATOR_REVISION >= 8);
+        }
         let labs = crate::pack::bundled().unwrap();
         let mut value: serde_json::Value = serde_json::from_slice(include_bytes!(
             "../tests/fixtures/shell-v7-synthetic-writer-progress.json"
@@ -459,5 +461,57 @@ mod revision8_capture_cancellation_acceptance {
         assert_eq!(std::fs::read(target).unwrap(), original);
         assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 2);
         assert_eq!(task.checked.load(Ordering::Relaxed), 0);
+    }
+}
+
+#[cfg(test)]
+mod genuine8_getopts_child_cancellation {
+    use super::*;
+    #[test]
+    fn confirmed_preview_cancel_with_active_getopts_child_preserves_raw8_and_all_histories() {
+        assert_eq!(shell::EVALUATOR_REVISION, 9);
+        const RAW: &[u8] =
+            include_bytes!("../tests/fixtures/shell-v8-synthetic-writer-progress.json");
+        let mut value: serde_json::Value = serde_json::from_slice(RAW).unwrap();
+        value["attempts"]["shell-arguments"]["state"]["source"] = serde_json::json!(
+            "pending=$(getopts ab choice -ab; while true; do :; done); printf parent-must-not-run"
+        );
+        let bytes = serde_json::to_vec_pretty(&value).unwrap();
+        let directory = tempfile::tempdir().unwrap();
+        let input = directory.path().join("input.json");
+        let target = directory.path().join("progress.json");
+        std::fs::write(&input, &bytes).unwrap();
+        std::fs::write(&target, RAW).unwrap();
+        let (tx, rx) = mpsc::channel();
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let child_barrier = barrier.clone();
+        let mut observed = false;
+        let task = Inspection::start_observing(
+            input.clone(),
+            crate::pack::bundled().unwrap(),
+            move |vm| {
+                if !observed && vm.active_capture_depth() > 0 && vm.active_getopts_scan() {
+                    observed = true;
+                    tx.send(()).unwrap();
+                    child_barrier.wait();
+                }
+            },
+        );
+        rx.recv_timeout(std::time::Duration::from_secs(5)).unwrap();
+        task.cancel.store(true, Ordering::Relaxed);
+        barrier.wait();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        loop {
+            if let Some(result) = task.poll() {
+                assert!(result.err().unwrap().contains("cancelled"));
+                break;
+            }
+            assert!(std::time::Instant::now() < deadline);
+            thread::yield_now();
+        }
+        assert_eq!(task.checked.load(Ordering::Relaxed), 0);
+        assert_eq!(std::fs::read(input).unwrap(), bytes);
+        assert_eq!(std::fs::read(target).unwrap(), RAW);
+        assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 2);
     }
 }

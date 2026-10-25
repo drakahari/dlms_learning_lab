@@ -6,6 +6,41 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M101 — shell9 source gate accepted; native migration next
+
+- Source ca1929b7397529853573b432a16b4757ead2d13a candidate installed lifecycle
+  PASS119 labs/29 units, upgradee850, exact synthetic original-nine bytes retained.
+  Installed prefix verified-ca1929b73975-ux_eo5fd. Archive SHA256
+  32dffc6056b543917af1f0e94a726cdbe1c879bc6f5a823240893ed473d8d429;
+  binary a7a4706096aa66f3c8b75d9b092f1c9708103e3446d6d0599d8e3611b2ca2f95.
+- Actual DEFAULT Wayland arrays-stop R2 PASS exit0/two captures: responsive loop,
+  Stop discards grading, keyboard repair/current Run and exact saved reload.
+  R1 failure remains retained. Shared alignment PASS72 captures: IPv4 blank,
+  populated/incorrect/partial fields and VLAN at100/150/200%, wide/narrow,
+  Light/Dark. Reviewed representative actual frames; no physical/novice acceptance.
+  Local audit audits/m100-installed-final-native.json SHA256
+  fcb9c6bd505f71601a244420f537b4f4dbb1d991c5322138b3783a0b16386ab9.
+- Exact peer-reviewed getopts R2 21 paths integrated from frozen manifest
+  fb029195ef46e1e0989d257108b70ac00ea4efc7beffe24fb77f1355ffea8089;
+  every main path matched base before replacement. No conflicts, dependencies,
+  lab/count/coverage change. Source evaluator9 is NOT yet accepted. Full library
+  plus every top-level integration test running serially via MAIN runner,
+  log m101-getopts-all-models-r1 completed991PASS/1FAIL over94targets. The sole
+  failure was old synthetic future sentinel8, now valid history. Original test
+  archived; current AND future revision rejection now tested. Scoped18 retry
+  PASS m101-history-sentinel-r2. Thus992 distinct model/content checks pass
+  across fullR1+scopedR2, not a new all-green full rerun. Full202 binary/UI PASS m101-getopts-all-ui-r1, all-target Clippy PASS R3,
+  fmt/diff PASS. ClippyR1/R2 only constant-version assertions; moved to const
+  blocks without weakening checks. No heavy invocation currently active. All new getopts55/Bash, resource and genuine8
+  migration checks passed. Independent source review accepts sentinel fix.
+- Next integrate reviewed native fixture controller, exact legacy8→9
+  migration/native RunStop/history/export/restore checks, then author reviewed
+  option-processing unit. DHCP R2 pure library remains isolated/uncompiled;
+  integrate and test before content. Existing helpers have no heavy grant.
+- Catalog119/29 =35CCNA,24LPIC1,20LPIC2,40Bash. Matrix134Partial/1Supporting/
+  1105Open unchanged. Major curriculum and Windows/macOS runtime, screen-reader,
+  physical-device and novice acceptance remain open. No release.
+
 ## Active M100 Stop native retry
 
 - e850d47b02f950a83bb351ec0aa2b1c8b2d94082 candidate/lifecycle119/29 PASS;

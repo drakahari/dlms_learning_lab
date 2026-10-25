@@ -1529,7 +1529,7 @@ mod saved_sequence_reader_tests {
 }
 
 #[cfg(test)]
-mod revision8_writer_acceptance {
+mod current_revision_writer_acceptance {
     use super::*;
     const ACTUAL7: &[u8] =
         include_bytes!("../tests/fixtures/shell-v7-synthetic-writer-progress.json");
@@ -1541,7 +1541,9 @@ mod revision8_writer_acceptance {
     }
     #[test]
     fn actual7_exact_copy_race_and_failed_persist_do_not_stamp_or_replace_target() {
-        assert_eq!(crate::shell::EVALUATOR_REVISION, 8);
+        const {
+            assert!(crate::shell::EVALUATOR_REVISION >= 8);
+        }
         for same in [false, true] {
             let dir = tempfile::tempdir().unwrap();
             let path = dir.path().join("snapshot.json");
@@ -1578,20 +1580,30 @@ mod revision8_writer_acceptance {
             assert!(result.is_err());
             assert_eq!(std::fs::read(&path).unwrap(), ACTUAL7);
             assert_eq!(
-                std::fs::read(path.with_extension("before-shell-v8.json")).unwrap(),
+                std::fs::read(path.with_extension(format!(
+                    "before-shell-v{}.json",
+                    crate::shell::EVALUATOR_REVISION
+                )))
+                .unwrap(),
                 ACTUAL7
             );
             assert!(candidate.migration_receipts.is_none());
             save(&path, &candidate).unwrap();
             assert_eq!(
-                std::fs::read(path.with_extension("before-shell-v8.json")).unwrap(),
+                std::fs::read(path.with_extension(format!(
+                    "before-shell-v{}.json",
+                    crate::shell::EVALUATOR_REVISION
+                )))
+                .unwrap(),
                 ACTUAL7
             );
         }
     }
     #[test]
-    fn actual7_postreplacement_sync_warning_commits8_receipt_and_retains_exact7_snapshot() {
-        assert_eq!(crate::shell::EVALUATOR_REVISION, 8);
+    fn actual7_postreplacement_sync_warning_commits_current_receipt_and_retains_exact7_snapshot() {
+        const {
+            assert!(crate::shell::EVALUATOR_REVISION >= 8);
+        }
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("progress.json");
         std::fs::write(&path, ACTUAL7).unwrap();
@@ -1612,16 +1624,116 @@ mod revision8_writer_acceptance {
         .unwrap();
         assert!(saved.durability_warning.is_some());
         assert_eq!(
-            std::fs::read(path.with_extension("before-shell-v8.json")).unwrap(),
+            std::fs::read(path.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
             ACTUAL7
         );
         assert!(candidate.migration_receipts.is_none());
         let disk: Progress = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
-        assert_eq!(disk.migration_receipts.as_ref().unwrap().shell, vec![7, 8]);
+        assert_eq!(
+            disk.migration_receipts.as_ref().unwrap().shell,
+            vec![7, crate::shell::EVALUATOR_REVISION]
+        );
         save(&path, &disk).unwrap();
         assert_eq!(
-            std::fs::read(path.with_extension("before-shell-v8.json")).unwrap(),
+            std::fs::read(path.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
             ACTUAL7
+        );
+    }
+}
+
+#[cfg(test)]
+mod genuine8_to9_writer_acceptance {
+    use super::*;
+    const ACTUAL8: &[u8] =
+        include_bytes!("../tests/fixtures/shell-v8-synthetic-writer-progress.json");
+    fn empty() -> Progress {
+        Progress {
+            schema_version: 1,
+            ..Default::default()
+        }
+    }
+    #[test]
+    fn genuine8_exact_copy_race_and_failed_main_persist_keep_target_and_caller_unchanged() {
+        assert_eq!(crate::shell::EVALUATOR_REVISION, 9);
+        for same in [false, true] {
+            let directory = tempfile::tempdir().unwrap();
+            let path = directory.path().join("copy.json");
+            let competing = if same {
+                ACTUAL8.to_vec()
+            } else {
+                serde_json::to_vec(&empty()).unwrap()
+            };
+            let result = preserve_copy_with_race(&path, ACTUAL8, || {
+                std::fs::write(&path, &competing).map_err(|e| e.to_string())
+            });
+            assert_eq!(result.is_ok(), same);
+            assert_eq!(std::fs::read(&path).unwrap(), competing);
+        }
+        for callback_fails in [false, true] {
+            let directory = tempfile::tempdir().unwrap();
+            let path = directory.path().join("progress.json");
+            std::fs::write(&path, ACTUAL8).unwrap();
+            let candidate = empty();
+            let result = save_with_writer(
+                &path,
+                &candidate,
+                WriteMode::Normal,
+                |raw| {
+                    assert_eq!(raw, Some(ACTUAL8));
+                    if callback_fails {
+                        Err("controlled callback failure".into())
+                    } else {
+                        Ok(())
+                    }
+                },
+                |_, _| Err("controlled persistence failure".into()),
+            );
+            assert!(result.is_err());
+            assert_eq!(std::fs::read(&path).unwrap(), ACTUAL8);
+            assert_eq!(
+                std::fs::read(path.with_extension("before-shell-v9.json")).unwrap(),
+                ACTUAL8
+            );
+            assert!(candidate.migration_receipts.is_none());
+        }
+    }
+    #[test]
+    fn genuine8_replacement_sync_warning_commits9_without_claiming_rollback() {
+        let directory = tempfile::tempdir().unwrap();
+        let path = directory.path().join("progress.json");
+        std::fs::write(&path, ACTUAL8).unwrap();
+        let candidate = empty();
+        let saved = save_with_writer(
+            &path,
+            &candidate,
+            WriteMode::Normal,
+            |_| Ok(()),
+            |p, b| {
+                write_atomic_with_sync(p, b, |_| {
+                    Err(std::io::Error::other("controlled postcommit sync warning"))
+                })
+            },
+        )
+        .unwrap();
+        assert!(saved.durability_warning.is_some());
+        let disk: Progress = serde_json::from_slice(&std::fs::read(&path).unwrap()).unwrap();
+        assert_eq!(
+            disk.migration_receipts.as_ref().unwrap().shell,
+            vec![7, 8, 9]
+        );
+        assert!(candidate.migration_receipts.is_none());
+        save(&path, &disk).unwrap();
+        assert_eq!(
+            std::fs::read(path.with_extension("before-shell-v9.json")).unwrap(),
+            ACTUAL8
         );
     }
 }

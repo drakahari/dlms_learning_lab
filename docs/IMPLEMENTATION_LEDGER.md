@@ -1239,3 +1239,62 @@ click with shared completion-first hover/click settling. A new exact real-egui
 production-phase regression types/Run/drives4924/4925 and proves no gradedRecord;
 it passes, as do3 existingStopUI checks. Failed native artifacts remain. No
 product simulation behavior change; actual newcandidate retry is still required.
+
+## 2026-10-25 — M100: installed normal-policy Stop and alignment acceptance
+
+Candidate ca1929b7397529853573b432a16b4757ead2d13a passes119-lab/29-unit
+installed upgrade, uninstall/reinstall and exact original-nine synthetic progress
+retention. Actual normal-policy native Wayland Stop retry exits0: the running
+loop remains responsive, Stop awards no record, keyboard repair/current Run and
+saved reload pass. The previous e850 native failure is retained; the correction
+settles the newly visible test button before clicking, without changing product
+Stop or grading behavior. Exact production-phase egui regression and prior three
+Stop UI checks pass.
+
+The same installed binary passes72 shared alignment captures: blank/populated,
+malformed/partial IPv4 answers and VLAN controls across100/150/200%, wide/narrow,
+Light/Dark. Representative actual images reviewed show centered text/placeholders,
+aligned columns, responsive stacking and scrolling. Local audit
+m100-installed-final-native.json pins binary/archive, logs and74 screenshots.
+This is not physical-keyboard, screen-reader, novice or other-OS acceptance.
+
+Next M101 integrates the independently reviewed bounded getopts scanner and
+actual8 progress fixtures, with all model/content/migration gates required before
+new curriculum credit. The catalog remains119 authored assignments, not a claim
+of complete certification coverage. No public release.
+
+## 2026-10-25 — M101: bounded option scanner and real8 history source gate
+
+Implemented evaluator9 getopts as typed scanner/evaluator state, with short-option
+clusters, required values, explicit reset, local ownership and inherited isolated
+capture/pipeline state. Exact input identity and all hidden copies share existing
+instruction/work/memory limits. No new dependency or host execution. The original
+256 ordinary-name allowance is preserved plus three fixed special-variable slots.
+Unsupported declarations and scanner reuse fail explicitly. All119 authored
+scenario identities/versions and40 script definitions/246 cases/40 examples stay
+unchanged. There is no new curriculum credit from the foundation.
+
+The full library/integration R1 run passed991 checks with one stale test sentinel
+failure: synthetic future8 became legitimate old history. Archived original test
+source; the correction rejects both current and future history revisions while
+retaining original6 bytes and32/33-capacity checks. Scoped18 retry passes, giving
+992 distinct checks across fullR1+scopedR2, not a claimed single green full rerun.
+This includes55 retained actual Bash observations with disclosed exclusions/
+diagnostic differences, alternate solutions, limits, Stop, exact genuine8 bytes,
+6/7/8 histories, real first-write backup, cancel/conflict/restore/reset and no
+fabricated credit. All202 binary/UI checks pass. ClippyR1/R2 found constant-version
+test assertion style only; compile-time assertions retain the checks, final
+all-target ClippyR3, formatter and diff checks pass.
+
+Single runner/jobs2/testthreads2: the ordinary full model run observed at least
+21.14GiB available memory, peak full PSI avg10=0.18%, zero OOM delta. The full UI
+run retained at least23GiB, full PSI0 and zero OOM delta. Disk-backed NVMe artifacts
+and the shared lock remained in use; no desktop/global setting was changed.
+
+The coarse curriculum index is reconciled with granular parent scopes, lab IDs
+and gaps, independently reviewed. All165 statuses/proposals/prerequisites and29
+upcoming rows stay unchanged; granular coverage bytes remain exact. README now
+points to the accepted119-lab ca1929b Fedora build, which still uses evaluator8.
+Next: genuine8→9 actual installed native acceptance, reviewed scripting projects,
+and guarded pure DHCPv4 foundation tests. Windows/macOS, physical accessibility,
+novice acceptance and substantial remaining curriculum stay open. No release.

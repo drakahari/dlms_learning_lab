@@ -100,7 +100,9 @@ fn run(source: &str, s: &Scenario) -> State {
 }
 #[test]
 fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_registered() {
-    assert_eq!(shell::EVALUATOR_REVISION, 8);
+    const {
+        assert!(shell::EVALUATOR_REVISION >= 8);
+    }
     let all = catalog();
     assert_eq!(all.len(), 119);
     assert_eq!(
@@ -303,7 +305,7 @@ fn plausible_wrong_partial_hardcodes_and_file_damage_fail_with_useful_feedback()
                 assert!(pass.contains(&true), "partial must have a real passed case");
             }
             let record = Some(Record {
-                engine_revision: 8,
+                engine_revision: shell::EVALUATOR_REVISION,
                 source: wrong.source.clone(),
                 results,
             });

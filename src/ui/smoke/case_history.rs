@@ -1,4 +1,4 @@
-//! App-only genuine frozen7→8 native acceptance. Controlled data; no reference State.
+//! App-only genuine frozen7→current native acceptance. Controlled data; no reference State.
 use super::*;
 use dlms_learning_lab::shell;
 use serde::Deserialize;
@@ -165,7 +165,7 @@ impl LabApp {
         else {
             panic!()
         };
-        assert_eq!(r.engine_revision, 8);
+        assert_eq!(r.engine_revision, shell::EVALUATOR_REVISION);
         assert_eq!(r.source, *source);
         assert_eq!(source, SOLUTION);
         self.case8_history();
@@ -175,7 +175,9 @@ impl LabApp {
         ctx: &egui::Context,
         stage: usize,
     ) -> (bool, Option<String>) {
-        assert_eq!(shell::EVALUATOR_REVISION, 8);
+        const {
+            assert!(shell::EVALUATOR_REVISION >= 8);
+        }
         let i = self.scenarios.iter().position(|s| s.id == ID).unwrap();
         let mut shot = None;
         match stage {
@@ -190,7 +192,12 @@ impl LabApp {
                     self.path.parent(),
                     Some(self._smoke_profile.as_ref().unwrap().path())
                 );
-                assert!(!self.path.with_extension("before-shell-v8.json").exists());
+                assert!(
+                    !self
+                        .path
+                        .with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
+                        .exists()
+                );
                 std::fs::write(&self.path, WRITER7).unwrap();
                 let mut f = std::fs::OpenOptions::new()
                     .write(true)
@@ -221,7 +228,11 @@ impl LabApp {
                 self.save();
                 assert!(self.storage_error.is_none());
                 assert_eq!(
-                    std::fs::read(self.path.with_extension("before-shell-v8.json")).unwrap(),
+                    std::fs::read(self.path.with_extension(format!(
+                        "before-shell-v{}.json",
+                        shell::EVALUATOR_REVISION
+                    )))
+                    .unwrap(),
                     WRITER7
                 );
                 assert!(!progress::current_solved(
@@ -260,7 +271,10 @@ impl LabApp {
                 ) {
                     return (false, None);
                 }
-                shot = Some(format!("case8-current8-passing-{stage}"));
+                shot = Some(format!(
+                    "case-current{}-passing-{stage}",
+                    shell::EVALUATOR_REVISION
+                ));
             }
             15009 => {
                 if !self.click_visible_smoke_control(ctx, self.metrics.lesson_tabs.get(1).copied())
@@ -366,7 +380,7 @@ impl LabApp {
                 assert_eq!(self.progress.favorites, original.favorites);
                 assert_eq!(
                     self.progress.migration_receipts.as_ref().unwrap().shell,
-                    vec![7, 8]
+                    vec![7, shell::EVALUATOR_REVISION]
                 );
             }
             15022 | 15032 | 15042 => {
@@ -526,7 +540,11 @@ impl LabApp {
                         .exists()
                 );
                 assert_eq!(
-                    std::fs::read(self.path.with_extension("before-shell-v8.json")).unwrap(),
+                    std::fs::read(self.path.with_extension(format!(
+                        "before-shell-v{}.json",
+                        shell::EVALUATOR_REVISION
+                    )))
+                    .unwrap(),
                     WRITER7
                 );
                 self.case8_pass(i);
@@ -554,7 +572,11 @@ impl LabApp {
                     bytes
                 );
                 assert_eq!(
-                    std::fs::read(self.path.with_extension("before-shell-v8.json")).unwrap(),
+                    std::fs::read(self.path.with_extension(format!(
+                        "before-shell-v{}.json",
+                        shell::EVALUATOR_REVISION
+                    )))
+                    .unwrap(),
                     WRITER7
                 );
                 self.case8_history();
@@ -563,7 +585,7 @@ impl LabApp {
                 let engine::State::Script { run: Some(run), .. } = &a.state else {
                     panic!()
                 };
-                assert_eq!(run.engine_revision, 8);
+                assert_eq!(run.engine_revision, shell::EVALUATOR_REVISION);
                 self.settings_open = false;
                 self.launch(i);
                 self.set_script_view(i, teaching::View::Assignment);
@@ -632,7 +654,11 @@ impl LabApp {
                     );
                 }
                 assert_eq!(
-                    std::fs::read(self.path.with_extension("before-shell-v8.json")).unwrap(),
+                    std::fs::read(self.path.with_extension(format!(
+                        "before-shell-v{}.json",
+                        shell::EVALUATOR_REVISION
+                    )))
+                    .unwrap(),
                     WRITER7
                 );
                 shot = Some("case8-selected-reset-preserves-other-contexts".into());
@@ -658,17 +684,17 @@ impl LabApp {
                 ));
                 assert_eq!(
                     self.progress.migration_receipts.as_ref().unwrap().shell,
-                    vec![7, 8]
+                    vec![7, shell::EVALUATOR_REVISION]
                 );
             }
             15073 | 15074 => {}
             LAST => {
                 println!(
-                    "PASS scoped native genuine7→8: real6+7 history, actual typed case8 Run/Stop/retry, separate example, exact first backup/readback,150/200 actual syntax error/repair, export/old7 preview Cancel+Confirm with current recheck/raw safety copy, selected Reset/Challenge. Synthetic data only; no novice/other-platform/screen-reader claim."
+                    "PASS scoped native genuine7→current: real6+7 history, actual typed case Run/Stop/retry, separate example, exact first backup/readback,150/200 actual syntax error/repair, export/old7 preview Cancel+Confirm with current recheck/raw safety copy, selected Reset/Challenge. Synthetic data only; no novice/other-platform/screen-reader claim."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
             }
-            _ => unreachable!("bounded dedicated genuine7→8 stage"),
+            _ => unreachable!("bounded dedicated genuine7→current stage"),
         }
         (true, shot)
     }
@@ -678,7 +704,9 @@ mod tests {
     use super::*;
     #[test]
     fn genuine7_native_plan_uses_real_frozen_data_and_bounded_case8_input_targets_only() {
-        assert_eq!(shell::EVALUATOR_REVISION, 8);
+        const {
+            assert!(shell::EVALUATOR_REVISION >= 8);
+        }
         for height in [1., 18., 180., 360.] {
             let viewport =
                 egui::Rect::from_min_size(egui::pos2(40., 100.), egui::vec2(400., height));

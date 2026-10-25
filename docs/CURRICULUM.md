@@ -20,7 +20,7 @@ Recheck evidence (2026-10-22): both official PDFs identify their blueprint versi
 
 [CURRICULUM.csv](CURRICULUM.csv) has **165 rows**: each active top-level objective in CCNA v1.1, LPIC-1 5.0 and LPIC-2 4.5, plus every upcoming CCNA v2.0 top-level objective. LPI's removed 104.4 is deliberately absent. Cisco lettered subobjectives are scoped under their parent; they are not individually marked covered. This is a complete planning index at that granularity, not complete implemented coverage. The [granular evidence/gap ledger](OBJECTIVE_MAPPING.md) separately indexes all current lettered subobjectives, LPI knowledge areas and named tools/terms, with explicit evidence per item and source-change guards.
 
-Each row records implemented scenario IDs (or None), a distinct proposed assignment, prerequisites, difficulty, the missing simulation model and its fidelity limit. **Partial** means only a narrow slice is implemented; even the existing labs do not cover the full named objective. Difficulty/prerequisite values are initial authoring estimates. Each proposed assignment may need several carefully authored scenarios after review, rather than one giant task per objective. No placeholder has been promoted into curriculum.
+Each row records credited scenario IDs (or None), a distinct proposed assignment, prerequisites, difficulty, the capability needed for the broader task and its remaining fidelity limit. The verified current parent slices are listed in the appendix below; their credited IDs and remaining gaps match the granular parent rows. A proposed task is not marked complete by related partial evidence. An Open parent can have a related implemented model or practice elsewhere without receiving objective credit; source-only libraries do not count as authored practical work. **Partial** means only a narrow slice is implemented; even the existing labs do not cover the full named objective. Difficulty/prerequisite values are initial authoring estimates. Each proposed assignment may need several carefully authored scenarios after review, rather than one giant task per objective. No placeholder has been promoted into curriculum.
 
 | Delivered assignment | Implemented practice | Important remaining gap |
 | --- | --- | --- |
@@ -155,3 +155,62 @@ M98 installed72f119/29 passes all3 actual reverse-DNS flows (50captures, clean
 exit) and identified30d upgrade/progress retention. Seven already Partial207.2
 rows strengthen narrowly; counts remain134Partial/1Supporting/1105Open. Original
 three terminal teaching source is verified; its actual native acceptance is next.
+
+
+## Current parent-slice reconciliation — 2026-10-25
+
+This appendix mirrors only the **136 current parent rows** in
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv). The 28 rows below already have Partial
+practice evidence; the other 108 current parents stay Open/Planned. No parent or
+child status is promoted by this reconciliation, and no full proposed assignment
+is declared complete. The CSV's remaining-gap field mirrors the corresponding
+parent evidence row; this appendix separates that gap from the verified slice.
+The 29 upcoming CCNA v2.0 planning rows, including their related-concept notes,
+remain unchanged and uncredited for that future blueprint.
+
+| Current blueprint / parent | Verified implemented slice — partial only |
+| --- | --- |
+| CCNA v1.1 1.6 | Conventional subnet allocation and a new usable workstation in a routed two-client handover. |
+| CCNA v1.1 1.8 | Manual conventional /64 configuration and reply-path verification. |
+| CCNA v1.1 1.9 | Supporting unicast/link-local explanation and scoped next-hop practice. |
+| CCNA v1.1 1.10 | Linux-style client configuration in one topology. |
+| CCNA v1.1 1.13 | Four native assignments: build both source paths, recover older locations, verify quiet-time aging and hand over two VLANs across three switches. |
+| CCNA v1.1 2.1 | Native configure/verify exercises: active data VLANs, access membership, explicit trunks, allowed sets, per-link tagging/native classification, both-direction broadcast service and separation; distinct handover. No real CLI. |
+| CCNA v1.1 2.2 | Native configure/verify exercises: active data VLANs, access membership, explicit trunks, allowed sets, per-link tagging/native classification, both-direction broadcast service and separation; distinct handover. No real CLI. |
+| CCNA v1.1 2.3 | Four native LLDP configuration/verification assignments: independent transmit/receive, current direct peers, advertised name/port-description/TTL refresh, transmit-only policy and preserved multi-link handover. Explicit manual events and modeled cache aging. |
+| CCNA v1.1 3.1 | Native IPv4/IPv6 static entries: selected prefix, next hop, interface, preference and default; applied path evidence. |
+| CCNA v1.1 3.2 | IPv4/IPv6 longest-prefix and equal-prefix distance behavior, with endpoint checks and cloned failure cases. |
+| CCNA v1.1 3.3 | Substantive native IPv4 network/return/default-preservation/host-exception/floating/capstone practice plus existing IPv6 static activities. |
+| CCNA v1.1 3.4 | Native single-area P2P parameter diagnosis, explicit router identities, directed SPF/ECMP candidates and passive LAN advertisement from current typed configuration. |
+| CCNA v1.1 5.6 | Four native document assignments: host/any source policy, ordered TCP/UDP and port exceptions, two-router direction diagnosis and two-boundary handover;31 fixed endpoint-bound packets plus22 separate example packets; correct enforcement location and required allowed traffic. |
+| LPIC-1 v5.0 103.1 | Basic commands, literal paths, quoting and simple command sequences. |
+| LPIC-1 v5.0 103.2 | Literal text filters and composed streams. Native scripting assignments also compose bounded cut field selection, C/POSIX whole-line sorting and adjacent uniq counts/duplicate selection. |
+| LPIC-1 v5.0 103.3 | Individual virtual-file and empty-directory operations; authored bounded name/type/depth searches, partial-search permission diagnosis and exact requested handovers with preserved sources/access. |
+| LPIC-1 v5.0 103.4 | Input/output/error redirection and bounded pipelines. |
+| LPIC-1 v5.0 103.5 | Inspect owned and same-name foreign processes, pause safely, resolve a pending termination and complete a parent/child handover. |
+| LPIC-1 v5.0 103.6 | Inspect and change an existing simulated ordinary-user process nice value while keeping required processes active and preserving peers. |
+| LPIC-1 v5.0 104.5 | Regular file and directory access; ordinary-owner mode/group repair; read versus search versus creation; in-place update versus metadata-preserving rename. Regular-file/group/traversal access with alternate repairs. |
+| LPIC-1 v5.0 105.1 | Reusable brace functions and return behavior. |
+| LPIC-1 v5.0 105.2 | Loop/test/condition/status/chaining behavior with adverse cases. Quoted original-source $() capture, trailing-LF removal, inherited helper stdout/status, isolated variables and shared virtual files; bounded subset only. First-match dispatch, prioritized canonical records and validated preview/apply publication with complete state preservation; equivalent supported conditionals pass. |
+| LPIC-1 v5.0 107.1 | Create, modify, rename and retire explicit local user/group records; copy supplied homes, preserve numeric ownership and store expiry metadata. |
+| LPIC-1 v5.0 108.2 | Inspect a single simulated service journal, filtered by service. |
+| LPIC-2 v4.5 202.1 | Bounded service configuration and saved/loaded/current separation; required preparation plus ordering; weak optional failure; preserved multi-unit target handover and separate next-session outcomes. |
+| LPIC-2 v4.5 203.1 | Saved six-field fstab subset, UUID/device identity, ext4/XFS type matching, ro/rw and auto/noauto, explicit mount/umount, blkid inspection, preserved peers and fresh-session alias permutations. |
+| LPIC-2 v4.5 207.1 | Explicit saved versus loaded-primary zone publication; secondary revision decision is a separate in-memory action. |
+| LPIC-2 v4.5 207.2 | Bounded forward A/AAAA/CNAME/MX/apex-NS and reverse PTR editing: IPv4 owner/type repair, full IPv6 nibble questions, multi-PTR/retirement and current selected-copy publication. Native controls are not full DNS utility syntax. |
+
+**Related practice without 104.3 credit.** The four existing native persistent-mount
+assignments (`lpic2-mount-identity`, `lpic2-mount-policy`, `lpic2-mount-manual`,
+`lpic2-mount-handover`) practice supplied device/UUID identity, a bounded six-field
+fstab editor, ro/rw and auto/noauto policy, explicit mount/unmount and preserved
+peers. They are mapped to LPIC-2 203.1. This corrects the coarse row's former claim
+that the fstab/options/UUID model did not exist; it does not create a new LPIC-1
+104.3 mapping. That parent stays Open, its proposed persistent-removable-mount
+assignment stays Planned, and `implemented_scenarios` stays None for that parent.
+User-mountable removable media, swap, systemd mount units and real kernel/device
+administration remain outside this practice.
+
+A Partial parent does not automatically credit its lettered subobjectives, knowledge
+areas or terms. Consult the granular row for each claimed skill and its evidence.
+DHCP/getopts source foundations and other proposed tasks are not new playable
+assignments or coverage merely because a related model or parent is mentioned.

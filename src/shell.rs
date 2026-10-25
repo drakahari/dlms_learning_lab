@@ -3,6 +3,7 @@ mod arithmetic;
 mod capture;
 mod case;
 mod execution;
+mod getopts;
 mod globbing;
 mod preparation;
 mod substitution;
@@ -19,7 +20,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 8;
+pub const EVALUATOR_REVISION: u32 = 9;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -27,6 +28,19 @@ pub const MAX_SOURCE: usize = 16_384;
 const MAX_TEXT: usize = 262_144;
 const MAX_OUTPUT: usize = 32_768;
 const MAX_STEPS: usize = 2000;
+const MAX_ORDINARY_NAMES: usize = 256;
+const MAX_SYSTEM_NAMES: usize = 3;
+fn ordinary_variable_name(key: &str) -> bool {
+    !matches!(key, "OPTIND" | "OPTERR" | "OPTARG")
+}
+fn variable_names_within_limit(names: &BTreeSet<&str>) -> bool {
+    names.len() <= MAX_ORDINARY_NAMES + MAX_SYSTEM_NAMES
+        && names
+            .iter()
+            .filter(|key| ordinary_variable_name(key))
+            .count()
+            <= MAX_ORDINARY_NAMES
+}
 const MAX_EXPANSION_WORK: usize = 1_000_000;
 /// Persistable diagnostics are bounded at creation, not only when rendering.
 fn diagnostic(mut text: String) -> String {
@@ -229,8 +243,6 @@ fn unmodeled_variable(n: &str) -> bool {
             "GROUPS",
             "PIPESTATUS",
             "SHLVL",
-            "OPTARG",
-            "OPTIND",
             "REPLY",
             "MAPFILE",
             "PS0",
@@ -250,7 +262,7 @@ fn unmodeled_variable(n: &str) -> bool {
         ]
         .contains(&n)
 }
-fn variable_target(n: &str) -> Result<(), String> {
+fn readable_variable(n: &str) -> Result<(), String> {
     if n == "IFS" {
         return Err(
             "Unsupported custom IFS; this subset uses default space, tab and newline splitting"
@@ -263,6 +275,22 @@ fn variable_target(n: &str) -> Result<(), String> {
         ));
     }
     Ok(())
+}
+fn variable_target(n: &str) -> Result<(), String> {
+    readable_variable(n)?;
+    if matches!(n, "OPTIND" | "OPTARG") {
+        return Err(
+            "Unsupported special-variable write; use scalar OPTIND=1 to reset getopts".into(),
+        );
+    }
+    Ok(())
+}
+fn scalar_assignment_target(n: &str) -> Result<(), String> {
+    if n == "OPTIND" {
+        Ok(())
+    } else {
+        variable_target(n)
+    }
 }
 fn reserved_function_name(n: &str) -> bool {
     // Keywords cannot become ordinary calls; no Bash builtin replacement is modeled.
@@ -1307,6 +1335,7 @@ struct CallFrame {
     whiles: usize,
     inputs: usize,
     locals: BTreeMap<String, Option<Value>>,
+    scanner: Option<getopts::Scanner>,
 }
 pub struct Vm {
     program: Arc<Program>,
@@ -1317,6 +1346,7 @@ pub struct Vm {
     steps: usize,
     expansion_work: Cell<usize>,
     env: BTreeMap<String, Value>,
+    scanner: getopts::Scanner,
     args: Vec<String>,
     input: String,
     input_pos: usize,
@@ -1346,6 +1376,10 @@ impl Vm {
     pub(crate) fn active_capture_depth(&self) -> usize {
         self.frames.len()
     }
+    #[cfg(test)]
+    pub(crate) fn active_getopts_scan(&self) -> bool {
+        self.scanner.active()
+    }
     pub fn new(source: &str, case: &Case) -> Result<Self, String> {
         if !case.valid() {
             return Err("Invalid simulation fixture".into());
@@ -1367,8 +1401,14 @@ impl Vm {
             env: case
                 .env
                 .iter()
+                .filter(|(k, _)| k.as_str() != "OPTERR")
                 .map(|(k, v)| (k.clone(), Value::Scalar(v.clone())))
+                .chain([
+                    ("OPTIND".into(), Value::Scalar("1".into())),
+                    ("OPTERR".into(), Value::Scalar("1".into())),
+                ])
                 .collect(),
+            scanner: getopts::Scanner::default(),
             args: case.args.clone(),
             input: case.stdin.clone(),
             input_pos: 0,
@@ -1418,6 +1458,7 @@ impl Vm {
         self.inputs.clear();
         self.functions.clear();
         self.env.clear();
+        self.scanner = getopts::Scanner::default();
         self.args.clear();
         self.input.clear();
         self.base_stdout = Dest::Out;
@@ -1916,6 +1957,9 @@ impl Vm {
                 self.env.remove(&name);
             }
         }
+        if let Some(scanner) = frame.scanner {
+            self.scanner = scanner;
+        }
         self.pc = frame.pc;
         self.args = frame.args;
         self.loops.truncate(frame.loops);
@@ -1954,6 +1998,7 @@ impl Vm {
             whiles: self.while_status.len(),
             inputs: self.inputs.len(),
             locals: BTreeMap::new(),
+            scanner: None,
         });
         self.pc = start;
         Ok(())
@@ -2001,7 +2046,8 @@ impl Vm {
             &self.inputs,
             &self.functions,
             &self.calls,
-        ) + self.input.len()
+        ) + self.scanner.bytes()
+            + self.input.len()
             + self.outcome.stdout.len()
             + self.outcome.stderr.len()
             + self
@@ -2031,7 +2077,7 @@ impl Vm {
         Ok(id)
     }
     fn preflight_value(&self, key: &str, bytes: usize) -> Result<(), String> {
-        variable_target(key)?;
+        readable_variable(key)?;
         if !name(key) {
             return Err("Unsupported variable name".into());
         }
@@ -2050,8 +2096,19 @@ impl Vm {
             return Err("Virtual memory/file limit exceeded".into());
         }
         let visible = self.live_variable_names();
-        if !visible.contains(key) && visible.len() >= 256 {
-            return Err("Variable limit exceeded (256 names)".into());
+        if !visible.contains(key)
+            && (visible.len() >= MAX_ORDINARY_NAMES + MAX_SYSTEM_NAMES
+                || ordinary_variable_name(key)
+                    && visible
+                        .iter()
+                        .filter(|name| ordinary_variable_name(name))
+                        .count()
+                        >= MAX_ORDINARY_NAMES)
+        {
+            return Err(
+                "Variable limit exceeded (256 ordinary names plus three fixed getopts names)"
+                    .into(),
+            );
         }
         Ok(())
     }
@@ -2089,6 +2146,7 @@ impl Vm {
             .collect()
     }
     fn store_value(&mut self, key: String, value: Value) -> Result<(), String> {
+        variable_target(&key)?;
         if value.elements().len() > 128 {
             return Err("Array element limit exceeded (128)".into());
         }
@@ -2097,6 +2155,16 @@ impl Vm {
         Ok(())
     }
     fn assign_scalar(&mut self, key: String, value: String) -> Result<(), String> {
+        scalar_assignment_target(&key)?;
+        if key == "OPTIND" {
+            if value != "1" {
+                return Err("Unsupported OPTIND write; only scalar value1 resets getopts".into());
+            }
+            self.preflight_value(&key, value.len())?;
+            self.env.insert(key, Value::Scalar(value));
+            self.scanner = getopts::Scanner::default();
+            return Ok(());
+        }
         let bytes = match self.env.get(&key) {
             Some(Value::Indexed(elements)) => {
                 elements.iter().skip(1).map(String::len).sum::<usize>()
@@ -2114,7 +2182,7 @@ impl Vm {
         Ok(())
     }
     fn limits(&self) -> Result<(), String> {
-        if self.live_variable_names().len() > 256
+        if !variable_names_within_limit(&self.live_variable_names())
             || self.live_function_names().len() > 64
             || self.outcome.files.len() > 64
             || self.memory_bytes() > MAX_TEXT
@@ -2189,6 +2257,13 @@ impl Vm {
         for (key, new_value) in declarations {
             self.release_pending(std::mem::size_of::<LocalDeclaration>())?;
             if !self.calls.last().unwrap().locals.contains_key(&key) {
+                if key == "OPTIND" {
+                    self.reserve_memory(std::mem::size_of::<getopts::Scanner>())?;
+                    // First declaration moves the prior scanner. Repeated local
+                    // resets keep this original snapshot until scope exit.
+                    let scanner = std::mem::take(&mut self.scanner);
+                    self.calls.last_mut().unwrap().scanner = Some(scanner);
+                }
                 self.reserve_memory(key.len())?;
                 let previous = self.env.remove(&key);
                 let array = matches!(&previous, Some(Value::Indexed(_)));
@@ -2221,6 +2296,7 @@ impl Vm {
         let ok = |s: String| (s, String::new(), 0);
         let usage = || Err(format!("Unsupported {cmd} arguments; see the shell subset"));
         match cmd {
+            "getopts" => self.getopts_builtin(args),
             "local" => Err("Unsupported declaration command name: use literal unquoted local inside a function".into()),
             ":" | "true" | "false" if args.is_empty() => {
                 Ok((empty.clone(), empty, i32::from(cmd == "false")))

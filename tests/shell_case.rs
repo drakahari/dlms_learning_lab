@@ -57,7 +57,9 @@ fn retained_actual_bash_observations_match_at_all_tick_slices_with_explicit_excl
     );
     assert_eq!(oracle.locale, "C");
     assert_eq!(oracle.observations.len(), 37);
-    assert_eq!(shell::EVALUATOR_REVISION, 8); // isolated runtime; migration remains a separate gate
+    const {
+        assert!(shell::EVALUATOR_REVISION >= 8);
+    } // Retained case capability; migration/current acceptance remains a separate gate
     for observation in oracle.observations {
         assert_eq!(observation.observation_sha256.len(), 64);
         if observation.excluded {

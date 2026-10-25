@@ -83,7 +83,7 @@ impl CommandTask {
             let mut word = word.clone();
             let (key, value) = word.0[0].text().unwrap().split_once('=').unwrap();
             let key = key.to_string();
-            variable_target(&key)?;
+            scalar_assignment_target(&key)?;
             *word.0[0].text_mut()? = value.to_string();
             self.assignment += 1;
             self.phase = CommandPhase::Assignment(key, Words::new(vec![(word, false)]));
@@ -327,7 +327,7 @@ fn local_declarations(values: Vec<String>, vm: &Vm) -> Result<Vec<LocalDeclarati
         let (key, new_value) = value
             .split_once('=')
             .map_or((value.as_str(), None), |(key, value)| (key, Some(value)));
-        variable_target(key)?;
+        getopts::local_target(key, new_value)?;
         if !name(key) {
             return Err("Unsupported local argument; use a valid variable name or NAME=value, without options or attributes".into());
         }
@@ -358,6 +358,7 @@ fn local_declarations(values: Vec<String>, vm: &Vm) -> Result<Vec<LocalDeclarati
 
 struct Snapshot {
     env: BTreeMap<String, Value>,
+    scanner: getopts::Scanner,
     args: Vec<String>,
     status: i32,
     input: String,
@@ -416,7 +417,8 @@ impl Pipeline {
                     .map(|(n, v)| n.len() + v.bytes())
                     .sum::<usize>()
                     + strings_bytes(&vm.args)
-                    + vm.input.len();
+                    + vm.input.len()
+                    + vm.scanner.bytes();
                 if vm
                     .memory_bytes()
                     .checked_add(bytes)
@@ -430,6 +432,7 @@ impl Pipeline {
                 vm.charge_expansion(bytes)?;
                 self.snapshot = Some(Snapshot {
                     env: vm.env.clone(),
+                    scanner: vm.scanner.clone(),
                     args: vm.args.clone(),
                     status: vm.outcome.status,
                     input: vm.input.clone(),
@@ -467,6 +470,7 @@ impl Pipeline {
                 // The completed isolated stage can be released before copying
                 // the retained parent snapshot for the next stage.
                 vm.env.clear();
+                vm.scanner = getopts::Scanner::default();
                 vm.args.clear();
                 vm.input.clear();
                 let cloned = saved.bytes - saved.input.len()
@@ -477,6 +481,7 @@ impl Pipeline {
                     };
                 vm.reserve_memory(cloned)?;
                 vm.env = saved.env.clone();
+                vm.scanner = saved.scanner.clone();
                 vm.args = saved.args.clone();
                 vm.outcome.status = saved.status;
                 vm.input = if self.stages == 0 {
@@ -514,6 +519,7 @@ impl Pipeline {
         if let Some(saved) = self.snapshot.take() {
             vm.release_pending(saved.bytes)?;
             vm.env = saved.env;
+            vm.scanner = saved.scanner;
             vm.args = saved.args;
             vm.input = saved.input;
             vm.input_pos = saved.pos + self.consumed;

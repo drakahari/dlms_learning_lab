@@ -10,6 +10,7 @@ pub(super) struct Suspended {
     pub range: Range<usize>,
     pub executed: bool,
     pub env: BTreeMap<String, Value>,
+    pub scanner: getopts::Scanner,
     pub args: Vec<String>,
     pub loops: Vec<(String, Vec<String>, usize)>,
     pub whiles: Vec<(i32, bool)>,
@@ -36,7 +37,8 @@ impl Suspended {
             &self.inputs,
             &self.functions,
             &self.calls,
-        ) + self.pending.bytes()
+        ) + self.scanner.bytes()
+            + self.pending.bytes()
             + dest_bytes(&self.stdout)
             + dest_bytes(&self.stderr)
     }
@@ -73,6 +75,7 @@ pub(super) fn context_bytes(
             .iter()
             .map(|call| {
                 strings_bytes(&call.args)
+                    + call.scanner.as_ref().map_or(0, getopts::Scanner::bytes)
                     + call
                         .locals
                         .iter()
@@ -127,17 +130,20 @@ impl Vm {
             .map(|(key, value)| key.len() + value.bytes())
             .sum::<usize>()
             + strings_bytes(&self.args)
-            + self.functions.keys().map(String::len).sum::<usize>();
+            + self.functions.keys().map(String::len).sum::<usize>()
+            + self.scanner.bytes();
         self.reserve_memory(bytes)?;
         self.charge_expansion(bytes + dest_bytes(&stderr))?;
         let env = self.env.clone();
         let args = self.args.clone();
         let functions = self.functions.clone();
+        let scanner = self.scanner.clone();
         let mut frame = Suspended {
             pc: self.pc,
             range: std::mem::replace(&mut self.range, range.clone()),
             executed: std::mem::replace(&mut self.frame_executed, false),
             env: std::mem::replace(&mut self.env, env),
+            scanner: std::mem::replace(&mut self.scanner, scanner),
             args: std::mem::replace(&mut self.args, args),
             functions: std::mem::replace(&mut self.functions, functions),
             loops: std::mem::take(&mut self.loops),
@@ -178,6 +184,7 @@ impl Vm {
         }
         self.ordinary_inputs.truncate(guard_depth);
         self.env.clear();
+        self.scanner = getopts::Scanner::default();
         self.args.clear();
         self.functions.clear();
         self.calls.clear();
@@ -200,6 +207,7 @@ impl Vm {
         self.range = frame.range;
         self.frame_executed = frame.executed;
         self.env = frame.env;
+        self.scanner = frame.scanner;
         self.args = frame.args;
         self.functions = frame.functions;
         self.calls = frame.calls;

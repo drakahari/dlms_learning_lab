@@ -461,7 +461,9 @@ impl LabApp {
         }
     }
     fn case_lessons_native(&mut self, ctx: &egui::Context, stage: usize) -> (bool, Option<String>) {
-        assert_eq!(shell::EVALUATOR_REVISION, 8);
+        const {
+            assert!(shell::EVALUATOR_REVISION >= 8);
+        }
         let ordinal = (stage - 7200) / 100;
         let phase = (stage - 7200) % 100;
         let id = CASE_LESSON_IDS[ordinal];

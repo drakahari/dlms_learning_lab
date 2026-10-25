@@ -1,5 +1,5 @@
-//! SOURCE-ONLY revision8 acceptance. Real captured7/6 snapshots, never relabeled8.
-//! Requires the separately reviewed evaluator8 change; deliberately fails on7.
+//! Current-revision migration checks from genuine frozen7/6 snapshots.
+//! Original8 test source is retained in ignored review evidence; old records stay exact.
 use dlms_learning_lab::{
     backup,
     engine::{Goal, State},
@@ -29,11 +29,12 @@ fn records() -> Vec<Old> {
         .collect()
 }
 fn labs() -> Vec<Scenario> {
-    assert_eq!(
-        shell::EVALUATOR_REVISION,
-        8,
-        "migration acceptance must run on actual8, never relabel captured7"
-    );
+    const {
+        assert!(
+            shell::EVALUATOR_REVISION >= 8,
+            "current migration never relabels captured7"
+        );
+    }
     pack::bundled().unwrap()
 }
 fn empty() -> Progress {
@@ -49,7 +50,7 @@ fn profile(labs: &[Scenario]) -> Progress {
     progress::decode(ORIGINAL, labs).unwrap()
 }
 fn slot(path: &Path) -> std::path::PathBuf {
-    path.with_extension("before-shell-v8.json")
+    path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
 }
 fn inspect(path: &Path, labs: &[Scenario]) -> Result<backup::Candidate, String> {
     backup::inspect(path, labs, &AtomicBool::new(false), &AtomicUsize::new(0))
@@ -181,7 +182,7 @@ fn genuine7_capture_all102_contexts_and_6_7_records_load_without_execution_or_ne
     }
 }
 #[test]
-fn exact_actual_writer7_bytes_are_backed_up_once_before8_and_repeat_saves_keep_history() {
+fn exact_actual_writer7_bytes_are_backed_up_once_before_current_and_repeat_saves_keep_history() {
     let labs = labs();
     let dir = tempfile::tempdir().unwrap();
     let path = dir.path().join("progress.json");
@@ -203,7 +204,10 @@ fn exact_actual_writer7_bytes_are_backed_up_once_before8_and_repeat_saves_keep_h
         caller
     );
     let read = progress::load(&path, &labs).unwrap();
-    assert_eq!(read.migration_receipts.as_ref().unwrap().shell, vec![7, 8]);
+    assert_eq!(
+        read.migration_receipts.as_ref().unwrap().shell,
+        vec![7, shell::EVALUATOR_REVISION]
+    );
     assert_contexts(&read);
     assert_histories(&read, true);
     progress::save(&path, &read).unwrap();
@@ -234,11 +238,14 @@ fn reset_first_and_practice_only7_cannot_skip_exact_target_backup() {
         progress::save(&path, &empty()).unwrap();
         assert_eq!(std::fs::read(slot(&path)).unwrap(), raw);
         let read = progress::load(&path, &labs).unwrap();
-        assert_eq!(read.migration_receipts.as_ref().unwrap().shell, vec![7, 8]);
+        assert_eq!(
+            read.migration_receipts.as_ref().unwrap().shell,
+            vec![7, shell::EVALUATOR_REVISION]
+        );
     }
 }
 #[test]
-fn valid_different_and_whitespace_only_occupied_before8_slots_block_without_writes() {
+fn valid_different_and_whitespace_only_occupied_before_current_slots_block_without_writes() {
     let labs = labs();
     let mut whitespace_only = WRITER7.to_vec();
     whitespace_only.push(b'\n');
@@ -276,7 +283,7 @@ fn forged_candidate_receipts_never_authorize_skipping_actual_old7_target() {
     let mut p = empty();
     p.migration_receipts = Some(progress::MigrationReceipts {
         workspace: true,
-        shell: vec![8],
+        shell: vec![shell::EVALUATOR_REVISION],
     });
     progress::save(&path, &p).unwrap();
     assert_eq!(std::fs::read(slot(&path)).unwrap(), WRITER7);
@@ -286,7 +293,7 @@ fn forged_candidate_receipts_never_authorize_skipping_actual_old7_target() {
             .migration_receipts
             .unwrap()
             .shell,
-        vec![7, 8]
+        vec![7, shell::EVALUATOR_REVISION]
     );
 }
 #[test]
@@ -309,7 +316,7 @@ fn explicit_import_recheck_adds_real_current8_only_from_edited_sources_and_retai
         else {
             panic!()
         };
-        assert_eq!(run.engine_revision, 8);
+        assert_eq!(run.engine_revision, shell::EVALUATOR_REVISION);
         assert_eq!(&run.source, source);
     }
     for id in ["shell-handover", "shell-capture-handover"] {
@@ -340,14 +347,17 @@ fn explicit_import_recheck_adds_real_current8_only_from_edited_sources_and_retai
             .migration_receipts
             .unwrap()
             .shell,
-        vec![7, 8]
+        vec![7, shell::EVALUATOR_REVISION]
     );
     let new_target = dir.path().join("new.json");
     let created = backup::restore(&new_target, &candidate, &labs).unwrap();
     assert!(created.safety_copy.is_none());
     assert!(!slot(&new_target).exists());
     let new_read = progress::load(&new_target, &labs).unwrap();
-    assert_eq!(new_read.migration_receipts.as_ref().unwrap().shell, vec![8]);
+    assert_eq!(
+        new_read.migration_receipts.as_ref().unwrap().shell,
+        vec![shell::EVALUATOR_REVISION]
+    );
     assert_contexts(&new_read);
     assert_histories(&new_read, true);
     let output = dir.path().join("portable.json");
@@ -382,8 +392,8 @@ fn cancelled_preview_and_restore_conflict_leave_target_input_and_receipts_exact(
 #[test]
 fn confirmed_raw_recovery_does_not_misclassify_corrupt_future_bytes_as_old7() {
     let labs = labs();
-    for raw in [b"{ corrupt synthetic target }".to_vec(),br#"{"schema_version":99,"clock":0,"favorites":[],"attempts":{}}"#.to_vec(),br#"{"schema_version":1,"clock":0,"favorites":[],"attempts":{},"migration_receipts":{"shell":[9]}}"#.to_vec()] {
-        let dir=tempfile::tempdir().unwrap();let target=dir.path().join("progress.json");std::fs::write(&target,&raw).unwrap();std::fs::write(slot(&target),b"unrelated fixed slot").unwrap();let result=backup::restore(&target,&backup::Candidate{progress:empty(),rechecked:0},&labs).unwrap();assert_eq!(std::fs::read(result.safety_copy.unwrap()).unwrap(),raw);assert_eq!(std::fs::read(slot(&target)).unwrap(),b"unrelated fixed slot");assert_eq!(progress::load(&target,&labs).unwrap().migration_receipts.unwrap().shell,vec![8]);
+    for raw in [b"{ corrupt synthetic target }".to_vec(),br#"{"schema_version":99,"clock":0,"favorites":[],"attempts":{}}"#.to_vec(),serde_json::to_vec(&serde_json::json!({"schema_version":1,"clock":0,"favorites":[],"attempts":{},"migration_receipts":{"shell":[shell::EVALUATOR_REVISION + 1]}})).unwrap()] {
+        let dir=tempfile::tempdir().unwrap();let target=dir.path().join("progress.json");std::fs::write(&target,&raw).unwrap();std::fs::write(slot(&target),b"unrelated fixed slot").unwrap();let result=backup::restore(&target,&backup::Candidate{progress:empty(),rechecked:0},&labs).unwrap();assert_eq!(std::fs::read(result.safety_copy.unwrap()).unwrap(),raw);assert_eq!(std::fs::read(slot(&target)).unwrap(),b"unrelated fixed slot");assert_eq!(progress::load(&target,&labs).unwrap().migration_receipts.unwrap().shell,vec![shell::EVALUATOR_REVISION]);
     }
 }
 #[test]
@@ -509,7 +519,7 @@ fn malformed_future_histories_or_receipts_cannot_change_original_target_bytes() 
         let mut value: serde_json::Value = serde_json::from_slice(WRITER7).unwrap();
         let history = &mut value["attempts"]["shell-handover"]["workspace"]["script_history"];
         if future {
-            history["engine_revision"] = serde_json::json!(9);
+            history["engine_revision"] = serde_json::json!(shell::EVALUATOR_REVISION + 1);
         } else {
             history["results"] = serde_json::json!("malformed results, not observations");
         }
@@ -520,7 +530,7 @@ fn malformed_future_histories_or_receipts_cannot_change_original_target_bytes() 
         assert!(!slot(&target).exists());
     }
     for receipts in [
-        serde_json::json!({"shell":[9]}),
+        serde_json::json!({"shell":[shell::EVALUATOR_REVISION + 1]}),
         serde_json::json!({"shell":[8,7]}),
         serde_json::json!({"shell":[7,7]}),
         serde_json::json!({"shell":vec![1;33]}),

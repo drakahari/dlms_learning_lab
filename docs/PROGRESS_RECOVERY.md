@@ -44,7 +44,7 @@ Fedora backend/UI/native evidence is recorded in IMPLEMENTATION_LEDGER.md. The s
 
 Saved script runs now identify the evaluator revision that produced them. Earlier records without that field remain readable and preserve their original source, output, file snapshots and earned credit. They are labeled **Earlier run complete · Rerun to verify**, separately from current success. Opening the assignment moves the older result to optional saved history without changing the draft. Run verifies the current draft; a failure or unsupported construct cannot reuse earlier success. A successful current Run restores current completion, while earlier history remains available. Reset explicitly clears that selected attempt, including history. Successive upgrades retain earlier runs together, including a later earned result alongside an older incomplete run. Optional Earlier saved runs shows their scripts, output and simulated files. History is bounded to32 records per attempt and the existing16MB profile limit; a full history needing another migration is rejected with the original retained, rather than silently discarding work.
 
-Before the first upgraded write, the exact older progress bytes are copied once to `progress-v1.before-shell-vN.json` (N is the new evaluator revision; currently8) beside the main file; existing backups are never replaced. Reads alone do not rewrite progress. Save size/bounds and atomic-write protections still apply. Export/restore retains earlier history and rechecks active saved runs with the current evaluator before approval; example output has separate revision labeling and never awards assignment credit. Future incompatible record revisions are rejected with the original file retained. Downgrade compatibility after saving new metadata is not claimed.
+Before the first upgraded write, the exact older progress bytes are copied once to `progress-v1.before-shell-vN.json` (N is the running evaluator revision) beside the main file; existing backups are never replaced. Reads alone do not rewrite progress. Save size/bounds and atomic-write protections still apply. Export/restore retains earlier history and rechecks active saved runs with the current evaluator before approval; example output has separate revision labeling and never awards assignment credit. Future incompatible record revisions are rejected with the original file retained. Downgrade compatibility after saving new metadata is not claimed.
 
 
 Evaluator4 tightens shared text-expansion bounds and cumulative replacement work. A source that earned credit under3 can now reach a resource limit, even without printing large output. Its exact earlier source/results/credit remain historical; a current Run is required for current completion. Existing earlier histories stay alongside it, and the first upgraded write preserves the exact prior profile in the non-overwriting v4 backup. Reset clears only the selected attempt/history; it cannot remove that original-byte safety copy. See SHELL_EXPANSION_LIMITS.md.
@@ -119,3 +119,24 @@ capacity, separate drafts/examples, exact backups, write failures, cancellation,
 restore and selected reset. Native and platform evidence is recorded separately
 in the implementation ledger; save/readback alone is not a cold-process restart
 or power-loss test. Keep an exported backup before trying an older app version.
+
+## Evaluator9 getopts source boundary (acceptance pending)
+
+Startup OPTERR now defaults to1 even when a fixture supplied0; this changes
+previously valid8 outcomes and requires9, independently of newly supported
+getopts. No9 activation or test/native acceptance is claimed by the source patch.
+Genuine6/7/8 records stay unchanged in bounded multirevision history. Opening or
+saving never replays an old script or fabricates current completion. Examples
+keep their own saved source/result revision; they never award assignment credit.
+
+The first9 write must preserve the **actual target's** exact raw bytes in
+`progress-v1.before-shell-v9.json`. An occupied different valid JSON or merely
+different whitespace blocks replacement. Old before8 copies are not overwritten.
+Only actual on-disk provenance governs repeated saves: a target carrying[7,8]
+becomes[7,8,9], whereas a direct7→9 write becomes[7,9]. Imported markers cannot
+skip protection. Reset-first and practice-only old results need the same backup.
+Pending/failed writes do not stamp the caller; a postreplacement durability
+warning means the replacement committed. Explicit confirmed raw recovery retains
+its exact pre-restore safety copy; it does not invent a prior revision receipt.
+Cancel writes nothing. No new progress schema or arbitrary revision override is
+introduced; existing generic receipt/history code supplies this transition.

@@ -520,10 +520,14 @@ fn full_32_record_history_rejects_extra_legacy_run_without_discarding_any_record
     std::fs::write(&path, &exact_32).unwrap();
     assert!(progress::save(&path, &p).is_err());
     assert_eq!(std::fs::read(&path).unwrap(), exact_32);
-    let mut future: serde_json::Value = serde_json::from_slice(&exact_32).unwrap();
-    future["attempts"][&lab.id]["workspace"]["script_history"]["engine_revision"] =
-        serde_json::json!(8);
-    assert!(progress::decode(&serde_json::to_vec(&future).unwrap(), &labs).is_err());
+    // History must stay strictly older than the current evaluator. Revision8
+    // is now genuine supported history; it is no longer a future sentinel.
+    for revision in [shell::EVALUATOR_REVISION, shell::EVALUATOR_REVISION + 1] {
+        let mut invalid: serde_json::Value = serde_json::from_slice(&exact_32).unwrap();
+        invalid["attempts"][&lab.id]["workspace"]["script_history"]["engine_revision"] =
+            serde_json::json!(revision);
+        assert!(progress::decode(&serde_json::to_vec(&invalid).unwrap(), &labs).is_err());
+    }
 }
 
 #[test]

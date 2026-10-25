@@ -122,8 +122,27 @@ the existing instruction, memory, output, expansion-work and responsive Stop
 budgets. Matching is iterative and cooperative. See [SHELL_CASE.md](SHELL_CASE.md)
 for expansion/status semantics, exact exclusions and acceptance evidence.
 
-New results identify evaluator 8. Genuine earlier results keep their original
+The case extension introduced evaluator 8. Genuine earlier results keep their original
 revision, source and output; opening a lesson does not invent a new solution.
 Only a current explicit Run or confirmed restore recheck can establish current
 success. Examples remain independent and ungraded. See
 [PROGRESS_RECOVERY.md](PROGRESS_RECOVERY.md) before downgrading an existing profile.
+
+## Getopts — evaluator9 source extension (acceptance pending)
+
+The isolated source milestone adds bounded `getopts OPTSTRING NAME [ARG...]`,
+cluster/required-value parsing, explicit OPTIND=1 reset and separate hidden cursor
+ownership through locals, captures and pipelines. Each run initializes OPTIND=1,
+OPTERR=1 and OPTARG unset; ordinary OPTERR operations remain available. Parsing
+requires scalar OPTERR0/1 and an exact unchanged declaration/argument list until
+reset. Uninitialized local OPTIND, arbitrary seeks, optional/long/non-ASCII option
+declarations and special-variable output aliases are excluded. No host command
+is invoked. See [SHELL_GETOPTS.md](SHELL_GETOPTS.md) for the exact boundaries,
+actual55 reference observations, resource accounting and completed model/migration
+checks. Installed revision9 acceptance remains pending.
+This source milestone adds no curriculum. Only genuine current9 execution may
+produce9 results; actual6/7/8 records and old backup bytes remain historical.
+The original256 ordinary-name allowance is preserved across current and hidden
+scopes, with at most three additional fixed getopts names (OPTIND/OPTERR/OPTARG).
+Their bytes and all snapshots remain charged to the unchanged memory/work caps;
+unsetting a special name never frees an ordinary-name slot.

@@ -386,7 +386,9 @@ fn history(p: &Progress) -> BTreeMap<String, Vec<Value>> {
 #[test]
 fn both_seed_practices_all_contexts_actual_records_and_raw_drafts_survive_save_restore_and_selected_reset()
  {
-    assert_eq!(shell::EVALUATOR_REVISION, 8);
+    const {
+        assert!(shell::EVALUATOR_REVISION >= 8);
+    }
     let all = pack::bundled().unwrap();
     let mut p = progress::decode(
         include_bytes!("fixtures/shell-v7-synthetic-progress-original.json"),

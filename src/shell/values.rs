@@ -1,5 +1,5 @@
 //! Runtime variable values and the deliberately bounded indexed-parameter syntax.
-use super::{name, variable_target};
+use super::{name, readable_variable};
 #[derive(Clone, Debug)]
 pub(super) enum Value {
     Scalar(String),
@@ -54,7 +54,7 @@ pub(super) fn array_ref(key: &str) -> Result<Option<ArrayRef<'_>>, String> {
     if !name(base) {
         return Err("Unsupported array parameter name".into());
     }
-    variable_target(base)?;
+    readable_variable(base)?;
     if index == "@" {
         return Ok(Some(if count {
             ArrayRef::Count(base)
