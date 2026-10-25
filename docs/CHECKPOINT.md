@@ -6,6 +6,34 @@ before every build/test/reference/native run. Use MAIN tools/dev.py only, one
 shared heavy slot, Cargo2 jobs AND2 test threads, exclusive automatic targets,
 private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
 
+## Active M103 — native migration controller verified; candidate next
+
+- Four-path developer-only history controller integrated from peer-reviewed R3
+  manifest6a552429c67d4cd9e47d9ced969516e2195c9c8392c18d9c0572343b6b4994f3.
+  Smoke-only closed writer7/writer8 modes, full original Record-chain equality,
+  exact backups, distinct practice, real editor Run/Stop, restore and Challenge.
+  Original119 library/count and all fixtures unchanged. Asynchronous Finish now
+  holds15075; exact repeated-SmokeTick regression covers both modes.
+- First attempt m103-controllerR1 ran0tests because guarded overlay preflight
+  refused two expected const-style base differences before copying; NOT accepted.
+  R2 six real tests5PASS/1FAIL from wrongly expecting self.save to mutate caller
+  receipts. Writer intentionally stamps only disk. Test now asserts untouched
+  caller AND persisted receipts; no backend change. R3 seven exactphase tests
+  PASS, all-targetClippy PASS, fmt/diff PASS. No heavy currently active.
+- Commit this scoped controller/docs batch, derive exact40/12hex SHA fromGit,
+  build MAIN candidate, installed upgradeca119/29, native getopts-history under
+  normal Wayland, then quietstarts/coldreopen asneeded. Do not count source gates
+  as actual installed evaluator9 acceptance. Owner's usable build stillca1929b.
+- ca1929b added1/1 actualWayland protocol/lifecycle startup to10/10quiet +
+  cold-processreopen/Stop/alignment. Root source review caughtR1 newexample using
+  assignmentvalues; R2distinct Welcome/Mina/ROOM source fixes it without touching
+  actual fixture. Peer caughtFinishadvance; R3fix verified. Failures retained.
+- Getopts3 content remains UNREGISTERED isolated;36cases/3examples,2alternates
+  and4wrong each,10tests unrun. Peer found unquoted spaced literal in capstone
+  practice; author corrects ONLY3example/experiment/repair strings inR2, no
+  expectedoutput/assignmentchange. Await finalpeerreview then rootVM/content
+  gate/nativebeforecountcredit. Current119/29=35/24/20/40 remains accurate.
+
 ## Active M102 — pure DHCP foundation tested; native9 controller pending
 
 - Exact peer-reviewed DHCP R2 four paths integrated without changing old source.
@@ -19,11 +47,12 @@ private verified NVMe Btrfs artifacts. Never bypass active/unfinished markers.
   helper ccna_discovery prepares isolated four-path smoke controller and exact
   opening/RunStop phases; source-only, no heavy grant. Independent_review authors
   three practical option-interface tasks in isolation; no credit/registration yet.
-- Root currently running installedca1929b quiet10 DEFAULT Wayland launches via
-  MAIN runner, m102-ca-startup-quiet-r1, no diagnostic interval override. Inspect
-  completion/active marker before another heavy command. Then strict two-process
-  cold reopen asneeded. Same installed ca baseline already passed lifecycle,
-  Stop2 and sharedalignment72. New source9 has no accepted candidate yet.
+- Installedca1929b quiet10 DEFAULT Wayland PASS m102-ca-startup-quiet-r1
+  (0.815–0.865sec), diagnostic override unset. Strict two-process NORMAL-private-
+  XDG cold reopen PASS m102-ca-cold-reopen-r2, manifest e4125533b4d6af59a69b13f17a35b1d5578ad245af6d391f12fc190a74d423e6.
+  R1 refused launcher symlink before launch; R2 used hash-verified ordinaryELF,
+  security checks unchanged. Coverage validator PASS119/134Partial/1Supporting/
+  1105Open. No heavy currently active. New source9 has no accepted candidate yet.
 - Next freeze/review/integrate native8→9 controller, scoped exactphase regressions,
   finalClippy, clean identified candidate, installed lifecycle and actual RunStop/
   migration/export/restore/Challenge flows. Then reviewed getopts unit and DHCP

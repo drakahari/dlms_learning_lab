@@ -1,15 +1,108 @@
-//! App-only genuine frozen7→current native acceptance. Controlled data; no reference State.
+//! App-only genuine frozen7/8→current native acceptance. Controlled data; no reference State.
 use super::*;
 use dlms_learning_lab::shell;
 use serde::Deserialize;
 use std::io::Write;
 const WRITER7: &[u8] =
     include_bytes!("../../../tests/fixtures/shell-v7-synthetic-writer-progress.json");
+const WRITER8: &[u8] =
+    include_bytes!("../../../tests/fixtures/shell-v8-synthetic-writer-progress.json");
+const GETOPTS_SOLUTION: &str = "value() { local OPTIND=1; local option; local result; while getopts t: option; do result=$OPTARG; done; printf '%s' \"$result\"; }\nsite=$(value -t \"$SITE\")\ntask=$(value -t \"$TASK\")\nprintf 'Site: %s\\nTask: %s\\n' \"$site\" \"$task\"\n";
+const GETOPTS_EXAMPLE: &str = "value() { local OPTIND=1; local option; local result; while getopts t: option; do result=$OPTARG; done; printf '%s' \"$result\"; }\nvisitor=$(value -t Mina)\nroom=$(value -t \"$ROOM\")\nprintf 'Welcome\\nHello, %s!\\nRoom: %s\\n' \"$visitor\" \"$room\"\n";
+const GETOPTS_LOOP: &str = "OPTIND=1; getopts ab parent -ab; case \"$(getopts ab child -ab; if [ \"$child\" = b ]; then printf entered > native-case-entered.txt; fi; while true; do :; done)\" in *) printf parent-must-not-run;; esac\n";
 const ID: &str = "shell-handover";
 const SOLUTION: &str = "site=$SITE\ntask=$TASK\ncase \"$task\" in\n '') printf 'Site: %s\\nTask: \\n' \"$site\";;\n *) printf 'Site: %s\\nTask: %s\\n' \"$site\" \"$task\";;\nesac\n";
 const LOOP: &str = "case \"$(printf entered > native-case-entered.txt; while true; do :; done)\" in *) printf parent-must-not-run;; esac\n";
 const INCOMPLETE: &str = "case \"$TASK\" in\n";
 const LAST: usize = 15075;
+impl HistorySource {
+    pub(in crate::ui) fn from_stage(smoke: bool, stage: Option<&str>) -> Option<Self> {
+        if !smoke {
+            return None;
+        }
+        match stage {
+            Some("case-history") => Some(Self::Writer7),
+            Some("getopts-history") => Some(Self::Writer8),
+            _ => None,
+        }
+    }
+    pub(in crate::ui) fn bytes(self) -> &'static [u8] {
+        match self {
+            Self::Writer7 => WRITER7,
+            Self::Writer8 => WRITER8,
+        }
+    }
+    fn original(self) -> Progress {
+        serde_json::from_slice(self.bytes()).unwrap()
+    }
+    fn contexts(self) -> usize {
+        match self {
+            Self::Writer7 => 102,
+            Self::Writer8 => 116,
+        }
+    }
+    fn filename(self) -> &'static str {
+        match self {
+            Self::Writer7 => "original-writer7.json",
+            Self::Writer8 => "original-writer8.json",
+        }
+    }
+    fn counts(self) -> std::collections::BTreeMap<u32, usize> {
+        match self {
+            Self::Writer7 => [(6, 33), (7, 37)].into(),
+            Self::Writer8 => [(6, 33), (7, 37), (8, 40)].into(),
+        }
+    }
+    fn receipts(self) -> Vec<u32> {
+        let mut receipts = self.original().migration_receipts.unwrap().shell;
+        if !receipts.contains(&shell::EVALUATOR_REVISION) {
+            receipts.push(shell::EVALUATOR_REVISION);
+        }
+        receipts
+    }
+    pub(in crate::ui) fn solution(self) -> &'static str {
+        match self {
+            Self::Writer7 => SOLUTION,
+            Self::Writer8 => GETOPTS_SOLUTION,
+        }
+    }
+    pub(in crate::ui) fn example_source(self) -> &'static str {
+        assert_eq!(
+            self,
+            Self::Writer8,
+            "only writer8 explicitly reruns the separate example"
+        );
+        GETOPTS_EXAMPLE
+    }
+    fn stopped_source(self) -> &'static str {
+        match self {
+            Self::Writer7 => LOOP,
+            Self::Writer8 => GETOPTS_LOOP,
+        }
+    }
+}
+fn earlier_records(
+    a: &dlms_learning_lab::progress::Attempt,
+) -> impl Iterator<Item = &shell::Record> {
+    let main = match &a.state {
+        engine::State::Script { run: Some(r), .. }
+            if r.engine_revision < shell::EVALUATOR_REVISION =>
+        {
+            Some(r)
+        }
+        _ => None,
+    };
+    a.workspace
+        .as_ref()
+        .into_iter()
+        .flat_map(|w| {
+            w.script_history
+                .as_ref()
+                .into_iter()
+                .chain(&w.script_history_more)
+        })
+        .chain(main)
+}
 #[derive(Deserialize)]
 struct Captured {
     id: String,
@@ -78,66 +171,25 @@ impl LabApp {
         self.pending_events.push(egui::Event::Text(text.into()));
     }
     fn case8_history(&self) {
-        let original: Progress = serde_json::from_slice(WRITER7).unwrap();
-        let mut six = 0;
-        let mut seven = 0;
-        for row in records() {
-            let a = &self.progress.attempts[&row.id];
-            let w = a.workspace.as_ref().unwrap();
-            if let Some(old) = &original.attempts[&row.id]
-                .workspace
-                .as_ref()
-                .unwrap()
-                .script_history
-            {
-                assert_eq!(old.engine_revision, 6);
-                assert_eq!(w.script_history.as_ref(), Some(old));
+        let mode = self.history_source.expect("closed synthetic history mode");
+        let original = mode.original();
+        let mut counts = std::collections::BTreeMap::new();
+        for (id, old) in &original.attempts {
+            let actual: Vec<_> = earlier_records(&self.progress.attempts[id]).collect();
+            let expected: Vec<_> = earlier_records(old).collect();
+            assert_eq!(actual, expected, "complete original legacy chain {id}");
+            for record in expected {
+                *counts.entry(record.engine_revision).or_insert(0usize) += 1;
             }
-            let actual_six = w
-                .script_history
-                .as_ref()
-                .into_iter()
-                .chain(&w.script_history_more)
-                .filter(|r| r.engine_revision == 6)
-                .count();
-            assert_eq!(
-                actual_six,
-                usize::from(
-                    original.attempts[&row.id]
-                        .workspace
-                        .as_ref()
-                        .unwrap()
-                        .script_history
-                        .is_some()
-                )
-            );
-            six += actual_six;
-            let historical = w
-                .script_history
-                .as_ref()
-                .into_iter()
-                .chain(&w.script_history_more)
-                .filter(|r| r.engine_revision == 7)
-                .collect::<Vec<_>>();
-            let current_old = match &a.state {
-                engine::State::Script { run: Some(r), .. } if r.engine_revision == 7 => Some(r),
-                _ => None,
-            };
-            assert_eq!(
-                historical.len() + usize::from(current_old.is_some()),
-                1,
-                "one genuine7 record {}",
-                row.id
-            );
-            assert!(
-                historical
-                    .into_iter()
-                    .chain(current_old)
-                    .all(|r| r == &row.record)
-            );
-            seven += 1;
         }
-        assert_eq!((six, seven), (33, 37));
+        assert_eq!(counts, mode.counts());
+        // Independent frozen7 corpus remains exact in both writer modes.
+        for row in records() {
+            let seven: Vec<_> = earlier_records(&self.progress.attempts[&row.id])
+                .filter(|r| r.engine_revision == 7)
+                .collect();
+            assert_eq!(seven, vec![&row.record], "genuine7 {}", row.id);
+        }
     }
     fn case8_wait(&self, ctx: &egui::Context, label: &'static str) -> bool {
         if self.script_job.is_none() {
@@ -167,7 +219,7 @@ impl LabApp {
         };
         assert_eq!(r.engine_revision, shell::EVALUATOR_REVISION);
         assert_eq!(r.source, *source);
-        assert_eq!(source, SOLUTION);
+        assert_eq!(source, self.history_source.unwrap().solution());
         self.case8_history();
     }
     pub(super) fn case_history_native(
@@ -175,9 +227,13 @@ impl LabApp {
         ctx: &egui::Context,
         stage: usize,
     ) -> (bool, Option<String>) {
+        let mode = self
+            .history_source
+            .expect("history source is selected only by closed smoke stage");
+        assert!(self.smoke);
         const {
-            assert!(shell::EVALUATOR_REVISION >= 8);
-        }
+            assert!(shell::EVALUATOR_REVISION >= 9);
+        };
         let i = self.scenarios.iter().position(|s| s.id == ID).unwrap();
         let mut shot = None;
         match stage {
@@ -185,8 +241,8 @@ impl LabApp {
                 assert!(self.smoke && self._smoke_profile.is_some());
                 assert_eq!(
                     self.scenarios.len(),
-                    116,
-                    "native acceptance requires the merged normal116 library"
+                    119,
+                    "native acceptance requires the merged normal119 library"
                 );
                 assert_eq!(
                     self.path.parent(),
@@ -198,18 +254,18 @@ impl LabApp {
                         .with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
                         .exists()
                 );
-                std::fs::write(&self.path, WRITER7).unwrap();
+                std::fs::write(&self.path, mode.bytes()).unwrap();
                 let mut f = std::fs::OpenOptions::new()
                     .write(true)
                     .create_new(true)
-                    .open(self.path.parent().unwrap().join("original-writer7.json"))
+                    .open(self.path.parent().unwrap().join(mode.filename()))
                     .unwrap();
-                f.write_all(WRITER7).unwrap();
+                f.write_all(mode.bytes()).unwrap();
                 self.progress = progress::load(&self.path, &self.scenarios).unwrap();
-                assert_eq!(self.progress.attempts.len(), 102);
+                assert_eq!(self.progress.attempts.len(), mode.contexts());
                 assert_eq!(
                     self.progress.migration_receipts.as_ref().unwrap().shell,
-                    vec![7]
+                    mode.original().migration_receipts.unwrap().shell
                 );
                 self.launch(i);
                 self.set_script_view(i, teaching::View::Assignment);
@@ -233,7 +289,7 @@ impl LabApp {
                         shell::EVALUATOR_REVISION
                     )))
                     .unwrap(),
-                    WRITER7
+                    mode.bytes()
                 );
                 assert!(!progress::current_solved(
                     &self.progress.attempts[ID],
@@ -246,13 +302,18 @@ impl LabApp {
                     return (false, None);
                 }
             }
-            15004 => shot = Some("case8-genuine6-and7-earlier-output".into()),
+            15004 => {
+                shot = Some(format!(
+                    "history-writer{}-complete-earlier-output",
+                    if mode == HistorySource::Writer7 { 7 } else { 8 }
+                ))
+            }
             15005 | 15012 | 15017 | 15024 | 15028 | 15034 | 15038 => {
                 if !self.case8_focus_editor(ctx) {
                     return (false, None);
                 }
             }
-            15006 | 15018 | 15029 | 15039 => self.case8_input(SOLUTION),
+            15006 | 15018 | 15029 | 15039 => self.case8_input(mode.solution()),
             15007 | 15019 | 15026 | 15030 | 15036 | 15040 => {
                 if !self.click_visible_smoke_control(ctx, self.metrics.check) {
                     return (false, None);
@@ -291,8 +352,16 @@ impl LabApp {
                     .script_learning
                     .as_ref()
                     .unwrap();
-                assert_eq!(l.example_revision, 7);
-                let original: Progress = serde_json::from_slice(WRITER7).unwrap();
+                let original = mode.original();
+                let old_example = original.attempts[ID]
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .script_learning
+                    .as_ref()
+                    .unwrap();
+                assert_eq!(l.example_revision, old_example.example_revision);
+                assert_eq!(l.example_result, old_example.example_result);
                 assert_eq!(
                     l.example_source,
                     original.attempts[ID]
@@ -309,12 +378,16 @@ impl LabApp {
                 shot = Some("case8-example-still-separate-earlier7".into());
             }
             15011 => {
+                if mode == HistorySource::Writer8 {
+                    self.smoke_stage = 15100 - 1;
+                    return (true, None);
+                }
                 if !self.click_visible_smoke_control(ctx, self.metrics.lesson_tabs.get(2).copied())
                 {
                     return (false, None);
                 }
             }
-            15013 => self.case8_input(LOOP),
+            15013 => self.case8_input(mode.stopped_source()),
             15014 => {
                 assert!(
                     self.metrics
@@ -349,7 +422,7 @@ impl LabApp {
                     &self.scenarios[i]
                 ));
                 assert!(
-                    matches!(&self.progress.attempts[ID].state,engine::State::Script{run:None,source}if source==LOOP)
+                    matches!(&self.progress.attempts[ID].state,engine::State::Script{run:None,source}if source==mode.stopped_source())
                 );
                 assert!(
                     self.notice
@@ -369,7 +442,7 @@ impl LabApp {
                     before
                 );
                 self.case8_pass(i);
-                let original: Progress = serde_json::from_slice(WRITER7).unwrap();
+                let original = mode.original();
                 for (id, old) in original.attempts.iter().filter(|(id, _)| id.as_str() != ID) {
                     assert_eq!(
                         serde_json::to_value(&self.progress.attempts[id]).unwrap(),
@@ -380,7 +453,7 @@ impl LabApp {
                 assert_eq!(self.progress.favorites, original.favorites);
                 assert_eq!(
                     self.progress.migration_receipts.as_ref().unwrap().shell,
-                    vec![7, shell::EVALUATOR_REVISION]
+                    mode.receipts()
                 );
             }
             15022 | 15032 | 15042 => {
@@ -456,7 +529,7 @@ impl LabApp {
                     return (false, None);
                 }
             }
-            15046 => self.case8_input("current8-native-backup.json"),
+            15046 => self.case8_input("current-native-backup.json"),
             15047 | 15052 | 15059 => {
                 if ctx
                     .data(|d| {
@@ -477,7 +550,7 @@ impl LabApp {
                     .path
                     .parent()
                     .unwrap()
-                    .join("current8-native-backup.json");
+                    .join("current-native-backup.json");
                 assert!(out.is_file());
                 let json: serde_json::Value =
                     serde_json::from_slice(&std::fs::read(out).unwrap()).unwrap();
@@ -493,7 +566,7 @@ impl LabApp {
                     return (false, None);
                 }
             }
-            15051 | 15058 => self.case8_input("original-writer7.json"),
+            15051 | 15058 => self.case8_input(mode.filename()),
             15053 | 15060 => {
                 if self.metrics.data_confirm.is_none() {
                     let began = ctx.data_mut(|d| {
@@ -518,7 +591,10 @@ impl LabApp {
                 if n < 3 {
                     return (false, None);
                 }
-                shot = Some(format!("case8-original7-review-{stage}"));
+                shot = Some(format!(
+                    "history-original-writer{}-review-{stage}",
+                    if mode == HistorySource::Writer7 { 7 } else { 8 }
+                ));
             }
             15054 => {
                 if !self.click_smoke_control(ctx, self.metrics.data_cancel) {
@@ -545,7 +621,7 @@ impl LabApp {
                         shell::EVALUATOR_REVISION
                     )))
                     .unwrap(),
-                    WRITER7
+                    mode.bytes()
                 );
                 self.case8_pass(i);
                 shot = Some("case8-cancel-keeps-current-work".into());
@@ -577,7 +653,7 @@ impl LabApp {
                         shell::EVALUATOR_REVISION
                     )))
                     .unwrap(),
-                    WRITER7
+                    mode.bytes()
                 );
                 self.case8_history();
                 let a = &self.progress.attempts[ID];
@@ -659,7 +735,7 @@ impl LabApp {
                         shell::EVALUATOR_REVISION
                     )))
                     .unwrap(),
-                    WRITER7
+                    mode.bytes()
                 );
                 shot = Some("case8-selected-reset-preserves-other-contexts".into());
             }
@@ -684,17 +760,62 @@ impl LabApp {
                 ));
                 assert_eq!(
                     self.progress.migration_receipts.as_ref().unwrap().shell,
-                    vec![7, shell::EVALUATOR_REVISION]
+                    mode.receipts()
                 );
+            }
+            15100 => {
+                if !self.case8_focus_editor(ctx) {
+                    return (false, None);
+                }
+            }
+            15101 => self.case8_input(mode.example_source()),
+            15102 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.check) {
+                    return (false, None);
+                }
+            }
+            15103 => {
+                if !self.case8_wait(ctx, "explicit independent example") {
+                    return (false, None);
+                }
+                let lesson = self.scenarios[i].teaching.as_ref().unwrap();
+                let learning = self.progress.attempts[ID]
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .script_learning
+                    .as_ref()
+                    .unwrap();
+                assert_eq!(learning.example_revision, shell::EVALUATOR_REVISION);
+                assert_eq!(learning.example_source, mode.example_source());
+                assert!(
+                    lesson
+                        .fixture
+                        .accepts(learning.example_result.as_ref().unwrap())
+                );
+                self.case8_pass(i);
+                shot = Some("getopts-history-explicit-independent-example".into());
+            }
+            15104 => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.lesson_tabs.get(2).copied())
+                {
+                    return (false, None);
+                }
+            }
+            15105 => {
+                self.smoke_stage = 15012 - 1;
             }
             15073 | 15074 => {}
             LAST => {
                 println!(
-                    "PASS scoped native genuine7→current: real6+7 history, actual typed case Run/Stop/retry, separate example, exact first backup/readback,150/200 actual syntax error/repair, export/old7 preview Cancel+Confirm with current recheck/raw safety copy, selected Reset/Challenge. Synthetic data only; no novice/other-platform/screen-reader claim."
+                    "PASS scoped native frozen history→current: complete original histories, actual typed Run/Stop/retry, separate example, exact first backup/readback,150/200 actual syntax error/repair, export/original preview Cancel+Confirm with current recheck/raw safety copy, selected Reset/Challenge. Synthetic data only; no novice/other-platform/screen-reader claim."
                 );
                 ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                // Window closure is asynchronous; subsequent frames must stay
+                // at this bounded terminal phase until the backend exits.
+                return (false, None);
             }
-            _ => unreachable!("bounded dedicated genuine7→current stage"),
+            _ => unreachable!("bounded dedicated frozen history→current stage"),
         }
         (true, shot)
     }
@@ -706,7 +827,7 @@ mod tests {
     fn genuine7_native_plan_uses_real_frozen_data_and_bounded_case8_input_targets_only() {
         const {
             assert!(shell::EVALUATOR_REVISION >= 8);
-        }
+        };
         for height in [1., 18., 180., 360.] {
             let viewport =
                 egui::Rect::from_min_size(egui::pos2(40., 100.), egui::vec2(400., height));

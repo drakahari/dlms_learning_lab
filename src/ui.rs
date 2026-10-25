@@ -193,6 +193,11 @@ struct Metrics {
     walkthrough: Option<egui::Rect>,
     confirm_reset: Option<egui::Rect>,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum HistorySource {
+    Writer7,
+    Writer8,
+}
 pub struct LabApp {
     scenarios: Vec<Scenario>,
     units: Vec<course::Unit>,
@@ -236,6 +241,7 @@ pub struct LabApp {
     address_example: Option<ipv4_workspace::Assignment>,
     address_worked: std::collections::BTreeMap<String, String>,
     smoke: bool,
+    history_source: Option<HistorySource>,
     reopen: Option<smoke::reopen::Session>,
     started: Instant,
     smoke_stage: usize,
@@ -247,6 +253,8 @@ impl LabApp {
         Self::from_context(&cc.egui_ctx, smoke, developer)
     }
     fn from_context(ctx: &egui::Context, smoke: bool, developer: bool) -> Self {
+        let history_source =
+            HistorySource::from_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref());
         let mut style = (*ctx.style()).clone();
         style.spacing.item_spacing = egui::vec2(12., 8.);
         style.spacing.button_padding = egui::vec2(14., 8.);
@@ -368,6 +376,7 @@ impl LabApp {
             address_example: None,
             address_worked: Default::default(),
             smoke,
+            history_source,
             reopen,
             started: Instant::now(),
             smoke_stage: if is_reopen {
@@ -396,7 +405,7 @@ impl LabApp {
                 18000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("mac-learning") {
                 16000
-            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-history") {
+            } else if history_source.is_some() {
                 15000
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("unit-manager-unit")

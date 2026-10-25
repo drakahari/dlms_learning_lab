@@ -1,6 +1,7 @@
 use super::*;
 use engine::State;
 mod client_learning;
+mod getopts_history;
 mod mac_learning;
 mod ospf;
 mod seed_learning;

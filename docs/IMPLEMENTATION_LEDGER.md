@@ -1318,3 +1318,27 @@ DHCPV4_SUBSET.md. No wire protocol, full server syntax, host networking, depende
 engine State/Goal, scenario, UI or progress changes. Catalog119 and coverage counts
 remain unchanged. Native adapters and authored practice are the next independent
 implementation work, not presumed complete because this library passes tests.
+
+## 2026-10-25 — M103: exact native migration phases prepared and tested
+
+Added a closed developer-smoke mode for the retained actual writer8 profile,
+alongside original writer7. Normal app selection cannot import either fixture.
+The shared controller checks complete original per-ID Record chains, original7
+corpus, exact pre9 backup, existing receipts, independent example, actual native
+input targets, current Run/Stop/retry, export/restore and selected reset/Challenge.
+The accepted119 catalog and all scenario/progress definitions remain unchanged.
+
+Root source review caught an assignment/practice mismatch before runtime; the
+practice now uses existing distinct Welcome/Mina/ROOM data. Independent review
+caught asynchronous Finish advancement; the controller holds after requesting
+Close. Seven actual-egui-phase checks pass, including two-mode first-save backups,
+caller-versus-persisted receipt distinction, explicit example Run, inherited child
+scanner Stop and repeated Finish. Initial guarded-copy/zero-test attempt is not
+acceptance; five-of-six R2 and corrected seven R3 results are retained. All-target
+Clippy and formatter pass. Full prior202 UI/992 model gates remain scoped source
+evidence; actual identified evaluator9 installed flow is the next mandatory gate.
+
+The earlier installed ca1929b candidate independently passes ten quiet starts,
+one actual Wayland protocol/readiness startup and a strict two-process NORMAL-
+private-profile reopen. No diagnostic interval override, personal files or desktop
+settings. Source and native acceptance remain distinguished. No release.

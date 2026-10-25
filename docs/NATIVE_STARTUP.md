@@ -140,3 +140,24 @@ use the smoke profile. Exact manifest/session receipt remains under
 `.build-artifacts/tmp/native-reopen-m99-installed-r1`. This verifies the scoped
 policy on Fedora44, not every Wayland driver or Windows/macOS runtime. Script
 Run/Stop/repair and quantitative idle observation remain separate gates.
+
+## M102 installed follow-through at ca1929b
+
+The hash-identified ca1929b119-lab installed candidate passes10/10 additional
+quiet default-policy Wayland launches (0.815–0.865s), plus1/1 protocol/lifecycle
+startup confirming actual Wayland activity/readiness/completed updates, diagnostic
+interval override unset. It also passes actual script loop Stop/keyboard repair/current grading and
+saved reload, plus72 IPv4/VLAN alignment captures at100/150/200%, wide/narrow,
+Light/Dark. These extend rather than relabel11811b7 evidence.
+
+Two real NORMAL-profile GUI processes with guarded private XDG directories pass
+cold reopening, preserving actual scripted completion, unfinished assignment and
+separate example drafts, favorite, text scale and theme. The retained manifest
+SHA256 is e4125533b4d6af59a69b13f17a35b1d5578ad245af6d391f12fc190a74d423e6
+under tmp/native-reopen-m102-ca-r2. The first tool invocation refused the installed
+launcher symlink before launch; the retry used the hash-verified ordinary ELF
+inside the same installation without relaxing no-follow or identity checks.
+
+No new underlying-driver-cause, quantitative idle-power, universal Wayland,
+physical accessibility, novice or other-OS acceptance claim. New evaluator9
+source still requires its own installed migration/native gate.
