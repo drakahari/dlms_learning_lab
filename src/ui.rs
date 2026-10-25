@@ -198,6 +198,11 @@ enum HistorySource {
     Writer7,
     Writer8,
 }
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum ScriptLessonFlow {
+    Case,
+    Getopts,
+}
 pub struct LabApp {
     scenarios: Vec<Scenario>,
     units: Vec<course::Unit>,
@@ -443,7 +448,7 @@ impl LabApp {
             } else if smoke
                 && matches!(
                     std::env::var("DLMS_SMOKE_STAGE").as_deref(),
-                    Ok("capture-lessons" | "case-lessons")
+                    Ok("capture-lessons" | "case-lessons" | "getopts-lessons")
                 )
             {
                 7200

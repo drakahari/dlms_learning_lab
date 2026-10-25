@@ -233,7 +233,7 @@ fn new_learning_drafts_context_and_backup_restore_preserve_every_old_context_and
             .or_insert_with(|| Attempt::new(s, 1));
     }
     let old = serde_json::to_value(&p).unwrap();
-    assert_eq!(p.attempts.len(), 119);
+    assert_eq!(p.attempts.len(), 122);
     assert!(
         old["attempts"]
             .as_object()

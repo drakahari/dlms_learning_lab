@@ -35,6 +35,13 @@ capture-only lock failures; it is separate from the historical Wayland callback
 issue. Exercise actual capture-phase code in a regression, not only its case
 list, before running a new native measurement stage.
 
+Every worktree mutation must set its explicit absolute working directory. Check
+the selected checkout before applying a patch; never rely on an inherited shell
+cwd. A setup error briefly applied a source patch in main on2026-10-25; the exact
+patch was immediately reversed and30 pinned main files independently rehashed.
+No build ran against that temporary change. Retain the base/source receipts and
+verify the intended checkout before continuing.
+
 For a same-project worktree, invoke the main runner with `--cwd WORKTREE` before
 the action. Each canonical checkout now has an exclusive Cargo target. Main
 keeps `target/`; a worktree uses `.build-artifacts/targets/NAME-PATHHASH` on the

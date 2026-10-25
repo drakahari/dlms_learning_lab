@@ -54,6 +54,9 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         send:rush:*) printf '%s\n' "$row" >> 'fast lane.txt'; fast=$((fast+1)) ;;"#,
         ),
         ("mode=$1", "mode=save"),
+        ("s) short=yes", "s) short=no"),
+        ("local prefix=museum", "local prefix=annex"),
+        ("apply=no", "apply=yes"),
     ];
     assert_eq!(
         edits.len(),

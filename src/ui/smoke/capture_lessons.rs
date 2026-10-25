@@ -6,8 +6,10 @@ impl LabApp {
         ctx: &egui::Context,
         stage: usize,
     ) -> (bool, Option<String>) {
-        if std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("case-lessons") {
-            return self.case_lessons_native(ctx, stage);
+        if let Some(kind) =
+            ScriptLessonFlow::from_stage(std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+        {
+            return self.case_lessons_native(ctx, stage, kind);
         }
         const IDS: [&str; 4] = [
             "shell-capture-preview",
@@ -345,6 +347,80 @@ const CASE_LESSON_IDS: [&str; 3] = [
     "shell-case-routing",
     "shell-case-publication",
 ];
+const GETOPTS_LESSON_IDS: [&str; 3] = [
+    "shell-options-report",
+    "shell-options-jobs",
+    "shell-options-publication",
+];
+#[derive(serde::Deserialize)]
+struct NativeScriptReview {
+    id: String,
+    alternates: Vec<String>,
+    wrong: Vec<NativeScriptWrong>,
+    partial: String,
+    try_change: NativeScriptChange,
+}
+#[derive(serde::Deserialize)]
+struct NativeScriptWrong {
+    name: String,
+    source: String,
+}
+#[derive(serde::Deserialize)]
+struct NativeScriptChange {
+    source: String,
+    expected: shell::Case,
+    repair: String,
+}
+impl ScriptLessonFlow {
+    pub(in crate::ui) fn from_stage(value: Option<&str>) -> Option<Self> {
+        match value {
+            Some("case-lessons") => Some(Self::Case),
+            Some("getopts-lessons") => Some(Self::Getopts),
+            _ => None,
+        }
+    }
+    fn ids(self) -> &'static [&'static str; 3] {
+        match self {
+            Self::Case => &CASE_LESSON_IDS,
+            Self::Getopts => &GETOPTS_LESSON_IDS,
+        }
+    }
+    fn unit(self) -> &'static str {
+        match self {
+            Self::Case => "shell-case-dispatch",
+            Self::Getopts => "shell-option-interfaces",
+        }
+    }
+    fn label(self) -> &'static str {
+        match self {
+            Self::Case => "case",
+            Self::Getopts => "getopts",
+        }
+    }
+    fn reviews(self) -> Vec<NativeScriptReview> {
+        // Fixed reviewed author data only; never a learner-provided path/source.
+        serde_json::from_str(match self {
+            Self::Case => include_str!("../../../tests/fixtures/shell-case-content-review.json"),
+            Self::Getopts => {
+                include_str!("../../../tests/fixtures/shell-getopts-content-review.json")
+            }
+        })
+        .unwrap()
+    }
+    fn alternate(self, review: &NativeScriptReview) -> &str {
+        match self {
+            Self::Case => review
+                .alternates
+                .iter()
+                .find(|s| !s.contains("case "))
+                .expect("equivalent if/loop solution"),
+            Self::Getopts => review
+                .alternates
+                .first()
+                .expect("reviewed manual parser alternative"),
+        }
+    }
+}
 fn case_lesson_editor_band(viewport: egui::Rect, height: f32) -> egui::Rect {
     egui::Rect::from_center_size(
         viewport.center(),
@@ -460,64 +536,144 @@ impl LabApp {
             assert_eq!(a.step, 0);
         }
     }
-    fn case_lessons_native(&mut self, ctx: &egui::Context, stage: usize) -> (bool, Option<String>) {
+    fn script_lesson_start_card(&mut self, ctx: &egui::Context, id: &str) -> bool {
+        let expected = self.scenarios.iter().position(|s| s.id == id).unwrap();
+        let key = egui::Id::new(("native-click-phases", self.smoke_stage));
+        if ctx.data(|d| d.get_temp::<u8>(key)).unwrap_or(0) >= 2 {
+            let done = self.click_visible_smoke_control(ctx, None);
+            if done {
+                assert_eq!(
+                    self.selected,
+                    Some(expected),
+                    "real Start/Continue selected requested normal lab"
+                );
+            }
+            return done;
+        }
+        assert!(self.selected.is_none());
+        let matches: Vec<_> = self
+            .scenarios
+            .iter()
+            .filter(|s| {
+                catalog::matches(
+                    s,
+                    &self.filter,
+                    self.progress.attempts.contains_key(&s.id),
+                    self.progress
+                        .attempts
+                        .get(&s.id)
+                        .is_some_and(|a| progress::current_solved(a, s)),
+                    self.progress.favorites.contains(&s.id),
+                )
+            })
+            .collect();
+        // Search also includes goals: a later task may mention this title.
+        // Follow the same normal catalogue order and select the requested card.
+        assert!(!self.filter.recent && self.page == 0);
+        assert!(matches.len() <= 12);
+        let ordinal = matches
+            .iter()
+            .position(|s| s.id == id)
+            .expect("requested normal lab is a search result");
+        assert_eq!(
+            self.metrics.card_actions.len(),
+            matches.len(),
+            "all normal search cards rendered before clicking"
+        );
+        self.click_visible_smoke_control(ctx, self.metrics.card_actions.get(ordinal).map(|r| r.0))
+    }
+    pub(in crate::ui) fn case_lessons_native(
+        &mut self,
+        ctx: &egui::Context,
+        stage: usize,
+        kind: ScriptLessonFlow,
+    ) -> (bool, Option<String>) {
         const {
             assert!(shell::EVALUATOR_REVISION >= 8);
         }
+        if kind == ScriptLessonFlow::Getopts {
+            const {
+                assert!(shell::EVALUATOR_REVISION >= 9);
+            }
+        }
+        assert!((7200..7500).contains(&stage));
         let ordinal = (stage - 7200) / 100;
         let phase = (stage - 7200) % 100;
-        let id = CASE_LESSON_IDS[ordinal];
-        assert_eq!(self.scenarios.len(), 119);
-        assert!(self.units.iter().any(|u| u.id == "shell-case-dispatch"
-            && u.labs.iter().map(String::as_str).eq(CASE_LESSON_IDS)));
+        let ids = kind.ids();
+        let id = ids[ordinal];
+        assert_eq!(self.scenarios.len(), 122, "normal registered catalogue");
+        assert!(
+            GETOPTS_LESSON_IDS
+                .iter()
+                .all(|id| self.scenarios.iter().any(|s| s.id == *id)),
+            "all three normal getopts IDs required"
+        );
+        assert!(
+            self.units.iter().any(|u| u.id == kind.unit()
+                && u.labs.iter().map(String::as_str).eq(ids.iter().copied()))
+        );
         let i = self
             .scenarios
             .iter()
             .position(|s| s.id == id)
-            .expect("normal bundled case lesson");
+            .expect("normal bundled script lesson");
         let scenario = self.scenarios[i].clone();
         let lesson = scenario.teaching.as_ref().unwrap();
-        let rows: serde_json::Value = serde_json::from_str(include_str!(
-            "../../../tests/fixtures/shell-case-content-review.json"
-        ))
-        .unwrap();
-        let review = rows
-            .as_array()
-            .unwrap()
-            .iter()
-            .find(|r| r["id"] == id)
-            .unwrap();
+        let rows = kind.reviews();
+        let review = rows.iter().find(|r| r.id == id).unwrap();
+        assert_eq!(review.try_change.repair, lesson.example);
         let reference = &scenario.solution[0];
-        let alternate = review["alternates"]
-            .as_array()
-            .unwrap()
+        let alternate = kind.alternate(review);
+        let partial = &review
+            .wrong
             .iter()
-            .filter_map(|s| s.as_str())
-            .find(|s| !s.contains("case "))
-            .expect("equivalent if/loop solution");
-        let partial = review["wrong"]
-            .as_array()
+            .find(|w| w.name == review.partial)
             .unwrap()
+            .source;
+        let wrong = &review
+            .wrong
             .iter()
-            .find(|w| w["name"] == review["partial"])
-            .unwrap()["source"]
-            .as_str()
-            .unwrap();
-        let wrong = review["wrong"]
-            .as_array()
+            .find(|w| w.name != review.partial)
             .unwrap()
-            .iter()
-            .find(|w| w["name"] != review["partial"])
-            .unwrap()["source"]
-            .as_str()
-            .unwrap();
+            .source;
         let mut shot = None;
         if std::env::var_os("DLMS_SMOKE_DIAGNOSTICS").is_some() {
-            eprintln!("case-lesson {id} phase {phase}");
+            eprintln!("{}-lesson {id} phase {phase}", kind.label());
         }
         match phase {
             0 => {
                 assert!(self.smoke && self._smoke_profile.is_some());
+                if kind == ScriptLessonFlow::Getopts {
+                    let key = egui::Id::new(("getopts-normal-library", stage));
+                    let prepared = ctx.data(|d| d.get_temp::<bool>(key)).unwrap_or(false);
+                    if !prepared {
+                        self.selected = None;
+                        self.filter = Filter {
+                            track: "Bash/Shell".into(),
+                            unit: kind.unit().into(),
+                            search: scenario.title.clone(),
+                            ..Default::default()
+                        };
+                        self.scale = 1.;
+                        self.theme_id = "dlms-dark".into();
+                        theme::apply(ctx, &self.theme_id);
+                        ctx.send_viewport_cmd(egui::ViewportCommand::Fullscreen(false));
+                        ctx.send_viewport_cmd(egui::ViewportCommand::InnerSize(egui::vec2(
+                            1200., 850.,
+                        )));
+                        ctx.data_mut(|d| d.insert_temp(key, true));
+                        return (false, None);
+                    }
+                    if !self.case_lesson_geometry(ctx) {
+                        return (false, None);
+                    }
+                    if !self.script_lesson_start_card(ctx, id) {
+                        return (false, None);
+                    }
+                    self.set_script_view(i, teaching::View::Introduction);
+                    self.progress.favorites.insert(id.into());
+                    return (true, None);
+                }
                 self.scale = 1.;
                 self.theme_id = "dlms-dark".into();
                 theme::apply(ctx, &self.theme_id);
@@ -574,8 +730,7 @@ impl LabApp {
                     .as_ref()
                     .unwrap();
                 let expected = if phase == 10 {
-                    serde_json::from_value::<shell::Case>(review["try_change"]["expected"].clone())
-                        .unwrap()
+                    review.try_change.expected.clone()
                 } else {
                     lesson.fixture.clone()
                 };
@@ -597,7 +752,7 @@ impl LabApp {
                     return (false, None);
                 }
             }
-            7 => self.case_lesson_type(review["try_change"]["source"].as_str().unwrap()),
+            7 => self.case_lesson_type(&review.try_change.source),
             8 => {
                 let learning = self.progress.attempts[id]
                     .workspace
@@ -606,10 +761,7 @@ impl LabApp {
                     .script_learning
                     .as_ref()
                     .unwrap();
-                assert_eq!(
-                    learning.example_source,
-                    review["try_change"]["source"].as_str().unwrap()
-                );
+                assert_eq!(learning.example_source, review.try_change.source);
                 assert!(learning.example_result.is_none());
             }
             12 => self.case_lesson_type(&lesson.example),
@@ -693,7 +845,12 @@ impl LabApp {
                     match phase {
                         28 => "reference-complete",
                         33 => "current-edit-rechecked",
-                        38 => "if-alternate-complete",
+                        38 =>
+                            if kind == ScriptLessonFlow::Case {
+                                "if-alternate-complete"
+                            } else {
+                                "manual-alternate-complete"
+                            },
                         46 => "challenge-light150-typed-and-run",
                         _ => "challenge-dark200-typed-and-run",
                     }
@@ -773,6 +930,9 @@ impl LabApp {
                     &scenario
                 ));
                 shot = Some(format!("{id}-unfinished-draft-resumed"));
+                if kind == ScriptLessonFlow::Getopts {
+                    self.smoke_stage = 7200 + ordinal * 100 + 66 - 1;
+                }
             }
             58 => {
                 let others: std::collections::BTreeMap<_, _> = self
@@ -783,6 +943,12 @@ impl LabApp {
                     .map(|(id, a)| (id.clone(), serde_json::to_vec(a).unwrap()))
                     .collect();
                 ctx.data_mut(|d| d.insert_temp(egui::Id::new("case-unit-other-attempts"), others));
+                if kind == ScriptLessonFlow::Getopts {
+                    let selected = serde_json::to_vec(&self.progress.attempts[id]).unwrap();
+                    ctx.data_mut(|d| {
+                        d.insert_temp(egui::Id::new("getopts-before-reset-selected"), selected)
+                    });
+                }
             }
             59 => {
                 if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
@@ -790,7 +956,12 @@ impl LabApp {
                 }
             }
             60 => {
-                if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                if kind == ScriptLessonFlow::Getopts {
+                    if !self.click_visible_smoke_control(ctx, self.metrics.reset_cancel) {
+                        return (false, None);
+                    }
+                    self.smoke_stage = 7200 + ordinal * 100 + 77 - 1;
+                } else if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
                     return (false, None);
                 }
             }
@@ -821,22 +992,158 @@ impl LabApp {
                 assert!(self.progress.favorites.contains(id));
             }
             63 => {
-                self.selected = None;
-                self.filter.track = "Bash/Shell".into();
-                self.filter.unit = "shell-case-dispatch".into();
+                if kind == ScriptLessonFlow::Getopts {
+                    if !self.click_visible_smoke_control(ctx, self.metrics.back) {
+                        return (false, None);
+                    }
+                    assert!(self.selected.is_none());
+                    self.filter = Filter {
+                        track: "Bash/Shell".into(),
+                        unit: kind.unit().into(),
+                        search: scenario.title.clone(),
+                        ..Default::default()
+                    };
+                } else {
+                    self.selected = None;
+                    self.filter.track = "Bash/Shell".into();
+                    self.filter.unit = kind.unit().into();
+                }
             }
             64 => {
                 shot = Some(format!("{id}-library-after-selected-reset"));
             }
             65 => {
-                if ordinal + 1 == CASE_LESSON_IDS.len() {
+                if ordinal + 1 == ids.len() {
                     println!(
-                        "PASS native three case lessons: introduction, separate ready-only example/Run/experiment/repair, full assignment, wrong and partial feedback, reference and if/loop alternate, current edit invalidation, actual Challenge Light150/Dark200 typing+Run, exact save/resume and selected reset. App-only synthetic inputs; no novice/accessibility/other-platform acceptance."
+                        "PASS native three {} lessons: introduction, separate ready-only example/Run/experiment/repair, full assignment, wrong and partial feedback, reference and alternate, current edit invalidation, actual Challenge Light150/Dark200 typing+Run, exact save/resume and selected reset. App-only author-reference inputs; no novice/accessibility/other-platform acceptance.",
+                        kind.label()
                     );
                     ctx.send_viewport_cmd(egui::ViewportCommand::Close);
+                    return (false, None); // Close is asynchronous: hold final phase.
                 } else {
                     self.smoke_stage = 7200 + (ordinal + 1) * 100 - 1;
                 }
+            }
+            66 if kind == ScriptLessonFlow::Getopts => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.mode_learn) {
+                    return (false, None);
+                }
+            }
+            67 if kind == ScriptLessonFlow::Getopts => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.lesson_tabs.get(1).copied())
+                {
+                    return (false, None);
+                }
+            }
+            68 if kind == ScriptLessonFlow::Getopts => {
+                if !self.case_lesson_focus(ctx) {
+                    return (false, None);
+                }
+            }
+            69 if kind == ScriptLessonFlow::Getopts => {
+                self.case_lesson_type(&format!("{}\nprintf 'unfinished practice", lesson.example))
+            }
+            70 if kind == ScriptLessonFlow::Getopts => {
+                assert_eq!(self.script_view(i), teaching::View::Example);
+                let a = &self.progress.attempts[id];
+                assert!(
+                    matches!(&a.state,engine::State::Script{source,run:None}if source==&format!("{reference}\nprintf 'unfinished assignment"))
+                );
+                let l = a
+                    .workspace
+                    .as_ref()
+                    .unwrap()
+                    .script_learning
+                    .as_ref()
+                    .unwrap();
+                assert_eq!(
+                    l.example_source,
+                    format!("{}\nprintf 'unfinished practice", lesson.example)
+                );
+                assert!(l.example_result.is_none());
+                assert!(!progress::current_solved(a, &scenario));
+                let before = serde_json::to_vec(&self.progress.attempts).unwrap();
+                self.save();
+                assert!(self.storage_error.is_none());
+                let raw = progress::read_bounded(&self.path, 16_000_000).unwrap();
+                let loaded = progress::decode(&raw, &self.scenarios).unwrap();
+                assert_eq!(serde_json::to_vec(&loaded.attempts).unwrap(), before);
+                self.progress = loaded;
+                ctx.data_mut(|d| {
+                    d.insert_temp(egui::Id::new("getopts-before-library-resume"), before)
+                });
+                shot = Some(format!("{id}-separate-unfinished-drafts-saved"));
+            }
+            71 if kind == ScriptLessonFlow::Getopts => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.back) {
+                    return (false, None);
+                }
+                assert!(self.selected.is_none());
+            }
+            72 if kind == ScriptLessonFlow::Getopts => {
+                assert!(self.selected.is_none());
+                self.filter = Filter {
+                    track: "Bash/Shell".into(),
+                    unit: kind.unit().into(),
+                    search: scenario.title.clone(),
+                    ..Default::default()
+                };
+            }
+            73 if kind == ScriptLessonFlow::Getopts => {
+                if !self.script_lesson_start_card(ctx, id) {
+                    return (false, None);
+                }
+            }
+            74 if kind == ScriptLessonFlow::Getopts => {
+                assert_eq!(self.selected, Some(i));
+                assert_eq!(self.script_view(i), teaching::View::Example);
+                let before = ctx
+                    .data(|d| d.get_temp::<Vec<u8>>(egui::Id::new("getopts-before-library-resume")))
+                    .unwrap();
+                let mut expected: std::collections::BTreeMap<String, progress::Attempt> =
+                    serde_json::from_slice(&before).unwrap();
+                // A real Continue legitimately records a new visit; every other field stays exact.
+                expected.get_mut(id).unwrap().visited = self.progress.attempts[id].visited;
+                assert_eq!(
+                    serde_json::to_vec(&self.progress.attempts).unwrap(),
+                    serde_json::to_vec(&expected).unwrap()
+                );
+                assert!(!progress::current_solved(
+                    &self.progress.attempts[id],
+                    &scenario
+                ));
+                shot = Some(format!("{id}-real-library-continue-separated-drafts"));
+            }
+            75 if kind == ScriptLessonFlow::Getopts => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.lesson_tabs.get(2).copied())
+                {
+                    return (false, None);
+                }
+            }
+            76 if kind == ScriptLessonFlow::Getopts => {
+                assert_eq!(self.script_view(i), teaching::View::Assignment);
+                self.smoke_stage = 7200 + ordinal * 100 + 58 - 1;
+            }
+            77 if kind == ScriptLessonFlow::Getopts => {
+                assert!(!self.reset_pending);
+                let before = ctx
+                    .data(|d| d.get_temp::<Vec<u8>>(egui::Id::new("getopts-before-reset-selected")))
+                    .unwrap();
+                assert_eq!(
+                    serde_json::to_vec(&self.progress.attempts[id]).unwrap(),
+                    before
+                );
+            }
+            78 if kind == ScriptLessonFlow::Getopts => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.reset) {
+                    return (false, None);
+                }
+            }
+            79 if kind == ScriptLessonFlow::Getopts => {
+                if !self.click_visible_smoke_control(ctx, self.metrics.confirm_reset) {
+                    return (false, None);
+                }
+                self.smoke_stage = 7200 + ordinal * 100 + 61 - 1;
             }
             _ => panic!("Unexpected case lesson phase {phase}"),
         }
@@ -849,10 +1156,26 @@ mod case_lesson_plan_tests {
     use super::*;
     #[test]
     fn three_case_lessons_are_normal_and_have_bounded_native_keyboard_plans() {
-        let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 119);
-        let units = course::bundled(&all).unwrap();
-        assert_eq!(units.len(), 29);
+        let mut all = pack::bundled().unwrap();
+        let mut units = course::bundled(&all).unwrap();
+        if !all.iter().any(|s| s.id == GETOPTS_LESSON_IDS[0]) {
+            #[derive(serde::Deserialize)]
+            struct AuthoringPack {
+                scenarios: Vec<Scenario>,
+            }
+            let extra: AuthoringPack =
+                serde_json::from_str(include_str!("../../../scenarios/shell-getopts-v1.json"))
+                    .unwrap();
+            all.extend(extra.scenarios);
+            units.push(
+                serde_json::from_str(include_str!(
+                    "../../../tests/fixtures/shell-getopts-unit-proposal.json"
+                ))
+                .unwrap(),
+            );
+        }
+        assert_eq!(all.len(), 122);
+        assert_eq!(units.len(), 30);
         let rows: serde_json::Value = serde_json::from_str(include_str!(
             "../../../tests/fixtures/shell-case-content-review.json"
         ))

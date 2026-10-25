@@ -1342,3 +1342,39 @@ The earlier installed ca1929b candidate independently passes ten quiet starts,
 one actual Wayland protocol/readiness startup and a strict two-process NORMAL-
 private-profile reopen. No diagnostic interval override, personal files or desktop
 settings. Source and native acceptance remain distinguished. No release.
+
+## 2026-10-25 — M104: three substantive option-interface projects, source gate
+
+Registered three distinct assignments after model validation: a flexible report
+interface, independent repeated-job parsers, and a two-level validate-all batch
+publisher.122 source labs/30units =35CCNA/24LPIC1/20LPIC2/43Bash; this is not full
+curriculum or new objective-status credit. References and two supported alternatives
+pass all36 independent cases at1/16/64 slices. Wrong/partial/hardcoded/file-damage
+programs fail; separate runnable museum examples, meaningful changes/repair,
+current-source invalidation, draft isolation, reset/resume/export/restore pass.
+Input grammar and portable versus Bash-specific features are explicit.
+
+Source review corrected quoted spaced filenames in practice; first VM gate caught
+three conditional alternatives using excluded elif. Equivalent nested conditions
+fix only those programs, never the engine or expected contracts. Full registered
+96-target model run has1020PASS/7 stale-integration failures; all seven targets
+pass59 checks after exact current counts, original-unit filtering, new experiments/
+reviews and correct actual-vs-source-file ordering.1027 distinct checks now pass
+across fullR1+scopedR2, not a claimed full green rerun. Old119 IDs/versions/specs,
+original116 order,40 original scripts/246cases/40examples, actual6/7/8 history and
+116-context old profile stay intact; new requirements remain absent/ungraded.
+
+The5 actual-egui native-flow checks pass after fixing test preconditions, normal
+related-result selection and per-phase test frame budget. Production VM limits
+and15s waits are unchanged. All16 whole-catalog layout checks, current7 history
+checks, original case-plan, final10 content checks, all-targetClippyR2 and format/
+diff pass. The earlier lint failure was an elidable lifetime annotation only.
+Current coverage validator reports122 IDs and unchanged134Partial/1Supporting/
+1105Open of1240 overlapping references. No percentage or mastery claim.
+
+The preceding119-lab b5f candidate passes installed upgrade, actual8→9 native
+16captures/clean exit,11 Wayland startups and strict two-process reopen. Its local
+audit is411e34d50c069b27dcd7769c2f73d141f5e4342e56c6164a09a45cbd0eebee8e.
+This122 source batch now requires its own installed three-lesson native review.
+DHCPbackend and Debian package management remain separate source/research work,
+not playable credit. No public release or new dependency.

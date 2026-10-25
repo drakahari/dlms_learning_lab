@@ -1,0 +1,1284 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-options-report",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-option-interfaces",
+      "topic": "Short-option interfaces",
+      "title": "Build a dependable short-option report",
+      "summary": "Accept different option spellings without damaging the evidence.",
+      "objective": "Build a report command. Before the single SOURCE operand, accept -q (omit the Tag line), -n TAG (default incident) and -o FILE (write the report there instead of stdout). Options may be reordered, repeated or clustered; required values may be attached or separate. The last -n or -o wins. An exact -- ends options; stop scanning at the first operand. A value required by -n may itself be --. TAG and any chosen output name must be nonempty.\n\nRequire exactly one existing SOURCE. On success return 0 with no errors: normally print Tag: TAG and a line break, then the exact SOURCE bytes; with -q print only those bytes. With -o, only that output may change and stdout is empty. Never overwrite SOURCE or keep.txt. Any unknown option, missing value, bad operand count, absent source or forbidden/empty output prints Usage: report [-q] [-n TAG] [-o FILE] SOURCE and a line break only to standard error, returns 2 and changes no file. Values are one-line text; filenames follow the supplied flat-name format. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with separate sample inputs; files reset on Run and your script draft stays saved.",
+          "action": "Build a report command. Before the single SOURCE operand, accept -q (omit the Tag line), -n TAG (default incident) and -o FILE (write the report there instead of stdout). Options may be reordered, repeated or clustered; required values may be attached or separate. The last -n or -o wins. An exact -- ends options; stop scanning at the first operand. A value required by -n may itself be --. TAG and any chosen output name must be nonempty.\n\nRequire exactly one existing SOURCE. On success return 0 with no errors: normally print Tag: TAG and a line break, then the exact SOURCE bytes; with -q print only those bytes. With -o, only that output may change and stdout is empty. Never overwrite SOURCE or keep.txt. Any unknown option, missing value, bad operand count, absent source or forbidden/empty output prints Usage: report [-q] [-n TAG] [-o FILE] SOURCE and a line break only to standard error, returns 2 and changes no file. Values are one-line text; filenames follow the supplied flat-name format. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The whole output, status and every final file matter.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare them with your current run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Handle the complete interface across different inputs, not only the first example.",
+          "action": "Write or repair the complete script, Run it, inspect a differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Write the declaration with one colon after each option that requires a value and one colon at the beginning for your own errors.",
+        "After the loop, shift only the consumed option arguments, then validate the remaining operand.",
+        "Validate the chosen output before either > or >>; even an error late in the options must preserve the old file."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html"
+      ],
+      "simplifications": "Native offline evaluator9 simulation, never host commands/files. Closed getopts subset: ASCII short options, required values, clusters, attached/separate values, leading-colon errors and exact OPTIND=1 reset. No long options, optional values, argument permutation, arbitrary OPTIND seeks, set/eval, custom IFS or shell parsing of data. Values are single-line text, without embedded line breaks or NUL. Filenames supplied to these tasks are canonical flat basenames without slash components or leading hyphens, except explicitly invalid empty arguments. Every file-map key is /work/NAME. This is finite behavior testing, not proof over unmodeled paths/options. GNU Bash Edition5.3 primary manual and retained55 fixed Bash5.3.9 observations are documented in SHELL_GETOPTS.md; checked2026-10-25. No new reference execution is claimed. getopts is available in portable shells; local variables and indexed arrays in the later projects are Bash-specific features.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Build the complete interface and preserve the supplied files.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Default report",
+            "args": [
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "Tag: incident\nRack check\nPower ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Reordered options and spaced value",
+            "args": [
+              "-o",
+              "plan.txt",
+              "-n",
+              "Night desk",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "Tag: Night desk\nRack check\nPower ready\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Cluster and attached name",
+            "args": [
+              "-qnNorth",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "100% ready\n*.txt\\path",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "100% ready\n*.txt\\path",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incidents.txt": "100% ready\n*.txt\\path",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Attached output and repeated flags",
+            "args": [
+              "-qqoother report.txt",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "100% ready\n*.txt\\path",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incidents.txt": "100% ready\n*.txt\\path",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "100% ready\n*.txt\\path",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Repeated name last value wins",
+            "args": [
+              "-n",
+              "first",
+              "-nsecond",
+              "--",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "Tag: second\nRack check\nPower ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Required option-looking value",
+            "args": [
+              "-n",
+              "--",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "Tag: --\nRack check\nPower ready\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Stop at the first operand",
+            "args": [
+              "incidents.txt",
+              "-q"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report [-q] [-n TAG] [-o FILE] SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Unknown option after an output",
+            "args": [
+              "-o",
+              "plan.txt",
+              "-z",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report [-q] [-n TAG] [-o FILE] SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Missing required value",
+            "args": [
+              "-n"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report [-q] [-n TAG] [-o FILE] SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Set empty name",
+            "args": [
+              "-n",
+              "",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report [-q] [-n TAG] [-o FILE] SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Never overwrite the source",
+            "args": [
+              "-o",
+              "incidents.txt",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report [-q] [-n TAG] [-o FILE] SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          },
+          {
+            "name": "Protect the supplied peer file",
+            "args": [
+              "-o",
+              "keep.txt",
+              "incidents.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report [-q] [-n TAG] [-o FILE] SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/incidents.txt": "Rack check\nPower ready\n",
+              "/work/plan.txt": "previous report\n",
+              "/work/other report.txt": "other previous\n",
+              "/work/keep.txt": "preserve exactly\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "usage() { printf 'Usage: report [-q] [-n TAG] [-o FILE] SOURCE\\n' >&2; }\ntag=incident\nquiet=no\nwriting=no\ndestination=\nwhile getopts ':qn:o:' option; do\n    case \"$option\" in\n        q) quiet=yes ;;\n        n) tag=$OPTARG ;;\n        o) destination=$OPTARG; writing=yes ;;\n        ?|:) usage; exit 2 ;;\n    esac\ndone\nshift \"$((OPTIND - 1))\"\nif test \"$#\" -ne 1 || test -z \"$1\" || test -z \"$tag\"; then\n    usage; exit 2\nfi\nif test -f \"$1\"; then\n    source=$1\nelse\n    usage; exit 2\nfi\nif test \"$writing\" = yes; then\n    if test -z \"$destination\" || test \"$destination\" = \"$source\" || test \"$destination\" = keep.txt; then\n        usage; exit 2\n    fi\n    if test \"$quiet\" = yes; then\n        cat \"$source\" > \"$destination\"\n    else\n        printf 'Tag: %s\\n' \"$tag\" > \"$destination\"\n        cat \"$source\" >> \"$destination\"\n    fi\nelse\n    if test \"$quiet\" = no; then printf 'Tag: %s\\n' \"$tag\"; fi\n    cat \"$source\"\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-case-interface",
+        "shell-shift",
+        "shell-cut-inventory"
+      ],
+      "retry_guidance": "Compare the first differing case: option spelling, argument boundaries, status and unchanged files. Repair the complete program, then Run again.",
+      "explanation": "Complete outcomes determine success. Equivalent supported programs are accepted, including manual parsers; no command-name or action-history requirement is graded.",
+      "teaching": {
+        "prerequisite_note": "Use argument checks from “Build a reliable report-mode interface”, shift from “Separate a header from the remaining items” and fixed-format printing. This lesson introduces getopts.",
+        "concepts": [
+          {
+            "title": "Read one option at a time",
+            "text": "while getopts \":sn:\" choice; do ...; done calls the builtin repeatedly while its status is 0. The declaration lists s as a flag and n: as an option requiring a value. Each success stores s or n in choice. OPTARG holds the required value. In an assignment such as label=$OPTARG it stays one value; quote it when passing it onward."
+          },
+          {
+            "title": "An option word is not always one option",
+            "text": "-snWest is the flag -s followed by -n with value West. -sn West consumes the next argument instead. Repeated flags are allowed. An option-looking required value, even --, is data. A plain operand stops scanning; options are not moved past it. An exact -- encountered as an option ends the loop."
+          },
+          {
+            "title": "Check errors, then find the operands",
+            "text": "The leading : suppresses automatic diagnostics. In the case body use ?|:) for an unknown option or missing required value; print your own message and exit 2. Normal end returns 1. shift \"$((OPTIND - 1))\" removes just the consumed option arguments; now $1 is the first operand. Validate the remaining count and values before any output redirection."
+          },
+          {
+            "title": "Keep interface policy separate from scanning",
+            "text": "getopts does not decide defaults, nonempty values or whether a destination may replace a source. Those are your task rules. Set defaults before the loop; assign a required value when its option appears so the final occurrence wins. Do all checks before opening an output file."
+          }
+        ],
+        "example": "label=museum\nshort=no\nwhile getopts ':sn:' choice; do\n    case \"$choice\" in\n        s) short=yes ;;\n        n) label=$OPTARG ;;\n        ?|:) printf 'Need loan options and TITLE\\n' >&2; exit 2 ;;\n    esac\ndone\nshift \"$((OPTIND - 1))\"\nif test \"$#\" -ne 1 || test -z \"$1\" || test -z \"$label\"; then\n    printf 'Need loan options and TITLE\\n' >&2; exit 2\nfi\nprintf 'Loan: %s\\n' \"$1\"\nif test \"$short\" = no; then printf 'Shelf: %s\\n' \"$label\"; fi\n",
+        "inputs": "Museum arguments are -sn, East wing and Map set. The separate museum file stays unchanged. The example uses -s and -n; the assignment has its own -q/-n/-o report interface.",
+        "try_change": "In the s) arm change short=yes to short=no and Run. The same options now display the Shelf line too. Restore short=yes to repair the example.",
+        "fixture": {
+          "name": "Museum loan options",
+          "args": [
+            "-sn",
+            "East wing",
+            "Map set"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/museum.txt": "unchanged\n"
+          },
+          "stdout": "Loan: Map set\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/museum.txt": "unchanged\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-options-jobs",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-option-interfaces",
+      "topic": "Short-option interfaces",
+      "title": "Keep repeated export jobs independent",
+      "summary": "Reuse one parser without leaking a previous job’s options or defaults.",
+      "objective": "Two script arguments name existing job files. Job files are argument lists, not shell scripts: one line is exactly one argument. A blank line is an empty argument; spaces inside a line stay together. Supplied lines have no leading/trailing space or tab and no embedded line break; the final line may lack its ending line break. Quotes and backslashes are literal data, not quoting syntax. Read with read -r and store each line in a quoted array element. Do not split on spaces, evaluate the file or change IFS. Each job accepts -s (short form), -p PREFIX (default export), then exactly one nonempty LABEL. Support option order, clusters, attached/separate values and --; stop at the first operand. The final -p wins, and PREFIX must be nonempty.\n\nProcess both jobs independently in argument order, even after one fails. A valid job prints Job N: Export LABEL using PREFIX and a line break, or Job N: PREFIX:LABEL with -s. A bad option/value/label or extra operand prints only Rejected job N and a line break to standard error for that job. After both, print Defaults: DEFAULT and a line break using the original supplied DEFAULT value. Return 0 if both jobs succeed, otherwise 1. Preserve every file. If there are not exactly two nonempty existing filenames, print only Need two job files and a line break to standard error, return 2 and process neither. Use the supplied filenames exactly.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with separate sample inputs; files reset on Run and your script draft stays saved.",
+          "action": "Two script arguments name existing job files. Job files are argument lists, not shell scripts: one line is exactly one argument. A blank line is an empty argument; spaces inside a line stay together. Supplied lines have no leading/trailing space or tab and no embedded line break; the final line may lack its ending line break. Quotes and backslashes are literal data, not quoting syntax. Read with read -r and store each line in a quoted array element. Do not split on spaces, evaluate the file or change IFS. Each job accepts -s (short form), -p PREFIX (default export), then exactly one nonempty LABEL. Support option order, clusters, attached/separate values and --; stop at the first operand. The final -p wins, and PREFIX must be nonempty.\n\nProcess both jobs independently in argument order, even after one fails. A valid job prints Job N: Export LABEL using PREFIX and a line break, or Job N: PREFIX:LABEL with -s. A bad option/value/label or extra operand prints only Rejected job N and a line break to standard error for that job. After both, print Defaults: DEFAULT and a line break using the original supplied DEFAULT value. Return 0 if both jobs succeed, otherwise 1. Preserve every file. If there are not exactly two nonempty existing filenames, print only Need two job files and a line break to standard error, return 2 and process neither. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The whole output, status and every final file matter.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare them with your current run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Handle the complete interface across different inputs, not only the first example.",
+          "action": "Write or repair the complete script, Run it, inspect a differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Keep OPTIND, the option name and each parser default local to the reusable helper.",
+        "Do not feed the complete file text to getopts as one argument; build a quoted array with one element per line.",
+        "Check the helper’s status before printing its description, then continue with the other job even after failure."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html"
+      ],
+      "simplifications": "Native offline evaluator9 simulation, never host commands/files. Closed getopts subset: ASCII short options, required values, clusters, attached/separate values, leading-colon errors and exact OPTIND=1 reset. No long options, optional values, argument permutation, arbitrary OPTIND seeks, set/eval, custom IFS or shell parsing of data. Values are single-line text, without embedded line breaks or NUL. Filenames supplied to these tasks are canonical flat basenames without slash components or leading hyphens, except explicitly invalid empty arguments. Every file-map key is /work/NAME. This is finite behavior testing, not proof over unmodeled paths/options. GNU Bash Edition5.3 primary manual and retained55 fixed Bash5.3.9 observations are documented in SHELL_GETOPTS.md; checked2026-10-25. No new reference execution is claimed. getopts is available in portable shells; local variables and indexed arrays in the later projects are Bash-specific features.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Build the complete interface and preserve the supplied files.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Independent prefixes",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "-p\nalpha\nMap\n",
+              "/work/two.args": "-p\nbeta\nCable\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 1: Export Map using alpha\nJob 2: Export Cable using beta\nDefaults: archive\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.args": "-p\nalpha\nMap\n",
+              "/work/two.args": "-p\nbeta\nCable\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Cluster and default after it",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "original"
+            },
+            "files": {
+              "/work/one.args": "-spDesk\nNorth room\n",
+              "/work/two.args": "South room\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 1: Desk:North room\nJob 2: Export South room using export\nDefaults: original\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.args": "-spDesk\nNorth room\n",
+              "/work/two.args": "South room\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Repeat and literal option value",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "-pfirst\n-p\n--\nLabel\n",
+              "/work/two.args": "-s\n-pdata%p\n*.txt\\label",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 1: Export Label using --\nJob 2: data%p:*.txt\\label\nDefaults: archive\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.args": "-pfirst\n-p\n--\nLabel\n",
+              "/work/two.args": "-s\n-pdata%p\n*.txt\\label",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "End options and keep a dash label",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "--\n-p\n",
+              "/work/two.args": "-p\nÉtage\nLabel  two\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 1: Export -p using export\nJob 2: Export Label  two using Étage\nDefaults: archive\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.args": "--\n-p\n",
+              "/work/two.args": "-p\nÉtage\nLabel  two\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Invalid first job does not skip second",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "-z\nBad\n",
+              "/work/two.args": "-s\n-p\nready\nGood\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 2: ready:Good\nDefaults: archive\n",
+            "stderr": "Rejected job 1\n",
+            "status": 1,
+            "after": {
+              "/work/one.args": "-z\nBad\n",
+              "/work/two.args": "-s\n-p\nready\nGood\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Invalid second job does not erase first",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "First\n",
+              "/work/two.args": "-p\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 1: Export First using export\nDefaults: archive\n",
+            "stderr": "Rejected job 2\n",
+            "status": 1,
+            "after": {
+              "/work/one.args": "First\n",
+              "/work/two.args": "-p\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Both invalid with two diagnostics",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "\n",
+              "/work/two.args": "-p\n\nLabel\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Defaults: archive\n",
+            "stderr": "Rejected job 1\nRejected job 2\n",
+            "status": 1,
+            "after": {
+              "/work/one.args": "\n",
+              "/work/two.args": "-p\n\nLabel\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Stop at operand instead of permuting",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "Label\n-s\n",
+              "/work/two.args": "-psecond\nGood\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 2: Export Good using second\nDefaults: archive\n",
+            "stderr": "Rejected job 1\n",
+            "status": 1,
+            "after": {
+              "/work/one.args": "Label\n-s\n",
+              "/work/two.args": "-psecond\nGood\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Same job file twice scans afresh",
+            "args": [
+              "one.args",
+              "one.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "-spRepeat\nDesk\n",
+              "/work/two.args": "unused\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 1: Repeat:Desk\nJob 2: Repeat:Desk\nDefaults: archive\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/one.args": "-spRepeat\nDesk\n",
+              "/work/two.args": "unused\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Empty and optionless jobs differ",
+            "args": [
+              "one.args",
+              "two.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "",
+              "/work/two.args": "Ready\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "Job 2: Export Ready using export\nDefaults: archive\n",
+            "stderr": "Rejected job 1\n",
+            "status": 1,
+            "after": {
+              "/work/one.args": "",
+              "/work/two.args": "Ready\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Missing file is a whole interface error",
+            "args": [
+              "one.args",
+              "absent.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "Ready\n",
+              "/work/two.args": "Done\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "",
+            "stderr": "Need two job files\n",
+            "status": 2,
+            "after": {
+              "/work/one.args": "Ready\n",
+              "/work/two.args": "Done\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          },
+          {
+            "name": "Exactly two filenames required",
+            "args": [
+              "one.args"
+            ],
+            "stdin": "",
+            "env": {
+              "DEFAULT": "archive"
+            },
+            "files": {
+              "/work/one.args": "Ready\n",
+              "/work/two.args": "Done\n",
+              "/work/keep.txt": "do not change\n"
+            },
+            "stdout": "",
+            "stderr": "Need two job files\n",
+            "status": 2,
+            "after": {
+              "/work/one.args": "Ready\n",
+              "/work/two.args": "Done\n",
+              "/work/keep.txt": "do not change\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "describe() {\n    local OPTIND=1\n    local option\n    local prefix=export\n    local short=no\n    while getopts ':sp:' option; do\n        case \"$option\" in\n            s) short=yes ;;\n            p) prefix=$OPTARG ;;\n            ?|:) return 2 ;;\n        esac\n    done\n    shift \"$((OPTIND - 1))\"\n    if test \"$#\" -ne 1 || test -z \"$1\" || test -z \"$prefix\"; then return 2; fi\n    if test \"$short\" = yes; then\n        description=\"$prefix:$1\"\n    else\n        description=\"Export $1 using $prefix\"\n    fi\n}\nif test \"$#\" -ne 2; then printf 'Need two job files\\n' >&2; exit 2; fi\nif test -z \"$1\" || test -z \"$2\"; then printf 'Need two job files\\n' >&2; exit 2; fi\nif test -f \"$1\" && test -f \"$2\"; then\n    failed=0\nelse\n    printf 'Need two job files\\n' >&2; exit 2\nfi\nprefix=$DEFAULT\nnumber=0\nfor file in \"$@\"; do\n    number=$((number + 1))\n    arguments=()\n    while read -r item || test -n \"$item\"; do\n        arguments=(\"${arguments[@]}\" \"$item\")\n    done < \"$file\"\n    if describe \"${arguments[@]}\"; then\n        printf 'Job %s: %s\\n' \"$number\" \"$description\"\n    else\n        printf 'Rejected job %s\\n' \"$number\" >&2\n        failed=1\n    fi\ndone\nprintf 'Defaults: %s\\n' \"$prefix\"\nexit \"$failed\"\n"
+      ],
+      "prerequisites": [
+        "shell-options-report",
+        "shell-array-handover",
+        "shell-local-heading",
+        "shell-return",
+        "shell-capture-decision"
+      ],
+      "retry_guidance": "Compare the first differing case: option spelling, argument boundaries, status and unchanged files. Repair the complete program, then Run again.",
+      "explanation": "Complete outcomes determine success. Equivalent supported programs are accepted, including manual parsers; no command-name or action-history requirement is graded.",
+      "teaching": {
+        "prerequisite_note": "Use “Build a dependable short-option report”, “Preview and publish a safe handover”, “Protect the report heading”, “Reject one item without ending the batch” and “Investigate findings without losing their status”. This lesson adds an explicitly local scanner and argument files.",
+        "concepts": [
+          {
+            "title": "Each function gets its own scan",
+            "text": "local and indexed arrays are Bash features. A function receives its own positional arguments, but getopts scanner state is normally shared. Begin a reusable parser with local OPTIND=1. This starts a fresh scan for this call and restores the caller’s scan on return. Use the explicit =1 form here. Merely changing the result variable does not reset the scanner."
+          },
+          {
+            "title": "Keep defaults local as well",
+            "text": "local prefix=export and local short=no give each call its own settings. local option keeps the result name from leaking. shift changes only this function’s remaining arguments. Return 2 for a bad job instead of exit, so the caller can continue with the next one."
+          },
+          {
+            "title": "A file can store argument boundaries",
+            "text": "Job files are argument lists, not shell scripts: one line is exactly one argument. A blank line is an empty argument; spaces inside a line stay together. Supplied lines have no leading/trailing space or tab and no embedded line break; the final line may lack its ending line break. Quotes and backslashes are literal data, not quoting syntax. Read with read -r and store each line in a quoted array element. Do not split on spaces, evaluate the file or change IFS. Start arguments=(). In while read -r item || test -n \"$item\"; do ...; done < \"$file\", append with arguments=(\"${arguments[@]}\" \"$item\"). Rebuilding the dense list preserves empty and spaced arguments. The final test includes an unterminated last line; a final empty read is not an extra argument."
+          },
+          {
+            "title": "Output and status are separate results",
+            "text": "Use if describe \"${arguments[@]}\"; then ...; else ...; fi. The call receives each stored argument separately. The helper intentionally sets one shared description variable, while keeping its scanner and defaults local. Only use that description after success; return 2 on error before setting it. Print the failure for this job and still run the next."
+          }
+        ],
+        "example": "describe() {\n    local OPTIND=1\n    local option\n    local prefix=museum\n    local short=no\n    while getopts ':sp:' option; do\n        case \"$option\" in\n            s) short=yes ;;\n            p) prefix=$OPTARG ;;\n            ?|:) return 2 ;;\n        esac\n    done\n    shift \"$((OPTIND - 1))\"\n    if test \"$#\" -ne 1 || test -z \"$1\" || test -z \"$prefix\"; then return 2; fi\n    if test \"$short\" = yes; then\n        description=\"$prefix:$1\"\n    else\n        description=\"Loan $1 from $prefix\"\n    fi\n}\nif test \"$#\" -ne 2; then printf 'Need two job files\\n' >&2; exit 2; fi\nif test -z \"$1\" || test -z \"$2\"; then printf 'Need two job files\\n' >&2; exit 2; fi\nif test -f \"$1\" && test -f \"$2\"; then\n    failed=0\nelse\n    printf 'Need two job files\\n' >&2; exit 2\nfi\nprefix=$DEFAULT\nnumber=0\nfor file in \"$@\"; do\n    number=$((number + 1))\n    arguments=()\n    while read -r item || test -n \"$item\"; do\n        arguments=(\"${arguments[@]}\" \"$item\")\n    done < \"$file\"\n    if describe \"${arguments[@]}\"; then\n        printf 'Job %s: %s\\n' \"$number\" \"$description\"\n    else\n        printf 'Rejected job %s\\n' \"$number\" >&2\n        failed=1\n    fi\ndone\nprintf 'Shelf default: %s\\n' \"$prefix\"\nexit \"$failed\"\n",
+        "inputs": "loans.args and returns.args hold two different museum jobs, with DEFAULT=lobby. All museum files must stay unchanged. These are separate from assignment one.args/two.args and its DEFAULT values.",
+        "try_change": "Change local prefix=museum to local prefix=annex and Run. Only the second job, which has no -p, changes; the first job and Shelf default stay the same. Restore museum to repair it.",
+        "fixture": {
+          "name": "Two museum loan jobs",
+          "args": [
+            "loans.args",
+            "returns.args"
+          ],
+          "stdin": "",
+          "env": {
+            "DEFAULT": "lobby"
+          },
+          "files": {
+            "/work/loans.args": "-p\neast\nMaps\n",
+            "/work/returns.args": "-s\nGuides\n",
+            "/work/museum.txt": "untouched\n"
+          },
+          "stdout": "Job 1: Loan Maps from east\nJob 2: museum:Guides\nShelf default: lobby\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/loans.args": "-p\neast\nMaps\n",
+            "/work/returns.args": "-s\nGuides\n",
+            "/work/museum.txt": "untouched\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-options-publication",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-option-interfaces",
+      "topic": "Short-option interfaces",
+      "title": "Publish only a fully validated export batch",
+      "summary": "Keep global options, independent job options and final publication separate.",
+      "objective": "Build a two-level export planner. Global options before the first job filename are -a (apply; default preview) and -o DEST (default plan.txt). Support order, repetition, clusters, attached/separate values and --; the final -o wins. Require one or more existing nonempty job filenames. DEST must be nonempty, different from every supplied job filename and different from keep.txt.\n\nJob files are argument lists, not shell scripts: one line is exactly one argument. A blank line is an empty argument; spaces inside a line stay together. Supplied lines have no leading/trailing space or tab and no embedded line break; the final line may lack its ending line break. Quotes and backslashes are literal data, not quoting syntax. Read with read -r and store each line in a quoted array element. Do not split on spaces, evaluate the file or change IFS. Each job has the same -s/-p PREFIX/LABEL interface as “Keep repeated export jobs independent”: default prefix export, nonempty prefix and exactly one nonempty label, first-operand stopping, clusters, attached/separate values, -- and last -p wins. Parse each job independently after parsing globals.\n\nValidate all globals, filenames and jobs before printing a preview or changing a file. For a valid batch, build one line per job in argument order: Export LABEL using PREFIX, or PREFIX:LABEL with -s. Preview prints Preview: and a line break, then all plan lines, returns 0 and changes no file. Apply replaces only DEST with those plan lines (each ends in a line break), prints Published: COUNT and a line break, and returns 0. All other files remain byte-exact. Any invalid global/job option, missing/empty value, wrong/missing job operand or forbidden destination prints only Invalid batch and a line break to standard error, returns 2, prints no normal output and changes no file. The goal is a two-level parser and all-job preflight, not a shell-command interpreter. Use the supplied filenames exactly.",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with separate sample inputs; files reset on Run and your script draft stays saved.",
+          "action": "Build a two-level export planner. Global options before the first job filename are -a (apply; default preview) and -o DEST (default plan.txt). Support order, repetition, clusters, attached/separate values and --; the final -o wins. Require one or more existing nonempty job filenames. DEST must be nonempty, different from every supplied job filename and different from keep.txt.\n\nJob files are argument lists, not shell scripts: one line is exactly one argument. A blank line is an empty argument; spaces inside a line stay together. Supplied lines have no leading/trailing space or tab and no embedded line break; the final line may lack its ending line break. Quotes and backslashes are literal data, not quoting syntax. Read with read -r and store each line in a quoted array element. Do not split on spaces, evaluate the file or change IFS. Each job has the same -s/-p PREFIX/LABEL interface as “Keep repeated export jobs independent”: default prefix export, nonempty prefix and exactly one nonempty label, first-operand stopping, clusters, attached/separate values, -- and last -p wins. Parse each job independently after parsing globals.\n\nValidate all globals, filenames and jobs before printing a preview or changing a file. For a valid batch, build one line per job in argument order: Export LABEL using PREFIX, or PREFIX:LABEL with -s. Preview prints Preview: and a line break, then all plan lines, returns 0 and changes no file. Apply replaces only DEST with those plan lines (each ends in a line break), prints Published: COUNT and a line break, and returns 0. All other files remain byte-exact. Any invalid global/job option, missing/empty value, wrong/missing job operand or forbidden destination prints only Invalid batch and a line break to standard error, returns 2, prints no normal output and changes no file. The goal is a two-level parser and all-job preflight, not a shell-command interpreter. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The whole output, status and every final file matter.",
+          "action": "Optional input details show the supplied arguments, files and expected results. Compare them with your current run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "Handle the complete interface across different inputs, not only the first example.",
+          "action": "Write or repair the complete script, Run it, inspect a differing result and retry. Help is optional.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Keep the outer parser defaults separate from the local defaults of each job parser.",
+        "Validate every job filename and forbidden output before reading jobs; then retain every successful description before producing any visible plan.",
+        "A failed later job must preserve an already-existing destination and must not leave a partial preview on stdout."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bourne-Shell-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Variables.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html"
+      ],
+      "simplifications": "Native offline evaluator9 simulation, never host commands/files. Closed getopts subset: ASCII short options, required values, clusters, attached/separate values, leading-colon errors and exact OPTIND=1 reset. No long options, optional values, argument permutation, arbitrary OPTIND seeks, set/eval, custom IFS or shell parsing of data. Values are single-line text, without embedded line breaks or NUL. Filenames supplied to these tasks are canonical flat basenames without slash components or leading hyphens, except explicitly invalid empty arguments. Every file-map key is /work/NAME. This is finite behavior testing, not proof over unmodeled paths/options. GNU Bash Edition5.3 primary manual and retained55 fixed Bash5.3.9 observations are documented in SHELL_GETOPTS.md; checked2026-10-25. No new reference execution is claimed. getopts is available in portable shells; local variables and indexed arrays in the later projects are Bash-specific features.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Build the complete interface and preserve the supplied files.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview leaves an old plan untouched",
+            "args": [
+              "red.args",
+              "blue.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "Preview:\nred:North\nExport South room using blue\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Apply both jobs after global scanning",
+            "args": [
+              "-a",
+              "red.args",
+              "blue.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "Published: 2\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "red:North\nExport South room using blue\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Cluster globals and selected output",
+            "args": [
+              "-aoother plan.txt",
+              "--",
+              "blue.args",
+              "red.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "Published: 2\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "Export South room using blue\nred:North\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Late bad job must preserve old output",
+            "args": [
+              "-a",
+              "red.args",
+              "bad.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "First bad job must not publish",
+            "args": [
+              "-a",
+              "bad.args",
+              "blue.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "No jobs after delimiter",
+            "args": [
+              "-a",
+              "--"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Global missing required value",
+            "args": [
+              "-o"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Source is never a destination",
+            "args": [
+              "-ao",
+              "red.args",
+              "red.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Protected file is never a destination",
+            "args": [
+              "-o",
+              "keep.txt",
+              "blue.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "A global option after an operand is a missing job",
+            "args": [
+              "red.args",
+              "-a"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid batch\n",
+            "status": 2,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "The final output setting wins",
+            "args": [
+              "-o",
+              "plan.txt",
+              "-oother plan.txt",
+              "-aa",
+              "blue.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "Published: 1\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/red.args": "-sp\nred\nNorth\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "Export South room using blue\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          },
+          {
+            "name": "Job delimiter values and repeated input",
+            "args": [
+              "-a",
+              "red.args",
+              "red.args"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/red.args": "-p\n--\n--\n-p\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "old plan\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            },
+            "stdout": "Published: 2\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/red.args": "-p\n--\n--\n-p\n",
+              "/work/blue.args": "-pblue\nSouth room\n",
+              "/work/bad.args": "-z\nBad\n",
+              "/work/plan.txt": "Export -p using --\nExport -p using --\n",
+              "/work/other plan.txt": "other old plan\n",
+              "/work/keep.txt": "keep exactly\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "describe() {\n    local OPTIND=1\n    local option\n    local prefix=export\n    local short=no\n    while getopts ':sp:' option; do\n        case \"$option\" in\n            s) short=yes ;;\n            p) prefix=$OPTARG ;;\n            ?|:) return 2 ;;\n        esac\n    done\n    shift \"$((OPTIND - 1))\"\n    if test \"$#\" -ne 1 || test -z \"$1\" || test -z \"$prefix\"; then return 2; fi\n    if test \"$short\" = yes; then\n        printf '%s:%s\\n' \"$prefix\" \"$1\"\n    else\n        printf 'Export %s using %s\\n' \"$1\" \"$prefix\"\n    fi\n}\ninvalid() { printf 'Invalid batch\\n' >&2; }\napply=no\ndestination=plan.txt\nwhile getopts ':ao:' option; do\n    case \"$option\" in\n        a) apply=yes ;;\n        o) destination=$OPTARG ;;\n        ?|:) invalid; exit 2 ;;\n    esac\ndone\nshift \"$((OPTIND - 1))\"\nif test \"$#\" -eq 0 || test -z \"$destination\" || test \"$destination\" = keep.txt; then invalid; exit 2; fi\nfor file in \"$@\"; do\n    if test -z \"$file\" || test \"$destination\" = \"$file\"; then invalid; exit 2; fi\n    if test -f \"$file\"; then\n        ready=yes\n    else\n        invalid; exit 2\n    fi\ndone\nplan=()\nfor file in \"$@\"; do\n    arguments=()\n    while read -r item || test -n \"$item\"; do\n        arguments=(\"${arguments[@]}\" \"$item\")\n    done < \"$file\"\n    if description=$(describe \"${arguments[@]}\"); then\n        plan=(\"${plan[@]}\" \"$description\")\n    else\n        invalid; exit 2\n    fi\ndone\nif test \"$apply\" = yes; then\n    printf '' > \"$destination\"\n    for row in \"${plan[@]}\"; do printf '%s\\n' \"$row\" >> \"$destination\"; done\n    printf 'Published: %s\\n' \"${#plan[@]}\"\nelse\n    printf 'Preview:\\n'\n    for row in \"${plan[@]}\"; do printf '%s\\n' \"$row\"; done\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-options-jobs",
+        "shell-bundle",
+        "shell-case-publication"
+      ],
+      "retry_guidance": "Compare the first differing case: option spelling, argument boundaries, status and unchanged files. Repair the complete program, then Run again.",
+      "explanation": "Complete outcomes determine success. Equivalent supported programs are accepted, including manual parsers; no command-name or action-history requirement is graded.",
+      "teaching": {
+        "prerequisite_note": "Use “Keep repeated export jobs independent”, “Assemble a bundle only after preflight checks” and “Preview or publish a validated release plan”. This task adds outer and per-job option interfaces to the same batch; the job files contain argument boundaries, not commands.",
+        "concepts": [
+          {
+            "title": "Two interfaces share a scanner unless you separate them",
+            "text": "The outer getopts loop parses global -a/-o before filenames. After its shift, the scanner has still already been used. Each job helper therefore needs its own local OPTIND=1; do not reuse the outer index for a job’s argument vector. One job may end normally and another may have a different number of options."
+          },
+          {
+            "title": "Load arguments, not commands",
+            "text": "Job files are argument lists, not shell scripts: one line is exactly one argument. A blank line is an empty argument; spaces inside a line stay together. Supplied lines have no leading/trailing space or tab and no embedded line break; the final line may lack its ending line break. Quotes and backslashes are literal data, not quoting syntax. Read with read -r and store each line in a quoted array element. Do not split on spaces, evaluate the file or change IFS. Reuse the quoted array-loading loop from the preceding lesson. A job’s own -- and required -- value have their own meaning inside that job; they do not change outer global options. Never pass job text to eval or try to split it as a command."
+          },
+          {
+            "title": "Finish every check before publication",
+            "text": "Create plan=(), capture one successful description at a time and retain it with plan=(\"${plan[@]}\" \"$description\"). If any helper fails, exit before printing the preview header or opening DEST. Once every job passes, loop over the saved descriptions. ${#plan[@]} counts jobs, including repeated source filenames."
+          },
+          {
+            "title": "Preview and apply have different effects",
+            "text": "Preview prints the completed plan and preserves even an old destination. Apply may first clear its validated destination with printf empty text, then append each saved description. Both use the same validated data. No helper should write to the final destination while still checking a job."
+          }
+        ],
+        "example": "describe() {\n    local OPTIND=1\n    local option\n    local prefix=museum\n    local short=no\n    while getopts ':sp:' option; do\n        case \"$option\" in\n            s) short=yes ;;\n            p) prefix=$OPTARG ;;\n            ?|:) return 2 ;;\n        esac\n    done\n    shift \"$((OPTIND - 1))\"\n    if test \"$#\" -ne 1 || test -z \"$1\" || test -z \"$prefix\"; then return 2; fi\n    if test \"$short\" = yes; then\n        printf '%s:%s\\n' \"$prefix\" \"$1\"\n    else\n        printf 'Loan %s from %s\\n' \"$1\" \"$prefix\"\n    fi\n}\ninvalid() { printf 'Invalid batch\\n' >&2; }\napply=no\ndestination=docket.txt\nwhile getopts ':ao:' option; do\n    case \"$option\" in\n        a) apply=yes ;;\n        o) destination=$OPTARG ;;\n        ?|:) invalid; exit 2 ;;\n    esac\ndone\nshift \"$((OPTIND - 1))\"\nif test \"$#\" -eq 0 || test -z \"$destination\" || test \"$destination\" = \"museum keep.txt\"; then invalid; exit 2; fi\nfor file in \"$@\"; do\n    if test -z \"$file\" || test \"$destination\" = \"$file\"; then invalid; exit 2; fi\n    if test -f \"$file\"; then\n        ready=yes\n    else\n        invalid; exit 2\n    fi\ndone\nplan=()\nfor file in \"$@\"; do\n    arguments=()\n    while read -r item || test -n \"$item\"; do\n        arguments=(\"${arguments[@]}\" \"$item\")\n    done < \"$file\"\n    if description=$(describe \"${arguments[@]}\"); then\n        plan=(\"${plan[@]}\" \"$description\")\n    else\n        invalid; exit 2\n    fi\ndone\nif test \"$apply\" = yes; then\n    printf '' > \"$destination\"\n    for row in \"${plan[@]}\"; do printf '%s\\n' \"$row\" >> \"$destination\"; done\n    printf 'Filed: %s\\n' \"${#plan[@]}\"\nelse\n    printf 'Preview:\\n'\n    for row in \"${plan[@]}\"; do printf '%s\\n' \"$row\"; done\nfi\n",
+        "inputs": "The example uses maps.args, guides.args, docket.txt and museum keep.txt. The assignment uses different red/blue/bad jobs and protected keep.txt. The example begins in preview and has no global options.",
+        "try_change": "Change only the initial apply=no to apply=yes and Run. The complete museum plan now replaces docket.txt and prints Filed: 2; museum keep.txt and both job files stay unchanged. Restore apply=no to return to preview.",
+        "fixture": {
+          "name": "Preview two museum jobs",
+          "args": [
+            "maps.args",
+            "guides.args"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/maps.args": "-p\neast\nMap set\n",
+            "/work/guides.args": "-s\nGuides\n",
+            "/work/docket.txt": "old docket\n",
+            "/work/museum keep.txt": "unchanged\n"
+          },
+          "stdout": "Preview:\nLoan Map set from east\nmuseum:Guides\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/maps.args": "-p\neast\nMap set\n",
+            "/work/guides.args": "-s\nGuides\n",
+            "/work/docket.txt": "old docket\n",
+            "/work/museum keep.txt": "unchanged\n"
+          }
+        }
+      }
+    }
+  ]
+}

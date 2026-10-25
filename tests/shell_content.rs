@@ -8,19 +8,40 @@ struct Review {
     incorrect: String,
     misconception: String,
 }
+fn reviews() -> Vec<Review> {
+    let mut rows: Vec<Review> =
+        serde_json::from_str(include_str!("fixtures/shell-content-review.json")).unwrap();
+    let options: Vec<serde_json::Value> =
+        serde_json::from_str(include_str!("fixtures/shell-getopts-content-review.json")).unwrap();
+    rows.extend(options.into_iter().map(|r| Review {
+        id: r["id"].as_str().unwrap().into(),
+        alternate: r["alternates"][0].as_str().unwrap().into(),
+        incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
+        misconception: r["wrong"][0]["misconception"].as_str().unwrap().into(),
+    }));
+    rows
+}
 fn quoted(value: &str) -> String {
     format!("'{}'", value.replace('\'', "'\\''"))
 }
 #[test]
 fn every_script_has_a_working_alternate_and_rejects_a_plausible_mistake_and_hardcoding() {
     let labs = pack::bundled().unwrap();
-    let rows: Vec<Review> =
-        serde_json::from_str(include_str!("fixtures/shell-content-review.json")).unwrap();
+    let rows = reviews();
     assert_eq!(
         rows.len(),
         labs.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count()
+    );
+    assert_eq!(
+        rows.iter()
+            .map(|r| r.id.as_str())
+            .collect::<std::collections::BTreeSet<_>>(),
+        labs.iter()
+            .filter(|s| matches!(s.goal, Goal::Script { .. }))
+            .map(|s| s.id.as_str())
+            .collect()
     );
     for row in rows {
         let lab = labs.iter().find(|s| s.id == row.id).unwrap();
@@ -83,8 +104,7 @@ fn every_script_has_a_working_alternate_and_rejects_a_plausible_mistake_and_hard
 #[test]
 fn authored_mistakes_can_be_partial_but_never_earn_full_credit() {
     let labs = pack::bundled().unwrap();
-    let rows: Vec<Review> =
-        serde_json::from_str(include_str!("fixtures/shell-content-review.json")).unwrap();
+    let rows = reviews();
     for id in [
         "shell-eof",
         "shell-batch-audit",

@@ -134,7 +134,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 119);
+    assert_eq!(all.len(), 122);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -145,7 +145,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
-        40
+        43
     );
     let mut case_count = 0;
     for old in originals {
@@ -178,9 +178,22 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         .filter(|s| !p.attempts.contains_key(&s.id))
         .map(|s| s.id.as_str())
         .collect();
-    assert_eq!(missing.len(), 3); // Already-authored PTR additions absent from old capture.
+    assert_eq!(
+        missing,
+        BTreeSet::from([
+            "lpic2-dns-reverse-investigation",
+            "lpic2-dns-reverse-ipv6",
+            "lpic2-dns-reverse-handover",
+            "shell-options-report",
+            "shell-options-jobs",
+            "shell-options-publication",
+        ])
+    ); // Later tasks remain absent and ungraded; no invented contexts.
     let original_histories = with_main_records(&p);
-    for s in all.iter().filter(|s| matches!(s.goal, Goal::Script { .. })) {
+    for s in all
+        .iter()
+        .filter(|s| matches!(s.goal, Goal::Script { .. }) && !missing.contains(s.id.as_str()))
+    {
         let a = p.attempts.get_mut(&s.id).unwrap();
         assert!(!progress::current_solved(a, s));
         workspace::prepare(a);

@@ -135,9 +135,9 @@ fn three_distinct_tasks_have_real_prerequisites_bounded_goals_and_reachable_refe
     let all = catalog();
     let tasks = labs();
     assert_eq!(tasks.len(), 3);
-    assert_eq!(all.len(), 119);
+    assert_eq!(all.len(), 122);
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 29);
+    assert_eq!(units.len(), 30);
     let unit = units.iter().find(|u| u.id == "dns-reverse").unwrap();
     assert_eq!(unit.prerequisites, ["dns-forward"]);
     assert_eq!(unit.labs, IDS);
@@ -444,6 +444,7 @@ fn all_original116_specs_and_unit_order_remain_exact_with_typed_historical_goals
     assert_eq!(
         all.iter()
             .skip(116)
+            .take(3)
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
         IDS

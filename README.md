@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **119 authored assignments:** 35 CCNA,24 LPIC-1,20 LPIC-2 and40 Bash/Shell. The verified Fedora candidate below contains all119 in29 units. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **119 verified authored assignments in the prepared Fedora candidate:** 35 CCNA,24 LPIC-1,20 LPIC-2 and40 Bash/Shell. The verified Fedora candidate below contains119 in29 units. Three additional scripting projects are source-gated and registered (122 total/30 units), pending their installed native review. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 If your terminal is in your home directory, first enter this repository directory:
 
 ```sh
-./dist/dlms-learning-lab-0.1.0-gca1929b73975-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+./dist/dlms-learning-lab-0.1.0-gb5f5f83508a3-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -48,15 +48,16 @@ an introduction, separate runnable practice and a full native assignment.
 Those four flows were accepted in earlier installed milestones. The current119-
 lab Fedora candidate preserves them and adds the accepted Find and reverse-DNS
 units. Its installed upgrade/uninstall/reinstall preserves synthetic progress;
-normal Wayland Run/Stop and72 alignment captures pass. The preceding normal-
-policy build passed11 Wayland startups and a real two-process reopen. See
+normal Wayland migration, Run/Stop,11 startups and real two-process reopen pass.
+Shared72-field alignment captures were accepted on the preceding ca1929b build;
+those native controls remain unchanged. See
 [NATIVE_STARTUP.md](docs/NATIVE_STARTUP.md) for the reproduced swap-interval wait,
 scoped application policy and evidence limits. Windows CI produced an unsigned
 116-lab candidate; actual Windows/macOS desktop acceptance remains pending.
 
-The bounded `getopts` extension is in source validation and is **not in the
-candidate above**. No new scripting lesson or coverage credit is inferred from
-that capability alone. This is a verified milestone, not complete curriculum or
+The bounded `getopts` engine is accepted in the119-lab candidate. Its three new
+practical assignments are in the source122 catalog and still need installed
+native acceptance. Their addition implies no complete exam coverage. This is a verified milestone, not complete curriculum or
 a public release.
 
 
