@@ -1,0 +1,1638 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-dns-reverse-investigation",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Reverse DNS",
+      "unit": "dns-reverse",
+      "title": "Repair names returned for connection-log addresses",
+      "summary": "Correct reverse owner and record-type mistakes without damaging the healthy resolver.",
+      "objective": "Connection logs identify 198.51.100.17 as backup-a.ops.example.test. and 198.51.100.29 as ingest.ops.example.test. Make the primary return those exact PTR target sets at the full reverse question names, and keep direct PTR records there in the saved zone. The current records include a misplaced owner and a forward record where reverse data is needed.\n\nPublish the saved zone on the primary. Keep 53.100.51.198.in-addr.arpa. returning only resolver.ops.example.test., retain its saved direct PTR, and preserve the saved apex NS target ns.ops.example.test. TTL values, record order and supported serial choices may vary. Other record types and unrelated owner names do not need to be removed.",
+      "retry_guidance": "Check the full question name and PTR type, then compare the saved editor with the selected serving copy. Preserve the named healthy records. Save zone, publish and retry the intended lookup.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Investigate the supplied address inventory, edit the reverse records, publish and verify the requested serving copies."
+      ],
+      "guide": [
+        {
+          "title": "Investigate and verify",
+          "why": "A saved line, a different record type or a stale query cannot establish the requested current reverse answers.",
+          "action": "Use the Introduction and separate practice example, then the full assignment. Edit Resource records and SOA serial; Save zone, Reload primary and Look up with type PTR. Check configuration evaluates the current task.",
+          "commands": []
+        }
+      ],
+      "explanation": "The requested owners contain reversed IPv4 octets and must have direct PTR records. A records, a swapped label, an alias substitute or a saved-only repair miss part of the task. The preserved .53 PTR and NS data are checked explicitly; unrelated harmless data and TTL alternatives are allowed.",
+      "hints": [
+        "Reverse whole octets, not their decimal digits. The zone covers 198.51.100 addresses; the last octet becomes the first label.",
+        "Inspect the two given addresses with type PTR. An A line cannot satisfy a reverse question; edit the owner/type as well as the target.",
+        "Use owners 17.100.51.198.in-addr.arpa. and 29.100.51.198.in-addr.arpa., with the supplied host names as PTR data. Keep .53 and the apex NS lines, then Save zone and Reload primary."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc1035.html",
+        "https://www.rfc-editor.org/rfc/rfc3596.html",
+        "https://www.rfc-editor.org/rfc/rfc2181.html",
+        "https://www.rfc-editor.org/rfc/rfc1982.html",
+        "https://www.rfc-editor.org/rfc/rfc2308.html"
+      ],
+      "simplifications": "Offline authoritative record editor with one fixed origin and configured, primary and secondary copies. Only explicit full ASCII names, TTL, IN and supported record types; SOA serial is a separate field. PTR targets are returned names, not recursive lookups. The supplied inventory defines canonical names; this reverse-only zone cannot prove external target canonicality or A/AAAA agreement. No full BIND files/commands, delegation/glue/RFC2317, wire transfers, cache/negative-cache timers, DNSSEC or host/network activity. TTL alternatives are accepted; only named record sets are preserved.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "100.51.198.in-addr.arpa.",
+            "serial": 70,
+            "records": [
+              {
+                "owner": "100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.ops.example.test."
+                }
+              },
+              {
+                "owner": "53.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.ops.example.test."
+                }
+              },
+              {
+                "owner": "71.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "backup-a.ops.example.test."
+                }
+              },
+              {
+                "owner": "29.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "198.51.100.29"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "100.51.198.in-addr.arpa.",
+            "serial": 70,
+            "records": [
+              {
+                "owner": "100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.ops.example.test."
+                }
+              },
+              {
+                "owner": "53.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.ops.example.test."
+                }
+              },
+              {
+                "owner": "71.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "backup-a.ops.example.test."
+                }
+              },
+              {
+                "owner": "29.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "198.51.100.29"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "100.51.198.in-addr.arpa.",
+            "serial": 70,
+            "records": [
+              {
+                "owner": "100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.ops.example.test."
+                }
+              },
+              {
+                "owner": "53.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.ops.example.test."
+                }
+              },
+              {
+                "owner": "71.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "backup-a.ops.example.test."
+                }
+              },
+              {
+                "owner": "29.100.51.198.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "198.51.100.29"
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "17.100.51.198.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "backup-a.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "backup-a.ops.example.test."
+              }
+            ],
+            "name": "17.100.51.198.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "29.100.51.198.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "ingest.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "ingest.ops.example.test."
+              }
+            ],
+            "name": "29.100.51.198.in-addr.arpa."
+          },
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "53.100.51.198.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.ops.example.test."
+              }
+            ],
+            "name": "53.100.51.198.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "100.51.198.in-addr.arpa.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.ops.example.test."
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":71,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"backup-a.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-handover"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Use the published-versus-saved checks from Complete a DNS service handover. This separate example uses different addresses, names and serials.",
+        "concepts": [
+          {
+            "title": "Reverse the question, return a name",
+            "text": "A forward A record starts with a host name and returns an IPv4 address. A reverse lookup starts with an address and asks for PTR data. For 203.0.113.7, reverse the four whole decimal octets to 7.113.0.203, then append .in-addr.arpa. The full question is 7.113.0.203.in-addr.arpa.; its answer is a host name, not another address."
+          },
+          {
+            "title": "Write the PTR line",
+            "text": "In this example type: 7.113.0.203.in-addr.arpa. 300 IN PTR collector.training.example.test. The owner is the full question name; PTR data is the supplied canonical host name. Both names end in a dot. 300 is the TTL in seconds and IN is the Internet class. PTR does not look up its target automatically. The provided host inventory supplies names outside this reverse zone."
+          },
+          {
+            "title": "Investigate type and authority",
+            "text": "An A line at a reverse owner does not answer a PTR question. Select PTR in Look up and use a name inside the displayed zone. A missing name or missing type can be a useful clue; a refusal outside the zone is not evidence that an address has no reverse name."
+          },
+          {
+            "title": "Save, publish, inspect",
+            "text": "Fill worked example changes only the separate practice editor. Inspect its lines, then Save zone and Reload primary. Choose PTR and Look up each full question; Check example checks the current practice. Later, Check configuration checks your assignment. Saving alone does not replace a serving copy."
+          }
+        ],
+        "example_description": "For 203.0.113.7 return collector.training.example.test.; for 203.0.113.22 return index.training.example.test. Preserve the .53 resolver PTR and apex NS. Fill the worked example, inspect the two PTR lines and publish it yourself.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "113.0.203.in-addr.arpa.",
+            "serial": 310,
+            "records": [
+              {
+                "owner": "113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.training.example.test."
+                }
+              },
+              {
+                "owner": "53.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.training.example.test."
+                }
+              },
+              {
+                "owner": "70.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "collector.training.example.test."
+                }
+              },
+              {
+                "owner": "22.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.22"
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "113.0.203.in-addr.arpa.",
+            "serial": 310,
+            "records": [
+              {
+                "owner": "113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.training.example.test."
+                }
+              },
+              {
+                "owner": "53.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.training.example.test."
+                }
+              },
+              {
+                "owner": "70.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "collector.training.example.test."
+                }
+              },
+              {
+                "owner": "22.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.22"
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "113.0.203.in-addr.arpa.",
+            "serial": 310,
+            "records": [
+              {
+                "owner": "113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.training.example.test."
+                }
+              },
+              {
+                "owner": "53.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.training.example.test."
+                }
+              },
+              {
+                "owner": "70.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "collector.training.example.test."
+                }
+              },
+              {
+                "owner": "22.113.0.203.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "A",
+                  "address": "203.0.113.22"
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"113.0.203.in-addr.arpa.\",\"serial\":311,\"records\":[{\"owner\":\"113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.training.example.test.\"}},{\"owner\":\"53.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.training.example.test.\"}},{\"owner\":\"7.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"collector.training.example.test.\"}},{\"owner\":\"22.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"index.training.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "7.113.0.203.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "collector.training.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "collector.training.example.test."
+              }
+            ],
+            "name": "7.113.0.203.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "22.113.0.203.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "index.training.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "index.training.example.test."
+              }
+            ],
+            "name": "22.113.0.203.in-addr.arpa."
+          },
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "53.113.0.203.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.training.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.training.example.test."
+              }
+            ],
+            "name": "53.113.0.203.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "113.0.203.in-addr.arpa.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.training.example.test."
+              }
+            ]
+          }
+        ],
+        "try_change": "After success change the .7 target to wrong.training.example.test. and increase the serial, then Save zone without reloading. Look up .7: the old served answer can still look correct. Check example exposes the saved/publication mismatch. Repair the target, Save zone and Reload primary."
+      }
+    },
+    {
+      "id": "lpic2-dns-reverse-ipv6",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Reverse DNS",
+      "unit": "dns-reverse",
+      "title": "Publish reverse names for an IPv6 rollout",
+      "summary": "Build full nibble owners from expanded IPv6 addresses and publish both service names.",
+      "objective": "The rollout inventory assigns 2001:db8:4400:1200::3a4:50b6 to render.ops.example.test. and 2001:db8:4400:1200::7 to queue.ops.example.test. Their fully expanded forms are 2001:0db8:4400:1200:0000:0000:03a4:50b6 and 2001:0db8:4400:1200:0000:0000:0000:0007. Build each full ip6.arpa. question, keep direct PTR records at those owners in the saved zone and make the primary return exactly the requested target names. The existing shortened/grouped owners are valid DNS names but do not answer these addresses.\n\nPublish the saved zone on the primary. Preserve the saved direct PTR and primary answer for 2001:db8:4400:1200::53 as resolver6.ops.example.test., and retain the saved apex NS target ns6.ops.example.test. TTL, order and supported serial alternatives are allowed; harmless unrelated owner names need not be removed.",
+      "retry_guidance": "Check the full question name and PTR type, then compare the saved editor with the selected serving copy. Preserve the named healthy records. Save zone, publish and retry the intended lookup.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Investigate the supplied address inventory, edit the reverse records, publish and verify the requested serving copies."
+      ],
+      "guide": [
+        {
+          "title": "Investigate and verify",
+          "why": "A saved line, a different record type or a stale query cannot establish the requested current reverse answers.",
+          "action": "Use the Introduction and separate practice example, then the full assignment. Edit Resource records and SOA serial; Save zone, Reload primary and Look up with type PTR. Check configuration evaluates the current task.",
+          "commands": []
+        }
+      ],
+      "explanation": "IPv6 reverse owners use all 32 hexadecimal digits in reverse order. The expected target remains an ordinary host name. Both direct saved PTR sets, current primary answers, publication and the named healthy records are checked; leftover harmless owners, TTL changes and equivalent case/order are allowed.",
+      "hints": [
+        "Expand each address to eight groups of four hexadecimal digits. Remove colons and count 32 digits before reversing.",
+        "Reverse individual digits, including zeros, then join them with dots and add ip6.arpa. Reversing groups or the compressed :: text omits labels.",
+        "Match each complete reversed owner to its supplied host name as PTR data. Preserve the ::53 and NS lines, Save zone, Reload primary and inspect both PTR questions."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc1035.html",
+        "https://www.rfc-editor.org/rfc/rfc3596.html",
+        "https://www.rfc-editor.org/rfc/rfc2181.html",
+        "https://www.rfc-editor.org/rfc/rfc1982.html",
+        "https://www.rfc-editor.org/rfc/rfc2308.html"
+      ],
+      "simplifications": "Offline authoritative record editor with one fixed origin and configured, primary and secondary copies. Only explicit full ASCII names, TTL, IN and supported record types; SOA serial is a separate field. PTR targets are returned names, not recursive lookups. The supplied inventory defines canonical names; this reverse-only zone cannot prove external target canonicality or A/AAAA agreement. No full BIND files/commands, delegation/glue/RFC2317, wire transfers, cache/negative-cache timers, DNSSEC or host/network activity. TTL alternatives are accepted; only named record sets are preserved.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "serial": 90,
+            "records": [
+              {
+                "owner": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns6.ops.example.test."
+                }
+              },
+              {
+                "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver6.ops.example.test."
+                }
+              },
+              {
+                "owner": "3a4.50b6.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "render.ops.example.test."
+                }
+              },
+              {
+                "owner": "7.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "queue.ops.example.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "serial": 90,
+            "records": [
+              {
+                "owner": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns6.ops.example.test."
+                }
+              },
+              {
+                "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver6.ops.example.test."
+                }
+              },
+              {
+                "owner": "3a4.50b6.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "render.ops.example.test."
+                }
+              },
+              {
+                "owner": "7.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "queue.ops.example.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "serial": 90,
+            "records": [
+              {
+                "owner": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns6.ops.example.test."
+                }
+              },
+              {
+                "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver6.ops.example.test."
+                }
+              },
+              {
+                "owner": "3a4.50b6.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "render.ops.example.test."
+                }
+              },
+              {
+                "owner": "7.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "queue.ops.example.test."
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "render.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "render.ops.example.test."
+              }
+            ],
+            "name": "6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "queue.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "queue.ops.example.test."
+              }
+            ],
+            "name": "7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa."
+          },
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver6.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver6.ops.example.test."
+              }
+            ],
+            "name": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns6.ops.example.test."
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":91,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"render.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-reverse-investigation"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Use Repair names returned for connection-log addresses. IPv6 uses the same PTR record and publication controls; only construction of its question name changes.",
+        "concepts": [
+          {
+            "title": "Expand before reversing",
+            "text": "IPv6 reverse questions use one hexadecimal digit per label, called a nibble, and end in ip6.arpa. First expand every group to four digits and every :: gap to zero groups: 2001:db8:5500:2400::be:29 becomes 2001:0db8:5500:2400:0000:0000:00be:0029. Remove colons to get all 32 digits. Keep every zero."
+          },
+          {
+            "title": "Reverse individual digits",
+            "text": "The expanded practice digits are 20010db8550024000000000000be0029. Read them from right to left, placing a dot between each digit, then append .ip6.arpa. The full practice question is 9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa. Reversing whole groups, the printed :: form or only the final host digits gives a different name."
+          },
+          {
+            "title": "Use a name as PTR data",
+            "text": "The worked record is: 9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa. 300 IN PTR worker.training.example.test. The left side is the reversed address; the right side remains the ordinary canonical host name. This zone has one fixed prefix. Keep its full owner suffix and the existing ::53 resolver and apex NS records."
+          },
+          {
+            "title": "Verify both requested addresses",
+            "text": "Fill worked example fills the separate editor only. Read both completed PTR lines; Save zone, Reload primary, select PTR and Look up each full question. Check example evaluates practice. The full assignment supplies expanded addresses so you can apply the same method without guessing compressed zero groups."
+          }
+        ],
+        "example_description": "In the different 2001:db8:5500:2400::/64 practice, make ::be:29 return worker.training.example.test. and ::4 return store.training.example.test. Preserve ::53 and NS. The full expanded method above explains the first owner; the filled editor provides both worked lines.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "serial": 410,
+            "records": [
+              {
+                "owner": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns6.training.example.test."
+                }
+              },
+              {
+                "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver6.training.example.test."
+                }
+              },
+              {
+                "owner": "be.29.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "worker.training.example.test."
+                }
+              },
+              {
+                "owner": "4.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "store.training.example.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "serial": 410,
+            "records": [
+              {
+                "owner": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns6.training.example.test."
+                }
+              },
+              {
+                "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver6.training.example.test."
+                }
+              },
+              {
+                "owner": "be.29.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "worker.training.example.test."
+                }
+              },
+              {
+                "owner": "4.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "store.training.example.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "serial": 410,
+            "records": [
+              {
+                "owner": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns6.training.example.test."
+                }
+              },
+              {
+                "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver6.training.example.test."
+                }
+              },
+              {
+                "owner": "be.29.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "worker.training.example.test."
+                }
+              },
+              {
+                "owner": "4.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "store.training.example.test."
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":411,\"records\":[{\"owner\":\"0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.training.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.training.example.test.\"}},{\"owner\":\"9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"worker.training.example.test.\"}},{\"owner\":\"4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"store.training.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "worker.training.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "worker.training.example.test."
+              }
+            ],
+            "name": "9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "store.training.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "store.training.example.test."
+              }
+            ],
+            "name": "4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa."
+          },
+          {
+            "kind": "Published",
+            "secondary": false
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver6.training.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver6.training.example.test."
+              }
+            ],
+            "name": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns6.training.example.test."
+              }
+            ]
+          }
+        ],
+        "try_change": "After success change the first label of the ::be:29 owner from 9 to 8, increase the serial, Save zone and Reload primary. The intended question now has no PTR answer while the healthy peer still works. Repair that owner using the expanded-digit method and publish again."
+      }
+    },
+    {
+      "id": "lpic2-dns-reverse-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Reverse DNS",
+      "unit": "dns-reverse",
+      "title": "Retire an old address and hand over both copies",
+      "summary": "Complete an address move, repair a shared PTR set and prove retirement on each serving copy.",
+      "objective": "Move service.ops.example.test. from 192.0.2.36 to 192.0.2.83. Keep a direct saved PTR at the new address and make both primary and secondary return only that host name there. The retired .36 question must return no PTR data on either serving copy; a missing name or a name with no PTR data is acceptable. A refusal, failed query or an alias that still returns PTR data is not retirement.\n\nAt shared logging address 192.0.2.44, retain logs-primary.ops.example.test., add logs-audit.ops.example.test. and remove the obsolete logs-old.ops.example.test. PTR value, so the saved set and both answers contain exactly those two active names. Preserve the saved direct .53 PTR and both answers as resolver.ops.example.test., and keep the saved apex NS target ns.handover.example.test.\n\nFinish with saved, primary and secondary copies agreeing. Their initial equal serials do not prove equal content. Supported newer serials, TTLs, order, case and harmless unrelated record types may vary; no particular update history is required.",
+      "retry_guidance": "Check the full question name and PTR type, then compare the saved editor with the selected serving copy. Preserve the named healthy records. Save zone, publish and retry the intended lookup.",
+      "difficulty": "Intermediate",
+      "minutes": 16,
+      "steps": [
+        "Investigate the supplied address inventory, edit the reverse records, publish and verify the requested serving copies."
+      ],
+      "guide": [
+        {
+          "title": "Investigate and verify",
+          "why": "A saved line, a different record type or a stale query cannot establish the requested current reverse answers.",
+          "action": "Use the Introduction and separate practice example, then the full assignment. Edit Resource records and SOA serial; Save zone, Reload primary and Look up with type PTR. Check configuration evaluates the current task.",
+          "commands": []
+        }
+      ],
+      "explanation": "Direct saved PTR sets anchor the new and shared owners. Current primary/secondary lookups prove their exact targets; separate authoritative no-PTR checks prove the retired question. Publication prevents an otherwise stale copy from earning completion. The named healthy PTR and NS data remain explicit constraints, without imposing a hidden whole-zone whitelist or a particular command order.",
+      "hints": [
+        "Write an inventory of new .83, shared .44, retired .36 and healthy .53. Check the PTR type on both selected servers.",
+        "The .44 PTR set needs two active values, not one preferred name. The .36 answer must have no PTR data; a CNAME leading back to the new service still answers it.",
+        "Save a repaired zone with a supported newer serial, Reload primary, then Update secondary. Check .83/.44 positives, .36 absence and .53 preservation on both copies."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.rfc-editor.org/rfc/rfc1035.html",
+        "https://www.rfc-editor.org/rfc/rfc3596.html",
+        "https://www.rfc-editor.org/rfc/rfc2181.html",
+        "https://www.rfc-editor.org/rfc/rfc1982.html",
+        "https://www.rfc-editor.org/rfc/rfc2308.html"
+      ],
+      "simplifications": "Offline authoritative record editor with one fixed origin and configured, primary and secondary copies. Only explicit full ASCII names, TTL, IN and supported record types; SOA serial is a separate field. PTR targets are returned names, not recursive lookups. The supplied inventory defines canonical names; this reverse-only zone cannot prove external target canonicality or A/AAAA agreement. No full BIND files/commands, delegation/glue/RFC2317, wire transfers, cache/negative-cache timers, DNSSEC or host/network activity. TTL alternatives are accepted; only named record sets are preserved.",
+      "initial": {
+        "kind": "AuthoritativeDns",
+        "server": {
+          "version": 1,
+          "configured": {
+            "origin": "2.0.192.in-addr.arpa.",
+            "serial": 200,
+            "records": [
+              {
+                "owner": "2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover.example.test."
+                }
+              },
+              {
+                "owner": "53.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.ops.example.test."
+                }
+              },
+              {
+                "owner": "36.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "service.ops.example.test."
+                }
+              },
+              {
+                "owner": "44.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "logs-primary.ops.example.test."
+                }
+              },
+              {
+                "owner": "44.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "logs-old.ops.example.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "2.0.192.in-addr.arpa.",
+            "serial": 200,
+            "records": [
+              {
+                "owner": "2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover.example.test."
+                }
+              },
+              {
+                "owner": "53.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.ops.example.test."
+                }
+              },
+              {
+                "owner": "36.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "service.ops.example.test."
+                }
+              },
+              {
+                "owner": "44.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "logs-primary.ops.example.test."
+                }
+              },
+              {
+                "owner": "44.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "logs-old.ops.example.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "2.0.192.in-addr.arpa.",
+            "serial": 200,
+            "records": [
+              {
+                "owner": "2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.handover.example.test."
+                }
+              },
+              {
+                "owner": "53.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.ops.example.test."
+                }
+              },
+              {
+                "owner": "36.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "service.ops.example.test."
+                }
+              },
+              {
+                "owner": "44.2.0.192.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "logs-old.ops.example.test."
+                }
+              }
+            ]
+          }
+        }
+      },
+      "goal": {
+        "kind": "AuthoritativeDns",
+        "requirements": [
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "83.2.0.192.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "service.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "service.ops.example.test."
+              }
+            ],
+            "name": "83.2.0.192.in-addr.arpa."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "service.ops.example.test."
+              }
+            ],
+            "name": "83.2.0.192.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "44.2.0.192.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "logs-primary.ops.example.test."
+              },
+              {
+                "type": "PTR",
+                "target": "logs-audit.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "logs-primary.ops.example.test."
+              },
+              {
+                "type": "PTR",
+                "target": "logs-audit.ops.example.test."
+              }
+            ],
+            "name": "44.2.0.192.in-addr.arpa."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "logs-primary.ops.example.test."
+              },
+              {
+                "type": "PTR",
+                "target": "logs-audit.ops.example.test."
+              }
+            ],
+            "name": "44.2.0.192.in-addr.arpa."
+          },
+          {
+            "kind": "NoAnswer",
+            "copy": "Primary",
+            "name": "36.2.0.192.in-addr.arpa.",
+            "record_type": "PTR"
+          },
+          {
+            "kind": "NoAnswer",
+            "copy": "Secondary",
+            "name": "36.2.0.192.in-addr.arpa.",
+            "record_type": "PTR"
+          },
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "53.2.0.192.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.ops.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.ops.example.test."
+              }
+            ],
+            "name": "53.2.0.192.in-addr.arpa."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.ops.example.test."
+              }
+            ],
+            "name": "53.2.0.192.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "2.0.192.in-addr.arpa.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.handover.example.test."
+              }
+            ]
+          }
+        ]
+      },
+      "solution": [
+        "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":201,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      "prerequisites": [
+        "lpic2-dns-reverse-ipv6"
+      ],
+      "dns_teaching": {
+        "prerequisite_note": "Use Publish reverse names for an IPv6 rollout and Bring a stale secondary up to date. This independent example changes address ownership, a shared PTR set and both serving copies.",
+        "concepts": [
+          {
+            "title": "More than one returned name",
+            "text": "A PTR set can legally contain multiple canonical host names. A shared logging address may therefore have two PTR lines at the same owner. Preserve every requested active name and remove only the obsolete value; DNS does not promise which value an application chooses first."
+          },
+          {
+            "title": "Retirement means checking an old question",
+            "text": "Practice moves archive.practice.example.test. from 10.23.41.18 to 10.23.41.92. Add the new reverse owner 92.41.23.10.in-addr.arpa. and remove PTR data for 18.41.23.10.in-addr.arpa.. Look up both questions on both copies. A missing old name and an existing old name with no PTR data both meet this task; a refusal or unfinished external alias does not prove absence."
+          },
+          {
+            "title": "Keep saved, primary and secondary copies together",
+            "text": "Save zone changes saved data. Reload primary publishes that saved copy locally. Update secondary compares serials; equal serials can leave different content unchanged. Choose a supported newer serial, then reload and update. Check example checks both loaded copies as well as the positive new/shared answers. No cache or transfer packets are simulated."
+          },
+          {
+            "title": "Work the separate handover",
+            "text": "Fill worked example to inspect the practice records: .92 PTR archive.practice.example.test., plus two PTR lines at .60 for audit-a.practice.example.test. and audit-b.practice.example.test. Keep .53 and NS. Save zone, Reload primary and Update secondary. Use the Server selector and PTR Look up for .92, .60 and retired .18. Later repeat that investigation with the full assignment inventory."
+          }
+        ],
+        "example_description": "In 10.23.41.0/24, move archive.practice.example.test. from .18 to .92, make .60 return exactly audit-a.practice.example.test. and audit-b.practice.example.test., and retire .18 PTR data on both copies. Keep .53 and NS. The filled practice editor is separate; publish and inspect it yourself.",
+        "fixture": {
+          "version": 1,
+          "configured": {
+            "origin": "41.23.10.in-addr.arpa.",
+            "serial": 610,
+            "records": [
+              {
+                "owner": "41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.practice.example.test."
+                }
+              },
+              {
+                "owner": "53.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.practice.example.test."
+                }
+              },
+              {
+                "owner": "18.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "archive.practice.example.test."
+                }
+              },
+              {
+                "owner": "60.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "audit-a.practice.example.test."
+                }
+              },
+              {
+                "owner": "60.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "audit-old.practice.example.test."
+                }
+              }
+            ]
+          },
+          "primary": {
+            "origin": "41.23.10.in-addr.arpa.",
+            "serial": 610,
+            "records": [
+              {
+                "owner": "41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.practice.example.test."
+                }
+              },
+              {
+                "owner": "53.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.practice.example.test."
+                }
+              },
+              {
+                "owner": "18.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "archive.practice.example.test."
+                }
+              },
+              {
+                "owner": "60.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "audit-a.practice.example.test."
+                }
+              },
+              {
+                "owner": "60.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "audit-old.practice.example.test."
+                }
+              }
+            ]
+          },
+          "secondary": {
+            "origin": "41.23.10.in-addr.arpa.",
+            "serial": 610,
+            "records": [
+              {
+                "owner": "41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "NS",
+                  "target": "ns.practice.example.test."
+                }
+              },
+              {
+                "owner": "53.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "resolver.practice.example.test."
+                }
+              },
+              {
+                "owner": "18.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "archive.practice.example.test."
+                }
+              },
+              {
+                "owner": "60.41.23.10.in-addr.arpa.",
+                "ttl": 300,
+                "data": {
+                  "type": "PTR",
+                  "target": "audit-old.practice.example.test."
+                }
+              }
+            ]
+          }
+        },
+        "example_solution": [
+          "zone {\"origin\":\"41.23.10.in-addr.arpa.\",\"serial\":611,\"records\":[{\"owner\":\"41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.practice.example.test.\"}},{\"owner\":\"53.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.practice.example.test.\"}},{\"owner\":\"92.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"archive.practice.example.test.\"}},{\"owner\":\"60.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"audit-a.practice.example.test.\"}},{\"owner\":\"60.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"audit-b.practice.example.test.\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "outcomes": [
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "92.41.23.10.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "archive.practice.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "archive.practice.example.test."
+              }
+            ],
+            "name": "92.41.23.10.in-addr.arpa."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "archive.practice.example.test."
+              }
+            ],
+            "name": "92.41.23.10.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "60.41.23.10.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "audit-a.practice.example.test."
+              },
+              {
+                "type": "PTR",
+                "target": "audit-b.practice.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "audit-a.practice.example.test."
+              },
+              {
+                "type": "PTR",
+                "target": "audit-b.practice.example.test."
+              }
+            ],
+            "name": "60.41.23.10.in-addr.arpa."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "audit-a.practice.example.test."
+              },
+              {
+                "type": "PTR",
+                "target": "audit-b.practice.example.test."
+              }
+            ],
+            "name": "60.41.23.10.in-addr.arpa."
+          },
+          {
+            "kind": "NoAnswer",
+            "copy": "Primary",
+            "name": "18.41.23.10.in-addr.arpa.",
+            "record_type": "PTR"
+          },
+          {
+            "kind": "NoAnswer",
+            "copy": "Secondary",
+            "name": "18.41.23.10.in-addr.arpa.",
+            "record_type": "PTR"
+          },
+          {
+            "kind": "Published",
+            "secondary": true
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "53.41.23.10.in-addr.arpa.",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.practice.example.test."
+              }
+            ]
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Primary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.practice.example.test."
+              }
+            ],
+            "name": "53.41.23.10.in-addr.arpa."
+          },
+          {
+            "kind": "Resolves",
+            "copy": "Secondary",
+            "record_type": "PTR",
+            "data": [
+              {
+                "type": "PTR",
+                "target": "resolver.practice.example.test."
+              }
+            ],
+            "name": "53.41.23.10.in-addr.arpa."
+          },
+          {
+            "kind": "Records",
+            "copy": "Configured",
+            "owner": "41.23.10.in-addr.arpa.",
+            "record_type": "NS",
+            "data": [
+              {
+                "type": "NS",
+                "target": "ns.practice.example.test."
+              }
+            ]
+          }
+        ],
+        "try_change": "After success add back the retired .18 PTR, increase the serial, Save zone and Reload primary only. Inspect both copies and Check example: the primary old answer returns again and the copies differ. Remove that old PTR, choose a newer serial, Save zone, Reload primary and Update secondary to repair."
+      }
+    }
+  ]
+}

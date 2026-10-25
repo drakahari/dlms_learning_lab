@@ -378,7 +378,7 @@ impl LabApp {
         }
     }
 }
-fn seed_picker(
+pub(super) fn seed_picker(
     ui: &mut egui::Ui,
     selected: &mut usize,
     labels: &[(&str, &str)],
@@ -412,7 +412,7 @@ fn seed_picker(
     metrics.seed_explanation = Some(explanation.rect);
     insert
 }
-fn seed_checks(ui: &mut egui::Ui, checks: Vec<(bool, String)>, metrics: &mut Metrics) {
+pub(super) fn seed_checks(ui: &mut egui::Ui, checks: Vec<(bool, String)>, metrics: &mut Metrics) {
     for (pass, message) in checks {
         let row = ui.label(format!(
             "{} · {message}",
@@ -422,7 +422,7 @@ fn seed_checks(ui: &mut egui::Ui, checks: Vec<(bool, String)>, metrics: &mut Met
     }
 }
 #[allow(clippy::too_many_arguments)]
-fn seed_terminal(
+pub(super) fn seed_terminal(
     ui: &mut egui::Ui,
     command: &mut String,
     transcript: &[String],
@@ -474,10 +474,11 @@ fn seed_terminal(
         );
         name_control(
             &r,
-            if kind == "seed-dns" {
-                "DNS practice terminal command — ungraded"
-            } else {
-                "Storage practice terminal command — ungraded"
+            match kind {
+                "seed-dns" => "DNS practice terminal command — ungraded",
+                "legacy-access" => "Access practice terminal command — ungraded",
+                "legacy-logs" => "Log practice terminal command — ungraded",
+                _ => "Storage practice terminal command — ungraded",
             },
         );
         metrics.terminal = Some(r.rect);
@@ -510,7 +511,7 @@ fn seed_terminal(
     (run && active && ui.is_enabled(), changed)
 }
 
-fn seed_message(s: &str) -> String {
+pub(super) fn seed_message(s: &str) -> String {
     let mut end = s.len().min(512);
     while !s.is_char_boundary(end) {
         end -= 1;

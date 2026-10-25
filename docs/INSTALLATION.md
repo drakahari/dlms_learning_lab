@@ -584,3 +584,33 @@ feedback, stacked VLAN controls and cold-loaded independent practice. This
 supersedes the pending scoped checks above without relabeling any earlier build.
 Historical startup cause and physical-device/screen-reader/novice/Windows/macOS
 desktop acceptance remain open. Catalog remains116/28; no new public release.
+
+
+## M95 current scoped Fedora candidate
+
+Clean source30d75e743ac9a4dc289fbae43e26675dbecfc055,116 labs/28 units:
+`dist/dlms-learning-lab-0.1.0-g30d75e743ac9-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+Archive SHA256e442beac21532181d24c705932eb6e511cb0f0cb918a65de8718646f8e54b9cc;
+binary SHA256a3cba9dfe98eac4310f397d756660828b0ecd604682c1d2d659c6995c2f120f3.
+Actual private installed prefix verified-30d75e743ac9-gjoj1ztt passes97b upgrade,
+identity/content/hash/desktop and clean uninstall/reinstall, retaining exact
+original-nine synthetic bytes (4b74228e2c3f7d090c345222c53b8bb7ed6cca922c546fedcb83def73a88d81e).
+Full original DNS/storage teaching flow exits0 with33 captures; actual errors,
+partial/alternate/current checks, pending/rejected edits, separated draft resume,
+reset, Challenge and light150/dark200 inputs pass. Root reviewed representative
+screens. Native XWayland quiet startup/readback passes10/10; default Wayland
+fails at first15s launch (0/1), with EGL/Wayland dispatch stack. The missing
+callback cause is unresolved; this does not establish default Wayland reliability.
+A process-local fallback can be used without changing session settings:
+
+```sh
+# Run from the repository folder, or use the executable's full absolute path.
+env -u WAYLAND_DISPLAY -u WAYLAND_SOCKET ./dist/dlms-learning-lab-0.1.0-g30d75e743ac9-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+```
+
+Private receipt audits/m95-installed-acceptance.json hashes every capture and
+records build/native memory observations: minimum22.94/24.29GiB available,
+PSIavg10 some/full0%, OOM delta0. These scoped checks do not establish a complete
+curriculum or novice/accessibility/other-OS acceptance. New source119/29 PTR
+integration requires its own candidate and native checks; this116 artifact is
+immutable. No public release is published.

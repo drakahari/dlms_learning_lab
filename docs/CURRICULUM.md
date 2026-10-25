@@ -1,6 +1,6 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Source inventory is **116 authored assignments in28 units:35CCNA,24LPIC-1,17LPIC-2 and40Bash/Shell**. The installed116 Fedora candidate passes gateway/Find native flows,72 alignment captures,10 quiet starts and strict real two-process cold reopening. These are scoped milestone checks, not full-product or other-platform acceptance. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
+Rechecked **2026-10-22**. This is a planning document, not a claim of complete exam preparation. Completion work is tracked in [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md). Source inventory is **119 authored assignments in29 units:35CCNA,24LPIC-1,20LPIC-2 and40Bash/Shell**. The three new reverse-DNS tasks have passed model/content gates; actual native acceptance is pending. The installed116 Fedora candidate passes gateway/Find native flows,72 alignment captures,10 quiet starts and strict real two-process cold reopening. These are scoped milestone checks, not full-product or other-platform acceptance. The scripting path has ten units; the original nine scenarios retain their IDs and progress. Numerical practice addresses and 900 synthetic catalog entries are never counted as authored labs. Planned assignments are not shown as playable catalog cards.
 
 ## Primary sources and version boundaries
 
@@ -137,3 +137,15 @@ render review are accepted; installed Fedora73777e0 also passes the complete
 all-four native flow,72-view shared alignment, quiet10/10 and cold reopening. Bounded find and reverse-DNS capabilities alone add no
 new authored labs or certification credit. Most full-product criteria remain
 Open, including broader networking/Linux/shell content and platform acceptance.
+
+
+M96 integrates three distinct reverse-DNS assignments after forward DNS: IPv4
+owner/type repair, full32-nibble IPv6 rollout, and multi-PTR/retirement/two-copy
+handover. Eleven model/content checks include separate practice, two alternatives
+per task, wrong/partial/current invalidation and original116 preservation. Actual
+native flows are pending, so the coverage matrix remains134Partial/1Supporting/
+1105Open and the latest scoped installed artifact remains116/28. Original
+permissions/traversal/log tasks now have source-tested introductions and separate
+terminal examples; new actual native review is still required. See
+DNS_REVERSE_LESSONS.md and LEGACY_ACCESS_LOGS_TEACHING.md. No new getopts or full
+certification/curriculum claim.

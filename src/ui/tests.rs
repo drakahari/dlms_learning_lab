@@ -486,6 +486,11 @@ fn open_assignment(a: &mut LabApp, i: usize) {
     if a.scenarios[i].service_teaching.is_some() {
         a.set_service_view(i, teaching::View::Assignment);
     }
+    if a.scenarios[i].legacy_access_teaching.is_some()
+        || a.scenarios[i].legacy_logs_teaching.is_some()
+    {
+        a.set_legacy_view(i, teaching::View::Assignment);
+    }
     if a.scenarios[i].seed_dns_teaching.is_some() || a.scenarios[i].seed_mount_teaching.is_some() {
         a.set_seed_view(i, teaching::View::Assignment);
     }
@@ -6940,3 +6945,6 @@ fn accounts_authored_unit_keeps_full_terminal_tasks_and_separate_guidance_at_all
 
 #[path = "tests/unit_manager.rs"]
 mod unit_manager;
+
+#[path = "tests/legacy_learning.rs"]
+mod legacy_learning;

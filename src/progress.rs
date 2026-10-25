@@ -148,6 +148,28 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
         })
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if validate_legacy_teaching_workspace(a).is_err() {
+        return false;
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.legacy_access_learning.as_ref())
+        .is_some_and(|l| {
+            s.legacy_access_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        })
+        || a.workspace
+            .as_ref()
+            .and_then(|w| w.legacy_logs_learning.as_ref())
+            .is_some_and(|l| {
+                s.legacy_logs_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            })
+    {
+        return false;
+    }
     if let State::UnitManager { simulation } = &a.state {
         let (
             State::UnitManager {
@@ -419,8 +441,30 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err("Incompatible saved attempt; original retained".into());
         }
         validate_accounts_workspace(a)?;
+        validate_legacy_teaching_workspace(a)?;
         validate_ospf_workspace(a)?;
         validate_unit_manager_workspace(a)?;
+        if a.workspace
+            .as_ref()
+            .and_then(|w| w.legacy_access_learning.as_ref())
+            .is_some_and(|l| {
+                s.legacy_access_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            })
+            || a.workspace
+                .as_ref()
+                .and_then(|w| w.legacy_logs_learning.as_ref())
+                .is_some_and(|l| {
+                    s.legacy_logs_teaching
+                        .as_ref()
+                        .is_none_or(|lesson| !l.valid_for(lesson))
+                })
+        {
+            return Err(
+                "Saved access/log practice differs from its lesson; original retained".into(),
+            );
+        }
         if let State::UnitManager { simulation } = &a.state {
             let (
                 State::UnitManager {
@@ -941,6 +985,19 @@ fn validate_dns_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_legacy_teaching_workspace(a: &Attempt) -> Result<(), String> {
+    let Some(w) = &a.workspace else { return Ok(()) };
+    if w.legacy_access_learning
+        .as_ref()
+        .is_some_and(|l| !matches!(a.state, State::Unix { .. }) || !l.valid())
+        || w.legacy_logs_learning
+            .as_ref()
+            .is_some_and(|l| !matches!(a.state, State::Logs { .. }) || !l.valid())
+    {
+        return Err("Invalid or wrong-kind access/log practice; original retained".into());
+    }
+    Ok(())
+}
 fn validate_seed_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else { return Ok(()) };
     if let Some(l) = &w.seed_dns_learning {
@@ -1054,6 +1111,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
         validate_accounts_workspace(a)?;
+        validate_legacy_teaching_workspace(a)?;
         validate_ospf_workspace(a)?;
         validate_unit_manager_workspace(a)?;
         validate_storage_workspace(a)?;

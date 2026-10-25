@@ -689,7 +689,7 @@ mod tests {
             assert_eq!(band.width(), viewport.width());
         }
         let labs = pack::bundled().unwrap();
-        assert_eq!(labs.len(), 116);
+        assert_eq!(labs.len(), 119);
         let p = progress::decode(WRITER7, &labs).unwrap();
         assert_eq!(p.attempts.len(), 102);
         assert_eq!(records().len(), 37);

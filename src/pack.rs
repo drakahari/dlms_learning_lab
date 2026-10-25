@@ -63,6 +63,10 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub seed_mount_teaching: Option<crate::seed_mount_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legacy_access_teaching: Option<crate::legacy_access_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legacy_logs_teaching: Option<crate::legacy_logs_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dns_teaching: Option<crate::dns_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub switching_teaching: Option<crate::switching_teaching::Lesson>,
@@ -273,6 +277,18 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             .is_some_and(|lesson| !lesson.valid_for(&s.initial, &s.goal))
         {
             return Err("Seed mount teaching requires distinct fixed capacity and device".into());
+        }
+        if s.legacy_access_teaching
+            .as_ref()
+            .is_some_and(|l| !l.valid_for(&s.initial, &s.goal))
+        {
+            return Err("Legacy access teaching requires a distinct bounded Unix example".into());
+        }
+        if s.legacy_logs_teaching
+            .as_ref()
+            .is_some_and(|l| !l.valid_for(&s.initial, &s.goal))
+        {
+            return Err("Legacy log teaching requires a distinct bounded Logs example".into());
         }
         if let Some(lesson) = &s.dns_teaching {
             let State::AuthoritativeDns { server } = &s.initial else {
@@ -781,6 +797,7 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/shell-file-batches-v1.json"),
         include_str!("../scenarios/ipv4-static-v1.json"),
         include_str!("../scenarios/dns-forward-v1.json"),
+        include_str!("../scenarios/dns-reverse-v1.json"),
         include_str!("../scenarios/shell-arrays-v1.json"),
         include_str!("../scenarios/linux-processes-v1.json"),
         include_str!("../scenarios/discovery-v1.json"),

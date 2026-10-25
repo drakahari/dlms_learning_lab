@@ -125,16 +125,18 @@ impl LabApp {
                     if learning.checked {
                         let checks = learning.checks(lesson);
                         if checks.iter().all(|c| c.0) {
-                            ui.label(
+                            let r = ui.label(
                                 RichText::new("Example checks pass · No assignment credit")
                                     .color(palette(ui).success),
                             );
+                            self.metrics.dns_result = Some(r.rect);
                         } else {
                             for (_, text) in checks.iter().filter(|c| !c.0).take(2) {
-                                ui.label(
+                                let r = ui.label(
                                     RichText::new(format!("Needs attention: {text}"))
                                         .color(palette(ui).error),
                                 );
+                                self.metrics.dns_result.get_or_insert(r.rect);
                             }
                         }
                     }
@@ -238,18 +240,20 @@ impl LabApp {
                         let pass = progress::current_solved(a, &scenario);
                         self.metrics.completion = pass;
                         if pass {
-                            ui.label(
+                            let r = ui.label(
                                 RichText::new("Objective complete · All current checks pass.")
                                     .strong()
                                     .color(palette(ui).success),
                             );
+                            self.metrics.dns_result = Some(r.rect);
                             if !a.challenge {
                                 ui.label(&scenario.explanation);
                             }
                             self.next_unit_lab(ui, i);
                         } else if let engine::State::AuthoritativeDns { server } = &a.state {
                             if !draft.matches(server) {
-                                ui.label(RichText::new("Unsaved changes · Save the zone, then verify the published answers.").color(palette(ui).error));
+                                let r = ui.label(RichText::new("Unsaved changes · Save the zone, then verify the published answers.").color(palette(ui).error));
+                                self.metrics.dns_result = Some(r.rect);
                             } else {
                                 for (_, text) in requirements
                                     .iter()
@@ -257,16 +261,18 @@ impl LabApp {
                                     .filter(|c| !c.0)
                                     .take(2)
                                 {
-                                    ui.label(
+                                    let r = ui.label(
                                         RichText::new(format!("Needs attention: {text}"))
                                             .color(palette(ui).error),
                                     );
+                                    self.metrics.dns_result.get_or_insert(r.rect);
                                 }
                             }
                         }
                     }
                 });
                 self.metrics.feedback = Some(result.response.rect);
+                self.metrics.dns_result.get_or_insert(result.response.rect);
             }
         }
     }
@@ -325,6 +331,7 @@ fn configuration(
                     .char_limit(10),
             )
             .labelled_by(label.id);
+        metrics.dns_fields.push(("serial".into(), r.rect, r.id));
         metrics.inputs.push(r.rect);
     });
     ui.label(RichText::new("Resource records · OWNER. TTL IN TYPE DATA").strong());
@@ -356,6 +363,9 @@ fn configuration(
     let exceeded = draft.text.len() > dlms_learning_lab::dns_workspace::MAX_TEXT;
     workspace::bound(&mut draft.text, dlms_learning_lab::dns_workspace::MAX_TEXT);
     metrics.terminal = Some(editor.inner.rect);
+    metrics
+        .dns_fields
+        .push(("records".into(), editor.inner.rect, editor.inner.id));
     if *focus {
         editor.inner.request_focus();
         *focus = false;
@@ -375,7 +385,8 @@ fn configuration(
         if secondary {let r=ui.add(button("Update secondary"));metrics.dns_update=Some(r.rect);if r.clicked(){draft.notice=Some(match server.update_secondary(){Ok(dns::Transfer::Updated)=>"Secondary updated from the primary.".into(),Ok(dns::Transfer::UnchangedEqual)=>"Secondary unchanged · The primary serial is equal; increment the saved serial and reload the primary before retrying.".into(),Ok(dns::Transfer::UnchangedOlder)=>"Secondary unchanged · The primary serial is older according to DNS serial arithmetic.".into(),Err(e)=>e.message});}}
     });
     if let Some(text) = &draft.notice {
-        ui.add(egui::Label::new(text).wrap());
+        let r = ui.add(egui::Label::new(text).wrap());
+        metrics.dns_notice = Some(r.rect);
     }
     ui.add_space(4.);
     ui.label(RichText::new("Inspect a served answer").strong());
@@ -406,12 +417,19 @@ fn configuration(
                     .selected_text(draft.query_copy.label())
                     .width(125.)
                     .show_ui(ui, |ui| {
-                        ui.selectable_value(&mut draft.query_copy, Snapshot::Primary, "Primary");
-                        ui.selectable_value(
+                        let r = ui.selectable_value(
+                            &mut draft.query_copy,
+                            Snapshot::Primary,
+                            "Primary",
+                        );
+                        metrics.dns_choices.push(("copy:Primary".into(), r.rect));
+                        let r = ui.selectable_value(
                             &mut draft.query_copy,
                             Snapshot::Secondary,
                             "Secondary",
                         );
+                        metrics.dns_choices.push(("copy:Secondary".into(), r.rect));
+                        metrics.dns_popup = Some(controls::popup_content_clip(ui));
                     })
                     .response;
                 r.widget_info(|| {
@@ -422,6 +440,7 @@ fn configuration(
                     )
                 });
                 metrics.dns_pickers.push(r.rect);
+                metrics.dns_copy = Some(r.rect);
             } else {
                 controls::label(ui, "Primary", 125.);
             }
@@ -447,6 +466,7 @@ fn configuration(
                 )
             });
             metrics.inputs.push(r.rect);
+            metrics.dns_fields.push(("query".into(), r.rect, r.id));
             if !wide {
                 ui.end_row();
                 controls::label(ui, "Type", 70.);
@@ -465,12 +485,11 @@ fn configuration(
                         QueryType::Ns,
                         QueryType::Ptr,
                     ] {
-                        ui.selectable_value(
-                            &mut draft.query_type,
-                            kind,
-                            dlms_learning_lab::dns_workspace::type_text(kind),
-                        );
+                        let label = dlms_learning_lab::dns_workspace::type_text(kind);
+                        let r = ui.selectable_value(&mut draft.query_type, kind, label);
+                        metrics.dns_choices.push((format!("type:{label}"), r.rect));
                     }
+                    metrics.dns_popup = Some(controls::popup_content_clip(ui));
                 })
                 .response;
             r.widget_info(|| {
@@ -481,6 +500,7 @@ fn configuration(
                 )
             });
             metrics.dns_pickers.push(r.rect);
+            metrics.dns_type = Some(r.rect);
             if !wide {
                 ui.end_row();
                 ui.label("");

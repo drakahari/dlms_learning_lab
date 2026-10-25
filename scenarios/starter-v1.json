@@ -534,7 +534,114 @@
         }
       ],
       "explanation": "With root as owner and editors as group, mode 660 gives alex group read/write and removes all other-class permissions. Changing ownership to alex while retaining restrictive bits is another valid solution. Owner permissions take precedence over group permissions.",
-      "unit": "linux-file-access"
+      "unit": "linux-file-access",
+      "legacy_access_teaching": {
+        "prerequisite_note": "Use the inspect-and-repair method from Access policy and safe file changes. This older exercise gives you a virtual administrator role; it does not operate on your computer.",
+        "concepts": [
+          {
+            "title": "Choose one permission class",
+            "text": "Every entry has an owner and a group. ls -l /srv/brief.txt shows its owner, group and read/write/execute bits. The model chooses owner bits when the user owns the entry; otherwise matching group bits; otherwise other bits. These classes are not added together. id dana shows Dana belongs to reviewers."
+          },
+          {
+            "title": "Translate the requested access",
+            "text": "Read is 4, write is 2 and execute is 1 in an octal mode digit. On the practice file, chmod 660 /srv/brief.txt gives owner and reviewers read/write and gives the other class no bits. Dana uses group bits while root owns it. Changing ownership to Dana and using 600 is another possible method; neither an exact mode nor one repair order is a hidden goal."
+          },
+          {
+            "title": "Verify the user, not only the listing",
+            "text": "test-access dana /srv/brief.txt rw is a simulator-only probe, not a Linux utility. It checks parent search permission and file access for Dana. Here mutations are administrative even when an ordinary user could not change the file. Privacy excludes the root administrator but also checks other modeled people: the unrelated observer must not gain access."
+          },
+          {
+            "title": "Know this small terminal",
+            "text": "Type one explained command and choose Run or Enter. Insert action fills the input only. This older terminal uses exact absolute paths and whitespace tokens, without shell quoting or expansion. It has no ACL, special mode bits or root access override. Practice remains separate; later Check work grades the full assignment from its current access state."
+          }
+        ],
+        "example_description": "Give dana read/write access to /srv/brief.txt, keeping the file private from the other class and every modeled nonadministrator except Dana. root owns it and reviewers is its group; Dana already belongs to reviewers. Inspect, change and probe this separate example.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "mode": 493,
+              "owner": "root",
+              "group": "root",
+              "directory": true
+            },
+            "/srv": {
+              "mode": 493,
+              "owner": "root",
+              "group": "root",
+              "directory": true
+            },
+            "/srv/brief.txt": {
+              "mode": 384,
+              "owner": "root",
+              "group": "reviewers",
+              "directory": false
+            }
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "dana": [
+              "dana",
+              "reviewers"
+            ],
+            "observer": [
+              "observer"
+            ],
+            "nobody": [
+              "nobody"
+            ]
+          }
+        },
+        "task": {
+          "path": "/srv/brief.txt",
+          "user": "dana",
+          "read": true,
+          "write": true,
+          "private": true,
+          "exclusive": true
+        },
+        "commands": [
+          {
+            "command": "ls -l /srv/brief.txt",
+            "explanation": "Read the compact mode, owner and group columns before changing anything.",
+            "simulator_only": false
+          },
+          {
+            "command": "id dana",
+            "explanation": "Read the modeled primary and supplementary groups; displayed numeric IDs are derived labels, not account-management records.",
+            "simulator_only": false
+          },
+          {
+            "command": "chmod 660 /srv/brief.txt",
+            "explanation": "Give owner and reviewers read/write while removing other-class bits.",
+            "simulator_only": false
+          },
+          {
+            "command": "test-access dana /srv/brief.txt rw",
+            "explanation": "Probe Dana's effective read/write access in this simulator.",
+            "simulator_only": true
+          },
+          {
+            "command": "test-access observer /srv/brief.txt r",
+            "explanation": "The unrelated observer should remain denied in this simulator.",
+            "simulator_only": true
+          }
+        ],
+        "reference": [
+          "chmod 660 /srv/brief.txt",
+          "test-access dana /srv/brief.txt rw"
+        ],
+        "try_change": "After success, run chmod 440 /srv/brief.txt and probe Dana for rw. Removing write makes the current access check fail. Restore 660 for the group-based method, then probe and Check example again.",
+        "try_commands": [
+          "chmod 440 /srv/brief.txt",
+          "test-access dana /srv/brief.txt rw"
+        ],
+        "repair_commands": [
+          "chmod 660 /srv/brief.txt",
+          "test-access dana /srv/brief.txt rw"
+        ]
+      }
     },
     {
       "id": "lpic1-traversal",
@@ -543,7 +650,7 @@
       "topic": "Permissions",
       "title": "Unlock the project directory",
       "summary": "Trace group access through a directory tree.",
-      "objective": "Let blair read /srv/project/notes.txt, keeping other users off that file. Repair group membership and traversal as needed.",
+      "objective": "Give blair read access to /srv/project/notes.txt without public file permissions. Repair group membership and traversal as needed.",
       "difficulty": "Intermediate",
       "minutes": 9,
       "initial": {
@@ -667,7 +774,121 @@
         }
       ],
       "explanation": "Adding blair to editors permits the group class to apply. Mode 750 on /srv/project adds the execute/search bit missing from 740. The file’s existing group-read bit then becomes reachable through all parent directories. Effective-access alternatives are accepted.",
-      "unit": "linux-file-access"
+      "unit": "linux-file-access",
+      "legacy_access_teaching": {
+        "prerequisite_note": "Use Share a report safely to choose owner/group/other permissions. This independent example adds a path with more than one directory. It keeps its own users, modes and command history.",
+        "concepts": [
+          {
+            "title": "Every parent needs search",
+            "text": "Reading a known file needs search/execute on every directory leading to it, including /, then read permission on the file. Directory read lists names; search lets a user pass through a known path. Missing search can block a readable file. Here namei /srv/review/plan.txt gives a compact simulated octal-mode/owner/group view, not the full real namei output."
+          },
+          {
+            "title": "Membership and bits are separate",
+            "text": "id evan initially lacks inspectors. usermod -aG inspectors evan appends one existing group and keeps Evan's primary group. This administrative simulation refreshes membership immediately; real existing login sessions may need refreshing. It does not create accounts/groups or model credentials. All group names must already exist in the supplied membership lists."
+          },
+          {
+            "title": "Add only what access needs",
+            "text": "The directory starts 740: group read without search. After adding inspectors, chmod 710 /srv/review gives the group search without requiring listing or write. The existing 640 file then supplies group read. 750 also works; exact directory read/write bits are not requested. Inspections are administrative; use test-access to ask about Evan's effective access."
+          },
+          {
+            "title": "Public is not the same as exclusive",
+            "text": "This task removes the file's other-class permissions; it does not ban an existing teammate who belongs to inspectors. test-access evan /srv/review/plan.txt r is a simulator-only check. In the full assignment Blair must gain read access without public file bits; existing Alex/editor access can remain. Current effective access, not a membership-change history, is graded."
+          }
+        ],
+        "example_description": "Let evan read /srv/review/plan.txt without public file permissions. Add the existing inspectors group and repair parent search as needed. The existing colleague may retain access. This example is independent of Blair's project assignment.",
+        "fixture": {
+          "nodes": {
+            "/": {
+              "mode": 493,
+              "owner": "root",
+              "group": "root",
+              "directory": true
+            },
+            "/srv": {
+              "mode": 493,
+              "owner": "root",
+              "group": "root",
+              "directory": true
+            },
+            "/srv/review": {
+              "mode": 480,
+              "owner": "root",
+              "group": "inspectors",
+              "directory": true
+            },
+            "/srv/review/plan.txt": {
+              "mode": 416,
+              "owner": "root",
+              "group": "inspectors",
+              "directory": false
+            }
+          },
+          "users": {
+            "root": [
+              "root"
+            ],
+            "evan": [
+              "evan"
+            ],
+            "colleague": [
+              "colleague",
+              "inspectors"
+            ],
+            "nobody": [
+              "nobody"
+            ]
+          }
+        },
+        "task": {
+          "path": "/srv/review/plan.txt",
+          "user": "evan",
+          "read": true,
+          "write": false,
+          "private": true,
+          "exclusive": false
+        },
+        "commands": [
+          {
+            "command": "id evan",
+            "explanation": "Inspect the current group list before changing it.",
+            "simulator_only": false
+          },
+          {
+            "command": "namei /srv/review/plan.txt",
+            "explanation": "Inspect compact simulated path components; this is not a full namei output/options model.",
+            "simulator_only": false
+          },
+          {
+            "command": "usermod -aG inspectors evan",
+            "explanation": "Append the known group; simulated sessions update immediately.",
+            "simulator_only": false
+          },
+          {
+            "command": "chmod 710 /srv/review",
+            "explanation": "Give inspectors search on the directory. Listing and write are not required here.",
+            "simulator_only": false
+          },
+          {
+            "command": "test-access evan /srv/review/plan.txt r",
+            "explanation": "Simulator-only probe of Evan's read access through all parents.",
+            "simulator_only": true
+          }
+        ],
+        "reference": [
+          "usermod -aG inspectors evan",
+          "chmod 710 /srv/review",
+          "test-access evan /srv/review/plan.txt r"
+        ],
+        "try_change": "After success, run chmod 700 /srv/review. The file still has group-read bits, but Evan loses parent search. Probe r and Check example, then restore 710 (or 750) and verify the path again.",
+        "try_commands": [
+          "chmod 700 /srv/review",
+          "test-access evan /srv/review/plan.txt r"
+        ],
+        "repair_commands": [
+          "chmod 710 /srv/review",
+          "test-access evan /srv/review/plan.txt r"
+        ]
+      }
     },
     {
       "id": "lpic1-logs",
@@ -754,7 +975,78 @@
         }
       ],
       "explanation": "Both ERROR lines must be retained and the INFO/WARN lines excluded. Direct grep or cat piped into grep produces the same resulting text. The most recent successful text query is graded, so printing the unfiltered log afterward removes current completion.",
-      "unit": "linux-file-access"
+      "unit": "linux-file-access",
+      "legacy_logs_teaching": {
+        "prerequisite_note": "Use the inspect-then-change method from Files, paths and safe handovers. This older log exercise has a small fixed catalog; its find and filter forms are simpler than the later recursive-search and script units.",
+        "concepts": [
+          {
+            "title": "Locate and inspect the supplied text",
+            "text": "A log is a sequence of text lines describing events. find /var/log -name worker.log locates that exact basename in this supplied catalog. It does not use wildcard patterns, depth or directory permissions. cat /var/log/worker.log displays the whole log. All paths are virtual; no host log is read."
+          },
+          {
+            "title": "Filter a literal substring",
+            "text": "grep FAIL /var/log/worker.log keeps each line containing the case-sensitive text FAIL. This exercise treats one word literally, not as a regular expression or a severity-field parser. FAIL and fail differ. There are two requested FAIL lines and INFO/WARN lines to exclude. The separate audit log has different messages; inspect the right source."
+          },
+          {
+            "title": "Pass text through a pipeline",
+            "text": "cat /var/log/worker.log | grep FAIL produces the same selected text. A pipe passes one stage's output to the next. Put spaces around | in this small terminal. There is no shell quoting, expansion, redirection or general command evaluator. tail -n 3 /var/log/worker.log inspects recent lines but can omit an earlier failure; filtering the full log avoids that omission."
+          },
+          {
+            "title": "The current selection is the task",
+            "text": "Successful cat, grep and tail queries replace the selected result. After a correct filter, printing the whole log makes the result too broad; filter again to repair. find, show and help only inspect and leave it alone. Check example reads the current selected text, not command history. A no-match query displays a message and selects empty text; no grep exit-status model is taught here."
+          }
+        ],
+        "example_description": "Locate worker.log and select exactly its two FAIL lines. Keep their original order and exclude INFO/WARN messages and the unrelated audit log. This practice uses different files/messages/needle from the app.log/ERROR assignment.",
+        "fixture": {
+          "files": {
+            "/var/log/worker.log": "11:00 INFO worker ready\n11:01 FAIL task18 rejected\n11:02 INFO retry queued\n11:03 FAIL task27 expired\n11:04 WARN queue growing\n",
+            "/var/log/audit-practice.log": "11:00 INFO audit opened\n11:05 FAIL unrelated audit warning\n"
+          },
+          "result": ""
+        },
+        "task": {
+          "path": "/var/log/worker.log",
+          "needle": "FAIL"
+        },
+        "commands": [
+          {
+            "command": "find /var/log -name worker.log",
+            "explanation": "Find the exact supplied basename; this fixed catalog form is not a recursive Tree search.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /var/log/worker.log",
+            "explanation": "Read every line before deciding what to select.",
+            "simulator_only": false
+          },
+          {
+            "command": "tail -n 3 /var/log/worker.log",
+            "explanation": "Inspect recent messages; this omits an earlier FAIL, so refilter the full log afterward.",
+            "simulator_only": false
+          },
+          {
+            "command": "grep FAIL /var/log/worker.log",
+            "explanation": "Select the two lines containing the literal uppercase FAIL.",
+            "simulator_only": false
+          },
+          {
+            "command": "cat /var/log/worker.log | grep FAIL",
+            "explanation": "An equivalent spaced pipeline; no extra command history is required.",
+            "simulator_only": false
+          }
+        ],
+        "reference": [
+          "find /var/log -name worker.log",
+          "grep FAIL /var/log/worker.log"
+        ],
+        "try_change": "After success, run cat /var/log/worker.log and Check example. The selected text now includes INFO/WARN, so the current task fails. Repair with grep FAIL /var/log/worker.log (or the explained pipeline), then check again.",
+        "try_commands": [
+          "cat /var/log/worker.log"
+        ],
+        "repair_commands": [
+          "grep FAIL /var/log/worker.log"
+        ]
+      }
     },
     {
       "id": "lpic2-service",

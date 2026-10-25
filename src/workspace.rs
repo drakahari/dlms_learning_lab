@@ -71,6 +71,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub seed_mount_learning: Option<crate::seed_mount_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub legacy_access_learning: Option<crate::legacy_access_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub legacy_logs_learning: Option<crate::legacy_logs_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub client_draft: Option<crate::client_teaching::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub dns_learning: Option<crate::dns_teaching::Learning>,
@@ -150,6 +154,11 @@ impl WorkspaceData {
             && self.client_learning.as_ref().is_none_or(|l| l.valid())
             && self.seed_dns_learning.as_ref().is_none_or(|l| l.valid())
             && self.seed_mount_learning.as_ref().is_none_or(|l| l.valid())
+            && self
+                .legacy_access_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
+            && self.legacy_logs_learning.as_ref().is_none_or(|l| l.valid())
             && self.client_draft.as_ref().is_none_or(|d| d.valid())
             && self.dns_learning.as_ref().is_none_or(|l| l.valid())
             && self.dns_draft.as_ref().is_none_or(|d| d.valid())

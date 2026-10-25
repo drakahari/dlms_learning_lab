@@ -1,7 +1,7 @@
 # Original DNS and mount teaching adapters
 
 Implementation2026-10-24, integrated/model and headless UI verified2026-10-25;
-actual native acceptance remains pending. These are introductions and independent practice for existing
+actual native acceptance on installed30d75e7 now passes via process-local XWayland. These are introductions and independent practice for existing
 `lpic2-dns` and `lpic2-storage`, not new lessons. The116-lesson catalog, IDs,
 versions, initial assignment States, Goals, solutions and unit membership stay
 unchanged. No evaluator revision, dependency, host action or coverage promotion.
@@ -113,3 +113,16 @@ after Needs attention. The fixed caption remains, outer action explanation now
 teaches validation purpose; false practice rows diagnose current saved/serving/
 serial or capacity/device/mount problems. Engine booleans, guards and passing
 messages are unchanged. New actual native acceptance remains pending.
+
+
+M95 installed follow-through: clean30d75e743ac9 passes identified97b upgrade,
+content/desktop/hash checks and uninstall/reinstall with exact original-nine
+synthetic progress retained. The full two-seed native flow exits0 after33 captures
+(run-iksgx1_d); root reviewed actual negative feedback and light150/dark200
+focused fields. Wrong/partial/alternate/current checks, separated unfinished
+drafts/save/readback/navigation resume, reset and Challenge all pass. This is
+injected native input, not a novice study, cold-process or physical-device test.
+Ten additional process-local XWayland startup/readbacks pass10/10. Default
+Wayland first launch times out15s (0/1), again in EGL/Wayland dispatch; its cause
+is not cured. No desktop/theme/service/security changes. Exact identities and
+hashes are in INSTALLATION.md; prior failed97b flow remains retained.

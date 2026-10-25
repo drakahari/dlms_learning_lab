@@ -8,6 +8,7 @@ mod acl_lessons;
 mod capture_lessons;
 mod case_history;
 mod client_learning;
+mod dns_reverse;
 mod find_lessons;
 mod mac_layout;
 mod mac_learning;
@@ -192,6 +193,11 @@ impl LabApp {
         if self.scenarios[i].service_teaching.is_some() {
             self.set_service_view(i, teaching::View::Assignment);
         }
+        if self.scenarios[i].legacy_access_teaching.is_some()
+            || self.scenarios[i].legacy_logs_teaching.is_some()
+        {
+            self.set_legacy_view(i, teaching::View::Assignment);
+        }
         if self.scenarios[i].seed_dns_teaching.is_some()
             || self.scenarios[i].seed_mount_teaching.is_some()
         {
@@ -356,6 +362,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 27000..=27999 => {
+                let (advance, capture) = self.dns_reverse_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 25000..=25999 => {
                 let (advance, capture) = self.seed_teaching_native(ctx, n);
                 if !advance {

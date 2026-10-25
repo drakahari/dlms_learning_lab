@@ -102,15 +102,15 @@ fn run(source: &str, s: &Scenario) -> State {
 fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_registered() {
     assert_eq!(shell::EVALUATOR_REVISION, 8);
     let all = catalog();
-    assert_eq!(all.len(), 116);
+    assert_eq!(all.len(), 119);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [35, 24, 17, 40]
+        [35, 24, 20, 40]
     );
     let original = pack::bundled().unwrap();
     let normal_units = course::bundled(&original).unwrap();
-    assert_eq!(normal_units.len(), 28);
+    assert_eq!(normal_units.len(), 29);
     let normal_unit = normal_units
         .iter()
         .find(|u| u.id == "shell-case-dispatch")

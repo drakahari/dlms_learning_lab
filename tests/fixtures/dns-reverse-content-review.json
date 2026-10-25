@@ -1,0 +1,710 @@
+[
+  {
+    "id": "lpic2-dns-reverse-investigation",
+    "expected_zone": {
+      "origin": "100.51.198.in-addr.arpa.",
+      "serial": 71,
+      "records": [
+        {
+          "owner": "100.51.198.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "NS",
+            "target": "ns.ops.example.test."
+          }
+        },
+        {
+          "owner": "53.100.51.198.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "resolver.ops.example.test."
+          }
+        },
+        {
+          "owner": "17.100.51.198.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "backup-a.ops.example.test."
+          }
+        },
+        {
+          "owner": "29.100.51.198.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "ingest.ops.example.test."
+          }
+        }
+      ]
+    },
+    "questions": [
+      {
+        "address": "198.51.100.17",
+        "owner": "17.100.51.198.in-addr.arpa.",
+        "targets": [
+          "backup-a.ops.example.test."
+        ]
+      },
+      {
+        "address": "198.51.100.29",
+        "owner": "29.100.51.198.in-addr.arpa.",
+        "targets": [
+          "ingest.ops.example.test."
+        ]
+      }
+    ],
+    "alternates": [
+      [
+        "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":88,\"records\":[{\"owner\":\"29.100.51.198.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"INGEST.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"17.100.51.198.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"BACKUP-A.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"53.100.51.198.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"RESOLVER.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"100.51.198.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"NS\",\"target\":\"NS.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"29.100.51.198.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"INGEST.OPS.EXAMPLE.TEST.\"}}]}",
+        "reload-primary"
+      ],
+      [
+        "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":80,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"backup-a.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"198.51.100.29\"}}]}",
+        "reload-primary",
+        "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":81,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"backup-a.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"198.51.100.29\"}}]}",
+        "reload-primary"
+      ]
+    ],
+    "wrong": [
+      {
+        "label": "A-only at the reverse owner",
+        "actions": [
+          "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":72,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"198.51.100.17\"}}]}",
+          "reload-primary"
+        ],
+        "failed_rows": [
+          0,
+          1
+        ]
+      },
+      {
+        "label": "wrong supplied target",
+        "actions": [
+          "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":72,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "failed_rows": [
+          0,
+          1
+        ]
+      },
+      {
+        "label": "alias gives same answer but lacks required direct PTR",
+        "actions": [
+          "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":72,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"helper.100.51.198.in-addr.arpa.\"}},{\"owner\":\"helper.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"backup-a.ops.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "failed_rows": [
+          0
+        ]
+      }
+    ],
+    "partial": [
+      {
+        "label": "saved only",
+        "actions": [
+          "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":71,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"backup-a.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}}]}"
+        ],
+        "expected_rows": [
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "break_again": {
+      "actions": [
+        "zone {\"origin\":\"100.51.198.in-addr.arpa.\",\"serial\":72,\"records\":[{\"owner\":\"100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.ops.example.test.\"}},{\"owner\":\"53.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"29.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}},{\"owner\":\"17.100.51.198.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"ingest.ops.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "failed_rows": [
+        0,
+        1
+      ]
+    },
+    "healthy_owner": "53.100.51.198.in-addr.arpa.",
+    "ns_owner": "100.51.198.in-addr.arpa.",
+    "example": {
+      "expected_zone": {
+        "origin": "113.0.203.in-addr.arpa.",
+        "serial": 311,
+        "records": [
+          {
+            "owner": "113.0.203.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "NS",
+              "target": "ns.training.example.test."
+            }
+          },
+          {
+            "owner": "53.113.0.203.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "resolver.training.example.test."
+            }
+          },
+          {
+            "owner": "7.113.0.203.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "collector.training.example.test."
+            }
+          },
+          {
+            "owner": "22.113.0.203.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "index.training.example.test."
+            }
+          }
+        ]
+      },
+      "questions": [
+        {
+          "address": "203.0.113.7",
+          "owner": "7.113.0.203.in-addr.arpa.",
+          "targets": [
+            "collector.training.example.test."
+          ]
+        },
+        {
+          "address": "203.0.113.22",
+          "owner": "22.113.0.203.in-addr.arpa.",
+          "targets": [
+            "index.training.example.test."
+          ]
+        }
+      ],
+      "experiment": [
+        "zone {\"origin\":\"113.0.203.in-addr.arpa.\",\"serial\":312,\"records\":[{\"owner\":\"113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.training.example.test.\"}},{\"owner\":\"53.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.training.example.test.\"}},{\"owner\":\"22.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"index.training.example.test.\"}},{\"owner\":\"7.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"wrong.training.example.test.\"}}]}"
+      ],
+      "failed_rows": [
+        0,
+        4
+      ],
+      "repair": [
+        "zone {\"origin\":\"113.0.203.in-addr.arpa.\",\"serial\":313,\"records\":[{\"owner\":\"113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.training.example.test.\"}},{\"owner\":\"53.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.training.example.test.\"}},{\"owner\":\"7.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"collector.training.example.test.\"}},{\"owner\":\"22.113.0.203.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"index.training.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "healthy_question": {
+        "address": "203.0.113.53",
+        "owner": "53.113.0.203.in-addr.arpa."
+      }
+    },
+    "healthy_question": {
+      "address": "198.51.100.53",
+      "owner": "53.100.51.198.in-addr.arpa."
+    }
+  },
+  {
+    "id": "lpic2-dns-reverse-ipv6",
+    "expected_zone": {
+      "origin": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+      "serial": 91,
+      "records": [
+        {
+          "owner": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "NS",
+            "target": "ns6.ops.example.test."
+          }
+        },
+        {
+          "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "resolver6.ops.example.test."
+          }
+        },
+        {
+          "owner": "6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "render.ops.example.test."
+          }
+        },
+        {
+          "owner": "7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "queue.ops.example.test."
+          }
+        }
+      ]
+    },
+    "questions": [
+      {
+        "address": "2001:db8:4400:1200::3a4:50b6",
+        "expanded": "20010db8440012000000000003a450b6",
+        "owner": "6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+        "targets": [
+          "render.ops.example.test."
+        ]
+      },
+      {
+        "address": "2001:db8:4400:1200::7",
+        "expanded": "20010db8440012000000000000000007",
+        "owner": "7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+        "targets": [
+          "queue.ops.example.test."
+        ]
+      }
+    ],
+    "alternates": [
+      [
+        "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":108,\"records\":[{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.B.D.0.1.0.0.2.IP6.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"QUEUE.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"6.B.0.5.4.A.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.B.D.0.1.0.0.2.IP6.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"RENDER.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.B.D.0.1.0.0.2.IP6.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"RESOLVER6.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"0.0.2.1.0.0.4.4.8.B.D.0.1.0.0.2.IP6.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"NS\",\"target\":\"NS6.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.B.D.0.1.0.0.2.IP6.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"QUEUE.OPS.EXAMPLE.TEST.\"}}]}",
+        "reload-primary"
+      ],
+      [
+        "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":100,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"render.ops.example.test.\"}},{\"owner\":\"7.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}}]}",
+        "reload-primary",
+        "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":101,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"render.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}},{\"owner\":\"3a4.50b6.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"render.ops.example.test.\"}},{\"owner\":\"7.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}}]}",
+        "reload-primary"
+      ]
+    ],
+    "wrong": [
+      {
+        "label": "omitted zero nibbles",
+        "actions": [
+          "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":92,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"render.ops.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "failed_rows": [
+          0,
+          1
+        ]
+      },
+      {
+        "label": "swapped host label",
+        "actions": [
+          "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":92,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "failed_rows": [
+          0,
+          1
+        ]
+      },
+      {
+        "label": "AAAA instead of PTR",
+        "actions": [
+          "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":92,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"AAAA\",\"address\":\"2001:db8:4400:1200::3a4:50b6\"}}]}",
+          "reload-primary"
+        ],
+        "failed_rows": [
+          0,
+          1
+        ]
+      }
+    ],
+    "partial": [
+      {
+        "label": "saved only",
+        "actions": [
+          "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":91,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"render.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}}]}"
+        ],
+        "expected_rows": [
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "break_again": {
+      "actions": [
+        "zone {\"origin\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":92,\"records\":[{\"owner\":\"0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.ops.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.ops.example.test.\"}},{\"owner\":\"7.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}},{\"owner\":\"6.b.0.5.4.a.3.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"queue.ops.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "failed_rows": [
+        0,
+        1
+      ]
+    },
+    "healthy_owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+    "ns_owner": "0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa.",
+    "example": {
+      "expected_zone": {
+        "origin": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+        "serial": 411,
+        "records": [
+          {
+            "owner": "0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "NS",
+              "target": "ns6.training.example.test."
+            }
+          },
+          {
+            "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "resolver6.training.example.test."
+            }
+          },
+          {
+            "owner": "9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "worker.training.example.test."
+            }
+          },
+          {
+            "owner": "4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "store.training.example.test."
+            }
+          }
+        ]
+      },
+      "questions": [
+        {
+          "address": "2001:db8:5500:2400::be:29",
+          "expanded": "20010db8550024000000000000be0029",
+          "owner": "9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+          "targets": [
+            "worker.training.example.test."
+          ]
+        },
+        {
+          "address": "2001:db8:5500:2400::4",
+          "expanded": "20010db8550024000000000000000004",
+          "owner": "4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.",
+          "targets": [
+            "store.training.example.test."
+          ]
+        }
+      ],
+      "experiment": [
+        "zone {\"origin\":\"0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":412,\"records\":[{\"owner\":\"0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.training.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.training.example.test.\"}},{\"owner\":\"4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"store.training.example.test.\"}},{\"owner\":\"8.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"worker.training.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "failed_rows": [
+        0,
+        1
+      ],
+      "repair": [
+        "zone {\"origin\":\"0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"serial\":413,\"records\":[{\"owner\":\"0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns6.training.example.test.\"}},{\"owner\":\"3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver6.training.example.test.\"}},{\"owner\":\"9.2.0.0.e.b.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"worker.training.example.test.\"}},{\"owner\":\"4.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"store.training.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "healthy_question": {
+        "address": "2001:db8:5500:2400::53",
+        "expanded": "20010db8550024000000000000000053",
+        "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.4.2.0.0.5.5.8.b.d.0.1.0.0.2.ip6.arpa."
+      }
+    },
+    "healthy_question": {
+      "address": "2001:db8:4400:1200::53",
+      "expanded": "20010db8440012000000000000000053",
+      "owner": "3.5.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.2.1.0.0.4.4.8.b.d.0.1.0.0.2.ip6.arpa."
+    }
+  },
+  {
+    "id": "lpic2-dns-reverse-handover",
+    "expected_zone": {
+      "origin": "2.0.192.in-addr.arpa.",
+      "serial": 201,
+      "records": [
+        {
+          "owner": "2.0.192.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "NS",
+            "target": "ns.handover.example.test."
+          }
+        },
+        {
+          "owner": "53.2.0.192.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "resolver.ops.example.test."
+          }
+        },
+        {
+          "owner": "83.2.0.192.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "service.ops.example.test."
+          }
+        },
+        {
+          "owner": "44.2.0.192.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "logs-primary.ops.example.test."
+          }
+        },
+        {
+          "owner": "44.2.0.192.in-addr.arpa.",
+          "ttl": 300,
+          "data": {
+            "type": "PTR",
+            "target": "logs-audit.ops.example.test."
+          }
+        }
+      ]
+    },
+    "questions": [
+      {
+        "address": "192.0.2.83",
+        "owner": "83.2.0.192.in-addr.arpa.",
+        "targets": [
+          "service.ops.example.test."
+        ]
+      },
+      {
+        "address": "192.0.2.44",
+        "owner": "44.2.0.192.in-addr.arpa.",
+        "targets": [
+          "logs-primary.ops.example.test.",
+          "logs-audit.ops.example.test."
+        ]
+      }
+    ],
+    "retired": {
+      "address": "192.0.2.36",
+      "owner": "36.2.0.192.in-addr.arpa."
+    },
+    "alternates": [
+      [
+        "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":218,\"records\":[{\"owner\":\"44.2.0.192.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"LOGS-AUDIT.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"44.2.0.192.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"LOGS-PRIMARY.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"83.2.0.192.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"SERVICE.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"53.2.0.192.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"RESOLVER.OPS.EXAMPLE.TEST.\"}},{\"owner\":\"2.0.192.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"NS\",\"target\":\"NS.HANDOVER.EXAMPLE.TEST.\"}},{\"owner\":\"44.2.0.192.IN-ADDR.ARPA.\",\"ttl\":900,\"data\":{\"type\":\"PTR\",\"target\":\"LOGS-AUDIT.OPS.EXAMPLE.TEST.\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      [
+        "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":220,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}},{\"owner\":\"36.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}}]}",
+        "reload-primary",
+        "update-secondary",
+        "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":221,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}},{\"owner\":\"36.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"A\",\"address\":\"192.0.2.36\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ]
+    ],
+    "wrong": [
+      {
+        "label": "new answer without retirement",
+        "actions": [
+          "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":202,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}},{\"owner\":\"36.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "failed_rows": [
+          6,
+          7
+        ]
+      },
+      {
+        "label": "shared set loses active second target",
+        "actions": [
+          "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":202,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "failed_rows": [
+          3,
+          4,
+          5
+        ]
+      },
+      {
+        "label": "retired alias still reaches PTR",
+        "actions": [
+          "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":202,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}},{\"owner\":\"36.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"83.2.0.192.in-addr.arpa.\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "failed_rows": [
+          6,
+          7
+        ]
+      },
+      {
+        "label": "external alias is unresolved, not absence",
+        "actions": [
+          "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":202,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}},{\"owner\":\"36.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"CNAME\",\"target\":\"unresolved.example.test.\"}}]}",
+          "reload-primary",
+          "update-secondary"
+        ],
+        "failed_rows": [
+          6,
+          7
+        ]
+      }
+    ],
+    "partial": [
+      {
+        "label": "saved only",
+        "actions": [
+          "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":201,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}}]}"
+        ],
+        "expected_rows": [
+          true,
+          false,
+          false,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "label": "primary only",
+        "actions": [
+          "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":201,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}}]}",
+          "reload-primary"
+        ],
+        "expected_rows": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "break_again": {
+      "actions": [
+        "zone {\"origin\":\"2.0.192.in-addr.arpa.\",\"serial\":202,\"records\":[{\"owner\":\"2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.handover.example.test.\"}},{\"owner\":\"53.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.ops.example.test.\"}},{\"owner\":\"83.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-primary.ops.example.test.\"}},{\"owner\":\"44.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"logs-audit.ops.example.test.\"}},{\"owner\":\"36.2.0.192.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"service.ops.example.test.\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      "failed_rows": [
+        6,
+        7
+      ]
+    },
+    "healthy_owner": "53.2.0.192.in-addr.arpa.",
+    "ns_owner": "2.0.192.in-addr.arpa.",
+    "example": {
+      "expected_zone": {
+        "origin": "41.23.10.in-addr.arpa.",
+        "serial": 611,
+        "records": [
+          {
+            "owner": "41.23.10.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "NS",
+              "target": "ns.practice.example.test."
+            }
+          },
+          {
+            "owner": "53.41.23.10.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "resolver.practice.example.test."
+            }
+          },
+          {
+            "owner": "92.41.23.10.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "archive.practice.example.test."
+            }
+          },
+          {
+            "owner": "60.41.23.10.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "audit-a.practice.example.test."
+            }
+          },
+          {
+            "owner": "60.41.23.10.in-addr.arpa.",
+            "ttl": 300,
+            "data": {
+              "type": "PTR",
+              "target": "audit-b.practice.example.test."
+            }
+          }
+        ]
+      },
+      "questions": [
+        {
+          "address": "10.23.41.92",
+          "owner": "92.41.23.10.in-addr.arpa.",
+          "targets": [
+            "archive.practice.example.test."
+          ]
+        },
+        {
+          "address": "10.23.41.60",
+          "owner": "60.41.23.10.in-addr.arpa.",
+          "targets": [
+            "audit-a.practice.example.test.",
+            "audit-b.practice.example.test."
+          ]
+        }
+      ],
+      "retired": {
+        "address": "10.23.41.18",
+        "owner": "18.41.23.10.in-addr.arpa."
+      },
+      "experiment": [
+        "zone {\"origin\":\"41.23.10.in-addr.arpa.\",\"serial\":612,\"records\":[{\"owner\":\"41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.practice.example.test.\"}},{\"owner\":\"53.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.practice.example.test.\"}},{\"owner\":\"92.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"archive.practice.example.test.\"}},{\"owner\":\"60.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"audit-a.practice.example.test.\"}},{\"owner\":\"60.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"audit-b.practice.example.test.\"}},{\"owner\":\"18.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"archive.practice.example.test.\"}}]}",
+        "reload-primary"
+      ],
+      "failed_rows": [
+        6,
+        8
+      ],
+      "repair": [
+        "zone {\"origin\":\"41.23.10.in-addr.arpa.\",\"serial\":613,\"records\":[{\"owner\":\"41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"NS\",\"target\":\"ns.practice.example.test.\"}},{\"owner\":\"53.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"resolver.practice.example.test.\"}},{\"owner\":\"92.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"archive.practice.example.test.\"}},{\"owner\":\"60.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"audit-a.practice.example.test.\"}},{\"owner\":\"60.41.23.10.in-addr.arpa.\",\"ttl\":300,\"data\":{\"type\":\"PTR\",\"target\":\"audit-b.practice.example.test.\"}}]}",
+        "reload-primary",
+        "update-secondary"
+      ],
+      "healthy_question": {
+        "address": "10.23.41.53",
+        "owner": "53.41.23.10.in-addr.arpa."
+      }
+    },
+    "healthy_question": {
+      "address": "192.0.2.53",
+      "owner": "53.2.0.192.in-addr.arpa."
+    }
+  }
+]

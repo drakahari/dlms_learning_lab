@@ -15,6 +15,7 @@ mod controls;
 mod data;
 mod discovery_workspace;
 mod dns_workspace;
+mod legacy_learning;
 mod ospf_workspace;
 mod process_learning;
 mod script_learning;
@@ -119,6 +120,13 @@ struct Metrics {
     dns_update: Option<egui::Rect>,
     dns_pickers: Vec<egui::Rect>,
     dns_editor_overflow: bool,
+    dns_fields: Vec<(String, egui::Rect, egui::Id)>,
+    dns_copy: Option<egui::Rect>,
+    dns_type: Option<egui::Rect>,
+    dns_popup: Option<egui::Rect>,
+    dns_choices: Vec<(String, egui::Rect)>,
+    dns_notice: Option<egui::Rect>,
+    dns_result: Option<egui::Rect>,
     discovery_send: Vec<(dlms_learning_lab::discovery::Endpoint, egui::Rect)>,
     discovery_toggles: Vec<(String, egui::Rect)>,
     discovery_time: Option<egui::Rect>,
@@ -366,6 +374,8 @@ impl LabApp {
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
             {
                 23000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("dns-reverse") {
+                27000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("seed-teaching") {
                 25000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("find-lessons") {
@@ -582,6 +592,14 @@ impl LabApp {
             dlms_learning_lab::seed_mount_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated seed mount teaching");
         }
+        if let Some(lesson) = &s.legacy_access_teaching {
+            dlms_learning_lab::legacy_access_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated access lesson");
+        }
+        if let Some(lesson) = &s.legacy_logs_teaching {
+            dlms_learning_lab::legacy_logs_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated log lesson");
+        }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, new_attempt);
         }
@@ -722,6 +740,14 @@ impl LabApp {
         if let Some(lesson) = &s.seed_mount_teaching {
             dlms_learning_lab::seed_mount_teaching::prepare(a, lesson, true)
                 .expect("validated seed mount teaching");
+        }
+        if let Some(lesson) = &s.legacy_access_teaching {
+            dlms_learning_lab::legacy_access_teaching::prepare(a, lesson, true)
+                .expect("validated access lesson");
+        }
+        if let Some(lesson) = &s.legacy_logs_teaching {
+            dlms_learning_lab::legacy_logs_teaching::prepare(a, lesson, true)
+                .expect("validated log lesson");
         }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(a, lesson, true);

@@ -94,3 +94,6 @@ pub mod mac_learning_workspace;
 
 pub mod seed_dns_teaching;
 pub mod seed_mount_teaching;
+
+pub mod legacy_access_teaching;
+pub mod legacy_logs_teaching;

@@ -247,6 +247,7 @@ fn typed_objectives_recompute_after_breakage_and_resume_without_touching_old_att
         &goal
     ));
     let mut lab = pack::bundled().unwrap()[3].clone();
+    lab.legacy_access_teaching = None; // This fixture replaces Unix with Filesystem.
     lab.id = "test-files".into();
     lab.initial = State::Filesystem { tree: t };
     lab.goal = goal;
@@ -354,6 +355,7 @@ fn entry_and_path_limits_and_invalid_goals_are_checked() {
     assert!(t.execute(&format!("touch {}", "x".repeat(256))).is_err());
     assert!(t.execute(&format!("cat {}", "x/".repeat(65))).is_err());
     let mut lab = pack::bundled().unwrap()[3].clone();
+    lab.legacy_access_teaching = None; // This fixture replaces Unix with Filesystem.
     lab.initial = State::Filesystem { tree: tree() };
     lab.goal = Goal::Filesystem {
         requirements: vec![Requirement::Entry {

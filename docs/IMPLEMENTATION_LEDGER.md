@@ -1123,3 +1123,42 @@ Before-case public7 capture: first guarded compile passes; first actual capture 
   fixtures under closed environment and bounded guarded execution. Differences
   remain unclassified before9. No new shell capability, evaluator9, learner-host
   execution, curriculum count or objective promotion. Original116/28 unchanged.
+
+
+### M95 installed teaching follow-through
+
+Clean30d75e7 candidate passes identified97b upgrade/lifecycle and exact old-nine
+synthetic retention. Actual full DNS/storage two-lesson flow exits0 after33captures,
+with pending/rejected edits, specific false feedback, alternatives/invalidation,
+separate drafts/resume/reset/Challenge and light150/dark200. Root reviewed actual
+screens. Process-local XWayland quiet starts10/10; default Wayland first launch
+fails15s (0/1), same observed EGL/Wayland wait, missing-callback cause unproven.
+Private audit75935337... hashes captures and memory observations. No cure or full
+platform/novice claim. See INSTALLATION.md for immutable identity/checksums.
+
+### M96 reverse-DNS tasks and original terminal teaching integration
+
+- Normal source119/29:35CCNA,24LPIC1,20LPIC2,40Bash. New distinct tasks are IPv4
+  reverse-owner/type repair, full IPv6 nibble rollout, and retired/multi-PTR/two-copy
+  handover. Source-reviewed20question table matches independent arithmetic.
+  Bounded record editor, separate practice and behavior/state grades preserve
+  unrelated named data, accept TTL/order/normalization/serial alternatives and
+  require positive publication alongside both retired-copy negatives.
+- Original permissions/traversal/log tasks gain explicit typed isolated examples,
+  explained commands and the accepted three-view pattern. IDs/versions/initials/
+  Goals/solutions and old progress stay intact. New terminal source uses existing
+  engines, no host execution or dependency. Practice scope differs from broader
+  legacy imports; bounded readers/context guards never narrow old assignment state.
+- Model/content R3 PASS279checks/23targets. R1 fixture-constant compile and R2
+ 104-versus107 current-kind count failures remain. New11PTR+15legacy model checks
+  cover references, alternatives, partial/wrong/current invalidation, context,
+  malformed/maximum inputs and exact original116 specs/unit relative order/history.
+- Four legacy UI tests, five PTR phase/geometry/editor/Close tests and nine old seed
+  regressions pass. New false practice prose uses actual diagnoses after independent
+  review;15 strengthened models pass. Repeated4UI review PASS. All-targetClippy
+  R3 passes after two style fixes; no allow/goal/expectation weakening. First PTR
+  compile's Confirm-field typo retained in failed log.193 UI checks accounted
+  across prior full/scoped runs, not a new full193 all-green run.
+- No objective promotion yet; matrix134Partial/1Supporting/1105Open remains.
+  Latest scoped installed candidate116 at30d75e7; new119 and original terminal
+  teaching still require actual native screens/flows and their own candidate.
