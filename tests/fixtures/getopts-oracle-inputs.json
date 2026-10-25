@@ -1,0 +1,1260 @@
+{
+  "status": "SOURCE PROPOSAL ONLY; no oracle/VM/compiler/Bash/version execution; all observations null",
+  "checked": "2026-10-24",
+  "purpose": "New independent getopts fixed fixture; never replace existing37 case inputs or regenerate old6/7/8 history. Requires root review and new collector admission before any run.",
+  "prior_37_fixture": {
+    "path": "tests/fixtures/shell-case-oracle-inputs.json",
+    "bytes": 29431,
+    "sha256": "e2979b112349c45cd083f0fc7e5dd49d7e3866bf762f60faf24ea9d232ff2cf3"
+  },
+  "bounded_proposal": {
+    "max_cases": 64,
+    "max_source_utf8_bytes": 4096,
+    "max_args": 16,
+    "max_arg_utf8_bytes": 256,
+    "stdin_bytes": 0,
+    "max_env_entries": 1,
+    "max_input_files": 1,
+    "max_file_utf8_bytes": 16
+  },
+  "cases": [
+    {
+      "id": "startup-defaults",
+      "group": "startup",
+      "admission": "candidate-subset",
+      "source": "printf 'ind=<%s>|err=<%s>|arg-count=%s\\n' \"$OPTIND\" \"$OPTERR\" \"${#OPTARG[@]}\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record actual startup special values; old8 rejection is genuine before9 behavior, not fabricated credit.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "cluster-and-end",
+      "group": "scanner",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe OPTIND inside cluster, transition to end and repeated end.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "repeated-clusters",
+      "group": "scanner",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -aab -b; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -aab -b; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -aab -b; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -aab -b; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -aab -b; rc=$?; printf 'call5|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -aab -b; rc=$?; printf 'call6|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe repeats and progression across argument boundaries.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "required-attached",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts ao: opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [
+          "-ovalue"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Required option argument remains opaque, including empty/dash-looking values.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "required-separate",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts ao: opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [
+          "-o",
+          "two words"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Required option argument remains opaque, including empty/dash-looking values.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "required-empty-value",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts ao: opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [
+          "-o",
+          ""
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Required option argument remains opaque, including empty/dash-looking values.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "required-dash-value",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts ao: opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [
+          "-o",
+          "-a"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Required option argument remains opaque, including empty/dash-looking values.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "required-double-dash-value",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts ao: opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [
+          "-o",
+          "--"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Required option argument remains opaque, including empty/dash-looking values.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "cluster-argument-suffix",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts ao: opt -aohello; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -aohello; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -aohello; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -aohello; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Argument-consuming option owns remaining cluster suffix.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "stop-double-dash",
+      "group": "operands",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; shift \"$((OPTIND-1))\"; printf 'left=<%s>\\n' \"$@\"",
+      "input": {
+        "args": [
+          "-a",
+          "--",
+          "-b"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "End boundary and remaining operands; no permutation.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "stop-first-operand",
+      "group": "operands",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; shift \"$((OPTIND-1))\"; printf 'left=<%s>\\n' \"$@\"",
+      "input": {
+        "args": [
+          "-a",
+          "operand",
+          "-b"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "End boundary and remaining operands; no permutation.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "stop-empty-operand",
+      "group": "operands",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; shift \"$((OPTIND-1))\"; printf 'left=<%s>\\n' \"$@\"",
+      "input": {
+        "args": [
+          "-a",
+          "",
+          "-b"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "End boundary and remaining operands; no permutation.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "stop-lone-dash",
+      "group": "operands",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt \"$@\"; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt \"$@\"; rc=$?; printf 'call4|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; shift \"$((OPTIND-1))\"; printf 'left=<%s>\\n' \"$@\"",
+      "input": {
+        "args": [
+          "-a",
+          "-",
+          "-b"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "End boundary and remaining operands; no permutation.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "normal-opterr0-unknown",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=0; getopts ao: opt -z; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -z; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "normal-opterr0-missing",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=0; getopts ao: opt -o; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -o; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "normal-opterr1-unknown",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=1; getopts ao: opt -z; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -z; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "normal-opterr1-missing",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=1; getopts ao: opt -o; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ao: opt -o; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "silent-opterr0-unknown",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=0; getopts :ao: opt -z; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts :ao: opt -z; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "silent-opterr0-missing",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=0; getopts :ao: opt -o; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts :ao: opt -o; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "silent-opterr1-unknown",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=1; getopts :ao: opt -z; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts :ao: opt -z; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "silent-opterr1-missing",
+      "group": "errors",
+      "admission": "candidate-subset",
+      "source": "OPTERR=1; getopts :ao: opt -o; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts :ao: opt -o; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Observe NAME, status, OPTARG set/unsetness and raw diagnostics; diagnostic text not promised byte-identical in simulator.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "arg-cleared-by-flag",
+      "group": "arguments",
+      "admission": "candidate-subset",
+      "source": "getopts o:a opt -o value -a; rc=$?; printf 'value|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts o:a opt -o value -a; rc=$?; printf 'flag|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts o:a opt -o value -a; rc=$?; printf 'end|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Distinguish set-empty/value from unset after flag/end.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "reset-mid-cluster",
+      "group": "reset",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; OPTIND=1; getopts ab opt -ab; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "OPTIND=1 must reset hidden offset, not merely scalar value.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "reset-after-end",
+      "group": "reset",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call3|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; OPTIND=1; getopts ab opt -ab; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Reset restores scan after exhaustion.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "reset-change-vector",
+      "group": "reset",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; OPTIND=1; getopts c: opt -c changed; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts c: opt -c changed; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Explicit reset permits changed optstring/vector.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "implicit-positional-shift",
+      "group": "operands",
+      "admission": "candidate-subset",
+      "source": "while getopts ao: opt; do rc=$?; printf 'loop|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; done; shift \"$((OPTIND-1))\"; printf 'remaining=<%s>\\n' \"$@\"",
+      "input": {
+        "args": [
+          "-a",
+          "-o",
+          "two words",
+          "file one",
+          "file two"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Standard positional parser and quoted remaining operands.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "function-local-parent-midcluster",
+      "group": "functions",
+      "admission": "decision-required",
+      "source": "getopts ab opt -ab; rc=$?; printf 'parent-before|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND=1; local opt; getopts xy opt -xy; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts xy opt -xy; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; f; rc=$?; printf 'after-return|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Settle exact parent hidden cluster restoration across local OPTIND=1 plus local result variable.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "function-local-repeated",
+      "group": "functions",
+      "admission": "decision-required",
+      "source": "f() { local OPTIND=1; local opt; while getopts ao: opt; do rc=$?; printf 'function|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; done; shift \"$((OPTIND-1))\"; printf 'rest=<%s>\\n' \"$@\"; }; f -a first; f -o \"two words\" second; printf 'parent-ind=%s\\n' \"$OPTIND\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Repeated explicit local reset with function positional parameters; no inherited reset invention.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "nested-local-restoration",
+      "group": "functions",
+      "admission": "decision-required",
+      "source": "outer() { local OPTIND=1; local opt; getopts ab opt -ab; rc=$?; printf 'outer-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; inner() { local OPTIND=1; local opt; getopts xy opt -xy; rc=$?; printf 'inner-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; inner; getopts ab opt -ab; rc=$?; printf 'outer-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; outer; printf 'global-ind=%s\\n' \"$OPTIND\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Determine multiple lexical-local scopes versus dynamically shared hidden scanner.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "function-shared-no-local",
+      "group": "functions",
+      "admission": "candidate-subset",
+      "source": "f() { getopts ab opt -ab; rc=$?; printf 'function|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; getopts ab opt -ab; rc=$?; printf 'parent|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f; getopts ab opt -ab; rc=$?; printf 'after|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Without local/reset, function and caller share same explicit vector/cursor.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "function-local-return",
+      "group": "functions",
+      "admission": "decision-required",
+      "source": "getopts ab opt -ab; rc=$?; printf 'parent|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND=1; local opt; getopts xy opt -xy; rc=$?; printf 'function|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; return 3; }; f; printf 'return=%s\\n' \"$?\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Early return must restore same local scalar and scanner relationship as ordinary return.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "function-local-uninitialized",
+      "group": "functions",
+      "admission": "initially-excluded",
+      "source": "getopts ab opt -ab; rc=$?; printf 'parent|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; f() { local OPTIND; local opt; getopts ab opt -ab; rc=$?; printf 'function|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; f; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Oracle-only settle local-without-initializer; initially excluded unless faithful ownership accepted.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "capture-parent-midcluster",
+      "group": "captures",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'parent-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; captured=$(getopts ab opt -ab; rc=$?; printf 'child|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"); printf 'capture=<%s>\\n' \"$captured\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Capture consumes a private inherited hidden cursor and restores parent offset/scalars.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "capture-reset-isolation",
+      "group": "captures",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'parent-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; captured=$(OPTIND=1; getopts xy opt -xy; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts xy opt -xy; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"); printf 'capture=<%s>\\n' \"$captured\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Child reset/vector cannot overwrite parent scanner signature.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "nested-captures",
+      "group": "captures",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; captured=$(getopts ab opt -ab; rc=$?; printf 'child-first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; nested=$(OPTIND=1; getopts xy opt -xy; rc=$?; printf 'grandchild|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"); printf 'nested=<%s>\\n' \"$nested\"; getopts ab opt -ab; rc=$?; printf 'child-end|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"); printf 'capture=<%s>\\n' \"$captured\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Distinct scalar/cursor state at each suspended context.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "capture-own-function-local",
+      "group": "captures",
+      "admission": "decision-required",
+      "source": "getopts ab opt -ab; captured=$(f() { local OPTIND=1; local opt; getopts xy opt -xy; rc=$?; printf 'child-function|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; }; f); printf 'capture=<%s>\\n' \"$captured\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Supported child-entered function local scope; do not accidentally admit direct inherited local.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "pipeline-first-stage-isolation",
+      "group": "pipelines",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; getopts ab opt -ab | printf ''; printf 'pipe=%s\\n' \"$?\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "First stage scanner mutation must not leak into parent; no unsupported function pipeline.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "pipeline-final-stage-isolation",
+      "group": "pipelines",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; printf '' | getopts ab opt -ab; printf 'pipe=%s\\n' \"$?\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Final stage also runs isolated in existing VM semantics; no lastpipe.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "pipeline-inherits-end-cursor",
+      "group": "pipelines",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; rc=$?; printf 'call1|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; getopts ab opt -ab; rc=$?; printf 'call2|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; printf '' | getopts ab opt -ab; printf 'pipe-end=%s\\n' \"$?\"; getopts ab opt -ab; rc=$?; printf 'parent-end|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Final stage must inherit exhausted cursor; resetting each stage would incorrectly yield status0.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "pipeline-stage-snapshots-independent",
+      "group": "pipelines",
+      "admission": "candidate-subset",
+      "source": "getopts ab opt -ab; getopts ab opt -ab | getopts ab opt -ab; printf 'pipe=%s\\n' \"$?\"; getopts ab opt -ab; rc=$?; printf 'parent-next|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Each stage starts from same parent snapshot, not previous stage cursor.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "array-output-scalar-setter",
+      "group": "destination",
+      "admission": "candidate-subset",
+      "source": "opt=(old tail); getopts ab opt -ab; rc=$?; printf 'array|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; printf 'tail=<%s>\\n' \"${opt[1]}\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Existing ordinary indexed NAME: scalar output updates element0 while retaining element1.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "builtin-head-and-args-once",
+      "group": "preparation",
+      "admission": "candidate-subset",
+      "source": "head=getopts; \"$head\" ab opt \"$(printf 'A\\n' >> prep.txt; printf '%s' -ab)\"; rc=$?; printf 'first|rc=%s|opt=<%s>|ind=%s|arg-count=%s|arg=<%s>\\n' \"$rc\" \"$opt\" \"$OPTIND\" \"${#OPTARG[@]}\" \"$OPTARG\"; read -r marker < prep.txt; printf 'marker=<%s>\\n' \"$marker\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Dynamic builtin head and capture-prepared arguments evaluated once; virtual supplied/new file only.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-unset",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "printf 'count=%s|value=<%s>\\n' \"${#OPTERR[@]}\" \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-explicit-zero",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "OPTERR=0; printf 'count=%s|value=<%s>\\n' \"${#OPTERR[@]}\" \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-explicit-one",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "OPTERR=1; printf 'count=%s|value=<%s>\\n' \"${#OPTERR[@]}\" \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-ordinary-text",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "OPTERR=plain; printf 'count=%s|value=<%s>\\n' \"${#OPTERR[@]}\" \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-array",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "OPTERR=(left right); printf 'count=%s|first=<%s>|next=<%s>\\n' \"${#OPTERR[@]}\" \"${OPTERR[0]}\" \"${OPTERR[1]}\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-local-restore",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "OPTERR=parent; f() { local OPTERR=child; printf 'inside=<%s>\\n' \"$OPTERR\"; }; f; printf 'after=<%s>\\n' \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-capture-restore",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "OPTERR=parent; value=$(OPTERR=child; printf '%s' \"$OPTERR\"); printf 'child=<%s>|parent=<%s>\\n' \"$value\" \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    },
+    {
+      "id": "prior8-opterr-fixture-env",
+      "group": "prior-valid8",
+      "admission": "immutable-before8-observation",
+      "source": "printf 'count=%s|value=<%s>\\n' \"${#OPTERR[@]}\" \"$OPTERR\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {
+          "OPTERR": "0"
+        },
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "question": "Record original8 outcome BEFORE any revision9 implementation; retain exact bytes even if9 deliberately rejects/defaults differently.",
+      "observe": [
+        "raw stdout",
+        "raw stderr",
+        "exit status",
+        "all supplied and created files"
+      ],
+      "actual_bash_5_3": null,
+      "actual_evaluator8_before9": null,
+      "accepted_after9": null
+    }
+  ]
+}
