@@ -17,6 +17,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_terminal: Option<crate::debian_packages_terminal::Session>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub apache_static_draft: Option<crate::apache_static_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub apache_static_learning: Option<crate::apache_static_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_draft: Option<crate::debian_packages_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_learning: Option<crate::debian_packages_teaching::Learning>,
@@ -124,6 +128,11 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.apache_static_draft.as_ref().is_none_or(|d| d.valid())
+            && self
+                .apache_static_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
             && self
                 .debian_packages_draft
                 .as_ref()
@@ -270,6 +279,11 @@ pub fn prepare(a: &mut Attempt) {
         && w.unit_manager_draft.is_none()
     {
         w.unit_manager_draft = crate::unit_manager_workspace::Draft::new(simulation).ok();
+    }
+    if let State::ApacheStatic { simulation } = &a.state
+        && w.apache_static_draft.is_none()
+    {
+        w.apache_static_draft = crate::apache_static_workspace::Draft::new(simulation).ok();
     }
     if let State::SpanningTree { simulation } = &a.state
         && w.spanning_tree_draft.is_none()

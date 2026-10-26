@@ -251,6 +251,9 @@ pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
 /// Fresh package outcomes with context/session guards; display history is never credit.
 pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     let fail = |m: &str| vec![(false, crate::debian_packages_workspace::notice(m))];
+    if let Err(e) = validate_apache_static_workspace(a) {
+        return fail(&e);
+    }
     if let Err(e) = validate_debian_packages_workspace(a) {
         return fail(&e);
     }
@@ -280,7 +283,58 @@ pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, S
     }
     definition.checks(simulation)
 }
+pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |m: &str| vec![(false, crate::apache_static_workspace::notice(m))];
+    if let Err(e) = validate_debian_packages_workspace(a) {
+        return fail(&e);
+    }
+    if let Err(e) = validate_apache_static_workspace(a) {
+        return fail(&e);
+    }
+    let (
+        State::ApacheStatic { simulation },
+        State::ApacheStatic {
+            simulation: authored,
+        },
+        crate::engine::Goal::ApacheStatic { definition },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return fail("Apache assignment kind/context differs");
+    };
+    if authored != &definition.initial || !definition.same_assignment(simulation) {
+        return fail("Apache fixed initial inventory differs from this assignment");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.apache_static_learning.as_ref())
+        .is_some_and(|l| {
+            s.apache_static_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        })
+    {
+        return fail("Apache example differs from its authored fixture");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.apache_static_draft.as_ref())
+        .is_some_and(|d| !d.matches(simulation))
+    {
+        return fail(
+            "Save pending configuration/file text before checking; request fields are read-only",
+        );
+    }
+    let mut rows = vec![(true, "Current configuration/file drafts are saved".into())];
+    rows.extend(definition.checks(simulation));
+    rows
+}
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::ApacheStatic { .. }) {
+        return current_apache_static_checks(a, s).iter().all(|r| r.0);
+    }
+    if validate_apache_static_workspace(a).is_err() {
+        return false;
+    }
     if matches!(a.state, State::DebianPackages { .. }) {
         return current_debian_packages_checks(a, s).iter().all(|r| r.0);
     }
@@ -591,6 +645,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        validate_apache_static_workspace(a)?;
         validate_debian_packages_workspace(a)?;
         validate_dhcpv4_workspace(a)?;
         validate_accounts_workspace(a)?;
@@ -704,6 +759,30 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             }
         }
 
+        if let State::ApacheStatic { simulation } = &a.state {
+            let (
+                State::ApacheStatic {
+                    simulation: authored,
+                },
+                crate::engine::Goal::ApacheStatic { definition },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err("Apache state on another activity".into());
+            };
+            if authored != &definition.initial
+                || !definition.same_assignment(simulation)
+                || a.workspace
+                    .as_ref()
+                    .and_then(|w| w.apache_static_learning.as_ref())
+                    .is_some_and(|l| {
+                        s.apache_static_teaching
+                            .as_ref()
+                            .is_none_or(|lesson| !l.valid_for(lesson))
+                    })
+            {
+                return Err("Saved Apache inventory/example differs from authored context; original retained".into());
+            }
+        }
         if let State::SpanningTree { simulation } = &a.state {
             let (
                 State::SpanningTree {
@@ -1112,6 +1191,45 @@ fn validate_unit_manager_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_apache_static_workspace(a: &Attempt) -> Result<(), String> {
+    let metadata = a
+        .workspace
+        .as_ref()
+        .is_some_and(|w| w.apache_static_draft.is_some() || w.apache_static_learning.is_some());
+    let State::ApacheStatic { simulation } = &a.state else {
+        return if metadata {
+            Err("Apache metadata on another activity".into())
+        } else {
+            Ok(())
+        };
+    };
+    if !crate::apache_static_workspace::admitted(simulation) {
+        return Err("Apache state exceeds app admission".into());
+    }
+    if a.workspace.as_ref().is_some_and(|w| {
+        w.apache_static_draft
+            .as_ref()
+            .is_some_and(|d| !d.valid_for(simulation))
+            || w.apache_static_learning.as_ref().is_some_and(|l| {
+                !l.valid()
+                    || l.fixture.inventory.fixture == simulation.inventory.fixture
+                    || l.fixture.inventory.server == simulation.inventory.server
+                    || l.fixture.inventory.config_path == simulation.inventory.config_path
+                    || l.fixture
+                        .inventory
+                        .entries
+                        .iter()
+                        .filter(|(_, v)| **v == crate::apache_static::EntryKind::File)
+                        .any(|(p, _)| {
+                            simulation.inventory.entries.get(p)
+                                == Some(&crate::apache_static::EntryKind::File)
+                        })
+            })
+    }) {
+        return Err("Foreign Apache draft/example inventory; original retained".into());
+    }
+    Ok(())
+}
 fn validate_spanning_tree_workspace(a: &Attempt) -> Result<(), String> {
     let Some(w) = &a.workspace else {
         return Ok(());
@@ -1470,6 +1588,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
+        validate_apache_static_workspace(a)?;
         validate_debian_packages_workspace(a)?;
         validate_dhcpv4_workspace(a)?;
         validate_accounts_workspace(a)?;

@@ -5,6 +5,8 @@ use std::collections::BTreeSet;
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub apache_static_teaching: Option<crate::apache_static_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub spanning_tree_teaching: Option<crate::spanning_tree_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub dhcpv4_teaching: Option<crate::dhcpv4_teaching::Lesson>,
@@ -168,7 +170,10 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || s.solution.iter().any(|v| {
                 v.trim().is_empty()
                     || v.len()
-                        > if matches!(s.initial, State::Ipv4Acl { .. }) {
+                        > if matches!(s.initial, State::ApacheStatic { .. }) {
+                            crate::apache_static_workspace::PREFIX.len()
+                                + crate::apache_static::MAX_ACTION_JSON
+                        } else if matches!(s.initial, State::Ipv4Acl { .. }) {
                             crate::acl_editor::MAX_JSON + 64
                         } else if matches!(s.initial, State::DebianPackages { .. }) {
                             crate::debian_packages_workspace::MAX_ACTION_BYTES
@@ -375,6 +380,28 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             return Err("DHCP objectives/teaching attached to another activity".into());
         }
 
+        if let State::ApacheStatic { simulation } = &s.initial {
+            let Goal::ApacheStatic { definition } = &s.goal else {
+                return Err("Apache state needs matching context/outcomes".into());
+            };
+            if simulation != &definition.initial || definition.validate().is_err() {
+                return Err("Apache goals must pin exact admitted initial inventory/state".into());
+            }
+            if s.guide.iter().any(|g| !g.commands.is_empty()) {
+                return Err(
+                    "Apache native guidance cannot advertise unimplemented Linux commands".into(),
+                );
+            }
+            if let Some(l) = &s.apache_static_teaching {
+                l.validate()?;
+                if !l.separate_from(simulation) {
+                    return Err("Apache example requires separate fixed identities".into());
+                }
+            }
+        } else if s.apache_static_teaching.is_some() || matches!(s.goal, Goal::ApacheStatic { .. })
+        {
+            return Err("Apache teaching/goals on another activity".into());
+        }
         if let State::SpanningTree { simulation } = &s.initial {
             let Goal::SpanningTree {
                 initial,
@@ -729,6 +756,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::ApacheStatic { simulation } => crate::apache_static_workspace::admitted(simulation),
         State::DebianPackages { simulation } => {
             crate::debian_packages_workspace::admitted(simulation)
         }

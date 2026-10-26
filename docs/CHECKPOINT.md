@@ -88,63 +88,49 @@ plain language. FinalR3 completes48. No Goal/State/grading/vector weakening.
 
 ## Current resumed work and exact next actions
 
-Root has no heavy active at this write. CollectorR3 11paths committed/pushed8f9ee86
-after176Python/fiveRust/Clippy/build. First full actualpublic9 capture
-public9-133-8f9-r1 FAILED after1568VM-only rows before Bash, original116-vs133
-history keyset assertion. NO COMPLETE; allpartial/control/source evidence kept.
-Do not use it as accepted baseline or change evaluator10 yet.
+Root resumes from clean pushed282d2fb. Actual unchanged public9 capture R3 is now
+COMPLETE and independently accepted, not just source-reviewed. Capture
+reviews/bash-safe-automation/captures/public9-133-282-r3 has manifest
+8987f4290cf58bdaa7bd7981f4cbeae9454fb4155bff47f4f254c0d8140aac00;
+COMPLETE is that plain-text hash. Final independent read-only review40ef01401082e4a41adcfc1f3f555a3a7d3adde15655a3e8bdd3dca727cf51be.
+138 pins and135 outputs rehashed:1570 actual VM rows/380 vectors,43 scripts/
+282 cases/43 examples,28 closed Bash5.3.9 observations, genuine6/7/8 histories,
+actual9 records, full133 history maps, unfinished drafts, restore/reset/Stop.
+Min23.585GiB available/PSI0/OOMdelta0. All138 exact source/probe/manual/Bash
+pins copied and rehashed BEFORE further source/build into immutable-public9-282-pins-r1.
+R1 history-keyset failure andR2 Stop-classifier failure remain non-COMPLETE;
+no failed partial was relabeled accepted. Current public9 producer remains frozen
+and must refuse evaluator10, not reinterpret prior observations.
 
-History correction committed/pushed717c4b3 after177Python/sixRustprobe/Clippy
-and actualprofile-phase regression PASS. Retrypublic9-133-717-r2 completed1570VM
-rows,zeroVMstderr/fullRustprofile, then failedPythonverify_profiles Stop-row'id'
-classification beforeBash. NO COMPLETE; retainR1/R2 and allcontrols.
+1. Reviewed Apache backendR4 integrated onto282 in13 paths; current ui/tests.rs
+merged against exact before snapshot to preserve test-only catalog cache. Receipt
+reviews/apache-static/main-applied-282-r1/APPLIED.json. Source manifest
+36131a0b7bf1a7ea0075b38260ef1a6e80f1b132d13658bebae3400dd972d241;
+peer90b8d541. First guarded21 backend plus20pure/69library PASS. New immutable
+RequestView batch source-review accepted; max32 91.05→30.77ms unoptimized.
+Test-only malformedport fixture corrected; explicit overlimit rejection retained. No normal Apache curriculum or renderer registered.
+All-targetClippy/fmt/diff and82 affected regression checks PASS; min19.71GiB
+available/max somePSI0.62%/OOM0, no sustainedpressure. Private native renderer per acknowledged
+contract0228b3e8 and substantive authored unit, with real rendered flows before
+coverage promotion. Preserve saved/active/live distinctions and positive serving.
+2. Delegated source-only empty-IFS read + pipefail evaluator10 capability task
+was authorized after actual baseline acceptance. Contract15f21c9d; no generalIFS,
+env-prefix framework, errexit, traps, new dependencies or host learner execution.
+Require actual28 reference observations, honest parser diagnostics, bounded Stop,
+real9-before10 migration and practice/assignment/history/backup isolation tests
+before normal2–3 distinct safe-automation assignments. Worker has NO heavy grant.
+3. BasicNAT pure privateR2 accepted20UNRUN; source7a784b73f0f635e6279ae9fb87094a2dd18a8145864d3bd282c75cdbec9f065a;
+contract32f9770a, peer reviews/nat-foundation/peer-review-r2. Not applied/exported.
+Actualpublic9 closure gate now satisfied; root may integrate/gate after current
+heavy run. Static+finite dynamic address mapping only; explicit Clear/no expiry/
+PAT/routing/security/session claims. Prefix0..32 eligibility is separate from
+originalIPv4 exercise's retained31/32 exclusion. Prioritize complete usable units.
 
-Two-file sourcepeer fix6b1db4d1/peerba7a0d17 applied: profileprojection indexes
-only7named kinds; stillrejects missingnamedID/slice/actual/duplicates/unknown.
-verify_vm/VM/probe/inputs/history/source unchanged. All178Python PASS; read-only
-retainedR2 actual1570-row +fullprofile validators PASS. This is a diagnostic audit,
-not fullcapture acceptance. Need fmt/diff/privacy andcommit, ordinaryprobecheck,
-NEW ID/138actualpins independentlyrecomputed then fullcapture retry. Never reuse
-controls oroverwritepartials. No evaluator10/Apache/NAT module changes.
-
-Installed133 verification is complete as scoped above. Only currentCCNA2.5/a/b
-andLPIC1-102.4 promoted to narrowly Partial practice after those gates; parent
-planningrows updated. Matrix140Partial/1Supporting/1099Open of1240overlapping
-references, all sourcefingerprints/positions and futureexamrows unchanged.
-Coverageintegrity PASS, not completion percentage or fullRapidPVST+/Debian/RPM.
-Sources checkedfullinventory10-22/scopedprimary10-25. Currentdocupdate pending
-commit alongside correction; preserve earlier evidence chronology.
-
-3. Capture actual unchanged public9 BEFORE evaluator10. CollectorR3 source
-55a6e782323df6f079833793761dc590badf705ce8e8878de68148715d0156ed / peer
-a4412596b9c4f30b5a6eaeaa4bc6ce8d7601332d67830b03974552046a3a0443
-is integrated and its176Python/fiveRust/Clippy/build gates PASS. Sourcebaseb17
-and app38a; actual source control must pin then-current committed MAIN. Library
-closure85,compiled125-source attestation,133/33,ordered43/282/43 unchanged.
-Canonical script inputSHA7ffa33d4cf83a3eed67f58265912677020c99d6f1f22f2f7730f4eb1ea500f32.
-No accepted actual full capture yet; firstattempt failed as recorded above. Prepare closed ID, independently recompute every
-source/binary/manual/Bash pin and create root-reviewed control, then execute fixed
-producer through MAINrunner. Retain actual6/7/8/9 and both old8 unfinished example
-sources; never replace/retag expectations as observations. Actual-byte aggregate,
-whole-child deadlines and all output/cleanup caps unchanged. Contract15f21c9d
-scopes empty-IFS read, pipefail and2–3 distinct automation tasks only after actual
-COMPLETE rehash/review. No generalIFS/errexit/traps/host execution/deps.
-4. Apache backend private R4 accepted,21UNRUN groups. Manifest
-reviews/apache-static/main-backend-integration-r4/SOURCE-READY.json
-SHA36131a0b7bf1a7ea0075b38260ef1a6e80f1b132d13658bebae3400dd972d241;
-peer90b8d541. Thirteen merged files NOT APPLIED. Recheck before hashes and merge
-incrementally: current ui/tests.rs now includes test-only cache absent from old
-R4 before snapshot; preserve it. Strict empty-struct Requirements/length-before-
-trim and reciprocal package/Apache fresh-helper admission retained; import/save
-already rejected mixed metadata, not an import bypass. Gate21 and max32-probe
-cost before native renderer (contract0228b3e8). No authored Apache unit exists.
-5. BasicNAT pure private R2 accepted,20UNRUN; source7a784b73f0f635e6279ae9fb87094a2dd18a8145864d3bd282c75cdbec9f065a;
-contract32f9770a, peer reviews/nat-foundation/peer-review-r2. Core/vectors/docs
-exactR1; R2 strengthens schema-negative proof only. No MAIN/export/engine/UI/data
-registration. DO NOT merge before actualpublic9 capture (closure pins). Static+
-finite dynamic address mapping only; explicit Clear/no expiry/no PAT/routing/
-security/session claims. True0..32 eligibility is separate from originalIPv4
-exercise's retained31/32 exclusion. No source/model/reference executions yet.
+Current source catalog remains133/33. Scoped installed38a verification above
+remains valid; new backend work does not add labs or justify coverage promotion.
+Matrix140Partial/1Supporting/1099Open of1240 overlapping references; all objective
+fingerprints/positions remain unchanged. Fullinventory sourcecheck10-22 and
+scoped primarycheck10-25; these are not complete certification/mastery claims.
 
 ## Completion and external gates
 

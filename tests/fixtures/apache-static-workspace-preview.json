@@ -1,0 +1,479 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "test-apache-static-workspace",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Unbundled Apache static adapter preview",
+      "unit": "",
+      "title": "Development static HTTP workspace",
+      "summary": "Private typed adapter fixture; no authored curriculum count.",
+      "objective": "Serve the supplied Report ready page from report.example.test now and after a separate next start. Deny its supplied private path with HTTP403. Keep observer.example.test healthy and preserve its page and the private file contents. Active configuration must match saved text; equivalent supported config is accepted.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied graph",
+        "Apply bridge and port configuration",
+        "Check current root, roles and tree path"
+      ],
+      "guide": [],
+      "explanation": "The public root and its matching grant now reach the supplied page, while the more specific private directory is denied. Saved and active documents agree and the independent next-start checks confirm the saved policy. The observer and private file were preserved.",
+      "hints": [
+        "Compare DocumentRoot with the fixed virtual file paths.",
+        "Saving does not reload the active source; a healthy current site can still have a wrong next start."
+      ],
+      "sources": [
+        "https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html"
+      ],
+      "simplifications": "Unbundled technical fixture,2026-10-25. Closed Apache2.4-style static config and typed HTTP outcomes only; no sockets, Linux aliases, workers, TLS, authentication, proxy or full Apache conformance.",
+      "initial": {
+        "kind": "ApacheStatic",
+        "simulation": {
+          "inventory": {
+            "fixture": "apache-assignment",
+            "server": "report-server",
+            "config_path": "/sim/apache.conf",
+            "entries": {
+              "/": "Directory",
+              "/srv": "Directory",
+              "/srv/report": "Directory",
+              "/srv/report/private": "Directory",
+              "/srv/archive": "Directory",
+              "/srv/observer": "Directory",
+              "/srv/report/index.html": "File",
+              "/srv/report/private/secret.txt": "File",
+              "/srv/archive/index.html": "File",
+              "/srv/observer/index.html": "File"
+            }
+          },
+          "saved": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName report.example.test\nDocumentRoot \"/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName observer.example.test\nDocumentRoot \"/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n",
+          "files": {
+            "/srv/report/index.html": "Report ready\n",
+            "/srv/report/private/secret.txt": "private\n",
+            "/srv/archive/index.html": "Old report\n",
+            "/srv/observer/index.html": "Observer healthy\n"
+          },
+          "active": {
+            "source": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName report.example.test\nDocumentRoot \"/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName observer.example.test\nDocumentRoot \"/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ApacheStatic",
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "apache-assignment",
+              "server": "report-server",
+              "config_path": "/sim/apache.conf",
+              "entries": {
+                "/": "Directory",
+                "/srv": "Directory",
+                "/srv/report": "Directory",
+                "/srv/report/private": "Directory",
+                "/srv/archive": "Directory",
+                "/srv/observer": "Directory",
+                "/srv/report/index.html": "File",
+                "/srv/report/private/secret.txt": "File",
+                "/srv/archive/index.html": "File",
+                "/srv/observer/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName report.example.test\nDocumentRoot \"/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName observer.example.test\nDocumentRoot \"/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n",
+            "files": {
+              "/srv/report/index.html": "Report ready\n",
+              "/srv/report/private/secret.txt": "private\n",
+              "/srv/archive/index.html": "Old report\n",
+              "/srv/observer/index.html": "Observer healthy\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName report.example.test\nDocumentRoot \"/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName observer.example.test\nDocumentRoot \"/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "report-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "report.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "report.example.test",
+                "resource": "/srv/report/index.html",
+                "body": "Report ready\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "report-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "report.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "report.example.test",
+                "resource": "/srv/report/index.html",
+                "body": "Report ready\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "report-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "observer.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "observer.example.test",
+                "resource": "/srv/observer/index.html",
+                "body": "Observer healthy\n",
+                "representation_bytes": 17,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "report-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "observer.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "observer.example.test",
+                "resource": "/srv/observer/index.html",
+                "body": "Observer healthy\n",
+                "representation_bytes": 17,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "report-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "report.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "report.example.test",
+                "resource": "/srv/report/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "report-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "report.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "report.example.test",
+                "resource": "/srv/report/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/observer/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/report/private/secret.txt"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apache-static {\"kind\":\"SaveConfig\",\"text\":\"Listen 8080\\n<Directory \\\"/\\\">\\nOptions None\\nAllowOverride None\\nRequire all denied\\n</Directory>\\n<VirtualHost *:8080>\\nServerName report.example.test\\nDocumentRoot \\\"/srv/report\\\"\\nDirectoryIndex index.html\\n<Directory \\\"/srv/report\\\">\\nRequire all granted\\n</Directory>\\n<Directory \\\"/srv/report/private\\\">\\nRequire all denied\\n</Directory>\\n</VirtualHost>\\n<VirtualHost *:8080>\\nServerName observer.example.test\\nDocumentRoot \\\"/srv/observer\\\"\\nDirectoryIndex index.html\\n<Directory \\\"/srv/observer\\\">\\nRequire all granted\\n</Directory>\\n</VirtualHost>\\n\"}",
+        "apache-static {\"kind\":\"Reload\"}"
+      ],
+      "prerequisites": [],
+      "apache_static_teaching": {
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "apache-gallery",
+              "server": "gallery-server",
+              "config_path": "/practice/gallery/apache.conf",
+              "entries": {
+                "/": "Directory",
+                "/practice/gallery/srv": "Directory",
+                "/practice/gallery/srv/report": "Directory",
+                "/practice/gallery/srv/report/private": "Directory",
+                "/practice/gallery/srv/archive": "Directory",
+                "/practice/gallery/srv/observer": "Directory",
+                "/practice/gallery/srv/report/index.html": "File",
+                "/practice/gallery/srv/report/private/secret.txt": "File",
+                "/practice/gallery/srv/archive/index.html": "File",
+                "/practice/gallery/srv/observer/index.html": "File",
+                "/practice": "Directory",
+                "/practice/gallery": "Directory"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName gallery.example.test\nDocumentRoot \"/practice/gallery/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/practice/gallery/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName attendant.example.test\nDocumentRoot \"/practice/gallery/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n",
+            "files": {
+              "/practice/gallery/srv/report/index.html": "Report ready\n",
+              "/practice/gallery/srv/report/private/secret.txt": "private\n",
+              "/practice/gallery/srv/archive/index.html": "Old report\n",
+              "/practice/gallery/srv/observer/index.html": "Observer healthy\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName gallery.example.test\nDocumentRoot \"/practice/gallery/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/practice/gallery/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName attendant.example.test\nDocumentRoot \"/practice/gallery/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "gallery-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "gallery.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/gallery/srv/report/index.html",
+                "body": "Report ready\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "gallery-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "gallery.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/gallery/srv/report/index.html",
+                "body": "Report ready\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "gallery-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "attendant.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "attendant.example.test",
+                "resource": "/practice/gallery/srv/observer/index.html",
+                "body": "Observer healthy\n",
+                "representation_bytes": 17,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "gallery-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "attendant.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "attendant.example.test",
+                "resource": "/practice/gallery/srv/observer/index.html",
+                "body": "Observer healthy\n",
+                "representation_bytes": 17,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "gallery-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "gallery.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/gallery/srv/report/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "gallery-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "gallery.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/gallery/srv/report/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/srv/observer/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/gallery/srv/report/private/secret.txt"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        },
+        "prerequisites": [],
+        "prerequisite_note": "Inspect saved configuration and the active server separately. This example teaches the supplied static-serving grammar; it runs no host server.",
+        "concepts": [
+          {
+            "title": "Three separate layers",
+            "text": "Saved configuration is text for the next start. Active configuration is what the running virtual server uses now. Supplied static files are live: saving a page changes later responses without reloading the config."
+          },
+          {
+            "title": "Read the document",
+            "text": "Listen chooses a destination port. A VirtualHost block names a site and its DocumentRoot. Directory rules allow or deny fixed folders; the more specific child rule replaces the parent. DirectoryIndex chooses a supplied file for a directory request. Only the documented literal subset is supported."
+          },
+          {
+            "title": "Save is not Reload",
+            "text": "Insert copies example text into the independent draft only. Save it explicitly, then Reload the running virtual server. Start while already active is a no-op. Check work also tests a new start using saved text and current files without changing your active server."
+          }
+        ],
+        "example_description": "Restore the gallery site while the attendant site and private file remain intact. Both current requests and a separate next-start test must serve the right public page and deny the private path.",
+        "example_actions": [
+          {
+            "title": "Save the corrected gallery document",
+            "explanation": "Change the gallery DocumentRoot and matching Directory grant from archive to report. The private child Directory remains denied; the attendant site stays unchanged.",
+            "action": {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName gallery.example.test\nDocumentRoot \"/practice/gallery/srv/report\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/report\">\nRequire all granted\n</Directory>\n<Directory \"/practice/gallery/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName attendant.example.test\nDocumentRoot \"/practice/gallery/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n"
+            }
+          },
+          {
+            "title": "Activate the saved gallery document",
+            "explanation": "Use the virtual Reload control. It parses the saved document before changing active serving; this is not a real Linux command.",
+            "action": {
+              "kind": "Reload"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Save the old archive-root document without reloading. Inspect why the current gallery still works but the next-start tests fail; restore the corrected document to repair.",
+          "actions": [
+            {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName gallery.example.test\nDocumentRoot \"/practice/gallery/srv/archive\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/archive\">\nRequire all granted\n</Directory>\n<Directory \"/practice/gallery/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName attendant.example.test\nDocumentRoot \"/practice/gallery/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SaveConfig",
+            "text": "Listen 8080\n<Directory \"/\">\nOptions None\nAllowOverride None\nRequire all denied\n</Directory>\n<VirtualHost *:8080>\nServerName gallery.example.test\nDocumentRoot \"/practice/gallery/srv/report\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/report\">\nRequire all granted\n</Directory>\n<Directory \"/practice/gallery/srv/report/private\">\nRequire all denied\n</Directory>\n</VirtualHost>\n<VirtualHost *:8080>\nServerName attendant.example.test\nDocumentRoot \"/practice/gallery/srv/observer\"\nDirectoryIndex index.html\n<Directory \"/practice/gallery/srv/observer\">\nRequire all granted\n</Directory>\n</VirtualHost>\n"
+          },
+          {
+            "kind": "Reload"
+          }
+        ]
+      }
+    }
+  ]
+}

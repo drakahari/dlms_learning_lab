@@ -922,7 +922,7 @@ pub struct Request {
     pub path: String,
 }
 impl Request {
-    fn shape(&self) -> Result<()> {
+    pub(crate) fn shape(&self) -> Result<()> {
         if !identity(&self.server) || self.port == 0 {
             return Err(fault(FaultKind::Invalid, "Invalid virtual destination"));
         }
@@ -1096,7 +1096,28 @@ fn file_response(r: &Request, h: &VirtualHost, p: &str, text: &str) -> Outcome {
 /// Pure request observation: no time, filesystem, process, socket or grading state.
 pub fn request(state: &State, r: &Request) -> Result<Outcome> {
     r.shape()?;
-    let config = state.validated_config()?;
+    RequestView::new(state)?.query(r)
+}
+
+/// One immutable, validated observation batch. It cannot outlive or mutate its
+/// borrowed state and cannot be serialized or restored as grading authority.
+pub(crate) struct RequestView<'a> {
+    state: &'a State,
+    config: Option<Configuration>,
+}
+impl<'a> RequestView<'a> {
+    pub(crate) fn new(state: &'a State) -> Result<Self> {
+        Ok(Self {
+            state,
+            config: state.validated_config()?,
+        })
+    }
+    pub(crate) fn query(&self, r: &Request) -> Result<Outcome> {
+        r.shape()?;
+        request_in(self.state, self.config.as_ref(), r)
+    }
+}
+fn request_in(state: &State, config: Option<&Configuration>, r: &Request) -> Result<Outcome> {
     let Some(c) = config else {
         return Ok(Outcome::NoListener);
     };
@@ -1135,7 +1156,7 @@ pub fn request(state: &State, r: &Request) -> Result<Outcome> {
     }
     let mapped = joined(&h.document_root, url)?;
     let kind = state.inventory.entries.get(&mapped);
-    let allowed = permission(&c, h, &mapped, kind == Some(&EntryKind::Directory));
+    let allowed = permission(c, h, &mapped, kind == Some(&EntryKind::Directory));
     if allowed == Access::Denied {
         if kind.is_none() {
             return Err(unsupported(
@@ -1200,5 +1221,82 @@ pub fn request(state: &State, r: &Request) -> Result<Outcome> {
                 Some(&mapped),
             )))
         }
+    }
+}
+
+#[cfg(test)]
+mod batch_tests {
+    use super::*;
+
+    #[test]
+    fn immutable_batch_matches_public_requests_and_retains_failure_precedence() {
+        let raw: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/apache-static-workspace-preview.json"
+        ))
+        .unwrap();
+        let mut state: State =
+            serde_json::from_value(raw["scenarios"][0]["initial"]["simulation"].clone()).unwrap();
+        let make = |host: &str, path: &str| Request {
+            server: state.inventory.server.clone(),
+            port: 8080,
+            method: Method::Get,
+            hosts: vec![host.into()],
+            path: path.into(),
+        };
+        let mut requests = Vec::new();
+        for host in [
+            "report.example.test",
+            "observer.example.test",
+            "unknown.example.test",
+            "report.example.test:9999",
+            "bad host",
+            "[::1]",
+            "host_unsupported",
+        ] {
+            for path in [
+                "/",
+                "/index.html",
+                "/private/secret.txt",
+                "/missing",
+                "/private",
+                "/private/",
+                "/index.html/",
+                "//",
+                "/../private",
+                "/?query",
+            ] {
+                let r = make(host, path);
+                requests.push(r.clone());
+                requests.push(Request {
+                    method: Method::Head,
+                    ..r
+                });
+            }
+        }
+        let mut bad = make("report.example.test", "/");
+        bad.port = 0;
+        requests.push(bad.clone());
+        for active in [true, false] {
+            if !active {
+                state.apply(&Action::Stop {}).unwrap();
+            }
+            let view = RequestView::new(&state).unwrap();
+            for r in &requests {
+                assert_eq!(view.query(r), request(&state, r));
+            }
+        }
+        state.files.remove("/srv/report/index.html");
+        assert!(RequestView::new(&state).is_err());
+        let error = request(&state, &bad).unwrap_err();
+        assert_eq!(
+            error,
+            bad.shape().unwrap_err(),
+            "request shape precedes invalid State"
+        );
+        bad.port = 8080;
+        assert_eq!(
+            request(&state, &bad).unwrap_err(),
+            state.validated_config().unwrap_err()
+        );
     }
 }

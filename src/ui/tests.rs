@@ -875,7 +875,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
-            State::DebianPackages { .. }
+            State::ApacheStatic { .. }
+            | State::DebianPackages { .. }
             | State::SpanningTree { .. }
             | State::DhcpV4 { .. }
             | State::Ipv4Acl { .. }

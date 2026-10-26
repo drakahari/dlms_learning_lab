@@ -1,6 +1,8 @@
 //! Offline simulation, declarative content validation, catalog, and local persistence.
 #![forbid(unsafe_code)]
 pub mod apache_static;
+pub mod apache_static_teaching;
+pub mod apache_static_workspace;
 pub mod catalog;
 pub mod client_teaching;
 pub mod debian_packages;

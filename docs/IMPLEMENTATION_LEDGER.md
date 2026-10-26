@@ -1913,3 +1913,39 @@ verify_vm unchanged, restricts projection to7namedtypes with strictID/slice/actu
 duplicate/unknown checks.178Python PASS; read-only retained actual1570/fullprofile
 validation PASS. No input/probe/VM/history/record revision changes, no accepted
 baseline frompartials. Commit/newpincontrol/newID fullretry next.
+
+
+## 2026-10-26 — M118 unchanged scripting baseline accepted; next capability gate
+
+Public9 R3 actual capture completes1570 VM rows/380 vectors and28 fixed closed
+Bash5.3.9 observations, current43/282/43 authored inputs, genuine6/7/8 histories,
+actual9 outcomes, full133 map, unfinished drafts, restore/reset/Stop. Manifest
+8987f4290cf58bdaa7bd7981f4cbeae9454fb4155bff47f4f254c0d8140aac00;
+independent final review40ef01401082e4a41adcfc1f3f555a3a7d3adde15655a3e8bdd3dca727cf51be.
+All138 pins/135 outputs independently rehashed. Exact138 old source/probe/manual/
+Bash pins preserved immutably before next source/build. Min23.585GiB/PSI0/OOM0.
+PriorR1/R2 remain failed/non-COMPLETE, no outcomes fabricated or retagged.
+
+Source-only scoped evaluator10 implementation authorized after this gate. Root
+integrates reviewed Apache backendR4 (13paths, preserving current test-only UI
+catalog cache); first21/resource tests pending. Neither task adds normal labs or
+coverage yet. No new dependencies, host learner execution, public release or
+platform/novice acceptance claim. Installed133 candidate38a stays available.
+
+
+M118 Apache backend first gate:20/21 pure/app tests PASS after fixing a test-only
+14-byte malformed port to a bounded4-byte malformed value; overlimit negative now
+explicitly preserves the prior saved target. First Clippy caught a one-character
+push_str in the new test; changed to push without semantic difference. Immutable
+RequestView batch optimization source-reviewed: public precedence/status vectors
+unchanged, borrowed lifetime prevents stale observations, no persisted cache.
+69 library +20 pure +21 app checks PASS; max32 batch91.05→30.77ms unoptimized.
+Native renderer/private4-task authorship next; no bundled count/coverage promotion.
+
+All-target Clippy/fmt/diff PASS. Affected82 checks PASS (21Apache app,7backup,
+10package Sessions,20package app,6progress sequences,18STP app). New Apache125
+snapshot exactly matches the existing STP125 fixture; test now reuses it, while
+redundant copy stays private. No baseline deleted. Gate observations minimum
+19.71GiB available, max somePSI0.62%, OOMdelta0; no sustained-pressure refusal.
+Private receipt reviews/apache-static/main-backend-gates-r1/RESULT.json. Native
+source worker remains source-only; public catalog133 and candidate38a unchanged.
