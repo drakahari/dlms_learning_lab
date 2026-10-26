@@ -1841,3 +1841,16 @@ in77.53s. This is test runtime, not application startup or a novice study. Min
 reviews/catalog133/full-regression-r2/RESULT.json. AlltargetClippyR4/fmt/diff PASS; public-tree checks
 continue before commit/candidate; installed133 and conditional coverage promotion
 remain pending.
+
+
+M116 committed/pushed38a8098. Clean Fedora44 candidate built at that exact source,
+ELF6d0257e58ccec397f8d374224b0a6b68bb1816365c29541e0da0995327185ddd,
+archive df94f20838a5b712787a4067ed59edb264975434e12acca31d067a6b7c43aa60.
+Target223 dependency notices/source gate passed; min21.72GiB/PSI0/OOMdelta0.
+Owner requested safe pause before packaged acceptance. Candidate12414 reaped,
+workers paused, no heavy child remains. Installed/lifecycle/startup/cold/alignment/
+new8 flows on this exact release ELF remain pending;14cf remains last scoped
+installed acceptance. Matrix unchanged. Private ApacheR4/NATR2 source accepted
+but21/20groups UNRUN, neither applied. Public9collectorR3 repin has not begun:
+only clean38a worktree created; acceptedR2 input/source/tooling remains unrun.
+Precise hashes/commands and independent next steps in CHECKPOINT.md. No release.

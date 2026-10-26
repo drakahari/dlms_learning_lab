@@ -719,3 +719,27 @@ references, not percent complete. Actual Windows/macOS runtime, signing and
 notarization, physical-device keyboard/screen-reader/novice comprehension remain
 pending. Linux notices were collected; the separate macOS dispatch original-
 notice gate remains unresolved. No public release or full-product claim.
+
+
+## M116 candidate prepared; acceptance paused
+
+Source38a8098c8820b487e54e4d65aa377597ddfc7e04 builds a Fedora44 candidate with
+133 authored assignments/33 units. The owner requested a pause immediately after
+building. It has NOT yet passed packaged lifecycle, native startup/reopening,
+alignment or the eight new lesson flows on this exact release ELF. The last scoped
+installed-accepted candidate remains14cf248 above. No release was published.
+
+Open the new candidate for inspection from any terminal directory:
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+ELF SHA-256: `6d0257e58ccec397f8d374224b0a6b68bb1816365c29541e0da0995327185ddd`.
+Archive SHA-256: `df94f20838a5b712787a4067ed59edb264975434e12acca31d067a6b7c43aa60`.
+Builder included223 target dependency packages with notices/source; no new
+dependency. Ordinary build minimum21.72GiB available, PSIavg10zero/OOMdelta0,
+with the shared two-job workflow; not a stress or universal-memory guarantee.
+Exact private candidate receipt: reviews/catalog133/fedora-candidate-38a-r1.
+Full source/native-development evidence and next acceptance commands are in
+CHECKPOINT.md. This artifact is a development candidate, not complete curriculum.
