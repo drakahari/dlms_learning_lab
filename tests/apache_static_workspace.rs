@@ -1,4 +1,8 @@
 //! Prospective app-only model checks. No host Apache/HTTP/command execution.
+#[path = "../examples/support/automation_digest.rs"]
+mod amendment_sha;
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::{
     apache_static as web,
     apache_static_teaching::{self as teaching, Learning},
@@ -516,7 +520,7 @@ fn original125_typed_specs_relative_order_units_and_optional_nil_wire_are_exact(
     assert_eq!(selected.len(), 125);
     for (a, b) in selected.into_iter().zip(&expected) {
         assert_eq!(a.id, b.id);
-        let value = serde_json::to_value(a).unwrap();
+        let value = teaching_amendment::original_scenario(a).unwrap();
         assert_eq!(value, serde_json::to_value(b).unwrap(), "{}", a.id);
         assert!(value.get("apache_static_teaching").is_none());
         let mut a = Attempt::new(a, 1);

@@ -18,6 +18,8 @@ from unittest.mock import patch
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 import automation_before10_oracle as oracle
+sys.path.insert(0, str(ROOT / 'tools' / 'tests'))
+import teaching_amendment
 
 
 @unittest.skipUnless(sys.platform.startswith('linux'), 'fixed Linux developer oracle')
@@ -183,6 +185,21 @@ class FixedAutomationSafety(unittest.TestCase):
         self.assertIn('"$row"', by_id['read-leading-trailing']['source'])
         self.assertNotIn('\\"$row', by_id['read-leading-trailing']['source'])
 
+    def test_closed_teaching_amendment_rejects_manifest_raw_and_lesson_tampering(self):
+        raw = (ROOT / 'tests/fixtures/shell-teaching-amendment-v1.json').read_bytes()
+        data = teaching_amendment.manifest(ROOT)
+        with self.assertRaisesRegex(ValueError, 'manifest SHA256'):
+            teaching_amendment.validate_manifest(raw + b' ')
+        for entry in data['files']:
+            current = (ROOT / entry['path']).read_bytes()
+            with self.assertRaisesRegex(ValueError, 'byte length'):
+                teaching_amendment.reverse_pack(entry, current + b' ')
+            pack = json.loads(current)
+            scenario = pack['scenarios'][entry['scenario_index']]
+            scenario['teaching']['concepts'][0]['text'] += ' unreviewed'
+            with self.assertRaisesRegex(ValueError, 'Whole amended Lesson'):
+                teaching_amendment.historical_example(ROOT, scenario)
+
     def test_original43_authored_inputs_are_exact_registered_pack_metadata(self):
         _, data=oracle.authored_inputs(ROOT)
         self.assertEqual(len(data['scripts']),43)
@@ -199,7 +216,7 @@ class FixedAutomationSafety(unittest.TestCase):
             p=raw_packs[s['id']]
             self.assertEqual(p['solution'],[s['source']])
             self.assertEqual(p['goal']['cases'],s['cases'])
-            self.assertEqual(p['teaching']['example'],s['example_source'])
+            self.assertEqual(teaching_amendment.historical_example(ROOT, p),s['example_source'])
             self.assertEqual(p['teaching']['fixture'],s['example_case'])
         self.assertEqual(data['catalog'],{n:s['version'] for n,s in raw_packs.items()})
         units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())

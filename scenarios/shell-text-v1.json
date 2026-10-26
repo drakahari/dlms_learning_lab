@@ -827,7 +827,7 @@
         "shell-capstone"
       ],
       "teaching": {
-        "prerequisite_note": "Combines the three text-processing lessons with validation, exit status and safe redirection from the earlier report capstone. This lesson introduces uniq -d as the repeated-groups filter.",
+        "prerequisite_note": "Combines the three text-processing lessons with validation, exit status and safe redirection from the earlier report capstone. This lesson adds argument-count and filename comparisons, plus uniq -d as the repeated-groups filter.",
         "concepts": [
           {
             "title": "An identity collision can hide in different rows",
@@ -840,11 +840,15 @@
           {
             "title": "Protect data before publishing a report",
             "text": "Validate both arguments and the source before any > or >>. Then replace the report heading and append the duplicate list. Supplied names are canonical single filenames; real filesystem links/alternate paths require more than textual equality, outside this activity."
+          },
+          {
+            "title": "Check the count and compare names",
+            "text": "The assignment requires exactly two arguments: [ \"$#\" -ne 2 ] succeeds when the supplied argument count is not two. -ne compares numbers; [ \"$input\" = \"$output\" ] compares text exactly. A || B tries B only if A fails; a guard joining invalid checks with || rejects when any check succeeds. The small example has no supplied arguments, so it creates count=2 and two filenames to practice these tests. In the assignment, use the real \"$#\", \"$1\" and \"$2\", and reject an empty output with -z, before any > or >>."
           }
         ],
-        "example": "cut -s -d : -f 1 labels.txt | sort | uniq -d\n",
-        "inputs": "labels.txt contains cable:Store, plug:Lab, cable:Desk and note only, on separate lines.",
-        "try_change": "Change -d to -u and run again. Now only the ID that occurred once is printed.",
+        "example": "count=2\ninput=labels.txt\noutput=example-audit.txt\nif [ \"$count\" -ne 2 ] || [ \"$input\" = \"$output\" ]; then\n    printf 'Choose two distinct example names\\n' >&2\n    exit 2\nfi\ncut -s -d : -f 1 labels.txt | sort | uniq -d\n",
+        "inputs": "No arguments are supplied. The script creates count, input and output as practice values; it does not write an output file. labels.txt contains cable:Store, plug:Lab, cable:Desk and note only, on separate lines.",
+        "try_change": "Change count=2 to count=1 and Run: the guard prints only an error and exits 2 before filtering. Restore count=2, then change output=example-audit.txt to output=labels.txt to exercise the filename collision check. Restore the distinct name afterward.",
         "fixture": {
           "name": "Find repeated example labels",
           "args": [],

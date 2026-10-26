@@ -1,5 +1,7 @@
 //! Opt-in fixed public9→current10 comparison, not a producer or saved recording.
 //! No Bash, process, learner source/path options, or old evidence writes.
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::{
     engine::Goal,
     pack,
@@ -13,6 +15,12 @@ use std::{
 };
 #[path = "support/automation_comparison.rs"]
 mod proof;
+// Reuse this binary's existing historical reader digest without another include.
+mod amendment_sha {
+    pub(super) fn hash(bytes: &[u8]) -> String {
+        super::proof::sha(bytes)
+    }
+}
 const SLICES: [usize; 4] = [1, 16, 32, 64];
 const STOP: &str = "held=$(printf entered > case-child.txt; while true; do printf ''; done)";
 const CHANGED: [&str; 23] = [
@@ -333,7 +341,10 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
             "unchanged reference source",
         );
         let l = lab.teaching.as_ref().unwrap();
-        assert_eq!(l.example, s["example_source"].as_str().unwrap());
+        assert_eq!(
+            teaching_amendment::historical_example(&lab.id, l).unwrap(),
+            s["example_source"].as_str().unwrap()
+        );
         proof::exact(&l.fixture, &s["example_case"], "unchanged example input");
     }
     let vectors = vectors(&authored, &fixed, &boundaries);

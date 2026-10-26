@@ -1,4 +1,8 @@
 //! Registration is append-only; new curriculum must not fabricate learner work.
+#[path = "../examples/support/automation_digest.rs"]
+mod amendment_sha;
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::{course, engine::Goal, pack, progress};
 use std::collections::BTreeMap;
 const NEW: [&str; 8] = [
@@ -23,7 +27,7 @@ fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current140
     let original: Vec<pack::Scenario> =
         serde_json::from_value(baseline["scenarios"].clone()).unwrap();
     assert_eq!(
-        serde_json::to_value(&all[..125]).unwrap(),
+        serde_json::to_value(teaching_amendment::original_catalog(&all[..125]).unwrap()).unwrap(),
         serde_json::to_value(original).unwrap()
     );
     assert_eq!(

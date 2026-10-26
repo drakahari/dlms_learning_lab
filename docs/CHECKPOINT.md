@@ -2,7 +2,31 @@
 
 2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
 No public release. Full curriculum/platform acceptance remains incomplete.
-Latest: source140/35 (42CCNA/28LPIC-1/24LPIC-2/46Bash); exact installed ddb886b passes all new7 flows,72alignment captures, lifecycle,11starts and script/DHCP cold reopening. Full regression1577/0 plus focused pacing regression, Clippy and coverage pass. M121 NAT backend is integrated/unbundled: MAIN full1620PASS0FAIL plus all eleven private checks run explicitly; native renderer/teaching remains next. The earlier fixture/order setup failures are corrected and retained. M123 pure RPM foundation is also gated in MAIN; native NAT renderer is being implemented privately. Read final M120–M123 sections before historical scope statements.
+Latest normal catalog: **140 authored labs / 35 units** — CCNA 42, LPIC-1 28,
+LPIC-2 24, Bash 46. The installed Fedora candidate `ddb886b4d418` remains the latest
+scoped accepted build; its exact launch command appears in INSTALLATION.md.
+
+Current work, in order:
+1. M124 five teaching-only Bash corrections are integrated in MAIN. Focused6 and
+   affected88 checks (including the private comparison), isolated all-target Clippy
+   and186 Python checks pass. MAIN full regression passed1653/0 with11 private checks excluded, then all11
+   passed explicitly. MAIN Clippy/Python211 pass; native review is next.
+   Exact old pack bytes remain reconstructible through a closed test-only amendment;
+   assignment identity, grading, inputs and retained drafts did not change.
+2. M125 NAT renderer passed its private313-test regression and final lint/UI gates.
+   Its72-stage native controller is source-frozen and under independent review.
+   It remains unbundled: no new NAT lab or coverage is claimed. First controller gate compiled but five of six event groups failed (child reveal /
+   modal close); R2 is under repair with strict assertions retained. Gate and inspect
+   the actual native workspace, then integrate teaching and three distinct assignments.
+3. M126 first fixed RPM reference collection completed but used the wrong input
+   domain: bare versions became package names. Original observations are retained.
+   A separately reviewed fixed identical-name/release wrapper is integrated and passed211 MAIN Python checks; a fresh default-sandbox capture is next. No simulator expectations changed.
+4. RPM's pure foundation is integrated and tested, with no normal package commands
+   or authored RPM lessons yet. The closed application/terminal contract is next.
+
+The coverage matrix remains144Partial/1Supporting/1095Open; these are overlapping
+references, not percentages or completed exam objectives. Full curriculum, other
+OS desktop runtime, physical-device accessibility and novice acceptance remain open.
 Root alone runs heavy work; delegated workers remain source-only.
 
 ## Mandatory safety on resume

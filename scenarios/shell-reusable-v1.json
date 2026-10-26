@@ -694,7 +694,7 @@
         "shell-loop"
       ],
       "teaching": {
-        "prerequisite_note": "Combines function return, shift, existence tests, loops and replacement/append. No new syntax is required.",
+        "prerequisite_note": "Combines function return, shift, existence tests, loops and replacement/append. This lesson adds an argument-count guard before checking the source files.",
         "concepts": [
           {
             "title": "Validate before changing the result",
@@ -707,11 +707,15 @@
           {
             "title": "Plan the replacement and append phases",
             "text": "Replace the destination once when validation succeeds, then append each heading and exact file contents in order. cat does not add a missing final line break. The complete assignment specifies the header and output channels."
+          },
+          {
+            "title": "Require enough arguments before preflight",
+            "text": "\"$#\" is the number of supplied arguments, including empty ones. [ \"$#\" -lt 2 ] succeeds when that number is less than two; -lt compares whole numbers, unlike -z, which tests empty text. A destination plus at least one source needs two arguments. The example also receives two arguments, both source names, so its new guard lets the existing file check run. Guard the count before saving $1 and shifting in the assignment."
           }
         ],
-        "example": "available() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            :\n        else\n            return 1\n        fi\n    done\n    return 0\n}\nif available \"$@\"; then\n    printf 'Ready to read\\n'\nelse\n    printf 'Nothing changed\\n'\nfi\n",
-        "inputs": "Arguments are menu.txt and missing.txt. Only menu.txt exists with the text Soup plus a newline.",
-        "try_change": "In the if condition, replace \"$@\" with menu.txt and run again. Observe the successful check; assignment drafts are separate.",
+        "example": "if [ \"$#\" -lt 2 ]; then\n    printf 'Need at least two example files\\n' >&2\n    exit 2\nfi\navailable() {\n    for file in \"$@\"; do\n        if [ -f \"$file\" ]; then\n            :\n        else\n            return 1\n        fi\n    done\n    return 0\n}\nif available \"$@\"; then\n    printf 'Ready to read\\n'\nelse\n    printf 'Nothing changed\\n'\nfi\n",
+        "inputs": "Arguments are menu.txt and missing.txt: two supplied arguments, so the count guard passes. Only menu.txt exists with the text Soup plus a newline.",
+        "try_change": "In the if available condition, replace \"$@\" with menu.txt and run again to observe the successful file check. Restore it, then change -lt 2 to -lt 3: the count guard rejects the two supplied arguments before preflight. Restore -lt 2 afterward; assignment drafts are separate.",
         "fixture": {
           "name": "Preflight without mutation",
           "args": [

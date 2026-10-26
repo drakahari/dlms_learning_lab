@@ -1,5 +1,7 @@
 //! Current-evaluator migration checks from exact actually captured writer8 bytes.
 //! New outcomes exist only when these tests explicitly execute the current VM.
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::{
     backup,
     engine::{Goal, State},
@@ -14,6 +16,7 @@ use std::{
 };
 #[path = "../examples/support/getopts_digest.rs"]
 mod digest;
+use digest as amendment_sha;
 const ACTUAL8: &[u8] = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
 const ACTUAL7: &[u8] = include_bytes!("fixtures/shell-v7-synthetic-writer-progress.json");
 fn empty() -> Progress {
@@ -163,7 +166,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         assert_eq!(s.solution.join("\n"), old["source"].as_str().unwrap());
         let lesson = s.teaching.as_ref().unwrap();
         assert_eq!(
-            lesson.example.as_str(),
+            teaching_amendment::historical_example(&s.id, lesson).unwrap(),
             old["example_source"].as_str().unwrap()
         );
         assert_eq!(

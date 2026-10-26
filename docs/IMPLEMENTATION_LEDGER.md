@@ -2374,3 +2374,56 @@ NO producer/attestation/data/recordchanges). FirstguardedfreshVM+allaffected
 historical/private/progressgatesqueuedafterM126capture under sharedlock; no tests
 or native acceptance yet. Independent RPMhelperreviewby teachingaudit foundno
 materialcodeissue; deadlinewordingcorrected. Continueauthorizedimplementation.
+
+
+## 2026-10-26 — M124 teaching gates and M126 reference-domain correction
+
+Independent review of all46 scripting assignments found five prerequisite gaps:
+argument-count/numeric/text guards in the text and bundle capstones, conditional
+AND/text comparison in file batches, the `test` spelling in case dispatch, and
+printf format reuse for arrays. Five Teaching objects now introduce those concepts;
+two separate practice defaults demonstrate their guards without changing fixture
+inputs or declared outcomes. All assignment IDs, versions, prerequisites, starters,
+objectives, cases and reference solutions remain exact. Existing practice drafts
+and results remain intact; reset receives the revised default.
+
+The closed test-only amendment pins all13 teaching leaves and nine raw byte edits,
+reconstructing each original pack to its immutable historical SHA. Full nonteaching
+scenario comparisons and original captured evaluator evidence remain enforced.
+Focused6 and affected88 tests pass in the isolated checkout, including actual
+writer8 work and the explicit private public9/current comparison. All-target Clippy
+and186 Python checks pass there. MAIN full regression and native review remain
+pending at this entry; no novice usability study is inferred.
+
+The first40-observation Fedora rpmsort collection completed under the default
+sandbox, but its16 mismatches were investigated rather than copied into the model.
+Matching upstream wrapper review showed bare labels were sorted as package names.
+All outputs/completion hashes were reverified and preserved. The corrected fixed
+NVR fixture keeps all20 original version expectations and fixes only equal name /
+release framing; its new fake gates and capture remain pending. Equality, fullEVR
+and package operations are not established by sorting. See RPM_VERSION_REFERENCE.md.
+No new lab count/coverage, host learner execution, dependency or release is added.
+
+
+M124 MAIN complete regression:1653PASS/0FAIL/11ignored across127 harnesses.
+The full run recorded434 memory samples: minimum21.26GiB available, peak some/full
+PSI avg10 both0.18%, OOM delta0, swap-in117pages and swap-out0. This is ordinary
+workload evidence, not a memory guarantee. The runner used2 Cargo jobs /2 test
+threads and project-disk temporary/target directories. MAIN Python checks after
+integrating the independently reviewed fixed NVR reference fixture pass211/211.
+The separate guarded reference capture is still pending; no agreement claim yet.
+
+M125 first controller gate compiled, then1/6 event groups passed. Four hit a
+strict bounded reveal of a control extending3px below its actual child viewport;
+the separate chooser test left Settings open. Exact diagnostics remain private.
+The source author is investigating metric/layout versus event fixture causes;
+no assertion, visibility bound, state transition or original smoke pacing was
+relaxed. The controller/renderer remains private and supplies no normal NAT lab.
+
+
+M124 final MAIN quality follow-up: all11 private-evidence checks passed explicitly
+under the guarded runner, including actual9 histories, backup/restore, selected
+reset, NAT independent context and public9/current comparison. MAIN all-target
+Clippy passes9.08s and211 Python workflow checks pass7.797s. No private historical
+capture or outcome was regenerated. Native teaching review remains the next gate.
+See SHELL_TEACHING_AMENDMENTS.md for the bounded correction and saved-work behavior.

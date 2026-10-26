@@ -1,5 +1,7 @@
 //! Exact append-only normal140 registration; frozen133 data remains authored
 //! input metadata, never regenerated historical learner results.
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::{
     course,
     engine::{self, Goal, State},
@@ -10,6 +12,7 @@ use dlms_learning_lab::{
 use std::collections::{BTreeMap, BTreeSet};
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+use digest as amendment_sha;
 const NEW: [&str; 7] = [
     "shell-preserve-lines",
     "shell-pipeline-status",
@@ -194,6 +197,8 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current140(
     assert_eq!(pins.len(), 31);
     for ((name, bytes), pin) in OLD_PACKS.iter().zip(pins) {
         assert_eq!(*name, pin["path"].as_str().unwrap());
+        let original_bytes = teaching_amendment::original_pack(name, bytes).unwrap();
+        let bytes = original_bytes.as_slice();
         assert_eq!(bytes.len() as u64, pin["bytes"].as_u64().unwrap());
         assert_eq!(
             digest::hash(bytes),
@@ -201,16 +206,20 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current140(
             "Frozen authored pack changed: {name}"
         );
     }
-    let texts = OLD_PACKS
+    let original_packs = OLD_PACKS
         .iter()
-        .map(|(_, bytes)| std::str::from_utf8(bytes).unwrap())
+        .map(|(name, bytes)| teaching_amendment::original_pack(name, bytes).unwrap())
+        .collect::<Vec<_>>();
+    let texts = original_packs
+        .iter()
+        .map(|bytes| std::str::from_utf8(bytes).unwrap())
         .collect::<Vec<_>>();
     let original = pack::load_catalog(&texts).unwrap();
     assert_eq!(original.len(), 133);
     exact(
-        &all[..133],
+        &teaching_amendment::original_catalog(&all[..133]).unwrap(),
         &original,
-        "Every typed original Scenario field",
+        "Every typed original Scenario field except the exact closed teaching amendment",
     );
     let ordered = all[..133]
         .iter()

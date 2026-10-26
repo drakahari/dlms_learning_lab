@@ -1,4 +1,8 @@
 //! Private backend-only fixture, prospective tests; no authored/native acceptance.
+#[path = "../examples/support/automation_digest.rs"]
+mod amendment_sha;
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::{
     backup,
     engine::{self, Goal, State},
@@ -750,7 +754,7 @@ fn original125_source_metadata_unit_order_and_omitted_optional_wire_are_exact() 
         expected.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
     );
     for (a, b) in all.iter().zip(expected) {
-        let encoded = serde_json::to_value(a).unwrap();
+        let encoded = teaching_amendment::original_scenario(a).unwrap();
         assert_eq!(encoded, serde_json::to_value(b).unwrap(), "{} spec", a.id);
         assert!(encoded.get("spanning_tree_teaching").is_none());
         let mut attempt = Attempt::new(a, 1);

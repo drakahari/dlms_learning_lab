@@ -1,5 +1,9 @@
 //! Prospective evaluator10 tests. Bash expectations are exact controlled actual
 //! observations; no historical public9 Record/outcome is relabeled as current.
+#[path = "../examples/support/automation_digest.rs"]
+mod amendment_sha;
+#[path = "support/teaching_amendment.rs"]
+mod teaching_amendment;
 use dlms_learning_lab::shell::{self, Case, Outcome, Vm};
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -455,7 +459,10 @@ fn all43_existing_scripts282_cases_and43_examples_keep_exact_authored_inputs_and
             "source {id}"
         );
         let lesson = lab.teaching.as_ref().unwrap();
-        assert_eq!(lesson.example, old["example_source"].as_str().unwrap());
+        assert_eq!(
+            teaching_amendment::historical_example(&lab.id, lesson).unwrap(),
+            old["example_source"].as_str().unwrap()
+        );
         assert_eq!(
             serde_json::to_value(&lesson.fixture).unwrap(),
             old["example_case"]
