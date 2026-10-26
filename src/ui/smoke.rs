@@ -339,7 +339,9 @@ impl LabApp {
         let immediate_stop = matches!(self.smoke_stage, 4924 | 4925 | 7012 | 7013 | 15014 | 15015)
             || matches!(
                 self.smoke_stage,
-                37067 | 37068 | 37267 | 37268 | 37467 | 37468
+                // Include Run's acknowledgement: a release build can otherwise
+                // exhaust its bounded job during the normal 350ms capture wait.
+                37066 | 37067 | 37068 | 37266 | 37267 | 37268 | 37466 | 37467 | 37468
             );
         if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;

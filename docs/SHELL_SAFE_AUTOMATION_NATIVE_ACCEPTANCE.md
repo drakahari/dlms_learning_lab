@@ -1,6 +1,6 @@
 # Reliable text workflows: native acceptance source plan
 
-Prepared2026-10-26. All seven actual-egui event/controller groups pass through
+Prepared2026-10-26. All eight actual-egui event/controller groups pass through
 the guarded runner. All three development-native Fedora flows passed72 captures
 before final wording/capture polish; installed acceptance remains pending. This controller adds no curriculum, evaluator, grade, host command or
 product panel. It targets the registered140-lab/35-unit source with46 Bash tasks. It is
@@ -38,8 +38,8 @@ post-Continue full raw JSON/portable data/receipt expectation includes only thos
 explicit fields. No receipt or learning key is dropped. Separate incomplete
 drafts, all other attempts and favorites remain checked through Cancel/reset.
 
-Only the six exact Stop-click/observation stages (37067/68,37267/68,37467/68)
-bypass the ordinary350ms controller delay, so a bounded loop can be cancelled
+Only the nine exact Run-acknowledgement/Stop/observation stages
+(37066/67/68,37266/67/68,37466/67/68) bypass the ordinary350ms controller delay, so a bounded loop can be cancelled
 before its instruction budget completes. Other waits/reveal/keyboard/click
 limits use the existing helpers. Resource feedback uses a fixed bounded script
 exceeding the existing32KiB output limit, without host effects or a new budget.
@@ -51,7 +51,7 @@ InnerSize is never represented as proof that a window manager honored a physical
 size. Context geometry is read outside every data closure. No product layout,
 spacing, host display or desktop setting changes.
 
-Seven passing event/phase groups cover exact routing; actual library/example
+Eight passing event/phase groups cover exact routing; actual library/example
 work; wrong/partial/reference/edit/alternate; syntax/unsupported/Stop/limit/retry;
 large-scale typing at two headless widths; and the complete warm/reset flow plus
 two delayed Close ticks. The incremental shared hooks were reviewed and merged without replacing Apache
@@ -69,3 +69,14 @@ has passed headless; the final installed capture still needs visual inspection.
 R1 native scripting geometry was946×929 at100/150/200%; larger requested sizes
 were not observed and are not claimed. Practice/file-detail rows outside those
 captures are not counted as visually reviewed. Original72 PNGs remain retained.
+
+
+Installed d781 candidate follow-through found no live job at the first Stop phase.
+The ordinary350ms Run-acknowledgement wait could consume bounded execution in a
+fast release build; that is a plausible mechanism, not proven exclusive causation.
+The three Run phases now join their exact Stop/observation exceptions. A regression
+through actual render/save/smoke_tick requires live execution and a real Stop for
+all three lessons, while neighboring phases65/69 retain normal pacing. All eight
+controller groups pass. No evaluator, resource budget or normal learning workflow
+changed. Failed evidence remains retained; the replacement installed candidate
+must pass its own native retry before this unit receives installed acceptance.

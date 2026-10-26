@@ -291,3 +291,81 @@ alignment; inspect refined wrong-site/cause and Expected/Actual comparison image
 Current last installed accepted command remains38a in INSTALLATION.md until the
 new exact identity and acceptance are recorded. Do not delete old candidates or
 claim full curriculum, screen-reader/novice or Windows/macOS runtime completion.
+
+
+### Live installed verification / next capability (2026-10-26)
+
+M120 source committed/pushed d7815690523a9049aa6f25491b06cf55084abbf6.
+Clean MAIN candidate built successfully, Linux223 notice/source gate PASS:
+`dist/dlms-learning-lab-0.1.0-gd7815690523a-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+ELF b337373466d41ef6970763e22d35b464776762f99da8f56bc2c5253fb7efb43e;
+archive1651e5c1a1b4b5599c6f80b4bc14da8ad5d7bc3fdf98d485113ab57fafce8de6.
+Exact installed app: .build-artifacts/installations/verified-d7815690523a-gbahmpx6/
+application/dlms-learning-lab. Lifecycleupgrade38a/uninstall/reinstall/desktop/
+originalnine byte retention PASS;1protocol+10quiet Wayland launchesPASS0.865–0.915s;
+actualscript+DHCP two-process cold reopen PASS. No universal startup cure claim.
+
+Installed Apache4 currently RUNNING under root session47912,
+log m120-installed140-apache-r1.log, capture run-yryllia5. Source remains unchanged
+in MAIN; docs alone can record this checkpoint. Root viewed refined actual first
+wrong-site feedback: it now names selected welcome vs required records site,
+with useful retry advice. Do not call the whole4flow accepted before exit/reap.
+Next sameELF3scripting (inspect whole Expected/Actual after realinnerwheel),
+shared72alignment and final representative image review. Acceptance progress:
+reviews/catalog140/installed-d781-acceptance-r1/PROGRESS.json. Do not stop at the
+package. Latest fully accepted installed candidate remains38a until these pass.
+
+Next CCNA foundation has advanced independently, WITHOUT MAIN integration/count:
+new isolatedworktree .build-artifacts/worktrees/nat-current140 atd781 +exact
+reviewed sourceR2fourfiles/tinylibexport. Exclusive Cargo target automatically
+selected .build-artifacts/targets/nat-current140-8cccbf2286e30c9a. All20purechecks
+and scopedlib/testClippy PASS via MAINrunner, rootonly; no corechanges. Receipt
+reviews/nat-foundation/current140-first-gate-r1/RESULT.json; independent sourcepeer
+9e1f4866 found no newmaterialissue. Objective4.1 remainsOpen, no newplayablelab.
+Official current CCNAv1.1 NAT4.1, Cisco13772 and RFC3022 re-opened2026-10-26;
+full objective inventory/futurev2 fingerprints remainunchanged.
+
+NAT adapter contractR2 independently accepted:4cfef7b0a42289394a3b1ba652a5a310f890d6958b3e8f498e58003187b2cbf6,
+manifest9116aa77, peerc77f9719. Root GRANTED ccna_discovery SOURCE-ONLY backend
+implementation in that isolatedworktree, no heavy/MAIN/core/deps/teaching/native/
+registry/normalcount changes. Existing current maps must be inspected, never
+created by Check. Policy-only goals valid when asked, with positivepolicy+
+freshDynamic/reverse proof.4×16freshsteps+4clears <=68calls on sequentialcopies;
+disabled rawdynamic fields retained/inactive. Stage2 ephemeral exact state/goal/
+pending display scheduling obligation before normalcards, never persistedcredit.
+One optional nat_draft must preserve allold140wire/history/progress. Require
+frozenmanifest/patch +rootpeerreview before sole guarded compile slot.
+Independent_review now SOURCE-ONLY researches LPIC1RPM102.5 subset/primarydocs,
+not implementation/hostRPM/referenceexec/newlabs; also available for Natpeer.
+Continue independent work; no publicrelease/OSchanges/cleanup.
+
+
+### Installed d781 scripting failure — replacement candidate next
+
+Installed d781 Apache4 flow reaped exit0/68PNGs run-yryllia5. Scripting run
+run-hv4z32cw failed at37067 with no live job (log m120-installed140-safe-automation-r1).
+First wrong Expected/Actual screenshot is now fully visible and root-reviewed;
+this does NOT make the failed flow accepted. The350ms Run-acknowledgement delay
+could let a release run reach its instruction limit before Stop; sole cause is
+not proven. Root fixed only exact Run phases37066/37266/37466 to join existing
+67/68 immediate pacing, leaving simulation/budgets/normal product unchanged.
+New regression drives actualrender/save/smoke_tick, realRun/Stop and current
+unsolved for each of3, neighbors65/69 stillpaced. All8 groupsPASS4.74s,
+sourcepeer9c15190e; finalClippyrunning session40458 atwrite. No heavyworkerallowed.
+Commit/push this tiny capture-only correction plus checkpoint/docs, then buildnew
+candidate cleanMAIN. Repeat installed acceptance on the NEW SAME ELF, starting
+with full3scripting to catch Stop before longApache/alignment. Keep failedd781,
+alllogs/PNGs/oldcandidates. Last fullyacceptedinstalled remains38a133/33.
+NAT source-only backend continues private/E1; don't overwrite Root pacingfix on
+future merges. No newnormalcounts; current140/35 asabove. RPMproposal99099bc1
+is private/UNRUN, no host RPM executable invoked. No release.
+
+
+Run-ack follow-up final gates: all8 scripting controller groupsPASS; alltarget
+ClippyPASS after ordinary testloop iterator cleanup, no lint waiver. Final actual
+pacer test (3real Run/Stop paths+pacedneighbors) separatelyPASS2.77s. Source
+peer9c15190e accepted narrow timing change. No full1578count claimed: prior full
+suite1577PASS plus new targeted regression are distinct scopes. Normal application,
+all140scenarios, EVAL10/budgets, progress and themes are unchanged. Commit/push
+correction and build replacement candidate; verify the actual release Run/Stop
+before long remaining installed gates. Failedd781 remains retained/unaccepted.

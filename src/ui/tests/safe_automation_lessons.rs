@@ -396,3 +396,87 @@ fn first_wrong_capture_really_scrolls_inner_output_and_paints_full_expected_actu
     );
     assert_eq!(a.smoke_stage, BASE + 21);
 }
+
+#[test]
+fn actual_smoke_pacer_acknowledges_run_then_clicks_stop_before_waiting() {
+    for (n, id) in IDS.iter().enumerate() {
+        let (ctx, mut a) = native_app();
+        let start = BASE + n * STRIDE;
+        a.smoke_stage = start;
+        until(&ctx, &mut a, start + 66, 1200.);
+        let mut observed_running = false;
+        for _ in 0..16 {
+            let events = std::mem::take(&mut a.pending_events);
+            let modifiers = events
+                .iter()
+                .rev()
+                .find_map(|event| {
+                    if let egui::Event::Key { modifiers, .. } = event {
+                        Some(*modifiers)
+                    } else {
+                        None
+                    }
+                })
+                .unwrap_or_default();
+            let _ = ctx.run(
+                egui::RawInput {
+                    screen_rect: Some(egui::Rect::from_min_size(
+                        egui::Pos2::ZERO,
+                        egui::vec2(1200., 950.),
+                    )),
+                    events,
+                    modifiers,
+                    ..Default::default()
+                },
+                |ctx| {
+                    a.render(ctx);
+                    a.save();
+                    observed_running |= a.script_job.is_some();
+                    // Keep ordinary pacing closed. The real Run/Stop phases must
+                    // proceed through smoke_tick without an elapsed-time escape.
+                    a.started = Instant::now();
+                    a.smoke_tick(ctx);
+                },
+            );
+            if a.smoke_stage == start + 69 {
+                break;
+            }
+        }
+        assert_eq!(
+            a.smoke_stage,
+            start + 69,
+            "Run acknowledgement and Stop must use consecutive actual frames"
+        );
+        assert!(
+            observed_running,
+            "The real Run button must create the job before Stop"
+        );
+        assert!(a.script_job.is_none());
+        assert!(
+            a.notice
+                .as_deref()
+                .is_some_and(|s| s.starts_with("Stopped"))
+        );
+        assert!(
+            matches!(&a.progress.attempts[*id].state,engine::State::Script{source,run:None} if source=="while true; do :; done\n")
+        );
+        assert!(!progress::current_solved(
+            &a.progress.attempts[*id],
+            &a.scenarios[a.selected.unwrap()]
+        ));
+    }
+    for offset in [65, 69] {
+        let (ctx, mut a) = native_app();
+        a.smoke_stage = BASE + offset;
+        let _ = ctx.run(egui::RawInput::default(), |ctx| {
+            a.started = Instant::now();
+            a.smoke_tick(ctx);
+        });
+        assert_eq!(
+            a.smoke_stage,
+            BASE + offset,
+            "Neighboring phases retain normal pacing"
+        );
+        assert!(a.pending_events.is_empty() && !a.capture_pending);
+    }
+}

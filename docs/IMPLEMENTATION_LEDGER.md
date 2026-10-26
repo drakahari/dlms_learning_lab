@@ -2055,3 +2055,19 @@ modules, tuning, HTTPS and proxy work remain open. Current overlapping matrix:
 144 Partial, one Supporting and 1095 Open, not a completion percentage. The latest
 accepted installed candidate remains 133/33 at38a; final polished 140 candidate
 and SAME-ELF installed acceptance are next. No public release.
+
+
+### M120 installed follow-through and capture timing correction
+
+Clean d781 Fedora candidate built with223 dependency notices. Its installed
+lifecycle/upgrade38a/uninstall/reinstall/desktop/original-nine byte retention,
+11Wayland starts (ten quiet0.865–0.915s), script/DHCP real two-process reopening
+and all four web workflows (68PNGs) pass on the same ELF b3373734. Refined actual
+feedback names the wrong site and distinguishes no-index403 from access denial.
+The scripting flow failed at first Stop: no live job at phase37067. It is retained
+as failure, not accepted or relabeled. Source review found Run acknowledgement
+still used the ordinary350ms delay. Only phases37066/37266/37466 now join exact
+Stop/observation pacing; normal app execution and all budgets are unchanged.
+The added actual-pacer regression plus all eight controller groups pass; adjacent
+65/69 remain paced. Independent source review9c15190e accepts this scope. A new
+clean candidate and SAME-ELF installed checks remain required. No release.
