@@ -79,4 +79,6 @@ identify status, selected site, mapped file, page text/length, redirect or cause
 rather than saying only that declared values differ. Three specific regression
 groups pass with unchanged grading. Teaching labels and the separate lobby
 example wording match their actual controls. Same-ELF polished installed140
-verification remains pending; earlier source-only statements are historical.
+verification passed at ddb886b: all four native flows/68 captures, including focused
+Light150/Dark200 editing and useful first-difference feedback. Earlier source-only
+statements are historical; this is not novice or other-platform acceptance.

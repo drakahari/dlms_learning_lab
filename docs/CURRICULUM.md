@@ -5,7 +5,9 @@ This is a plan and evidence ledger, not complete exam preparation. Source invent
 **140 authored assignments/35 units:42CCNA,28LPIC-1,24LPIC-2,46Bash/Shell**.
 The new four static-web and three reliable-text assignments pass model/content
 and actual-egui event checks plus all seven development-native Fedora flows.
-Final polished installed acceptance remains pending. The last scoped accepted installed catalog remains133/33.
+Final polished same-ELF installed140 acceptance passed at ddb886b: all seven new
+lesson flows, lifecycle, eleven starts, script/DHCP two-process reopening and shared
+alignment. This is scoped Fedora technical acceptance, not completed curriculum.
 All eight package/STP assignments pass model/content and full installed native
 flows (69 package and48 STP captures) on Fedora38a8098. That same133-lab candidate
 passes lifecycle,11normal Wayland starts, real script/DHCP process reopening and
@@ -251,8 +253,8 @@ responses, valid alternative methods, wrong/partial/hardcoded work, preservation
 source invalidation and separate practice. Both units completed real Fedora
 development-native flows (68web/72script captures), with representative light/dark
 and150/200% renders reviewed. Shared72-frame alignment also passes100/150/200%.
-The final wording/diagnostic/capture refinements still need same-ELF installed
-verification; candidate creation is not that verification.
+The final wording/diagnostic/capture refinements now pass same-ELF installed
+verification at ddb886b; candidate creation alone was not that verification.
 
 Only LPIC-2 v4.5 208.1 parent/K1/K3/K7 gain narrow Partial practice. Static serving
 is not installation, actual Apache commands, logs, authentication, scripting
@@ -261,5 +263,5 @@ HTTPS or proxy operation. Those requirements stay Open. The three scripts do not
 complete safe automation or create new issuer credit; trap/recovery/atomic-file
 projects, associative data and broader shell utilities remain planned. Current
 source140/35 and overlapping144Partial/1Supporting/1095Open are not completion
-percentages; latest accepted installed catalog remains133/33 at38a pending final
+percentages; scoped accepted installed catalog is now140/35 at ddb886b after final
 candidate acceptance. All1240 original source fingerprints/positions are retained.

@@ -2,7 +2,7 @@
 
 2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
 No public release. Full curriculum/platform acceptance remains incomplete.
-Latest: normal source140/35 (42CCNA/28LPIC-1/24LPIC-2/46Bash); all new7 development-native flows and72alignment captures passed. Final polished full regression1577/0, Clippy and coverage pass; installed140 gates are next; installed38a133/33 remains last accepted candidate. Read the latest M120 section before older historical scope statements.
+Latest: source140/35 (42CCNA/28LPIC-1/24LPIC-2/46Bash); exact installed ddb886b passes all new7 flows,72alignment captures, lifecycle,11starts and script/DHCP cold reopening. Full regression1577/0 plus focused pacing regression, Clippy and coverage pass. M121 NAT backend remains isolated/unbundled; first gate has one genuine-history fixture-setup failure under repair. Read final M120/M121 sections before historical scope statements.
 Root alone runs heavy work; delegated workers remain source-only.
 
 ## Mandatory safety on resume
@@ -16,7 +16,7 @@ network targets, old-project/desktop/GPU/swap/service/model changes or new deps.
 Worktree mutations need explicit absolute cwd. No Context calls inside ctx.data
 closures. Delegated workers have NO heavy grants. MIT originals are approved.
 
-## Completed source milestone and candidate
+## Historical M116 source milestone and candidate
 
 Code commit **38a8098c8820b487e54e4d65aa377597ddfc7e04** pushed to origin/main.
 A documentation-only pause/checkpoint commit follows; it does not change that ELF.
@@ -26,7 +26,7 @@ specifications/order,31-unit prefix,43scripts/282cases/43examples and real synth
 writer6/7/8 histories remain exact. No new Attempts/answers/mastery invented.
 Native Rust/offline/simulation-only and28 themes remain intact.
 
-Current scoped INSTALLED-ACCEPTED Fedora candidate38a8098,133/33:
+Historical scoped INSTALLED-ACCEPTED Fedora candidate38a8098,133/33:
 `dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
 Open from any terminal directory:
 "$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
@@ -369,3 +369,51 @@ suite1577PASS plus new targeted regression are distinct scopes. Normal applicati
 all140scenarios, EVAL10/budgets, progress and themes are unchanged. Commit/push
 correction and build replacement candidate; verify the actual release Run/Stop
 before long remaining installed gates. Failedd781 remains retained/unaccepted.
+
+
+### M120 final same-ELF installed140 acceptance / M121 checkpoint (2026-10-26)
+
+Source ddb886b4d41852822a3497daabcc21bc37d80e90 pushed; exact Fedora44 candidate
+`dist/dlms-learning-lab-0.1.0-gddb886b4d418-x86_64-unknown-linux-gnu-fedora-44-candidate`.
+Open from any cwd with:
+`"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gddb886b4d418-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"`.
+ELF90690062330eaa4b4a946c6eaaa282b5e221c42f770f672155025afbc24d0dc8;
+archive bb1c89b52c1d5b043b2fb7fbdf542c73e3cf86910915723b4417aa3978f756ea.
+Installed verified-ddb886b4d418-hqjy9lq7/application/dlms-learning-lab is identical.
+All children reaped exit0: lifecycle upgrade from d781/uninstall/reinstall/desktop/
+original-nine exact bytes,1protocol+10quiet Wayland starts (0.865–0.916s), real
+script/DHCP two-process reopen, three scripting flows72PNGs run-j9ce6mal, four
+web flows68PNGs run-8jgdspl2 and shared72alignment run-67dqqlph. All212 images
+retained privately; root inspected representative actual errors, focus, Light150
+editor and Dark200 fields. Actual scripting946x929, Apache/alignment946x929 and
+1920x1080; do not claim requested wider scripting size was observed. New-seven
+warm exact readback is distinct from script/DHCP cold reopening. Earlier d781
+Stop failure retained, not relabeled. Final narrow capture-pacing correction has
+actual-frame regression; no normal product execution/budget change.
+Private receipt reviews/catalog140/installed-ddb-acceptance-r1/RESULT.json,
+SHA88d8434c189936113ba68dc5b9baaba038b364e60fca90850bab692dd0a2c2c8.
+Linux223 notice/source gate PASS. Nine guarded memory logs in final candidate/
+installed window:1284samples, minimum21.64GiB available, some/full PSIavg10max0.18%,
+OOMcounter unchanged0. No pressure refusal, shared2job/2thread workflow unchanged.
+Historical Wayland exact-driver cause remains unproved; eleven starts are scoped
+observations. Full curriculum, physical-device, screen-reader, novice and
+Windows/macOS desktop acceptance remain open. No public release.
+
+Current inventory140/35=42CCNA/28LPIC-1/24LPIC-2/46Bash, scripting46/314behavioral
+cases/46separate examples. Matrix144Partial/1Supporting/1095Open of1240 overlapping
+references, not completion percentage. No NAT/RPM authored labs or objective credit.
+Native CI40381197535 checks exact ddb: Ubuntu success, Windows Clippy failure under
+investigation, macOS still running at this record. CI is not desktop acceptance.
+
+M121 isolated .build-artifacts/worktrees/nat-current140 at d781, exclusive target
+nat-current140-8cccbf2286e30c9a; no MAIN integration. Reviewed pure BasicNAT20PASS,
+core Clippy PASS. Reviewed adapter R3 compiled: backend21PASS/1FAIL/1ignored;
+failure genuine-history test setup expected6/7/8 but v8 fixture alone lacks all.
+ccna_discovery repairing actual immutable fixture composition, no weakened field
+retention or fabricated histories. Max trial68calls/4clones observed1.752ms (one
+technical sample, not benchmark). Root only heavy slot; worker source-only.
+Next gate corrected frozen source, scoped Clippy, explicit actual9 private test,
+all affected/full regressions, then coherent backend integration preserving ddb
+capture pacing. Only afterward native adapter/teaching/distinct NAT assignments.
+RPM EVR/query contract R2 remains source proposal, no implementation/reference
+execution grant. Continue other independent work; do not stop at packaging.

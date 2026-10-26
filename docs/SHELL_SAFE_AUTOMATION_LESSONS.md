@@ -3,7 +3,9 @@
 2026-10-26. This guide describes the current three-lab `shell-safe-automation`
 unit. Six content groups and seven actual egui controller groups have passed under
 the guarded runner, including the corrected Stop acknowledgement. All three development-native Fedora flows passed72 captures before final
-wording/capture polish; same-ELF installed acceptance remains pending. These checks do not establish full safe automation,
+wording/capture polish; final same-ELF installed acceptance passed at ddb886b with
+all three flows/72 captures, including real release Run/Stop. The retained d781
+Stop-capture failure is not counted as acceptance. These checks do not establish full safe automation,
 novice or accessibility acceptance, other operating systems, or real filesystem
 safety.
 

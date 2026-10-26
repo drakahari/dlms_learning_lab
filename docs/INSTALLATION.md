@@ -4,26 +4,36 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current scoped Fedora candidate: **38a8098c8820**,133 authored labs/33 units
-(42CCNA,28LPIC-1,20LPIC-2,43Bash). Open directly from any terminal directory:
+Current scoped Fedora candidate: **ddb886b4d418**,140 authored labs/35 units
+(42CCNA,28LPIC-1,24LPIC-2,46Bash). Open directly from any terminal directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gddb886b4d418-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-The same installed ELF passes upgrade14cf/uninstall/reinstall/desktop validation
-and exact synthetic original-nine progress retention;11normal Wayland starts;
-real two-process script/DHCP reopening;72shared alignment captures; and all eight
-normal package/STP lesson flows (69+48captures). Representative actual100/150/200%
-light/dark renders, fields/columns/focus/feedback reviewed. No diagnostic backend
-override, desktop changes or personal-progress inspection. Technical synthetic
-inputs are not novice, physical-device, screen-reader or other-platform acceptance.
-ELF6d0257e58ccec397f8d374224b0a6b68bb1816365c29541e0da0995327185ddd;
-archive df94f20838a5b712787a4067ed59edb264975434e12acca31d067a6b7c43aa60.
-Private accepted receipt reviews/catalog133/installed-38a-acceptance-r1/RESULT.json
-SHA6edf1592b456d4d48195bd68adbae08ec903f557d40a90728d934e1f6af3c49e.
-This remains an unsigned development milestone with incomplete curriculum and
-platform acceptance. Historical acceptance entries below retain their own identities.
+The same installed ELF passes upgrade from d781/uninstall/reinstall/desktop
+validation and exact synthetic original-nine progress retention; eleven normal
+Wayland starts; actual two-process script/DHCP reopening;72 shared alignment
+captures; and all seven new lesson flows (68 static-web and72 scripting captures).
+The earlier133 candidate separately passed all eight package/STP flows; those are
+not claimed repeated in this installed pass. Representative100/150/200% light/dark
+renders, fields/columns/focus/feedback reviewed. Apache/alignment measured946x929
+and1920x1080; scripting measured946x929 even when a wider size was requested.
+No diagnostic backend override, desktop changes or personal-progress inspection.
+Technical synthetic inputs are not novice, physical-device, screen-reader or
+other-platform acceptance. New-seven resume uses exact warm raw/portable/receipt
+readback; script/DHCP cold reopening is a distinct actual two-process check.
+
+ELF SHA-256: `90690062330eaa4b4a946c6eaaa282b5e221c42f770f672155025afbc24d0dc8`.
+Archive SHA-256: `bb1c89b52c1d5b043b2fb7fbdf542c73e3cf86910915723b4417aa3978f756ea`.
+Private accepted receipt: reviews/catalog140/installed-ddb-acceptance-r1/RESULT.json,
+SHA-256 `88d8434c189936113ba68dc5b9baaba038b364e60fca90850bab692dd0a2c2c8`.
+Linux223 notices and exact source archives passed the candidate gate. This is an
+unsigned development milestone with incomplete curriculum/platform acceptance.
+The retained d781 candidate failed the scripting Stop capture; it is not relabeled
+accepted. Its replacement changes only exact capture Run-acknowledgement pacing,
+with an actual-frame regression; normal execution and budgets are unchanged.
+Historical acceptance entries below retain their own identities.
 
 Extract the candidate archive. Open a terminal in its extracted folder and run:
 
