@@ -290,7 +290,7 @@ impl Trial {
             && self.positive(None, None)
     }
 }
-#[derive(Clone, Debug, Serialize)]
+#[derive(Clone, Debug, PartialEq, Serialize)]
 pub struct Definition {
     pub initial: State,
     pub requirements: Vec<Requirement>,

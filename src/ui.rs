@@ -19,6 +19,7 @@ mod dhcpv4_workspace;
 mod discovery_workspace;
 mod dns_workspace;
 mod legacy_learning;
+mod nat_workspace;
 mod ospf_workspace;
 mod process_learning;
 mod script_learning;
@@ -41,6 +42,14 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
+    nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
+    nat_choices: Vec<(String, egui::Rect)>,
+    nat_popup: Option<egui::Rect>,
+    nat_static_viewport: Option<egui::Rect>,
+    nat_static_scroll: Option<(egui::Id, egui::Vec2, egui::Vec2)>,
+    nat_feedback: Option<egui::Rect>,
+    nat_observation: Option<egui::Rect>,
     apache_controls: Vec<(String, egui::Rect, bool)>,
     apache_fields: Vec<(String, egui::Rect, egui::Id, bool)>,
     apache_editor: Option<(egui::Rect, egui::Rect, egui::Id, bool)>,
@@ -89,6 +98,10 @@ struct Metrics {
     assignment_action: Option<egui::Rect>,
     settings: Option<egui::Rect>,
     data_export: Option<egui::Rect>,
+    data_file_cancel: Option<egui::Rect>,
+    settings_tabs: Vec<(String, egui::Rect, egui::Rect)>,
+    settings_samples: Option<(egui::Rect, egui::Rect)>,
+    settings_close: Option<(egui::Rect, egui::Id, bool, egui::Rect)>,
     data_restore: Option<egui::Rect>,
     data_file_action: Option<egui::Rect>,
     data_file_viewport: Option<egui::Rect>,
@@ -293,6 +306,7 @@ pub struct LabApp {
     notice: Option<String>,
     metrics: Metrics,
     apache_presentation: apache_static_workspace::Presentation,
+    nat_presentation: nat_workspace::Presentation,
     help_open: bool,
     extra_filters: bool,
     host_activity: bool,
@@ -433,6 +447,7 @@ impl LabApp {
             notice: None,
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
+            nat_presentation: nat_workspace::Presentation::default(),
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -445,6 +460,10 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if let Some(stage) =
+                Self::nat_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("apache-static-lessons")
             {
@@ -661,6 +680,7 @@ impl LabApp {
     }
     fn launch(&mut self, i: usize) {
         self.invalidate_apache_presentation();
+        self.nat_presentation.clear();
         self.script_job = None;
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
@@ -834,6 +854,7 @@ impl LabApp {
     }
     fn reset_attempt(&mut self, i: usize) {
         self.invalidate_apache_presentation();
+        self.nat_presentation.clear();
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
@@ -1111,7 +1132,7 @@ impl LabApp {
                         self.scenarios
                             .iter()
                             .find(|s| &s.id == *id)
-                            .is_some_and(|s| progress::current_solved(a, s))
+                            .is_some_and(|s| self.visible_solved(a, s))
                     })
                 })
                 .count();
@@ -1124,8 +1145,7 @@ impl LabApp {
                             .iter()
                             .find(|s| &s.id == *id)
                             .is_some_and(|s| {
-                                !progress::current_solved(a, s)
-                                    && progress::legacy_script_credit(a, s)
+                                !self.visible_solved(a, s) && progress::legacy_script_credit(a, s)
                             })
                     })
                 })
@@ -1172,7 +1192,7 @@ impl LabApp {
                                 .progress
                                 .attempts
                                 .get(id)
-                                .is_none_or(|a| !progress::current_solved(a, s))
+                                .is_none_or(|a| !self.visible_solved(a, s))
                     })
                 });
             ui.horizontal_wrapped(|ui| {
@@ -1222,10 +1242,12 @@ impl LabApp {
                 self.filter.search.clear();
                 self.selected = None;
                 self.invalidate_apache_presentation();
+                self.nat_presentation.clear();
             }
         }
     }
     fn library(&mut self, ui: &mut egui::Ui) {
+        self.nat_library_prepass();
         ui.heading("Practice library");
         ui.add_space(2.);
         ui.horizontal_wrapped(|ui| {
@@ -1403,7 +1425,7 @@ impl LabApp {
                     s,
                     &self.filter,
                     a.is_some(),
-                    a.is_some_and(|a| progress::current_solved(a, s)),
+                    a.is_some_and(|a| self.visible_solved(a, s)),
                     self.progress.favorites.contains(&s.id),
                 )
             })
@@ -1494,7 +1516,9 @@ impl LabApp {
                             },
                         );
                         let a = self.progress.attempts.get(&s.id);
-                        let complete = a.is_some_and(|a| progress::current_solved(a, s));
+                        let complete = a.is_some_and(|a| {
+                            nat_workspace::solved_with_memo(&self.nat_presentation.memo, a, s)
+                        });
                         let favorite = self.progress.favorites.contains(&s.id);
                         let status = if a.is_some_and(|a| progress::legacy_script_credit(a, s))
                             && !complete
@@ -1705,6 +1729,7 @@ impl LabApp {
     }
     fn render(&mut self, ctx: &egui::Context) {
         self.metrics = Metrics::default();
+        self.nat_presentation.memo.begin_frame();
         ctx.set_zoom_factor(self.scale);
         controls::configure(ctx);
         self.advance_scripts(ctx);

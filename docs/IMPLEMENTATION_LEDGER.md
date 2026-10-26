@@ -2474,3 +2474,24 @@ feedback prefixes and a missing arrow glyph. R5 fixes and actual wide capture ar
 under source-only work before normal integration. This is not an authored NAT unit.
 The reviewed three-task teaching contract explicitly bounds all worked/experiment/
 repair action lists1..16 with pre-body17th rejection. No count/coverage promotion.
+
+
+## 2026-10-26 — M125 native integration, still no authored NAT credit
+
+R5 passes8 event groups, Clippy and the actual72-stage Fedora flow with24PNG in
+`run-_146_j9a`. Observed1920×1080 fullscreen100 and946×929 windowed150/200,
+PPP1.15/1.725/2.3. Root inspected initial and partial wide plus both focused narrow
+views. One map's fields are visible together, status wording is not duplicated,
+and ASCII arrows render. No model/bool/trial/pacing/strict-visibility weakening.
+R1/R2 failed events, R3 oscillation trace, R4 technical native images remain retained.
+
+Integrated13 exact renderer/controller paths into MAINc868a19, preserving the newer
+five teaching amendments and Root's visible-example helper/test. All659 other
+tracked files initially rehashed unchanged; explicit documentation updates follow.
+MAIN UI322/0,97.54s; all-target Clippy14.21s; model/backend43/0 including actual9
+history/backup/reset pass. No complete1677/full-project count is claimed: the
+last whole-project1653 run predates the UI addition. No current issuer/source
+fingerprint or objective status changed.4.1 remains Open; planned static/pool/
+handover assignments and their teaching/practice are not authored coverage yet.
+The additional Settings Close and chooser Cancel are real controls; no click-through
+or hidden flag switch substitutes for them in native checks.

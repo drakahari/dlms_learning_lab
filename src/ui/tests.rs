@@ -9,6 +9,8 @@ mod dhcpv4_lessons;
 mod getopts_history;
 mod getopts_lessons;
 mod mac_learning;
+mod nat;
+mod nat_native;
 mod ospf;
 mod safe_automation_lessons;
 mod seed_learning;

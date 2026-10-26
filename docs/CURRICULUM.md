@@ -272,8 +272,9 @@ candidate acceptance. All1240 original source fingerprints/positions are retaine
 The independently reviewed [pure model](NAT_SUBSET.md) and
 [typed workspace backend](NAT_WORKSPACE_SUBSET.md) pass their compiler, outcome,
 alternate-policy, bound, invalidation and progress-retention gates. They model
-inside-source static and pool address mappings. There is no native workspace or
-authored NAT lesson yet; current CCNA4.1 stays **Open**, and140/35 and all1240
+inside-source static and pool address mappings. The [native workbench](NAT_NATIVE.md)
+now passes MAIN UI/model gates and a scoped actual Fedora technical flow. It remains
+unbundled with no authored NAT lesson; current CCNA4.1 stays **Open**, and140/35 and all1240
 issuer fingerprints/status totals remain unchanged. The planned unit separates
 static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
 It does not promise PAT, transport sessions, IOS or actual packet delivery. The

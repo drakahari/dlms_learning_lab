@@ -18,6 +18,7 @@ mod legacy_terminal;
 mod mac_layout;
 mod mac_learning;
 mod mac_lessons;
+pub(in crate::ui) mod nat;
 mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
@@ -553,6 +554,13 @@ impl LabApp {
             }
             n @ (7600..=7639 | 7660..=7666) => {
                 let (advance, capture) = self.acl_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ nat::FIRST..=nat::LAST => {
+                let (advance, capture) = self.nat_native(ctx, n);
                 if !advance {
                     return;
                 }

@@ -172,15 +172,19 @@ impl LabApp {
         if let Some(mut browser) = self.data_tools.browser.take() {
             let mut open = true;
             let mut chosen = false;
+            let mut cancelled = false;
             let mut navigate = None;
             egui::Window::new(match browser.mode{Mode::Export=>"Export progress backup",Mode::Restore=>"Choose progress backup"}).open(&mut open).default_width(620.).default_height(360.).max_width((ctx.content_rect().width()-24.).max(200.)).max_height((ctx.content_rect().height()-24.).max(140.)).vscroll(true).resizable(true).show(ctx,|ui|{
     ui.label(match browser.mode{Mode::Export=>"Choose a folder and an unused filename. This saves your progress and both kinds of drafts.",Mode::Restore=>"Choose a DLMS backup or an earlier progress JSON file. You will review it before anything is replaced."});
     ui.horizontal_wrapped(|ui|{if ui.button("Up a folder").clicked(){navigate=browser.folder.parent().map(Path::to_path_buf);}
     if ui.button("Documents").clicked(){navigate=Some(self.backup_folder());}});
     ui.add(egui::Label::new(browser.folder.to_string_lossy()).wrap());
-    // Reserve the two footer controls inside the actual chooser viewport.
+    // Reserve the filename row and measured wrapped action rows inside the chooser.
     // A long folder path or extra recovery files must not hide Check backup.
-    let footer=2.*controls::height(ui)+3.*ui.spacing().item_spacing.y;
+    let action_text=match browser.mode{Mode::Export=>"Save backup",Mode::Restore=>"Check backup"};
+    let action_width=controls::button_width(ui,action_text)+controls::button_width(ui,"Cancel")+ui.spacing().item_spacing.x;
+    let action_rows=if action_width<=ui.available_width(){1.}else{2.};
+    let footer=(1.+action_rows)*controls::height(ui)+(2.+action_rows)*ui.spacing().item_spacing.y;
     let row=ui.text_style_height(&egui::TextStyle::Body);
     let file_height=(ui.clip_rect().bottom()-ui.cursor().top()-footer).clamp(row,row*12.);
     egui::ScrollArea::vertical().id_salt("backup-files").min_scrolled_height(0.).max_height(file_height).show(ui,|ui|{
@@ -194,9 +198,17 @@ impl LabApp {
         self.metrics.data_filename=Some(field.rect);self.metrics.data_filename_id=Some(field.id);
     });
     if let Some(e)=&browser.error{ui.colored_label(palette(ui).error,e);}
-    let action=ui.add(primary(ui,match browser.mode{Mode::Export=>"Save backup",Mode::Restore=>"Check backup"}));
-    self.metrics.data_file_action=Some(action.rect);self.metrics.data_file_viewport=Some(ui.clip_rect());chosen=action.clicked();
+    ui.horizontal_wrapped(|ui| {
+        let action=ui.add(primary(ui,action_text));
+        self.metrics.data_file_action=Some(action.rect);self.metrics.data_file_viewport=Some(ui.clip_rect());chosen=action.clicked();
+        let cancel=ui.add(button("Cancel"));name_control(&cancel,"Cancel file selection without changing progress");
+        self.metrics.data_file_cancel=Some(cancel.rect);cancelled=cancel.clicked();
+    });
    });
+            if cancelled {
+                open = false;
+                chosen = false;
+            }
             if let Some(folder) = navigate {
                 browser.folder = folder;
                 browser.refresh();

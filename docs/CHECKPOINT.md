@@ -14,15 +14,15 @@ Current work, in order:
    clicked below the viewport; the existing reveal helper and a100/150/200 event
    regression fix it. This follow-up is capture-only; normal workflows are unchanged.
    Assignment identity/grading/inputs and old drafts/records remain intact.
-2. M125 NAT remains private/unbundled. Renderer313 checks and controller R4 six
+2. M125 NAT workbench is integrated in MAIN but remains unbundled. Renderer313 checks and controller R4 six
    event groups, Clippy and actual72-stage Fedora flow pass. Measured scrolling
    animation oscillation, rather than a hard limit, explained earlier failures;
    bounded settling preserves strict visibility and original pacing. Actual images
    exposed a cramped single-map list, duplicate status prefixes and an unsupported
-   arrow glyph. R5 fixes pass all8 event groups, lint and build; actual wide/windowed
-   capture is running. Initial wide images show the corrected fields/text.
-   Then integrate current MAIN safely and build the reviewed three-task teaching unit
-   (contractR3). No NAT authored-lab count or objective credit yet.
+   arrow glyph. R5 fixes pass8 event groups and actual24-image wide/windowed flow.
+   Main integration preserves all newer data/capture changes;322 UI,43 model checks
+   and Clippy pass. Source commit/fresh teaching worktree is next, then implement the
+   reviewed three-task unit (contractR3). No NAT authored count/objective credit yet.
 3. M126 corrected fixed-NVR reference is pushed (`78d5e1b`) and completed under the
    default sandbox:28 strict orders match,12 ties inconclusive,0 mismatches. Original
    wrong-domain capture remains exact. No fullEVR/equality/package-operation proof.

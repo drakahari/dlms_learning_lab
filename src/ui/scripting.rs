@@ -465,11 +465,22 @@ impl LabApp {
     pub(super) fn appearance_preview(&mut self, ctx: &egui::Context) {
         if self.settings_open || self.theme_preview {
             let mut open = true;
+            let mut close_settings = false;
             egui::Window::new("Settings").open(&mut open).default_width(500.)
                 .max_width((ctx.content_rect().width()-2.*f32::from(controls::PAD_X)).max(0.))
                 .max_height((ctx.content_rect().height()-2.*f32::from(controls::PAD_Y)).max(0.))
                 .resizable(true).vscroll(true).show(ctx,|ui|{
-                ui.horizontal_wrapped(|ui| { ui.selectable_value(&mut self.settings_data,false,"Appearance");ui.selectable_value(&mut self.settings_data,true,"Your data"); });
+                ui.horizontal_wrapped(|ui| {
+                    let appearance=ui.selectable_value(&mut self.settings_data,false,"Appearance");
+                    self.metrics.settings_tabs.push(("appearance".into(),appearance.rect,ui.clip_rect()));
+                    let data=ui.selectable_value(&mut self.settings_data,true,"Your data");
+                    self.metrics.settings_tabs.push(("data".into(),data.rect,ui.clip_rect()));
+                    let size=egui::vec2(controls::button_width(ui,"Close settings"),controls::height(ui));
+                    let close=ui.add_enabled(!self.data_tools.modal_open(),button("Close settings").min_size(size));
+                    name_control(&close,"Close settings without changing progress");
+                    self.metrics.settings_close=Some((close.rect,close.id,close.enabled(),ui.clip_rect()));
+                    close_settings=close.clicked();
+                });
                 if self.settings_data { egui::ScrollArea::vertical().id_salt("data-settings-scroll").max_height(ctx.content_rect().height()*0.65).show(ui,|ui|self.data_settings(ui)); } else {
                 ui.heading("Appearance");
                 ui.label(RichText::new(format!("Version {} · Build {}",env!("CARGO_PKG_VERSION"),option_env!("DLMS_BUILD_REVISION").unwrap_or("development").chars().take(12).collect::<String>())).small());
@@ -477,7 +488,7 @@ impl LabApp {
                 ui.label(format!("{} · {}",theme::find(&self.theme_id).group,theme::find(&self.theme_id).name));
                 ui.label("Selection previews immediately and is saved locally. Your desktop theme stays unchanged.");
                 egui::ScrollArea::vertical().max_height(ctx.content_rect().height()*0.65).show(ui,|ui|{
-                    egui::CollapsingHeader::new("Theme samples").default_open(self.theme_preview).show(ui, |ui| {
+                    let samples=egui::CollapsingHeader::new("Theme samples").default_open(self.theme_preview).show(ui, |ui| {
                     ui.label("Examples only · These controls demonstrate appearance and perform no lab actions.");
                     card(ui).show(ui,|ui|{
                         ui.label("Readable workspace text");
@@ -497,6 +508,7 @@ impl LabApp {
                         ui.label("Tab moves focus; the focused control has a contrasting outline.");
                     });
                     });
+                    self.metrics.settings_samples=Some((samples.header_response.rect,ui.clip_rect()));
                     egui::CollapsingHeader::new("Sources & attribution").show(ui,|ui|{
                         ui.label("Five stock DLMS palettes, all 22 official Omarchy v4.0.4 palettes, and the accepted Learning Lab Navy. DLMS and upstream Omarchy Ethereal remain distinct entries.");
                         ui.label("Omarchy revision c668141e9c42b13c80c9ca4ea108e11708c5e8a5 · Native role/contrast adaptations.");
@@ -506,6 +518,9 @@ impl LabApp {
                 });
                 }
             });
+            if close_settings {
+                open = false;
+            }
             self.settings_open = open;
             if !open {
                 self.theme_preview = false;
