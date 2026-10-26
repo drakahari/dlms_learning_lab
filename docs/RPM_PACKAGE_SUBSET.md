@@ -6,7 +6,10 @@ mistake is retained: six files/archive produced8173 tokens,19 below8192. The
 corrected near-cap valid control uses six; the token-only negative uses seven
 (9326). Limits and strict assertions were preserved. One keys-only iteration lint
 was corrected without a waiver. MAIN integration gates are recorded separately.
-No real RPM/DNF reference has run; EVR expectations remain documentation-derived.
+The first fixed rpmsort collection has run, but bare version labels reached the
+wrapper's package-name ordering and do not establish version conformance; see
+[RPM_VERSION_REFERENCE.md](RPM_VERSION_REFERENCE.md). EVR expectations remain
+documentation-derived. No package operation or DNF reference has run.
 No engine State/Goal, application persistence, CLI, renderer, lesson, registry,
 dependency or objective status change. All140 existing activities remain intact;
 this library supplies no course credit or real RPM transaction conformance.
@@ -20,8 +23,8 @@ sources checked2026-10-26: [LPI v5.0 102.5](https://www.lpi.org/our-certificatio
 [DNF4](https://dnf.readthedocs.io/en/stable/command_ref.html) and
 [DNF5](https://dnf5.readthedocs.io/en/latest/commands/repoquery.8.html).
 No upstream implementation code is imported/copied. Expected vectors are authored
-from behavior documentation, not observed utility results. rpm/rpmsort installed
-paths were inspected earlier; neither version nor any operation was invoked.
+from behavior documentation, not observed utility results. The fixed rpmsort
+collection is development-only and does not supply package-operation evidence.
 
 ## Boundary and separate authorities
 
@@ -121,9 +124,11 @@ maxima fit together. No global2MiB pack/16MB progress limit is increased. Propos
 max legal escaped/combined tests independently count actual serialized keys/values;
 no size/performance result is claimed before the first guarded gate.
 
-Corrected R2 tests remain prospective until their next guarded gate. No command adapter, app
-engine export or actual package/reference execution is added; the tiny lib module
-export is for the pure test API. LPI102.5 also requires YUM/Zypper and signatures;
+Corrected pure-model tests passed23/23 in the isolated checkout and MAIN.
+MAIN's focused library/NAT/RPM gate passed140 checks and all-target Clippy passed.
+The latest complete1620-check regression predates this RPM module; a new complete
+regression has not been claimed. No command adapter, app engine State or actual
+package operation is added; the tiny lib module export is for the pure test API. LPI102.5 also requires YUM/Zypper and signatures;
 this foundation is not a practical/objective completion claim. Native teaching,
 source/command annotations, saved draft admission and genuine-history app tests
 require later explicitly reviewed contracts.

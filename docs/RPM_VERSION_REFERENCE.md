@@ -1,18 +1,26 @@
 # Fixed RPM VERSION sorting reference
 
-2026-10-26. Source-only developer collector; all23 new Python groups and actual
-reference collection are **unrun** at this handoff. The pure RPM core passed its
-separate23 model checks and scoped Clippy; those checks are not real RPM results.
+2026-10-26. The original bare-label collector passed208 Python workflow tests, including23 new
+fake-process groups, in both its isolated checkout and MAIN. The first actual
+Fedora capture completed40 sequential observations under the default development
+sandbox. **It does not establish RPM version conformance:**12 strict observations
+matched,16 did not, and12 tied controls remain inconclusive. The bare labels were interpreted as package names, so those observations test
+name sorting rather than version comparison. They must not change the core or
+be reported as reference agreement. The pure RPM core's23 model checks are separate.
 This tool does not provide an application command, package transaction, dependency
 resolver, learner-script host runner, curriculum lab or objective coverage.
 
-The first reference is deliberately small:20 reviewed VERSION-component pairs,
-each supplied in both literal input orders. The only program is the reviewed
+The corrected reference is deliberately small:20 reviewed VERSION-component pairs,
+each supplied in both literal input orders as `dlms-oracle-VERSION-1`. The fixed
+NAME and RELEASE are identical across each comparison. The only program is the reviewed
 `/usr/bin/rpmsort` ELF. Its retained nofollow file descriptor is hashed before and
 after execution and used as the executable path. There are **no options or file
 arguments**, including no `--version`, `--reverse`, `--config` or `--`. Nothing
 invokes a shell, package manager, macro evaluation, RPM database or package script.
-The source fixture remains empty of observations. No input can be supplied by a
+Both the original VERSION fixture and the new, separately hash-pinned NVR fixture
+remain empty of observations. The collector validates every original pair, expectation
+and meaning against the unchanged original fixture before accepting its framed copy.
+No input can be supplied by a
 learner or caller; its full bytes must match the reviewed digest.
 
 The official [rpmsort(1)](https://rpm.org/docs/6.0.x/man/rpmsort.1) and
@@ -21,12 +29,40 @@ support the documented expectations. Manual URLs/date and the pinned reviewed
 contract are provenance; no claim of a retained full manual byte copy is made.
 The15 original full-EVR vectors remain unchanged. Their release-text projections
 are only VERSION inputs here; epoch ordering and full EVR composition are excluded.
-The5 extras were separately reviewed. An observed sorted pair cannot prove
+The5 extras were separately reviewed. Only VERSION varies inside the fixed
+NVR labels; there is no epoch/architecture/full-EVR inference. An observed sorted pair cannot prove
 comparator equality: tied controls always leave equality and strict compatibility
 null, regardless of input/output order. A strict mismatch is retained as an actual
 observation and requires scope review; it never rewrites the manual expectation
 or adjusts the model automatically. COMPLETE means all observations were captured,
 not that the model matches or the cases prove full RPM conformance.
+
+## Input-domain diagnosis and source-only correction
+
+The retained first capture supplied bare VERSION strings. The matching official
+[6.0.2 tool wrapper](https://github.com/rpm-software-management/rpm/blob/rpm-6.0.2-release/tools/rpmsort.cc),
+checked2026-10-26, splits package labels using the last two hyphens (lines48–82).
+It first compares the remaining NAME as plain text; only equal names reach its
+VERSION/RELEASE comparator calls (lines85–115). A no-hyphen label therefore stays
+entirely in NAME. The observed `10` before `2`, and a release before its `~rc`
+text, agree with that name comparison. They are not RPM VERSION-comparator
+counterexamples. This is a collector input-domain mistake, not evidence to change
+our independent model or expected orders. The matching5280-byte upstream wrapper
+retains SHA-256 `86bca909466243a90423cb4f7cd8f14ceb1915d99f47a6341cef945fb31d1786`.
+Exact downstream build correspondence remains qualified as in the startup audit.
+No GPL comparator implementation was read or copied into the model.
+
+The new `rpmsort-version-nvr-inputs.json` preserves the original20 VERSION pairs
+and their authored expected orders and adds fixed `dlms-oracle-` / `-1` framing.
+This puts the varying labels in the wrapper's VERSION position while NAME and
+RELEASE remain identical. The collector accepts no caller-selected name, release,
+fixture or pattern. It preserves raw full-NVR stdin/stdout and checks full-NVR
+multisets/orders derived only by framing the independent original expectations.
+The258-byte stdin limit, argv, environment and all process/evidence limits remain
+unchanged. This correction and its25 fake-process guard groups passed as part of211 MAIN
+Python workflow checks on2026-10-26. The corrected actual capture is pending; only a
+new capture ID after source review may supply observations. Old fixtures, old
+COMPLETE/raw evidence, the15 full-EVR model vectors and the pure model stay exact.
 
 ## Trusted executable and qualified startup evidence
 
@@ -82,21 +118,56 @@ unchanged pins, exact outputs, quiescence and final deadline checks. A later
 directory-sync failure is reported as a committed durability warning, never
 misreported as a retryable uncommitted capture. No old evidence is deleted.
 
-## Prospective gates
+## Workflow and captured evidence
 
-After independent source review and integration into MAIN, root may run:
+After independent source review and integration into MAIN, the guarded commands are:
 
 ```sh
 python3 tools/dev.py python-tests
-python3 tools/dev.py tool rpm_version_oracle.py --capture-id version-components-r1
+python3 tools/dev.py tool rpm_version_oracle.py --capture-id version-via-nvr-r2
 ```
 
 The first command discovers `tools/tests/test_rpm_version_oracle.py` using only fake
-processes. It never runs the reference program. The second command requires an
-explicit later actual-reference grant and a new ID; it is not authorized by this
-source-only handoff. Tests cover closed input/CLI admission, lock/MAIN/environment,
+processes. It never runs the reference program. The second command requires a new ID and the fixed trusted-tool conditions above.
+It accepts no caller-provided fixture or command. A new actual corrected capture
+requires the reviewed fixed-tool conditions; no corrected actual capture has run
+yet. The211-check MAIN fake/workflow gate passed before any corrected tool launch. Tests cover closed input/CLI admission, lock/MAIN/environment,
 actual aggregate growth, exact ELF FD and output protocols, inconclusive ties,
-40-child full fake capture, no-clobber/partial retention, source drift, whole
+fixed NAME/RELEASE framing and unchanged original expected pairs,40-child full
+fake capture, no-clobber/partial retention, source drift, whole
 deadline before launch and publication, fake timeout/held-pipe cleanup, and actual
 stream/aggregate byte limits. No real utility subprocess, compiler, VM or model
 was started while authoring these files.
+
+
+The retained first capture is `version-components-m126-r1`, source `a194ff8`.
+Its54,624-byte manifest SHA-256 is
+`e32213a32c505ac39db7d8943f495b59e016c80b1f610df29ee5c5a824d86c00`.
+All retained output hashes and the no-clobber completion marker were independently
+read back. `COMPLETE` records collection success, while
+`strict_cases_compatible=false` records disagreement. None of the20 expected
+pairs, original15 full-EVR model vectors or observed outputs was rewritten.
+The runner exited with no active/unfinished-child marker; its one memory sample
+reported23.48GiB available, zero memory pressure and zero OOM kills. This short
+collection is not a stress test or a guarantee for other workloads.
+
+
+## Why bare VERSION inputs were the wrong reference domain
+
+Review of the matching official
+[rpmsort wrapper at rpm-6.0.2-release](https://github.com/rpm-software-management/rpm/blob/rpm-6.0.2-release/tools/rpmsort.cc)
+on2026-10-26 explains the mismatch. The wrapper splits package labels using the
+last two hyphens and sorts package names before their version and release parts.
+A label with no hyphens remains a package name. For example, the captured `10`
+before `2` is lexicographic name ordering, not evidence against numeric version
+comparison. The earlier startup audit deliberately did not inspect that callback;
+the initial component-only contract therefore overstated the usable input domain.
+The mistake and all raw observations are retained.
+
+A corrected, separately pinned fixture will surround each unchanged version with
+the same package name and release (`dlms-oracle-VERSION-1`). That keeps name and
+release constant so differing versions reach the version comparison branch. It
+requires fresh fake-process gates and a new capture identity; the original capture
+will never be overwritten or relabeled as a conformant comparison. Equality,
+complete epoch/version/release behavior and actual package operations remain
+outside the proposed sorting evidence. No upstream implementation is copied.

@@ -25,6 +25,7 @@ class RpmVersionOracle(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory(prefix='rpm-oracle-guards-')
         self.root = Path(self.temp.name).resolve()
         self.raw, self.rows = oracle.load_fixed(ROOT)
+        self.version_raw = oracle.safe.read_bytes(ROOT / oracle.VERSION_FIXED, oracle.FIXTURE_CAP)
 
     def tearDown(self):
         self.temp.cleanup()  # Only fresh tiny fixtures owned by this test.
@@ -51,7 +52,8 @@ class RpmVersionOracle(unittest.TestCase):
             value['cases'][0]['a'] = text
             raw = json.dumps(value).encode()
             with patch.object(oracle, 'FIXED_SHA', hashlib.sha256(raw).hexdigest()), \
-                 patch.object(oracle.safe, 'read_bytes', return_value=raw):
+                 patch.object(oracle.safe, 'read_bytes', side_effect=lambda p, cap: (
+                     self.version_raw if Path(p) == ROOT / oracle.VERSION_FIXED else raw)):
                 with self.assertRaises(oracle.safe.OracleError, msg=repr(text)):
                     oracle.load_fixed(ROOT)
         for change in ('observation', 'extra', 'count', 'order', 'boolean'):
@@ -63,8 +65,42 @@ class RpmVersionOracle(unittest.TestCase):
             else: value['cases'][0]['docs_expected_order'] = True
             raw = json.dumps(value).encode()
             with patch.object(oracle, 'FIXED_SHA', hashlib.sha256(raw).hexdigest()), \
-                 patch.object(oracle.safe, 'read_bytes', return_value=raw):
+                 patch.object(oracle.safe, 'read_bytes', side_effect=lambda p, cap: (
+                     self.version_raw if Path(p) == ROOT / oracle.VERSION_FIXED else raw)):
                 with self.assertRaises(oracle.safe.OracleError): oracle.load_fixed(ROOT)
+
+    def test_fixed_nvr_framing_preserves_all_original_pairs_and_expectations(self):
+        original = json.loads(self.version_raw)
+        self.assertEqual(hashlib.sha256(self.version_raw).hexdigest(), oracle.VERSION_SHA)
+        self.assertEqual(original['observations'], [])
+        for row, version in zip(self.rows, original['cases']):
+            self.assertEqual({key: row[key] for key in version}, version)
+            self.assertEqual(row['nvr_a'], 'dlms-oracle-' + version['a'] + '-1')
+            self.assertEqual(row['nvr_b'], 'dlms-oracle-' + version['b'] + '-1')
+            self.assertLessEqual(len((row['nvr_a'] + '\n' + row['nvr_b'] + '\n').encode()), 258)
+        self.assertEqual(self.rows[10]['nvr_a'], 'dlms-oracle-2-1')
+        self.assertEqual(self.rows[10]['nvr_b'], 'dlms-oracle-10-1')
+        self.assertEqual(self.rows[6]['nvr_a'], 'dlms-oracle-1.0~rc1-1')
+
+    def test_no_arbitrary_name_release_bare_label_epoch_or_original_expectation_change(self):
+        for change in ('name', 'release', 'bare', 'epoch', 'expectation'):
+            value = json.loads(self.raw)
+            row = value['cases'][0]
+            if change == 'name': row['nvr_a'] = 'foreign-2-1'
+            elif change == 'release': row['nvr_a'] = 'dlms-oracle-2-2'
+            elif change == 'bare': row['nvr_a'] = row['a']
+            elif change == 'epoch': row['nvr_a'] = 'dlms-oracle-9:2-1'
+            else: row['docs_expected_order'] = -1
+            raw = json.dumps(value).encode()
+            with patch.object(oracle, 'FIXED_SHA', hashlib.sha256(raw).hexdigest()), \
+                 patch.object(oracle.safe, 'read_bytes', side_effect=lambda p, cap: (
+                     self.version_raw if Path(p) == ROOT / oracle.VERSION_FIXED else raw)):
+                with self.assertRaises(oracle.safe.OracleError, msg=change):
+                    oracle.load_fixed(ROOT)
+        with patch.object(oracle.safe, 'read_bytes', side_effect=lambda p, cap: (
+                self.version_raw + b' ' if Path(p) == ROOT / oracle.VERSION_FIXED else self.raw)):
+            with self.assertRaisesRegex(oracle.safe.OracleError, 'VERSION input bytes changed'):
+                oracle.load_fixed(ROOT)
 
     def test_duplicate_json_keys_fail_closed(self):
         with self.assertRaisesRegex(oracle.safe.OracleError, 'Duplicate'):
@@ -180,8 +216,8 @@ class RpmVersionOracle(unittest.TestCase):
 
     def test_strict_orders_are_observations_and_mismatches_do_not_rewrite_oracle(self):
         row = self.rows[6]
-        good = {'stdout': '1.0~rc1\n1.0\n', 'stderr': '', 'status': 0}
-        bad = {'stdout': '1.0\n1.0~rc1\n', 'stderr': '', 'status': 0}
+        good = {'stdout': 'dlms-oracle-1.0~rc1-1\ndlms-oracle-1.0-1\n', 'stderr': '', 'status': 0}
+        bad = {'stdout': 'dlms-oracle-1.0-1\ndlms-oracle-1.0~rc1-1\n', 'stderr': '', 'status': 0}
         for order in oracle.ORDERS:
             self.assertTrue(oracle.observation(row, order, good)['strict_sort_compatible'])
             self.assertFalse(oracle.observation(row, order, bad)['strict_sort_compatible'])
@@ -189,13 +225,15 @@ class RpmVersionOracle(unittest.TestCase):
 
     def test_both_tie_orders_never_claim_equality_or_strict_compatibility(self):
         row = self.rows[2]
-        for text in ('1.01\n1.1\n', '1.1\n1.01\n'):
+        for text in ('dlms-oracle-1.01-1\ndlms-oracle-1.1-1\n',
+                     'dlms-oracle-1.1-1\ndlms-oracle-1.01-1\n'):
             r = oracle.observation(row, 'a-b', {'stdout': text, 'stderr': '', 'status': 0})
             self.assertIsNone(r['strict_sort_compatible'])
             self.assertIsNone(r['comparator_equality_observed'])
 
     def test_malformed_or_failed_process_result_is_not_an_observation(self):
-        for actual in ({'stdout': '1.0\n1.0~rc1\n', 'stderr': '', 'status': -9},
+        for actual in ({'stdout': '1.0~rc1\n1.0\n', 'stderr': '', 'status': 0},
+                       {'stdout': '1.0\n1.0~rc1\n', 'stderr': '', 'status': -9},
                        {'stdout': '1.0\n1.0~rc1\n', 'stderr': 'error', 'status': 0},
                        {'stdout': '1.0\n', 'stderr': '', 'status': 0},
                        {'stdout': '1.0\nextra\n', 'stderr': '', 'status': 0},
@@ -218,12 +256,12 @@ class RpmVersionOracle(unittest.TestCase):
             self.assertLessEqual(len(data), 258)
             labels = data.decode().splitlines()
             row = self.rows[(len(outputs) - 1) // 2]
-            text = ('\n'.join([row['a'], row['b']] if row['docs_expected_order'] <= 0
-                              else [row['b'], row['a']]) + '\n')
+            text = ('\n'.join([row['nvr_a'], row['nvr_b']] if row['docs_expected_order'] <= 0
+                              else [row['nvr_b'], row['nvr_a']]) + '\n')
             oracle.safe.write_new(folder / 'stdout.raw', text.encode(), budget, cap)
             oracle.safe.write_new(folder / 'stderr.raw', b'', budget, cap)
             if fail: raise oracle.safe.OracleError('fake child failed after output')
-            self.assertEqual(sorted(labels), sorted([row['a'], row['b']]))
+            self.assertEqual(sorted(labels), sorted([row['nvr_a'], row['nvr_b']]))
             return {'stdout': text, 'stderr': '', 'status': 0}
         pins = [{'path': '/fake/source', 'bytes': 1, 'sha256': '0' * 64}]
         if drift: pins_after = [{**pins[0], 'sha256': '1' * 64}]

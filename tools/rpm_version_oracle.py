@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fixed development rpmsort VERSION-component observations; no learner input.
+"""Fixed development VERSION observations via constant NVR framing; no learner input.
 
 Only MAIN tools/dev.py may invoke this tool. No shell, RPM transaction, option,
 filename, macro, DB or full-EVR comparison is admitted. Actual execution must
@@ -20,8 +20,10 @@ import time
 import case_bash_oracle as safe
 
 ROOT = Path(__file__).resolve().parents[1]
-FIXED = 'tests/fixtures/rpmsort-version-inputs.json'
-FIXED_SHA = '70bd89690c9b0cbe29f9dc26b9aab4cd04330053009c5bf2c624089c3777d88f'
+VERSION_FIXED = 'tests/fixtures/rpmsort-version-inputs.json'
+VERSION_SHA = '70bd89690c9b0cbe29f9dc26b9aab4cd04330053009c5bf2c624089c3777d88f'
+FIXED = 'tests/fixtures/rpmsort-version-nvr-inputs.json'
+FIXED_SHA = '36143d9912286d9fb40585df0e05c4b026c0ffbc8539a24565912336555a1f17'
 ELF = Path('/usr/bin/rpmsort')
 ELF_PIN = {'path': str(ELF), 'bytes': 15832,
            'sha256': '54bc254cc76ebe6340bf26e841fe0ad14f243419e2b1f4061a992d2eac0c19aa'}
@@ -38,7 +40,7 @@ PROVENANCE = {
 SOURCE_FILES = (
     'tools/rpm_version_oracle.py', 'tools/tests/test_rpm_version_oracle.py',
     'tools/case_bash_oracle.py', 'tools/build_safety.py', 'tools/dev.py',
-    'tools/tests/test_case_bash_oracle.py', FIXED,
+    'tools/tests/test_case_bash_oracle.py', FIXED, VERSION_FIXED,
     'docs/RPM_VERSION_REFERENCE.md', 'src/rpm_packages.rs',
     'tests/rpm_packages.rs', 'tests/fixtures/rpm-package-vectors.json',
     'docs/RPM_PACKAGE_SUBSET.md',
@@ -90,10 +92,10 @@ def main_guard(root):
     return inherited
 
 
-def load_fixed(root):
-    raw = safe.read_bytes(root / FIXED, FIXTURE_CAP)
-    safe.require(hashlib.sha256(raw).hexdigest() == FIXED_SHA,
-                 'Reviewed fixed20 input bytes changed')
+def load_versions(root):
+    raw = safe.read_bytes(root / VERSION_FIXED, FIXTURE_CAP)
+    safe.require(hashlib.sha256(raw).hexdigest() == VERSION_SHA,
+                 'Reviewed fixed20 VERSION input bytes changed')
     value = strict_json(raw)
     safe.require(set(value) == {'schema_version', 'scope', 'source_urls', 'cases', 'observations'}
                  and value['schema_version'] == 1
@@ -114,6 +116,36 @@ def load_fixed(root):
             safe.require(isinstance(row[key], str)
                          and re.fullmatch(r'[A-Za-z0-9._+~^]{1,128}', row[key]),
                          'Only reviewed VERSION labels; no flags, EVR, path or source')
+    return raw, rows
+
+
+def load_fixed(root):
+    raw = safe.read_bytes(root / FIXED, FIXTURE_CAP)
+    safe.require(hashlib.sha256(raw).hexdigest() == FIXED_SHA,
+                 'Reviewed fixed20 NVR input bytes changed')
+    value = strict_json(raw)
+    safe.require(set(value) == {'schema_version', 'scope', 'source_urls',
+                                'version_fixture_sha256', 'framing', 'cases', 'observations'}
+                 and value['schema_version'] == 1
+                 and value['scope'] == 'VERSION_VIA_FIXED_NVR_SORT'
+                 and value['source_urls'] == URLS
+                 and value['version_fixture_sha256'] == VERSION_SHA
+                 and value['framing'] == {'name': 'dlms-oracle', 'release': '1'}
+                 and value['observations'] == [], 'Closed fixed NVR framing and provenance')
+    _, versions = load_versions(root)
+    rows = value['cases']
+    safe.require(isinstance(rows, list) and len(rows) == 20, 'Exactly20 framed pairs')
+    for row, version in zip(rows, versions):
+        safe.require(isinstance(row, dict)
+                     and set(row) == set(version) | {'nvr_a', 'nvr_b'}
+                     and type(row['docs_expected_order']) is int
+                     and {key: row[key] for key in version} == version,
+                     'Original VERSION pairs and authored expectations remain exact')
+        for key in ('a', 'b'):
+            safe.require(row['nvr_' + key] == 'dlms-oracle-' + version[key] + '-1',
+                         'Only the fixed identical NAME/RELEASE wrapper is admitted')
+        safe.require(len((row['nvr_a'] + '\n' + row['nvr_b'] + '\n').encode('ascii')) <= 258,
+                     'Original stdin ceiling also applies to NVR framing')
     return raw, rows
 
 
@@ -198,17 +230,20 @@ def observation(row, order, actual):
                  and raw.endswith('\n') and '\r' not in raw,
                  'Bounded exact newline-terminated output')
     labels = raw[:-1].split('\n')
-    safe.require(Counter(labels) == Counter([row['a'], row['b']]),
+    safe.require(Counter(labels) == Counter([row['nvr_a'], row['nvr_b']]),
                  'Output must be exact input multiset; no added/dropped lines')
     expectation = row['docs_expected_order']
     # Sort output cannot establish comparator equality, regardless of tie order.
-    expected = [row['a'], row['b']] if expectation < 0 else [row['b'], row['a']]
+    expected = ([row['nvr_a'], row['nvr_b']] if expectation < 0
+                else [row['nvr_b'], row['nvr_a']])
     compatible = None if expectation == 0 else labels == expected
-    return {'id': row['id'], 'input_order': order, 'stdout': raw,
+    return {'id': row['id'], 'input_order': order,
+            'version_a': row['a'], 'version_b': row['b'],
+            'nvr_a': row['nvr_a'], 'nvr_b': row['nvr_b'], 'stdout': raw,
             'stderr': actual['stderr'], 'status': actual['status'],
             'docs_expected_order': expectation, 'strict_sort_compatible': compatible,
             'comparator_equality_observed': None,
-            'claim': 'Tie/equality pending' if expectation == 0 else 'VERSION component sort only'}
+            'claim': 'Tie/equality pending' if expectation == 0 else 'VERSION via identical NAME/RELEASE framing only'}
 
 
 def publish(out, manifest, budget, start):
@@ -246,7 +281,7 @@ def capture(root, name, inherited):
         'status': 'INCOMPLETE', 'source_head': head, 'source_pins': before,
         'elf_package_metadata': PACKAGE, 'argv': [str(ELF)],
         'startup_evidence': 'Trusted development executable; wrapper audit is qualified, not a transitive proof',
-        'claims': 'Fixed VERSION stdio only; no VM/model, package transactions, learner input or fullEVR proof; transitive startup effects not proven',
+        'claims': 'Fixed VERSION via identical NAME/RELEASE stdio only; no VM/model, package transactions, learner input or fullEVR proof; transitive startup effects not proven',
     }, budget, ROW_CAP))
     with executable(ELF_PIN) as (program, fd):
         for row in rows:
@@ -255,7 +290,8 @@ def capture(root, name, inherited):
                 folder = safe.private_dir(out, row['id'] + '-' + order)
                 work = safe.private_dir(folder, 'work')
                 env = environment(folder)
-                labels = [row['a'], row['b']] if order == 'a-b' else [row['b'], row['a']]
+                labels = ([row['nvr_a'], row['nvr_b']] if order == 'a-b'
+                          else [row['nvr_b'], row['nvr_a']])
                 data = ('\n'.join(labels) + '\n').encode('ascii')
                 safe.require(len(data) <= 258, 'Fixed stdin byte ceiling')
                 outputs.append(safe.write_new(folder / 'stdin.raw', data, budget, 258))
@@ -292,7 +328,7 @@ def capture(root, name, inherited):
                 'source_pins': before, 'outputs': outputs, 'elf_package_metadata': PACKAGE,
                 'observations': observations, 'child_count': 40,
                 'evidence_bytes_before_manifest': budget.used,
-                'scope': '20VERSION pairs, both orders; no EVR composition or equality proof',
+                'scope': '20VERSION pairs via fixed identical NAME/RELEASE labels, both orders; no EVR composition or equality proof',
                 'strict_cases_compatible': all(r['strict_sort_compatible'] is not False
                                                for r in observations),
                 'comparator_equality_observed': None}
