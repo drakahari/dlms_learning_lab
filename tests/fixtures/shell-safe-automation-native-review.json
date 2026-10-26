@@ -1,0 +1,100 @@
+[
+  {
+    "id": "shell-preserve-lines",
+    "alternate": "if test \"$#\" -ne 1; then\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nposition=0\nwhile IFS='' read -r line || test -n \"$line\"; do\n    position=$((position + 1))\n    printf '%s: [%s]\\n' \"$position\" \"$line\"\ndone < \"$source\"\n",
+    "incorrect": "if test \"$#\" -ne 1; then\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nnumber=0\nwhile read -r line || test -n \"$line\"; do\n    number=$((number + 1))\n    printf '%s: [%s]\\n' \"$number\" \"$line\"\ndone < \"$source\"\n",
+    "misconception": "Ordinary read trims meaningful edge spaces and tabs despite preserving backslashes.",
+    "partial": "if test \"$#\" -ne 1; then\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nnumber=0\nwhile read -r line || test -n \"$line\"; do\n    number=$((number + 1))\n    printf '%s: [%s]\\n' \"$number\" \"$line\"\ndone < \"$source\"\n",
+    "wrong": "printf '1: [Router]\\n2: [Switch]\\n'\n",
+    "experiment": {
+      "source": "if test \"$#\" -ne 1; then\n    printf 'Usage: practice SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: practice SOURCE\\n' >&2\n    exit 2\nfi\nnumber=0\nwhile read -r line || test -n \"$line\"; do\n    number=$((number + 1))\n    printf '%s: [%s]\\n' \"$number\" \"$line\"\ndone < \"$source\"\n",
+      "expected": {
+        "name": "Controlled practice experiment",
+        "args": [
+          "notices.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/notices.txt": "  Gate open  \nnext\\door\nlast",
+          "/work/keep.txt": "Practice note\n"
+        },
+        "stdout": "1: [Gate open]\n2: [next\\door]\n3: [last]\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/notices.txt": "  Gate open  \nnext\\door\nlast",
+          "/work/keep.txt": "Practice note\n"
+        }
+      }
+    },
+    "repair": "if test \"$#\" -ne 1; then\n    printf 'Usage: practice SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: practice SOURCE\\n' >&2\n    exit 2\nfi\nnumber=0\nwhile IFS= read -r line || test -n \"$line\"; do\n    number=$((number + 1))\n    printf '%s: [%s]\\n' \"$number\" \"$line\"\ndone < \"$source\"\n"
+  },
+  {
+    "id": "shell-pipeline-status",
+    "alternate": "if test \"$#\" -ne 1; then\n    printf 'Usage: errors SOURCE\\n' >&2\n    exit 2\nfi\nmatches=$(grep -F ERROR \"$1\")\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" | sort | uniq > errors.txt\nelse\n    printf '' > errors.txt\nfi\nprintf 'Report updated\\n'\n",
+    "incorrect": "if test \"$#\" -ne 1; then\n    printf 'Usage: errors SOURCE\\n' >&2\n    exit 2\nfi\nset +o pipefail\nmatches=$(grep -F ERROR \"$1\" | sort | uniq)\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" > errors.txt\nelse\n    printf '' > errors.txt\nfi\nprintf 'Report updated\\n'\n",
+    "misconception": "A successful final stage hides a failed producer and can replace the last good report.",
+    "partial": "if test \"$#\" -ne 1; then\n    printf 'Usage: errors SOURCE\\n' >&2\n    exit 2\nfi\nset +o pipefail\nmatches=$(grep -F ERROR \"$1\" | sort | uniq)\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" > errors.txt\nelse\n    printf '' > errors.txt\nfi\nprintf 'Report updated\\n'\n",
+    "wrong": "printf 'ERROR power\\nERROR rack\\n' > errors.txt\nprintf 'Report updated\\n'\n",
+    "experiment": {
+      "source": "if test \"$#\" -ne 1; then\n    printf 'Usage: warnings SOURCE\\n' >&2\n    exit 2\nfi\nset -o pipefail\nmatches=$(grep -F WARN missing.log | sort | uniq)\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" > warnings.txt\nelse\n    printf '' > warnings.txt\nfi\nprintf 'Report updated\\n'\n",
+      "expected": {
+        "name": "Controlled practice experiment",
+        "args": [
+          "sample.log"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/sample.log": "OK\nWARN lift\nWARN door\nWARN lift\n",
+          "/work/warnings.txt": "Before\n",
+          "/work/keep.txt": "Example evidence\n"
+        },
+        "stdout": "",
+        "stderr": "grep: missing.log: No such file or directory\nReport unavailable\n",
+        "status": 2,
+        "after": {
+          "/work/sample.log": "OK\nWARN lift\nWARN door\nWARN lift\n",
+          "/work/warnings.txt": "Before\n",
+          "/work/keep.txt": "Example evidence\n"
+        }
+      }
+    },
+    "repair": "if test \"$#\" -ne 1; then\n    printf 'Usage: warnings SOURCE\\n' >&2\n    exit 2\nfi\nset -o pipefail\nmatches=$(grep -F WARN \"$1\" | sort | uniq)\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" > warnings.txt\nelse\n    printf '' > warnings.txt\nfi\nprintf 'Report updated\\n'\n"
+  },
+  {
+    "id": "shell-safe-handover",
+    "alternate": "usage() {\n    printf 'Usage: report SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -ne 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nprintf '' > \"$destination\"\ncount=0\nwhile IFS= read -r line || test -n \"$line\"; do\n    printf 'Entry: <%s>\\n' \"$line\" >> \"$destination\"\n    count=$((count + 1))\ndone < \"$source\"\nprintf 'Total: %s\\n' \"$count\" >> \"$destination\"\nprintf 'Published report\\n'\n",
+    "incorrect": "usage() {\n    printf 'Usage: report SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -lt 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nreport=$(count=0\n    while IFS= read -r line || test -n \"$line\"; do\n        printf 'Entry: <%s>\\n' \"$line\"\n        count=$((count + 1))\n    done < \"$source\"\n    printf 'Total: %s\\n' \"$count\"\n)\nprintf '%s\\n' \"$report\" > \"$destination\"\nprintf 'Published report\\n'\n",
+    "misconception": "Checking only a minimum argument count silently accepts extra operands.",
+    "partial": "usage() {\n    printf 'Usage: report SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -lt 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nreport=$(count=0\n    while IFS= read -r line || test -n \"$line\"; do\n        printf 'Entry: <%s>\\n' \"$line\"\n        count=$((count + 1))\n    done < \"$source\"\n    printf 'Total: %s\\n' \"$count\"\n)\nprintf '%s\\n' \"$report\" > \"$destination\"\nprintf 'Published report\\n'\n",
+    "wrong": "printf 'Entry: <Door>\\nEntry: <Lift>\\nTotal: 2\\n' > report.txt\nprintf 'Published report\\n'\n",
+    "experiment": {
+      "source": "usage() {\n    printf 'Usage: practice SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -ne 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nreport=$(count=0\n    while IFS= read -r line || test -n \"$line\"; do\n        printf 'Notice: <%s>\\n' \"$line\"\n        count=$((count + 1))\n    done < \"$source\"\n    printf 'Notices: %s\\n' \"$count\"\n)\nprintf '%s\\n' \"$report\" > keep.txt\nprintf 'Example published\\n'\n",
+      "expected": {
+        "name": "Controlled practice experiment",
+        "args": [
+          "display.txt",
+          "handover.txt"
+        ],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/display.txt": "  Front desk  \nside\\gate",
+          "/work/handover.txt": "Previous example\n",
+          "/work/keep.txt": "Example note\n"
+        },
+        "stdout": "Example published\n",
+        "stderr": "",
+        "status": 0,
+        "after": {
+          "/work/display.txt": "  Front desk  \nside\\gate",
+          "/work/handover.txt": "Previous example\n",
+          "/work/keep.txt": "Notice: <  Front desk  >\nNotice: <side\\gate>\nNotices: 2\n"
+        }
+      }
+    },
+    "repair": "usage() {\n    printf 'Usage: practice SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -ne 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nreport=$(count=0\n    while IFS= read -r line || test -n \"$line\"; do\n        printf 'Notice: <%s>\\n' \"$line\"\n        count=$((count + 1))\n    done < \"$source\"\n    printf 'Notices: %s\\n' \"$count\"\n)\nprintf '%s\\n' \"$report\" > \"$destination\"\nprintf 'Example published\\n'\n"
+  }
+]

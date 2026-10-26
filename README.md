@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **133 authored assignments:**42 CCNA,28 LPIC-1,20 LPIC-2 and43 Bash/Shell in33 units. The Fedora38a8098 candidate passes scoped installed acceptance, including all eight package/STP lesson flows. That same installed executable passes lifecycle, normal Wayland startup, script/DHCP process reopening and shared alignment checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **140 authored assignments:**42 CCNA,28 LPIC-1,24 LPIC-2 and46 Bash/Shell in35 source units. The latest scoped accepted Fedora candidate remains133 labs at38a8098, including all eight package/STP lesson flows. The seven new assignments pass model/content, UI events and development-native Fedora flows; final polished installed140 acceptance is pending. The installed133 executable passes lifecycle, normal Wayland startup, script/DHCP process reopening and shared alignment checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh
-$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -40,6 +40,13 @@ Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two te
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 
 ## This milestone
+
+The source now includes four [static-web configuration assignments](docs/STATIC_WEB_LESSONS.md)
+and three [reliable-text scripting assignments](docs/SHELL_SAFE_AUTOMATION_LESSONS.md).
+They retain separate introductions/practice and full assignments, with alternate
+solutions, preservation checks and useful incorrect/partial feedback. Their development-native baseline passes all seven full flows; final polished
+packaged acceptance is tracked separately below. Source registration
+does not imply complete objective coverage.
 
 The three [DHCP client and relay assignments](docs/DHCPV4_LESSONS.md) teach
 applied policy versus held options, relay/wrong-mask diagnosis and a safe

@@ -533,7 +533,7 @@ fn original125_typed_specs_relative_order_units_and_optional_nil_wire_are_exact(
     let old_units = baseline["units"]["units"].as_array().unwrap();
     let all_units = current_units["units"].as_array().unwrap();
     assert_eq!(old_units.len(), 31);
-    assert_eq!(all_units.len(), 33);
+    assert_eq!(all_units.len(), 35);
     assert_eq!(&all_units[..old_units.len()], old_units.as_slice());
 }
 
@@ -715,7 +715,7 @@ fn current_real_script_records_genuine678_histories_both_editors_backup_restore_
         )
     }
     assert_eq!(restored.attempts[&s.id].state, s.initial);
-    assert_eq!(originals.len(), 133);
+    assert_eq!(originals.len(), 140);
 }
 #[test]
 fn context_corruption_and_wrong_kind_save_never_overwrite_a_valid_profile() {
@@ -847,7 +847,7 @@ fn direct_oversized_whitespace_teaching_rejects_before_trim_without_publishing()
 fn both_family_current_helpers_reject_foreign_valid_metadata_without_mutating_or_saving() {
     let apache_scenario = scenario();
     let mut all = catalog();
-    assert_eq!(all.len(), 133);
+    assert_eq!(all.len(), 140);
     let package_scenario = all
         .iter()
         .find(|s| s.id == "lpic1-package-install")
@@ -1001,4 +1001,212 @@ fn both_family_current_helpers_reject_foreign_valid_metadata_without_mutating_or
             "other state/metadata changed"
         );
     }
+}
+
+#[test]
+fn optional_native_editor_kind_omits_legacy_wire_and_preserves_raw_drafts() {
+    use work::EditorKind;
+    let s = scenario();
+    let draft = Draft::new(sim(&s.initial)).unwrap();
+    let original = serde_json::to_value(&draft).unwrap();
+    assert!(original.get("editor_kind").is_none());
+    assert_eq!(
+        serde_json::from_value::<Draft>(original.clone()).unwrap(),
+        draft
+    );
+    for kind in [EditorKind::Config, EditorKind::File] {
+        let mut d = draft.clone();
+        d.editor_kind = Some(kind);
+        d.config_text = "unfinished raw config".into();
+        d.request_port = "bad!".into();
+        assert!(d.valid_for(sim(&s.initial)));
+        for raw in [
+            serde_json::to_string(&d).unwrap(),
+            serde_json::to_string_pretty(&d).unwrap(),
+        ] {
+            assert_eq!(serde_json::from_str::<Draft>(&raw).unwrap(), d);
+        }
+    }
+    for bad in [
+        serde_json::json!("future"),
+        serde_json::json!("x".repeat(100_000)),
+        serde_json::json!({"File":true}),
+    ] {
+        let mut value = original.clone();
+        value["editor_kind"] = bad;
+        let error = serde_json::from_value::<Draft>(value)
+            .unwrap_err()
+            .to_string();
+        assert!(error.len() < 256, "bounded editor diagnostic");
+    }
+    let mut null = original;
+    null["editor_kind"] = serde_json::Value::Null;
+    assert_eq!(serde_json::from_value::<Draft>(null).unwrap(), draft);
+}
+
+#[test]
+fn probe_feedback_names_first_status_site_resource_page_text_and_length_difference() {
+    let s = scenario();
+    let state = good(&s);
+    let before = serde_json::to_value(&state).unwrap();
+    for (kind, words) in [
+        ("status", vec!["HTTP 200 returned", "expected HTTP 403"]),
+        (
+            "site",
+            vec![
+                "Selected site report.example.test",
+                "expected other.example.test",
+            ],
+        ),
+        (
+            "resource",
+            vec![
+                "Mapped resource /srv/report/index.html",
+                "expected /srv/observer/index.html",
+            ],
+        ),
+        ("body", vec!["Page text differs", "UTF-8 bytes"]),
+        (
+            "length",
+            vec!["Page length is 13 UTF-8 bytes", "expected 14"],
+        ),
+    ] {
+        let mut d = def(&s).clone();
+        let Requirement::CurrentHttp { request, expected } = &mut d.requirements[0] else {
+            panic!("positive current fixture row")
+        };
+        match kind {
+            "status" => {
+                expected.status = 403;
+                expected.body.clear();
+                expected.representation_bytes = None;
+                expected.cause = Some(work::ResponseCause::AccessDenied);
+            }
+            "site" => expected.vhost = Some("other.example.test".into()),
+            "resource" => {
+                expected.vhost = Some("REPORT.EXAMPLE.TEST".into());
+                expected.resource = Some("/srv/observer/index.html".into());
+            }
+            "body" => expected.body = "Wrong report\n".into(),
+            "length" => {
+                request.method = web::Method::Head;
+                expected.body.clear();
+                expected.representation_bytes = Some(14);
+            }
+            _ => unreachable!(),
+        }
+        d.validate().unwrap();
+        let rows = d.checks(sim(&state));
+        assert!(!rows[0].0);
+        for word in words {
+            assert!(
+                rows[0].1.contains(word),
+                "first differing response field is named"
+            );
+        }
+        assert!(
+            !rows[0].1.contains("declared")
+                && !rows[0].1.contains("Report ready")
+                && !rows[0].1.contains("Wrong report"),
+            "no developer jargon or page-content dump"
+        );
+        assert!(rows.iter().all(|r| r.1.len() <= 512));
+        assert!(
+            serde_json::to_value(&state).unwrap() == before,
+            "diagnosis is read-only"
+        );
+    }
+    assert!(
+        def(&s).checks(sim(&state)).iter().all(|r| r.0),
+        "independent original expected rows were not replaced"
+    );
+}
+#[test]
+fn probe_feedback_distinguishes_redirect_location_and_same403_wrong_reason() {
+    let s = scenario();
+    let mut state = good(&s);
+    let mut d = def(&s).clone();
+    for inventory in [&mut d.initial.inventory, &mut sim_mut(&mut state).inventory] {
+        inventory
+            .entries
+            .insert("/srv/report/docs".into(), web::EntryKind::Directory);
+    }
+    let Requirement::CurrentHttp { request, expected } = &mut d.requirements[0] else {
+        panic!("current row")
+    };
+    request.path = "/docs".into();
+    expected.status = 301;
+    expected.resource = Some("/srv/report/docs".into());
+    expected.body.clear();
+    expected.representation_bytes = None;
+    expected.redirect_path = Some("/elsewhere/".into());
+    expected.cause = Some(work::ResponseCause::DirectorySlash);
+    d.validate().unwrap();
+    let before = serde_json::to_value(&state).unwrap();
+    let row = &d.checks(sim(&state))[0];
+    assert!(
+        !row.0
+            && row.1.contains("Redirect location /docs/")
+            && row.1.contains("expected /elsewhere/")
+    );
+    assert!(serde_json::to_value(&state).unwrap() == before);
+    // The authored access task has a genuine same403 false positive that only
+    // the response reason distinguishes: no index is not an access-rule denial.
+    let s = pack::load(include_str!("../scenarios/apache-static-v1.json"))
+        .unwrap()
+        .remove(2);
+    let (index, request) = def(&s)
+        .requirements
+        .iter()
+        .enumerate()
+        .find_map(|(i, r)| match r {
+            Requirement::CurrentHttp { request, expected }
+                if request.path == "/private/" && expected.status == 403 =>
+            {
+                Some((i, request))
+            }
+            _ => None,
+        })
+        .unwrap();
+    let web::Outcome::Http(actual) = web::request(sim(&s.initial), request).unwrap() else {
+        panic!("active public server")
+    };
+    assert_eq!(actual.status.code(), 403);
+    assert_eq!(actual.cause, web::Cause::NoIndex);
+    let row = &def(&s).checks(sim(&s.initial))[index];
+    assert!(
+        !row.0
+            && row.1.contains("no directory page was available")
+            && row.1.contains("denial by the directory access rule")
+    );
+}
+#[test]
+fn probe_feedback_excerpts_are_bounded_and_no_listener_stays_distinct() {
+    let s = scenario();
+    let state = good(&s);
+    let mut d = def(&s).clone();
+    let long = [
+        "a".repeat(63),
+        "b".repeat(63),
+        "c".repeat(63),
+        "d".repeat(61),
+    ]
+    .join(".");
+    assert_eq!(long.len(), 253);
+    let Requirement::CurrentHttp { expected, .. } = &mut d.requirements[0] else {
+        panic!()
+    };
+    expected.vhost = Some(long.clone());
+    d.validate().unwrap();
+    let row = &d.checks(sim(&state))[0];
+    assert!(!row.0 && row.1.len() <= 512 && row.1.contains("...") && !row.1.contains(&long));
+    let mut stopped = state;
+    run(&s, &mut stopped, &web::Action::Stop {});
+    let rows = def(&s).checks(sim(&stopped));
+    assert!(
+        !rows[0].0
+            && rows[0].1.contains("no active virtual listener")
+            && rows[0].1.contains("expected HTTP 200")
+    );
+    assert!(rows.iter().all(|r| r.1.len() <= 512));
 }

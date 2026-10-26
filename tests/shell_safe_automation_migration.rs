@@ -54,7 +54,25 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 133);
+    assert_eq!(labs.len(), 140);
+    let later = labs
+        .iter()
+        .filter(|s| !original.attempts.contains_key(&s.id))
+        .map(|s| s.id.as_str())
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_eq!(
+        later,
+        std::collections::BTreeSet::from([
+            "shell-preserve-lines",
+            "shell-pipeline-status",
+            "shell-safe-handover",
+            "lpic2-web-routing",
+            "lpic2-web-pages",
+            "lpic2-web-access",
+            "lpic2-web-handover"
+        ])
+    );
+    assert_eq!(original.attempts.len(), 133);
     (raw, original, labs)
 }
 // Progress's portable Serialize intentionally omits main-only provenance.
@@ -164,7 +182,12 @@ fn actual9_open_prepare_preserves_all6_7_8_9_histories_drafts_and_unrelated_cont
     let (raw, original, labs) = private();
     let mut loaded = progress::decode(&raw, &labs).unwrap();
     evidence::exact(&history(&loaded, false), &history(&original, false));
-    for lab in &labs {
+    // These are the exact loaded133 contexts. The new7 stay absent; opening
+    // an older profile must not fabricate Attempts or historical answers.
+    for lab in labs
+        .iter()
+        .filter(|lab| original.attempts.contains_key(&lab.id))
+    {
         let a = loaded.attempts.get_mut(&lab.id).unwrap();
         if matches!(a.state, State::Script { .. }) {
             assert!(!progress::current_solved(a, lab));

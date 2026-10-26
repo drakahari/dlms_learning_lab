@@ -5,6 +5,7 @@ mod accounts;
 mod accounts_lessons;
 mod acl;
 mod acl_lessons;
+pub(in crate::ui) mod apache_static_lessons;
 mod capture_lessons;
 mod case_history;
 mod client_learning;
@@ -20,6 +21,7 @@ mod mac_lessons;
 mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
+mod safe_automation_lessons;
 mod seed_teaching;
 pub(super) mod spanning_tree;
 mod spanning_tree_lessons;
@@ -334,7 +336,11 @@ impl LabApp {
     pub(super) fn smoke_tick(&mut self, ctx: &egui::Context) {
         // Stop probes use consecutive frames so cancellation is checked during
         // execution rather than after the finite instruction budget finishes.
-        let immediate_stop = matches!(self.smoke_stage, 4924 | 4925 | 7012 | 7013 | 15014 | 15015);
+        let immediate_stop = matches!(self.smoke_stage, 4924 | 4925 | 7012 | 7013 | 15014 | 15015)
+            || matches!(
+                self.smoke_stage,
+                37067 | 37068 | 37267 | 37268 | 37467 | 37468
+            );
         if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;
         }
@@ -419,6 +425,13 @@ impl LabApp {
             }
             n @ 16000..=16399 => {
                 let (advance, capture) = self.mac_learning_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 36000..=36999 => {
+                let (advance, capture) = self.apache_static_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }
@@ -538,6 +551,13 @@ impl LabApp {
             }
             n @ (7600..=7639 | 7660..=7666) => {
                 let (advance, capture) = self.acl_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 37000..=37504 => {
+                let (advance, capture) = self.safe_automation_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

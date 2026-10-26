@@ -130,27 +130,31 @@ impl LabApp {
         ui.horizontal_wrapped(|ui| {
             ui.label("Inspect inputs");
             let picker_width = 230_f32.min(ui.available_width());
-            ui.allocate_ui_with_layout(egui::vec2(picker_width, controls::height(ui)), egui::Layout::left_to_right(egui::Align::Center), |ui| {
-                let picker=egui::ComboBox::from_id_salt("script-case")
-                    .width(picker_width)
-                    .truncate()
-                    .selected_text(&cases[selected].name)
-                    .show_ui(ui, |ui| {
-                        for (n, c) in cases.iter().enumerate() {
-                            ui.selectable_value(&mut selected, n, &c.name);
-                        }
-                    });
-                name_control(&picker.response,"Inspect script test inputs");
-            });
-            ui.label(
-                RichText::new(format!(
-                    "Run script checks {} sets of sample inputs; simulated files reset for each test",
-                    cases.len()
-                ))
-                .small()
-                .color(palette(ui).muted),
+            ui.allocate_ui_with_layout(
+                egui::vec2(picker_width, controls::height(ui)),
+                egui::Layout::left_to_right(egui::Align::Center),
+                |ui| {
+                    let picker = egui::ComboBox::from_id_salt("script-case")
+                        .width(picker_width)
+                        .truncate()
+                        .selected_text(&cases[selected].name)
+                        .show_ui(ui, |ui| {
+                            for (n, c) in cases.iter().enumerate() {
+                                ui.selectable_value(&mut selected, n, &c.name);
+                            }
+                        });
+                    name_control(&picker.response, "Inspect script test inputs");
+                },
             );
         });
+        ui.label(
+            RichText::new(format!(
+                "Run script checks {} sets of sample inputs; simulated files reset for each test",
+                cases.len()
+            ))
+            .small()
+            .color(palette(ui).muted),
+        );
         self.script_case = selected;
         let c = &cases[selected];
         if !c.env.is_empty() {

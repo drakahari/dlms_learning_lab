@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are140 narrowly evidenced Partial practice rows, one Supporting explanation row and1099 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package38a8098 contains133 authored assignments/33 units. Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are144 narrowly evidenced Partial practice rows, one Supporting explanation row and1095 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package38a8098 contains133 authored assignments/33 units. Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -139,3 +139,19 @@ term/knowledge or future-v2 credit is inherited. Overlapping140Partial/1Supporti
 11normal starts, script/DHCP cold reopen,72alignment and all8normal lesson flows
 (69package+48STP captures); representative actual renders reviewed. See
 INSTALLATION.md, DEBIAN_PACKAGE_LESSONS.md and SPANNING_TREE_LESSONS.md.
+
+
+M120 adds only four narrowly Partial LPIC-2 v4.5 rows:208.1 parent and K1/K3/K7,
+after model/content/alternative/negative checks and all four real development-native
+lesson flows (68 screenshots; representative renders independently reviewed).
+The native flow used normal140/35 source, not appended developer labs. It covers
+bounded static configuration, directory-path access and wildcard name/alias/default
+routing. Dedicated-IP vhosts, logs, authentication, .htaccess, modules, resource
+controls and exact named Linux tools remain Open. K8 remains Open: an implicit
+directory-slash redirect does not teach configurable Redirect statements.
+Current LPI objectives/version and Apache references were rechecked2026-10-26;
+all1240 source fingerprints/positions and future Cisco rows remain unchanged.
+Source inventory140/35=42CCNA/28LPIC-1/24LPIC-2/46Bash; latest accepted installed
+Fedora catalog remains133/33 at38a until final candidate gates. Overlapping
+144Partial/1Supporting/1095Open is not a completion percentage. The three reliable
+text scripts add real practice but no new issuer-row or universal POSIX claim.

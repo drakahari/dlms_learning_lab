@@ -136,7 +136,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 133);
+    assert_eq!(all.len(), 140);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -147,7 +147,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
-        43
+        46
     );
     let mut case_count = 0;
     for old in originals {
@@ -200,8 +200,15 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "ccna-stp-local-cost",
             "ccna-stp-parallel",
             "ccna-stp-handover",
+            "shell-preserve-lines",
+            "shell-pipeline-status",
+            "shell-safe-handover",
+            "lpic2-web-routing",
+            "lpic2-web-pages",
+            "lpic2-web-access",
+            "lpic2-web-handover",
         ])
-    ); // Later tasks remain absent and ungraded; no invented contexts.
+    ); // All24 later tasks remain absent and ungraded; no invented contexts.
     let original_histories = with_main_records(&p);
     for s in all
         .iter()

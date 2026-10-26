@@ -2,6 +2,7 @@
 
 2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
 No public release. Full curriculum/platform acceptance remains incomplete.
+Latest: normal source140/35 (42CCNA/28LPIC-1/24LPIC-2/46Bash); all new7 development-native flows and72alignment captures passed. Final polished full regression1577/0, Clippy and coverage pass; installed140 gates are next; installed38a133/33 remains last accepted candidate. Read the latest M120 section before older historical scope statements.
 Root alone runs heavy work; delegated workers remain source-only.
 
 ## Mandatory safety on resume
@@ -160,3 +161,133 @@ screen-reader accessibility and novice comprehension remain pending. Old116
 WindowsCI is not133/runtime acceptance. macOS redistribution still blocked by
 missing original dispatch0.2.0 notice (bd0c93bb…,upstream82d6c7a5…,research733c1719…);
 no invented notice/credentials/security bypass. No public release.
+
+
+## Live continuation after d49cf9a (2026-10-26)
+
+Core/data milestone d49cf9a pushed. Root integrated native Apache R2 (manifest
+d42b1ecc; native-main-integration-r3/APPLIED.json), then normal140 source overlay
+1db2df39 from exactd49 (catalog140/main-integration-r1/APPLIED.json). Both uncommitted
+at this write. Normal source140/35 =42CCNA/28LPIC1/24LPIC2/46Bash,314cases/46examples.
+No installed140/native-render acceptance or new objective promotion yet;38a stays
+last scoped installed133 candidate. Source only workers have NO heavy grant.
+
+Native renderer22 backend+13 actual-egui/buffer groups PASS. Root corrections:
+TextBuffer::type_id required by lockedegui0.33.3; test must let collapse animation
+settle and inspect staticLabel AccessKit value (not label); an empty Host is honest
+Unsupported in the accepted core, not invented400. Intro/example now display the
+actual separate example task; lengthy duplicate action/experiment prose moved out
+of Intro into Example. Fresh action notice clears stale prior practice failure.
+Clippy fixed question_mark/collapsible_if without waiver; finalalltarget PASS.
+Actual native screenshots/controller still pending. Native worker source-only
+preparing normal4 controller env apache-static-lessons, closed36000..36999.
+
+New3 Bash labs passed6 content groups for32cases/3examples, real alternative methods,
+partial/wrong/hardcoded answers, invalidation, isolated drafts, old progress/backup/
+restore/reset. First test setup correctly rejected external prerequisites; bounded
+fullcatalog context fixes setup (pack count<100, each<2MB), no loader widening.
+New7 registered append-only. First compiler caught &&slice in historical catalog133
+loop; removed one redundant borrow. Normal140 firstcombined R2 gates PASS: catalog140,
+catalog133, prototype(allfamilies), Apache8content and Bash6content. Log
+m120-normal140-first-gates-r2.log. Full current140 alltarget/Python/Clippy, actual9
+private migration/after10 scope extension and native/controller flows remain next.
+
+Workers now: ccna SOURCE-ONLY normal3 scripting controller envsafe-automation-lessons
+closed37000..37999; independent_review SOURCE-ONLY normal4 Apache controller. Merge
+only narrow hooks in smoke.rs/ui.rs/tests.rs preserving both and rootrenderer/tests.
+No newState/Record installs, effects through actual UI, no devlab append. After
+source review/gates, build devbinary and inspect real normal140 Fedora screens,
+sharedalignment matrix and all7 flows; then coherent commit/push, build clean
+candidate and repeat SAME-ELF installed checks before acceptance. Capture receipts,
+source/baseline pins and original history/progress remain retained and ignored.
+
+
+### M120 continuation gates (2026-10-26)
+
+Current normal source140/35:42CCNA/28LPIC-1/24LPIC-2/46Bash. Both native
+controllers integrated incrementally; Apache36000 range and reliable scripting37000
+range coexist. All4Apache full event flows pass, including idle autosave, exact
+raw/portable/main-receipt readback and held asynchronous Finish. Insert/Reset now
+focus the editor on the following frame after the button click releases; no
+per-screen position offset or layout redesign. All6scripting event groups pass:
+actual typing, wrong/partial/reference/alternate, syntax/unsupported/resource
+feedback, active Run/Stop, Challenge, scaled editing, separate drafts, exact
+warm Continue and selected reset. Stop probe first wrongly required a cancelled
+job to remain alive while acknowledging the click; fixed the assertion timing,
+retaining the live-before-click and cancelled-afterward checks.
+
+Full140 R1 found five missed expanded-catalog assumptions. Root corrected exact
+historical projections/context-required Apache handling and extended global shell
+reviews to every46 task. Global teaching check then caught a genuinely identical
+practice/assignment interface in the new capstone: practice now uses Notice,
+Notices and Example published; assignment Entry/Total/Published report unchanged.
+All32 assignment cases unchanged. Final full R2:1573PASS/0FAIL/10ignored in123
+harnesses, log m120-normal140-full-r2.log; minimum22.21GiB available, PSIavg10max0,
+OOMdelta0. Explicit private run includes all ten skipped checks:74lib+5after10+
+8migration PASS, retaining actual9/genuine6/7/8 histories and exact old bytes with
+new7 attempts absent. Final alltargetClippy PASS; Python rerun in progress at this
+write. No actual native140 or installed140 acceptance yet; installed38a133/33
+remains the last accepted scoped candidate. Source inventory docs now distinguish
+those identities. No new objective promotion or public release.
+
+Next: guarded dev build, actual Fedora Apache4 and scripting3 flows, inspect
+representative native renders and full shared alignment matrix. Correct actual
+findings; then commit/push, clean MAIN candidate, SAME-ELF installed lifecycle,
+startup/reopen/alignment/new7 checks. Do not substitute headless events or package
+creation for those gates. Root owns the only heavy slot; source workers complete.
+
+
+### M120 native baseline and final polish (2026-10-26)
+
+All actual native children reaped exit0 using development ELF beaa4e9f… from
+recorded dirty source snapshot: Apache4/68PNGs run-nt6yl2wp, scripting3/72PNGs
+run-ykxp1e9b, shared72alignment run-b8igaz5s. One startup protocol/readback passed.
+Representative real Fedora screens reviewed by root and two independent source/
+image workers, not a novice study or physical keyboard/accessibility acceptance.
+Bash requested wider windows were NOT observed: actual946x929 atall3scales;
+Apache/alignment measured946x929 and1920x1080. Complete raw/portable/receipt warm
+readback, alternate/wrong/partial, invalidation, reset and active Stop passed.
+See reviews/catalog140/development-normal140-acceptance-r1/RESULT.json. Root
+source rehash confirmed all compiled changed inputs remained frozen during runs.
+
+Actual review found improvements now applied: Apache probes identify the first
+wrong status/site/resource/page/length/redirect/cause (including same403 from a
+missing directory page vs intended access denial), still using identical matches
+and notice caps. Three focused checks plus all25backend/8content/5catalog PASS.
+Three teaching-label/site-name text leaves corrected only. New scripting notes
+use exact human lesson titles; allcases/Goal/programs/examples unchanged. Input
+reset note now below label/dropdown instead of wrapping beneath its label. First
+wrong capture drives an actual inner wheel and regression requires fully painted
+Expected/Actual text. First attempt at that new test sampled before async Run
+published its Record; bounded actual-frame wait corrected it. FullUI R1:296PASS/
+1testsetupFAIL; final targeted7PASS. All20affected script/content/catalog checks
+PASS. Shared progress-retention footer now also follows Apache's early dispatch.
+
+Narrow LPIC2v4.5 208.1 parent/K1/K3/K7 promoted Partial after actual4native baseline;
+all1240fingerprints/positions unchanged, namedtools/auth/logs/dedicatedIP/Redirect/
+TLS/proxy remainOpen.144Partial/1Supporting/1095Open not a completion percentage.
+Final all-target/no-fail-fast R3 running at this write (m120-final140-full-r3.log).
+No candidate140 created or accepted yet. Next finalClippy/fmt/coverage/private-file
+review, commit/push, candidate from clean MAIN and SAME-ELF installed lifecycle,
+startup/reopen/alignment/new7 native flows, inspect refined diagnostics/comparison.
+Do not stop at packaging or call source/runtime counts curriculum completion.
+
+
+### Ready for M120 code commit / candidate
+
+Final full R3 reaped exit0:1577PASS/0FAIL/10ignored,123harnesses. Minimum22.17GiB
+available/PSIavg10max0/OOMdelta0; only2Cargo jobs/2testthreads under sharedlock.
+Final alltargetClippy PASS. CSV guard initially rejected src/ui/tests evidence
+paths (it intentionally admits onlytests/); retained that guard and reference
+actual integration content/backend/catalog checks. Final coverage guard PASS:
+1240refs/136parents/144Partial/1Supporting/1095Open/140authored files. Source/UI
+native checks remain separate from bookkeeping. Full normal140 source/final
+native-polish changes are uncommitted at this write. Privacy scan70public-source
+paths found no credentials, personal home paths, private progress or generated
+artifacts; original snapshots and all212native PNGs remain ignored on disk.
+Next commit/push, clean MAIN Fedora candidate, SAME-ELF installed lifecycle,
+quiet startup series, script/DHCP cold reopen, new7 full native flows and shared
+alignment; inspect refined wrong-site/cause and Expected/Actual comparison images.
+Current last installed accepted command remains38a in INSTALLATION.md until the
+new exact identity and acceptance are recorded. Do not delete old candidates or
+claim full curriculum, screen-reader/novice or Windows/macOS runtime completion.

@@ -13,8 +13,10 @@ const NEW: [&str; 8] = [
 ];
 
 #[test]
-fn old125_complete_specs_and31_units_are_exact_prefixes_of_registered133_and33() {
-    let all = pack::bundled().unwrap();
+fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current140() {
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 140);
+    let all = &current[..133];
     assert_eq!(all.len(), 133);
     let baseline: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/spanning-tree-original125.json")).unwrap();
@@ -28,7 +30,9 @@ fn old125_complete_specs_and31_units_are_exact_prefixes_of_registered133_and33()
         all[125..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         NEW
     );
-    let units = course::bundled(&all).unwrap();
+    let current_units = course::bundled(&current).unwrap();
+    assert_eq!(current_units.len(), 35);
+    let units = &current_units[..33];
     assert_eq!(units.len(), 33);
     assert_eq!(
         serde_json::to_value(&units[..31]).unwrap(),
@@ -53,7 +57,7 @@ fn old125_complete_specs_and31_units_are_exact_prefixes_of_registered133_and33()
         NEW[4..]
     );
     let mut counts = BTreeMap::new();
-    for s in &all {
+    for s in all {
         *counts.entry(s.track.as_str()).or_insert(0) += 1;
     }
     assert_eq!(

@@ -1,5 +1,7 @@
 use super::*;
 use engine::State;
+mod apache_static;
+mod apache_static_lessons;
 mod client_learning;
 mod debian_packages;
 mod dhcpv4;
@@ -8,6 +10,7 @@ mod getopts_history;
 mod getopts_lessons;
 mod mac_learning;
 mod ospf;
+mod safe_automation_lessons;
 mod seed_learning;
 mod spanning_tree;
 #[test]
@@ -875,8 +878,20 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
             }
             State::Mount { writable, .. } => *writable = false,
             State::Script { run, .. } => *run = None,
-            State::ApacheStatic { .. }
-            | State::DebianPackages { .. }
+            state @ State::ApacheStatic { .. } => {
+                let action = dlms_learning_lab::apache_static::Action::Stop {};
+                engine::execute_for_goal(
+                    state,
+                    &a.scenarios[i].goal,
+                    &format!(
+                        "{}{}",
+                        dlms_learning_lab::apache_static_workspace::PREFIX,
+                        serde_json::to_string(&action).unwrap()
+                    ),
+                )
+                .unwrap();
+            }
+            State::DebianPackages { .. }
             | State::SpanningTree { .. }
             | State::DhcpV4 { .. }
             | State::Ipv4Acl { .. }

@@ -204,7 +204,10 @@ class FixedAutomationSafety(unittest.TestCase):
         self.assertEqual(data['catalog'],{n:s['version'] for n,s in raw_packs.items()})
         units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())
         self.assertEqual(units['version'],1)
-        self.assertEqual(len(units['units']),33)
+        frozen=json.loads((ROOT/'tests/fixtures/catalog133-original-index.json').read_bytes())
+        self.assertEqual(len(units['units']),35)
+        self.assertEqual(units['units'][:33],frozen['units']['units'])
+        self.assertEqual([u['id'] for u in units['units'][33:]],['shell-safe-automation','static-web-services'])
 
     def test_historical_module_closure_refuses_added_code_before_any_pin_or_child(self):
         pinned = oracle.strict_json(oracle.safe.read_bytes(ROOT/oracle.PIN_PATHS, oracle.SOURCE_CAP))

@@ -57,6 +57,12 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("s) short=yes", "s) short=no"),
         ("local prefix=museum", "local prefix=annex"),
         ("apply=no", "apply=yes"),
+        ("IFS= read", "read"),
+        (r#"grep -F WARN "$1""#, "grep -F WARN missing.log"),
+        (
+            r#"printf '%s\n' "$report" > "$destination""#,
+            r#"printf '%s\n' "$report" > keep.txt"#,
+        ),
     ];
     assert_eq!(
         edits.len(),

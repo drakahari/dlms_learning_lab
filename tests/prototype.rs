@@ -347,7 +347,19 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if matches!(a.state, State::DebianPackages { .. }) {
+        if matches!(a.state, State::ApacheStatic { .. }) {
+            let action = dlms_learning_lab::apache_static::Action::Stop {};
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    dlms_learning_lab::apache_static_workspace::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
+        } else if matches!(a.state, State::DebianPackages { .. }) {
             let engine::Goal::DebianPackages { definition } = &s.goal else {
                 panic!("package assignment goal kind");
             };

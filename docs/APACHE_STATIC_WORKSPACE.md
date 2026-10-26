@@ -170,5 +170,7 @@ request/invalid-State precedence have a new library regression. The same maximum
 32-probe case measured91.05ms before and30.77ms after in unoptimized tests on this
 Fedora host. This is a bounded observation, not a universal frame-time guarantee.
 UI must still avoid repeating complete grading while idle. No response cache or
-persisted result grants credit. Native editor/content acceptance remains pending;
-this backend does not add curriculum or promote208.1 coverage by itself.
+persisted result grants credit. The four normally bundled tasks now have model,
+content and development-native editor checks; see STATIC_WEB_LESSONS.md and
+APACHE_STATIC_NATIVE_ACCEPTANCE.md. Final polished installed acceptance remains
+pending. A backend alone does not add curriculum or objective coverage.

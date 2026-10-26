@@ -428,7 +428,7 @@ fn case_lesson_editor_band(viewport: egui::Rect, height: f32) -> egui::Rect {
     )
 }
 impl LabApp {
-    fn case_lesson_focus(&mut self, ctx: &egui::Context) -> bool {
+    pub(super) fn case_lesson_focus(&mut self, ctx: &egui::Context) -> bool {
         let key = egui::Id::new(("native-click-phases", self.smoke_stage));
         let phase = ctx.data(|d| d.get_temp::<u8>(key)).unwrap_or(0);
         let clicked = if phase >= 2 {
@@ -455,7 +455,7 @@ impl LabApp {
         }
         clicked
     }
-    fn case_lesson_type(&mut self, source: &str) {
+    pub(super) fn case_lesson_type(&mut self, source: &str) {
         assert!(source.len() <= shell::MAX_SOURCE);
         self.pending_events = [true, false]
             .into_iter()
@@ -473,7 +473,7 @@ impl LabApp {
             .collect();
         self.pending_events.push(egui::Event::Text(source.into()));
     }
-    fn case_lesson_wait(&self, ctx: &egui::Context) -> bool {
+    pub(super) fn case_lesson_wait(&self, ctx: &egui::Context) -> bool {
         if self.script_job.is_none() {
             return true;
         }
@@ -490,7 +490,7 @@ impl LabApp {
         ctx.request_repaint();
         false
     }
-    fn case_lesson_geometry(&self, ctx: &egui::Context) -> bool {
+    pub(super) fn case_lesson_geometry(&self, ctx: &egui::Context) -> bool {
         let current = ctx.content_rect();
         let zoom = ctx.zoom_factor();
         let stable = ctx.data_mut(|d| {
@@ -515,7 +515,7 @@ impl LabApp {
         }
         stable
     }
-    fn case_lesson_assignment(&self, i: usize, expected: Option<&str>, pass: bool) {
+    pub(super) fn case_lesson_assignment(&self, i: usize, expected: Option<&str>, pass: bool) {
         let s = &self.scenarios[i];
         let a = &self.progress.attempts[&s.id];
         let engine::State::Script {
@@ -536,7 +536,7 @@ impl LabApp {
             assert_eq!(a.step, 0);
         }
     }
-    fn script_lesson_start_card(&mut self, ctx: &egui::Context, id: &str) -> bool {
+    pub(super) fn script_lesson_start_card(&mut self, ctx: &egui::Context, id: &str) -> bool {
         let expected = self.scenarios.iter().position(|s| s.id == id).unwrap();
         let key = egui::Id::new(("native-click-phases", self.smoke_stage));
         if ctx.data(|d| d.get_temp::<u8>(key)).unwrap_or(0) >= 2 {
@@ -601,7 +601,7 @@ impl LabApp {
         let phase = (stage - 7200) % 100;
         let ids = kind.ids();
         let id = ids[ordinal];
-        assert_eq!(self.scenarios.len(), 133, "normal registered catalogue");
+        assert_eq!(self.scenarios.len(), 140, "normal registered catalogue");
         assert!(
             GETOPTS_LESSON_IDS
                 .iter()
@@ -1174,8 +1174,8 @@ mod case_lesson_plan_tests {
                 .unwrap(),
             );
         }
-        assert_eq!(all.len(), 133);
-        assert_eq!(units.len(), 33);
+        assert_eq!(all.len(), 140);
+        assert_eq!(units.len(), 35);
         let rows: serde_json::Value = serde_json::from_str(include_str!(
             "../../../tests/fixtures/shell-case-content-review.json"
         ))

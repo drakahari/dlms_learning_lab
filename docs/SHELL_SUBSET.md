@@ -162,12 +162,14 @@ Their bytes and all snapshots remain charged to the unchanged memory/work caps;
 unsetting a special name never frees an ordinary-name slot.
 
 
-## Scoped empty-IFS read and pipefail: private evaluator10 source
+## Scoped empty-IFS read and pipefail: evaluator10
 
-Source implementation2026-10-26; compiler, model, migration and native checks are
-**unrun**. This is not a new lesson, coverage claim or activation on MAIN.
-The exact accepted public9 capture remains immutable and its producer refuses
-other evaluator revisions. Only an actual current10 Run can produce10 results.
+Implemented2026-10-26 with controlled reference comparisons, bounded execution,
+progress migration checks and three reliable-text assignments. Actual Fedora and
+installed acceptance for the new lessons is tracked separately. This is a scoped
+subset, not complete Bash/POSIX support or objective coverage. The exact accepted
+public9 capture remains immutable and its producer refuses other evaluator
+revisions. Only an actual current10 Run can produce10 results.
 
 Accepted temporary forms are `IFS= read -r NAME`, `IFS='' read -r NAME` and
 `IFS="" read -r NAME` (literal empty quoted fragments may combine). Literal

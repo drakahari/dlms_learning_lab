@@ -425,8 +425,9 @@ fn all43_existing_scripts282_cases_and43_examples_keep_exact_authored_inputs_and
         "fixtures/automation-before10-authored-inputs.json"
     ))
     .unwrap();
-    let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 133);
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 140);
+    let labs = &current[..133];
     let catalog = labs
         .iter()
         .map(|s| (s.id.clone(), s.version))

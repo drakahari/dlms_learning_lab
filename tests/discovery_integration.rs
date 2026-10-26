@@ -133,7 +133,7 @@ fn private_pack_reference_alternate_orders_and_refreshes_reach_both_current_neig
         assert!(!engine::solved(&state, &lab.goal));
     }
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 133);
+    assert_eq!(all.len(), 140);
     assert!(!all.iter().any(|s| s.id == lab.id));
     assert!(engine::help(&lab.initial).contains("no CDP"));
 }

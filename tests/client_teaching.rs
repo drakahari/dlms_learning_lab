@@ -31,7 +31,7 @@ fn solved(s: &pack::Scenario) -> State {
 #[test]
 fn original_nine_definitions_and_existing_client_terminal_solutions_remain_exact() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 133);
+    assert_eq!(labs.len(), 140);
     let old: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/client-original-seeds.json")).unwrap();
     for row in old["scenarios"].as_array().unwrap() {

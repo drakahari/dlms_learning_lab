@@ -341,7 +341,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 33);
+    assert_eq!(units.len(), 35);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -360,6 +360,8 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     for id in [
         "debian-package-administration",
         "spanning-tree-steady-state",
+        "shell-safe-automation",
+        "static-web-services",
     ] {
         assert_eq!(units.iter().filter(|u| u["id"] == id).count(), 1);
     }
@@ -369,6 +371,11 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
             && u["id"] != "dhcpv4-client-foundations"
             && u["id"] != "debian-package-administration"
             && u["id"] != "spanning-tree-steady-state"
+            && u["id"] != "shell-safe-automation"
+            && u["id"] != "static-web-services"
     });
-    assert_eq!(current, old["units"]);
+    assert!(
+        current == old["units"],
+        "Full original unit fields/order differ"
+    );
 }

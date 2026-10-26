@@ -1,0 +1,988 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-preserve-lines",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-safe-automation",
+      "topic": "Reliable text automation",
+      "title": "Keep every label while reading text",
+      "summary": "Read complete and partial lines without trimming meaningful data.",
+      "objective": "Write a script taking exactly one existing SOURCE file. Print each record as NUMBER: [TEXT] and a newline, numbered from 1. Preserve spaces, tabs, backslashes, percent signs, carriage returns and UTF-8 text inside TEXT. Count an empty line as one record; an empty file has no records. Process a nonempty final record even without its final newline. Add one output newline per record. Do not change any virtual file. Bad count or missing source: print only Usage: labels SOURCE and a newline to standard error, return 2 and change no file. Success returns 0 with no error output. Supplied filenames are flat basenames.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs and reset simulated files. Your script draft stays saved.",
+          "action": "Write a script taking exactly one existing SOURCE file. Print each record as NUMBER: [TEXT] and a newline, numbered from 1. Preserve spaces, tabs, backslashes, percent signs, carriage returns and UTF-8 text inside TEXT. Count an empty line as one record; an empty file has no records. Process a nonempty final record even without its final newline. Add one output newline per record. Do not change any virtual file. Bad count or missing source: print only Usage: labels SOURCE and a newline to standard error, return 2 and change no file. Success returns 0 with no error output. Supplied filenames are flat basenames.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The lab supplies arguments and simulated files, not pre-created working variables. Each test resets those files; the draft stays saved.",
+          "action": "Read a normal case and an edge case. Predict their output and which files must stay unchanged before running your script.",
+          "commands": []
+        },
+        {
+          "title": "Compare the result",
+          "why": "Output, exit status and the complete virtual file map all matter. A command that ran is not necessarily a correct assignment.",
+          "action": "Run the complete script. Inspect the failing case, expected and actual result, then edit and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Use a read condition that accepts either a complete line or a nonempty final partial line.",
+        "Number records inside the loop; the blank-line case must still increment it."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html"
+      ],
+      "simplifications": "In-process evaluator10 subset; no host shell, files, subprocess or network. Literal-empty IFS prefixes are supported only for read -r NAME. Only set -o pipefail and set +o pipefail are supported; no general IFS, environment prefixes, errexit, traps or full Bash. Flat virtual UTF-8 files, finite LF-delimited input; CR is ordinary data and NUL is excluded. GNU Bash5.3.9 controlled reference cases and the original installed GNU manual supply this subset; online GNU fetch timed out and POSIX Issue8 pages returned403 on2026-10-26, so no universal portability claim is made. Current sample cases test behavior, not arbitrary host paths, failures or concurrent writes.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the full assignment here. The practice example has its own editor.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ordinary labels",
+            "args": [
+              "labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "Router\nSwitch\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "1: [Router]\n2: [Switch]\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "Router\nSwitch\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Edge spaces and tabs",
+            "args": [
+              "rack labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/rack labels.txt": "  Rack A  \n\tRack B\t\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "1: [  Rack A  ]\n2: [\tRack B\t]\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/rack labels.txt": "  Rack A  \n\tRack B\t\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Backslashes and percent",
+            "args": [
+              "labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "path\\west 100%\nnext\\item\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "1: [path\\west 100%]\n2: [next\\item]\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "path\\west 100%\nnext\\item\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Blank records are real entries",
+            "args": [
+              "labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "\nA\n\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "1: []\n2: [A]\n3: []\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "\nA\n\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Final record has no newline",
+            "args": [
+              "labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "first\n  final  ",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "1: [first]\n2: [  final  ]\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "first\n  final  ",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Empty file has no records",
+            "args": [
+              "labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "UTF8 and carriage return",
+            "args": [
+              "labels.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "Caf\u00e9\r\n \u5c55\u793a \n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "1: [Caf\u00e9\r]\n2: [ \u5c55\u793a ]\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/labels.txt": "Caf\u00e9\r\n \u5c55\u793a \n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Missing operand",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "Original\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: labels SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/labels.txt": "Original\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Wrong count",
+            "args": [
+              "labels.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "Original\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: labels SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/labels.txt": "Original\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Missing source",
+            "args": [
+              "missing.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/labels.txt": "Original\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: labels SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/labels.txt": "Original\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 1; then\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: labels SOURCE\\n' >&2\n    exit 2\nfi\nnumber=0\nwhile IFS= read -r line || test -n \"$line\"; do\n    number=$((number + 1))\n    printf '%s: [%s]\\n' \"$number\" \"$line\"\ndone < \"$source\"\n"
+      ],
+      "prerequisites": [
+        "shell-number-records",
+        "shell-eof"
+      ],
+      "teaching": {
+        "example": "if test \"$#\" -ne 1; then\n    printf 'Usage: practice SOURCE\\n' >&2\n    exit 2\nfi\nsource=$1\nif test -f \"$source\"; then :; else\n    printf 'Usage: practice SOURCE\\n' >&2\n    exit 2\nfi\nnumber=0\nwhile IFS= read -r line || test -n \"$line\"; do\n    number=$((number + 1))\n    printf '%s: [%s]\\n' \"$number\" \"$line\"\ndone < \"$source\"\n",
+        "inputs": "The practice example supplies its own arguments and virtual files shown below. It creates all working variables itself; no variable values leak from this editor into the assignment.",
+        "try_change": "Remove only IFS= in the practice script, Run, and compare the spaces around Gate open. Restore it, then remove the || test -n part and see the final last record disappear.",
+        "fixture": {
+          "name": "Separate notice example",
+          "args": [
+            "notices.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/notices.txt": "  Gate open  \nnext\\door\nlast",
+            "/work/keep.txt": "Practice note\n"
+          },
+          "stdout": "1: [  Gate open  ]\n2: [next\\door]\n3: [last]\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/notices.txt": "  Gate open  \nnext\\door\nlast",
+            "/work/keep.txt": "Practice note\n"
+          }
+        },
+        "concepts": [
+          {
+            "title": "Whitespace can be part of the label",
+            "text": "Ordinary read -r line trims spaces and tabs at the edges. IFS= read -r line temporarily asks that one read to keep them; it does not change later splitting. -r keeps backslashes as text. Type the script in the editor and use Run against the sample inputs; no real file or shell is involved."
+          },
+          {
+            "title": "A newline and the end of input differ",
+            "text": "read consumes the newline and returns status 0 for a complete line, even a blank line. At the end it returns 1. A final nonempty line without a newline is still assigned to line, despite status 1. The condition read ... || test -n \"$line\" handles that last record; empty EOF stops it."
+          },
+          {
+            "title": "Keep data out of the format",
+            "text": "Use a fixed printf format and quoted values, such as printf '%s: [%s]\\n' \"$number\" \"$line\". Percent signs inside the label then stay data. The script creates source, number and line; the lab supplies the filename as $1, not a pre-created line variable."
+          }
+        ],
+        "prerequisite_note": "Builds on Number a handover queue and Keep the final record when input ends. Revisit them for numbering, read loops and final partial records; this introduction adds preserving edge whitespace."
+      },
+      "explanation": "A successful loop preserves the line as data, numbers even empty records, and keeps a nonempty final partial line. The literal-empty IFS prefix changes only that read; quoted printf values prevent spaces, backslashes and percent signs becoming commands or formatting. Validation happens before any file change."
+    },
+    {
+      "id": "shell-pipeline-status",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-safe-automation",
+      "topic": "Reliable text automation",
+      "title": "Do not publish a pipeline that failed",
+      "summary": "Distinguish no matches from a failed producer before replacing a report.",
+      "objective": "Take exactly one SOURCE filename. Supplied source filenames are distinct from errors.txt and keep.txt. Select every line containing literal uppercase ERROR, sort whole lines in C-byte order and remove duplicates. On a valid source, replace errors.txt with those records (one newline each), print Report updated and a newline, return 0 and preserve every other file. No matches or an empty source are valid: publish an empty report. On a missing source, leave every file unchanged, return 2 and send the grep missing-file diagnostic followed by Report unavailable and a newline to standard error; stdout stays empty. Bad argument count: only Usage: errors SOURCE and a newline on standard error, status 2, no changes. Filenames are supplied flat basenames.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs and reset simulated files. Your script draft stays saved.",
+          "action": "Take exactly one SOURCE filename. Supplied source filenames are distinct from errors.txt and keep.txt. Select every line containing literal uppercase ERROR, sort whole lines in C-byte order and remove duplicates. On a valid source, replace errors.txt with those records (one newline each), print Report updated and a newline, return 0 and preserve every other file. No matches or an empty source are valid: publish an empty report. On a missing source, leave every file unchanged, return 2 and send the grep missing-file diagnostic followed by Report unavailable and a newline to standard error; stdout stays empty. Bad argument count: only Usage: errors SOURCE and a newline on standard error, status 2, no changes. Filenames are supplied flat basenames.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The lab supplies arguments and simulated files, not pre-created working variables. Each test resets those files; the draft stays saved.",
+          "action": "Read a normal case and an edge case. Predict their output and which files must stay unchanged before running your script.",
+          "commands": []
+        },
+        {
+          "title": "Compare the result",
+          "why": "Output, exit status and the complete virtual file map all matter. A command that ran is not necessarily a correct assignment.",
+          "action": "Run the complete script. Inspect the failing case, expected and actual result, then edit and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Capture a candidate before redirecting to the final report. A failed grep must not be hidden by a successful uniq.",
+        "Treat status 1 as valid empty output; reject a file error before any final write."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html"
+      ],
+      "simplifications": "In-process evaluator10 subset; no host shell, files, subprocess or network. Literal-empty IFS prefixes are supported only for read -r NAME. Only set -o pipefail and set +o pipefail are supported; no general IFS, environment prefixes, errexit, traps or full Bash. Flat virtual UTF-8 files, finite LF-delimited input; CR is ordinary data and NUL is excluded. GNU Bash5.3.9 controlled reference cases and the original installed GNU manual supply this subset; online GNU fetch timed out and POSIX Issue8 pages returned403 on2026-10-26, so no universal portability claim is made. Current sample cases test behavior, not arbitrary host paths, failures or concurrent writes.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the full assignment here. The practice example has its own editor.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Repeated errors",
+            "args": [
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": "OK\nERROR rack\nERROR power\nERROR rack\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Earlier report\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "OK\nERROR rack\nERROR power\nERROR rack\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "ERROR power\nERROR rack\n"
+            }
+          },
+          {
+            "name": "No match is not an error",
+            "args": [
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": "OK\nWARN only\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Earlier report\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "OK\nWARN only\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": ""
+            }
+          },
+          {
+            "name": "Empty source",
+            "args": [
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": "",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Earlier report\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": ""
+            }
+          },
+          {
+            "name": "Space in source filename",
+            "args": [
+              "night shift.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/night shift.log": "ERROR Zebra\nERROR Apple\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Retain until success\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/night shift.log": "ERROR Zebra\nERROR Apple\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "ERROR Apple\nERROR Zebra\n"
+            }
+          },
+          {
+            "name": "Literal match inside a record",
+            "args": [
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": "NOTERROR still contains it\nerror lower\nERROR final",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Old\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "NOTERROR still contains it\nerror lower\nERROR final",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "ERROR final\nNOTERROR still contains it\n"
+            }
+          },
+          {
+            "name": "UTF8 byte order",
+            "args": [
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": "ERROR \u5c55\u793a\nERROR Caf\u00e9\nERROR Alpha\nERROR Caf\u00e9\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": "ERROR \u5c55\u793a\nERROR Caf\u00e9\nERROR Alpha\nERROR Caf\u00e9\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "ERROR Alpha\nERROR Caf\u00e9\nERROR \u5c55\u793a\n"
+            }
+          },
+          {
+            "name": "Missing producer input",
+            "args": [
+              "missing.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Known good report\n"
+            },
+            "stdout": "",
+            "stderr": "grep: missing.log: No such file or directory\nReport unavailable\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Known good report\n"
+            }
+          },
+          {
+            "name": "Missing operand",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Known good report\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: errors SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Known good report\n"
+            }
+          },
+          {
+            "name": "Extra operand",
+            "args": [
+              "events.log",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Known good report\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: errors SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Known good report\n"
+            }
+          },
+          {
+            "name": "Matching records retain edge whitespace",
+            "args": [
+              "events.log"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/events.log": " ERROR pad  \n\tERROR tab\t\nERROR 100%\n ERROR pad  \n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "Earlier report\n"
+            },
+            "stdout": "Report updated\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/events.log": " ERROR pad  \n\tERROR tab\t\nERROR 100%\n ERROR pad  \n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/errors.txt": "\tERROR tab\t\n ERROR pad  \nERROR 100%\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "if test \"$#\" -ne 1; then\n    printf 'Usage: errors SOURCE\\n' >&2\n    exit 2\nfi\nset -o pipefail\nmatches=$(grep -F ERROR \"$1\" | sort | uniq)\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" > errors.txt\nelse\n    printf '' > errors.txt\nfi\nprintf 'Report updated\\n'\n"
+      ],
+      "prerequisites": [
+        "shell-preserve-lines",
+        "shell-capture-decision",
+        "shell-uniq-counts"
+      ],
+      "teaching": {
+        "example": "if test \"$#\" -ne 1; then\n    printf 'Usage: warnings SOURCE\\n' >&2\n    exit 2\nfi\nset -o pipefail\nmatches=$(grep -F WARN \"$1\" | sort | uniq)\nstatus=$?\nif test \"$status\" -gt 1; then\n    printf 'Report unavailable\\n' >&2\n    exit 2\nfi\nif test -n \"$matches\"; then\n    printf '%s\\n' \"$matches\" > warnings.txt\nelse\n    printf '' > warnings.txt\nfi\nprintf 'Report updated\\n'\n",
+        "inputs": "The practice example supplies its own arguments and virtual files shown below. It creates all working variables itself; no variable values leak from this editor into the assignment.",
+        "try_change": "In the practice example, replace \"$1\" in the practice grep command with the literal missing.log. With pipefail enabled, warnings.txt stays unchanged. Remove set -o pipefail and observe the misleading update.",
+        "fixture": {
+          "name": "Separate warning report",
+          "args": [
+            "sample.log"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/sample.log": "OK\nWARN lift\nWARN door\nWARN lift\n",
+            "/work/warnings.txt": "Before\n",
+            "/work/keep.txt": "Example evidence\n"
+          },
+          "stdout": "Report updated\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/sample.log": "OK\nWARN lift\nWARN door\nWARN lift\n",
+            "/work/warnings.txt": "WARN door\nWARN lift\n",
+            "/work/keep.txt": "Example evidence\n"
+          }
+        },
+        "concepts": [
+          {
+            "title": "The last stage can hide an earlier failure",
+            "text": "By default, a pipeline reports only its last stage status. grep may fail to open the source, while sort and uniq still accept empty input and succeed. Explicit set -o pipefail changes the pipeline result to the rightmost failing stage, or 0 when all succeed. Each new Run starts with this option off."
+          },
+          {
+            "title": "No matching lines is a useful result",
+            "text": "For the supported grep -F form, 0 means matches, 1 means no matches, and 2 means a file error. No matches is not a broken source. Save status=$? immediately after the pipeline or capture before another command replaces it. The simulator still reports unsupported syntax and resource limits as ungraded errors."
+          },
+          {
+            "title": "Build the candidate before writing",
+            "text": "matches=$(...) captures output and inherits pipefail. It strips trailing newlines, so put back one with printf when matches is nonempty; use an empty printf for no matches. Validate status before > errors.txt, because > empties an old file immediately. The script creates matches and status; $1 comes from the lab. Checking the producer separately is also a valid approach."
+          }
+        ],
+        "prerequisite_note": "Builds on Keep every label while reading text, Investigate findings without losing their status and Count locations without losing repeats. Revisit them for literal records, saved status, captures, sorting and deduplication; this introduction adds pipeline failure handling."
+      },
+      "explanation": "The report is a candidate until its producer status is known. pipefail exposes a failing grep that successful sort/uniq would hide; checking grep separately is equivalent. No matches produces an empty valid report, while a file error leaves the previous report intact. Capture removes trailing newlines, so publication restores one only for nonempty data."
+    },
+    {
+      "id": "shell-safe-handover",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-safe-automation",
+      "topic": "Reliable text automation",
+      "title": "Publish a validated text handover",
+      "summary": "Combine input validation, literal line handling and a report built before publication.",
+      "objective": "Write report SOURCE OUTPUT. Require exactly two nonempty flat basenames (no slash, . or ..), an existing SOURCE, and OUTPUT different from SOURCE and keep.txt. Read every source record without trimming text; handle blank lines and a final partial record. Write Entry: <TEXT> and a newline for each record, then Total: N and a newline to OUTPUT. An empty source produces only Total: 0 and a newline. Success: print Published report and a newline, status 0, no error output. Preserve SOURCE, keep.txt and every other file. On any invalid count, name, missing source or protected output, print only Usage: report SOURCE OUTPUT and a newline to standard error, status 2, and change no file. All work is simulated; this is not an atomic or concurrent filesystem transaction.",
+      "difficulty": "Advanced",
+      "minutes": 35,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs and reset simulated files. Your script draft stays saved.",
+          "action": "Write report SOURCE OUTPUT. Require exactly two nonempty flat basenames (no slash, . or ..), an existing SOURCE, and OUTPUT different from SOURCE and keep.txt. Read every source record without trimming text; handle blank lines and a final partial record. Write Entry: <TEXT> and a newline for each record, then Total: N and a newline to OUTPUT. An empty source produces only Total: 0 and a newline. Success: print Published report and a newline, status 0, no error output. Preserve SOURCE, keep.txt and every other file. On any invalid count, name, missing source or protected output, print only Usage: report SOURCE OUTPUT and a newline to standard error, status 2, and change no file. All work is simulated; this is not an atomic or concurrent filesystem transaction.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The lab supplies arguments and simulated files, not pre-created working variables. Each test resets those files; the draft stays saved.",
+          "action": "Read a normal case and an edge case. Predict their output and which files must stay unchanged before running your script.",
+          "commands": []
+        },
+        {
+          "title": "Compare the result",
+          "why": "Output, exit status and the complete virtual file map all matter. A command that ran is not necessarily a correct assignment.",
+          "action": "Run the complete script. Inspect the failing case, expected and actual result, then edit and retry.",
+          "commands": []
+        }
+      ],
+      "hints": [
+        "Perform every count, name and collision check before any output redirect.",
+        "Keep the count inside the capture, and print its Total line there before publishing the complete candidate."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Pipelines.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Substitution.html"
+      ],
+      "simplifications": "In-process evaluator10 subset; no host shell, files, subprocess or network. Literal-empty IFS prefixes are supported only for read -r NAME. Only set -o pipefail and set +o pipefail are supported; no general IFS, environment prefixes, errexit, traps or full Bash. Flat virtual UTF-8 files, finite LF-delimited input; CR is ordinary data and NUL is excluded. GNU Bash5.3.9 controlled reference cases and the original installed GNU manual supply this subset; online GNU fetch timed out and POSIX Issue8 pages returned403 on2026-10-26, so no universal portability claim is made. Current sample cases test behavior, not arbitrary host paths, failures or concurrent writes.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write the full assignment here. The practice example has its own editor.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Complete handover",
+            "args": [
+              "source.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Door\nLift\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/report.txt": "Previous report\n"
+            },
+            "stdout": "Published report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "Door\nLift\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/report.txt": "Entry: <Door>\nEntry: <Lift>\nTotal: 2\n"
+            }
+          },
+          {
+            "name": "Formatting characters and spaces",
+            "args": [
+              "night notes.txt",
+              "night report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/night notes.txt": "  west\\door 100% \n\tcare\t\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/night report.txt": "Keep until validated\n"
+            },
+            "stdout": "Published report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/night notes.txt": "  west\\door 100% \n\tcare\t\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/night report.txt": "Entry: <  west\\door 100% >\nEntry: <\tcare\t>\nTotal: 2\n"
+            }
+          },
+          {
+            "name": "Partial final record",
+            "args": [
+              "source.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "A\n B ",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n"
+            },
+            "stdout": "Published report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "A\n B ",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/report.txt": "Entry: <A>\nEntry: < B >\nTotal: 2\n"
+            }
+          },
+          {
+            "name": "Empty input still has a total",
+            "args": [
+              "source.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/report.txt": "Previous\n"
+            },
+            "stdout": "Published report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/report.txt": "Total: 0\n"
+            }
+          },
+          {
+            "name": "Blank and UTF8 records",
+            "args": [
+              "source.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "\nCaf\u00e9\r\n \u5c55\u793a \n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n"
+            },
+            "stdout": "Published report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/source.txt": "\nCaf\u00e9\r\n \u5c55\u793a \n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n",
+              "/work/unrelated.txt": "Other work\n",
+              "/work/report.txt": "Entry: <>\nEntry: <Caf\u00e9\r>\nEntry: < \u5c55\u793a >\nTotal: 3\n"
+            }
+          },
+          {
+            "name": "Extra handover operand",
+            "args": [
+              "source.txt",
+              "report.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Missing source",
+            "args": [
+              "missing.txt",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Output is input",
+            "args": [
+              "source.txt",
+              "source.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Protected output",
+            "args": [
+              "source.txt",
+              "keep.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Empty output",
+            "args": [
+              "source.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Output traversal",
+            "args": [
+              "source.txt",
+              "../escape"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          },
+          {
+            "name": "Source traversal",
+            "args": [
+              "../escape",
+              "report.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: report SOURCE OUTPUT\n",
+            "status": 2,
+            "after": {
+              "/work/source.txt": "Read only\n",
+              "/work/report.txt": "Previous report\n",
+              "/work/keep.txt": "Evidence must stay unchanged.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "usage() {\n    printf 'Usage: report SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -ne 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nreport=$(count=0\n    while IFS= read -r line || test -n \"$line\"; do\n        printf 'Entry: <%s>\\n' \"$line\"\n        count=$((count + 1))\n    done < \"$source\"\n    printf 'Total: %s\\n' \"$count\"\n)\nprintf '%s\\n' \"$report\" > \"$destination\"\nprintf 'Published report\\n'\n"
+      ],
+      "prerequisites": [
+        "shell-pipeline-status",
+        "shell-case-publication",
+        "shell-local-heading"
+      ],
+      "teaching": {
+        "example": "usage() {\n    printf 'Usage: practice SOURCE OUTPUT\\n' >&2\n    exit 2\n}\nif test \"$#\" -ne 2; then usage; fi\nsource=$1\ndestination=$2\ncase \"$source\" in\n    ''|*/*|.|..) usage ;;\nesac\ncase \"$destination\" in\n    ''|*/*|.|..|keep.txt) usage ;;\nesac\nif test \"$source\" = \"$destination\"; then usage; fi\nif test -f \"$source\"; then :; else usage; fi\nreport=$(count=0\n    while IFS= read -r line || test -n \"$line\"; do\n        printf 'Notice: <%s>\\n' \"$line\"\n        count=$((count + 1))\n    done < \"$source\"\n    printf 'Notices: %s\\n' \"$count\"\n)\nprintf '%s\\n' \"$report\" > \"$destination\"\nprintf 'Example published\\n'\n",
+        "inputs": "The practice example supplies its own arguments and virtual files. It publishes Notice: <TEXT> rows and Notices: N to handover.txt, then prints Example published. The assignment has its own Entry/Total/Published report interface. The script creates its own variables; drafts remain separate.",
+        "try_change": "In the separate example, change only the final output destination to keep.txt. Observe why validation must use the same destination that publication uses. Restore it, then remove IFS= and compare the spaces in Front desk.",
+        "fixture": {
+          "name": "Separate exhibit handover",
+          "args": [
+            "display.txt",
+            "handover.txt"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/display.txt": "  Front desk  \nside\\gate",
+            "/work/handover.txt": "Previous example\n",
+            "/work/keep.txt": "Example note\n"
+          },
+          "stdout": "Example published\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/display.txt": "  Front desk  \nside\\gate",
+            "/work/handover.txt": "Notice: <  Front desk  >\nNotice: <side\\gate>\nNotices: 2\n",
+            "/work/keep.txt": "Example note\n"
+          }
+        },
+        "concepts": [
+          {
+            "title": "Validate before opening the output",
+            "text": "The > operator can erase an existing file before a later error is noticed. Check all arguments and preservation rules first. A case pattern such as */* detects a slash; quoted empty text, . and .. are invalid names for this task. No real directory or host file exists here."
+          },
+          {
+            "title": "Build one candidate in a capture",
+            "text": "A capture can run the entire read loop and print its total. Variables changed inside it stay there, so compute and print the count inside the capture as well. Quoted \"$report\" preserves spaces and embedded line breaks. All capture text shares the existing memory, output and instruction limits."
+          },
+          {
+            "title": "Publish only after the candidate is ready",
+            "text": "The final count line (Notices in this example, Total in the assignment) ensures the candidate is nonempty even for an empty source. Capture removes its final newline; printf '%s\\n' \"$report\" restores exactly one. Only then redirect to the validated output. This protects these supplied files from validation errors; it is not a promise of crash-safe real filesystem replacement."
+          }
+        ],
+        "prerequisite_note": "Builds on Do not publish a pipeline that failed, Preview or publish a validated release plan and Protect the report heading. Revisit them for producer checks, argument validation, case patterns and local scope; this introduction combines validation with literal line handling before publication."
+      },
+      "explanation": "Count, path and collision validation happens first. The capture builds all entries and the total with literal line handling; its own count stays inside that scope. Only a complete candidate is written to the approved destination. Full file-map grading also verifies input, evidence and unrelated files; this is bounded simulated publication, not a crash-safe real filesystem transaction."
+    }
+  ]
+}

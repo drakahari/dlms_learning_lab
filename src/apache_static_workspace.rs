@@ -367,6 +367,94 @@ impl Definition {
         }).collect()
     }
 }
+// Short excerpts retain useful site/path distinctions without dumping config
+// or a large expected value. Body text is never included in feedback.
+fn response_field(value: Option<&str>, absent: &str) -> String {
+    let Some(value) = value else {
+        return absent.into();
+    };
+    let mut end = value.len().min(96);
+    while !value.is_char_boundary(end) {
+        end -= 1;
+    }
+    let mut text = value[..end].to_owned();
+    if end < value.len() {
+        text.push_str("...");
+    }
+    text
+}
+fn response_difference(response: &web::Response, expected: &HttpExpectation) -> String {
+    if response.status.code() != expected.status {
+        return format!(
+            "HTTP {} returned; expected HTTP {}. Check the requested site, path and access rule.",
+            response.status.code(),
+            expected.status
+        );
+    }
+    let same_site = match (&expected.vhost, &response.vhost) {
+        (Some(a), Some(b)) => a.eq_ignore_ascii_case(b),
+        (None, None) => true,
+        _ => false,
+    };
+    if !same_site {
+        return format!(
+            "Selected site {}; expected {}. Check the site names, aliases and their order.",
+            response_field(response.vhost.as_deref(), "none"),
+            response_field(expected.vhost.as_deref(), "no selected site")
+        );
+    }
+    if response.resource != expected.resource {
+        return format!(
+            "Mapped resource {}; expected {}. Check DocumentRoot and DirectoryIndex for this site.",
+            response_field(response.resource.as_deref(), "none"),
+            response_field(expected.resource.as_deref(), "no mapped resource")
+        );
+    }
+    if response.body != expected.body {
+        return format!(
+            "Page text differs from the required text ({} returned UTF-8 bytes; {} expected). Inspect the mapped file contents.",
+            response.body.len(),
+            expected.body.len()
+        );
+    }
+    if response.representation_bytes != expected.representation_bytes {
+        let bytes = |n: Option<usize>| n.map_or_else(|| "none".into(), |n| n.to_string());
+        return format!(
+            "Page length is {} UTF-8 bytes; expected {}. For HEAD, this is the page length, not the empty response body.",
+            bytes(response.representation_bytes),
+            bytes(expected.representation_bytes)
+        );
+    }
+    if response.redirect_path != expected.redirect_path {
+        return format!(
+            "Redirect location {}; expected {}. Inspect the requested directory path.",
+            response_field(response.redirect_path.as_deref(), "none"),
+            response_field(expected.redirect_path.as_deref(), "no redirect")
+        );
+    }
+    // Status alone cannot distinguish an access-rule denial from a missing index.
+    let reason = match response.cause {
+        web::Cause::File => "a static file was returned",
+        web::Cause::DirectorySlash => "a directory slash redirect was returned",
+        web::Cause::InvalidHost => "the Host fields were invalid",
+        web::Cause::AccessDenied => "the directory access rule denied the request",
+        web::Cause::MissingResource => "the mapped resource was missing",
+        web::Cause::NoIndex => "no directory page was available",
+    };
+    let wanted = match expected.cause {
+        Some(ResponseCause::File) => "a static-file response",
+        Some(ResponseCause::DirectorySlash) => "a directory slash redirect",
+        Some(ResponseCause::InvalidHost) => "invalid Host fields",
+        Some(ResponseCause::AccessDenied) => "denial by the directory access rule",
+        Some(ResponseCause::MissingResource) => "a missing-resource response",
+        Some(ResponseCause::NoIndex) => "no available directory page",
+        None => "the required response",
+    };
+    format!(
+        "HTTP {} occurred because {reason}; expected {wanted}.",
+        response.status.code()
+    )
+}
 fn probe(
     view: Result<&web::RequestView<'_>, &web::Fault>,
     request: &Request,
@@ -381,7 +469,7 @@ fn probe(
         Ok(Outcome::NoListener) => (
             false,
             format!(
-                "{label}: no active virtual listener for this server/port; expected HTTP{}",
+                "{label}: no active virtual listener for this server/port; expected HTTP {}.",
                 expected.status
             ),
         ),
@@ -394,26 +482,46 @@ fn probe(
                 pass,
                 if pass {
                     format!(
-                        "{label}: HTTP{} and declared response fields match",
+                        "{label}: HTTP {} matches the required response.",
                         response.status.code()
                     )
                 } else {
-                    format!(
-                        "{label}: HTTP{} from {} at {}; expected HTTP{} with the declared content/response values. Inspect active roots, access rules and current files",
-                        response.status.code(),
-                        response.vhost.as_deref().unwrap_or("no selected site"),
-                        response.resource.as_deref().unwrap_or("no mapped resource"),
-                        expected.status
-                    )
+                    format!("{label}: {}", response_difference(&response, expected))
                 },
             )
         }
+    }
+}
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+pub enum EditorKind {
+    Config,
+    File,
+}
+impl<'de> Deserialize<'de> for EditorKind {
+    fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
+        struct Kind;
+        impl serde::de::Visitor<'_> for Kind {
+            type Value = EditorKind;
+            fn expecting(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+                f.write_str("Config or File editor")
+            }
+            fn visit_str<E: serde::de::Error>(self, value: &str) -> Result<Self::Value, E> {
+                match value {
+                    "Config" => Ok(EditorKind::Config),
+                    "File" => Ok(EditorKind::File),
+                    _ => Err(E::custom("Invalid Apache editor kind")),
+                }
+            }
+        }
+        d.deserialize_str(Kind)
     }
 }
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Draft {
     pub version: u8,
     pub context: Inventory,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub editor_kind: Option<EditorKind>,
     pub config_text: String,
     pub selected_file: Option<String>,
     pub file_text: String,
@@ -430,6 +538,8 @@ impl<'de> Deserialize<'de> for Draft {
         struct R {
             version: u8,
             context: Inventory,
+            #[serde(default)]
+            editor_kind: Option<EditorKind>,
             #[serde(deserialize_with = "text::<_,16384>")]
             config_text: String,
             #[serde(default, deserialize_with = "option_text::<_,160>")]
@@ -450,6 +560,7 @@ impl<'de> Deserialize<'de> for Draft {
         let v = Self {
             version: r.version,
             context: r.context,
+            editor_kind: r.editor_kind,
             config_text: r.config_text,
             selected_file: r.selected_file,
             file_text: r.file_text,
@@ -479,6 +590,7 @@ impl Draft {
         let d = Self {
             version: 1,
             context: s.inventory.clone(),
+            editor_kind: None,
             config_text: s.saved.clone(),
             selected_file: None,
             file_text: String::new(),

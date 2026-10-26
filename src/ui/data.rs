@@ -246,6 +246,7 @@ impl LabApp {
                         .and_then(|_| backup::restore(&self.path, &candidate, &self.scenarios));
                     match result {
                         Ok(safety) => {
+                            self.invalidate_apache_presentation();
                             self.progress = candidate.progress;
                             self.address_worked.clear();
                             self.address_example = None;

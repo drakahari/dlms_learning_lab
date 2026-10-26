@@ -2,13 +2,16 @@
 
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
-**133 authored assignments/33 units:42CCNA,28LPIC-1,20LPIC-2,43Bash/Shell**.
+**140 authored assignments/35 units:42CCNA,28LPIC-1,24LPIC-2,46Bash/Shell**.
+The new four static-web and three reliable-text assignments pass model/content
+and actual-egui event checks plus all seven development-native Fedora flows.
+Final polished installed acceptance remains pending. The last scoped accepted installed catalog remains133/33.
 All eight package/STP assignments pass model/content and full installed native
 flows (69 package and48 STP captures) on Fedora38a8098. That same133-lab candidate
 passes lifecycle,11normal Wayland starts, real script/DHCP process reopening and
 72shared alignment captures. Original IDs/progress remain; numeric practice and
 900 synthetic catalog previews are not authored labs. Planned work stays separate.
-The scripting path has eleven units.
+The scripting path has twelve units.
 See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
 
 ## Primary sources and version boundaries
@@ -52,7 +55,7 @@ Each row records credited scenario IDs (or None), a distinct proposed assignment
 
 ## Learning order and capability gates
 
-CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. DHCP client/relay practice now has three accepted assignments. The pure single-instance steady-state spanning-tree core is implemented; its app adapter, native teaching and authored unit remain pending. Integrated dual-stack diagnosis, LACP, FHRP and broader protocol behavior still require models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
+CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. DHCP client/relay practice now has three accepted assignments. The bounded single-instance steady-state spanning-tree model, app adapter, teaching and four authored assignments pass scoped installed acceptance; real BPDUs, convergence and per-VLAN protocol behavior remain absent. Integrated dual-stack diagnosis, LACP, FHRP and broader protocol behavior still require models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
 
 LPIC-1 progresses through terminal/files → permissions/accounts → packages/processes → storage/boot → shell/scheduling → networking/services/security. Hardware probing, bootloaders, real package transactions, locale behavior, accessibility and cryptography require new evidence/state models; existing tests do not establish those capabilities. A visual configuration exercise must identify what it models and what it cannot execute.
 
@@ -65,11 +68,11 @@ The first fifteen shell labs and four text-processing labs use **portable shell 
 | Stage | Status / distinct assignments | Prerequisites | Capability and portability boundary |
 | --- | --- | --- | --- |
 | 1. Foundations | **Implemented:** reliable handover; supplied-file labels; input without losing backslashes; missing-destination guard; incident report; multi-file handover; safe-report capstone | Listed preceding lab in the unit, advisory rather than a lock | Scalars, quoting, positional arguments, read, printf, status, test/if, redirects, for, literal grep/cat. Portable subset; 3–5 deterministic cases per assignment |
-| 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x` and pipefail remain unsupported; Bash local is taught in the following scope unit |
+| 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x` remains unsupported; explicit pipefail is now taught in the later reliable-text unit; Bash local is taught in the following scope unit |
 | 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Implemented with installed native acceptance:** short-option report, independent job parsers and validated batch publication. **Planned:** streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. Bounded command-output capture now has its own taught unit (SHELL_CAPTURE_LESSONS.md). The bounded getopts extension and its three source-gated projects are documented in SHELL_GETOPTS_LESSONS.md; compound/function-call redirects and parameter defaults remain unsupported |
 | 4. Structured Bash | **Implemented:** exact dispatch lists, whole-list mutation repair, grouped package inventory and preview/save handover. **Planned:** associative lookup, command construction and regex validation | Reusable functions, scope and filename selection | Bounded Bash-specific dense indexed arrays/counts/quoted @ implemented and taught. No associative/sparse arrays, computed indices/index writes, `[[ ]]`, `=~` or full Bash arrays. Portable arithmetic remains a separate counters unit. |
 | 5. Text and data | **Implemented:** inventory field extraction, unique manifests, grouped location counts and a duplicate-ID audit. **Planned:** regex audit, snapshot comparison and broader malformed-row recovery | Streams, conditions and functions | Bounded C-locale sort/uniq/cut models and four reviewed assignments implemented; broader sed/awk/regex/locale behavior still needed. Distinguish shell language from external utility semantics |
-| 6. Safe automation projects | **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |
+| 6. Safe automation projects | **Implemented narrow precursor:** preserve exact input lines, distinguish no matches from a missing pipeline input, and validate-before-writing report handover. **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |
 
 Each planned stage includes a guided repair, independent construction and capstone with multiple deterministic cases, adverse inputs, alternate supported solutions and current-state invalidation. Do not simply vary constants to inflate counts. Before implementing unsupported syntax, extend the grammar, expansion order, evaluator and development-oracle fixtures; review fidelity and resource bounds before authoring the lesson.
 
@@ -237,3 +240,26 @@ service. Current objective/technical sources checked2026-10-25, source inventory
 fingerprints remain2026-10-22, futureCCNAv2 uncredited.136Partial/1Supporting/
 1103Open overlapping references are not a completion percentage. See
 DHCPV4_LESSONS.md and INSTALLATION.md for exact scope and evidence.
+
+
+## M120 static web and reliable text — implemented source
+
+Four [static-web assignments](STATIC_WEB_LESSONS.md) and three
+[reliable-text scripts](SHELL_SAFE_AUTOMATION_LESSONS.md) are registered normally,
+not developer fixtures. Model/content checks exercise independent expected
+responses, valid alternative methods, wrong/partial/hardcoded work, preservation,
+source invalidation and separate practice. Both units completed real Fedora
+development-native flows (68web/72script captures), with representative light/dark
+and150/200% renders reviewed. Shared72-frame alignment also passes100/150/200%.
+The final wording/diagnostic/capture refinements still need same-ELF installed
+verification; candidate creation is not that verification.
+
+Only LPIC-2 v4.5 208.1 parent/K1/K3/K7 gain narrow Partial practice. Static serving
+is not installation, actual Apache commands, logs, authentication, scripting
+modules, resource tuning, dedicated-IP hosts, configurable Redirect statements,
+HTTPS or proxy operation. Those requirements stay Open. The three scripts do not
+complete safe automation or create new issuer credit; trap/recovery/atomic-file
+projects, associative data and broader shell utilities remain planned. Current
+source140/35 and overlapping144Partial/1Supporting/1095Open are not completion
+percentages; latest accepted installed catalog remains133/33 at38a pending final
+candidate acceptance. All1240 original source fingerprints/positions are retained.

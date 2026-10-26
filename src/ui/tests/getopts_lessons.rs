@@ -24,8 +24,8 @@ fn proposed_app() -> (egui::Context, LabApp) {
             .unwrap(),
         );
     }
-    assert_eq!(a.scenarios.len(), 133);
-    assert_eq!(a.units.len(), 33);
+    assert_eq!(a.scenarios.len(), 140);
+    assert_eq!(a.units.len(), 35);
     (ctx, a)
 }
 fn tick(ctx: &egui::Context, a: &mut LabApp, kind: ScriptLessonFlow) -> Option<String> {

@@ -950,5 +950,7 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/dhcpv4-client-v1.json"),
         include_str!("../scenarios/debian-packages-v1.json"),
         include_str!("../scenarios/spanning-tree-v1.json"),
+        include_str!("../scenarios/shell-safe-automation-v1.json"),
+        include_str!("../scenarios/apache-static-v1.json"),
     ])
 }

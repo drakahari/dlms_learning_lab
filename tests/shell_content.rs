@@ -19,6 +19,11 @@ fn reviews() -> Vec<Review> {
         incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
         misconception: r["wrong"][0]["misconception"].as_str().unwrap().into(),
     }));
+    let safe: Vec<Review> = serde_json::from_str(include_str!(
+        "fixtures/shell-safe-automation-native-review.json"
+    ))
+    .unwrap();
+    rows.extend(safe);
     rows
 }
 fn quoted(value: &str) -> String {

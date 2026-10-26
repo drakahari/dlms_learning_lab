@@ -1,9 +1,12 @@
 # Static web services unit
 
-Authored 2026-10-26. **Four data-complete assignments are currently unbundled.**
-Their native editor and normal catalog registration are not accepted yet. They do
-not increase the 133-lab installed catalog or promote objective coverage. The
-eight content test groups exercise actual in-process behavior, not a real server.
+Authored2026-10-26. Four assignments are bundled normally with their native
+workspace in source140/35 (42CCNA/28LPIC-1/24LPIC-2/46Bash). Model/content and
+full actual-egui event flows pass. All four development-native Fedora flows also
+passed68 captures, with representative light/dark/scaled images independently
+reviewed. The final diagnostic/wording polish still needs same-ELF installed
+verification. Coverage is narrow Partial208.1/K1/K3/K7 only; no full Apache or
+certification-preparation claim follows. See [acceptance](APACHE_STATIC_NATIVE_ACCEPTANCE.md).
 
 | Assignment | Distinct skill | Prerequisite |
 | --- | --- | --- |
@@ -66,3 +69,14 @@ configuration, confirms the alias leaks HTTP200, and requires exactly the two
 alias-private rows to fail while all other promises still pass. The model allows
 legitimate duplicate-name ordering; the task checks its actual promise instead
 of banning valid configurations to hide the gap.
+
+
+Development-native Fedora follow-through: all four normal lessons passed through
+actual controls, with68 PNGs at946×929 and1920×1080, including Light150/Dark200.
+Representative18 images were independently inspected; headless event checks do
+not stand in for those renders. Final plain-language response diagnostics now
+identify status, selected site, mapped file, page text/length, redirect or cause
+rather than saying only that declared values differ. Three specific regression
+groups pass with unchanged grading. Teaching labels and the separate lobby
+example wording match their actual controls. Same-ELF polished installed140
+verification remains pending; earlier source-only statements are historical.

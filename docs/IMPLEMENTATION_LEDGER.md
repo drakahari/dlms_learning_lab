@@ -1992,3 +1992,66 @@ leakage with both-name current/next-start guards (50assignment/50example rows).
 Native source handed off10paths/13UNRUNchecks. Three safe-automation assignments
 are privately authored with31cases and independent content review underway.
 Actual native/newunit integration and packaged acceptance remain next, not complete.
+
+
+## 2026-10-26 — M120 meaningful static-web and reliable-text units
+
+Normal source inventory is 140 assignments in 35 units: 42 CCNA, 28 LPIC-1,
+24 LPIC-2 and 46 Bash/Shell. Existing 133 authored definitions, versions, unit
+metadata/order and 31 pack hashes remain exact; the seven additions are appended.
+No generated variants count as labs. New profiles are not invented when loading
+old progress. All three scripts use the accepted editor and separate examples;
+all four web tasks have an editor, live virtual files and a read-only request
+workspace. No dependencies, host execution, listeners or network actions added.
+
+The scripting tasks preserve literal input (including final partial records),
+distinguish missing pipeline input from valid empty output, and validate before
+publishing a handover. Their 10/10/12 deterministic cases check whole outcomes
+and file maps; genuinely different methods pass and hardcoded/partial shortcuts
+fail. The capstone practice uses Notice/Notices, distinct from assignment
+Entry/Total, after a teaching regression caught the copied interface. Examples
+and assignment drafts remain separate through navigation, resume and reset.
+
+Web tasks cover alias/default routing, ordered directory pages/live files,
+path-based access, and saved/active/next-start handover. Fifty assignment outcomes
+and 50 separate example outcomes are assertions within four labs. Independent
+review found an alias-private-file leak; a regression now fails both affected
+rows without banning valid duplicate-name configuration. Actual screen review
+then improved feedback to name the first differing response field/cause, instead
+of the misleading same-status 'declared values' message. Check labels and separate
+example names were corrected. Insert/Reset focuses the editor after the click;
+shared retention wording and native control metrics remain consistent.
+
+Development ELF beaa4e9f passed all seven full native Fedora flows: 68 web and
+72 script captures, plus 72 shared alignment captures at 100/150/200% light/dark.
+Representative renders were reviewed independently, including actual focus,
+errors, complete tasks and narrow stacking. Apache/alignment measured 946x929
+and 1920x1080; scripting remained 946x929 despite larger requests. Exact warm
+raw/portable/receipt readback, alternatives, invalidation, selected reset and
+active Run/Stop passed. These are trusted technical inputs, not novice,
+physical-keyboard, screen-reader, cold-process or other-platform acceptance.
+Practice/file detail text outside a captured viewport was not claimed reviewed.
+A later capture regression requires the complete Expected/Actual pair inside its
+paint clip using an actual inner wheel event; it changes no Attempt data.
+
+The first expanded-catalog full gate exposed five stale test assumptions; exact
+historical projections and new-family goal-aware checks fixed them. Full R2 then
+passed 1573 checks, zero failures and ten private-evidence checks skipped. Those
+ten were explicitly run: library/after10/migration 74+5+8 all pass, including
+actual9 and genuine6/7/8 histories, old exact bytes, receipts and new attempts
+remaining absent. Python 185 passed. First final UI-polish gate passed 296 and
+failed one new test sampling its asynchronous result too early; a bounded real
+frame wait corrected the test, and all seven controller groups pass. The final
+full regression after diagnostic/text/footer changes passes 1577 checks, zero
+failures and ten explicitly private checks skipped. All-target Clippy/fmt and
+coverage validation pass; the CSV uses allowed integration-test evidence paths
+without widening the validator. Full R3 minimum available memory was22.17GiB,
+maximum PSIavg10 zero and OOM delta zero; no pressure refusal.
+
+Only LPIC-2 208.1 parent/K1/K3/K7 gains narrowly Partial practice after the native
+baseline. All 1240 source fingerprints/positions stay exact; named tools,
+installation, logs, authentication, dedicated-IP vhosts, explicit Redirect,
+modules, tuning, HTTPS and proxy work remain open. Current overlapping matrix:
+144 Partial, one Supporting and 1095 Open, not a completion percentage. The latest
+accepted installed candidate remains 133/33 at38a; final polished 140 candidate
+and SAME-ELF installed acceptance are next. No public release.

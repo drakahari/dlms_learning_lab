@@ -1,18 +1,25 @@
 use super::*;
 use engine::State;
 impl LabApp {
-    pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
-        let s = self.scenarios[i].clone();
-        let mut challenge = self.progress.attempts[&s.id].challenge;
+    pub(super) fn workspace_header(&mut self, ui: &mut egui::Ui, i: usize) -> bool {
+        let id = self.scenarios[i].id.clone();
+        let track = self.scenarios[i].track.clone();
+        let topic = self.scenarios[i].topic.clone();
+        let manager = matches!(self.scenarios[i].initial, State::UnitManager { .. });
+        let mut challenge = self.progress.attempts[&id].challenge;
         ui.horizontal_wrapped(|ui| {
             let r = ui.add(button("Back to library"));
             self.metrics.back = Some(r.rect);
+            self.metrics
+                .workspace_header_controls
+                .push(("back".into(), r.rect, r.id));
             if r.clicked() {
                 self.script_job = None;
                 self.selected = None;
+                self.invalidate_apache_presentation();
             }
             ui.label(
-                RichText::new(format!("{} / {}", s.track, s.topic))
+                RichText::new(format!("{} / {}", track, topic))
                     .small()
                     .color(palette(ui).accent),
             );
@@ -21,23 +28,36 @@ impl LabApp {
             let independent = ui.selectable_value(&mut challenge, true, "Challenge");
             self.metrics.mode_learn = Some(learn.rect);
             self.metrics.mode_challenge = Some(independent.rect);
-            if matches!(s.initial, State::UnitManager { .. }) {
+            self.metrics
+                .workspace_header_controls
+                .push(("learn".into(), learn.rect, learn.id));
+            self.metrics.workspace_header_controls.push((
+                "challenge".into(),
+                independent.rect,
+                independent.id,
+            ));
+            if manager {
                 self.metrics.manager_learn = Some(learn.rect);
                 self.metrics.manager_challenge = Some(independent.rect);
             }
             if before != challenge {
-                self.progress.attempts.get_mut(&s.id).unwrap().challenge = challenge;
+                self.progress.attempts.get_mut(&id).unwrap().challenge = challenge;
                 self.help_open = false;
                 self.script_job = None;
                 if let Some(view) = &mut self.ipv4_view {
                     view.hide_guidance();
                 }
                 self.dirty = true;
+                self.invalidate_apache_presentation();
             }
             let r = ui.add(button("Reset"));
             self.metrics.reset = Some(r.rect);
+            self.metrics
+                .workspace_header_controls
+                .push(("reset".into(), r.rect, r.id));
             if r.clicked() {
                 self.reset_pending = true;
+                self.invalidate_apache_presentation();
                 self.lesson_scroll_reset = true;
                 self.focus_input = false;
                 if let Some(view) = &mut self.ipv4_view {
@@ -63,6 +83,16 @@ impl LabApp {
                 }
             });
         }
+        challenge
+    }
+    pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::ApacheStatic { .. }) {
+            self.apache_static_page(ui, i);
+            Self::workspace_footer(ui);
+            return;
+        }
+        let s = self.scenarios[i].clone();
+        let challenge = self.workspace_header(ui, i);
         ui.add_space(8.);
         card(ui).show(ui, |ui| {
             ui.set_min_width(ui.available_width());
@@ -251,6 +281,9 @@ impl LabApp {
                 }
             }
         });
+        Self::workspace_footer(ui);
+    }
+    fn workspace_footer(ui: &mut egui::Ui) {
         ui.label(
             RichText::new(
                 "Simulation only · Leaving keeps your work and editor drafts saved locally.",

@@ -10,6 +10,7 @@ use eframe::egui::{self, RichText};
 mod accounts_workspace;
 mod acl_workspace;
 mod address_learning;
+mod apache_static_workspace;
 mod client_learning;
 mod controls;
 mod data;
@@ -40,6 +41,16 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    apache_controls: Vec<(String, egui::Rect, bool)>,
+    apache_fields: Vec<(String, egui::Rect, egui::Id, bool)>,
+    apache_editor: Option<(egui::Rect, egui::Rect, egui::Id, bool)>,
+    apache_file_items: Vec<(String, egui::Rect)>,
+    apache_action_items: Vec<(usize, egui::Rect)>,
+    apache_popup: Option<(String, egui::Rect)>,
+    apache_result: Option<egui::Rect>,
+    apache_response: Option<egui::Rect>,
+    apache_check_evaluated: bool,
+    workspace_header_controls: Vec<(String, egui::Rect, egui::Id)>,
     main_viewport: Option<egui::Rect>,
     main_scroll_offset: egui::Vec2,
     main_content_size: egui::Vec2,
@@ -281,6 +292,7 @@ pub struct LabApp {
     lesson_scroll_reset: bool,
     notice: Option<String>,
     metrics: Metrics,
+    apache_presentation: apache_static_workspace::Presentation,
     help_open: bool,
     extra_filters: bool,
     host_activity: bool,
@@ -420,6 +432,7 @@ impl LabApp {
             lesson_scroll_reset: false,
             notice: None,
             metrics: Metrics::default(),
+            apache_presentation: apache_static_workspace::Presentation::default(),
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -432,6 +445,10 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("apache-static-lessons")
+            {
+                36000
             } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("spanning-tree-lessons")
             {
@@ -509,6 +526,11 @@ impl LabApp {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
+            } else if let Some(stage) = Self::safe_automation_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if smoke
                 && matches!(
                     std::env::var("DLMS_SMOKE_STAGE").as_deref(),
@@ -638,6 +660,7 @@ impl LabApp {
         }
     }
     fn launch(&mut self, i: usize) {
+        self.invalidate_apache_presentation();
         self.script_job = None;
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
@@ -650,6 +673,7 @@ impl LabApp {
             .entry(s.id.clone())
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
+        Self::prepare_apache_static(a, s, new_attempt);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated ACL lesson");
@@ -809,6 +833,7 @@ impl LabApp {
         };
     }
     fn reset_attempt(&mut self, i: usize) {
+        self.invalidate_apache_presentation();
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
@@ -817,6 +842,7 @@ impl LabApp {
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
+        Self::prepare_apache_static(a, s, true);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
                 .expect("validated ACL lesson");
@@ -1195,6 +1221,7 @@ impl LabApp {
                 self.filter.topic.clear();
                 self.filter.search.clear();
                 self.selected = None;
+                self.invalidate_apache_presentation();
             }
         }
     }

@@ -304,8 +304,11 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
         serde_json::from_slice(include_bytes!("fixtures/automation-oracle-inputs.json")).unwrap();
     let boundaries: Value =
         serde_json::from_slice(include_bytes!("fixtures/automation-vm-boundaries.json")).unwrap();
-    let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 133);
+    let current = pack::bundled().unwrap();
+    assert_eq!(current.len(), 140);
+    // Compare the exact original133 input context; the7 newly authored tasks
+    // have no public9 observation and must never acquire fabricated old rows.
+    let labs = &current[..133];
     let current_catalog = labs
         .iter()
         .map(|s| (s.id.clone(), s.version))
