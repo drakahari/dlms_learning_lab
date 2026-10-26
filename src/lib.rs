@@ -98,6 +98,8 @@ pub mod unit_manager_workspace;
 pub mod mac_learning;
 pub mod mac_learning_teaching;
 pub mod mac_learning_workspace;
+pub mod nat;
+pub mod nat_workspace;
 
 pub mod seed_dns_teaching;
 pub mod seed_mount_teaching;

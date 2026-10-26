@@ -2132,3 +2132,57 @@ this edited development helper is not relabeled original evidence. MAIN guarded
 all-target Clippy passed after the correction. A new exact-source CI rerun is
 required; Fedora ddb candidate bytes and scoped acceptance remain unchanged.
 No Windows/macOS desktop runtime claim or public release.
+
+
+### M121 Basic NAT backend integrated and gated (2026-10-26)
+
+Reviewed original pure coreR2 plus adapterR5 integrated into MAIN only after the
+isolated full1619PASS0FAIL11ignored and explicit20core+23adapter PASS including
+actual9; source/peer receipts28b059ce/b29f3fa9. MAIN original base checks retained
+ddb capture pacing and7dde Windows correction. All34 authored scenario files
+stay byte-exact; normal140/35 (42CCNA/28LPIC-1/24LPIC-2/46Bash),314script cases,
+46examples, EVAL10,28themes and old progress remain unchanged. Added optional
+nil-skipped nat_draft, typed State/Goal and strict same-inventory admission, current
+mapping/policy checks, separate copied-policy trials and bounded raw/native API.
+Check never creates a current mapping. No native renderer, teaching or NAT card.
+CCNA4.1 staysOpen, matrix144Partial/1Supporting/1095Open and all1240issuer pins
+unchanged. Planning text now correctly distinguishes static/pool objective wording
+from the old generic NAT/PAT-session label, without awarding practice credit.
+
+MAIN full alltargets/no-fail-fast:1620PASS/0FAIL/11ignored in125harnesses, log
+m121-main-nat-full-r1.log. All eleven private checks explicitly exercised in
+lib74+Nat23+after10comparison5+migration8 PASS,0ignored. Actual6/7/8/9 records,
+raw originals/backups/receipts, full old140 contexts and selected reset/restore
+retained; no histories generated or revision relabeling. Python185PASS,
+alltargetClippy and coverage guard PASS. Formatter check found one multiline
+assert block; whitespace-only collapse then fmt/diff PASS. Final20+23Nat test
+rerun postformat PASS; no repeated full1620 claimed for that whitespace edit.
+Full MAIN448memory samples minimum19.60GiB available, some/full PSIavg10max0,
+OOMcounter unchanged0; only2Cargo jobs/2testthreads under sharedlock. Finalmax
+trial shape68calls/4copies; isolated final single sample1.813ms is not benchmark.
+Private integration receipt reviews/nat-foundation/main-backend-integration-r1/
+RESULT.json retains source/log hashes. Failed R3 history setup and R4 struct-vs-
+JSON key-order byte comparison remain retained; test helpers now compare every
+field value and array order while separate actual rawbyte assertions remain exact.
+Two Clippy findings corrected without waivers or budget/test reduction.
+
+Next renderer-only unbundled stage: contract98c5a8f4/manifest890773bf under peer
+review; exact complete-input ephemeral key must feed library counts/filter/badges/
+prereqs and workspace, no peridle trial replay or stale success. ExplicitCheck
+still fresh, no broad cacheplatform. Reuse shared forms/rows/spacing/popup clips,
+stable row identity/modal guards and real address observations. Then separately
+review teaching/context/caps, three distinct tasks, normal integration and actual
+Fedora native/install acceptance. Do not grant objective credit at pure/UI stage.
+
+RPM pure source R1 ready privateworktree rpm-current140 at7dde, manifest9d73b80d;
+23prospective groups/15independent EVR vectors, allUNRUN at this checkpoint. Root
+and ccna_discovery source-review next before sole guarded compiler/reference gate.
+No package CLI/sidecars/UI/normal lessons yet; no new dependencies or hostRPM calls.
+NativeCI40386416552 runs7dde; previous40381197535 ddb Ubuntu/macOS jobs passed,
+Windows tests passed but Clippy failed; cfgUnix correction in7dde under rerun.
+Ubuntu ddb archive retained dist/native-ci-ddb886b/ubuntu, SHA
+ba54642f6da67f95b94eb81186f7a26c649dc8dcc710906eda6c729de5b86ecc.
+This is CI build evidence, not desktop acceptance. Current fully scoped Fedora
+owner command remains ddb in INSTALLATION.md. All private images/progress/logs
+remain ignored. Full curriculum, Windows/macOS desktop, physical-device, reader,
+novice, macOS originaldispatch notice/signing remainOPEN. No publicrelease.

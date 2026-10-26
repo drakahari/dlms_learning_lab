@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    BasicNat {
+        simulation: crate::nat::State,
+    },
     ApacheStatic {
         simulation: crate::apache_static::State,
     },
@@ -139,6 +142,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    BasicNat {
+        definition: Box<crate::nat_workspace::Definition>,
+    },
     ApacheStatic {
         definition: Box<crate::apache_static_workspace::Definition>,
     },
@@ -301,6 +307,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::BasicNat { simulation }, Goal::BasicNat { definition }) => {
+            definition.checks(simulation)
+        }
         (State::ApacheStatic { simulation }, Goal::ApacheStatic { definition }) => {
             definition.checks(simulation)
         }
@@ -618,6 +627,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::BasicNat { .. } => crate::nat_workspace::HELP,
         State::ApacheStatic { .. } => crate::apache_static_workspace::HELP,
         State::DebianPackages { .. } => crate::debian_packages_terminal::HELP,
         State::SpanningTree { .. } => crate::spanning_tree_workspace::HELP,
@@ -677,6 +687,21 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::BasicNat { simulation } = s {
+        if input.len() > crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON {
+            return Err("Typed NAT input exceeds raw bound".into());
+        }
+        let Goal::BasicNat { definition } = goal else {
+            return Err("NAT action needs authored inventory context".into());
+        };
+        if !definition.same_assignment(simulation) {
+            return Err("Foreign or oversized NAT context".into());
+        }
+        if matches!(input.trim(), "help" | "show") {
+            return execute(s, input);
+        }
+        return crate::nat_workspace::execute(&definition.initial, simulation, input);
+    }
     if let State::ApacheStatic { simulation } = s {
         if input.len()
             > crate::apache_static_workspace::PREFIX.len() + crate::apache_static::MAX_ACTION_JSON
@@ -821,6 +846,16 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::BasicNat { .. }) {
+        if input.len() > crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON {
+            return Err("Typed NAT input exceeds raw bound".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::nat_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("NAT mutation requires fixed goal context; no router command runs".into()),
+        };
+    }
     if matches!(s, State::ApacheStatic { .. }) {
         if input.len()
             > crate::apache_static_workspace::PREFIX.len() + crate::apache_static::MAX_ACTION_JSON
@@ -968,7 +1003,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::ApacheStatic { .. }
+        State::BasicNat { .. }
+        | State::ApacheStatic { .. }
         | State::DebianPackages { .. }
         | State::SpanningTree { .. }
         | State::DhcpV4 { .. }
@@ -1413,6 +1449,13 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::BasicNat { simulation } => format!(
+            "Basic NAT address-only model: {} inside hosts, {} outside peers, {} static and {} current dynamic mappings. No sessions, routing, connectivity or security verdict",
+            simulation.inventory().inside.len(),
+            simulation.inventory().outside.len(),
+            simulation.configuration().statics.len(),
+            simulation.bindings().len()
+        ),
         State::ApacheStatic { simulation } => format!(
             "Virtual static HTTP: {} fixed files; {}. Saved configuration and active source are separate; no host listener or process",
             simulation.files.len(),

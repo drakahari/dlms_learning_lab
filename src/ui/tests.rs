@@ -891,7 +891,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 )
                 .unwrap();
             }
-            State::DebianPackages { .. }
+            State::BasicNat { .. }
+            | State::DebianPackages { .. }
             | State::SpanningTree { .. }
             | State::DhcpV4 { .. }
             | State::Ipv4Acl { .. }

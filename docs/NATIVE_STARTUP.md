@@ -161,3 +161,15 @@ inside the same installation without relaxing no-follow or identity checks.
 No new underlying-driver-cause, quantitative idle-power, universal Wayland,
 physical accessibility, novice or other-OS acceptance claim. New evaluator9
 source still requires its own installed migration/native gate.
+
+
+## M120 installed140 follow-through — 2026-10-26
+
+Exact ddb886b installed Fedora ELF passes1protocol/lifecycle and10quiet normal
+Wayland startup/readbacks, plus actual two-process script/DHCP reopening. The
+quiet0.865–0.916s includes test pacing and is not a benchmark. All seven new
+lesson flows and shared72alignment captures pass separately on that same ELF.
+No diagnostic override, desktop/GPU/theme/service or compositor change. Evidence
+and exact identities are in INSTALLATION.md and the private catalog140 receipt.
+This extends scoped reliability observations; it does not establish the historical
+driver cause, universal Wayland, novice, reader or other-OS runtime acceptance.

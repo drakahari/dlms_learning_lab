@@ -170,7 +170,9 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || s.solution.iter().any(|v| {
                 v.trim().is_empty()
                     || v.len()
-                        > if matches!(s.initial, State::ApacheStatic { .. }) {
+                        > if matches!(s.initial, State::BasicNat { .. }) {
+                            crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON
+                        } else if matches!(s.initial, State::ApacheStatic { .. }) {
                             crate::apache_static_workspace::PREFIX.len()
                                 + crate::apache_static::MAX_ACTION_JSON
                         } else if matches!(s.initial, State::Ipv4Acl { .. }) {
@@ -380,6 +382,19 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             return Err("DHCP objectives/teaching attached to another activity".into());
         }
 
+        if let State::BasicNat { simulation } = &s.initial {
+            let Goal::BasicNat { definition } = &s.goal else {
+                return Err("NAT state needs matching authored context/outcomes".into());
+            };
+            if simulation != &definition.initial || definition.validate().is_err() {
+                return Err("NAT goal must pin exact admitted initial state".into());
+            }
+            if s.guide.iter().any(|g| !g.commands.is_empty()) {
+                return Err("NAT stage1 has no learner command guidance".into());
+            }
+        } else if matches!(s.goal, Goal::BasicNat { .. }) {
+            return Err("NAT goal on another activity".into());
+        }
         if let State::ApacheStatic { simulation } = &s.initial {
             let Goal::ApacheStatic { definition } = &s.goal else {
                 return Err("Apache state needs matching context/outcomes".into());
@@ -756,6 +771,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::BasicNat { simulation } => crate::nat_workspace::admitted(simulation),
         State::ApacheStatic { simulation } => crate::apache_static_workspace::admitted(simulation),
         State::DebianPackages { simulation } => {
             crate::debian_packages_workspace::admitted(simulation)

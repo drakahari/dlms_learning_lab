@@ -265,3 +265,19 @@ projects, associative data and broader shell utilities remain planned. Current
 source140/35 and overlapping144Partial/1Supporting/1095Open are not completion
 percentages; scoped accepted installed catalog is now140/35 at ddb886b after final
 candidate acceptance. All1240 original source fingerprints/positions are retained.
+
+
+### Basic NAT backend foundation — 2026-10-26
+
+The independently reviewed [pure model](NAT_SUBSET.md) and
+[typed workspace backend](NAT_WORKSPACE_SUBSET.md) pass their compiler, outcome,
+alternate-policy, bound, invalidation and progress-retention gates. They model
+inside-source static and pool address mappings. There is no native workspace or
+authored NAT lesson yet; current CCNA4.1 stays **Open**, and140/35 and all1240
+issuer fingerprints/status totals remain unchanged. The planned unit separates
+static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
+It does not promise PAT, transport sessions, IOS or actual packet delivery. The
+old plan's generic NAT/PAT-session label was not the issuer objective wording;
+current4.1 explicitly concerns inside-source static mappings and pools. This
+clarifies the implementation boundary without granting practice credit or altering
+the separate future-blueprint plan.

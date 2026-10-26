@@ -15,6 +15,8 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub nat_draft: Option<crate::nat_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_terminal: Option<crate::debian_packages_terminal::Session>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub apache_static_draft: Option<crate::apache_static_workspace::Draft>,
@@ -128,6 +130,7 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.nat_draft.as_ref().is_none_or(|d| d.valid())
             && self.apache_static_draft.as_ref().is_none_or(|d| d.valid())
             && self
                 .apache_static_learning
@@ -265,6 +268,11 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if let State::BasicNat { simulation } = &a.state
+        && w.nat_draft.is_none()
+    {
+        w.nat_draft = crate::nat_workspace::Draft::new(simulation).ok();
+    }
     if let State::DebianPackages { simulation } = &a.state
         && w.debian_packages_draft.is_none()
     {

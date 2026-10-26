@@ -151,6 +151,9 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
 /// No result survives a state/draft change or becomes a persisted credential.
 /// Reject context and pending draft first; do not run new-client probes for them.
 pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nat_workspace(a) {
+        return vec![(false, crate::nat_workspace::notice(&e))];
+    }
     let fail = |text: &str| vec![(false, text.to_owned())];
     if let Err(error) = validate_dhcpv4_workspace(a) {
         return fail(&error);
@@ -199,6 +202,9 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Current applied draft/context first; snapshot predicates are derived once per batch.
 pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nat_workspace(a) {
+        return vec![(false, crate::nat_workspace::notice(&e))];
+    }
     let fail = |m: &str| vec![(false, crate::spanning_tree_workspace::notice(m))];
     if let Err(e) = validate_spanning_tree_workspace(a) {
         return fail(&e);
@@ -250,6 +256,9 @@ pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
 }
 /// Fresh package outcomes with context/session guards; display history is never credit.
 pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nat_workspace(a) {
+        return vec![(false, crate::nat_workspace::notice(&e))];
+    }
     let fail = |m: &str| vec![(false, crate::debian_packages_workspace::notice(m))];
     if let Err(e) = validate_apache_static_workspace(a) {
         return fail(&e);
@@ -284,6 +293,9 @@ pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, S
     definition.checks(simulation)
 }
 pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nat_workspace(a) {
+        return vec![(false, crate::nat_workspace::notice(&e))];
+    }
     let fail = |m: &str| vec![(false, crate::apache_static_workspace::notice(m))];
     if let Err(e) = validate_debian_packages_workspace(a) {
         return fail(&e);
@@ -328,7 +340,71 @@ pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     rows.extend(definition.checks(simulation));
     rows
 }
+pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |m: &str| vec![(false, crate::nat_workspace::notice(m))];
+    if let Err(e) = validate_nat_workspace(a) {
+        return fail(&e);
+    }
+    // Existing family validators are admission only; none calls a grader.
+    for validate in [
+        validate_apache_static_workspace,
+        validate_debian_packages_workspace,
+        validate_spanning_tree_workspace,
+        validate_dhcpv4_workspace,
+        validate_unit_manager_workspace,
+        validate_ospf_workspace,
+        validate_acl_workspace,
+        validate_accounts_workspace,
+        validate_storage_workspace,
+        validate_discovery_workspace,
+        validate_process_workspace,
+        validate_dns_workspace,
+        validate_legacy_teaching_workspace,
+        validate_seed_workspace,
+        validate_client_workspace,
+        validate_service_workspace,
+        validate_address_workspace,
+        validate_routing_workspace,
+        validate_mac_workspace,
+    ] {
+        if let Err(e) = validate(a) {
+            return fail(&e);
+        }
+    }
+    let (
+        State::BasicNat { simulation },
+        State::BasicNat {
+            simulation: authored,
+        },
+        crate::engine::Goal::BasicNat { definition },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return fail("NAT assignment kind/context differs");
+    };
+    if authored != &definition.initial || !definition.same_assignment(simulation) {
+        return fail("NAT immutable origin differs from authored assignment");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.nat_draft.as_ref())
+        .is_some_and(|d| !d.matches(simulation))
+    {
+        return fail("Apply or repair pending NAT policy; request fields are read-only");
+    }
+    let mut rows = vec![(
+        true,
+        "Current NAT policy edits match the applied configuration".into(),
+    )];
+    rows.extend(definition.checks(simulation));
+    rows
+}
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if validate_nat_workspace(a).is_err() {
+        return false;
+    }
+    if matches!(a.state, State::BasicNat { .. }) {
+        return current_nat_checks(a, s).iter().all(|r| r.0);
+    }
     if matches!(a.state, State::ApacheStatic { .. }) {
         return current_apache_static_checks(a, s).iter().all(|r| r.0);
     }
@@ -645,6 +721,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        validate_nat_workspace(a)?;
         validate_apache_static_workspace(a)?;
         validate_debian_packages_workspace(a)?;
         validate_dhcpv4_workspace(a)?;
@@ -759,6 +836,20 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             }
         }
 
+        if let State::BasicNat { simulation } = &a.state {
+            let (
+                State::BasicNat {
+                    simulation: authored,
+                },
+                crate::engine::Goal::BasicNat { definition },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err("Saved NAT state on another activity".into());
+            };
+            if authored != &definition.initial || !definition.same_assignment(simulation) {
+                return Err("Saved NAT origin differs from authored inventory".into());
+            }
+        }
         if let State::ApacheStatic { simulation } = &a.state {
             let (
                 State::ApacheStatic {
@@ -1191,6 +1282,36 @@ fn validate_unit_manager_workspace(a: &Attempt) -> Result<(), String> {
     }
     Ok(())
 }
+fn validate_nat_workspace(a: &Attempt) -> Result<(), String> {
+    let draft = a.workspace.as_ref().and_then(|w| w.nat_draft.as_ref());
+    let State::BasicNat { simulation } = &a.state else {
+        return if draft.is_some() {
+            Err("NAT editor metadata on another activity".into())
+        } else {
+            Ok(())
+        };
+    };
+    // These older families lack a standalone wrong-kind validator. Reject only
+    // their typed editors/practice on the new NAT kind; shared command/scalars,
+    // historical records and provenance remain unchanged and never grade NAT.
+    if a.workspace.as_ref().is_some_and(|w| {
+        w.script_learning.is_some()
+            || w.terminal_learning.is_some()
+            || w.switching_draft.is_some()
+            || w.switching_learning.is_some()
+            || w.ipv6_draft.is_some()
+            || w.ipv6_learning.is_some()
+    }) {
+        return Err("Another activity's typed editor/practice metadata is attached to NAT".into());
+    }
+    if a.workspace.as_ref().is_some_and(|w| !w.valid())
+        || !crate::nat_workspace::admitted(simulation)
+        || draft.is_some_and(|d| !d.valid_for(simulation))
+    {
+        return Err("NAT state/editor bounds or immutable inventory differ".into());
+    }
+    Ok(())
+}
 fn validate_apache_static_workspace(a: &Attempt) -> Result<(), String> {
     let metadata = a
         .workspace
@@ -1588,6 +1709,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
+        validate_nat_workspace(a)?;
         validate_apache_static_workspace(a)?;
         validate_debian_packages_workspace(a)?;
         validate_dhcpv4_workspace(a)?;
