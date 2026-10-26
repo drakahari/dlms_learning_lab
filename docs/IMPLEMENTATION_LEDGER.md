@@ -2211,3 +2211,52 @@ reviews/nat-foundation/renderer-base-main90b-r1/BASE.json SHA352ab1e88080b24f1e4
 RenderercontractR1 peer d00c44f0 requested concrete perkey/aggregate memo budget,
 cache-unavailable truth and explicit cheap idle path. R2 delta pending; no native
 implementation grant yet. Continue authorized work, no owner routine approvals.
+
+
+### M123 pure RPM foundation integrated (2026-10-26)
+
+Pure RPM sourceR3 b4c3a7bb and independent peer82e53b46 accepted,5source snapshots+
+47 protected pins exact. Copy only4new files+tinylibexport into MAIN, preserving
+both Nat modules and allcurrent code; never copyolderworkerlib. Implements original
+bounded EVR/provider/source/manifest observations and explicit logical script-free
+archive sets, not real RPM aliases/transactions. New23 checks PASS, scoped Clippy
+PASS. MAIN lib74+Nat20+Natadapter23+RPM23=140 scopedchecks PASS0FAIL0ignored;
+alltargetClippy17.95s, fmt/diff andcoverage guard PASS. Latest full1620PASS precedes
+this puremodule addition; no full1643count claimed. Current140labs/35units and
+all34scenario files,28themes,314scriptcases/46examples andsavedprogress unchanged.
+
+FirstguardedR1:22PASS1FAIL because the supposed token-overflow fixture had8173,
+19below8192. Independent JSON-only shape arithmetic established6files8173 and
+7files9326 (strings28549/32513, depth8). Corrected6near-limitvalid/7invalid keeps
+strict overflow/string-independence checks and adds exacttuples. FinalR2/R3 all23
+PASS. One ordinary map-keys Clippy cleanup, no waiver, model/budget/test reduction
+or generated golden observations. Firstcompile61samples min22.06GiB/PSIavg10max
+0.18/OOMdelta0; MAINintegration29samples min19.87GiB/PSI0/OOM0; Clippy19samples
+min20.87GiB/PSI0/OOM0. Shared2job/2thread workflow/exclusive targets preserved.
+Private result reviews/rpm-package-foundation/main-integration-r1/RESULT.json.
+
+Combined State S<=128KiB/N<=8192/count/depth, compact1MiB/raw2MiB closure enforced
+before content clones. Plans use borrowed references before charging prospective
+final State; atomic publication follows. Actual file discrepancies and dependency
+problems are queryable states. Whole-database health/name-architecture constraints
+are explicitly logical-subset restrictions, not universal rpm verdicts. Modified/
+missing config, sidecar decisions, ownership transfers, solver, signatures and
+archive parsing remain unsupported; no command aliases/native UI/lessons. All11
+LPIC1v5.0 102.5refs remainOpen; planning boundary corrected, no statuses/fingerprints
+or futureversion rows changed. Documentation-derived EVR vectors are not realRPM
+observations. Fixed VERSION-only rpmsort oracle proposal05fcb0de is under startup/
+provenance/isolation source audit, neverexecuted. ActualELF embeddednote identifies
+rpm6.0.2-1.fc44; this is distinct from justreadingmanual6.0.2. FullEVR composition
+and equality are not proved by sorted VERSION labels. No newdeps or hostchanges.
+
+Parallel next work: Nat renderercontractR2 a218e8b4/manifestd210a398/peerf4893790
+ROOT ACK; SOURCE-ONLY implementation grant at exact9cc(Main90b) privateworktree,
+no heavy/MAIN writes. Own narrowUI/memo/tests/hooks andDefinitionPartialEq only,
+no normalcards/teaching/schema yet.16entries/4MiBchargekey/16MiBaggregate LRU,
+normal3 closure<=6180KiB, preclone bounds, exactkey cheapHIT; validuncacheabledata
+uses fresh truthful sharedfallback once/unchangedframe rather than falsegrade.
+Sameframe mutations/Check refresh finalinputs evenifextraevaluationneeded. First
+source/event/maxfixture gates before rootnativecontroller and renderedscreens.
+Then separatetypedteaching/context contract and3distinct authoredtasks. No new
+NAT/RPM lab counts/coverage until actual practice gates. Keeprootpacing/EVAL10/
+legacybytes andnormalapplication. Ordinaryimplementationcontinues, no release.

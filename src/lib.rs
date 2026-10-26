@@ -120,3 +120,6 @@ pub mod spanning_tree_workspace;
 #[cfg(test)]
 #[path = "../tests/support/actual9_evidence.rs"]
 pub(crate) mod actual9_test_evidence;
+
+/// Restricted RPM EVR/provider observations; no CLI or curriculum.
+pub mod rpm_packages;

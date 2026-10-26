@@ -171,3 +171,15 @@ old plan's generic NAT/PAT-session label was not the issuer objective wording;
 current4.1 explicitly concerns inside-source static mappings and pools. This
 clarifies the implementation boundary without granting practice credit or altering
 the separate future-blueprint plan.
+
+
+### RPM foundation — no practical credit yet
+
+The [pure RPM foundation](RPM_PACKAGE_SUBSET.md) passes23 independent behavior/
+negative/bound groups and library integration checks. It distinguishes RPM EVR,
+capability providers and installed/local/repository sources, with atomic logical
+script-free sets. No command adapter or authored lesson exists; all LPIC-1 v5.0
+102.5 references remain **Open**. Real command fidelity, configuration sidecars,
+resolver/signature/archive behavior and practical teaching remain pending. Current
+140/35 inventory and all issuer fingerprints/status totals are unchanged. A
+library is not implemented learner coverage or complete package administration.
