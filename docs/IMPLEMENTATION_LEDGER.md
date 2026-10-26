@@ -1875,3 +1875,32 @@ digest,alltargetClippy/probe ordinarybuild pass. Root holds sole shared heavy
 lease; no Bash/metadata/fullVM producer/capture yet. No parser/evaluator revision
 or new curriculum from tooling. Pin preparation and independent actual approval
 precede every fixed reference capture; real-byte/deadline safeguards unchanged.
+
+
+Installed38a STP four-task run completes48actual captures, run-f4mokd4m, with
+reference/alternate/partial/currentinvalidation, isolatedexamples, actual150Light/
+200Darktyping, fullwarm raw/portable/receipt/readback, navigation/Favorite/reset.
+Representative final renders reviewed. SameELF6d0257e5 now passes complete scoped
+133/33 lifecycle/startup/cold/alignment/new8 acceptance. Receipt
+reviews/catalog133/installed-38a-acceptance-r1/RESULT.json SHA6edf1592b456d4d48195bd68adbae08ec903f557d40a90728d934e1f6af3c49e.
+STP min23.59GiB/PSI0/OOM0. Only currentCCNA2.5/a/b andLPIC1-102.4 promoted
+Partial;140/1/1099 overlapping refs, all1240 source fingerprints unchanged.
+No full RapidPVST+/Debian/RPM/futureexam/platform/novice claims or release.
+
+First actual public9 capture public9-133-8f9-r1 ABORTED after1568VM-only rows at
+full history-map comparison (original116 vs current133 keys), before Bash phase.
+No COMPLETE; raw partials/controls retained. Four-file sourcepeer correction
+ee3e7205/peer0433279e preserves exact116 old histories plus17explicit empties
+at construction/load/inspect/restore and full currentkeysets; all other fullfield/
+rawbyte checks retained with bounded mismatch diagnostics. Actual profile-helper
+regression and independent Python guard added; no VM/data/expected-history or
+recordrevision changes. New gates/re-pinned fresh-ID retry remain separate.
+
+
+History correction gates PASS: newactual profile() regression runs from actual
+referenceVM9 Records, checks complete real helper save/load/inspect/restore/reset
+and rejects fabricated addedhistory/oldhistory loss/keyset replacement. All177
+Python andsixRustprobe tests,Clippy pass. No production engine/inputs/fixtures
+changed. New approved-source/binary pins and new no-clobber ID required for actual
+retry; oldR1partial remains non-COMPLETE. Scoped installed38a evidence/crosswalk
+and correcteddeveloperprobe can now be committed together before retry.

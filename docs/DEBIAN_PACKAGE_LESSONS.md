@@ -1,11 +1,11 @@
 # Debian package unit — registered, development native verified
 
 Four distinct assignments are bundled in `scenarios/debian-packages-v1.json`.
-The source catalog is133 labs/33 units. All four lessons pass actual development-
-native flows (69 captures), including separate practice, meaningful assignment,
-alternatives, current invalidation, retry and warm resume. This is not installed-
-candidate or beginner acceptance; the last accepted Fedora package remains125.
-No objective credit is promoted before the remaining acceptance gates.
+The catalog is133 labs/33 units. All four package lessons pass model/content,
+development-native and installed Fedora38a8098 flows, including separate practice,
+alternatives, current invalidation, retry and warm resume. Full lifecycle/startup/
+cold-reopen/alignment checks use that same installed ELF; novice and other-platform
+acceptance remain pending. Only a narrow102.4 parent slice is Partial practice.
 
 | Task | Practical outcome | Distinct reasoning |
 | --- | --- | --- |
@@ -51,3 +51,11 @@ Primary sources checked2026-10-25: [LPIC-1 v5.0,102.4](https://www.lpi.org/our-c
 [dpkg1.22.22](https://manpages.debian.org/trixie/dpkg/dpkg.1.en.html) and
 [dpkg-query](https://manpages.debian.org/trixie/dpkg/dpkg-query.1.en.html).
 Only a narrow future102.4 slice is proposed; no full exam preparation claim.
+
+
+2026-10-26: all four normal lessons also pass on installed Fedora38a8098, the
+same ELF6d0257e5 used for lifecycle, startup, cold-reopening and alignment checks.
+Package69/STP48 actual captures and representative rendered review establish the
+scoped installed milestone; earlier source-only/development notes are historical.
+No actual package utilities/BPDUs/protocol/other-platform or novice acceptance.
+See INSTALLATION.md for complete identity and retained limits.

@@ -4,19 +4,26 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current scoped Fedora candidate: **14cf24839d3c**,125 authored labs/31 units
-(38CCNA,24LPIC-1,20LPIC-2,43Bash). Open directly from any terminal directory:
+Current scoped Fedora candidate: **38a8098c8820**,133 authored labs/33 units
+(42CCNA,28LPIC-1,20LPIC-2,43Bash). Open directly from any terminal directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g14cf24839d3c-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-This build passed installed lifecycle/upgrade, all3 new DHCP native learning
-flows,11 normal Wayland startups, both real process-reopen cases and72 shared
-alignment captures. Normal Wayland needs no diagnostic/X11 override. Exact
-checksums and acceptance limits are in the M106 entry below. It remains an
-unsigned development milestone with incomplete curriculum/platform acceptance.
-
+The same installed ELF passes upgrade14cf/uninstall/reinstall/desktop validation
+and exact synthetic original-nine progress retention;11normal Wayland starts;
+real two-process script/DHCP reopening;72shared alignment captures; and all eight
+normal package/STP lesson flows (69+48captures). Representative actual100/150/200%
+light/dark renders, fields/columns/focus/feedback reviewed. No diagnostic backend
+override, desktop changes or personal-progress inspection. Technical synthetic
+inputs are not novice, physical-device, screen-reader or other-platform acceptance.
+ELF6d0257e58ccec397f8d374224b0a6b68bb1816365c29541e0da0995327185ddd;
+archive df94f20838a5b712787a4067ed59edb264975434e12acca31d067a6b7c43aa60.
+Private accepted receipt reviews/catalog133/installed-38a-acceptance-r1/RESULT.json
+SHA6edf1592b456d4d48195bd68adbae08ec903f557d40a90728d934e1f6af3c49e.
+This remains an unsigned development milestone with incomplete curriculum and
+platform acceptance. Historical acceptance entries below retain their own identities.
 
 Extract the candidate archive. Open a terminal in its extracted folder and run:
 
@@ -721,7 +728,7 @@ pending. Linux notices were collected; the separate macOS dispatch original-
 notice gate remains unresolved. No public release or full-product claim.
 
 
-## M116 candidate prepared; acceptance paused
+## Historical M116 candidate preparation; acceptance paused at that time
 
 Source38a8098c8820b487e54e4d65aa377597ddfc7e04 builds a Fedora44 candidate with
 133 authored assignments/33 units. The owner requested a pause immediately after

@@ -190,9 +190,9 @@ See DNS_NO_ANSWER_SUBSET.md. This capability introduces no new State or curricul
 ## Current authoring boundary — M116 in progress
 
 Current source has133 authored assignments/33 units, including four Debian
-package and four ideal STP tasks. The accepted installed candidate still has125;
-new-unit native/installed evidence is tracked in CHECKPOINT.md, not implied by
-source registration. Bash evaluator9 supports the documented functions, arrays,
+package and four ideal STP tasks. The scoped installed Fedora candidate38a8098 also has133; all eight new package/
+STP lesson flows pass on that exact ELF. Evidence is tracked in CHECKPOINT.md and
+INSTALLATION.md, not implied by source registration alone. Bash evaluator9 supports the documented functions, arrays,
 substitution, expansion and option interfaces; historical subset/count statements
 above describe their dated milestone, not current capability. SHELL_SUBSET.md is
 the current language contract. No new evaluator10 behavior is active.

@@ -1,10 +1,10 @@
 # Ideal spanning-tree unit — authored source, normal-unit acceptance pending
 
 Four distinct assignments in `scenarios/spanning-tree-v1.json` are now bundled.
-The source catalog is133/33; all four normal lessons pass development-native
-flows with48 actual captures. See SPANNING_TREE_LESSONS_NATIVE.md for exact
-identity and retained failures; installed133 acceptance remains pending.
-The accepted installed candidate remains125/31 and coverage is unchanged.
+The catalog is133/33; all four normal lessons pass model/content and both
+development-native and installed Fedora38a8098 flows (48captures each).
+SPANNING_TREE_LESSONS_NATIVE.md and INSTALLATION.md retain exact identities and
+failures. Only narrowly tested current2.5/a/b slices gain Partial practice.
 
 | Task | Full practical outcome | Distinct reasoning |
 | --- | --- | --- |
@@ -57,3 +57,11 @@ Primary sources checked2026-10-25:
 [CCNA200-301 v1.1](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf)
 and [Cisco document24062,2023-02-09](https://www.cisco.com/c/en/us/support/docs/lan-switching/spanning-tree-protocol/24062-146.html).
 Future exam versions remain separate and uncredited.
+
+
+2026-10-26: all four normal lessons also pass on installed Fedora38a8098, the
+same ELF6d0257e5 used for lifecycle, startup, cold-reopening and alignment checks.
+Package69/STP48 actual captures and representative rendered review establish the
+scoped installed milestone; earlier source-only/development notes are historical.
+No actual package utilities/BPDUs/protocol/other-platform or novice acceptance.
+See INSTALLATION.md for complete identity and retained limits.

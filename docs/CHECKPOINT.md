@@ -25,24 +25,25 @@ specifications/order,31-unit prefix,43scripts/282cases/43examples and real synth
 writer6/7/8 histories remain exact. No new Attempts/answers/mastery invented.
 Native Rust/offline/simulation-only and28 themes remain intact.
 
-New candidate BUILT, NOT YET INSTALLED/RUNTIME ACCEPTED:
+Current scoped INSTALLED-ACCEPTED Fedora candidate38a8098,133/33:
 `dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab`.
 Open from any terminal directory:
 "$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
-ELF6d0257e58ccec397f8d374224b0a6b68bb1816365c29541e0da0995327185ddd.
-Archive df94f20838a5b712787a4067ed59edb264975434e12acca31d067a6b7c43aa60.
-Linux target223 dependency notices/source packages included; builder gate passed.
-Candidate process12414 finished/reaped. Min21.72GiB available/PSIavg10zero/OOM0.
-Private receipt reviews/catalog133/fedora-candidate-38a-r1/RESULT.json.
-
-Last scoped INSTALLED-ACCEPTED build remains14cf24839d3c,125/31:
-ELFd873a1879e76d6bc2c1104e03751a9218e6946a4ef14aad4eecdec5ad217f2c1;
-archive8e556d5813de3945dd8cd56fa923725a5f7626f5ff65bb4249d84df34f6f555b.
-It passed actual installed lifecycle/upgrade86ca, all3 DHCP native flows63captures,
-11normal Wayland starts, real script+DHCP two-process reopening and72alignment
-captures. Receipt reviews/dhcpv4-content/installed-14cf-acceptance-r1/RESULT.json
-SHA42db18ec35daa435700d3e86fc537360cc8db77f9700bfa302961f253f31fd53.
-These are NOT new38a acceptance. No CI dispatch for38a was started in this pass.
+ELF6d0257e58ccec397f8d374224b0a6b68bb1816365c29541e0da0995327185ddd;
+archive df94f20838a5b712787a4067ed59edb264975434e12acca31d067a6b7c43aa60.
+Linux223dependency notice/source gate passed. Actual private installation
+.build-artifacts/installations/verified-38a8098c8820-jgqeo6pm/application binary.
+SameELF passes upgrade14cf/uninstall/reinstall/desktop/progress retention,1protocol+
+10quietnormalWaylandstarts0.865–0.915s, script/DHCP real2process reopen,72alignment
+run-jjmks7m3, all4package69shots run-j6idxlvw and4STP48shots run-f4mokd4m.
+Representative actual100/150/200% light/dark fields,placeholders,columns,focus,
+topology,partialfeedback reviewed. No diagnostic override or desktop changes.
+Receipt reviews/catalog133/installed-38a-acceptance-r1/RESULT.json
+SHA6edf1592b456d4d48195bd68adbae08ec903f557d40a90728d934e1f6af3c49e.
+STP min23.59GiB/PSI0/OOM0; candidatebuild min21.72GiB/PSI0/OOM0. These remain
+synthetic/reference-driven scoped technical checks, not novice/device/reader/
+otherOS/fullcurriculum acceptance. No public release/CI dispatch. Prior14cf
+acceptance remains historical; source38a still defines exactapplicationcode.
 
 ## M116 actual verification and retained corrections
 
@@ -85,40 +86,32 @@ images when rendered Bridge/Port pickers shifted with label lengths. Shared
 form_row aligns them; explicit matrix/19STP UI groups pass. Root-port label uses
 plain language. FinalR3 completes48. No Goal/State/grading/vector weakening.
 
-## Current resumed verification and collector gate
+## Current resumed work and exact next actions
 
-Installed38a lifecycle PASS: private installation
-.build-artifacts/installations/verified-38a8098c8820-jgqeo6pm/application/dlms-learning-lab
-has exact6d0257e5 ELF,133/33, upgrade14cf/uninstall/reinstall/desktop validation/
-original-nine synthetic byte retention. One protocol+10quiet normal Wayland starts
-PASS0.865–0.915s, no diagnostic override. Script and DHCP real2process cold
-reopen PASS. Shared72alignment captures PASS run-jjmks7m3; representative actual
-100/150/200 light/dark fields/columns/topology reviewed. Normal four package
-lessons PASS69installed captures run-j6idxlvw, logm116-installed-38a-package-lessons-r1.
-STP normal-four installed flows still PENDING, so final installed acceptance and
-conditional4coverage promotions are not yet claimed. Source count133/33 unchanged.
+Root has no heavy active at this write. CollectorR3 11paths committed/pushed8f9ee86
+after176Python/fiveRust/Clippy/build. First full actualpublic9 capture
+public9-133-8f9-r1 FAILED after1568VM-only rows before Bash, original116-vs133
+history keyset assertion. NO COMPLETE; allpartial/control/source evidence kept.
+Do not use it as accepted baseline or change evaluator10 yet.
 
-Collector R3 sourcepeer accepted55a6e782, peer a4412596. Copied11exact reviewed
-paths after allbase/source preconditions, rootreceipt
-reviews/bash-safe-automation/main-collector-integration-r3/APPLIED.json. MAIN
-176Python/fiveRustprobe checks,Clippy/probe build PASS. Full actual9/Bash capture
-NOT performed; metadata/pin approval/capture next. No evaluator10/NAT/Apache
-module changes. All43/282/43 inputs and actual oldrecords stay exact.
+Four-file peer-reviewed correction ee3e7205/peer0433279e integrated: full133
+expectedhistorymap preserves116oldvectors/order and17empty new histories at
+construction/load/inspect/restore, exactcurrentAttemptkeys and every original
+fullfield/rawbyte check; bounded diagnostics. Newactualprofile-phase regression
+PASS; full177Python/sixRustprobe checks andClippy PASS. No model/evaluator/input/
+fixture/recordrevision changes. Need fmt/diff/privacy, coherent correction+
+installedacceptance/coverage commit, ordinary rebuiltprobe, NEW metadata ID with
+all138pins independently re-reviewed, then actualcapture retry. Old approvedID
+is immutable and invalid for newcode; neveroverwrite or loosenpins.
 
-## Exact resume sequence
+Installed133 verification is complete as scoped above. Only currentCCNA2.5/a/b
+andLPIC1-102.4 promoted to narrowly Partial practice after those gates; parent
+planningrows updated. Matrix140Partial/1Supporting/1099Open of1240overlapping
+references, all sourcefingerprints/positions and futureexamrows unchanged.
+Coverageintegrity PASS, not completion percentage or fullRapidPVST+/Debian/RPM.
+Sources checkedfullinventory10-22/scopedprimary10-25. Currentdocupdate pending
+commit alongside correction; preserve earlier evidence chronology.
 
-1. Verify the38a PACKAGED application first: guarded installed_acceptance.py with
-previous14cf candidate and --labs133 --units33; then same identified installed ELF
-for normal repeated startup, script/DHCP cold reopening,72 shared IPv4/VLAN
-alignment and both normal8lesson native flows. Reinspect actual rendered screens.
-Lifecycle/startup/reopen/alignment/package flows now pass as recorded above;
-normal four STP installed flows remain. Keep all failures.
-2. Only after those gates, consider private reviewed FOUR-row narrow promotion
-(currentCCNA2.5/a/b andLPIC1-102.4). Sourceproposal
-reviews/m116-coverage-proposal/source-r1 SHA8211464e70a9d6f1f3b0795466443d79e712a714a1ac4cc8b67ab7589b9074e2.
-Current matrix remains136Partial/1Supporting/1103Open of1240 overlapping refs;
-not a completion percentage. FutureCCNAv2 and unmodeled protocol/transactions/
-RPM get no credit. Official full inventory2026-10-22; scoped primary reads10-25.
 3. Capture actual unchanged public9 BEFORE evaluator10. CollectorR3 source
 55a6e782323df6f079833793761dc590badf705ce8e8878de68148715d0156ed / peer
 a4412596b9c4f30b5a6eaeaa4bc6ce8d7601332d67830b03974552046a3a0443
@@ -126,7 +119,7 @@ is integrated and its176Python/fiveRust/Clippy/build gates PASS. Sourcebaseb17
 and app38a; actual source control must pin then-current committed MAIN. Library
 closure85,compiled125-source attestation,133/33,ordered43/282/43 unchanged.
 Canonical script inputSHA7ffa33d4cf83a3eed67f58265912677020c99d6f1f22f2f7730f4eb1ea500f32.
-No actual full capture yet. Prepare closed ID, independently recompute every
+No accepted actual full capture yet; firstattempt failed as recorded above. Prepare closed ID, independently recompute every
 source/binary/manual/Bash pin and create root-reviewed control, then execute fixed
 producer through MAINrunner. Retain actual6/7/8/9 and both old8 unfinished example
 sources; never replace/retag expectations as observations. Actual-byte aggregate,

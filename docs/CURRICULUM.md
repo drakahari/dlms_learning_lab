@@ -3,14 +3,12 @@
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
 **133 authored assignments/33 units:42CCNA,28LPIC-1,20LPIC-2,43Bash/Shell**.
-Eight newly registered package/STP assignments have model/content gates; all eight
-also pass development-native flows (69 package and48 STP captures). Their installed-candidate
-acceptance remains pending.
-The three-task DHCP unit passes model/content and complete installed native
-flows. The125-lab Fedora candidate at14cf248 passes normal startup and real
-process-reopen checks. Original IDs/progress remain; numerical practice and900
-synthetic catalog previews are not authored labs. Planned assignments do not
-become cards. The scripting path has eleven units.
+All eight package/STP assignments pass model/content and full installed native
+flows (69 package and48 STP captures) on Fedora38a8098. That same133-lab candidate
+passes lifecycle,11normal Wayland starts, real script/DHCP process reopening and
+72shared alignment captures. Original IDs/progress remain; numeric practice and
+900 synthetic catalog previews are not authored labs. Planned work stays separate.
+The scripting path has eleven units.
 See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
 
 ## Primary sources and version boundaries

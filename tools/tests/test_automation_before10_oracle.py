@@ -304,5 +304,27 @@ class FixedAutomationSafety(unittest.TestCase):
             oracle.capture_child(*args,started=0.,timeout=2.,inherited=())
             self.assertEqual(child.call_args.kwargs['timeout'],2.)
 
+    def test_added_contexts_require_empty_history_and_exact_current_keyset(self):
+        # Ephemeral checker inputs only; no new outcomes or saved credit are invented.
+        old=json.loads((ROOT/'tests/fixtures/shell-v8-synthetic-writer-progress.json').read_bytes())
+        _,authored=oracle.authored_inputs(ROOT)
+        current=json.loads(json.dumps(old))
+        added=set(authored['catalog'])-set(old['attempts'])
+        self.assertEqual(len(added),17)
+        for name in added: current['attempts'][name]={'workspace':{}}
+        self.assertEqual(oracle.verify_added_history_empty(old,current,authored['catalog']),added)
+        first=sorted(added)[0]
+        record=old['attempts']['shell-arguments']['state']['run']
+        for field,value in [('script_history',record),('script_history_more',[record])]:
+            bad=json.loads(json.dumps(current));bad['attempts'][first]['workspace'][field]=value
+            with self.assertRaisesRegex(oracle.safe.OracleError,'empty prior history'):
+                oracle.verify_added_history_empty(old,bad,authored['catalog'])
+        bad=json.loads(json.dumps(current));del bad['attempts'][first]['workspace']
+        with self.assertRaises(oracle.safe.OracleError):oracle.verify_added_history_empty(old,bad,authored['catalog'])
+        bad=json.loads(json.dumps(current));del bad['attempts']['shell-arguments'];bad['attempts']['foreign']={'workspace':{}}
+        with self.assertRaisesRegex(oracle.safe.OracleError,'context keys'):
+            oracle.verify_added_history_empty(old,bad,authored['catalog'])
+        self.assertTrue(old==json.loads((ROOT/'tests/fixtures/shell-v8-synthetic-writer-progress.json').read_bytes()))
+
 if __name__ == '__main__': unittest.main()
 

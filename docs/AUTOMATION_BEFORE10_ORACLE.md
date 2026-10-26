@@ -139,3 +139,33 @@ empty-IFS/pipefail implementation. Changed public behavior will require revision
 and a separate exact before10 boundary preserving genuine6/7/8/9 history. Neither
 future evaluator code, migration, authored projects nor native acceptance is part
 of this source proposal.
+
+
+## Private history-key correction after the retained first capture
+
+2026-10-26. The first actual attempt `public9-133-8f9-r1` used committed8f9ee86.
+It stopped safely after1568 VM rows (906886 stdout bytes) at the profile history
+comparison;306538 stderr bytes, no COMPLETE, and Bash/version never reached.
+The original116 history vectors were compared against a current133-key map that
+also correctly contains17 empty new histories. This is a harness assertion defect,
+not a VM, expected-output, fixture or record-version change. Every failed file and
+its original approval/STARTED/binary/source identities remains retained unchanged.
+Those partial actual9 observations are not an accepted full baseline.
+
+The private correction constructs the full expected map: all original116 vectors
+and ordering remain exact; only the17 genuinely added IDs receive empty history.
+The current Attempt keyset must equal the entire133 catalog. Construction, normal
+load, export inspection and confirmed restore compare that same full map; current9
+runs stay separate and never become invented prior history. Python independently
+requires all17 new prior histories empty. No unrelated Attempt or profile field
+comparison is dropped. Full-state and raw-byte equality remain strict, with small
+first-field/byte-offset diagnostics rather than dumping entire Records/profiles.
+
+One new prospective Rust check invokes the actual production profile helper after
+building43 genuine current9 Records from future actual reference VM runs. It
+exercises save/load/export/inspect/restore/reset and rejects injected new history,
+lost old history and changed current keys. One additional Python guard covers the
+independent17-empty/keyset check using ephemeral validator data. These NEW checks
+are UNRUN; earlier176Python/fiveRust passes remain historical. Revised source/probe
+pins and a new capture ID plus explicit serialized grant are mandatory before any
+repeat. No producer, reference, VM or test was executed while authoring this patch.

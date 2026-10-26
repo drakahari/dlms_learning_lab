@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **133 authored source assignments:**42 CCNA,28 LPIC-1,20 LPIC-2 and43 Bash/Shell in33 units. The last installed candidate contains125; the eight new package/STP lessons are undergoing native acceptance. The current Fedora candidate passes installed lifecycle, all three new DHCP learning flows, normal Wayland startup and real process-reopen checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **133 authored assignments:**42 CCNA,28 LPIC-1,20 LPIC-2 and43 Bash/Shell in33 units. The Fedora38a8098 candidate passes scoped installed acceptance, including all eight package/STP lesson flows. That same installed executable passes lifecycle, normal Wayland startup, script/DHCP process reopening and shared alignment checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh
-$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g14cf24839d3c-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
+$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g38a8098c8820-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -54,7 +54,8 @@ including incorrect/partial/alternate work, invalidation, resume/reset and
 Light150/Dark200 editing. Startup and progress evidence are recorded in
 [INSTALLATION.md](docs/INSTALLATION.md). The source now adds four [Debian package assignments](docs/DEBIAN_PACKAGE_LESSONS.md)
 and four [steady-state spanning-tree assignments](docs/SPANNING_TREE_LESSONS.md),
-with separate teaching/practice and full state-based tasks. All eight development-native flows pass; installed-candidate gates are in progress. Remaining objective gaps stay
+with separate teaching/practice and full state-based tasks. All eight installed-native flows pass on38a8098, with explicit transaction/
+protocol simplifications and incomplete curriculum coverage. Remaining objective gaps stay
 explicit in the [coverage ledger](docs/OBJECTIVE_MAPPING.md). This is a tested
 milestone, not complete curriculum or a public release.
 

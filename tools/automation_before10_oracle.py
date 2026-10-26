@@ -321,6 +321,20 @@ def recheck_projection(current, scripts, actual, pending):
     return expected
 
 
+def verify_added_history_empty(old, current, catalog):
+    original_ids = set(old['attempts'])
+    current_ids = set(current['attempts'])
+    require(len(original_ids) == 116 and len(catalog) == 133 and original_ids <= set(catalog)
+            and current_ids == set(catalog), 'Exact old116/current133 context keys required')
+    added = current_ids - original_ids
+    require(len(added) == 17, 'Exactly17 added current contexts required')
+    for name in sorted(added):
+        workspace = current['attempts'][name].get('workspace')
+        require(isinstance(workspace, dict) and historical(workspace) == [],
+                'Added context must have empty prior history: ' + name)
+    return added
+
+
 def verify_profiles(root, folder, authored, vm_text):
     original = safe.read_bytes(root / 'tests/fixtures/shell-v8-synthetic-writer-progress.json', PROFILE_CAP)
     original7 = safe.read_bytes(root / 'tests/fixtures/shell-v7-synthetic-writer-progress.json', PROFILE_CAP)
@@ -328,6 +342,7 @@ def verify_profiles(root, folder, authored, vm_text):
     raw = safe.read_bytes(folder / 'writer9-original.json', PROFILE_CAP)
     current = strict_json(raw)
     require(set(current) == set(old) and set(current['attempts']) == set(authored['catalog']), 'Actual writer9 top-level fields/contexts')
+    verify_added_history_empty(old, current, authored['catalog'])
     require(current['migration_receipts'] == {**old['migration_receipts'], 'shell': [7,8,9]}, 'Target-derived actual writer9 receipts')
     require(all(current[k] == old[k] for k in old if k not in ('attempts','migration_receipts')), 'Original profile metadata changed')
     rows = [strict_json(line) for line in vm_text.splitlines()]

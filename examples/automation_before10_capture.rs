@@ -270,6 +270,117 @@ fn snapshots(p: &Progress) -> BTreeMap<String, Vec<Record>> {
         })
         .collect()
 }
+fn small_label(text: &str, cap: usize) -> String {
+    let mut end = text.len().min(cap);
+    while !text.is_char_boundary(end) {
+        end -= 1;
+    }
+    text[..end].to_owned()
+}
+fn first_difference(left: &Value, right: &Value, path: &str) -> Option<String> {
+    if left == right {
+        return None;
+    }
+    let path = small_label(path, 384);
+    match (left, right) {
+        (Value::Object(a), Value::Object(b)) => {
+            for key in a.keys().chain(b.keys()) {
+                let next = small_label(&format!("{path}/{key}"), 384);
+                match (a.get(key), b.get(key)) {
+                    (Some(a), Some(b)) => {
+                        if let Some(d) = first_difference(a, b, &next) {
+                            return Some(d);
+                        }
+                    }
+                    _ => return Some(next),
+                }
+            }
+            unreachable!()
+        }
+        (Value::Array(a), Value::Array(b)) => {
+            if a.len() != b.len() {
+                return Some(small_label(&format!("{path}/length"), 384));
+            }
+            for (i, (a, b)) in a.iter().zip(b).enumerate() {
+                if let Some(d) = first_difference(a, b, &format!("{path}/{i}")) {
+                    return Some(d);
+                }
+            }
+            unreachable!()
+        }
+        _ => Some(path),
+    }
+}
+fn assert_same<A: Serialize, B: Serialize>(actual: &A, expected: &B, context: &str) {
+    let actual = serde_json::to_value(actual).unwrap();
+    let expected = serde_json::to_value(expected).unwrap();
+    if let Some(path) = first_difference(&actual, &expected, "$") {
+        panic!(
+            "Fixed profile mismatch {} at {}",
+            small_label(context, 64),
+            path
+        );
+    }
+}
+fn assert_bytes_same(actual: &[u8], expected: &[u8], context: &str) {
+    if actual != expected {
+        let offset = actual
+            .iter()
+            .zip(expected)
+            .position(|(a, b)| a != b)
+            .unwrap_or(actual.len().min(expected.len()));
+        panic!(
+            "Fixed profile bytes differ {} at offset{} ({} vs{} bytes)",
+            small_label(context, 64),
+            offset,
+            actual.len(),
+            expected.len()
+        );
+    }
+}
+fn expected_histories(
+    original: &BTreeMap<String, Vec<Record>>,
+    original_ids: &std::collections::BTreeSet<String>,
+    current_ids: &std::collections::BTreeSet<String>,
+) -> BTreeMap<String, Vec<Record>> {
+    assert_eq!(original_ids.len(), 116);
+    assert_eq!(current_ids.len(), 133);
+    assert_same(
+        &original
+            .keys()
+            .cloned()
+            .collect::<std::collections::BTreeSet<_>>(),
+        original_ids,
+        "all old116 history keys",
+    );
+    assert!(
+        original_ids.is_subset(current_ids),
+        "current catalog lost original IDs"
+    );
+    let added = current_ids
+        .difference(original_ids)
+        .cloned()
+        .collect::<Vec<_>>();
+    assert_eq!(added.len(), 17);
+    let mut expected = original.clone();
+    for id in added {
+        assert!(expected.insert(id, Vec::new()).is_none());
+    }
+    expected
+}
+fn assert_full_histories(p: &Progress, expected: &BTreeMap<String, Vec<Record>>, context: &str) {
+    let current_ids = p
+        .attempts
+        .keys()
+        .cloned()
+        .collect::<std::collections::BTreeSet<_>>();
+    let expected_ids = expected
+        .keys()
+        .cloned()
+        .collect::<std::collections::BTreeSet<_>>();
+    assert_same(&current_ids, &expected_ids, "exact current133 Attempt keys");
+    assert_same(&snapshots(p), expected, context);
+}
 fn histories(p: &Progress) {
     let history = snapshots(p);
     let raw8: Value = serde_json::from_slice(ORIGINAL8).unwrap();
@@ -324,10 +435,10 @@ fn profile(
     new_bytes(&path, ORIGINAL8);
     new_bytes(&path.with_extension("before-shell-v8.json"), ORIGINAL7);
     let mut p = progress::load(&path, labs).unwrap();
-    assert_eq!(
-        bounded(&path, PROFILE_CAP),
+    assert_bytes_same(
+        &bounded(&path, PROFILE_CAP),
         ORIGINAL8,
-        "reader changed actual8 target"
+        "reader actual8 target",
     );
     let old: Value = serde_json::from_slice(ORIGINAL8).unwrap();
     for a in p.attempts.values_mut() {
@@ -337,6 +448,14 @@ fn profile(
     }
     histories(&p);
     let original_history = snapshots(&p);
+    let original_ids = old["attempts"]
+        .as_object()
+        .unwrap()
+        .keys()
+        .cloned()
+        .collect();
+    let current_ids = labs.iter().map(|s| s.id.clone()).collect();
+    let expected_history = expected_histories(&original_history, &original_ids, &current_ids);
     // Existing non-script contexts and examples remain unchanged. Later contexts start ungraded.
     for (index, s) in labs.iter().enumerate() {
         let new = !p.attempts.contains_key(&s.id);
@@ -379,14 +498,10 @@ fn profile(
     }
     assert_eq!(p.attempts.len(), labs.len());
     histories(&p);
-    assert_eq!(snapshots(&p), original_history);
+    assert_full_histories(&p, &expected_history, "constructed history133");
     for (id, a) in old["attempts"].as_object().unwrap() {
         if a["state"]["kind"] != "Script" {
-            assert_eq!(
-                serde_json::to_value(&p.attempts[id]).unwrap(),
-                *a,
-                "old non-script changed {id}"
-            );
+            assert_same(&p.attempts[id], a, &format!("old non-script {id}"));
         }
         if a["workspace"]["script_learning"].is_object() {
             let mut wanted = a["workspace"]["script_learning"].clone();
@@ -394,10 +509,10 @@ fn profile(
                 wanted["example_source"] =
                     format!("{}\nif", wanted["example_source"].as_str().unwrap()).into();
             }
-            assert_eq!(
-                serde_json::to_value(&p.attempts[id]).unwrap()["workspace"]["script_learning"],
-                wanted,
-                "imported example changed beyond explicit draft {id}"
+            assert_same(
+                &serde_json::to_value(&p.attempts[id]).unwrap()["workspace"]["script_learning"],
+                &wanted,
+                &format!("imported example {id}"),
             );
         }
     }
@@ -419,34 +534,37 @@ fn profile(
             .durability_warning
             .is_none()
     );
-    assert_eq!(
-        serde_json::to_value(&p.migration_receipts).unwrap(),
-        caller,
-        "save stamped caller"
+    assert_same(
+        &serde_json::to_value(&p.migration_receipts).unwrap(),
+        &caller,
+        "save caller receipts",
     );
-    assert_eq!(
-        bounded(&path.with_extension("before-shell-v9.json"), PROFILE_CAP),
-        ORIGINAL8
+    assert_bytes_same(
+        &bounded(&path.with_extension("before-shell-v9.json"), PROFILE_CAP),
+        ORIGINAL8,
+        "before9 actual8 bytes",
     );
-    assert_eq!(
-        bounded(&path.with_extension("before-shell-v8.json"), PROFILE_CAP),
-        ORIGINAL7
+    assert_bytes_same(
+        &bounded(&path.with_extension("before-shell-v8.json"), PROFILE_CAP),
+        ORIGINAL7,
+        "preserved before8 actual7 bytes",
     );
     let writer = bounded(&path, PROFILE_CAP);
     new_bytes(&dir.join("writer9-original.json"), &writer);
     let loaded = progress::load(&path, labs).unwrap();
     histories(&loaded);
-    assert_eq!(snapshots(&loaded), original_history);
+    assert_full_histories(&loaded, &expected_history, "loaded history133");
     assert_eq!(
         loaded.migration_receipts.as_ref().unwrap().shell,
         vec![7, 8, 9]
     );
-    assert_eq!(
-        serde_json::to_value(&loaded).unwrap(),
-        serde_json::to_value(&p).unwrap()
-    );
+    assert_same(&loaded, &p, "all loaded portable fields");
     progress::save(&path, &loaded).unwrap();
-    assert_eq!(bounded(&path, PROFILE_CAP), writer);
+    assert_bytes_same(
+        &bounded(&path, PROFILE_CAP),
+        &writer,
+        "unchanged writer9 bytes",
+    );
     let export = dir.join("portable-backup.json");
     assert!(backup::export(&export, &loaded, labs).unwrap().is_none());
     assert!(
@@ -455,20 +573,34 @@ fn profile(
             .unwrap()
             .contains("cancelled")
     );
-    assert_eq!(bounded(&path, PROFILE_CAP), writer);
+    assert_bytes_same(
+        &bounded(&path, PROFILE_CAP),
+        &writer,
+        "unchanged writer9 bytes",
+    );
     let candidate =
         backup::inspect(&export, labs, &AtomicBool::new(false), &AtomicUsize::new(0)).unwrap();
-    assert_eq!(bounded(&path, PROFILE_CAP), writer);
-    assert_eq!(snapshots(&candidate.progress), original_history);
+    assert_bytes_same(
+        &bounded(&path, PROFILE_CAP),
+        &writer,
+        "unchanged writer9 bytes",
+    );
+    assert_full_histories(
+        &candidate.progress,
+        &expected_history,
+        "inspected history133",
+    );
     let restored = backup::restore(&path, &candidate, labs).unwrap();
     assert!(restored.durability_warning.is_none());
-    assert_eq!(
-        bounded(restored.safety_copy.as_ref().unwrap(), PROFILE_CAP),
-        writer
+    assert_bytes_same(
+        &bounded(restored.safety_copy.as_ref().unwrap(), PROFILE_CAP),
+        &writer,
+        "restore safety copy",
     );
-    assert_eq!(
-        snapshots(&progress::load(&path, labs).unwrap()),
-        original_history
+    assert_full_histories(
+        &progress::load(&path, labs).unwrap(),
+        &expected_history,
+        "restored history133",
     );
     for id in ["shell-handover", "shell-capture-handover"] {
         let a = &candidate.progress.attempts[id];
@@ -499,12 +631,13 @@ fn profile(
     let reset_path = reset.join("progress.json");
     new_bytes(&reset_path, ORIGINAL8);
     progress::save(&reset_path, &empty).unwrap();
-    assert_eq!(
-        bounded(
+    assert_bytes_same(
+        &bounded(
             &reset_path.with_extension("before-shell-v9.json"),
-            PROFILE_CAP
+            PROFILE_CAP,
         ),
-        ORIGINAL8
+        ORIGINAL8,
+        "reset first before9 bytes",
     );
     let occupied = directory(dir, "occupied-slot");
     let target = occupied.join("progress.json");
@@ -514,8 +647,16 @@ fn profile(
     let slot = target.with_extension("before-shell-v9.json");
     new_bytes(&slot, &conflict);
     assert!(progress::save(&target, &empty).is_err());
-    assert_eq!(bounded(&target, PROFILE_CAP), ORIGINAL8);
-    assert_eq!(bounded(&slot, PROFILE_CAP), conflict);
+    assert_bytes_same(
+        &bounded(&target, PROFILE_CAP),
+        ORIGINAL8,
+        "occupied slot target",
+    );
+    assert_bytes_same(
+        &bounded(&slot, PROFILE_CAP),
+        &conflict,
+        "occupied valid slot bytes",
+    );
     row(
         out,
         &json!({"kind":"profile-evidence","synthetic_only":true,"catalog_contexts":labs.len(),"current9_actual_records":43,"genuine6_history_records":33,"genuine7_history_records":37,"genuine8_history_records":40,"ungraded_assignment_drafts":["shell-handover","shell-capture-handover"],"ungraded_example_drafts":["shell-handover","shell-capture-handover"],"writer_receipts":[7,8,9],"before9_exact_original8":true,"before8_exact_original7":true,"repeat_write_exact":true,"preview_cancel_preserve_target":true,"restore_exact_current9_safety_copy":true,"reset_first_exact_original8":true,"occupied_whitespace_slot_rejected":true,"future10_not_implemented":true}),
@@ -808,6 +949,132 @@ mod tests {
             assert!(c["accepted_after10"].is_null());
             assert!(c.get("expected").is_none());
         }
+    }
+    #[test]
+    fn actual_profile_phase_preserves_all_old_histories_and_empty_added_contexts() {
+        assert_eq!(shell::EVALUATOR_REVISION, 9);
+        let labs = pack::bundled().unwrap();
+        assert_eq!(labs.len(), 133);
+        let mut records = BTreeMap::new();
+        for lab in &labs {
+            if let Goal::Script { cases } = &lab.goal {
+                let source = lab.solution[0].clone();
+                let results = cases
+                    .iter()
+                    .map(|case| {
+                        let actual = shell::run(&source, case);
+                        assert!(
+                            case.accepts(&actual),
+                            "current reference mismatch {}",
+                            lab.id
+                        );
+                        actual
+                    })
+                    .collect();
+                records.insert(
+                    lab.id.clone(),
+                    Record {
+                        engine_revision: shell::EVALUATOR_REVISION,
+                        source,
+                        results,
+                    },
+                );
+            }
+        }
+        assert_eq!(records.len(), 43);
+        // Run the SAME profile helper as the real capture, including save/load,
+        // inspect/restore/reset and exact old target/backup-byte assertions.
+        let dir = tempfile::tempdir().unwrap();
+        let mut evidence = Vec::new();
+        profile(
+            &mut evidence,
+            dir.path(),
+            &labs,
+            &records,
+            Instant::now() + Duration::from_secs(150),
+        );
+        let rows = std::str::from_utf8(&evidence)
+            .unwrap()
+            .lines()
+            .map(|line| serde_json::from_str::<Value>(line).unwrap())
+            .collect::<Vec<_>>();
+        assert_eq!(rows.len(), 1);
+        assert_eq!(rows[0]["kind"], "profile-evidence");
+        let original_path = dir.path().join("original8-control.json");
+        new_bytes(&original_path, ORIGINAL8);
+        let mut old = progress::load(&original_path, &labs).unwrap();
+        for a in old.attempts.values_mut() {
+            if matches!(a.state, State::Script { .. }) {
+                workspace::prepare(a);
+            }
+        }
+        let original_history = snapshots(&old);
+        let original_ids = old.attempts.keys().cloned().collect();
+        let current_ids = labs.iter().map(|s| s.id.clone()).collect();
+        let expected = expected_histories(&original_history, &original_ids, &current_ids);
+        let path = dir.path().join("progress.json");
+        let mut loaded = progress::load(&path, &labs).unwrap();
+        assert_full_histories(&loaded, &expected, "actual profile regression");
+        let added = current_ids
+            .difference(&original_ids)
+            .cloned()
+            .collect::<Vec<_>>();
+        assert_eq!(added.len(), 17);
+        for id in &added {
+            assert!(expected[id].is_empty());
+        }
+        // A plausible current9 Record must NOT become fabricated prior history.
+        let new_script = added.iter().find(|id| records.contains_key(*id)).unwrap();
+        loaded
+            .attempts
+            .get_mut(new_script)
+            .unwrap()
+            .workspace
+            .as_mut()
+            .unwrap()
+            .script_history = Some(records[new_script].clone());
+        let failure = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            assert_full_histories(&loaded, &expected, "added history must stay empty")
+        }))
+        .unwrap_err();
+        let message = failure.downcast_ref::<String>().unwrap();
+        assert!(message.len() <= 512 && message.contains(new_script.as_str()));
+        let mut loaded = progress::load(&path, &labs).unwrap();
+        let old_script = original_history
+            .iter()
+            .find(|(_, v)| !v.is_empty())
+            .unwrap()
+            .0;
+        loaded
+            .attempts
+            .get_mut(old_script)
+            .unwrap()
+            .workspace
+            .as_mut()
+            .unwrap()
+            .script_history = None;
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| assert_full_histories(
+                &loaded,
+                &expected,
+                "old history cannot be dropped"
+            )))
+            .is_err()
+        );
+        let mut loaded = progress::load(&path, &labs).unwrap();
+        let removed = loaded.attempts.remove(&added[0]).unwrap();
+        loaded.attempts.insert("foreign-context".into(), removed);
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| assert_full_histories(
+                &loaded,
+                &expected,
+                "current keyset cannot change"
+            )))
+            .is_err()
+        );
+        let a = json!({"field":"é".repeat(100_000)});
+        let b = json!({"field":"different"});
+        assert_eq!(first_difference(&a, &b, "$"), Some("$/field".into()));
     }
     #[test]
     fn capture_entry_rejects_missing_guard_without_running_vm() {

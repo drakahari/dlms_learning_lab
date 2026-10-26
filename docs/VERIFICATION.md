@@ -1,7 +1,7 @@
 # Verification evidence and current limits
 
-Current M116 source133/33 is under acceptance; the last scoped installed Fedora
-candidate is125/31 at14cf248. Use CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
+Current source133/33 has scoped installed Fedora acceptance at38a8098, including
+all8 new package/STP lesson flows; full curriculum/platform acceptance remains open. Use CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
 INSTALLATION.md for current exact source/binary/run identities and failures.
 Current shell contract is SHELL_SUBSET.md (evaluator9), not the original v1
 feature list below. MIT for original code/curriculum is approved; third-party
