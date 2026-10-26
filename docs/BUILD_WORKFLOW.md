@@ -167,3 +167,21 @@ python3 tools/dev.py tool installed_acceptance.py --candidate dist/EXACT-NEW-CAN
 ```
 
 It verifies build-manifest/binary identity, installs only into a new private project-disk directory, upgrades an actually identified older executable, checks installed content/desktop metadata, uninstalls/reinstalls, and retains exact separate synthetic original-nine progress bytes. Resolved candidate/install roots cannot escape the project or use RAM filesystems. Leftover desktop entries and dangling application/launcher links fail acceptance. Fixed commands have nonblocking32KiB streaming capture and bounded timeout/pipe teardown under the parent's shared lock, memory observer and owned process group. Descendants never detach from that group; failed runs return to its cleanup. Per-command logs and acceptance.json remain under ignored .build-artifacts/installations. No personal progress, desktop theme, host service or learner script is accessed. This proves installer file retention on this host; native GUI/reopening/startup and other operating systems require separate checks.
+
+
+## Retaining CI installation candidates
+
+Keep downloaded archives and extraction output under ignored dist/, with private
+metadata/verification under .build-artifacts/. For the gh download process as well
+as the final destination, set disk temporary paths for that command only:
+
+```sh
+env TMPDIR="$PWD/.build-artifacts/tmp" TMP="$PWD/.build-artifacts/tmp" TEMP="$PWD/.build-artifacts/tmp" gh run download RUN_ID --name EXACT_ARTIFACT --dir dist/native-ci-REV/PLATFORM
+```
+
+Run from MAIN after verifying the disk location above; do not change global
+shell variables. Serialize large retrieval/inspection with local heavy work.
+Verify exact revision and sidecar SHA-256 before owner delivery. Inspect bounded
+archive metadata without executing a Windows/macOS binary on Fedora; CI success
+is not desktop acceptance. Installing, unpacking and native acceptance remain
+separately guarded project-disk operations. No command here publishes a release.

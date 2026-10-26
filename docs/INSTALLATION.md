@@ -760,3 +760,29 @@ with the shared two-job workflow; not a stress or universal-memory guarantee.
 Exact private candidate receipt: reviews/catalog133/fedora-candidate-38a-r1.
 Full source/native-development evidence and next acceptance commands are in
 CHECKPOINT.md. This artifact is a development candidate, not complete curriculum.
+
+
+## M122 refreshed native CI candidates — 2026-10-26
+
+[Run40386416552](https://github.com/drakahari/dlms_learning_lab/actions/runs/40386416552)
+at7dde3e45cbc1b8cc7b9f47094cfdf7411eadba86 passed all three native jobs. The
+Windows-only unused_mut failure in prior40381197535 was corrected without
+suppressing the lint or changing Unix private-directory permissions. Native
+headless tests/Clippy, applicable Python/coverage/notice gates and Linux/Windows
+candidate creation passed. macOS compiled/tests passed; its originaldispatch
+notice gate still prevents a candidate. These archives contain140 assignments/
+35units and the accepted GUI, before the later unbundled NAT backend. They are
+unsigned owner-test candidates, not desktop runtime acceptance or a public release.
+
+| Retained candidate | SHA-256 |
+| --- | --- |
+| `dist/native-ci-7dde3e4/ubuntu/dlms-learning-lab-0.1.0-g7dde3e45cbc1-x86_64-unknown-linux-gnu-ubuntu-24.04-candidate.tar.gz` | `45ce3ffe5cba68416d6070e58c2160cc56fcb1891845e7bb9d92d31f427e9b24` |
+| `dist/native-ci-7dde3e4/windows/dlms-learning-lab-0.1.0-g7dde3e45cbc1-x86_64-pc-windows-msvc-windows-candidate.zip` | `4b82d722cbee629e8cd6c118dfad9c3775c4c5e377b6d268ac4008fca7280b43` |
+
+Downloaded to verified project disk with per-command disk TMPDIR/TMP/TEMP.
+Sidecar hashes and bounded embedded BUILD_INFO revision checked without running
+or extracting those applications. Private receipt reviews/ci-7dde3e4-candidates-r1.
+Actual Windows/macOS install/reopen/upgrade/uninstall, keyboard/scaling/accessibility
+and OS-security acceptance remain pending. No signing credentials were generated,
+no security policy bypassed and no release published. The actual installed Fedora
+accepted command at the top remains ddb886b, with its separate checksum/evidence.

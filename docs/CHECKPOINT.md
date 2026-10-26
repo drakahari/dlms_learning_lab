@@ -471,3 +471,28 @@ This is CI build evidence, not desktop acceptance. Current fully scoped Fedora
 owner command remains ddb in INSTALLATION.md. All private images/progress/logs
 remain ignored. Full curriculum, Windows/macOS desktop, physical-device, reader,
 novice, macOS originaldispatch notice/signing remainOPEN. No publicrelease.
+
+
+M122 follow-through: CI40386416552 at7dde3e45cbc1b8cc7b9f47094cfdf7411eadba86
+completed all3nativejobsSUCCESS. Linux/Windows candidates downloaded on project
+disk with private command-local TMPDIR/TMP/TEMP; sidecar/hash and bounded embedded
+revision verification PASS. Ubuntu archive45ce3ffe5cba68416d6070e58c2160cc56fcb1891845e7bb9d92d31f427e9b24;
+Windows4b82d722cbee629e8cd6c118dfad9c3775c4c5e377b6d268ac4008fca7280b43,
+paths in INSTALLATION.md. Both140/35, before90b unbundledNAT. macOS compile/tests
+PASS but originaldispatch notice stillblocks candidate. No otherOS desktop,
+screenreader/novice claim or release. Oldddb CI Windows failure retained honestly.
+
+M123 RPM firstguarded puregate compiled,22PASS/1FAIL/0ignored (sourceR1), log
+m123-rpm-foundation-first-r1.log. Tokennegative fixture used6files/archive but
+independent wirecount is8173, below8192;5files7020,7files9326. Fixing fixture with
+6near-limit valid/7token-only invalid; strict token>MAX andstrings<MAX assertions
+remain. No model/limits reduced; allother22pass. Sourceworker R2 pendingfreeze,
+rootownssole heavy slot; no source/reference/hostRPM executed byworkers.
+Natnativeworktree cleanprivate9cc496466117e73f1ef7477e2e5adc7641472b3d exactly
+matchesMAIN90b tree, preservingprivateR5ad33458 andallsource/logsnapshots. Only3
+expected add/add conflicts resolved EXACTMAIN (2subsetdocs/oneformatterblock).
+Exclusive warmtargetunchanged, no crossworktreetarget sharing. Base receipt
+reviews/nat-foundation/renderer-base-main90b-r1/BASE.json SHA352ab1e88080b24f1e46e17a7c29161f50fcf4847050c83afd756931f65b67ec.
+RenderercontractR1 peer d00c44f0 requested concrete perkey/aggregate memo budget,
+cache-unavailable truth and explicit cheap idle path. R2 delta pending; no native
+implementation grant yet. Continue authorized work, no owner routine approvals.
