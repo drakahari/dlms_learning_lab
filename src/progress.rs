@@ -248,35 +248,44 @@ pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     ));
     rows
 }
+/// Fresh package outcomes with context/session guards; display history is never credit.
+pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |m: &str| vec![(false, crate::debian_packages_workspace::notice(m))];
+    if let Err(e) = validate_debian_packages_workspace(a) {
+        return fail(&e);
+    }
+    let (
+        State::DebianPackages { simulation },
+        State::DebianPackages {
+            simulation: authored,
+        },
+        crate::engine::Goal::DebianPackages { definition },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return fail("Package assignment kind/context differs");
+    };
+    if authored != &definition.initial {
+        return fail("Package initial context differs from the task");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.debian_packages_learning.as_ref())
+        .is_some_and(|l| {
+            s.debian_packages_teaching
+                .as_ref()
+                .is_none_or(|lesson| !l.valid_for(lesson))
+        })
+    {
+        return fail("Package practice differs from its authored fixture");
+    }
+    definition.checks(simulation)
+}
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::DebianPackages { .. }) {
+        return current_debian_packages_checks(a, s).iter().all(|r| r.0);
+    }
     if validate_debian_packages_workspace(a).is_err() {
         return false;
-    }
-    if let State::DebianPackages { simulation } = &a.state {
-        let (
-            State::DebianPackages {
-                simulation: authored,
-            },
-            crate::engine::Goal::DebianPackages { definition },
-        ) = (&s.initial, &s.goal)
-        else {
-            return false;
-        };
-        if authored != &definition.initial {
-            return false;
-        }
-        if a.workspace
-            .as_ref()
-            .and_then(|w| w.debian_packages_learning.as_ref())
-            .is_some_and(|l| {
-                s.debian_packages_teaching
-                    .as_ref()
-                    .is_none_or(|lesson| !l.valid_for(lesson))
-            })
-        {
-            return false;
-        }
-        return definition.checks(simulation).iter().all(|row| row.0);
     }
     if matches!(a.state, State::SpanningTree { .. }) {
         return current_spanning_tree_checks(a, s).iter().all(|r| r.0);
@@ -284,7 +293,6 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
     if validate_spanning_tree_workspace(a).is_err() {
         return false;
     }
-
     if matches!(a.state, State::DhcpV4 { .. }) {
         return current_dhcpv4_checks(a, s).iter().all(|row| row.0);
     }
@@ -1361,10 +1369,11 @@ fn validate_routing_workspace(a: &Attempt) -> Result<(), String> {
     Ok(())
 }
 fn validate_debian_packages_workspace(a: &Attempt) -> Result<(), String> {
-    let metadata = a
-        .workspace
-        .as_ref()
-        .is_some_and(|w| w.debian_packages_draft.is_some() || w.debian_packages_learning.is_some());
+    let metadata = a.workspace.as_ref().is_some_and(|w| {
+        w.debian_packages_draft.is_some()
+            || w.debian_packages_learning.is_some()
+            || w.debian_packages_terminal.is_some()
+    });
     let State::DebianPackages { simulation } = &a.state else {
         return if metadata {
             Err("Package metadata on another activity; original retained".into())
@@ -1380,6 +1389,9 @@ fn validate_debian_packages_workspace(a: &Attempt) -> Result<(), String> {
             .debian_packages_draft
             .as_ref()
             .is_some_and(|d| !d.valid_for(simulation))
+            || w.debian_packages_terminal
+                .as_ref()
+                .is_some_and(|t| !t.valid_for(simulation))
             || w.debian_packages_learning.as_ref().is_some_and(|l| {
                 !l.valid()
                     || !crate::debian_packages_teaching::separate_contexts(&l.context, simulation)

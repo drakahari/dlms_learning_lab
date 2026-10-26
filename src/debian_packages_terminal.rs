@@ -1,14 +1,16 @@
 //! Closed literal Debian spellings over fictional script-free data; no host utility.
+pub mod session;
 use crate::{
     debian_packages::{self as core, Action, State, Status, Version},
     debian_packages_workspace::{self as work, Definition},
     shell,
 };
+pub use session::Session;
 use std::cmp::Ordering;
 pub const MAX_COMMAND_BYTES: usize = 2048;
 pub const MAX_OUTPUT_BYTES: usize = 32768;
 pub const HELP: &str = "Virtual Debian package console: dpkg-query -W [-f='FORMAT'] [NAME]; dpkg-query -S ABS_PATH (installed recorded owner); apt-cache --important depends NAME; apt-get --error-on=any update; apt-get -y install NAME[=VERSION]...; apt-get -y --reinstall install NAME=VERSION (same installed/cached artifact; all installed Depends healthy); dpkg -r|--remove NAME; dpkg -P|--purge NAME; dpkg --compare-versions V1 lt|le|eq|ne|ge|gt V2. Literal arguments only. Formatter fields: Package, binary:Package, Version, Architecture, db:Status-Status. Script-free final-state simulation, not dpkg/APT transaction or rollback execution, archives, downloads, privilege or security checks. No dpkg -i/unpack/configure/verify/audit, APT removal/resolver/pinning or RPM aliases. Mutation output is explicitly a model-derived simulation summary. help/show are simulator helpers; reading help or inspecting data does not complete the assignment.";
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
 pub enum DiagnosticKind {
     Syntax,
     Unsupported,
@@ -828,4 +830,52 @@ pub fn output_text(result: Result<Output>) -> std::result::Result<String, String
             e.kind, e.message, e.status
         )),
     }
+}
+
+/// Annotation admission, not learner grading: require the same parsed operation
+/// and the same reached guarded effect. A no-op query is never an action alias.
+pub(crate) fn validate_annotation(
+    definition: &Definition,
+    state: &State,
+    action: &Action,
+    input: &str,
+) -> std::result::Result<(), String> {
+    if input.len() > MAX_COMMAND_BYTES
+        || !work::action_bounded(action)
+        || !definition.same_assignment(state)
+    {
+        return Err("Foreign/oversized package command annotation".into());
+    }
+    let parsed = parse(input).map_err(|e| e.message)?;
+    let identity = match (&parsed.kind, action) {
+        (Kind::Update, Action::RefreshIndex {}) => true,
+        (Kind::Install(a), Action::Install { packages }) => a == packages,
+        (Kind::Reinstall { package, .. }, Action::Reinstall { name }) => package == name,
+        (
+            Kind::Remove {
+                package,
+                purge: false,
+            },
+            Action::Remove { name },
+        ) => package == name,
+        (
+            Kind::Remove {
+                package,
+                purge: true,
+            },
+            Action::Purge { name },
+        ) => package == name,
+        _ => false,
+    };
+    if !identity {
+        return Err("Example command must name the same supported package operation".into());
+    }
+    let mut expected = state.clone();
+    work::apply(definition, &mut expected, action)?;
+    let mut actual = state.clone();
+    let output = execute(definition, &mut actual, input).map_err(|e| e.message)?;
+    if output.status != 0 || actual != expected {
+        return Err("Example command does not have the declared guarded operation effect".into());
+    }
+    Ok(())
 }

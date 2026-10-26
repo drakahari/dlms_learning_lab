@@ -1,6 +1,7 @@
 use super::*;
 use engine::State;
 mod client_learning;
+mod debian_packages;
 mod dhcpv4;
 mod dhcpv4_lessons;
 mod getopts_history;

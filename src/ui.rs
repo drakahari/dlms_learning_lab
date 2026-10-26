@@ -13,6 +13,7 @@ mod address_learning;
 mod client_learning;
 mod controls;
 mod data;
+mod debian_packages_workspace;
 mod dhcpv4_workspace;
 mod discovery_workspace;
 mod dns_workspace;
@@ -139,6 +140,16 @@ struct Metrics {
     dns_choices: Vec<(String, egui::Rect)>,
     dns_notice: Option<egui::Rect>,
     dns_result: Option<egui::Rect>,
+    package_command: Option<(egui::Rect, egui::Id, bool)>,
+    package_run: Option<(egui::Rect, bool)>,
+    package_path: Option<egui::Rect>,
+    package_path_popup: Option<egui::Rect>,
+    package_path_items: Vec<(String, egui::Rect)>,
+    package_example: Option<egui::Rect>,
+    package_example_popup: Option<egui::Rect>,
+    package_example_items: Vec<(usize, egui::Rect)>,
+    package_inspector: Option<egui::Rect>,
+    package_diagnostics: Vec<(egui::Rect, f32)>,
     dhcp_fields: Vec<(String, egui::Rect, egui::Id)>,
     dhcp_field_clips: std::collections::BTreeMap<String, egui::Rect>,
     dhcp_controls: Vec<(String, egui::Rect, bool)>,
@@ -670,6 +681,10 @@ impl LabApp {
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, new_attempt);
         }
+        if let Some(lesson) = &s.debian_packages_teaching {
+            dlms_learning_lab::debian_packages_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated package lesson");
+        }
         if let Some(lesson) = &s.dhcpv4_teaching {
             dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated DHCP teaching");
@@ -832,6 +847,10 @@ impl LabApp {
         }
         if let Some(lesson) = &s.process_teaching {
             dlms_learning_lab::process_teaching::prepare(a, lesson, true);
+        }
+        if let Some(lesson) = &s.debian_packages_teaching {
+            dlms_learning_lab::debian_packages_teaching::prepare(a, lesson, true)
+                .expect("validated package lesson");
         }
         if let Some(lesson) = &s.dhcpv4_teaching {
             dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, true)

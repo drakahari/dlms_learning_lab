@@ -93,39 +93,48 @@ separate. All curriculum/platform completion remains Open.
 
 ## Immediate next actions — continue implementation
 
-Root sole guarded slot; no heavy worker grants. Source8246971 M112 pushed after
-620b918 M110 and61262bf M111. Uncommitted M113/M114 now ready for commit/push:
-STPnative15headless groups PASS, alltargetClippyR2/fmt/diff, actual native R5 PASS
-16PNG at946x929 density1.15/100/150/200 Light/Dark, exact ELFSHA69bafc057c9eae362ebfc773b0580a9776f9bab177e11506827e89e0046748e5.
-Receipt reviews/spanning-tree-foundation/development-native-r5/RESULT.json;
-run-5to3l6jq, logm113-stp-native-fedora-r5. Representative final renders inspected.
-Warm technicalfixture only, no packaged/normalauthored/cold/novice/otherOS claim.
-R1-3 failedscrolllock: l.checked repeatedlytriggeredfeedbackreveal; rootfixed
-Check-event-onlyreveal+idleframes. Pointerfixalonewasinsufficient. R4favorite
-setupmissingdirtyfixedretainingassert; headless nowrender→save→SmokeTick like
-native, fullcontrollerpasses. Sourcepeeraccepts, outcomes/visibilitynotweakened.
+No heavy run active at this write. MAIN57a2829 M113/M114 pushed; earlier8246971,
+61262bf,620b918 pushed. Package nativeR1 integrated UNCOMMITTED13paths over BOTH
+STP/DHCP, sourcepeeraccepts. All68lib8content15terminal20adapterPASS;Session9/10
+firstthen10/10retry aftertest-onlybackupinspectioncontrolcorrection (oldRun8→9
+islegitimateexplicitrecheck, ordinaryresumeexact). Eight UI testsPASS; stale
+previous-framebuttonrect correctedtosameframepaintbounds, strictcontainsintact.
+23combinedpackage/STPUIcontrollerPASS;9broadertargets77PASS, ClippyR2/fmt/diffPASS.
+Nomainmodel/Goal/initial/historyfixturechangeinthosetestfixes. Commit/pushM115.
 
-Four unbundled STP assignments +6content tests PASS alongside20core18adapter.
-Private drafts r1/r2/r3 retained; prereqmetadata/testdraftrow corrected, expected
-vectorsunchanged. Four package assignments +8tests/148broaderchecks/Clippy PASS
-and sourcecommitted8246971, but UNBUNDLED pending nativeAPI. No count/coverage.
+Next applyfaithful4packageannotations fromprivate draft-r4/ANNOTATIONS.json,
+register4package+4STPsource tasksand2units, prove exact old125/31prefixandgenuine
+history/noinventednewattempts. Normalcountthen133/33SOURCEonly; notnativeaccepted
+untilactualfullauthoredflows. Existingnewdata proseclarifiesindependent samples
+anddestructiveReset;STPdefinesbridge/root. Original125specs/order unchanged.
 
-Next integrate reviewed package nativeR1 af4d23d4…13paths,10session+8egui UNRUN.
-Root prepared reviewed-source/basehash staging at
-reviews/package-management/main-native-integration-r1. Sixconflicts resolved in
-progress/workspaceUI preserving BOTH full STP+packagechecks/dispatch. NoMAINwrites
-yet. Recheckbeforebytes, apply, solefirstgate. Preserve currentguideparserguard,
-STPfeedbackidlefix/controller and current125 content/history. Then add faithful
-optional command annotations (private draft-r4/ANNOTATIONS.json), register4+4 units
-withold125/31prefix/historyproof, actualnormalcontentflows beforecoverage.
+Reviewedpackagecontroller6paths pendingintegration:
+reviews/package-management/lessons-native-source-r1/SOURCE-READY.json
+SHA978991b9ec6ee39804389aad3ac693b2733e392871a81b46f4448cf908968df4.
+Runtime requiresnormalunit/fourIDs/annotations;69shotsUNRUN. Applyincrementally
+overcurrentUI/STP/guidancechanges. Sourcepeeraccepts; stage34000package-lessons.
+4headlessgroupsandactualrender/save/idle/Tick gatedbeforenativerun.
 
-independent_review SOURCEONLY preparing package-lessons actualcontroller separate
-worktree/freeze: usesactualLibraryFavorite/BackContinue, render/save/idle/Tick.
-ccna_discovery SOURCEONLY implementing Apacheadapter contract8882c388… approved:
-current+singlefreshNextStart positiveHTTP200 checks, boundededitor/requestdrafts,
-readonlyrequestsnotpendingcredit, separatefixturepractice; exact coreRequestshape
-pub(crate) samebodyallowedifneeded. Noheavy/deps/normalcount/credit. Continueall
-fourtracks; do notstopatFedora package or125labs.
+STPdevelopmenttechnicalfixturePASS15headless+16nativeR5PNGs at946x929/density1.15,
+Light150/Dark200typed actualfields;69bafc057c9eae362ebfc773b0580a9776f9bab177e11506827e89e0046748e5.
+Receipt reviews/spanning-tree-foundation/development-native-r5,run-5to3l6jq.
+EarlierR1-3scrolllock(productcheckedflagrepeatedfeedbackreveal)fixedevent-only+
+idleframes;pointerfixaloneinsufficient. R4favoritecontrollerdirtysetupfixed.
+Warmonly/notpackaged/normalfourlessons/cold/actualFavoritebutton/novice/otherOS.
+FourSTPcontent6groups+20core18adapterPASS;fourpackage8groupsPASS.
+
+ApacheadapterR2sourcepeeraccepts20UNRUNgroups: manifest08f03854db1e83367f6614841ff8f2c301221b788f8c8bcb0d99af0627af9c05.
+TwofieldlessRequirements nowemptySTRUCT{}samewire/unknownrefusal; lengthbefore
+trimpreflight. AllotherR1source/prereq/fixtures exact. Integrate/gatesaftercurrent
+unitwork; notappcontent/coverage.
+
+ccna_discovery SOURCEONLYpreparingfixedpublic9collector+boundedbuiltin-onlyBash
+oracleproposal (contract15f21c9d ACK) BEFOREevaluator/parserchanges.43labs/282cases/
+43examples9observationsmustbepinned; preserve6/7/8/9, don'trelabelold8. EmptyIFS
+readfirst/pipefailnextthen2–3distinctbyte-preserving/status-handlingprojects, no
+generalIFS/set/errexit/traps/hostsecurityclaims/deps. independent_reviewfinished
+packagecontroller/Apachepeerreviews and isavailable. ALLworkersnoheavygrants.
+Continueallfourtracks; do notstopatFedora package.
 
 ## Source receipts and retained gates
 

@@ -19,6 +19,12 @@ pub struct Concept {
 #[serde(deny_unknown_fields)]
 pub struct ExampleAction {
     pub action: Action,
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "optional_command"
+    )]
+    pub command: Option<String>,
     #[serde(deserialize_with = "work::string::<_,2048>")]
     pub explanation: String,
 }
@@ -76,6 +82,14 @@ impl<'de> Deserialize<'de> for Lesson {
         Ok(l)
     }
 }
+fn optional_command<'de, D: Deserializer<'de>>(d: D) -> Result<Option<String>, D::Error> {
+    Ok(
+        Option::<work::Text<{ crate::debian_packages_terminal::MAX_COMMAND_BYTES }>>::deserialize(
+            d,
+        )?
+        .map(|s| s.0),
+    )
+}
 fn prose(s: &str, n: usize) -> bool {
     !s.trim().is_empty() && s.len() <= n && !s.contains('\0')
 }
@@ -100,10 +114,14 @@ impl Lesson {
                 .concepts
                 .iter()
                 .all(|c| prose(&c.title, 128) && prose(&c.text, 2048))
-            && self
-                .example_actions
-                .iter()
-                .all(|a| prose(&a.explanation, 2048) && work::action_bounded(&a.action))
+            && self.example_actions.iter().all(|a| {
+                prose(&a.explanation, 2048)
+                    && work::action_bounded(&a.action)
+                    && a.command.as_ref().is_none_or(|c| {
+                        c.len() <= crate::debian_packages_terminal::MAX_COMMAND_BYTES
+                            && !c.contains('\0')
+                    })
+            })
             && self
                 .try_change
                 .actions
@@ -126,6 +144,14 @@ impl Lesson {
         }
         let mut worked = self.definition.initial.clone();
         for action in &self.example_actions {
+            if let Some(command) = &action.command {
+                crate::debian_packages_terminal::validate_annotation(
+                    &self.definition,
+                    &worked,
+                    &action.action,
+                    command,
+                )?;
+            }
             work::apply(&self.definition, &mut worked, &action.action)?;
         }
         if !self.definition.checks(&worked).iter().all(|c| c.0) {
@@ -168,6 +194,8 @@ pub struct Learning {
     pub selected_action: usize,
     pub checked: bool,
     pub notice: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub terminal: Option<crate::debian_packages_terminal::Session>,
 }
 impl<'de> Deserialize<'de> for Learning {
     fn deserialize<D: Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
@@ -183,6 +211,8 @@ impl<'de> Deserialize<'de> for Learning {
             checked: bool,
             #[serde(default, deserialize_with = "optional_notice")]
             notice: Option<String>,
+            #[serde(default)]
+            terminal: Option<crate::debian_packages_terminal::Session>,
         }
         let r = R::deserialize(d)?;
         let l = Self {
@@ -194,6 +224,7 @@ impl<'de> Deserialize<'de> for Learning {
             selected_action: r.selected_action,
             checked: r.checked,
             notice: r.notice,
+            terminal: r.terminal,
         };
         if !l.valid() {
             return Err(D::Error::custom("Invalid bounded package practice"));
@@ -216,6 +247,10 @@ impl Learning {
             && work::admitted(&self.simulation)
             && self.simulation.catalog() == self.context.catalog()
             && self.draft.valid_for(&self.simulation)
+            && self
+                .terminal
+                .as_ref()
+                .is_none_or(|t| t.valid_for(&self.simulation))
             && work::within(self, MAX_LEARNING_BYTES)
     }
     pub fn valid_for(&self, l: &Lesson) -> bool {
@@ -238,11 +273,97 @@ impl Learning {
             selected_action: 0,
             checked: false,
             notice: None,
+            terminal: None,
         };
         if !v.valid_for(l) {
             return Err("Package practice exceeds aggregate app admission".into());
         }
         Ok(v)
+    }
+    fn with_terminal_bounded(
+        &self,
+        state: &State,
+        terminal: Option<&crate::debian_packages_terminal::Session>,
+        checked: bool,
+    ) -> bool {
+        #[derive(Serialize)]
+        struct B<'a> {
+            version: u32,
+            view: View,
+            context: &'a State,
+            simulation: &'a State,
+            draft: &'a Draft,
+            selected_action: usize,
+            checked: bool,
+            notice: &'a Option<String>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            terminal: Option<&'a crate::debian_packages_terminal::Session>,
+        }
+        work::within(
+            &B {
+                version: self.version,
+                view: self.view,
+                context: &self.context,
+                simulation: state,
+                draft: &self.draft,
+                selected_action: self.selected_action,
+                checked,
+                notice: &self.notice,
+                terminal,
+            },
+            MAX_LEARNING_BYTES,
+        )
+    }
+    pub fn initialize_terminal(&mut self, l: &Lesson) -> Result<(), String> {
+        if !self.valid_for(l) {
+            return Err("Foreign package practice; previous work retained".into());
+        }
+        if self.terminal.is_some() {
+            return Ok(());
+        }
+        let s = crate::debian_packages_terminal::Session::default();
+        if !self.with_terminal_bounded(&self.simulation, Some(&s), self.checked) {
+            return Err("Practice terminal exceeds aggregate admission".into());
+        }
+        self.terminal = Some(s);
+        Ok(())
+    }
+    pub fn terminal_edits_valid(&self, l: &Lesson) -> bool {
+        self.valid_for(l)
+    }
+    pub fn insert_command(&mut self, l: &Lesson, command: &str) -> Result<(), String> {
+        if command.len() > crate::debian_packages_terminal::MAX_COMMAND_BYTES || !self.valid_for(l)
+        {
+            return Err("Invalid package command insertion; previous work retained".into());
+        }
+        let mut next = self.terminal.clone().unwrap_or_default();
+        next.command = command.to_owned();
+        if !next.valid_for(&self.simulation)
+            || !self.with_terminal_bounded(&self.simulation, Some(&next), self.checked)
+        {
+            return Err("Practice command exceeds aggregate admission".into());
+        }
+        self.terminal = Some(next);
+        Ok(())
+    }
+    pub fn submit_command(&mut self, l: &Lesson) -> Result<bool, String> {
+        if !self.valid_for(l) {
+            return Err("Foreign package practice; previous work retained".into());
+        }
+        let mut state = self.simulation.clone();
+        let mut terminal = self.terminal.clone().unwrap_or_default();
+        let changed = terminal.submit(&l.definition, &mut state)?;
+        let checked = self.checked && !changed;
+        if !self.with_terminal_bounded(&state, Some(&terminal), checked) {
+            return Err(
+                "Practice terminal result exceeds aggregate admission; previous work retained"
+                    .into(),
+            );
+        }
+        self.simulation = state;
+        self.terminal = Some(terminal);
+        self.checked = checked;
+        Ok(changed)
     }
     pub fn checks(&self, l: &Lesson) -> Vec<(bool, String)> {
         if !self.valid_for(l) {
@@ -280,6 +401,8 @@ impl Learning {
             selected_action: usize,
             checked: bool,
             notice: &'a Option<String>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            terminal: Option<&'a crate::debian_packages_terminal::Session>,
         }
         if !work::within(
             &B {
@@ -291,6 +414,7 @@ impl Learning {
                 selected_action: self.selected_action,
                 checked: self.checked,
                 notice: &self.notice,
+                terminal: self.terminal.as_ref(),
             },
             MAX_LEARNING_BYTES,
         ) {
@@ -319,6 +443,8 @@ impl Learning {
             selected_action: usize,
             checked: bool,
             notice: Option<String>,
+            #[serde(skip_serializing_if = "Option::is_none")]
+            terminal: Option<&'a crate::debian_packages_terminal::Session>,
         }
         let message = work::notice(format!(
             "Logical operation: {} package record(s) and {} file(s) changed",
@@ -335,6 +461,7 @@ impl Learning {
                 selected_action: self.selected_action,
                 checked: false,
                 notice: Some(message.clone()),
+                terminal: self.terminal.as_ref(),
             },
             MAX_LEARNING_BYTES,
         ) {

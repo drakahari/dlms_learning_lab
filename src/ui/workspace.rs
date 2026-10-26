@@ -68,6 +68,8 @@ impl LabApp {
             ui.set_min_width(ui.available_width());
             if matches!(s.initial, State::SpanningTree { .. }) {
                 self.spanning_tree_workspace(ui, i);
+            } else if matches!(s.initial, State::DebianPackages { .. }) {
+                self.debian_packages_workspace(ui, i);
             } else if matches!(s.initial, State::DhcpV4 { .. }) {
                 self.dhcpv4_workspace(ui, i);
             } else if matches!(s.initial, State::MacLearning { .. }) {
@@ -159,6 +161,8 @@ impl LabApp {
             }
             let show_help = if matches!(s.initial, State::SpanningTree { .. }) {
                 self.spanning_tree_view(i) == teaching::View::Assignment
+            } else if matches!(s.initial, State::DebianPackages { .. }) {
+                self.debian_packages_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::DhcpV4 { .. }) {
                 self.dhcpv4_view(i) == teaching::View::Assignment
             } else if matches!(s.initial, State::MacLearning { .. }) {
@@ -222,6 +226,8 @@ impl LabApp {
                         ui.push_id(("stp-help", &s.id, challenge), |ui| {
                             self.spanning_tree_help(ui, i)
                         });
+                    } else if matches!(s.initial, State::DebianPackages { .. }) {
+                        self.debian_packages_help(ui, i);
                     } else if matches!(s.initial, State::DhcpV4 { .. }) {
                         ui.push_id(("dhcp-help", &s.id, challenge), |ui| {
                             self.dhcpv4_help(ui, i)

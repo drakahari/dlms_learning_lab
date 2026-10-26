@@ -15,6 +15,8 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub debian_packages_terminal: Option<crate::debian_packages_terminal::Session>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_draft: Option<crate::debian_packages_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_learning: Option<crate::debian_packages_teaching::Learning>,
@@ -130,6 +132,10 @@ impl WorkspaceData {
                 .debian_packages_learning
                 .as_ref()
                 .is_none_or(|l| l.valid())
+            && self
+                .debian_packages_terminal
+                .as_ref()
+                .is_none_or(|t| t.valid())
             && self.dhcpv4_draft.as_ref().is_none_or(|d| d.valid())
             && self.dhcpv4_learning.as_ref().is_none_or(|l| l.valid())
             && self

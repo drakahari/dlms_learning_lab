@@ -1744,3 +1744,34 @@ row offset; authored vectors unchanged. Source independently reviewed. Both this
 unit and four package tasks remain UNBUNDLED; normal125/31 and coverage unchanged.
 Continue package native integration/annotations, registration/native full-content
 flows and Apache/remaining four-track work. No release.
+
+## 2026-10-25 — M115: native isolated package command sessions
+
+Integrated independently reviewed13-path workbench over current STP/DHCP: native
+closed command console, bounded scrolling transcript/status/diagnostics, same
+font-derived input/button sizes, independent raw assignment/example drafts and
+read-only supplied-file inspector. Optional faithful command annotations require
+same parsed operation AND same reached guarded effect; Insert never executes.
+Current package outcomes remain state-based; unsubmitted commands/history don't
+invalidate honest applied credit or confer success. Old None wire/context/bounds
+remain protected. No host command/archives/downloads or new dependency.
+
+First gate68lib/8content/15terminal/20adapter pass;9/10Session pass, then all10
+Session pass after test-only explicit-inspection correction. Old Script results
+are legitimately rechecked by backup inspection: ordinary resume must remain
+exact, while post-inspection old Attempts must equal an independent old-only
+inspection control. Selected full Attempt/both Sessions/favorites before reset
+remain exact; original genuine histories/production code unchanged.
+
+Eight UI groups pass. Initial painted-Run check used a stale prior-frame button
+rect during smooth scrolling; corrected to strict same-frame containment, no
+visual/tolerance weakening. Combined23package/STP UI/controller checks pass,
+9broader targets77pass, alltargetClippyR2/fmt/diff pass after unused import and
+identical-predicate style fix. Source integration/test deltas independently
+reviewed. New content prose clarifies independent sample workstations/destructive
+Reset needs, and defines bridge/root in everyday terms; no Goal/initial/case change.
+Normal catalog still125/31. Next: faithful annotations, register eight reviewed
+source assignments with exact old125/31-prefix/history proof, then actual native
+content flows and candidate gates. Package native source is not yet rendered
+acceptance. ApacheR2/20prospective tests source accepted; Bash public9 collector/
+fixed reference proposal precedes any evaluator10 change. No release.
