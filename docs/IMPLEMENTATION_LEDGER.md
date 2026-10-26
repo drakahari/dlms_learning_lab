@@ -2427,3 +2427,50 @@ reset, NAT independent context and public9/current comparison. MAIN all-target
 Clippy passes9.08s and211 Python workflow checks pass7.797s. No private historical
 capture or outcome was regenerated. Native teaching review remains the next gate.
 See SHELL_TEACHING_AMENDMENTS.md for the bounded correction and saved-work behavior.
+
+
+## 2026-10-26 — M124 actual native review and M126 fixed-NVR evidence
+
+Actual Fedora review passes all18 existing assignments across the five affected
+units: text4, reusable4, file-batches3, arrays4, case3. The same final development
+ELF has SHA2565b170f94f2318bc912528f6c5918a5ad0c19994ab59d5bf094c864286f62af62;
+text was rerun after the shared capture correction to keep this identity consistent.
+Private runs: text `run-s94fzs_s`23PNGs; reusable `run-2magbin4`23; batches
+`run-s0y3xdu8`22; arrays `run-wvehl4cj`; case `run-ojh1jo_p`45. References and
+injected app events exercise separate ungraded practice, assignments, useful wrong/
+partial feedback, retry/alternates, current invalidation, resume/reset and supported
+light150/dark200 views. This is not a novice study or physical-device/reader/otherOS
+acceptance. An independent reviewer inspected four100% teaching images without a
+material finding. No claim that every image was manually reviewed.
+
+The first reusable native run failed after its new longer introduction: the old
+capture clicked the below-viewport primary example button. Reused the existing
+bounded visible-control helper; no product UI/grade/pacing redesign. New real-event
+regression passes100/150/200 and the complete reusable native rerun passes. Final
+all-target Clippy passes1.66s. The earlier complete1653 run precedes this additional
+capture-only regression; it is not relabeled1654.
+
+Shared alignment repeated on that same development ELF:72 captures in
+`run-s1eufzs6`, actual1920×1080/946×929 at100/150/200 in light/dark. Root manually
+reviewed wide100 IPv4 placeholders and VLAN columns, wide150 light VLAN, narrow200
+light VLAN and dark IPv4 populated/error states. Centered single-line text and
+labels, equal topology cards/connectors, numeric columns and clean stacked layouts
+remain visible; scrolling keeps large text. New installed-candidate acceptance is
+still required. No existing screenshot or diagnostic was removed.
+
+M126 corrected fixed-NVR capture from78d5e1b completed40 observations:28 strict
+orders agree,12 tie controls inconclusive,0 strict mismatches. All162 output hashes
+and completion marker reverified. Manifest375537c30568f0104dc90202469563d62e2b5d8be0330f27ebd21e7f4139b280;
+private receipt `reviews/rpm-package-foundation/version-oracle/actual-via-nvr-r2`.
+No original expectation, model algorithm or wrong-domain capture was rewritten.
+This is VERSION ordering only, not fullEVR/equality or package transaction proof.
+
+M125 technical native R4 flow passes on Fedora with24 captures in `run-3_s8mmmq`,
+actual946×929 and observedPPP1.15/1.725/2.3 for100/150/200. Six event groups and
+all-target Clippy4.33s pass. Earlier source/runtime failures remain retained; real
+scroll animation needed bounded settling, not weakened visibility or pacing.
+Manual render review found a one-map viewport hiding its second field, repeated
+feedback prefixes and a missing arrow glyph. R5 fixes and actual wide capture are
+under source-only work before normal integration. This is not an authored NAT unit.
+The reviewed three-task teaching contract explicitly bounds all worked/experiment/
+repair action lists1..16 with pre-body17th rejection. No count/coverage promotion.

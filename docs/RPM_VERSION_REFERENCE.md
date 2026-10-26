@@ -60,7 +60,7 @@ fixture or pattern. It preserves raw full-NVR stdin/stdout and checks full-NVR
 multisets/orders derived only by framing the independent original expectations.
 The258-byte stdin limit, argv, environment and all process/evidence limits remain
 unchanged. This correction and its25 fake-process guard groups passed as part of211 MAIN
-Python workflow checks on2026-10-26. The corrected actual capture is pending; only a
+Python workflow checks on2026-10-26. The corrected actual capture passed its scoped strict-order checks; only a
 new capture ID after source review may supply observations. Old fixtures, old
 COMPLETE/raw evidence, the15 full-EVR model vectors and the pure model stay exact.
 
@@ -130,8 +130,8 @@ python3 tools/dev.py tool rpm_version_oracle.py --capture-id version-via-nvr-r2
 The first command discovers `tools/tests/test_rpm_version_oracle.py` using only fake
 processes. It never runs the reference program. The second command requires a new ID and the fixed trusted-tool conditions above.
 It accepts no caller-provided fixture or command. A new actual corrected capture
-requires the reviewed fixed-tool conditions; no corrected actual capture has run
-yet. The211-check MAIN fake/workflow gate passed before any corrected tool launch. Tests cover closed input/CLI admission, lock/MAIN/environment,
+requires the reviewed fixed-tool conditions; the corrected actual capture is recorded below. The211-check MAIN fake/workflow
+gate passed before that launch. Tests cover closed input/CLI admission, lock/MAIN/environment,
 actual aggregate growth, exact ELF FD and output protocols, inconclusive ties,
 fixed NAME/RELEASE framing and unchanged original expected pairs,40-child full
 fake capture, no-clobber/partial retention, source drift, whole
@@ -171,3 +171,17 @@ requires fresh fake-process gates and a new capture identity; the original captu
 will never be overwritten or relabeled as a conformant comparison. Equality,
 complete epoch/version/release behavior and actual package operations remain
 outside the proposed sorting evidence. No upstream implementation is copied.
+
+
+## Corrected fixed-NVR observation
+
+The separately identified `version-via-nvr-m126-r2` capture ran from committed
+source `78d5e1b9f48f67cd41b5b81e16a5b09dceccc81c`, using the default development
+sandbox and unchanged execution limits. All40 observations completed:28 strict
+orders agree with their unchanged documented expectations;12 tie controls remain
+inconclusive. There were no strict-order mismatches. The59,881-byte manifest hash
+is `375537c30568f0104dc90202469563d62e2b5d8be0330f27ebd21e7f4139b280`.
+Its completion marker and all162 retained output hashes were independently read
+back. The earlier bare-label capture remains intact. This supports only these
+VERSION ordering examples through identical-name/release framing. It does not
+prove equality, complete EVR composition, package operations or full RPM fidelity.

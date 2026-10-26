@@ -41,5 +41,22 @@ retention, export/restore and selected reset. The eight affected integration sui
 pass88 checks including the explicit historical public9/current comparison.
 MAIN's complete regression passes1653 checks with11 private-evidence checks
 excluded from its ordinary run. All11 private-evidence checks also passed in an explicit guarded MAIN run.
-MAIN all-target Clippy and211 Python workflow checks pass. Native review remains
-pending; this evidence is not a novice user study or assistive-technology acceptance.
+MAIN all-target Clippy and211 Python workflow checks pass.
+
+Actual Fedora flows pass for all18 existing assignments in the five affected units:
+text processing, reusable functions, file batches, arrays and case dispatch. They
+exercise introductions, separate practice/experiments, assignments, retries,
+current-success invalidation and resume; the later flows also cover alternatives,
+partial answers and selected reset. Light150/Dark200 views are included where
+those existing flows support them. An independent reviewer found no material issue
+in four100% teaching frames. Shared72-view IPv4/VLAN alignment was repeated at
+100/150/200%, actual1920×1080 and946×929, light/dark; five representative frames
+were manually reviewed. These are agent-input/render checks, not a novice user
+study, physical-keyboard, screen-reader or other-platform acceptance.
+
+The first reusable flow exposed a capture-script error: its bottom introduction
+button had moved below the viewport. The controller now uses the existing bounded
+reveal helper before a real click. A new actual-event regression passes at100/150/
+200%; the failed run is retained. No lesson controls, learner workflow or grading
+changed. The corrected native rerun passes. These development checks do not replace
+acceptance of a future packaged executable.

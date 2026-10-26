@@ -6,10 +6,10 @@ mistake is retained: six files/archive produced8173 tokens,19 below8192. The
 corrected near-cap valid control uses six; the token-only negative uses seven
 (9326). Limits and strict assertions were preserved. One keys-only iteration lint
 was corrected without a waiver. MAIN integration gates are recorded separately.
-The first fixed rpmsort collection has run, but bare version labels reached the
-wrapper's package-name ordering and do not establish version conformance; see
-[RPM_VERSION_REFERENCE.md](RPM_VERSION_REFERENCE.md). EVR expectations remain
-documentation-derived. No package operation or DNF reference has run.
+The first bare-label rpmsort collection tested the wrong input domain. A corrected
+fixed-NVR collection agrees on28 strict VERSION orders;12 tie controls remain
+inconclusive. See [RPM_VERSION_REFERENCE.md](RPM_VERSION_REFERENCE.md). Complete
+EVR expectations remain documentation-derived; no equality/full-EVR proof follows. No package operation or DNF reference has run.
 No engine State/Goal, application persistence, CLI, renderer, lesson, registry,
 dependency or objective status change. All140 existing activities remain intact;
 this library supplies no course credit or real RPM transaction conformance.

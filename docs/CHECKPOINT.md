@@ -7,22 +7,30 @@ LPIC-2 24, Bash 46. The installed Fedora candidate `ddb886b4d418` remains the la
 scoped accepted build; its exact launch command appears in INSTALLATION.md.
 
 Current work, in order:
-1. M124 five teaching-only Bash corrections are integrated in MAIN. Focused6 and
-   affected88 checks (including the private comparison), isolated all-target Clippy
-   and186 Python checks pass. MAIN full regression passed1653/0 with11 private checks excluded, then all11
-   passed explicitly. MAIN Clippy/Python211 pass; native review is next.
-   Exact old pack bytes remain reconstructible through a closed test-only amendment;
-   assignment identity, grading, inputs and retained drafts did not change.
-2. M125 NAT renderer passed its private313-test regression and final lint/UI gates.
-   Its72-stage native controller is source-frozen and under independent review.
-   It remains unbundled: no new NAT lab or coverage is claimed. First controller gate compiled but five of six event groups failed (child reveal /
-   modal close); R2 is under repair with strict assertions retained. Gate and inspect
-   the actual native workspace, then integrate teaching and three distinct assignments.
-3. M126 first fixed RPM reference collection completed but used the wrong input
-   domain: bare versions became package names. Original observations are retained.
-   A separately reviewed fixed identical-name/release wrapper is integrated and passed211 MAIN Python checks; a fresh default-sandbox capture is next. No simulator expectations changed.
-4. RPM's pure foundation is integrated and tested, with no normal package commands
-   or authored RPM lessons yet. The closed application/terminal contract is next.
+1. M124 five Bash teaching corrections are integrated and pushed (`ebae45f`).
+   MAIN full regression1653/0, all11 private checks explicitly, Clippy and211
+   Python checks pass. Actual native flows for all18 assignments in the five
+   affected units pass, plus72 shared alignment captures. The old reusable capture
+   clicked below the viewport; the existing reveal helper and a100/150/200 event
+   regression fix it. This follow-up is capture-only; normal workflows are unchanged.
+   Assignment identity/grading/inputs and old drafts/records remain intact.
+2. M125 NAT remains private/unbundled. Renderer313 checks and controller R4 six
+   event groups, Clippy and actual72-stage Fedora flow pass. Measured scrolling
+   animation oscillation, rather than a hard limit, explained earlier failures;
+   bounded settling preserves strict visibility and original pacing. Actual images
+   exposed a cramped single-map list, duplicate status prefixes and an unsupported
+   arrow glyph. R5 fixes pass all8 event groups, lint and build; actual wide/windowed
+   capture is running. Initial wide images show the corrected fields/text.
+   Then integrate current MAIN safely and build the reviewed three-task teaching unit
+   (contractR3). No NAT authored-lab count or objective credit yet.
+3. M126 corrected fixed-NVR reference is pushed (`78d5e1b`) and completed under the
+   default sandbox:28 strict orders match,12 ties inconclusive,0 mismatches. Original
+   wrong-domain capture remains exact. No fullEVR/equality/package-operation proof.
+4. RPM application/terminal/teaching backend is under source-only implementation
+   in `rpm-app-140`, from MAIN78d5e1b, after root/independent contractR2 ACK. Noarch
+   headers, quiet supported success versus explicit simulator limitations, no fake
+   failure status or -V. The additive borrowed query view preserves public guards
+   and validates once per grade batch. No renderer/registration/credit yet.
 
 The coverage matrix remains144Partial/1Supporting/1095Open; these are overlapping
 references, not percentages or completed exam objectives. Full curriculum, other

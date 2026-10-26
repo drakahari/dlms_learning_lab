@@ -7071,3 +7071,53 @@ mod unit_manager;
 
 #[path = "tests/legacy_learning.rs"]
 mod legacy_learning;
+
+#[test]
+fn scripting_capture_reveals_a_tall_introduction_before_clicking_its_example_action() {
+    for scale in [1., 1.5, 2.] {
+        let (ctx, mut a) = app();
+        let i = a
+            .scenarios
+            .iter()
+            .position(|s| s.id == "shell-bundle")
+            .unwrap();
+        assert_eq!(
+            i, 23,
+            "The retained reusable-unit capture uses this original position"
+        );
+        a.launch(i);
+        a.scale = scale;
+        a.smoke = true;
+        a.smoke_stage = 900 + 3 * 18 + 2;
+        frame(&ctx, &mut a, 1200., 850., vec![]);
+        let initial = a.metrics.example_action.unwrap();
+        assert!(
+            initial.bottom() > a.metrics.main_viewport.unwrap().bottom(),
+            "The regression must reproduce an offscreen action at {scale}"
+        );
+        let mut wheel = false;
+        for _ in 0..100 {
+            let events = std::mem::take(&mut a.pending_events);
+            wheel |= events
+                .iter()
+                .any(|e| matches!(e, egui::Event::MouseWheel { .. }));
+            frame(&ctx, &mut a, 1200., 850., events);
+            a.started = Instant::now() - std::time::Duration::from_secs(1);
+            a.smoke_tick(&ctx);
+            if a.smoke_stage == 900 + 3 * 18 + 3 {
+                break;
+            }
+        }
+        assert!(wheel, "The actual outer scroll must reveal the action");
+        assert_eq!(a.smoke_stage, 900 + 3 * 18 + 3);
+        assert_eq!(a.script_view(i), teaching::View::Example);
+        assert_eq!(
+            a.progress.attempts["shell-bundle"].state,
+            a.scenarios[i].initial
+        );
+        assert!(!progress::current_solved(
+            &a.progress.attempts["shell-bundle"],
+            &a.scenarios[i]
+        ));
+    }
+}

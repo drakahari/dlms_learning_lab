@@ -5266,9 +5266,11 @@ impl LabApp {
                         assert_eq!(self.script_view(i), teaching::View::Introduction);
                         shot = Some(format!("{id}-introduction"));
                     }
-                    2 => self
-                        .pending_events
-                        .extend(click(self.metrics.example_action.unwrap())),
+                    2 => {
+                        if !self.click_visible_smoke_control(ctx, self.metrics.example_action) {
+                            return;
+                        }
+                    }
                     3 => {
                         assert_eq!(self.script_view(i), teaching::View::Example);
                         self.pending_events
