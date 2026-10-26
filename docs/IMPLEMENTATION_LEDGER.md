@@ -2260,3 +2260,117 @@ source/event/maxfixture gates before rootnativecontroller and renderedscreens.
 Then separatetypedteaching/context contract and3distinct authoredtasks. No new
 NAT/RPM lab counts/coverage until actual practice gates. Keeprootpacing/EVAL10/
 legacybytes andnormalapplication. Ordinaryimplementationcontinues, no release.
+
+
+### M124/M125 live continuation checkpoint (2026-10-26)
+
+MAIN clean codefd7be1cc347d12fd767c6ab3e4a2b77c57550db7 pushed; normal140/35,
+acceptedinstalledFedora ddb unchanged. No newNAT/RPM authored labs or credit.
+All localheavycommands reaped EXCEPT root Clippysession94264 at this write,
+logm125-nat-renderer-clippy-r7.log. No workerheavygrants. Keep sharedMAINrunner,
+2jobs/2threads/exclusivetargets/diskTMP andallretainedfailed evidence.
+
+M125unbundledNatUI sourceprivateworktree nat-current140 HEAD9cc exactMAIN90b,
+warmexclusive targetnat-current140-8cccbf2286e30c9a. SourceR1e0882d03/peer76f627a4
+caught&BoxDefinition mismatch;R2one.as_ref binding6e6014fb/peerreadback. First
+R2compilerE0500 librarywholeSelfborrow, correctedR3freeMemohelper0eaf6f62/
+peer9c143cfb. R3UI6PASS2FAIL; memo6PASS andseparatehistory1PASS. R4diagnostics+
+realheaderreveal2a0d2528 yielded7PASS1FAIL: staticlisttargetx240..573 butparent
+clipx0..1172 gavewheelx593 overRIGHTcolumn. No productlayout defect proven.
+R5passivestaticScrollArea.inner_rect metric+stricthelper1401a298 fixesactual
+childwheelroute; all8UI PASS. Visibilityassertions/40bound retained, no direct
+reset/statebypass. SourceR6FieldSpec +iteratorcleanupbbd45228 retainsIDs/labels/
+widths/caps. Complete binregression313PASS0FAIL0ignored92.94s,96memorysamples,
+min22.81GiB/PSI0/OOM0. AlltargetClippyR6 rejected onlytestfilter.next_back style;
+rootchanged torfind (samepredicate/order), R7Clippy94264 currentlyRUNNING.
+No production/state/grade/budget changes since313pass. R6snapshots8owned+
+283protected remainfrozen; rootR7test-onlydelta stillneedsreceipt andfinalgate.
+No rendererMAINintegration or actualnewnativecaptureyet.
+
+Rendererexactmemo16entry/4MiBkey/16MiBaggregate with512KiBframebudget; fulltyped
+key/history/pending/foreign guards, no idlevalidation/serialization/snapshotclone,
+truthfuluncacheablefreshfallback. All7actualmemo groups pass. Nativecontroller
+contractd0dfaeb8/6484a0aa/peer99fde940 acceptedSOURCE design for38000..38071
+closed--ui-smoke DLMS_SMOKE_STAGE=nat-workspace only, privateauthoredtechnical
+fixture, REALStart/fields/Apply/probes/Check/Clear, strictwholeAttempt/readback/
+receipts/favorites/clock, light150dark200/observedgeometry, heldFinish. NOcontroller
+implementation grantyet untilR7lint/finalsourcebase receipt. No status/subtype
+filtering allowed; onlyexistingtop-levelmigration_receipts serializationdifference.
+Thennativepaintreview before3separateteaching/normalNATassignments; notstopatpreview.
+
+M124independentall46Bash sourceauditfound5teach-beforetest gaps: $#/-ne/filename=
+inthetextcapstone; $#/-lt beforebundle repair; &&/= filebatch capstone; testvs[]
+caseinterface; printf-formatreuse arraypriority. FiveTeaching-onlydataamendments
+prepared in shell-teaching-140 basefd7, NO app/UI/grade/schema/prereq/version/
+fixture change. Two newdefaultexampleguardprefixes retainEXACToriginalfixture/
+normaloutcome; existing savedassignment/exampledrafts/results NEVERreplaced.
+Publicclosedmanifest4f852c80 has13exactteachingops/9byteranges, reconstructsall5
+originalpackbytes toimmutableold31SHA. R2frozen18efc82b underWORKTREE's own
+.build-artifacts/reviews/teaching-audit-46-r1/remediation-source-r2. Stricttest-only
+helpers +8guardadaptations preserveALLoriginalindexes/source-inputs/records/
+producers/attestations; no runtimepatchlayer/blanketTeachingignore. 5newcurrentVM
+and1Pythonmetadata test sources UNRUN; actualoldobservationsneverrewritten.
+Peer2d9ff68c verified17source/261protected/19MB andexactraw+typedreversal. Only
+sourcefindingduplicate_mod SHA import; authorR3dedup pending (reuseexisting
+rootdigest orproof::sha, no waiver/oldfilechanges). Firstguardedcompile/testQUEUED
+followingNatheavy; needmetadata/pins/sourcepeerreadback andallaffectedhistorical/
+private migration gates, thenteachingnative/screens. Sourceworkeronly.
+
+M126RPMVERSIONreferencehelper sourceR1frozen0cf9c7bb/patch5d2b4345 inrpm-current140
+(base7dde +exactpureRPMR3).5owned helper/tools-tests/fixed20VERSIONpairs/tinydev
+allowlist/docs;23fake-processgroups UNRUN. No actualrpmsortprocesshaseverrun.
+Independentteaching-audit sourcepeerverified5owned+52protected, no materialbug;
+nonblockingdoc precision30seconddeadlinevsboundedcleanupelapsed. ELFembedded
+package6.0.2-1.fc44/buildid c556addb.../SHA54bc254c...; upstreamwrapperno direct
+config/macro/DBcalls, downstream/transitiveclosure notabsoluteproof. Rootaccepts
+trustedFedoraDEVtool withfixedliteralstdin/nooptions/files/closedHOMEenvcwd,
+sameFD ELF pin/40sequential2s/30deadline/512KiBtotal/sourcepinrechecks/noclobber
+COMPLETE. Actualcapture mustdefaulttoolssandboxONLY, no escalation/securitybypass.
+No EVRcomposition/equality/referenceconformanceclaim from VERSIONsorting; ties
+pending. Root/peerreview+fakeprocessgatesbeforeexplicitcapturegrant. SourceR1
+frozen whileNatpeerwork, no helperMAINintegrationyet. App/terminal4taskoutline
+061ad516 pendinglatercontract, CLIaliases/configsidecars/solver remainunsupported.
+
+
+### M125 renderer gates / M126 fixed reference gate (2026-10-26)
+
+M125 source/event gates complete privately: fullbin313PASS0FAIL92.94s, finalalltarget
+ClippyR7PASS4.14s and8finalUI PASS1.45s. Rootprivatecommit6e169411c6cb342811214d73008a307d6e626755
+on nat-current140 is CLEAN acceptedrendererbase, stillNOTMAIN/unbundled. Rootgate
+reviews/nat-foundation/renderer-root-gate-r7/RESULT.json SHA0398da9f11086f9961bc7357dea7b178efa452f1d8d0ec41c4fe058f8623281b.
+No activeheavycommand at this write. Renderer-sourceR1..R6/failedcompiler/lint/
+viewportdiagnostics allretained. OnlyR7runtime delta fromfull313 isNONE; rfindis
+test-iterator-only cleanup, documentstatusreconciled. All15newUI/memo groups pass.
+
+ROOTgranted source-only technicalcontroller undercontractd0dfaeb8/6484a0aa,
+peer99fde940, toccna_discovery onexact6e169privatebase. Controllerunderimplementation,
+no heavy/actualnative yet. Explicitadditionalowned scopes: passivetab/ThemeSamples
+metrics scripting.rs; actualsafe chooserCancel indata.rs+metric (noSave-asCancel),
+contractamendment4bd1270a/ef204aba; readonlyPresentation.observed_effect getter
+only. Cancelmustnotwritefile/progress andmustworkwithinvalidfilename, usemeasured
+footerrow reserve; existingX remains. Allothercontrollerboundaries/staticinner
+viewport/wholeprogressreadback/pacing/Closehold/normal140 unchanged. Sourcefreeze,
+root/peer/gatesbeforeactualFedoraWindow, thenthreeauthoredNATtasks notjustpreview.
+
+M126 fixedVERSIONoracle integratedMAIN source afterroot+independentreview;
+all208Pythonfake/workflowchecksPASS bothprivate7.802s andMAIN7.849s. Docdeadline
+precisioncorrected:30secondlaunch/completiondeadline, syncfilesystem/cleanup can
+extendelapsed. No actualrpmsortprocesshaseverrun at this entry. Provenance/5source
+pins retained source0cf9c7bb; RootMAINfakegate receipt
+reviews/rpm-package-foundation/version-oracle-main-r1/RESULT.json SHA5ae1402a3d07f04287af2bb2e15601b5ab02801d09ab244dd964d46d590c332b.
+HelperexecutableRoottrust exactFedoraELF54bc254c..., fixed20VERSIONlabels/bothorders,
+40sequential/nooptions/files/sourceoverrides, privateHOME/TMP/XDG/emptyPATH/C locale,
+2sperchild/30deadline/512KiBtotal, sameFD+beforeafterpins/noclobberCOMPLETE. Fake
+processcheckscoverboundaries/timeout/cleanup/publication andrequire no realutility.
+No arbitrarycommand/learnerinput orfullEVR/equalityproof. Rootnextcommit/push then
+explicitfixedcaptureid underDEFAULTsandboxONLY; refusalmustNOTescalate/bypass.
+No appdependency or learner-host execution introduced. SourceMainnormal140/35,
+allcurrentobjectivestatuses/themes/progressunchanged. No release.
+
+M1245Teaching-onlyamendments remainprivate shell-teaching-140. Peer2d9ff68c accepts
+exact5originalpackreconstruction/13closedleaves/8historicalguards and261protected
+files; sourceR3digestdedupinprogress (oldreaderthinSHAaccessorallowedifneeded,
+NO producer/attestation/data/recordchanges). FirstguardedfreshVM+allaffected
+historical/private/progressgatesqueuedafterM126capture under sharedlock; no tests
+or native acceptance yet. Independent RPMhelperreviewby teachingaudit foundno
+materialcodeissue; deadlinewordingcorrected. Continueauthorizedimplementation.
