@@ -2119,3 +2119,16 @@ all affected/full regressions, then coherent backend integration preserving ddb
 capture pacing. Only afterward native adapter/teaching/distinct NAT assignments.
 RPM EVR/query contract R2 remains source proposal, no implementation/reference
 execution grant. Continue other independent work; do not stop at packaging.
+
+
+### M122 native Windows build follow-through (2026-10-26)
+
+Exact ddb CI40381197535 Windows tests passed; Clippy stopped at unused_mut in
+examples/getopts_before9_capture.rs:229. The builder is only mutated for Unix
+mode0700. Scope the mutable shadow to cfg(unix), preserving private permissions
+there and identical non-Unix create behavior, with no lint suppression. Original
+historical producer source/binary/hash evidence remains retained and unchanged;
+this edited development helper is not relabeled original evidence. MAIN guarded
+all-target Clippy passed after the correction. A new exact-source CI rerun is
+required; Fedora ddb candidate bytes and scoped acceptance remain unchanged.
+No Windows/macOS desktop runtime claim or public release.

@@ -226,7 +226,9 @@ fn new_bytes(path: &Path, bytes: &[u8]) {
 }
 fn directory(parent: &Path, name: &str) -> PathBuf {
     let p = parent.join(name);
-    let mut builder = fs::DirBuilder::new();
+    let builder = fs::DirBuilder::new();
+    #[cfg(unix)]
+    let mut builder = builder;
     #[cfg(unix)]
     {
         use std::os::unix::fs::DirBuilderExt;
