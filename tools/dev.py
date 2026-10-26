@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import os
+import re
 from pathlib import Path
 import shutil
 import sys
@@ -35,6 +36,54 @@ def validate_cargo_args(arguments):
     forbidden = ('-j', '--jobs', '--test-threads', '--target-dir', '--manifest-path', '--config', '--out-dir', '--artifact-dir', '--lockfile-path', '-C', '-Z')
     if any(value.startswith(forbidden) for value in arguments):
         raise RuntimeError('Cargo job/test/path/config overrides are not accepted; use the reviewed runner options')
+
+
+def historical_capture_preflight(arguments, cwd):
+    """Frozen public9 capture cannot be tested/compiled as current outcomes.
+
+    Cargo skips this one nondefault-feature target in ordinary all-target gates.
+    Explicit requests must instead prove the historical evaluator boundary before
+    any compiler child. No feature changes runtime evaluator selection.
+    """
+    feature = 'historical-evaluator9-capture'
+    enabled, explicit, all_features = False, False, False
+    index = 0
+    while index < len(arguments) and arguments[index] != '--':
+        value = arguments[index]
+        if value == '--all-features':
+            all_features = True
+        elif value in ('--features', '-F'):
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo features require an explicit value')
+            enabled |= any(name.rsplit('/', 1)[-1] == feature
+                           for name in re.split(r'[,\s]+', arguments[index]))
+        elif value.startswith('--features=') or value.startswith('-F'):
+            names = value.split('=', 1)[1] if value.startswith('--features=') else value[2:]
+            if value.startswith('-F='):
+                names = names[1:]
+            enabled |= any(name.rsplit('/', 1)[-1] == feature
+                           for name in re.split(r'[,\s]+', names))
+        elif value == '--example':
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo example requires an explicit name')
+            explicit |= arguments[index] == 'automation_before10_capture'
+        elif value == '--example=automation_before10_capture':
+            explicit = True
+        index += 1
+    if not (enabled or explicit or all_features):
+        return
+    source = Path(cwd) / 'src/shell.rs'
+    with source.open('rb') as stream:
+        raw = stream.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024:
+        raise RuntimeError('Historical capture evaluator declaration exceeds source bound')
+    revisions = re.findall(rb'^pub const EVALUATOR_REVISION: u32 = ([0-9]+);$', raw, re.MULTILINE)
+    if revisions != [b'9']:
+        raise RuntimeError('Frozen automation_before10_capture requires actual public evaluator9; current evaluator cannot relabel historical observations')
+    if explicit and not (enabled or all_features):
+        raise RuntimeError('Explicit public9 capture requires --features historical-evaluator9-capture')
 
 
 def tool_outputs(arguments, cwd, root):
@@ -115,6 +164,7 @@ def main():
             session.run([str(executable), *args.args[1:]], cwd=run_dir)
         else:
             validate_cargo_args(args.args)
+            historical_capture_preflight(args.args, args.cwd)
             cargo = shutil.which('cargo')
             command = [cargo, args.action, '--jobs', str(JOBS), *args.args]
             if args.action == 'test':

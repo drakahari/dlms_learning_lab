@@ -1,4 +1,5 @@
-//! Prospective pure-VM checks. Retained actual55 Bash results are never relabeled9.
+//! Current pure-VM comparisons with retained actual55 Bash reference outputs;
+//! no historical evaluator result is relabeled as current.
 use dlms_learning_lab::shell::{self, Case, Outcome, Vm};
 use serde::Deserialize;
 use std::collections::BTreeMap;
@@ -57,7 +58,9 @@ struct Oracle {
 }
 #[test]
 fn all55_actual_bash_observations_have_explicit_supported_excluded_and_diagnostic_classification() {
-    assert_eq!(shell::EVALUATOR_REVISION, 9);
+    const {
+        assert!(shell::EVALUATOR_REVISION >= 9);
+    }
     let oracle: Oracle =
         serde_json::from_str(include_str!("fixtures/getopts-bash539-observations.json")).unwrap();
     assert_eq!(

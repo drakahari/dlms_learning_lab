@@ -8,15 +8,15 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 - Unquoted `*`/`?` filename matching after splitting over flat virtual files; quoted/escaped bytes stay literal, no-match words remain unchanged, hidden names need an explicit leading dot, matches are C-byte sorted. See SHELL_GLOBBING.md for bounds/exclusions.
 - Integer arithmetic expansion `$(( expression ))` within the bounded contract below.
 - Named scalar assignments (assignment-only commands); `$name`, `${name}`, `$1`…`$9`, `$#`, `$?`. Undefined parameters expand to empty. Unquoted expansion uses default space/tab/newline field splitting. Sole `"$@"` expands each positional argument separately, including empty arguments. Other uses of `$@` are rejected.
-- `|`, `&&`, `||`; pipeline status is the last stage. Pipeline variable changes are isolated; virtual file writes and first-stage stdin consumption persist. A first-stage redirected or explicit file input leaves the caller’s finite stdin untouched. No pipefail/set -e.
+- `|`, `&&`, `||`; pipeline status is the last stage by default. Explicit `set -o pipefail` selects the rightmost nonzero stage status, or0 if all stages succeed; `set +o pipefail` restores the default. Pipeline variable/option changes are isolated; virtual file writes and first-stage stdin consumption persist. A first-stage redirected or explicit file input leaves the caller’s finite stdin untouched. No other `set` forms or `set -e`.
 - `if …; then …; [else …;] fi`, `for name in words; do …; done`, `while …; do …; done`, nesting within the limits below.
 - Text redirects `<`, `>`, `>>`, `2>`, `2>>`, `>&2`, `1>&2`, `2>&1`, evaluated left to right. Redirected paths must expand to exactly one word. Only a single trailing input redirect on while loops is supported, as specified below; other compound-command redirects remain unsupported.
-- Commands (shell builtins and simulated text utilities): `printf` with literal `%s`, `%%`, `\n`, `\t`, `\\` formats (format repeats for excess arguments); `echo` without flags or backslashes; `cat PATH`; `grep -F LITERAL [PATH]` (literal lines, status 0/1/2); `read -r NAME` (one variable, default whitespace trimming, EOF status); `test`/`[` with `-n`, `-z`, `-f`, `=`, `!=`, `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`, or one-string truth; `true`, `false`, `:`, `exit [0…255]`; function `return [0…255]`, `shift [N]`, and the Bash-specific local-variable extension as specified below.
+- Commands (shell builtins and simulated text utilities): `printf` with literal `%s`, `%%`, `\n`, `\t`, `\\` formats (format repeats for excess arguments); `echo` without flags or backslashes; `cat PATH`; `grep -F LITERAL [PATH]` (literal lines, status 0/1/2); `read -r NAME` (one variable, default whitespace trimming, EOF status) and the narrowly scoped literal `IFS= read -r NAME` described below; `test`/`[` with `-n`, `-z`, `-f`, `=`, `!=`, `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`, or one-string truth; `true`, `false`, `:`, `exit [0…255]`; function `return [0…255]`, `shift [N]`, and the Bash-specific local-variable extension as specified below.
 - The first `#!/bin/bash` or `#!/bin/sh` line is a comment, not a process launcher. No startup files or inherited host environment. Each test starts with its declared environment, arguments, stdin and virtual files. Each Run starts fresh; editor work remains saved.
 
 ## Honest exclusions
 
-Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, `set`, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
+Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
 Diagnostic clarification (2026-10-25): `elif` clauses remain unsupported. Use
 nested `if`/`else` blocks. A bare unquoted `elif` command head, including a pipeline
@@ -59,7 +59,7 @@ Initial scope: at least one valid variable argument, no `local` options/attribut
 
 Primary reference: GNU Bash5.3.9 installed manual (`/usr/share/info/bash.info.gz`, sections Shell Functions, Bash Builtins and The Shopt Builtin), plus controlled disposable development fixtures. GNU online function/builtin pages timed out during this check; source URLs remain [functions](https://www.gnu.org/software/bash/manual/html_node/Shell-Functions.html), [builtins](https://www.gnu.org/software/bash/manual/html_node/Bash-Builtins.html) and [shopt](https://www.gnu.org/software/bash/manual/html_node/The-Shopt-Builtin.html). Three reviewed local-scope/debugging assignments follow this capability; see [SHELL_SCOPE.md](SHELL_SCOPE.md). Full advanced Bash and certification coverage remain open.
 
-Default `IFS` reads as space/tab/newline. Custom IFS assignment/declaration/read/loop targets and fixture overrides are rejected until custom splitting is implemented; it must never silently behave as ordinary text. Variable names, saved shadow values, file names and finite input count toward the aggregate memory limit.
+Default `IFS` reads as space/tab/newline. Except for the literal-empty read prefix below, custom IFS assignment/declaration/read/loop targets and fixture overrides are rejected until custom splitting is implemented; it must never silently behave as ordinary text. Variable names, saved shadow values, file names and finite input count toward the aggregate memory limit.
 
 Unmodeled special/readonly/dynamic variables (including UID/EUID, `_`, RANDOM, positional-metadata arrays and shell-option variables) are rejected in expansion, assignment, local/read/for targets and fixture environment. The subset also reserves BASH*, COMP_* and HIST* names conservatively; these prefixes are a simulator namespace restriction, not a claim that every possible such name is special in Bash. Ordinary application names remain available.
 
@@ -160,3 +160,84 @@ The original256 ordinary-name allowance is preserved across current and hidden
 scopes, with at most three additional fixed getopts names (OPTIND/OPTERR/OPTARG).
 Their bytes and all snapshots remain charged to the unchanged memory/work caps;
 unsetting a special name never frees an ordinary-name slot.
+
+
+## Scoped empty-IFS read and pipefail: private evaluator10 source
+
+Source implementation2026-10-26; compiler, model, migration and native checks are
+**unrun**. This is not a new lesson, coverage claim or activation on MAIN.
+The exact accepted public9 capture remains immutable and its producer refuses
+other evaluator revisions. Only an actual current10 Run can produce10 results.
+
+Accepted temporary forms are `IFS= read -r NAME`, `IFS='' read -r NAME` and
+`IFS="" read -r NAME` (literal empty quoted fragments may combine). Literal
+quoted/escaped `read` heads keep their ordinary text role. The prefix is admitted
+from original literal syntax, not a variable/capture that happens to yield empty.
+Only the builtin's line assignment uses empty IFS: preserve all bytes before the
+first LF, including edge spaces/tabs, internal spaces, CR, UTF-8 and backslashes.
+LF is consumed but not stored. A nonempty final line without LF is assigned with
+status1; empty EOF assigns empty/status1; an LF-terminated empty line has status0.
+The finite input, target validation, array element0 update, local scope and
+ordinary redirected-input cursor rules are unchanged. NUL remains excluded.
+
+Arguments and then ordered redirects expand before the read policy takes effect.
+A redirect capture that expands `$IFS` still sees the default space/tab/newline.
+There is no temporary environment-map assignment and no change to later field
+splitting or ordinary `read -r NAME` trimming. Nonempty/dynamic/persistent/local
+IFS, general assignment prefixes, multiple targets and other read flags remain
+unsupported; no host environment or process is involved. Rejected reached
+commands keep the existing argument/redirect timing, including redirects already
+performed before a builtin-argument diagnostic.
+
+Each fresh run starts with pipefail off. Only `set -o pipefail` and
+`set +o pipefail` are supported. A pipeline pins its option at entry. Ordinary
+functions share the caller's option; captures inherit it and restore the parent
+on return; each isolated pipeline stage starts with the parent option and cannot
+change it for another stage or the caller. No `errexit`, option listing,
+`set --`, shell-option variables, pipeline negation or new pipeline function-call
+support is implied. Unsupported/resource/Stop errors remain fatal ungraded
+outcomes, not recoverable pipeline status values. Existing file effects and
+first-stage input consumption are unchanged; failure status is not a rollback.
+
+The cooperative continuation retains one four-byte rightmost-nonzero accumulator
+for an enabled multi-stage pipeline, charged to the existing memory/work ledger.
+No output copies, new VM/child budget, external process or timing dependency is
+introduced. Source/token/argument/redirect/stage/input/output/instruction/memory/
+work/capture-depth limits and cooperative Stop remain unchanged. Default-off
+pipelines keep their existing dynamic-memory accounting.
+
+Reference scope is GNU Bash5.3 manual Edition5.3 and **actual Bash5.3.9** in the
+accepted fixed28 controlled C-locale cases. The source/input/output fixture
+`automation-bash539-observations.json` contains those actual Bash observations
+and provenance hashes only, never saved learner Records or claimed evaluator10
+observations. Two observed general-prefix/dynamic-IFS cases remain explicitly
+excluded. POSIX Issue8 portability has not been verified for pipefail here; do
+not call it universally nonportable or claim complete POSIX/Bash behavior.
+
+The frozen public9 producer is a nondefault Cargo feature target
+`historical-evaluator9-capture`; ordinary all-target gates skip this historical
+producer rather than execute its revision9 assertions under10. Explicit requests
+must pass the MAIN runner's source-revision preflight and its existing runtime9
+identity guard; no feature selects older evaluator semantics. See the
+[Cargo target contract](https://doc.rust-lang.org/cargo/reference/cargo-targets.html#required-features)
+(checked2026-10-26). Retained before10 pins/binaries remain the evidence of9.
+
+
+### Current implementation gate — 2026-10-26
+
+The scoped extension above is now implemented on MAIN as evaluator10; earlier
+source-only statements describe its handoff. Fifteen new VM groups pass, including
+all26 supported fixed actual Bash5.3.9 cases and both honest exclusions. Controlled
+comparisons do not execute learner input on the host. A separate opt-in comparison
+classifies all1570 frozen9 rows and reruns380 vectors at four tick slices:357 retain
+exact complete outcomes and ticks;23 intended changes match actual Bash. Four Stop
+paths retain exact observed outcomes/ticks. Historical profile/identity metadata
+remains labeled9; it is never presented as new10 observations.
+
+Actual9 migration replay passes raw-target protection, full6/7/8/9 histories,
+separate drafts, target-derived receipts, reset-first/practice-only, occupied slots,
+failed writes/durability warnings and explicit backup recheck/cancel/restore. No
+new requirements or learner answers are invented. The full application regression
+passes before a test-only shared-helper cleanup, followed by affected library/
+migration checks and all-target Clippy. New practical assignments and native
+acceptance are separate gates; the installed133 candidate38a still uses evaluator9.

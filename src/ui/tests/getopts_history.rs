@@ -92,7 +92,7 @@ fn getopts_history_mode_is_closed_and_smoke_only() {
 #[test]
 fn getopts_history_exact_smoke_tick_opening_preserves_both_frozen_profiles_without_credit() {
     const {
-        assert!(dlms_learning_lab::shell::EVALUATOR_REVISION == 9);
+        assert!(dlms_learning_lab::shell::EVALUATOR_REVISION >= 9);
     }
     for (mode, contexts, revisions) in [
         (HistorySource::Writer7, 102, vec![7]),
@@ -111,7 +111,10 @@ fn getopts_history_exact_smoke_tick_opening_preserves_both_frozen_profiles_witho
             a.progress.migration_receipts.as_ref().unwrap().shell,
             revisions
         );
-        let backup = a.path.with_extension("before-shell-v9.json");
+        let backup = a.path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        ));
         assert!(
             !backup.exists(),
             "opening alone does not manufacture a migration save"
@@ -139,9 +142,9 @@ fn getopts_history_exact_smoke_tick_opening_preserves_both_frozen_profiles_witho
         assert_eq!(a.smoke_stage, 15003);
         assert_eq!(std::fs::read(backup).unwrap(), mode.bytes());
         let expected = if mode == HistorySource::Writer7 {
-            vec![7, 9]
+            vec![7, dlms_learning_lab::shell::EVALUATOR_REVISION]
         } else {
-            vec![7, 8, 9]
+            vec![7, 8, dlms_learning_lab::shell::EVALUATOR_REVISION]
         };
         // The writer stamps only its on-disk copy; caller data stays unchanged.
         assert_eq!(
@@ -210,7 +213,10 @@ fn getopts_history_new_example_branch_uses_actual_input_run() {
         .script_learning
         .as_ref()
         .unwrap();
-    assert_eq!(learning.example_revision, 9);
+    assert_eq!(
+        learning.example_revision,
+        dlms_learning_lab::shell::EVALUATOR_REVISION
+    );
     assert_eq!(
         learning.example_source,
         HistorySource::Writer8.example_source()

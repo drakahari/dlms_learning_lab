@@ -20,7 +20,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 9;
+pub const EVALUATOR_REVISION: u32 = 10;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -1355,6 +1355,7 @@ pub struct Vm {
     expansion_work: Cell<usize>,
     env: BTreeMap<String, Value>,
     scanner: getopts::Scanner,
+    pipefail: bool,
     args: Vec<String>,
     input: String,
     input_pos: usize,
@@ -1417,6 +1418,7 @@ impl Vm {
                 ])
                 .collect(),
             scanner: getopts::Scanner::default(),
+            pipefail: false,
             args: case.args.clone(),
             input: case.stdin.clone(),
             input_pos: 0,
@@ -2295,7 +2297,11 @@ impl Vm {
         }
         Ok(())
     }
-    fn builtin(&mut self, a: &[String]) -> Result<(String, String, i32), String> {
+    fn builtin(
+        &mut self,
+        a: &[String],
+        read_mode: execution::ReadMode,
+    ) -> Result<(String, String, i32), String> {
         let empty = String::new();
         let Some(cmd) = a.first().map(String::as_str) else {
             return Ok((empty.clone(), empty, 0));
@@ -2305,6 +2311,10 @@ impl Vm {
         let usage = || Err(format!("Unsupported {cmd} arguments; see the shell subset"));
         match cmd {
             "getopts" => self.getopts_builtin(args),
+            "set" if args.len() == 2 && args[1] == "pipefail" && matches!(args[0].as_str(), "-o" | "+o") => {
+                self.pipefail = args[0] == "-o";
+                Ok((empty.clone(), empty, 0))
+            }
             "local" => Err("Unsupported declaration command name: use literal unquoted local inside a function".into()),
             ":" | "true" | "false" if args.is_empty() => {
                 Ok((empty.clone(), empty, i32::from(cmd == "false")))
@@ -2415,8 +2425,12 @@ impl Vm {
                 } else {
                     (rest, 1, rest.len())
                 };
-                self.reserve_memory(args[1].len() + line.trim_matches([' ', '\t']).len())?;
-                self.assign_scalar(args[1].clone(), line.trim_matches([' ', '\t']).into())?;
+                let line = match read_mode {
+                    execution::ReadMode::Default => line.trim_matches([' ', '\t']),
+                    execution::ReadMode::EmptyIfs => line,
+                };
+                self.reserve_memory(args[1].len() + line.len())?;
+                self.assign_scalar(args[1].clone(), line.into())?;
                 self.input_pos += used;
                 Ok((empty.clone(), empty, status))
             }

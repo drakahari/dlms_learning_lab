@@ -1,0 +1,2390 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-web-routing",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Static web services",
+      "unit": "static-web-services",
+      "title": "Route site names without changing the default site",
+      "summary": "Repair an alias while preserving two sites and the fallback page.",
+      "objective": "The workstation serves welcome.example.test and records.example.test on virtual port 8080. Make catalog.example.test serve the Records catalog from /srv/records/index.html, through the records site. Keep both named sites working, and keep welcome as the first/default site for unknown.example.test. Preserve every supplied file. Saved and active configuration must agree, and all routes must still work after a separate simulated next start.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "retry_guidance": "Compare each site block and the alias before changing a page. A correct-looking page for one name does not prove the other names work.",
+      "steps": [
+        "Understand the full assignment and inspect current configuration, files and requests.",
+        "Make targeted edits and explicitly save or activate the relevant layer.",
+        "Check the complete current and next-start outcomes; repair and retry."
+      ],
+      "guide": [],
+      "explanation": "The alias selects the records site before its root maps the path to a file. The first site remains the unknown-name fallback. Checking all names in current and next-start copies prevents a one-page shortcut.",
+      "hints": [
+        "Find the ServerAlias line and the site block that contains it.",
+        "The alias belongs in the records site; the first welcome site must remain the fallback."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://httpd.apache.org/docs/2.4/en/vhosts/details.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/core.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_dir.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_authz_core.html",
+        "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.2"
+      ],
+      "simplifications": "Sources checked 2026-10-26: LPIC-2 v4.5 Topic208.1 and Apache2.4. Closed offline static-site model with one destination port, literal names, fixed regular text files and typed GET/HEAD results. No real Apache process, socket, DNS lookup, Linux permissions, authentication, TLS, proxy, modules, includes, scripts, generated directory listings or full server lifecycle. Saved configuration, active source and live files are separate. Unsupported directives and request forms are diagnosed. A logical Stop/Start check is not an operating-system boot test.",
+      "initial": {
+        "kind": "ApacheStatic",
+        "simulation": {
+          "inventory": {
+            "fixture": "routing-task",
+            "server": "routing-task-server",
+            "config_path": "/config/routing-task.conf",
+            "entries": {
+              "/": "Directory",
+              "/srv": "Directory",
+              "/srv/welcome": "Directory",
+              "/srv/welcome/index.html": "File",
+              "/srv/records": "Directory",
+              "/srv/records/index.html": "File"
+            }
+          },
+          "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName welcome.example.test\n    ServerAlias catalog.example.test\n    DocumentRoot \"/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName records.example.test\n    DocumentRoot \"/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+          "files": {
+            "/srv/welcome/index.html": "Welcome desk\n",
+            "/srv/records/index.html": "Records catalog\n"
+          },
+          "active": {
+            "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName welcome.example.test\n    ServerAlias catalog.example.test\n    DocumentRoot \"/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName records.example.test\n    DocumentRoot \"/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ApacheStatic",
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "routing-task",
+              "server": "routing-task-server",
+              "config_path": "/config/routing-task.conf",
+              "entries": {
+                "/": "Directory",
+                "/srv": "Directory",
+                "/srv/welcome": "Directory",
+                "/srv/welcome/index.html": "File",
+                "/srv/records": "Directory",
+                "/srv/records/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName welcome.example.test\n    ServerAlias catalog.example.test\n    DocumentRoot \"/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName records.example.test\n    DocumentRoot \"/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/srv/welcome/index.html": "Welcome desk\n",
+              "/srv/records/index.html": "Records catalog\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName welcome.example.test\n    ServerAlias catalog.example.test\n    DocumentRoot \"/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName records.example.test\n    DocumentRoot \"/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "welcome.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "welcome.example.test",
+                "resource": "/srv/welcome/index.html",
+                "body": "Welcome desk\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "welcome.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "welcome.example.test",
+                "resource": "/srv/welcome/index.html",
+                "body": "Welcome desk\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "records.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "records.example.test",
+                "resource": "/srv/records/index.html",
+                "body": "Records catalog\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "records.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "records.example.test",
+                "resource": "/srv/records/index.html",
+                "body": "Records catalog\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "catalog.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "records.example.test",
+                "resource": "/srv/records/index.html",
+                "body": "Records catalog\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "catalog.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "records.example.test",
+                "resource": "/srv/records/index.html",
+                "body": "Records catalog\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "unknown.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "welcome.example.test",
+                "resource": "/srv/welcome/index.html",
+                "body": "Welcome desk\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "unknown.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "welcome.example.test",
+                "resource": "/srv/welcome/index.html",
+                "body": "Welcome desk\n",
+                "representation_bytes": 13,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/welcome/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/records/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apache-static {\"kind\":\"SaveConfig\",\"text\":\"Listen 8080\\n<Directory \\\"/\\\">\\n    Options None\\n    AllowOverride None\\n    Require all denied\\n</Directory>\\n<VirtualHost *:8080>\\n    ServerName welcome.example.test\\n    DocumentRoot \\\"/srv/welcome\\\"\\n    DirectoryIndex index.html\\n    <Directory \\\"/srv/welcome\\\">\\n        Require all granted\\n    </Directory>\\n</VirtualHost>\\n<VirtualHost *:8080>\\n    ServerName records.example.test\\n    ServerAlias catalog.example.test\\n    DocumentRoot \\\"/srv/records\\\"\\n    DirectoryIndex index.html\\n    <Directory \\\"/srv/records\\\">\\n        Require all granted\\n    </Directory>\\n</VirtualHost>\\n\"}",
+        "apache-static {\"kind\":\"Reload\"}"
+      ],
+      "prerequisites": [],
+      "apache_static_teaching": {
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "routing-example",
+              "server": "routing-example-server",
+              "config_path": "/config/routing-example.conf",
+              "entries": {
+                "/": "Directory",
+                "/practice": "Directory",
+                "/practice/routing": "Directory",
+                "/practice/routing/srv": "Directory",
+                "/practice/routing/srv/welcome": "Directory",
+                "/practice/routing/srv/welcome/index.html": "File",
+                "/practice/routing/srv/records": "Directory",
+                "/practice/routing/srv/records/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName lobby.example.test\n    ServerAlias art.example.test\n    DocumentRoot \"/practice/routing/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName gallery.example.test\n    DocumentRoot \"/practice/routing/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/practice/routing/srv/welcome/index.html": "Gallery lobby\n",
+              "/practice/routing/srv/records/index.html": "Art collection\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName lobby.example.test\n    ServerAlias art.example.test\n    DocumentRoot \"/practice/routing/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName gallery.example.test\n    DocumentRoot \"/practice/routing/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "lobby.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "lobby.example.test",
+                "resource": "/practice/routing/srv/welcome/index.html",
+                "body": "Gallery lobby\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "lobby.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "lobby.example.test",
+                "resource": "/practice/routing/srv/welcome/index.html",
+                "body": "Gallery lobby\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "gallery.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/routing/srv/records/index.html",
+                "body": "Art collection\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "gallery.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/routing/srv/records/index.html",
+                "body": "Art collection\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "art.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/routing/srv/records/index.html",
+                "body": "Art collection\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "art.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "gallery.example.test",
+                "resource": "/practice/routing/srv/records/index.html",
+                "body": "Art collection\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "unknown.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "lobby.example.test",
+                "resource": "/practice/routing/srv/welcome/index.html",
+                "body": "Gallery lobby\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "routing-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "unknown.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "lobby.example.test",
+                "resource": "/practice/routing/srv/welcome/index.html",
+                "body": "Gallery lobby\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/routing/srv/welcome/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/routing/srv/records/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        },
+        "prerequisites": [],
+        "prerequisite_note": "Start here for static-site practice. You should be able to edit a text document; this introduction explains the web-specific terms. All supplied paths and requests are simulated.",
+        "concepts": [
+          {
+            "title": "A request names a site",
+            "text": "A static web server returns supplied file text. In this model you choose the destination port, a Host name and a path in the request form; Request reads the active configuration without contacting a real network. HTTP200 means a page was returned, not that it was the intended page."
+          },
+          {
+            "title": "Names choose a site; roots choose files",
+            "text": "ServerName names a site; ServerAlias gives it another name. DocumentRoot says where that site reads its supplied files. With these wildcard virtual hosts on one port, the first matching name or alias wins; an unknown name falls back to the first site. A VirtualHost opening tag and matching closing tag group one site. Directory tags group a path\u2019s access rule. Keep the supplied tags paired when moving a setting."
+          },
+          {
+            "title": "Save and activate are separate",
+            "text": "Type configuration in the editor, then Save configuration. Reload activates saved changes only if they parse. Read the result with Request; use Check configuration to verify the whole assignment, including a separate next start."
+          }
+        ],
+        "example_description": "In this separate gallery, make art.example.test return Art collection from /practice/routing/srv/records/index.html through gallery.example.test. Keep lobby.example.test and its default page working. The alias currently selects the lobby. Try the annotated editor actions, then request the alias and an unknown name. This example is ungraded; assignment drafts stay separate.",
+        "example_actions": [
+          {
+            "title": "Move the alias to the correct site",
+            "explanation": "ServerAlias gives a site another name. Keep the welcome site first so an unknown name still reaches the welcome page.",
+            "action": {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName lobby.example.test\n    DocumentRoot \"/practice/routing/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName gallery.example.test\n    ServerAlias art.example.test\n    DocumentRoot \"/practice/routing/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          {
+            "title": "Activate the saved document",
+            "explanation": "Saving leaves the old source active. Reload parses and activates the saved text; the request result then changes.",
+            "action": {
+              "kind": "Reload"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, move the alias back to the first site, Save and Reload. Predict which named requests change while the unknown-name fallback stays healthy.",
+          "actions": [
+            {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName lobby.example.test\n    ServerAlias art.example.test\n    DocumentRoot \"/practice/routing/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName gallery.example.test\n    DocumentRoot \"/practice/routing/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            },
+            {
+              "kind": "Reload"
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SaveConfig",
+            "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName lobby.example.test\n    DocumentRoot \"/practice/routing/srv/welcome\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/welcome\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName gallery.example.test\n    ServerAlias art.example.test\n    DocumentRoot \"/practice/routing/srv/records\"\n    DirectoryIndex index.html\n    <Directory \"/practice/routing/srv/records\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+          },
+          {
+            "kind": "Reload"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-web-pages",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Static web services",
+      "unit": "static-web-services",
+      "title": "Choose a landing page and publish a correction",
+      "summary": "Use ordered directory pages and verify live text without unnecessary reloads.",
+      "objective": "On docs.example.test, make / serve /srv/docs/intro.html with the exact text Welcome to the repair guide. followed by a newline. Keep /manual redirecting to /manual/ and /manual/ serving the supplied Reference pages text through index.html. Preserve both existing index.html files. GET must return the landing-page text; HEAD must return no body and its correct byte length. Keep saved and active configuration aligned, with the same behavior after a separate simulated next start.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "retry_guidance": "Separate a wrong landing-page choice from wrong page contents. Verify / and /manual/ rather than fixing one by breaking the other.",
+      "steps": [
+        "Understand the full assignment and inspect current configuration, files and requests.",
+        "Make targeted edits and explicitly save or activate the relevant layer.",
+        "Check the complete current and next-start outcomes; repair and retry."
+      ],
+      "guide": [],
+      "explanation": "The ordered DirectoryIndex list selects intro.html at the site root and falls back to index.html in /manual. Saving live intro text changes GET and its byte length immediately. HEAD returns no body; the directory redirect keeps its slash target.",
+      "hints": [
+        "Which filename does DirectoryIndex try first? Which one exists in /manual?",
+        "Use the Files view to publish the new intro text; Reload alone cannot change a file."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://httpd.apache.org/docs/2.4/en/vhosts/details.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/core.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_dir.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_authz_core.html",
+        "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.2"
+      ],
+      "simplifications": "Sources checked 2026-10-26: LPIC-2 v4.5 Topic208.1 and Apache2.4. Closed offline static-site model with one destination port, literal names, fixed regular text files and typed GET/HEAD results. No real Apache process, socket, DNS lookup, Linux permissions, authentication, TLS, proxy, modules, includes, scripts, generated directory listings or full server lifecycle. Saved configuration, active source and live files are separate. Unsupported directives and request forms are diagnosed. A logical Stop/Start check is not an operating-system boot test.",
+      "initial": {
+        "kind": "ApacheStatic",
+        "simulation": {
+          "inventory": {
+            "fixture": "index-task",
+            "server": "index-task-server",
+            "config_path": "/config/index-task.conf",
+            "entries": {
+              "/": "Directory",
+              "/srv": "Directory",
+              "/srv/docs": "Directory",
+              "/srv/docs/intro.html": "File",
+              "/srv/docs/index.html": "File",
+              "/srv/docs/manual": "Directory",
+              "/srv/docs/manual/index.html": "File"
+            }
+          },
+          "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName docs.example.test\n    DocumentRoot \"/srv/docs\"\n    DirectoryIndex index.html\n    <Directory \"/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+          "files": {
+            "/srv/docs/intro.html": "Draft\n",
+            "/srv/docs/index.html": "Old landing\n",
+            "/srv/docs/manual/index.html": "Reference pages\n"
+          },
+          "active": {
+            "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName docs.example.test\n    DocumentRoot \"/srv/docs\"\n    DirectoryIndex index.html\n    <Directory \"/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ApacheStatic",
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "index-task",
+              "server": "index-task-server",
+              "config_path": "/config/index-task.conf",
+              "entries": {
+                "/": "Directory",
+                "/srv": "Directory",
+                "/srv/docs": "Directory",
+                "/srv/docs/intro.html": "File",
+                "/srv/docs/index.html": "File",
+                "/srv/docs/manual": "Directory",
+                "/srv/docs/manual/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName docs.example.test\n    DocumentRoot \"/srv/docs\"\n    DirectoryIndex index.html\n    <Directory \"/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/srv/docs/intro.html": "Draft\n",
+              "/srv/docs/index.html": "Old landing\n",
+              "/srv/docs/manual/index.html": "Reference pages\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName docs.example.test\n    DocumentRoot \"/srv/docs\"\n    DirectoryIndex index.html\n    <Directory \"/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/intro.html",
+                "body": "Welcome to the repair guide.\n",
+                "representation_bytes": 29,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/intro.html",
+                "body": "Welcome to the repair guide.\n",
+                "representation_bytes": 29,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "HEAD",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/intro.html",
+                "body": "",
+                "representation_bytes": 29,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "HEAD",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/intro.html",
+                "body": "",
+                "representation_bytes": 29,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/manual"
+              },
+              "expected": {
+                "status": 301,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/manual",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": "/manual/",
+                "cause": "DirectorySlash"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/manual"
+              },
+              "expected": {
+                "status": 301,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/manual",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": "/manual/",
+                "cause": "DirectorySlash"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/manual/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/manual/index.html",
+                "body": "Reference pages\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "docs.example.test"
+                ],
+                "path": "/manual/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "docs.example.test",
+                "resource": "/srv/docs/manual/index.html",
+                "body": "Reference pages\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FileMatches",
+              "path": "/srv/docs/intro.html",
+              "contents": "Welcome to the repair guide.\n"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/docs/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/docs/manual/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apache-static {\"kind\":\"SaveConfig\",\"text\":\"Listen 8080\\n<Directory \\\"/\\\">\\n    Options None\\n    AllowOverride None\\n    Require all denied\\n</Directory>\\n<VirtualHost *:8080>\\n    ServerName docs.example.test\\n    DocumentRoot \\\"/srv/docs\\\"\\n    DirectoryIndex intro.html index.html\\n    <Directory \\\"/srv/docs\\\">\\n        Require all granted\\n    </Directory>\\n</VirtualHost>\\n\"}",
+        "apache-static {\"kind\":\"Reload\"}",
+        "apache-static {\"kind\":\"WriteFile\",\"path\":\"/srv/docs/intro.html\",\"text\":\"Welcome to the repair guide.\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic2-web-routing"
+      ],
+      "apache_static_teaching": {
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "index-example",
+              "server": "index-example-server",
+              "config_path": "/config/index-example.conf",
+              "entries": {
+                "/": "Directory",
+                "/practice": "Directory",
+                "/practice/pages": "Directory",
+                "/practice/pages/srv": "Directory",
+                "/practice/pages/srv/docs": "Directory",
+                "/practice/pages/srv/docs/intro.html": "File",
+                "/practice/pages/srv/docs/index.html": "File",
+                "/practice/pages/srv/docs/manual": "Directory",
+                "/practice/pages/srv/docs/manual/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName fieldguide.example.test\n    DocumentRoot \"/practice/pages/srv/docs\"\n    DirectoryIndex index.html\n    <Directory \"/practice/pages/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/practice/pages/srv/docs/intro.html": "Draft\n",
+              "/practice/pages/srv/docs/index.html": "Old landing\n",
+              "/practice/pages/srv/docs/manual/index.html": "Reference pages\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName fieldguide.example.test\n    DocumentRoot \"/practice/pages/srv/docs\"\n    DirectoryIndex index.html\n    <Directory \"/practice/pages/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/intro.html",
+                "body": "Field guide ready.\n",
+                "representation_bytes": 19,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/intro.html",
+                "body": "Field guide ready.\n",
+                "representation_bytes": 19,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "HEAD",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/intro.html",
+                "body": "",
+                "representation_bytes": 19,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "HEAD",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/intro.html",
+                "body": "",
+                "representation_bytes": 19,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/manual"
+              },
+              "expected": {
+                "status": 301,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/manual",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": "/manual/",
+                "cause": "DirectorySlash"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/manual"
+              },
+              "expected": {
+                "status": 301,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/manual",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": "/manual/",
+                "cause": "DirectorySlash"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/manual/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/manual/index.html",
+                "body": "Reference pages\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "index-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "fieldguide.example.test"
+                ],
+                "path": "/manual/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "fieldguide.example.test",
+                "resource": "/practice/pages/srv/docs/manual/index.html",
+                "body": "Reference pages\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FileMatches",
+              "path": "/practice/pages/srv/docs/intro.html",
+              "contents": "Field guide ready.\n"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/pages/srv/docs/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/pages/srv/docs/manual/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        },
+        "prerequisites": [
+          "lpic2-web-routing"
+        ],
+        "prerequisite_note": "Build on Route site names without changing the default site. You can revisit its introduction or separate example without changing this assignment.",
+        "concepts": [
+          {
+            "title": "A directory needs a landing page",
+            "text": "A path such as / names a directory, not a file. DirectoryIndex lists filenames to try there, in order. It does not rename files. Keep a useful fallback for other directories; this simulator does not generate a directory listing."
+          },
+          {
+            "title": "A file edit differs from a setting change",
+            "text": "Save configuration stores settings; Reload activates them. In Files, select one supplied path, edit its text and Save file. The next virtual request reads live file text immediately, even without another Reload."
+          },
+          {
+            "title": "GET, HEAD and a directory slash",
+            "text": "GET returns page text. HEAD reports the same selected representation length without its body; length means UTF-8 bytes. A directory path without its final slash redirects to the slash form. Request shows these outcomes; it is not a browser or network call."
+          }
+        ],
+        "example_description": "In this separate field guide, make / on fieldguide.example.test serve intro.html with Field guide ready. followed by a newline. Keep /manual/ serving Reference pages. The supplied directory-page setting and live intro text both need work. Try the annotated edits, then compare GET and HEAD. This example is ungraded; assignment drafts stay separate.",
+        "example_actions": [
+          {
+            "title": "Choose the page and fallback",
+            "explanation": "DirectoryIndex tries the listed names in order inside the requested directory. The manual has no intro.html, so index.html remains its fallback.",
+            "action": {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName fieldguide.example.test\n    DocumentRoot \"/practice/pages/srv/docs\"\n    DirectoryIndex intro.html index.html\n    <Directory \"/practice/pages/srv/docs\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          {
+            "title": "Activate the directory-page choice",
+            "explanation": "Reload uses the saved document; it does not rewrite any page text.",
+            "action": {
+              "kind": "Reload"
+            }
+          },
+          {
+            "title": "Publish the supplied new message",
+            "explanation": "Save this live virtual file. Later requests read it immediately; no additional Reload is needed for a file-content change.",
+            "action": {
+              "kind": "WriteFile",
+              "path": "/practice/pages/srv/docs/intro.html",
+              "text": "Field guide ready.\n"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, replace intro.html with Oops and a newline, then Save file without Reload. Predict the GET text and HEAD length.",
+          "actions": [
+            {
+              "kind": "WriteFile",
+              "path": "/practice/pages/srv/docs/intro.html",
+              "text": "Oops\n"
+            }
+          ],
+          "expected": [
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "WriteFile",
+            "path": "/practice/pages/srv/docs/intro.html",
+            "text": "Field guide ready.\n"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-web-access",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Static web services",
+      "unit": "static-web-services",
+      "title": "Keep public pages open and staff notes private",
+      "summary": "Repair a directory rule without denying the whole site or a similarly named neighbour.",
+      "objective": "Keep hub.example.test / serving Visitor guide and /private-notes/ serving Public safety notes. Requests for /private/secret.txt and /private/ must return HTTP403 through the hub site now and after a separate simulated next start. Preserve every supplied file, including the staff notes; do not delete a secret to hide it. Saved and active configuration must agree.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "retry_guidance": "Read the exact failing path. Check both directory ancestry and the active policy; preserving a file is different from serving it.",
+      "steps": [
+        "Understand the full assignment and inspect current configuration, files and requests.",
+        "Make targeted edits and explicitly save or activate the relevant layer.",
+        "Check the complete current and next-start outcomes; repair and retry."
+      ],
+      "guide": [],
+      "explanation": "The public grant stays in place while the private child rule denies its descendants. The sibling private-notes is outside that ancestry. Both live public pages and intact-but-denied staff notes are required, so stopping or deleting files cannot pass.",
+      "hints": [
+        "Keep the public parent granted, then consider a more specific private Directory rule.",
+        "A sibling whose name starts with private is not inside the private directory."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://httpd.apache.org/docs/2.4/en/vhosts/details.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/core.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_dir.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_authz_core.html",
+        "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.2"
+      ],
+      "simplifications": "Sources checked 2026-10-26: LPIC-2 v4.5 Topic208.1 and Apache2.4. Closed offline static-site model with one destination port, literal names, fixed regular text files and typed GET/HEAD results. No real Apache process, socket, DNS lookup, Linux permissions, authentication, TLS, proxy, modules, includes, scripts, generated directory listings or full server lifecycle. Saved configuration, active source and live files are separate. Unsupported directives and request forms are diagnosed. A logical Stop/Start check is not an operating-system boot test.",
+      "initial": {
+        "kind": "ApacheStatic",
+        "simulation": {
+          "inventory": {
+            "fixture": "access-task",
+            "server": "access-task-server",
+            "config_path": "/config/access-task.conf",
+            "entries": {
+              "/": "Directory",
+              "/srv": "Directory",
+              "/srv/hub": "Directory",
+              "/srv/hub/index.html": "File",
+              "/srv/hub/private": "Directory",
+              "/srv/hub/private/secret.txt": "File",
+              "/srv/hub/private-notes": "Directory",
+              "/srv/hub/private-notes/index.html": "File"
+            }
+          },
+          "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName hub.example.test\n    DocumentRoot \"/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+          "files": {
+            "/srv/hub/index.html": "Visitor guide\n",
+            "/srv/hub/private/secret.txt": "Staff only\n",
+            "/srv/hub/private-notes/index.html": "Public safety notes\n"
+          },
+          "active": {
+            "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName hub.example.test\n    DocumentRoot \"/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ApacheStatic",
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "access-task",
+              "server": "access-task-server",
+              "config_path": "/config/access-task.conf",
+              "entries": {
+                "/": "Directory",
+                "/srv": "Directory",
+                "/srv/hub": "Directory",
+                "/srv/hub/index.html": "File",
+                "/srv/hub/private": "Directory",
+                "/srv/hub/private/secret.txt": "File",
+                "/srv/hub/private-notes": "Directory",
+                "/srv/hub/private-notes/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName hub.example.test\n    DocumentRoot \"/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/srv/hub/index.html": "Visitor guide\n",
+              "/srv/hub/private/secret.txt": "Staff only\n",
+              "/srv/hub/private-notes/index.html": "Public safety notes\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName hub.example.test\n    DocumentRoot \"/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/index.html",
+                "body": "Visitor guide\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/index.html",
+                "body": "Visitor guide\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/private/"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/private",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/private/"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/private",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/private-notes/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/private-notes/index.html",
+                "body": "Public safety notes\n",
+                "representation_bytes": 20,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "hub.example.test"
+                ],
+                "path": "/private-notes/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "hub.example.test",
+                "resource": "/srv/hub/private-notes/index.html",
+                "body": "Public safety notes\n",
+                "representation_bytes": 20,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/hub/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/hub/private/secret.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/hub/private-notes/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apache-static {\"kind\":\"SaveConfig\",\"text\":\"Listen 8080\\n<Directory \\\"/\\\">\\n    Options None\\n    AllowOverride None\\n    Require all denied\\n</Directory>\\n<VirtualHost *:8080>\\n    ServerName hub.example.test\\n    DocumentRoot \\\"/srv/hub\\\"\\n    DirectoryIndex index.html\\n    <Directory \\\"/srv/hub\\\">\\n        Require all granted\\n    </Directory>\\n    <Directory \\\"/srv/hub/private\\\">\\n        Require all denied\\n    </Directory>\\n</VirtualHost>\\n\"}",
+        "apache-static {\"kind\":\"Reload\"}"
+      ],
+      "prerequisites": [
+        "lpic2-web-pages"
+      ],
+      "apache_static_teaching": {
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "access-example",
+              "server": "access-example-server",
+              "config_path": "/config/access-example.conf",
+              "entries": {
+                "/": "Directory",
+                "/practice": "Directory",
+                "/practice/access": "Directory",
+                "/practice/access/srv": "Directory",
+                "/practice/access/srv/hub": "Directory",
+                "/practice/access/srv/hub/index.html": "File",
+                "/practice/access/srv/hub/private": "Directory",
+                "/practice/access/srv/hub/private/secret.txt": "File",
+                "/practice/access/srv/hub/private-notes": "Directory",
+                "/practice/access/srv/hub/private-notes/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName reading.example.test\n    DocumentRoot \"/practice/access/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/practice/access/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/practice/access/srv/hub/index.html": "Visitor guide\n",
+              "/practice/access/srv/hub/private/secret.txt": "Staff only\n",
+              "/practice/access/srv/hub/private-notes/index.html": "Public safety notes\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName reading.example.test\n    DocumentRoot \"/practice/access/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/practice/access/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/index.html",
+                "body": "Visitor guide\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/index.html",
+                "body": "Visitor guide\n",
+                "representation_bytes": 14,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/private/secret.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/private/secret.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/private/"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/private",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/private/"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/private",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/private-notes/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/private-notes/index.html",
+                "body": "Public safety notes\n",
+                "representation_bytes": 20,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "access-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "reading.example.test"
+                ],
+                "path": "/private-notes/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "reading.example.test",
+                "resource": "/practice/access/srv/hub/private-notes/index.html",
+                "body": "Public safety notes\n",
+                "representation_bytes": 20,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/access/srv/hub/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/access/srv/hub/private/secret.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/access/srv/hub/private-notes/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        },
+        "prerequisites": [
+          "lpic2-web-pages"
+        ],
+        "prerequisite_note": "Build on Choose a landing page and publish a correction. You can revisit its introduction or separate example without changing this assignment.",
+        "concepts": [
+          {
+            "title": "Permission is part of serving",
+            "text": "A successful public page returns HTTP200. A configured denial returns HTTP403 in this exercise. NoListener means the virtual service is stopped or the destination is wrong; it is not evidence that access rules are correct."
+          },
+          {
+            "title": "A directory rule covers its descendants",
+            "text": "Require all granted allows the directory; Require all denied denies it. Here a more specific matching Directory rule replaces the parent rule. The private directory and its files share ancestry; private-notes is a different sibling, despite the similar spelling."
+          },
+          {
+            "title": "Verify the allowed and denied cases",
+            "text": "Edit configuration, Save and Reload, then request both a public page and the private file. Linux file permissions, users, passwords and TLS are outside this lab; this is static HTTP policy, not a complete security configuration."
+          }
+        ],
+        "example_description": "In this separate reading room, keep reading.example.test / and /private-notes/ public while /private/secret.txt and /private/ return HTTP403. Preserve every file. Try the annotated directory rule, then request both allowed and denied paths. This example is ungraded; assignment drafts stay separate.",
+        "example_actions": [
+          {
+            "title": "Add a rule for the private directory",
+            "explanation": "The more specific private directory overrides the public parent in this closed model. A sibling named private-notes is a different directory.",
+            "action": {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName reading.example.test\n    DocumentRoot \"/practice/access/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/practice/access/srv/hub\">\n        Require all granted\n    </Directory>\n    <Directory \"/practice/access/srv/hub/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          {
+            "title": "Activate and inspect both outcomes",
+            "explanation": "Reload, then request a public page and the private file. A stopped service or a rule denying everything does not meet both requirements.",
+            "action": {
+              "kind": "Reload"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, remove the private-directory denial, Save and Reload. Predict the private-file result while public pages stay available.",
+          "actions": [
+            {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName reading.example.test\n    DocumentRoot \"/practice/access/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/practice/access/srv/hub\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            },
+            {
+              "kind": "Reload"
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SaveConfig",
+            "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName reading.example.test\n    DocumentRoot \"/practice/access/srv/hub\"\n    DirectoryIndex index.html\n    <Directory \"/practice/access/srv/hub\">\n        Require all granted\n    </Directory>\n    <Directory \"/practice/access/srv/hub/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n"
+          },
+          {
+            "kind": "Reload"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-web-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Static web services",
+      "unit": "static-web-services",
+      "title": "Hand over a release that survives its next start",
+      "summary": "Repair saved configuration, publish a release and protect neighbouring content.",
+      "objective": "Hand over release.example.test and its download.example.test alias with Release 2 ready followed by a newline from /srv/release/index.html. Requests for /private/notes.txt through either name must return HTTP403, and the file must remain unchanged. Keep status.example.test serving Status healthy, and preserve its page and the archive page. Current serving and a separate next start must both meet these requirements; saved and active source must agree. Diagnose the supplied saved-versus-active mismatch and publish only the requested release page.",
+      "difficulty": "Advanced",
+      "minutes": 25,
+      "retry_guidance": "Use the failed current and next-start rows to locate the layer. A saved repair, an active repair and a published file solve different problems.",
+      "steps": [
+        "Understand the full assignment and inspect current configuration, files and requests.",
+        "Make targeted edits and explicitly save or activate the relevant layer.",
+        "Check the complete current and next-start outcomes; repair and retry."
+      ],
+      "guide": [],
+      "explanation": "The repaired saved root and private policy agree with active source; the release file carries the new text. Main name, alias, status site, denied private notes and independent next start all pass while unrelated files remain intact.",
+      "hints": [
+        "Compare saved DocumentRoot with the active source and the supplied release directory.",
+        "Verify the alias and status site as well as the main release page; preserve the staff notes and deny their directory."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://httpd.apache.org/docs/2.4/en/vhosts/details.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/core.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_dir.html",
+        "https://httpd.apache.org/docs/2.4/en/mod/mod_authz_core.html",
+        "https://www.rfc-editor.org/rfc/rfc9110.html#section-9.3.2"
+      ],
+      "simplifications": "Sources checked 2026-10-26: LPIC-2 v4.5 Topic208.1 and Apache2.4. Closed offline static-site model with one destination port, literal names, fixed regular text files and typed GET/HEAD results. No real Apache process, socket, DNS lookup, Linux permissions, authentication, TLS, proxy, modules, includes, scripts, generated directory listings or full server lifecycle. Saved configuration, active source and live files are separate. Unsupported directives and request forms are diagnosed. A logical Stop/Start check is not an operating-system boot test.",
+      "initial": {
+        "kind": "ApacheStatic",
+        "simulation": {
+          "inventory": {
+            "fixture": "handover-task",
+            "server": "handover-task-server",
+            "config_path": "/config/handover-task.conf",
+            "entries": {
+              "/": "Directory",
+              "/srv": "Directory",
+              "/srv/release": "Directory",
+              "/srv/release/index.html": "File",
+              "/srv/release/private": "Directory",
+              "/srv/release/private/notes.txt": "File",
+              "/srv/status": "Directory",
+              "/srv/status/index.html": "File",
+              "/srv/archive": "Directory",
+              "/srv/archive/index.html": "File"
+            }
+          },
+          "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName release.example.test\n    ServerAlias download.example.test\n    DocumentRoot \"/srv/archive\"\n    DirectoryIndex index.html\n    <Directory \"/srv/archive\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName status.example.test\n    DocumentRoot \"/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+          "files": {
+            "/srv/release/index.html": "Release 1 ready\n",
+            "/srv/release/private/notes.txt": "Private deployment notes\n",
+            "/srv/status/index.html": "Status healthy\n",
+            "/srv/archive/index.html": "Retired release\n"
+          },
+          "active": {
+            "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName release.example.test\n    ServerAlias download.example.test\n    DocumentRoot \"/srv/release\"\n    DirectoryIndex index.html\n    <Directory \"/srv/release\">\n        Require all granted\n    </Directory>\n    <Directory \"/srv/release/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName status.example.test\n    DocumentRoot \"/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "ApacheStatic",
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "handover-task",
+              "server": "handover-task-server",
+              "config_path": "/config/handover-task.conf",
+              "entries": {
+                "/": "Directory",
+                "/srv": "Directory",
+                "/srv/release": "Directory",
+                "/srv/release/index.html": "File",
+                "/srv/release/private": "Directory",
+                "/srv/release/private/notes.txt": "File",
+                "/srv/status": "Directory",
+                "/srv/status/index.html": "File",
+                "/srv/archive": "Directory",
+                "/srv/archive/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName release.example.test\n    ServerAlias download.example.test\n    DocumentRoot \"/srv/archive\"\n    DirectoryIndex index.html\n    <Directory \"/srv/archive\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName status.example.test\n    DocumentRoot \"/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/srv/release/index.html": "Release 1 ready\n",
+              "/srv/release/private/notes.txt": "Private deployment notes\n",
+              "/srv/status/index.html": "Status healthy\n",
+              "/srv/archive/index.html": "Retired release\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName release.example.test\n    ServerAlias download.example.test\n    DocumentRoot \"/srv/release\"\n    DirectoryIndex index.html\n    <Directory \"/srv/release\">\n        Require all granted\n    </Directory>\n    <Directory \"/srv/release/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName status.example.test\n    DocumentRoot \"/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "release.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/index.html",
+                "body": "Release 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "release.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/index.html",
+                "body": "Release 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "download.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/index.html",
+                "body": "Release 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "download.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/index.html",
+                "body": "Release 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "release.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "release.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "download.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "download.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "release.example.test",
+                "resource": "/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "status.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "status.example.test",
+                "resource": "/srv/status/index.html",
+                "body": "Status healthy\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-task-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "status.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "status.example.test",
+                "resource": "/srv/status/index.html",
+                "body": "Status healthy\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FileMatches",
+              "path": "/srv/release/index.html",
+              "contents": "Release 2 ready\n"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/release/private/notes.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/status/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/srv/archive/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "apache-static {\"kind\":\"SaveConfig\",\"text\":\"Listen 8080\\n<Directory \\\"/\\\">\\n    Options None\\n    AllowOverride None\\n    Require all denied\\n</Directory>\\n<VirtualHost *:8080>\\n    ServerName release.example.test\\n    ServerAlias download.example.test\\n    DocumentRoot \\\"/srv/release\\\"\\n    DirectoryIndex index.html\\n    <Directory \\\"/srv/release\\\">\\n        Require all granted\\n    </Directory>\\n    <Directory \\\"/srv/release/private\\\">\\n        Require all denied\\n    </Directory>\\n</VirtualHost>\\n<VirtualHost *:8080>\\n    ServerName status.example.test\\n    DocumentRoot \\\"/srv/status\\\"\\n    DirectoryIndex index.html\\n    <Directory \\\"/srv/status\\\">\\n        Require all granted\\n    </Directory>\\n</VirtualHost>\\n\"}",
+        "apache-static {\"kind\":\"Reload\"}",
+        "apache-static {\"kind\":\"WriteFile\",\"path\":\"/srv/release/index.html\",\"text\":\"Release 2 ready\\n\"}"
+      ],
+      "prerequisites": [
+        "lpic2-web-access"
+      ],
+      "apache_static_teaching": {
+        "definition": {
+          "initial": {
+            "inventory": {
+              "fixture": "handover-example",
+              "server": "handover-example-server",
+              "config_path": "/config/handover-example.conf",
+              "entries": {
+                "/": "Directory",
+                "/practice": "Directory",
+                "/practice/handover": "Directory",
+                "/practice/handover/srv": "Directory",
+                "/practice/handover/srv/release": "Directory",
+                "/practice/handover/srv/release/index.html": "File",
+                "/practice/handover/srv/release/private": "Directory",
+                "/practice/handover/srv/release/private/notes.txt": "File",
+                "/practice/handover/srv/status": "Directory",
+                "/practice/handover/srv/status/index.html": "File",
+                "/practice/handover/srv/archive": "Directory",
+                "/practice/handover/srv/archive/index.html": "File"
+              }
+            },
+            "saved": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName exhibit.example.test\n    ServerAlias view.example.test\n    DocumentRoot \"/practice/handover/srv/archive\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/archive\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName desk.example.test\n    DocumentRoot \"/practice/handover/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n",
+            "files": {
+              "/practice/handover/srv/release/index.html": "Release 1 ready\n",
+              "/practice/handover/srv/release/private/notes.txt": "Private deployment notes\n",
+              "/practice/handover/srv/status/index.html": "Status healthy\n",
+              "/practice/handover/srv/archive/index.html": "Retired release\n"
+            },
+            "active": {
+              "source": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName exhibit.example.test\n    ServerAlias view.example.test\n    DocumentRoot \"/practice/handover/srv/release\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/release\">\n        Require all granted\n    </Directory>\n    <Directory \"/practice/handover/srv/release/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName desk.example.test\n    DocumentRoot \"/practice/handover/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "exhibit.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/index.html",
+                "body": "Exhibit 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "exhibit.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/index.html",
+                "body": "Exhibit 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "view.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/index.html",
+                "body": "Exhibit 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "view.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/index.html",
+                "body": "Exhibit 2 ready\n",
+                "representation_bytes": 16,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "exhibit.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "exhibit.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "view.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "view.example.test"
+                ],
+                "path": "/private/notes.txt"
+              },
+              "expected": {
+                "status": 403,
+                "vhost": "exhibit.example.test",
+                "resource": "/practice/handover/srv/release/private/notes.txt",
+                "body": "",
+                "representation_bytes": null,
+                "redirect_path": null,
+                "cause": "AccessDenied"
+              }
+            },
+            {
+              "kind": "CurrentHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "desk.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "desk.example.test",
+                "resource": "/practice/handover/srv/status/index.html",
+                "body": "Status healthy\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "NextStartHttp",
+              "request": {
+                "server": "handover-example-server",
+                "port": 8080,
+                "method": "GET",
+                "hosts": [
+                  "desk.example.test"
+                ],
+                "path": "/"
+              },
+              "expected": {
+                "status": 200,
+                "vhost": "desk.example.test",
+                "resource": "/practice/handover/srv/status/index.html",
+                "body": "Status healthy\n",
+                "representation_bytes": 15,
+                "redirect_path": null,
+                "cause": "File"
+              }
+            },
+            {
+              "kind": "FileMatches",
+              "path": "/practice/handover/srv/release/index.html",
+              "contents": "Exhibit 2 ready\n"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/handover/srv/release/private/notes.txt"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/handover/srv/status/index.html"
+            },
+            {
+              "kind": "FilePreserved",
+              "path": "/practice/handover/srv/archive/index.html"
+            },
+            {
+              "kind": "ActiveMatchesSaved"
+            }
+          ]
+        },
+        "prerequisites": [
+          "lpic2-web-access"
+        ],
+        "prerequisite_note": "Build on Keep public pages open and staff notes private. You can revisit its introduction or separate example without changing this assignment.",
+        "concepts": [
+          {
+            "title": "Current success can hide a bad handover",
+            "text": "Saved text is what a later Start reads. Active source is what current requests use. They can differ. A healthy status site now does not prove that another site or the next start will work."
+          },
+          {
+            "title": "Combine the tools you have practiced",
+            "text": "Inspect Active configuration, compare the editable saved text and review the fixed Files list. Repair site roots, aliases and private policy as needed. Save and Reload configuration; save page text separately. Do not replace a healthy neighbour to make one test pass."
+          },
+          {
+            "title": "Verify outcomes, not a command history",
+            "text": "Check configuration evaluates current requests, a separate Stop/Start copy, required page text and preserved files. It does not stop your active model or demand a particular edit sequence. Equivalent supported configurations can pass."
+          }
+        ],
+        "example_description": "In this separate exhibition, publish Exhibit 2 ready followed by a newline through exhibit.example.test and view.example.test. Keep desk.example.test healthy and the private notes denied through both exhibition names and intact. Saved and active text disagree. Try the annotated handover and file edit, then verify the next-start checks. This example is ungraded; assignment drafts stay separate.",
+        "example_actions": [
+          {
+            "title": "Repair the saved handover",
+            "explanation": "The active source points at the release directory while the saved document points at the archive. Repair the saved root and its matching access rule, including private denial.",
+            "action": {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName exhibit.example.test\n    ServerAlias view.example.test\n    DocumentRoot \"/practice/handover/srv/release\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/release\">\n        Require all granted\n    </Directory>\n    <Directory \"/practice/handover/srv/release/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName desk.example.test\n    DocumentRoot \"/practice/handover/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+            }
+          },
+          {
+            "title": "Load the repaired saved document",
+            "explanation": "Reload makes active serving agree with the corrected saved document. The independent next-start check must also remain healthy.",
+            "action": {
+              "kind": "Reload"
+            }
+          },
+          {
+            "title": "Publish version two",
+            "explanation": "Save only the release page; leave the status, archive and private notes unchanged.",
+            "action": {
+              "kind": "WriteFile",
+              "path": "/practice/handover/srv/release/index.html",
+              "text": "Exhibit 2 ready\n"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After the worked repair, save an unfinished VirtualHost block without reloading. Predict why current requests keep working but the next-start test fails.",
+          "actions": [
+            {
+              "kind": "SaveConfig",
+              "text": "Listen 8080\n<VirtualHost *:8080>\nServerName broken.example.test\n"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            false,
+            true,
+            true,
+            true,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "SaveConfig",
+            "text": "Listen 8080\n<Directory \"/\">\n    Options None\n    AllowOverride None\n    Require all denied\n</Directory>\n<VirtualHost *:8080>\n    ServerName exhibit.example.test\n    ServerAlias view.example.test\n    DocumentRoot \"/practice/handover/srv/release\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/release\">\n        Require all granted\n    </Directory>\n    <Directory \"/practice/handover/srv/release/private\">\n        Require all denied\n    </Directory>\n</VirtualHost>\n<VirtualHost *:8080>\n    ServerName desk.example.test\n    DocumentRoot \"/practice/handover/srv/status\"\n    DirectoryIndex index.html\n    <Directory \"/practice/handover/srv/status\">\n        Require all granted\n    </Directory>\n</VirtualHost>\n"
+          }
+        ]
+      }
+    }
+  ]
+}

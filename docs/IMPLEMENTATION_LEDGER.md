@@ -1949,3 +1949,46 @@ redundant copy stays private. No baseline deleted. Gate observations minimum
 19.71GiB available, max somePSI0.62%, OOMdelta0; no sustained-pressure refusal.
 Private receipt reviews/apache-static/main-backend-gates-r1/RESULT.json. Native
 source worker remains source-only; public catalog133 and candidate38a unchanged.
+
+
+## 2026-10-26 — M119 scoped line reading and pipeline status
+
+Implemented source-reviewed literal-empty IFS read policy and explicit pipefail
+in evaluator10. Original parser architecture, ordinary default paths, budgets,
+cooperative Stop and in-process isolation remain. No environment-prefix framework,
+custom splitting, errexit, host process or dependency added. Fresh runs start
+pipefail off; functions share it, captures/stages inherit and isolate it. Read
+arguments/ordered redirects see original default IFS before the temporary policy.
+
+All15 new VM groups,10 getopts,3 portable migration/digest and8 existing migration
+groups PASS. New fixtures contain only fixed controlled actual Bash observations;
+actual saved9 Records remain private. Independent root checks rehashed all28 actual
+observations/source/input/provenance. New9 opt-in private migration checks PASS:
+full133 attempts, actual43 Record9, real6/7/8 histories, drafts, exact raw target/
+before slots, receipts, copy races, reset-first, practice-only, export/cancel/
+restore and active-child Stop. Source review corrected full-progress assertions
+to include main-only receipts, not just portable serialization.
+
+Full all-target/no-fail-fast R1 PASS1535/0FAIL/9ignored,120harnesses. Those ignored9
+were separately run and passed. Later Clippy caught duplicated test helper modules;
+use one cfgtest library module, no lint waiver. Affected74library+8migration checks
+PASS after cleanup. After10 comparison5groups PASS, including4slices for380vectors:
+357 exact unchanged outcomes+ticks,23 intentional changes equal actualBash, all
+1570 historical rows classified and oldmetadata still9. No new capture/COMPLETE/
+Record9 was generated or relabeled. All185Python and final all-targetClippy PASS.
+Actual explicit historical feature request under10 refuses before a compiler child.
+
+First VM gate caught a test function named reserved builtin enable; only its test
+name changed. Python's input-table test was coupled to the old compiled-module
+closure; it now verifies the original declared packs directly, while the producer
+still rejects expanded modules and a synthetic negative proves that rejection.
+Whole public9 producer/input files and accepted evidence remain exact and frozen.
+Private receipts evaluator10-main-gates-r1/RESULT.json and ACTUAL-COMPARISON.json;
+full R1 minimum21.99GiB available/maxPSI0.18%/OOM0, no sustained pressure.
+
+Catalog stays133/33 =42/28/20/43; no new objectives promoted. Four unbundled Apache
+assignments pass8content groups after independent review closed alias-private
+leakage with both-name current/next-start guards (50assignment/50example rows).
+Native source handed off10paths/13UNRUNchecks. Three safe-automation assignments
+are privately authored with31cases and independent content review underway.
+Actual native/newunit integration and packaged acceptance remain next, not complete.

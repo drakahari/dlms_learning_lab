@@ -469,7 +469,9 @@ mod genuine8_getopts_child_cancellation {
     use super::*;
     #[test]
     fn confirmed_preview_cancel_with_active_getopts_child_preserves_raw8_and_all_histories() {
-        assert_eq!(shell::EVALUATOR_REVISION, 9);
+        const {
+            assert!(shell::EVALUATOR_REVISION >= 9);
+        }
         const RAW: &[u8] =
             include_bytes!("../tests/fixtures/shell-v8-synthetic-writer-progress.json");
         let mut value: serde_json::Value = serde_json::from_slice(RAW).unwrap();
@@ -513,5 +515,62 @@ mod genuine8_getopts_child_cancellation {
         assert_eq!(std::fs::read(input).unwrap(), bytes);
         assert_eq!(std::fs::read(target).unwrap(), RAW);
         assert_eq!(std::fs::read_dir(directory.path()).unwrap().count(), 2);
+    }
+}
+
+#[cfg(test)]
+mod actual9_safe_automation_child_cancellation {
+    use super::*;
+    use crate::actual9_test_evidence as evidence;
+    #[test]
+    #[ignore = "Requires fixed private actual9 COMPLETE; explicit guarded replay only"]
+    fn actual9_preview_cancel_with_active_child_preserves_exact_input_target_and_all_history() {
+        assert_eq!(shell::EVALUATOR_REVISION, 10);
+        let raw = evidence::original9();
+        let mut value: serde_json::Value = serde_json::from_slice(&raw).unwrap();
+        value["attempts"]["shell-arguments"]["state"]["source"] = serde_json::json!(
+            "pending=$(set -o pipefail; false | true; while true; do :; done); printf must-not-run"
+        );
+        let bytes = serde_json::to_vec(&value).unwrap();
+        evidence::exact(
+            &value,
+            &serde_json::from_slice::<serde_json::Value>(&bytes).unwrap(),
+        );
+        let dir = tempfile::tempdir().unwrap();
+        let input = dir.path().join("input.json");
+        let target = dir.path().join("progress.json");
+        std::fs::write(&input, &bytes).unwrap();
+        std::fs::write(&target, &raw).unwrap();
+        let (tx, rx) = mpsc::channel();
+        let barrier = Arc::new(std::sync::Barrier::new(2));
+        let child_barrier = barrier.clone();
+        let mut observed = false;
+        let task = Inspection::start_observing(
+            input.clone(),
+            crate::pack::bundled().unwrap(),
+            move |vm| {
+                if !observed && vm.active_capture_depth() > 0 {
+                    observed = true;
+                    tx.send(()).unwrap();
+                    child_barrier.wait();
+                }
+            },
+        );
+        rx.recv_timeout(std::time::Duration::from_secs(5)).unwrap();
+        task.cancel.store(true, Ordering::Relaxed);
+        barrier.wait();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        loop {
+            if let Some(result) = task.poll() {
+                assert!(result.err().unwrap().contains("cancelled"));
+                break;
+            }
+            assert!(std::time::Instant::now() < deadline);
+            thread::yield_now();
+        }
+        assert_eq!(task.checked.load(Ordering::Relaxed), 0);
+        assert_eq!(std::fs::read(input).unwrap(), bytes);
+        assert_eq!(std::fs::read(target).unwrap(), raw);
+        assert_eq!(std::fs::read_dir(dir.path()).unwrap().count(), 2);
     }
 }

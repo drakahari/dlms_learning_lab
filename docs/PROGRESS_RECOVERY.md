@@ -140,3 +140,44 @@ warning means the replacement committed. Explicit confirmed raw recovery retains
 its exact pre-restore safety copy; it does not invent a prior revision receipt.
 Cancel writes nothing. No new progress schema or arbitrary revision override is
 introduced; existing generic receipt/history code supplies this transition.
+
+
+## Evaluator10 source transition (not yet gated or activated)
+
+The private empty-IFS-read/pipefail implementation changes supported outcomes and
+therefore identifies new explicit runs as10. Actual6/7/8/9 source/results/file
+snapshots remain historical and unchanged. Opening/preparing an older assignment
+moves its old run into bounded history without executing it or awarding current
+credit; a saved practice result retains its own actual revision until an explicit
+practice Run or a disclosed backup recheck. No9 outcome is regenerated with10
+and labeled historical. Existing 32-record/16MB bounds are unchanged.
+
+The generic writer already protects the exact on-disk target before its first10
+write in the non-overwriting `before-shell-v10.json` slot. Existing before8/9
+slots remain byte-exact. Receipts are derived only from that actual target:
+`[7,8,9]` becomes `[7,8,9,10]`, while a direct7→10 write yields `[7,10]`, without
+inventing8 or9. Reset-first, practice-only, imported receipt claims, occupied
+valid slots, copy races, failed persistence and postcommit durability warnings
+must retain their existing semantics. Portable exports omit target provenance;
+preview/Cancel does not write; confirmed restore independently protects its
+actual target and explicitly rechecks saved active results under10.
+
+Prospective default tests retain genuine public6/7/8 fixtures plus explicitly
+empty old9 shapes that carry no execution/credit. Actual9→10 replay tests are
+ignored by default and require the fixed private synthetic accepted COMPLETE
+capture and exact writer9 SHA. They retain all133 attempts, 43 actual9 main
+records, genuine6/7/8 histories, both independent draft sets, favorites and old
+raw backup bytes. Private recordings are not committed. These source tests,
+including exact before10 protection and active-child cancellation, are **unrun**;
+this paragraph claims no new runtime/native/other-platform acceptance.
+
+
+The evaluator10 transition is now gated on MAIN (2026-10-26). All nine explicit
+private replay tests pass against the hash-pinned accepted actual9 synthetic
+profile, including full receipt comparisons omitted by portable serialization.
+Older raw files, histories, drafts and favorites survive; direct7→10 has no
+invented8/9 receipt. The bounded current interpreter rechecks only when the user
+explicitly runs work or accepts a disclosed backup recheck. This is technical
+synthetic-profile evidence, not personal-profile, novice or other-OS acceptance.
+The installed38a Fedora candidate remains evaluator9 until a newer candidate is
+built and accepted; do not use an older candidate to interpret newer results.

@@ -11,6 +11,7 @@ pub(super) struct Suspended {
     pub executed: bool,
     pub env: BTreeMap<String, Value>,
     pub scanner: getopts::Scanner,
+    pub pipefail: bool,
     pub args: Vec<String>,
     pub loops: Vec<(String, Vec<String>, usize)>,
     pub whiles: Vec<(i32, bool)>,
@@ -144,6 +145,7 @@ impl Vm {
             executed: std::mem::replace(&mut self.frame_executed, false),
             env: std::mem::replace(&mut self.env, env),
             scanner: std::mem::replace(&mut self.scanner, scanner),
+            pipefail: self.pipefail,
             args: std::mem::replace(&mut self.args, args),
             functions: std::mem::replace(&mut self.functions, functions),
             loops: std::mem::take(&mut self.loops),
@@ -208,6 +210,7 @@ impl Vm {
         self.frame_executed = frame.executed;
         self.env = frame.env;
         self.scanner = frame.scanner;
+        self.pipefail = frame.pipefail;
         self.args = frame.args;
         self.functions = frame.functions;
         self.calls = frame.calls;

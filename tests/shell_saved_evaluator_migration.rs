@@ -1,5 +1,5 @@
-//! Prospective revision9 checks from exact actually captured writer8 bytes.
-//! New9 outcomes exist only when these tests explicitly execute the current VM.
+//! Current-evaluator migration checks from exact actually captured writer8 bytes.
+//! New outcomes exist only when these tests explicitly execute the current VM.
 use dlms_learning_lab::{
     backup,
     engine::{Goal, State},
@@ -23,7 +23,9 @@ fn empty() -> Progress {
     }
 }
 fn labs() -> Vec<pack::Scenario> {
-    assert_eq!(shell::EVALUATOR_REVISION, 9);
+    const {
+        assert!(shell::EVALUATOR_REVISION >= 9);
+    }
     pack::bundled().unwrap()
 }
 fn raw8() -> Progress {
@@ -69,7 +71,7 @@ fn with_main_records(p: &Progress) -> BTreeMap<String, Vec<shell::Record>> {
     values
 }
 fn slot(path: &Path) -> std::path::PathBuf {
-    path.with_extension("before-shell-v9.json")
+    path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
 }
 fn inspect(
     path: &Path,
@@ -223,7 +225,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_drafts_and_unrelated(&p);
 }
 #[test]
-fn actual8_target_gets_exact_before9_copy_keeps_before8_and_only_commits_actual_receipts() {
+fn actual8_target_gets_exact_before_current_copy_keeps_before8_and_only_commits_actual_receipts() {
     let all = labs();
     let directory = tempfile::tempdir().unwrap();
     let path = directory.path().join("progress.json");
@@ -249,7 +251,7 @@ fn actual8_target_gets_exact_before9_copy_keeps_before8_and_only_commits_actual_
     let loaded = progress::load(&path, &all).unwrap();
     assert_eq!(
         loaded.migration_receipts.as_ref().unwrap().shell,
-        vec![7, 8, 9]
+        vec![7, 8, shell::EVALUATOR_REVISION]
     );
     assert_eq!(histories(&loaded), with_main_records(&raw8()));
     assert_drafts_and_unrelated(&loaded);
@@ -292,21 +294,25 @@ fn reset_first_and_practice_only8_cannot_skip_target_backup_and_conflicting_vali
                 .migration_receipts
                 .unwrap()
                 .shell,
-            vec![7, 8, 9]
+            vec![7, 8, shell::EVALUATOR_REVISION]
         );
     }
 }
 #[test]
-fn imported_current_marker_never_skips_actual_old8_target_and_direct7_to9_does_not_invent8() {
+fn imported_current_marker_never_skips_actual_old8_target_and_direct7_to_current_does_not_invent_intermediate_versions()
+ {
     let all = labs();
-    for (raw, receipts) in [(ACTUAL8, vec![7, 8, 9]), (ACTUAL7, vec![7, 9])] {
+    for (raw, receipts) in [
+        (ACTUAL8, vec![7, 8, shell::EVALUATOR_REVISION]),
+        (ACTUAL7, vec![7, shell::EVALUATOR_REVISION]),
+    ] {
         let directory = tempfile::tempdir().unwrap();
         let path = directory.path().join("progress.json");
         std::fs::write(&path, raw).unwrap();
         let mut candidate = empty();
         candidate.migration_receipts = Some(progress::MigrationReceipts {
             workspace: true,
-            shell: vec![9],
+            shell: vec![shell::EVALUATOR_REVISION],
         });
         progress::save(&path, &candidate).unwrap();
         assert_eq!(std::fs::read(slot(&path)).unwrap(), raw);
@@ -352,7 +358,7 @@ fn export_inspect_cancel_confirmed_restore_rechecks_only_explicitly_and_retains6
             run: Some(run),
         } = &a.state
         {
-            assert_eq!(run.engine_revision, 9);
+            assert_eq!(run.engine_revision, shell::EVALUATOR_REVISION);
             assert_eq!(&run.source, source);
             let s = all.iter().find(|s| &s.id == id).unwrap();
             let Goal::Script { cases } = &s.goal else {
@@ -373,7 +379,10 @@ fn export_inspect_cancel_confirmed_restore_rechecks_only_explicitly_and_retains6
     assert_eq!(std::fs::read(&input).unwrap(), export);
     let loaded = progress::load(&target, &all).unwrap();
     assert_eq!(snapshot(&loaded), snapshot(&candidate.progress));
-    assert_eq!(loaded.migration_receipts.unwrap().shell, vec![7, 8, 9]);
+    assert_eq!(
+        loaded.migration_receipts.unwrap().shell,
+        vec![7, 8, shell::EVALUATOR_REVISION]
+    );
 }
 #[test]
 fn selected_reset_retains_all_other_attempts_favorites_histories_and_example_drafts() {

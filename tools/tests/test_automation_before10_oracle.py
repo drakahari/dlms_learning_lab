@@ -183,12 +183,15 @@ class FixedAutomationSafety(unittest.TestCase):
         self.assertIn('"$row"', by_id['read-leading-trailing']['source'])
         self.assertNotIn('\\"$row', by_id['read-leading-trailing']['source'])
 
-    def test_all43_authored_inputs_are_exact_current_pack_metadata(self):
+    def test_original43_authored_inputs_are_exact_registered_pack_metadata(self):
         _, data=oracle.authored_inputs(ROOT)
         self.assertEqual(len(data['scripts']),43)
         self.assertEqual(sum(len(s['cases']) for s in data['scripts']),282)
         raw_packs={}
-        for name in oracle.expected_inputs(ROOT)['compiled_files']:
+        # This is the frozen authored-input table, not permission to run its
+        # historical producer against today's expanded library module closure.
+        pinned = oracle.strict_json(oracle.safe.read_bytes(ROOT/oracle.PIN_PATHS, oracle.SOURCE_CAP))
+        for name in pinned['compiled_files']:
             if name.startswith('scenarios/') and name!='scenarios/units-v1.json':
                 pack=json.loads((ROOT/name).read_bytes())
                 for s in pack['scenarios']: raw_packs[s['id']]=s
@@ -202,6 +205,21 @@ class FixedAutomationSafety(unittest.TestCase):
         units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())
         self.assertEqual(units['version'],1)
         self.assertEqual(len(units['units']),33)
+
+    def test_historical_module_closure_refuses_added_code_before_any_pin_or_child(self):
+        pinned = oracle.strict_json(oracle.safe.read_bytes(ROOT/oracle.PIN_PATHS, oracle.SOURCE_CAP))
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            path=root/oracle.PIN_PATHS
+            path.parent.mkdir(parents=True)
+            path.write_text(json.dumps(pinned))
+            for name in pinned['compiled_files']:
+                if name.startswith('src/'):
+                    p=root/name;p.parent.mkdir(parents=True,exist_ok=True);p.write_text('// synthetic module\n')
+            (root/'src/extra_module.rs').write_text('// extra code must invalidate the old closure\n')
+            with patch.object(oracle.safe,'pin',side_effect=AssertionError('No executable/source pin after closure mismatch')):
+                with self.assertRaisesRegex(oracle.safe.OracleError,'Library module set changed'):
+                    oracle.expected_inputs(root)
 
     def test_main_portable_projection_removes_only_receipts_and_retains_all_other_keys(self):
         main={'schema_version':1,'favorites':['fixed'],'clock':3,'attempts':{'fixed':{'draft':'unfinished'}},'migration_receipts':{'shell':[7,8,9]}}

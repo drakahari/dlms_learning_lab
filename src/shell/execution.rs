@@ -3,6 +3,44 @@
 use super::*;
 use preparation::Words;
 
+/// A temporary read policy, never an environment mutation. Recognition uses
+/// the original literal prefix, before expansion can erase its provenance.
+#[derive(Clone, Copy)]
+pub(super) enum ReadMode {
+    Default,
+    EmptyIfs,
+}
+fn empty_ifs_read(words: &[Word]) -> bool {
+    let Some(prefix) = words.first() else {
+        return false;
+    };
+    let Some(first) = prefix.0.first() else {
+        return false;
+    };
+    if first.quote != Quote::Bare
+        || first.text() != Some("IFS=")
+        || !prefix.0[1..].iter().all(|part| part.text() == Some(""))
+    {
+        return false;
+    }
+    // Quoted/escaped literal command text is valid; expanded heads are not a
+    // general environment-prefix capability. No concatenation allocation.
+    let Some(head) = words.get(1) else {
+        return false;
+    };
+    let mut remaining = "read";
+    for part in &head.0 {
+        let Some(text) = part.text() else {
+            return false;
+        };
+        let Some(rest) = remaining.strip_prefix(text) else {
+            return false;
+        };
+        remaining = rest;
+    }
+    remaining.is_empty()
+}
+
 enum CommandPhase {
     Begin,
     Arguments(Words),
@@ -24,6 +62,7 @@ struct CommandTask {
     saved_input: Option<(String, usize, usize, usize)>,
     input_guard_base: Option<usize>,
     last_status: Option<i32>,
+    read_mode: ReadMode,
 }
 impl CommandTask {
     fn bytes(&self) -> usize {
@@ -74,6 +113,7 @@ impl CommandTask {
             saved_input: None,
             input_guard_base: None,
             last_status: None,
+            read_mode: ReadMode::Default,
         }
     }
     fn next_assignment(&mut self, vm: &Vm) -> Result<(), String> {
@@ -138,10 +178,13 @@ impl CommandTask {
                 } else if self.command.words.iter().all(Word::assignment) {
                     self.next_assignment(vm)?;
                 } else {
-                    vm.reserve_memory(self.command.words.iter().map(word_bytes).sum())?;
+                    let start = usize::from(empty_ifs_read(&self.command.words));
+                    if start != 0 {
+                        self.read_mode = ReadMode::EmptyIfs;
+                    }
+                    vm.reserve_memory(self.command.words[start..].iter().map(word_bytes).sum())?;
                     self.phase = CommandPhase::Arguments(Words::new(
-                        self.command
-                            .words
+                        self.command.words[start..]
                             .iter()
                             .cloned()
                             .map(|w| (w, true))
@@ -302,7 +345,18 @@ impl CommandTask {
                     {
                         return Err("Assignments before a command are unsupported; put the assignment on its own line".into());
                     }
-                    vm.builtin(&self.args)?
+                    if matches!(self.read_mode, ReadMode::EmptyIfs)
+                        && !(self.args.len() == 3
+                            && self.args[0] == "read"
+                            && self.args[1] == "-r"
+                            && name(&self.args[2]))
+                    {
+                        return Err(
+                            "Unsupported empty IFS prefix; use only literal IFS= read -r NAME"
+                                .into(),
+                        );
+                    }
+                    vm.builtin(&self.args, self.read_mode)?
                 };
                 vm.rebase_pending(0, out.len() + err.len())?;
                 self.restore_input(vm)?;
@@ -359,6 +413,7 @@ fn local_declarations(values: Vec<String>, vm: &Vm) -> Result<Vec<LocalDeclarati
 struct Snapshot {
     env: BTreeMap<String, Value>,
     scanner: getopts::Scanner,
+    pipefail: bool,
     args: Vec<String>,
     status: i32,
     input: String,
@@ -371,6 +426,8 @@ pub(super) struct Pipeline {
     active: Option<CommandTask>,
     snapshot: Option<Snapshot>,
     multiple: bool,
+    pipefail: bool,
+    rightmost_nonzero: i32,
     started: bool,
     stages: usize,
     consumed: usize,
@@ -389,10 +446,17 @@ impl Pipeline {
             + self.snapshot.as_ref().map_or(0, |snapshot| snapshot.bytes)
             + self.pipe.len()
             + self.destination.as_ref().map_or(0, capture::dest_bytes)
+            + if self.multiple && self.pipefail {
+                std::mem::size_of::<i32>()
+            } else {
+                0
+            }
     }
     pub(super) fn new(commands: Vec<Command>) -> Self {
         Self {
             multiple: commands.len() > 1,
+            pipefail: false,
+            rightmost_nonzero: 0,
             commands: commands.into_iter(),
             active: None,
             snapshot: None,
@@ -407,6 +471,12 @@ impl Pipeline {
     pub(super) fn advance(&mut self, vm: &mut Vm) -> Result<bool, String> {
         if !self.started {
             self.started = true;
+            if self.multiple && vm.pipefail {
+                vm.reserve_memory(std::mem::size_of::<i32>())?;
+                vm.charge_expansion(std::mem::size_of::<i32>())?;
+                self.pipefail = true;
+                vm.rebase_pending(0, std::mem::size_of::<i32>())?;
+            }
             vm.reserve_memory(capture::dest_bytes(&vm.base_stdout))?;
             self.destination = Some(vm.base_stdout.clone());
             vm.rebase_pending(0, self.destination.as_ref().map_or(0, capture::dest_bytes))?;
@@ -433,6 +503,7 @@ impl Pipeline {
                 self.snapshot = Some(Snapshot {
                     env: vm.env.clone(),
                     scanner: vm.scanner.clone(),
+                    pipefail: vm.pipefail,
                     args: vm.args.clone(),
                     status: vm.outcome.status,
                     input: vm.input.clone(),
@@ -446,6 +517,9 @@ impl Pipeline {
         if let Some(command) = &mut self.active {
             if command.advance(vm, self.multiple)?.is_some() {
                 self.active = None;
+                if self.pipefail && vm.outcome.status != 0 {
+                    self.rightmost_nonzero = vm.outcome.status;
+                }
                 if self.stages == 1 && self.multiple {
                     self.consumed = vm.input_pos;
                 }
@@ -482,6 +556,7 @@ impl Pipeline {
                 vm.reserve_memory(cloned)?;
                 vm.env = saved.env.clone();
                 vm.scanner = saved.scanner.clone();
+                vm.pipefail = saved.pipefail;
                 vm.args = saved.args.clone();
                 vm.outcome.status = saved.status;
                 vm.input = if self.stages == 0 {
@@ -520,10 +595,14 @@ impl Pipeline {
             vm.release_pending(saved.bytes)?;
             vm.env = saved.env;
             vm.scanner = saved.scanner;
+            vm.pipefail = saved.pipefail;
             vm.args = saved.args;
             vm.input = saved.input;
             vm.input_pos = saved.pos + self.consumed;
             vm.input_id = saved.input_id;
+        }
+        if self.pipefail {
+            vm.outcome.status = self.rightmost_nonzero;
         }
         Ok(true)
     }

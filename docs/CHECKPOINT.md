@@ -113,13 +113,29 @@ All-targetClippy/fmt/diff and82 affected regression checks PASS; min19.71GiB
 available/max somePSI0.62%/OOM0, no sustainedpressure. Private native renderer per acknowledged
 contract0228b3e8 and substantive authored unit, with real rendered flows before
 coverage promotion. Preserve saved/active/live distinctions and positive serving.
-2. Delegated source-only empty-IFS read + pipefail evaluator10 capability task
-was authorized after actual baseline acceptance. Contract15f21c9d; no generalIFS,
-env-prefix framework, errexit, traps, new dependencies or host learner execution.
-Require actual28 reference observations, honest parser diagnostics, bounded Stop,
-real9-before10 migration and practice/assignment/history/backup isolation tests
-before normal2–3 distinct safe-automation assignments. Worker has NO heavy grant.
-3. BasicNAT pure privateR2 accepted20UNRUN; source7a784b73f0f635e6279ae9fb87094a2dd18a8145864d3bd282c75cdbec9f065a;
+2. Scoped evaluator10 implemented and gated on MAIN, reviewed for this milestone. SourceR2 5fa81c76; root merge preserves Apache production. Runtime3paths
+only. Literal-empty read, pipefail, no generalIFS/envprefix/errexit/deps/host.
+FullR1alltarget1535PASS/0FAIL/9ignored; actual9private9 separatelyPASS. After
+single cfgtest helper dedup,74lib+8migrationPASS; all185Python/finalClippyPASS.
+After10 fixedcomparison5PASS: all1570 historical rows,380vectors×4slices,
+357unchanged fullOutcome/ticks,23intended matchesactualBash,4Stop paths exact.
+Original producer/inputs remain exact, historical feature refuses10 before child.
+Receipts reviews/bash-safe-automation/evaluator10-main-gates-r1. No new9 recordings
+in publicGit. Native/scripted new10 use and packaged acceptance remain pending.
+3. Native Apache sourceR1 received10paths/13UNRUNchecks,97b50b62; root source
+review/integration next. Preserve current getopts_history revision updates and
+cfgtest catalog cache. Technical fixture metadata corrected only track/steps/
+URLs; state/Goal/solution/Lesson exact. Four normal assignments UNREGISTERED in
+scenarios/apache-static-v1.json plus tests/apache_static_content.rs:8groupsPASS,
+50current/next/preservation outcomes plus50separateexample rows. Alias-private
+leak fixed after sourcepeer55e109ca; duplicate-vhost negative proves exact two
+new rows fail while all other promises pass. Freeze corrected contentR2 receipt.
+4. Private3Bash tasks at reviews/bash-safe-automation/unit-source-r1/
+shell-safe-automation-v1.json,32cases (10/10/12). Source content review underway;
+not model-run or registered. Fix any review findings, then test taught/alternate/
+negative/draft/history outcomes before normal34th unit/native flows. Existing
+Introduction→separatepractice→fullassignment editor remains approved.
+5. BasicNAT pure privateR2 accepted20UNRUN; source7a784b73f0f635e6279ae9fb87094a2dd18a8145864d3bd282c75cdbec9f065a;
 contract32f9770a, peer reviews/nat-foundation/peer-review-r2. Not applied/exported.
 Actualpublic9 closure gate now satisfied; root may integrate/gate after current
 heavy run. Static+finite dynamic address mapping only; explicit Clear/no expiry/

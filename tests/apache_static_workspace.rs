@@ -662,7 +662,10 @@ fn current_real_script_records_genuine678_histories_both_editors_backup_restore_
     std::fs::write(path.with_extension("before-shell-v8.json"), old7).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v9.json")).unwrap(),
+        std::fs::read(
+            path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
+        )
+        .unwrap(),
         old8
     );
     assert_eq!(

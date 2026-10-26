@@ -114,3 +114,7 @@ pub mod spanning_tree;
 
 pub mod spanning_tree_teaching;
 pub mod spanning_tree_workspace;
+
+#[cfg(test)]
+#[path = "../tests/support/actual9_evidence.rs"]
+pub(crate) mod actual9_test_evidence;

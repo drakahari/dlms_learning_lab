@@ -78,6 +78,16 @@ validation; direct loader and integration tests remain uncached. Keep two runtim
 threads and the shared heavy-work lock; this is not permission to add concurrency.
 The isolation regression and measured complete-run evidence belong in the ledger.
 
+The immutable public-evaluator9 capture example is a historical-only target behind
+the nondefault `historical-evaluator9-capture` Cargo feature. Ordinary all-target
+checks exclude that one old producer; its accepted original source, executable
+and evidence remain preserved privately. Explicit selection of that target,
+feature or `--all-features` is refused before compilation unless the selected
+checkout really declares evaluator9. A feature never switches current evaluator
+semantics. Use ordinary default-feature gates for current development; do not
+bypass this refusal to relabel historical observations. New comparison and private
+migration tests run current in-process simulation against hash-pinned old evidence.
+
 ## Disk location and toolchain
 
 The dedicated ignored directory is `.build-artifacts` under the main checkout.
