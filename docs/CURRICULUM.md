@@ -2,7 +2,10 @@
 
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
-**125 authored assignments/31 units:38CCNA,24LPIC-1,20LPIC-2,43Bash/Shell**.
+**133 authored assignments/33 units:42CCNA,28LPIC-1,20LPIC-2,43Bash/Shell**.
+Eight newly registered package/STP assignments have model/content gates; all eight
+also pass development-native flows (69 package and48 STP captures). Their installed-candidate
+acceptance remains pending.
 The three-task DHCP unit passes model/content and complete installed native
 flows. The125-lab Fedora candidate at14cf248 passes normal startup and real
 process-reopen checks. Original IDs/progress remain; numerical practice and900

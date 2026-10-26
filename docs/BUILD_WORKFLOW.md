@@ -70,6 +70,14 @@ or abbreviated forms are rejected. Do not call raw Cargo/rustc to evade the shar
 compiler/probe run must be coordinated through this runner or an explicitly
 reviewed extension to it; it must not overlap another heavy command.
 
+UI unit-test setup validates the immutable bundled catalog once per test binary
+and clones that owned baseline into each fresh application. This cfg(test)-only
+cache shares no context, profile, progress, draft, grade or expected outcome.
+Normal/development/candidate GUI binaries still run their original pack/unit
+validation; direct loader and integration tests remain uncached. Keep two runtime
+threads and the shared heavy-work lock; this is not permission to add concurrency.
+The isolation regression and measured complete-run evidence belong in the ledger.
+
 ## Disk location and toolchain
 
 The dedicated ignored directory is `.build-artifacts` under the main checkout.

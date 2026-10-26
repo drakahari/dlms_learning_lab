@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **125 authored assignments:**38 CCNA,24 LPIC-1,20 LPIC-2 and43 Bash/Shell in31 units. The current Fedora candidate passes installed lifecycle, all three new DHCP learning flows, normal Wayland startup and real process-reopen checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **133 authored source assignments:**42 CCNA,28 LPIC-1,20 LPIC-2 and43 Bash/Shell in33 units. The last installed candidate contains125; the eight new package/STP lessons are undergoing native acceptance. The current Fedora candidate passes installed lifecycle, all three new DHCP learning flows, normal Wayland startup and real process-reopen checks. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -52,9 +52,9 @@ or DNS-service proof.
 The125-lab Fedora candidate at14cf248 passes all three installed native flows,
 including incorrect/partial/alternate work, invalidation, resume/reset and
 Light150/Dark200 editing. Startup and progress evidence are recorded in
-[INSTALLATION.md](docs/INSTALLATION.md). The source also has reviewed pure Debian
-package and steady-state spanning-tree foundations; those add no authored labs
-until their workspaces and teaching are accepted. Remaining objective gaps stay
+[INSTALLATION.md](docs/INSTALLATION.md). The source now adds four [Debian package assignments](docs/DEBIAN_PACKAGE_LESSONS.md)
+and four [steady-state spanning-tree assignments](docs/SPANNING_TREE_LESSONS.md),
+with separate teaching/practice and full state-based tasks. All eight development-native flows pass; installed-candidate gates are in progress. Remaining objective gaps stay
 explicit in the [coverage ledger](docs/OBJECTIVE_MAPPING.md). This is a tested
 milestone, not complete curriculum or a public release.
 

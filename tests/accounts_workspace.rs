@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 125);
+    assert_eq!(all.len(), 133);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -403,11 +403,24 @@ fn all_bundled_attempts_current_records_and_selected_reset_survive_exact_roundtr
 }
 #[test]
 fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
-    let old = pack::bundled()
-        .unwrap()
+    let all = pack::bundled().unwrap();
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.initial, State::DebianPackages { .. }))
+            .count(),
+        4
+    );
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.initial, State::SpanningTree { .. }))
+            .count(),
+        4
+    );
+    let old = all
         .into_iter()
-        // This regression compares the original pre-context-wrapper kinds.
-        // OSPF, multi-unit services and DHCP require pinned goals and have dedicated regression tests.
+        // Compare the legacy context-free kinds. Packages and spanning tree,
+        // like accounts, OSPF, multi-unit services and DHCP, require pinned goals
+        // and have dedicated context-rejection and goal-aware regression tests.
         .filter(|s| {
             !matches!(
                 s.initial,
@@ -415,6 +428,8 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::Ospf { .. }
                     | State::UnitManager { .. }
                     | State::DhcpV4 { .. }
+                    | State::DebianPackages { .. }
+                    | State::SpanningTree { .. }
             )
         })
         .collect::<Vec<_>>();

@@ -59,11 +59,105 @@ fn opening_terminal_assignment_keeps_task_visible_and_scrolling_does_not_grow_ou
         );
     }
 }
+// Cache only trusted compile-time catalog validation. Every app receives owned
+// clones; contexts, profiles, progress, workspaces and fixture injection stay fresh.
+pub(super) fn validated_ui_catalog() -> (Vec<Scenario>, Vec<course::Unit>) {
+    static CATALOG: std::sync::OnceLock<(Vec<Scenario>, Vec<course::Unit>)> =
+        std::sync::OnceLock::new();
+    CATALOG
+        .get_or_init(|| {
+            let scenarios = pack::bundled().expect("Bundled pack validates");
+            let units = course::bundled(&scenarios).expect("Bundled units validate");
+            (scenarios, units)
+        })
+        .clone()
+}
 fn app() -> (egui::Context, LabApp) {
     let ctx = egui::Context::default();
     let mut a = LabApp::from_context(&ctx, true, false);
     a.smoke = false;
     (ctx, a)
+}
+#[test]
+fn ui_catalog_cache_clones_do_not_share_scenarios_units_or_app_state() {
+    let baseline = serde_json::to_vec(&validated_ui_catalog()).unwrap();
+    let (first_ctx, mut first) = app();
+    let (second_ctx, mut second) = app();
+    assert_ne!(
+        first.path, second.path,
+        "each app needs its own profile path"
+    );
+    assert_ne!(
+        first._smoke_profile.as_ref().unwrap().path(),
+        second._smoke_profile.as_ref().unwrap().path()
+    );
+    assert!(first.progress.attempts.is_empty() && second.progress.attempts.is_empty());
+    assert!(first.progress.favorites.is_empty() && second.progress.favorites.is_empty());
+    let i = first
+        .scenarios
+        .iter()
+        .position(|s| s.id == "ccna-gateway")
+        .unwrap();
+    let id = first.scenarios[i].id.clone();
+    first.launch(i);
+    first.progress.favorites.insert(id.clone());
+    first
+        .progress
+        .attempts
+        .get_mut(&id)
+        .unwrap()
+        .workspace
+        .as_mut()
+        .unwrap()
+        .client_draft
+        .as_mut()
+        .unwrap()
+        .address = "unfinished first app".into();
+    assert!(second.progress.attempts.is_empty() && second.progress.favorites.is_empty());
+    second.launch(i);
+    assert_ne!(
+        first.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .client_draft
+            .as_ref()
+            .unwrap()
+            .address,
+        second.progress.attempts[&id]
+            .workspace
+            .as_ref()
+            .unwrap()
+            .client_draft
+            .as_ref()
+            .unwrap()
+            .address
+    );
+    first.scenarios[i].title.push_str(" first app edit");
+    first.scenarios[i].solution.push("first app only".into());
+    let State::Network { address, .. } = &mut first.scenarios[i].initial else {
+        panic!("supplied gateway scenario kind");
+    };
+    *address = "192.0.2.222".parse().unwrap();
+    first.units[0].title.push_str(" first app edit");
+    first.units[0].labs.clear();
+    first.units[0].prerequisites.push("first-app-only".into());
+    assert!(
+        serde_json::to_vec(&(&first.scenarios, &first.units)).unwrap() != baseline,
+        "mutation setup must differ from the trusted catalog"
+    );
+    assert!(
+        serde_json::to_vec(&(&second.scenarios, &second.units)).unwrap() == baseline,
+        "scenario/initial/solution or unit mutations leaked into another app"
+    );
+    assert!(
+        serde_json::to_vec(&validated_ui_catalog()).unwrap() == baseline,
+        "app mutations leaked into the retained trusted base"
+    );
+    let second_spacing = second_ctx.style().spacing.item_spacing;
+    first_ctx.style_mut(|s| s.spacing.item_spacing.x += 7.);
+    assert_eq!(second_ctx.style().spacing.item_spacing, second_spacing);
+    assert!(second.progress.favorites.is_empty());
 }
 fn accounts_fixture_app(view: teaching::View) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();

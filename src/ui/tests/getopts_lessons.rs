@@ -1,5 +1,5 @@
 //! Headless authoring regressions. Fixture append is confined to this test module;
-//! the production controller requires the registered122 catalogue and normal unit.
+//! the production controller requires the registered133 catalogue and normal unit.
 use super::*;
 use serde::Deserialize;
 const IDS: [&str; 3] = [
@@ -24,8 +24,8 @@ fn proposed_app() -> (egui::Context, LabApp) {
             .unwrap(),
         );
     }
-    assert_eq!(a.scenarios.len(), 122);
-    assert_eq!(a.units.len(), 30);
+    assert_eq!(a.scenarios.len(), 133);
+    assert_eq!(a.units.len(), 33);
     (ctx, a)
 }
 fn tick(ctx: &egui::Context, a: &mut LabApp, kind: ScriptLessonFlow) -> Option<String> {

@@ -51,7 +51,7 @@ impl LabApp {
             || self.theme_preview
             || self.data_tools.modal_open();
         let s = &self.scenarios[i];
-        ui.heading(&s.title);
+        self.metrics.package_heading = Some(ui.heading(&s.title).rect);
         ui.label(
             RichText::new(
                 "Virtual Debian packages · Script-free simulation; no host packages or services.",
@@ -181,8 +181,9 @@ impl LabApp {
                     let feedback=controls::feedback(ui,r.clicked(),|ui|{
                         if l.checked{
                             let rows=l.checks(lesson);let solved=rows.iter().all(|r|r.0);
-                            if solved{ui.colored_label(palette(ui).success,"Example checks pass · No assignment credit");}
-                            current_rows(ui,&rows,(&s.id,true));
+                            if solved{self.metrics.package_result=Some(ui.colored_label(palette(ui).success,"Example checks pass · No assignment credit").rect);}
+                            let first = current_rows(ui,&rows,(&s.id,true));
+                            if !solved { self.metrics.package_result=first; }
                         }
                     });self.metrics.feedback=Some(feedback.response.rect);
                     ui.label(format!("Try a change: {}",lesson.try_change.description));
@@ -265,29 +266,33 @@ impl LabApp {
                 }
                 let checked = w.checked;
                 let mut complete = false;
-                let result = controls::feedback(ui, r.clicked(), |ui| {
-                    if checked {
-                        let rows = progress::current_debian_packages_checks(
-                            &self.progress.attempts[&s.id],
-                            s,
-                        );
-                        complete = rows.iter().all(|r| r.0);
-                        if complete {
-                            ui.colored_label(
+                let result =
+                    controls::feedback(ui, r.clicked(), |ui| {
+                        if checked {
+                            let rows = progress::current_debian_packages_checks(
+                                &self.progress.attempts[&s.id],
+                                s,
+                            );
+                            complete = rows.iter().all(|r| r.0);
+                            if complete {
+                                self.metrics.package_result = Some(ui.colored_label(
                                 palette(ui).success,
                                 "Objective complete · Current package and file checks pass.",
-                            );
+                            ).rect);
+                            }
+                            let first = current_rows(ui, &rows, (&s.id, false));
+                            if !complete {
+                                self.metrics.package_result = first;
+                            }
+                            if complete {
+                                egui::CollapsingHeader::new("Why this works")
+                                    .id_salt(("package-why", &s.id, challenge))
+                                    .show(ui, |ui| {
+                                        ui.label(&s.explanation);
+                                    });
+                            }
                         }
-                        current_rows(ui, &rows, (&s.id, false));
-                        if complete && !challenge {
-                            egui::CollapsingHeader::new("Why this repair works")
-                                .id_salt(("package-why", &s.id))
-                                .show(ui, |ui| {
-                                    ui.label(&s.explanation);
-                                });
-                        }
-                    }
-                });
+                    });
                 self.metrics.feedback = Some(result.response.rect);
                 self.metrics.completion = complete;
                 if complete {
@@ -308,24 +313,23 @@ impl LabApp {
         let s = &self.scenarios[i];
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         ui.add_enabled_ui(!blocked, |ui| {
+            if a.hints > 0 {
+                ui.label(&s.hints[a.hints - 1]);
+            }
+            let hint = ui.add_enabled(
+                a.hints < s.hints.len(),
+                button(if a.hints == 0 {
+                    "Show a hint"
+                } else {
+                    "Another hint"
+                }),
+            );
+            self.metrics.hint = Some(hint.rect);
+            if hint.clicked() {
+                a.hints += 1;
+                self.dirty = true;
+            }
             if !a.challenge {
-                if a.hints > 0 {
-                    ui.label(&s.hints[a.hints - 1]);
-                }
-                if ui
-                    .add_enabled(
-                        a.hints < s.hints.len(),
-                        button(if a.hints == 0 {
-                            "Show a hint"
-                        } else {
-                            "Another hint"
-                        }),
-                    )
-                    .clicked()
-                {
-                    a.hints += 1;
-                    self.dirty = true;
-                }
                 egui::CollapsingHeader::new("Optional walkthrough")
                     .id_salt(("package-guide", &s.id))
                     .show(ui, |ui| {
@@ -376,9 +380,17 @@ impl LabApp {
         });
     }
 }
-fn current_rows(ui: &mut egui::Ui, rows: &[(bool, String)], scope: (&str, bool)) {
+fn current_rows(
+    ui: &mut egui::Ui,
+    rows: &[(bool, String)],
+    scope: (&str, bool),
+) -> Option<egui::Rect> {
+    let mut first = None;
     for (_, message) in rows.iter().filter(|r| !r.0).take(2) {
-        ui.colored_label(palette(ui).error, message);
+        let r = ui.colored_label(palette(ui).error, message);
+        if first.is_none() {
+            first = Some(r.rect);
+        }
     }
     egui::CollapsingHeader::new("Current checks")
         .id_salt(("package-checks", scope))
@@ -390,6 +402,7 @@ fn current_rows(ui: &mut egui::Ui, rows: &[(bool, String)], scope: (&str, bool))
                 ));
             }
         });
+    first
 }
 fn displayed(s: &str, command: bool) -> Cow<'_, str> {
     if !s

@@ -347,7 +347,45 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::Ipv4Acl { network } = &mut a.state {
+        if matches!(a.state, State::DebianPackages { .. }) {
+            let engine::Goal::DebianPackages { definition } = &s.goal else {
+                panic!("package assignment goal kind");
+            };
+            let target = definition
+                .requirements
+                .iter()
+                .find_map(|r| match r {
+                    dlms_learning_lab::debian_packages_workspace::Requirement::Installed {
+                        package,
+                        ..
+                    }
+                    | dlms_learning_lab::debian_packages_workspace::Requirement::RetainedConfig {
+                        package,
+                        ..
+                    } => Some(package),
+                    _ => None,
+                })
+                .expect("package task requires an installed or retained record");
+            // Purge an actual required record via the supported goal-aware CLI.
+            engine::execute_for_goal(&mut a.state, &s.goal, &format!("dpkg -P {target}")).unwrap();
+        } else if let State::SpanningTree { simulation } = &a.state {
+            let bridge = simulation.topology().bridges.keys().next().unwrap().clone();
+            let action = dlms_learning_lab::spanning_tree::Action::BridgeOnline {
+                bridge,
+                online: false,
+            };
+            // Every normal task explicitly preserves supplied bridge availability.
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    dlms_learning_lab::spanning_tree_workspace::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
+        } else if let State::Ipv4Acl { network } = &mut a.state {
             // Removing the real policies permits every forbidden flow again.
             network.devices.clear();
         } else if let State::UnitManager { simulation } = &a.state {
@@ -467,8 +505,10 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
         assert!(!engine::solved(&a.state, &s.goal));
         p.attempts.insert(s.id.clone(), a);
     }
+    assert_eq!(p.attempts.len(), labs.len());
     progress::save(&path, &p).unwrap();
     let q = progress::load(&path, &labs).unwrap();
+    assert_eq!(q.attempts.len(), labs.len());
     for s in &labs {
         assert!(!engine::solved(&q.attempts[&s.id].state, &s.goal));
     }

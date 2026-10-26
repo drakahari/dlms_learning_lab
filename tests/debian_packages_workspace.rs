@@ -486,7 +486,7 @@ fn every_original125_definition_unit_and_actual_history_survives_optional_metada
         serde_json::from_str(include_str!("fixtures/debian-packages-original125.json")).unwrap();
     assert_eq!(baseline["scenarios"].as_array().unwrap().len(), 125);
     let current = bundled();
-    assert_eq!(current.len(), 125);
+    assert_eq!(current.len(), 133);
     for raw in baseline["scenarios"].as_array().unwrap() {
         let x = current
             .iter()
@@ -508,7 +508,11 @@ fn every_original125_definition_unit_and_actual_history_survives_optional_metada
         );
     }
     let units: Value = serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
-    assert_eq!(units, baseline["units"]);
+    assert_eq!(units["version"], baseline["units"]["version"]);
+    assert_eq!(
+        &units["units"].as_array().unwrap()[..31],
+        baseline["units"]["units"].as_array().unwrap().as_slice()
+    );
     let original = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let mut p = progress::decode(original, &catalog).unwrap();
     let old = serde_json::to_value(&p.attempts).unwrap();

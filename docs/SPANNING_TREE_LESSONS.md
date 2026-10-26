@@ -1,7 +1,10 @@
 # Ideal spanning-tree unit — authored source, normal-unit acceptance pending
 
-Four distinct assignments in `scenarios/spanning-tree-v1.json` remain unbundled.
-The normal catalog stays125/31 and its coverage matrix is unchanged.
+Four distinct assignments in `scenarios/spanning-tree-v1.json` are now bundled.
+The source catalog is133/33; all four normal lessons pass development-native
+flows with48 actual captures. See SPANNING_TREE_LESSONS_NATIVE.md for exact
+identity and retained failures; installed133 acceptance remains pending.
+The accepted installed candidate remains125/31 and coverage is unchanged.
 
 | Task | Full practical outcome | Distinct reasoning |
 | --- | --- | --- |

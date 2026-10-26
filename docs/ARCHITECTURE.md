@@ -149,7 +149,7 @@ Authoring difficulty labels are the shared `pack::DIFFICULTIES`: Beginner, Inter
 
 Pure OSPF compatibility/SPF and virtual multi-unit manager foundations are documented in OSPF_SUBSET.md and UNIT_MANAGER_SUBSET.md. These modules add no playable lab or issuer coverage by themselves. Their native/backend adapters remain under independent review; the existing IPv4/static/single-service activities and progress stay unchanged.
 
-## Current M67 integration and authoring
+## Historical M67 integration and authoring
 
 The earlier foundation-only notes above are historical. ACL policy, local-account,
 LLDP, persistent-mount and IPv4-routing units now have real authored tasks and
@@ -175,7 +175,7 @@ normal curriculum until main integration, native editor/terminal acceptance and
 content verification. Existing single-Service data and commands remain intact.
 No original project VM architecture or dynamic executable plugin is imported.
 
-The shell engine remains revision7. Proposed case/esac work requires an actual
+At M67 the shell engine remained revision7. Proposed case/esac work required an actual
 unchanged7 baseline and explicit multirevision progress preservation before
 activation; source proposals are not implemented capability or mastery.
 
@@ -185,3 +185,38 @@ absence within the bounded zone. It rejects failed/incomplete external-alias
 walks; it is not a synchronization or event-history credential. Author handovers
 with positive required answers and Published plus both serving-copy negatives.
 See DNS_NO_ANSWER_SUBSET.md. This capability introduces no new State or curriculum.
+
+
+## Current authoring boundary — M116 in progress
+
+Current source has133 authored assignments/33 units, including four Debian
+package and four ideal STP tasks. The accepted installed candidate still has125;
+new-unit native/installed evidence is tracked in CHECKPOINT.md, not implied by
+source registration. Bash evaluator9 supports the documented functions, arrays,
+substitution, expansion and option interfaces; historical subset/count statements
+above describe their dated milestone, not current capability. SHELL_SUBSET.md is
+the current language contract. No new evaluator10 behavior is active.
+
+For packages use the typed script-free model, guarded closed terminal and separate
+bounded assignment/example Sessions. Optional authored command annotations must
+parse to their typed action and reach the same effect; Insert is never Run. Goals
+grade current records, dependencies, supplied file text and retention, not history
+or a matching command string. See DEBIAN_PACKAGE_LESSONS.md,
+DEBIAN_PACKAGES_TERMINAL.md and DEBIAN_PACKAGES_WORKSPACE.md.
+
+For STP use the pure ideal P2P graph, identity-pinned settings draft and independent
+example. Apply is atomic and separate from Check. Include positive connectivity
+and availability requirements so disabling competitors cannot satisfy the task.
+Grade freshly derived roots/roles/costs/paths, never stored success; malformed or
+pending drafts cannot pass. Native selectors use shared form rows and bounded
+popup content, with actual font-derived heights/label columns. See
+SPANNING_TREE_LESSONS.md and SPANNING_TREE_WORKSPACE.md. Neither model proves
+real package transactions or protocol/device behavior.
+
+The pure Apache static-server module remains a foundation with no normal authored
+unit or native renderer. Reviewed adapter proposals and other private future
+capabilities are not registered content or objective coverage. Reuse the ordinary
+versioned pack loader, validate identifiers/state/objectives/hints/reachability,
+retain exact original catalog prefixes and genuine history, then verify separate
+practice/experiments, alternatives/negatives and actual native full assignments
+before promoting evidence. No executable scenario scripts or plugin platform.

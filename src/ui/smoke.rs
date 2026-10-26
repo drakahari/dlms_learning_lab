@@ -8,6 +8,7 @@ mod acl_lessons;
 mod capture_lessons;
 mod case_history;
 mod client_learning;
+mod debian_packages_lessons;
 mod dhcpv4;
 mod dhcpv4_lessons;
 mod dns_reverse;
@@ -21,6 +22,7 @@ mod ospf_lessons;
 pub(super) mod reopen;
 mod seed_teaching;
 pub(super) mod spanning_tree;
+mod spanning_tree_lessons;
 mod substitution;
 mod unit_manager;
 mod unit_manager_lessons;
@@ -422,8 +424,22 @@ impl LabApp {
                 }
                 shot = capture;
             }
+            n @ 35000..=35999 => {
+                let (advance, capture) = self.spanning_tree_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 33000..=spanning_tree::LAST => {
                 let (advance, capture) = self.spanning_tree_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 34000..=34999 => {
+                let (advance, capture) = self.debian_packages_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

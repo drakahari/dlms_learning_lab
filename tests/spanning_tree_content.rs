@@ -214,8 +214,8 @@ fn separate_graphs_fill_only_then_apply_and_exact_experiment_expectations_hold()
 #[test]
 fn unfinished_drafts_resume_honestly_and_selected_reset_preserves_other_attempts() {
     let labs = labs();
-    let mut catalog = pack::bundled().unwrap();
-    catalog.extend(labs.clone());
+    let catalog = pack::bundled().unwrap();
+    assert!(labs.iter().all(|s| catalog.iter().any(|c| c.id == s.id)));
     let mut p = Progress {
         schema_version: 1,
         ..Default::default()

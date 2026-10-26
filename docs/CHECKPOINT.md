@@ -16,9 +16,10 @@ absolute cwd. No Context calls inside ctx.data closures. Workers NO heavy grants
 
 ## Current source and accepted candidate
 
-Source HEAD61262bf pushed (M110 package adapter/terminal and M111 STP adapter/
-Apache core), after accepted native14cf248. New source capabilities are NOT
-installed-candidate acceptance. Accepted candidate stays the exact14cf ELF below.
+Source M116 follows pushed d424ffb (M115 package native sessions); registration
+and normal lesson controllers have completed development-native/full-test gates. Current SOURCE133 labs/33 units =
+42CCNA/28LPIC-1/20LPIC-2/43Bash. New source/native development evidence is NOT
+installed-candidate acceptance. Accepted candidate stays exact14cf ELF below.
 
 Accepted scoped Fedora125 labs/31 units =38CCNA/24LPIC-1/20LPIC-2/43Bash,
 all28 themes, old122 specs/order/30-unit prefix and genuine writer6/7/8 preserved.
@@ -93,48 +94,96 @@ separate. All curriculum/platform completion remains Open.
 
 ## Immediate next actions — continue implementation
 
-No heavy run active at this write. MAIN57a2829 M113/M114 pushed; earlier8246971,
-61262bf,620b918 pushed. Package nativeR1 integrated UNCOMMITTED13paths over BOTH
-STP/DHCP, sourcepeeraccepts. All68lib8content15terminal20adapterPASS;Session9/10
-firstthen10/10retry aftertest-onlybackupinspectioncontrolcorrection (oldRun8→9
-islegitimateexplicitrecheck, ordinaryresumeexact). Eight UI testsPASS; stale
-previous-framebuttonrect correctedtosameframepaintbounds, strictcontainsintact.
-23combinedpackage/STPUIcontrollerPASS;9broadertargets77PASS, ClippyR2/fmt/diffPASS.
-Nomainmodel/Goal/initial/historyfixturechangeinthosetestfixes. Commit/pushM115.
+Package normal-four development native run completed/reaped, exit0. MAIN M116
+uncommitted: appended package/STP packs and two units, faithful six command
+annotations, exact old125 full typed specs/order/31-unit prefix/genuine histories
+preserved (catalog133 tests), no new Attempts invented. First registration
+gate81 checks/eight targets PASS. Four package controller plus nine UI groups
+PASS, alltargetClippy/fmt/diff PASS before STP-controller integration.
 
-Next applyfaithful4packageannotations fromprivate draft-r4/ANNOTATIONS.json,
-register4package+4STPsource tasksand2units, prove exact old125/31prefixandgenuine
-history/noinventednewattempts. Normalcountthen133/33SOURCEonly; notnativeaccepted
-untilactualfullauthoredflows. Existingnewdata proseclarifiesindependent samples
-anddestructiveReset;STPdefinesbridge/root. Original125specs/order unchanged.
+Normal package native PASS69actualPNG, run-eq60b9m2, log
+m116-package-normal-four-native-r1. ELF27c0d57771f8e090cec1d3da0e796982a03b99f64d32713bb0f2dde0f02f0e0f.
+Private receipt reviews/package-management/development-normal133-native-r1.
+Full4 Intro/separatepractice/experiment/repair/assignment, wrong/partial/reference/
+alternate/current-invalidation, real Favorite/BackContinue, exact raw/portable/
+receipt warm save/readback before selected ResetCancel/Confirm, Challenge.
+Observed946×929 and1920×1080, Light150/Dark200typing. Representative actual
+Intro/assignment/partial-feedback renders inspected. Min23.36GiB/PSI0/OOMdelta0.
+Not packaged/cold-process/novice/physical-device/otherOS acceptance.
 
-Reviewedpackagecontroller6paths pendingintegration:
-reviews/package-management/lessons-native-source-r1/SOURCE-READY.json
-SHA978991b9ec6ee39804389aad3ac693b2733e392871a81b46f4448cf908968df4.
-Runtime requiresnormalunit/fourIDs/annotations;69shotsUNRUN. Applyincrementally
-overcurrentUI/STP/guidancechanges. Sourcepeeraccepts; stage34000package-lessons.
-4headlessgroupsandactualrender/save/idle/Tick gatedbeforenativerun.
+Normal STP controllerR2 integrated incrementally, retaining package34000/current
+guidance/133. First headless3/4 exposed remembered popup width after zoom; shared
+fit_popup_contents constrains real child width before choices, strict visibility
+unchanged. Retry4/4 PASS. NativeR1 sandboxNoCompositor retained; approveddesktop
+R2 normal, intentionally stopped after30images to fix observed Bridge/Port
+label-shift. Shared form_row aligns them, rootportlabel plain;19STPUI/controller
+groups + strengthened width/scalematrix PASS.
 
-STPdevelopmenttechnicalfixturePASS15headless+16nativeR5PNGs at946x929/density1.15,
-Light150/Dark200typed actualfields;69bafc057c9eae362ebfc773b0580a9776f9bab177e11506827e89e0046748e5.
-Receipt reviews/spanning-tree-foundation/development-native-r5,run-5to3l6jq.
-EarlierR1-3scrolllock(productcheckedflagrepeatedfeedbackreveal)fixedevent-only+
-idleframes;pointerfixaloneinsufficient. R4favoritecontrollerdirtysetupfixed.
-Warmonly/notpackaged/normalfourlessons/cold/actualFavoritebutton/novice/otherOS.
-FourSTPcontent6groups+20core18adapterPASS;fourpackage8groupsPASS.
+Final nativeR3 PASS48actual/allfour normal tasks, session68852 REAPED, log
+m116-stp-normal-four-native-r3/run-nhs3g6gm. ELFb49b6b50bb380c5b752f03403de63e135e9e5fdd08692131a6ccaeffc5589722;
+exactsource/start/finalreceipt reviews/spanning-tree-foundation/development-normal133-native-r3.
+Measured946×929/1920×1080,100/150/200%, Light/Dark focusedtyping, full Intro/
+exampleexperiment/repair/assignmentwrongpartialreferencealternateinvalidation,
+exactwarmraw/portable/receipts/bothdrafts/realFavoriteBackContinue/ResetCancelConfirm.
+Representativefinalrendersreviewed, min23.51GiB/PSI0/OOMdelta0. Notpackaged/cold/
+novice/device/screenreader/otherOS/protocol acceptance.
 
-ApacheadapterR2sourcepeeraccepts20UNRUNgroups: manifest08f03854db1e83367f6614841ff8f2c301221b788f8c8bcb0d99af0627af9c05.
-TwofieldlessRequirements nowemptySTRUCT{}samewire/unknownrefusal; lengthbefore
-trimpreflight. AllotherR1source/prereq/fixtures exact. Integrate/gatesaftercurrent
-unitwork; notappcontent/coverage.
+AlltargetClippyR3,149Python,coverage/paletteintegrity,fmtdiff PASS. Coverage stays
+136/1/1103. Applied reviewed currentcount-only overlay16paths from
+reviews/m116-current-count-maintenance/source-r2 (manifestda576959) incl2current
+DHCPcoldguards. History/oldprefix/math/fixtures/outputs unchanged,110occurrences
+classified. First fullR1 reaped1469PASS/15FAIL: stale122 setup, contextfree scope, broken-
+state dispatch and exact later-ID absence set. Applied reviewed7fileR5 overlay
+(d2213b29), retaining110legacycontextfree and genuine116/40/246, actually breaking
+and resuming newPkg/STP through goal-aware real mutations.
 
-ccna_discovery SOURCEONLYpreparingfixedpublic9collector+boundedbuiltin-onlyBash
-oracleproposal (contract15f21c9d ACK) BEFOREevaluator/parserchanges.43labs/282cases/
-43examples9observationsmustbepinned; preserve6/7/8/9, don'trelabelold8. EmptyIFS
-readfirst/pipefailnextthen2–3distinctbyte-preserving/status-handlingprojects, no
-generalIFS/set/errexit/traps/hostsecurityclaims/deps. independent_reviewfinished
-packagecontroller/Apachepeerreviews and isavailable. ALLworkersnoheavygrants.
-Continueallfourtracks; do notstopatFedora package.
+Test-only immutable validatedcatalog cache (7fba97b3) applied; production actual
+loaders unchanged. Isolation firstgatePASS. Complete all-targetR2 PASS1485/0,
+116harnesses,273UI PASS77.53s vs1144.79s (runtime2unchanged). Min22.76GiB/PSI0/
+OOMdelta0; receipt reviews/catalog133/full-regression-r2. Session23123REAPED.
+ClippyR4 PASS/reaped, fmt/diff PASS. No heavy active. Next privacy/git review,
+coherentM116commit/push, cleanFedora133candidate and actual installedsameELF
+acceptance. No partial-full-green claim.
+
+After gates: broader regressions/Clippy/coverage/palette, coherent M116 commit/push,
+clean identified133Fedora candidate; actual installed lifecycle,11normal starts,
+cold progress,72alignment and normal-new-unit acceptance on SAME ELF. Do not
+treat package or counts as product completion. Matrix unchanged until evidence.
+
+PRIVATE Apache integration R4 peer accepted, no MAIN writes:
+reviews/apache-static/main-backend-integration-r4/SOURCE-READY.json SHA36131a0b;
+peerreceipt main-backend-peer-review-r4 SHA90b8d541. R3 fixes test-only units
+null==null by actual version equality+1. R4 reciprocal helper admission preserves
+validator bodies and rejects constructed mixed package/Apache metadata; save/
+decode already rejected it, not an import bypass. New21st both-direction group;
+all21 UNRUN. Preserve prior revisions/fixtures. R2 manifest
+08f03854db1e83367f6614841ff8f2c301221b788f8c8bcb0d99af0627af9c05.
+21prospective backend groups UNRUN; retain strict empty-struct Requirements and
+length-before-trim preflight. Run max32probe cost before native renderer. Minimal
+renderer contract0228b3e8ba3c071f05d534c0d43942612751f9f599fee413d43d9e967459cebc
+ACK only, implementation conditional on backend gates/timing; no real Apache.
+
+Bash public9 BEFORE10 collectorR2 source peer accepted, manifest
+80b35b76794fedb3197a1024077d6f17ea90cdd50ddfb44c7a059b90ae49e407.
+27Python+4Rust UNRUN; no evaluator change. MUST rebase/repin old125-base capture
+source closure to CLEAN current133 before execution.43labs/282cases/43examples
++28fixed builtin-only Bash cases and8 VM-only boundaries, actual observations,
+retained executable FDs/source/input/toolchain pins, bounded output/time/cleanup.
+R2 fixes actual-byte aggregate charge and whole deadline BEFORE all children.
+Keep genuine6/7/8/9/both old8 unfinished-example sources; no retag/regenerated
+fixtures. Next scoped emptyIFS read, pipefail only after controlled reference,
+then2–3 distinct safe automation projects. Contract15f21c9d ACK, no generalIFS/
+errexit/traps/host-security claims/dependencies. ALL workers no heavy grants.
+
+ccna_discovery SOURCEONLY staging pure BasicNAT privately after reviewed contractR2
+32f9770a9001b634a51911478f494086179504b0c6b2bd1ab15b29cda73f00dc. Static+finite
+dynamic address maps only, typed unmatched/exhausted outcomes, explicitClear/no
+expiry/inbound-peer/routing/PAT limitations and numeric admissioncaps. NO MAIN
+merge before public9 baseline capture (libraryclosure pins), no host/deps/new
+registry/content/coverage claim, no heavy grant. independent_review awaitingfreeze.
+
+Continue all four tracks and platform-independent work. External acceptance
+limits below do not stop unrelated implementation.
 
 ## Source receipts and retained gates
 

@@ -54,6 +54,18 @@ pub fn dropdown(ui: &egui::Ui, id: impl std::hash::Hash, maximum: f32) -> egui::
         .width(ui.available_size_before_wrap().x.min(maximum).max(0.))
         .wrap_mode(egui::TextWrapMode::Truncate)
 }
+/// Bound popup rows to the current visible width, including after zoom/resize.
+/// egui remembers an Area's previous size; a ComboBox's default width alone
+/// cannot shrink that remembered popup when the viewport becomes narrower.
+/// Call before adding choices, so their actual hit rectangles also fit.
+pub fn fit_popup_contents(ui: &mut egui::Ui) {
+    let visible = ui.clip_rect().intersect(ui.ctx().content_rect());
+    let width = ui
+        .available_width()
+        .min((visible.right() - ui.next_widget_position().x).max(0.));
+    ui.set_width(width);
+    ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+}
 pub fn cell<R>(
     ui: &mut egui::Ui,
     width: f32,

@@ -134,7 +134,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 125);
+    assert_eq!(all.len(), 133);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -190,6 +190,14 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "ccna-dhcp-held-options",
             "ccna-dhcp-relay-scope",
             "ccna-dhcp-lease-handover",
+            "lpic1-package-install",
+            "lpic1-package-metadata",
+            "lpic1-package-payload",
+            "lpic1-package-handover",
+            "ccna-stp-root",
+            "ccna-stp-local-cost",
+            "ccna-stp-parallel",
+            "ccna-stp-handover",
         ])
     ); // Later tasks remain absent and ungraded; no invented contexts.
     let original_histories = with_main_records(&p);

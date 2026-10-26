@@ -44,3 +44,13 @@ IPv4 static-routing capability and native integration are specified in [IPV4_ROU
 The six substantive IPv4 static-routing assignments in IPV4_LESSONS.md cover network construction, reverse-path diagnosis, longest-prefix detours, host exceptions, equal-prefix floating behavior and a two-client recovery capstone. They have independent introductions/examples/experiments and state-based positive/negative/alternate tests; number variants remain only ungraded examples. Their narrow objective evidence extends existing Partial rows, without claiming complete IOS/dynamic routing or certification preparation.
 
 The six new forward-DNS lessons are separate from this original-nine scope: see DNS_LESSONS.md, DNS_WORKSPACE.md and DNS_SUBSET.md for typed records, primary/secondary publication, preserved-data goals, current limitations and checked references. Existing seed IDs/goals/progress are unchanged.
+
+
+Current source inventory and exact implemented-versus-planned coverage live in
+CURRICULUM.md and OBJECTIVE_MAPPING.md. M116 registers133 authored tasks, including
+four distinct package policies/repairs and four ideal STP graph tasks; its
+installed acceptance is still pending. Different example values and generated
+practice never add authored lab counts. DEBIAN_PACKAGE_LESSONS.md and
+SPANNING_TREE_LESSONS.md record checked2026-10-25 official technical references
+and the explicit transaction/protocol limitations. Historical counts above
+belong to their original scopes.

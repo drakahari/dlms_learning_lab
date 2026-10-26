@@ -498,3 +498,22 @@ fn package_warm_resume_and_selected_reset_preserve_both_command_drafts_and_other
         );
     }
 }
+
+#[test]
+fn package_challenge_hints_require_a_request_and_do_not_reveal_walkthrough_or_change_work() {
+    let (ctx, mut a, i) = opened(View::Assignment);
+    a.progress.attempts.get_mut(ID).unwrap().challenge = true;
+    a.set_debian_packages_view(i, View::Assignment);
+    draw(&ctx, &mut a);
+    let before = a.progress.attempts[ID].state.clone();
+    assert!(!a.metrics.help_visible && a.metrics.hint.is_none());
+    let help = find(&ctx, &mut a, 1200., 850., |m| m.help);
+    point_click(&ctx, &mut a, 1200., 850., help);
+    draw(&ctx, &mut a);
+    let hint = find(&ctx, &mut a, 1200., 850., |m| m.hint);
+    point_click(&ctx, &mut a, 1200., 850., hint);
+    draw(&ctx, &mut a);
+    assert_eq!(a.progress.attempts[ID].hints, 1);
+    assert_eq!(a.progress.attempts[ID].state, before);
+    assert!(a.metrics.command_insert.is_none());
+}

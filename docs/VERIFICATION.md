@@ -1,4 +1,22 @@
-# M54 native persistent-mount integration — 2026-10-23
+# Verification evidence and current limits
+
+Current M116 source133/33 is under acceptance; the last scoped installed Fedora
+candidate is125/31 at14cf248. Use CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
+INSTALLATION.md for current exact source/binary/run identities and failures.
+Current shell contract is SHELL_SUBSET.md (evaluator9), not the original v1
+feature list below. MIT for original code/curriculum is approved; third-party
+notices stay intact and macOS redistribution has an unresolved dispatch notice.
+
+Native CI builds on Windows/macOS exist at earlier milestones; actual desktop
+runtime acceptance on those systems, screen-reader/physical-device accessibility
+and novice comprehension remain pending. Automated input and screenshots are
+technical checks, not a learner study. Full curriculum remains incomplete.
+
+## Historical prototype verification
+
+The following dated evidence describes earlier builds and their then-supported
+subset. It does not override current counts/capabilities or platform acceptance.
+
 
 531 all-target Rust tests pass. Final85UI rerun/Clippy/formatter,27Python,28palettes/notices and coverage validation pass; independent15integration+4UI checks pass and both original malformed-goal/manual-source proof packs now reject. Source/root/independent native render review accepted. Full native fixture flow and final short-toolbar follow-through pass, including actual200% Check/feedback; all72 shared IPv4/VLAN native alignment captures pass. Exact logs and limits in STORAGE_WORKSPACE.md and IMPLEMENTATION_LEDGER.md. No new authored count/coverage:82/nineteen,109Partial/1Supporting/1130Open. No novice/physical-device/screen-reader, Windows/macOS desktop or historical-startup-cure claim. Latest installed package remains eff98f0; new source is not implied inside it.
 

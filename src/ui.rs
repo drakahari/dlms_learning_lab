@@ -53,6 +53,10 @@ struct Metrics {
     address_diagram: Option<egui::Rect>,
     acl_diagram: Option<egui::Rect>,
     acl_router: Option<egui::Rect>,
+    stp_heading: Option<egui::Rect>,
+    stp_result: Option<egui::Rect>,
+    stp_bridge_popup: Option<egui::Rect>,
+    stp_port_popup: Option<egui::Rect>,
     stp_bridge: Option<egui::Rect>,
     stp_port: Option<egui::Rect>,
     stp_link: Option<egui::Rect>,
@@ -140,6 +144,8 @@ struct Metrics {
     dns_choices: Vec<(String, egui::Rect)>,
     dns_notice: Option<egui::Rect>,
     dns_result: Option<egui::Rect>,
+    package_heading: Option<egui::Rect>,
+    package_result: Option<egui::Rect>,
     package_command: Option<(egui::Rect, egui::Id, bool)>,
     package_run: Option<(egui::Rect, bool)>,
     package_path: Option<egui::Rect>,
@@ -315,8 +321,12 @@ impl LabApp {
             .text_styles
             .insert(egui::TextStyle::Monospace, egui::FontId::monospace(15.));
         ctx.set_style(style);
+        #[cfg(not(test))]
         let scenarios = pack::bundled().expect("Bundled pack validates");
+        #[cfg(not(test))]
         let units = course::bundled(&scenarios).expect("Bundled units validate");
+        #[cfg(test)]
+        let (scenarios, units) = tests::validated_ui_catalog();
         // Developer reopen validation runs before default path/fallback/profile I/O.
         let reopen = smoke::reopen::Session::from_environment(smoke, developer)
             .unwrap_or_else(|e| panic!("Developer reopen refused: {e}"));
@@ -423,9 +433,16 @@ impl LabApp {
             smoke_stage: if is_reopen {
                 17000
             } else if smoke
+                && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("spanning-tree-lessons")
+            {
+                35000
+            } else if smoke
                 && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("spanning-tree-workspace")
             {
                 33000
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("package-lessons")
+            {
+                34000
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("client-teaching")
             {
                 23000

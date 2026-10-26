@@ -1,9 +1,11 @@
-# Debian package unit — authored source, native acceptance pending
+# Debian package unit — registered, development native verified
 
-Four distinct assignments are authored in `scenarios/debian-packages-v1.json`.
-They are deliberately **not bundled yet**. The normal application still has125
-labs in31 units; these tasks do not yet promote any objective or installer claim.
-The native terminal and command-annotation workbench is a separate prerequisite.
+Four distinct assignments are bundled in `scenarios/debian-packages-v1.json`.
+The source catalog is133 labs/33 units. All four lessons pass actual development-
+native flows (69 captures), including separate practice, meaningful assignment,
+alternatives, current invalidation, retry and warm resume. This is not installed-
+candidate or beginner acceptance; the last accepted Fedora package remains125.
+No objective credit is promoted before the remaining acceptance gates.
 
 | Task | Practical outcome | Distinct reasoning |
 | --- | --- | --- |

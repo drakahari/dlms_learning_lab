@@ -1775,3 +1775,69 @@ source assignments with exact old125/31-prefix/history proof, then actual native
 content flows and candidate gates. Package native source is not yet rendered
 acceptance. ApacheR2/20prospective tests source accepted; Bash public9 collector/
 fixed reference proposal precedes any evaluator10 change. No release.
+
+
+## 2026-10-25 — M116 in progress: register eight reviewed assignments
+
+Source catalog133/33 =42CCNA/28LPIC-1/20LPIC-2/43Bash. Appended four distinct
+Debian-package tasks and four STP tasks/two units, with exact original125 typed
+specifications/order,31-unit prefix,282 Bash cases and genuine progress fixtures
+preserved. Six optional command annotations match parsed actions and reached
+effects. First registration gate81 checks across eight targets passes.
+
+Normal package controller passes four headless groups plus nine package UI checks;
+Challenge offers optional hints and a mode-salted collapsed completion explanation
+without unsolicited walkthrough. Actual development-native four-lesson run passes
+69 captures, observed946×929 and1920×1080, Light150/Dark200 real typing, independent
+examples/experiment/repair, wrong/partial/reference/alternate/current invalidation,
+real Favorite/Back/Continue, warm exact raw/portable/receipt save/readback and
+ResetCancel/Confirm. Representative actual Intro/assignment/error renders reviewed.
+ELF27c0d57771f8e090cec1d3da0e796982a03b99f64d32713bb0f2dde0f02f0e0f; private
+receipt reviews/package-management/development-normal133-native-r1/RESULT.json.
+Min23.36GiB available, PSIavg10zero, OOMdelta0. No real dpkg/APT/host shell,
+novice, cold-process or packaged133 acceptance. AlltargetClippy/fmt/diff pass at
+this stage. Normal STP controller integration/gates and new candidate remain
+pending; coverage136Partial/1Supporting/1103Open unchanged.
+
+
+M116 normal STP follow-through: first controller3/4 passed, strict popup visibility
+caught an earlier larger Area width after zoom. Shared popup-child fitting fixes
+actual option layout, without changing the strict predicate; retry4/4 passes.
+NativeR1 sandboxNoCompositor retained separately; approved desktop R2 connected
+normally, then was deliberately interrupted after30 captures when rendered review
+found label-length-shifted Bridge/Port pickers. Shared form_row aligns them and
+plain root-port text replaces None. All19 STP UI/controller groups pass; strengthened
+width/scalematrix passes. No model/Goal/State/fixtures/grading changes.
+
+Final development-native R3 passes48actual images/allfour normal tasks at measured
+946×929/1920×1080,100/150/200%, Light/Dark. Actual Fill-only/Apply/Check, practice
+experiment/repair, wrong/partial/reference/alternate/current invalidation and repair,
+real priority/cost typing, full raw/portable/receipt warm save/readback, actual
+Favorite/Back/Continue, ResetCancel/Confirm and Challenge. Representative final
+assignment/partial/Light150 renders reviewed. ELFb49b6b50bb380c5b752f03403de63e135e9e5fdd08692131a6ccaeffc5589722;
+private receipt reviews/spanning-tree-foundation/development-normal133-native-r3.
+Min23.51GiB/PSIavg10zero/OOMdelta0. Warm/synthetic/reference-driven, not packaged,
+cold-process, novice, physical-device/screen-reader/Windows/macOS acceptance.
+Broader current-count maintenance and candidate gates continue; coverage unchanged.
+
+
+M116 full regression: first complete run1469PASS/15FAIL, including260/272 UI
+(1144.79s). Failures were older122 current-catalog setup, context-free test scope
+for new goal-required types, broken-state test dispatch and the exact old-writer
+missing-ID set. Corrected current counts; retained legacy110 context-free targets
+with explicit4package/4STP exclusions and original command/state assertions. Added
+real goal-aware dpkg-P/BridgeOnline mutations to broken-state save/resume for all
+133; genuine116 attempts/40definitions/246cases remain pinned, with exact17later
+IDs absent. No expected vectors or genuine fixtures regenerated.
+
+A cfg(test)-only OnceLock retains one normally validated immutable catalog and
+clones owned Scenario/Unit data per fresh application. Production loaders remain
+verbatim and uncached. New isolation test proves separate contexts/profiles/
+progress/favorites/native drafts and deep catalog mutation isolation. No grade
+or expected-output cache, disabled tests, or concurrency increase. Final complete
+all-target/no-fail-fast rerun1485PASS/0FAIL,116harnesses; all273 UI groups PASS
+in77.53s. This is test runtime, not application startup or a novice study. Min
+22.76GiB available/PSIavg10zero/OOMdelta0. Private receipt
+reviews/catalog133/full-regression-r2/RESULT.json. AlltargetClippyR4/fmt/diff PASS; public-tree checks
+continue before commit/candidate; installed133 and conditional coverage promotion
+remain pending.

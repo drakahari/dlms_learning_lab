@@ -446,6 +446,18 @@ fn spanning_tree_native_width_scale_mode_matrix_has_bounded_fields_shared_height
                     for (_, r, _) in &a.metrics.stp_fields {
                         assert!((r.height() - h).abs() < 1.);
                     }
+                    let bridge = a.metrics.stp_bridge.unwrap();
+                    let port = a.metrics.stp_port.unwrap();
+                    assert!(
+                        (bridge.left() - port.left()).abs() < 1.
+                            && (bridge.width() - port.width()).abs() < 1.,
+                        "Bridge/Port value columns must align at {width}/{scale}/{view:?}: {bridge:?}, {port:?}"
+                    );
+                    for picker in [bridge, port] {
+                        assert!((picker.height() - h).abs() < 1.);
+                        assert!(picker.left() >= rect.left() - 1.);
+                        assert!(picker.right() <= rect.right() + 1.);
+                    }
                 }
             }
         }

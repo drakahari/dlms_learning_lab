@@ -494,7 +494,7 @@ fn old122_specs_units_and_actual6_7_8_records_remain_exact_without_rerunning() {
     let original = baseline["scenarios"].as_array().unwrap();
     assert_eq!(original.len(), 122);
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 125);
+    assert_eq!(current.len(), 133);
     assert_eq!(
         current[..122]
             .iter()
@@ -527,7 +527,7 @@ fn old122_specs_units_and_actual6_7_8_records_remain_exact_without_rerunning() {
         );
     }
     let units: Value = serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
-    assert_eq!(units["units"].as_array().unwrap().len(), 31);
+    assert_eq!(units["units"].as_array().unwrap().len(), 33);
     assert_eq!(
         &units["units"].as_array().unwrap()[..30],
         baseline["units"]["units"].as_array().unwrap().as_slice()

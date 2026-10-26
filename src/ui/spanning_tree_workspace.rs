@@ -70,7 +70,7 @@ impl LabApp {
     }
     fn spanning_tree_contents(&mut self, ui: &mut egui::Ui, i: usize) {
         let s = self.scenarios[i].clone();
-        ui.heading(&s.title);
+        self.metrics.stp_heading = Some(ui.heading(&s.title).rect);
         ui.label(RichText::new("Ideal point-to-point spanning tree · Current calculated roles and paths; no BPDUs, convergence or packet test.").small().color(palette(ui).muted));
         if !self.progress.attempts[&s.id].challenge && s.spanning_tree_teaching.is_some() {
             let view = self.spanning_tree_view(i);
@@ -156,8 +156,10 @@ impl LabApp {
                     let feedback = controls::feedback(ui, check_example, |ui| {
                         if l.checked {
                             let rows = l.checks(lesson);
-                            if rows.iter().all(|r| r.0) { ui.label(RichText::new("Example checks pass · No assignment credit").color(palette(ui).success)); }
-                            stp_results(ui, &rows);
+                            let pass=rows.iter().all(|r| r.0);
+                            if pass { self.metrics.stp_result=Some(ui.label(RichText::new("Example checks pass · No assignment credit").color(palette(ui).success)).rect); }
+                            let first=stp_results(ui, &rows);
+                            if !pass {self.metrics.stp_result=first;}
                         }
                     });
                     self.metrics.feedback = Some(feedback.response.rect);
@@ -229,12 +231,20 @@ impl LabApp {
                         let passed = rows.iter().all(|r| r.0);
                         self.metrics.completion = passed;
                         if passed {
-                            ui.label(
-                                RichText::new("Objective complete · All current graph checks pass")
+                            self.metrics.stp_result = Some(
+                                ui.label(
+                                    RichText::new(
+                                        "Objective complete · All current graph checks pass",
+                                    )
                                     .color(palette(ui).success),
+                                )
+                                .rect,
                             );
                         }
-                        stp_results(ui, &rows);
+                        let first = stp_results(ui, &rows);
+                        if !passed {
+                            self.metrics.stp_result = first;
+                        }
                         if passed {
                             if !a.challenge {
                                 ui.label(&s.explanation);
@@ -281,18 +291,26 @@ impl LabApp {
 fn stp_check_shortcut(ui: &egui::Ui) -> bool {
     ui.is_enabled() && ui.input(|i| i.modifiers.command && i.key_pressed(egui::Key::Enter))
 }
-fn stp_results(ui: &mut egui::Ui, rows: &[(bool, String)]) {
+fn stp_results(ui: &mut egui::Ui, rows: &[(bool, String)]) -> Option<egui::Rect> {
     let pass = rows.iter().filter(|r| r.0).count();
-    if pass < rows.len() {
-        ui.label(format!("{pass} of {} current checks pass.", rows.len()));
-    }
-    for (_, m) in rows.iter().filter(|r| !r.0) {
-        ui.add(
+    let mut first = if pass < rows.len() {
+        Some(
+            ui.label(format!("{pass} of {} current checks pass.", rows.len()))
+                .rect,
+        )
+    } else {
+        None
+    };
+    for (index, (_, m)) in rows.iter().filter(|r| !r.0).enumerate() {
+        let response = ui.add(
             egui::Label::new(
                 RichText::new(format!("Needs attention · {m}")).color(palette(ui).error),
             )
             .wrap(),
         );
+        if index == 0 {
+            first = Some(first.map_or(response.rect, |r| r.union(response.rect)));
+        }
     }
     if pass > 0 {
         egui::CollapsingHeader::new(format!("View {pass} passing checks")).show(ui, |ui| {
@@ -301,6 +319,7 @@ fn stp_results(ui: &mut egui::Ui, rows: &[(bool, String)]) {
             }
         });
     }
+    first
 }
 fn stp_select_bridge(d: &mut Draft, b: &str) {
     d.selected_bridge = b.into();
@@ -342,33 +361,37 @@ fn stp_workbench(
                     }
                 });
         });
-    ui.horizontal_wrapped(|ui| {
-        ui.label("Bridge");
+    controls::form_row(ui, "Bridge", |ui, width| {
         let old = d.selected_bridge.clone();
-        let r = controls::dropdown(ui, "stp-bridge", ui.available_width())
+        let r = controls::dropdown(ui, "stp-bridge", width)
             .selected_text(&d.selected_bridge)
             .show_ui(ui, |ui| {
+                controls::fit_popup_contents(ui);
                 for b in d.bridges.keys() {
                     let r = ui.selectable_value(&mut d.selected_bridge, b.clone(), b);
                     metrics.stp_bridge_items.push((b.clone(), r.rect));
                 }
+                metrics.stp_bridge_popup = Some(controls::popup_content_clip(ui));
             });
         metrics.stp_bridge = Some(r.response.rect);
         if old != d.selected_bridge {
             d.selected_port = d.bridges[&d.selected_bridge].ports.keys().next().cloned();
             *focus = false;
         }
-        ui.label("Port");
+    });
+    controls::form_row(ui, "Port", |ui, width| {
         if d.bridges[&d.selected_bridge].ports.is_empty() {
             ui.label("No supplied ports");
         } else {
-            let r = controls::dropdown(ui, "stp-port", ui.available_width())
+            let r = controls::dropdown(ui, "stp-port", width)
                 .selected_text(d.selected_port.as_deref().unwrap_or("Select port"))
                 .show_ui(ui, |ui| {
+                    controls::fit_popup_contents(ui);
                     for p in d.bridges[&d.selected_bridge].ports.keys() {
                         let r = ui.selectable_value(&mut d.selected_port, Some(p.clone()), p);
                         metrics.stp_port_items.push((p.clone(), r.rect));
                     }
+                    metrics.stp_port_popup = Some(controls::popup_content_clip(ui));
                 });
             metrics.stp_port = Some(r.response.rect);
         }
@@ -558,7 +581,9 @@ fn stp_current(ui: &mut egui::Ui, state: &tree::State, d: &Draft, scope: egui::I
         Some(root) => format!(
             "Root: {root} · root cost {} · root port {}",
             b.root_cost.unwrap(),
-            b.root_port.as_deref().unwrap_or("None · root bridge")
+            b.root_port
+                .as_deref()
+                .unwrap_or("not needed (this is the root)")
         ),
         None => "Bridge offline · no current root or path".into(),
     });

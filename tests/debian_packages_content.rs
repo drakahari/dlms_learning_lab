@@ -257,8 +257,8 @@ fn dangerous_or_unmodeled_commands_are_rejected_atomically_with_bounded_feedback
 #[test]
 fn every_new_attempt_resumes_independent_example_drafts_and_selected_reset_keeps_other_work() {
     let labs = lessons();
-    let mut catalog = pack::bundled().unwrap();
-    catalog.extend(labs.clone());
+    let catalog = pack::bundled().unwrap();
+    assert!(labs.iter().all(|s| catalog.iter().any(|c| c.id == s.id)));
     let mut p = Progress {
         schema_version: 1,
         ..Default::default()

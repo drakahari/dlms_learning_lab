@@ -1218,7 +1218,7 @@ mod context_tests {
             .unwrap();
         let ctx = egui::Context::default();
         let (mut writer, _old_writer_profile) = dhcp_app(&ctx, &session);
-        assert_eq!(writer.scenarios.len(), 125);
+        assert_eq!(writer.scenarios.len(), 133);
         let captures = dhcp_until(&ctx, &mut writer, 17028);
         assert_eq!(captures, 7);
         for _ in 0..2 {
