@@ -169,3 +169,16 @@ independent17-empty/keyset check using ephemeral validator data. These NEW check
 are UNRUN; earlier176Python/fiveRust passes remain historical. Revised source/probe
 pins and a new capture ID plus explicit serialized grant are mandatory before any
 repeat. No producer, reference, VM or test was executed while authoring this patch.
+
+
+2026-10-26 follow-through: actualR1 stopped at the original116/current133 history
+keyset comparison; correction preserves old vectors plus17empty added histories
+at every profile checkpoint. ActualR2 completed1570VM rows and full Rustprofile
+proof, then the independent Python projection incorrectly indexed the deliberately
+unnamed Stop row byid. A strict7named-kind index fixes that tooling mismatch
+without changing authoritative verify_vm or any complete field/byte/history
+checks.178Python/sixRustprobe checks andClippy pass across these corrections;
+read-only retainedR2 full transcript/profile validation passes. R1/R2 remain
+partial non-COMPLETE evidence. A fresh reviewed-source/pin/ID actual retry is
+required before future evaluator work. No expected outcomes, old records or VM
+semantics were changed to obtain a pass.

@@ -326,5 +326,52 @@ class FixedAutomationSafety(unittest.TestCase):
             oracle.verify_added_history_empty(old,bad,authored['catalog'])
         self.assertTrue(old==json.loads((ROOT/'tests/fixtures/shell-v8-synthetic-writer-progress.json').read_bytes()))
 
+    def test_profile_recheck_observations_include_real_idless_stop_without_indexing_it(self):
+        # This is the exact genuine stopped row shape from retained actual R2.
+        # Named outcomes below are ephemeral checker inputs, not observed credit.
+        stop = {'actual': {'error': 'Stopped: this run was not graded',
+                'files': {'/work/case-child.txt': 'entered'}, 'status': 2, 'stderr': '', 'stdout': ''},
+                'kind': 'stopped-ungraded', 'record_created': False, 'slice': 1,
+                'source': "held=$(printf entered > case-child.txt; while true; do printf ''; done)",
+                'ticks_before_stop': 3}
+        self.assertNotIn('id',stop)
+        kinds=('authored-case','worked-example','fixed-automation-public9','vm-boundary-public9',
+               'unfinished-assignment','unfinished-example','imported-example')
+        named=[];expected={}
+        for index,kind in enumerate(kinds):
+            identity='fixed/0' if kind=='authored-case' else 'fixed'
+            outcome={'stdout':'validator-'+str(index),'stderr':'','status':0,'files':{},'error':None}
+            for size in (1,16,32,64):named.append({'kind':kind,'id':identity,'slice':size,'actual':outcome})
+            expected[(kind,identity)]=outcome
+        # Metadata must never become recheck outcomes; verify_vm validates it first.
+        rows=[{'kind':'identity'},*named,{'kind':'authored-record'},stop,
+              {'kind':'profile-evidence'},{'kind':'finished'}]
+        before=json.loads(json.dumps(rows))
+        actual=oracle.profile_observations(rows)
+        self.assertEqual(actual,expected)
+        self.assertEqual(len(actual),7)
+        self.assertEqual(rows,before)
+        # Exercise the same pure recheck path called by verify_profiles after indexing.
+        current={'attempts':{'fixed':{'state':{'source':'assignment','run':None},'workspace':{
+            'script_learning':{'example_source':'example','example_revision':7,'example_result':{'old':True}}}}}}
+        scripts={'fixed':{'source':'assignment','cases':[{}],'example_source':'example'}}
+        projected=oracle.recheck_projection(current,scripts,actual,())
+        self.assertEqual(projected['attempts']['fixed']['state']['run']['results'],[expected[('authored-case','fixed/0')]])
+        self.assertEqual(projected['attempts']['fixed']['workspace']['script_learning']['example_result'],expected[('worked-example','fixed')])
+        # Malformed known named rows must fail even for a slice not used by recheck.
+        base={'kind':'authored-case','id':'fixed/0','slice':1,'actual':expected[('authored-case','fixed/0')]}
+        for change,message in [({'id':None},'missing ID'),({'id':''},'missing ID'),
+                               ({'slice':0},'invalid slice'),({'slice':True},'invalid slice')]:
+            with self.assertRaisesRegex(oracle.safe.OracleError,message):oracle.profile_observations([{**base,**change},stop])
+        for size in (1,16):
+            bad={k:v for k,v in {**base,'slice':size}.items() if k!='id'}
+            with self.assertRaisesRegex(oracle.safe.OracleError,'missing ID'):oracle.profile_observations([bad,stop])
+        bad={k:v for k,v in base.items() if k!='slice'}
+        with self.assertRaisesRegex(oracle.safe.OracleError,'invalid slice'):oracle.profile_observations([bad,stop])
+        bad={k:v for k,v in base.items() if k!='actual'}
+        with self.assertRaisesRegex(oracle.safe.OracleError,'missing actual'):oracle.profile_observations([bad,stop])
+        with self.assertRaisesRegex(oracle.safe.OracleError,'Unknown VM row'):oracle.profile_observations([stop,{'kind':'unrecognized','slice':1,'actual':{}}])
+        with self.assertRaisesRegex(oracle.safe.OracleError,'Duplicate named'):oracle.profile_observations([base,stop,base])
+
 if __name__ == '__main__': unittest.main()
 

@@ -94,15 +94,18 @@ public9-133-8f9-r1 FAILED after1568VM-only rows before Bash, original116-vs133
 history keyset assertion. NO COMPLETE; allpartial/control/source evidence kept.
 Do not use it as accepted baseline or change evaluator10 yet.
 
-Four-file peer-reviewed correction ee3e7205/peer0433279e integrated: full133
-expectedhistorymap preserves116oldvectors/order and17empty new histories at
-construction/load/inspect/restore, exactcurrentAttemptkeys and every original
-fullfield/rawbyte check; bounded diagnostics. Newactualprofile-phase regression
-PASS; full177Python/sixRustprobe checks andClippy PASS. No model/evaluator/input/
-fixture/recordrevision changes. Need fmt/diff/privacy, coherent correction+
-installedacceptance/coverage commit, ordinary rebuiltprobe, NEW metadata ID with
-all138pins independently re-reviewed, then actualcapture retry. Old approvedID
-is immutable and invalid for newcode; neveroverwrite or loosenpins.
+History correction committed/pushed717c4b3 after177Python/sixRustprobe/Clippy
+and actualprofile-phase regression PASS. Retrypublic9-133-717-r2 completed1570VM
+rows,zeroVMstderr/fullRustprofile, then failedPythonverify_profiles Stop-row'id'
+classification beforeBash. NO COMPLETE; retainR1/R2 and allcontrols.
+
+Two-file sourcepeer fix6b1db4d1/peerba7a0d17 applied: profileprojection indexes
+only7named kinds; stillrejects missingnamedID/slice/actual/duplicates/unknown.
+verify_vm/VM/probe/inputs/history/source unchanged. All178Python PASS; read-only
+retainedR2 actual1570-row +fullprofile validators PASS. This is a diagnostic audit,
+not fullcapture acceptance. Need fmt/diff/privacy andcommit, ordinaryprobecheck,
+NEW ID/138actualpins independentlyrecomputed then fullcapture retry. Never reuse
+controls oroverwritepartials. No evaluator10/Apache/NAT module changes.
 
 Installed133 verification is complete as scoped above. Only currentCCNA2.5/a/b
 andLPIC1-102.4 promoted to narrowly Partial practice after those gates; parent

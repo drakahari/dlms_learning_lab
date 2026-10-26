@@ -1904,3 +1904,12 @@ Python andsixRustprobe tests,Clippy pass. No production engine/inputs/fixtures
 changed. New approved-source/binary pins and new no-clobber ID required for actual
 retry; oldR1partial remains non-COMPLETE. Scoped installed38a evidence/crosswalk
 and correcteddeveloperprobe can now be committed together before retry.
+
+
+ActualcaptureR2 public9-133-717-r2 completes1570VM rows/0stderr/fullRustprofile
+then independentPythonprojection aborts on idlessStop row, beforeBash/COMPLETE.
+Sourcepeer two-file classifier correction6b1db4d1/ba7a0d17 keeps authoritative
+verify_vm unchanged, restricts projection to7namedtypes with strictID/slice/actual/
+duplicate/unknown checks.178Python PASS; read-only retained actual1570/fullprofile
+validation PASS. No input/probe/VM/history/record revision changes, no accepted
+baseline frompartials. Commit/newpincontrol/newID fullretry next.

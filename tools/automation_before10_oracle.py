@@ -335,6 +335,27 @@ def verify_added_history_empty(old, current, catalog):
     return added
 
 
+def profile_observations(rows):
+    # verify_vm remains the authoritative full transcript/input/Record admission.
+    named = ('authored-case', 'worked-example', 'fixed-automation-public9',
+             'vm-boundary-public9', 'unfinished-assignment', 'unfinished-example', 'imported-example')
+    metadata = ('identity', 'authored-record', 'stopped-ungraded', 'profile-evidence', 'finished')
+    actual = {}
+    for row in rows:
+        kind = row.get('kind')
+        require(kind in named or kind in metadata, 'Unknown VM row in profile observations')
+        if kind not in named:
+            continue
+        require(isinstance(row.get('id'), str) and row['id'], 'Named VM observation missing ID')
+        require(type(row.get('slice')) is int and row['slice'] in (1,16,32,64), 'Named VM observation invalid slice')
+        require('actual' in row, 'Named VM observation missing actual outcome')
+        if row['slice'] == 1:
+            key = (kind, row['id'])
+            require(key not in actual, 'Duplicate named slice1 profile observation')
+            actual[key] = row['actual']
+    return actual
+
+
 def verify_profiles(root, folder, authored, vm_text):
     original = safe.read_bytes(root / 'tests/fixtures/shell-v8-synthetic-writer-progress.json', PROFILE_CAP)
     original7 = safe.read_bytes(root / 'tests/fixtures/shell-v7-synthetic-writer-progress.json', PROFILE_CAP)
@@ -347,7 +368,7 @@ def verify_profiles(root, folder, authored, vm_text):
     require(all(current[k] == old[k] for k in old if k not in ('attempts','migration_receipts')), 'Original profile metadata changed')
     rows = [strict_json(line) for line in vm_text.splitlines()]
     records = {r['id']: r['record'] for r in rows if r.get('kind') == 'authored-record'}
-    actual = {(r['kind'],r['id']):r['actual'] for r in rows if r.get('slice') == 1 and 'actual' in r}
+    actual = profile_observations(rows)
     scripts = {s['id']: s for s in authored['scripts']}
     pending = ('shell-handover', 'shell-capture-handover')
     for name, s in scripts.items():
