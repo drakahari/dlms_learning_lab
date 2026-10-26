@@ -1,9 +1,8 @@
 # Implementation continuation checkpoint
 
-2026-10-25,21:15 America/Chicago. **PAUSED at the owner's request.** Do not start
-more development, tests, references or native runs until explicitly resumed.
-No build/native/reference child remains running; both delegated workers paused.
-Full application/curriculum remains incomplete. No public release.
+2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
+No public release. Full curriculum/platform acceptance remains incomplete.
+Root alone runs heavy work; delegated workers remain source-only.
 
 ## Mandatory safety on resume
 
@@ -86,34 +85,54 @@ images when rendered Bridge/Port pickers shifted with label lengths. Shared
 form_row aligns them; explicit matrix/19STP UI groups pass. Root-port label uses
 plain language. FinalR3 completes48. No Goal/State/grading/vector weakening.
 
+## Current resumed verification and collector gate
+
+Installed38a lifecycle PASS: private installation
+.build-artifacts/installations/verified-38a8098c8820-jgqeo6pm/application/dlms-learning-lab
+has exact6d0257e5 ELF,133/33, upgrade14cf/uninstall/reinstall/desktop validation/
+original-nine synthetic byte retention. One protocol+10quiet normal Wayland starts
+PASS0.865–0.915s, no diagnostic override. Script and DHCP real2process cold
+reopen PASS. Shared72alignment captures PASS run-jjmks7m3; representative actual
+100/150/200 light/dark fields/columns/topology reviewed. Normal four package
+lessons PASS69installed captures run-j6idxlvw, logm116-installed-38a-package-lessons-r1.
+STP normal-four installed flows still PENDING, so final installed acceptance and
+conditional4coverage promotions are not yet claimed. Source count133/33 unchanged.
+
+Collector R3 sourcepeer accepted55a6e782, peer a4412596. Copied11exact reviewed
+paths after allbase/source preconditions, rootreceipt
+reviews/bash-safe-automation/main-collector-integration-r3/APPLIED.json. MAIN
+176Python/fiveRustprobe checks,Clippy/probe build PASS. Full actual9/Bash capture
+NOT performed; metadata/pin approval/capture next. No evaluator10/NAT/Apache
+module changes. All43/282/43 inputs and actual oldrecords stay exact.
+
 ## Exact resume sequence
 
 1. Verify the38a PACKAGED application first: guarded installed_acceptance.py with
 previous14cf candidate and --labs133 --units33; then same identified installed ELF
 for normal repeated startup, script/DHCP cold reopening,72 shared IPv4/VLAN
 alignment and both normal8lesson native flows. Reinspect actual rendered screens.
-No new38a startup/reopen/installed acceptance exists yet. Keep all failures.
+Lifecycle/startup/reopen/alignment/package flows now pass as recorded above;
+normal four STP installed flows remain. Keep all failures.
 2. Only after those gates, consider private reviewed FOUR-row narrow promotion
 (currentCCNA2.5/a/b andLPIC1-102.4). Sourceproposal
 reviews/m116-coverage-proposal/source-r1 SHA8211464e70a9d6f1f3b0795466443d79e712a714a1ac4cc8b67ab7589b9074e2.
 Current matrix remains136Partial/1Supporting/1103Open of1240 overlapping refs;
 not a completion percentage. FutureCCNAv2 and unmodeled protocol/transactions/
 RPM get no credit. Official full inventory2026-10-22; scoped primary reads10-25.
-3. Capture actual unchanged public9 BEFORE evaluator10. Accepted collectorR2
-source80b35b76794fedb3197a1024077d6f17ea90cdd50ddfb44c7a059b90ae49e407;
-27Python+4Rust UNRUN. Repin planbab611eb; STOP checkpoint
-reviews/bash-safe-automation/collector-repin-stop-r1/STOP_CHECKPOINT.json
-SHA6295e78e223329c0f4efd4bb5030a81be747c5aa552310cb737214230ca01e9c.
-New worktree automation-before10-r3/branch same is CLEAN at38a; only creation
-completed. NO R2 files copied, NO R3 repin/attestation/source freeze or reference
-execution. Rebase/repin to then-current CLEAN HEAD (including this doc checkpoint),
-actual85-module closure/two new packs/units133/33; keep43/282/43 canonical inputs
-SHA7ffa33d4cf83a3eed67f58265912677020c99d6f1f22f2f7730f4eb1ea500f32 exact.
-Source peer and guarded tests precede preparation/capture. Retain genuine6/7/8/9
-and both old8 unfinished example sources. R2 actual-byte aggregate and whole-child
-deadline fixes must remain. No evaluator10 edits exist. Contract15f21c9d scopes
-empty-IFS read then pipefail and2–3 distinct automation projects; no generalIFS/
-errexit/traps/host execution/deps or unsupported-syntax pretending.
+3. Capture actual unchanged public9 BEFORE evaluator10. CollectorR3 source
+55a6e782323df6f079833793761dc590badf705ce8e8878de68148715d0156ed / peer
+a4412596b9c4f30b5a6eaeaa4bc6ce8d7601332d67830b03974552046a3a0443
+is integrated and its176Python/fiveRust/Clippy/build gates PASS. Sourcebaseb17
+and app38a; actual source control must pin then-current committed MAIN. Library
+closure85,compiled125-source attestation,133/33,ordered43/282/43 unchanged.
+Canonical script inputSHA7ffa33d4cf83a3eed67f58265912677020c99d6f1f22f2f7730f4eb1ea500f32.
+No actual full capture yet. Prepare closed ID, independently recompute every
+source/binary/manual/Bash pin and create root-reviewed control, then execute fixed
+producer through MAINrunner. Retain actual6/7/8/9 and both old8 unfinished example
+sources; never replace/retag expectations as observations. Actual-byte aggregate,
+whole-child deadlines and all output/cleanup caps unchanged. Contract15f21c9d
+scopes empty-IFS read, pipefail and2–3 distinct automation tasks only after actual
+COMPLETE rehash/review. No generalIFS/errexit/traps/host execution/deps.
 4. Apache backend private R4 accepted,21UNRUN groups. Manifest
 reviews/apache-static/main-backend-integration-r4/SOURCE-READY.json
 SHA36131a0b7bf1a7ea0075b38260ef1a6e80f1b132d13658bebae3400dd972d241;

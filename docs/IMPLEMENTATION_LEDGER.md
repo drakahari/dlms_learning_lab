@@ -1854,3 +1854,24 @@ installed acceptance. Matrix unchanged. Private ApacheR4/NATR2 source accepted
 but21/20groups UNRUN, neither applied. Public9collectorR3 repin has not begun:
 only clean38a worktree created; acceptedR2 input/source/tooling remains unrun.
 Precise hashes/commands and independent next steps in CHECKPOINT.md. No release.
+
+
+## 2026-10-26 — M117 resumed installed checks and baseline tooling
+
+Owner resumed. Same38a installed ELF6d0257e5 passes lifecycle upgrade14cf,133/33
+content/manifest/hash, desktop validation, uninstall/reinstall and exact synthetic
+original-nine progress retention. NormalWayland1protocol+10quietstarts PASS
+0.865–0.915s, no driver/desktop override; script/DHCP real2process reopening PASS.
+72sharedalignment captures pass; representative actual large/small light/dark
+IPv4 placeholders/populated/topology and VLAN columns reviewed. All4 normal
+package lessons pass69installed captures/realcontrols, isolated practice, wrong/
+partial/alternate/currentinvalidation, rawSessions warmreadback, navigation/reset
+and large-text typing. STP installed4 pending; no final133/coverage acceptance yet.
+
+Reviewed collectorR3 repins only133/33 source/catalog closure and two new packs,
+with43/282/43 input block byteexactR2. Source55a6e782/peer a4412596;11owned files
+applied after exactpreconditions.176Python (27newguards),fiveRustprobe tests incl
+digest,alltargetClippy/probe ordinarybuild pass. Root holds sole shared heavy
+lease; no Bash/metadata/fullVM producer/capture yet. No parser/evaluator revision
+or new curriculum from tooling. Pin preparation and independent actual approval
+precede every fixed reference capture; real-byte/deadline safeguards unchanged.

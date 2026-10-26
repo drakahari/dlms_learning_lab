@@ -1,0 +1,483 @@
+{
+  "schema_version": 1,
+  "status": "Fixed unrun sources; outcomes deliberately absent; no source accepts learner input",
+  "cases": [
+    {
+      "id": "read-leading-trailing",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "  alpha\t \n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-backslashes-percent",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "\\first 100% \\tail\t\n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-blank-line",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "\n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-empty-eof",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-partial-final",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "  final\t ",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-cr-utf8",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": " é\r\n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-literal-empty-quotes",
+      "group": "empty-ifs",
+      "source": "IFS='' read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "  quoted  \n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-double-empty-quotes",
+      "group": "empty-ifs",
+      "source": "IFS=\"\" read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "\tquoted\t\n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-quoted-head",
+      "group": "empty-ifs",
+      "source": "IFS= 'read' -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"; printf 'IFS:<%s>\\n' \"$IFS\"",
+      "input": {
+        "args": [],
+        "stdin": "  head  \n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "decision",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-helper-scope",
+      "group": "empty-ifs",
+      "source": "take() { local row; IFS= read -r row; printf 'child:<%s>\\n' \"$row\"; }; row=parent; take; printf 'parent:<%s>\\n' \"$row\"",
+      "input": {
+        "args": [],
+        "stdin": "  child  \n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-capture-input-isolation",
+      "group": "empty-ifs",
+      "source": "row=parent; got=$(IFS= read -r row; printf '<%s>' \"$row\"); read -r after; printf '%s|<%s>|<%s>\\n' \"$got\" \"$row\" \"$after\"",
+      "input": {
+        "args": [],
+        "stdin": "  child  \n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-redirect-capture-order",
+      "group": "empty-ifs",
+      "source": "IFS= read -r row <\"$(printf '%s' \"$IFS\" >&2; printf input.txt)\"; printf '<%s>\\n' \"$row\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n",
+          "/work/input.txt": "  disk line  \n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-dynamic-empty-value",
+      "group": "empty-ifs",
+      "source": "empty=; IFS=$empty read -r row; printf '<%s>\\n' \"$row\"",
+      "input": {
+        "args": [],
+        "stdin": " dynamic ",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "deferred",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "read-default-control",
+      "group": "control9",
+      "source": "read -r row; rc=$?; printf '<%s>|%s\\n' \"$row\" \"$rc\"",
+      "input": {
+        "args": [],
+        "stdin": "  normal\t \n",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "already-supported9",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "prefix-other-variable",
+      "group": "empty-ifs",
+      "source": "x=parent; x=child printf '<%s>\\n' \"$x\"; printf '<%s>\\n' \"$x\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "deferred",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-default-control",
+      "group": "control9",
+      "source": "false | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "already-supported9",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-upstream-false",
+      "group": "pipefail",
+      "source": "set -o pipefail; false | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-all-success",
+      "group": "pipefail",
+      "source": "set -o pipefail; true | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-rightmost-distinct",
+      "group": "pipefail",
+      "source": "set -o pipefail; exit 3 | exit 7 | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-last-distinct",
+      "group": "pipefail",
+      "source": "set -o pipefail; exit 3 | true | exit 5; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-disable",
+      "group": "pipefail",
+      "source": "set -o pipefail; set +o pipefail; false | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-and-or",
+      "group": "pipefail",
+      "source": "set -o pipefail; false | true && printf wrong; false | true || printf 'handled\\n'",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-capture-inherit",
+      "group": "pipefail",
+      "source": "set -o pipefail; value=$(false | true); rc=$?; printf '<%s>|%s\\n' \"$value\" \"$rc\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-capture-isolate",
+      "group": "pipefail",
+      "source": "set -o pipefail; value=$(set +o pipefail; false | true; printf '%s' \"$?\"); false | true; printf '<%s>|%s\\n' \"$value\" \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-function-shares",
+      "group": "pipefail",
+      "source": "enable_it() { set -o pipefail; }; enable_it; false | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-child-toggle",
+      "group": "pipefail",
+      "source": "set -o pipefail; true | set +o pipefail; false | true; printf '%s\\n' \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "candidate",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-empty-prefix-read-stage",
+      "group": "pipefail",
+      "source": "set -o pipefail; printf '  data  \\n' | IFS= read -r row; printf '<%s>|%s\\n' \"$row\" \"$?\"",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "decision",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    },
+    {
+      "id": "pipe-control-quoted-data",
+      "group": "control9",
+      "source": "printf '%s\\n' 'set -o pipefail' 'IFS= read -r row'",
+      "input": {
+        "args": [],
+        "stdin": "",
+        "env": {},
+        "files": {
+          "/work/keep.txt": "retained\n"
+        }
+      },
+      "proposed_scope": "already-supported9",
+      "actual_bash_5_3": null,
+      "actual_public9_before10": null,
+      "accepted_after10": null
+    }
+  ]
+}
