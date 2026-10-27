@@ -2583,3 +2583,19 @@ one shared pack admission: handover has four optional guide entries but three
 step labels. Existing loader correctly rejects the mismatch. The author is
 aligning the authored labels; no bounds, validator, state or expected vector
 will be relaxed. The failed log is retained as m127-nat-content-first-r1.log.
+
+NAT content R2 fixes only handover’s four step labels to match its four existing
+guides. All eight content groups now PASS3.01s, including33 reviewed plans, two
+valid workflows per task, separate worked/adverse/repair practice, cross-fixture
+hardcode rejection and full backup/reset retention. Clippy PASS0.31s. Private
+base489a044 records exact source before normal143/36 registration. Root and peer
+accept the normal three-task native plan4c63b462 as source design only; actual
+controller, rendered screens and packaged acceptance remain pending.
+
+MAIN8f5e5fa is pushed. The remaining six historical private checks pass, bringing
+all13 current private checks to explicit PASS across the scoped gates.211 Python
+checks PASS7.827s. Coverage integrity passes1240 references:144Partial/1Supporting/
+1095Open,140 normal labs. RPM gap descriptions now correctly mention implemented
+command/practice backends while retaining every Open status and source fingerprint.
+The objective-mapping narrative also corrects its stale no-native-NAT description.
+No practical coverage promotion or new packaged acceptance is claimed.

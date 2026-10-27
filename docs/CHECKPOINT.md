@@ -30,10 +30,11 @@ Current work, in order:
    min21.25GiB available/PSI0/OOM0; explicit historical checks remain separately
    evidenced, not counted as default passes.
    Three distinct tasks are being authored privately, then registered only after
-   content/alternate/negative/native gates. First eight content tests compile but
-   fail shared admission: handover has four optional guide entries and only three
-   step labels. Author is aligning that prose, without changing bounds or models.
-   No new count.
+   content/alternate/negative/native gates. All eight content groups now pass
+   (3.01s;33 review plans) and Clippy is clean after aligning handover’s four
+   optional guide entries with four step labels. Private exactbase489a044 anchors
+   the active143/36 registration work; original140/35 specs stay pinned.
+   Normal MAIN still has no new authored count.
 3. M126 corrected fixed-NVR reference is pushed (`78d5e1b`) and completed under the
    default sandbox:28 strict orders match,12 ties inconclusive,0 mismatches. Original
    wrong-domain capture remains exact. No fullEVR/equality/package-operation proof.
@@ -49,7 +50,10 @@ Current work, in order:
    root/peer source-ACK;178 default model tests,33 UI/memo tests,seven explicit
    private checks and all-target Clippy pass. MAIN confirms178+33+7. Private exact
    source commitfbac26e is the renderer base; native UI implementation is active.
-   No RPM registration/credit yet.
+   Native renderer implementation is active in rpm-native-140, using full separate
+   sessions and four unregistered authored contexts. MAIN8f5e5fa is pushed. All13
+   current private migration checks and211 Python workflow checks pass. No RPM
+   registration/credit yet.
 
 The coverage matrix remains144Partial/1Supporting/1095Open; these are overlapping
 references, not percentages or completed exam objectives. Full curriculum, other

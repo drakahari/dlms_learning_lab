@@ -162,8 +162,9 @@ text scripts add real practice but no new issuer-row or universal POSIX claim.
 The independently reviewed [pure model](NAT_SUBSET.md) and
 [typed workspace backend](NAT_WORKSPACE_SUBSET.md) pass their compiler, outcome,
 alternate-policy, bound, invalidation and progress-retention gates. They model
-inside-source static and pool address mappings. There is no native workspace or
-authored NAT lesson yet; current CCNA4.1 stays **Open**, and140/35 and all1240
+inside-source static and pool address mappings. The [native workbench](NAT_NATIVE.md)
+and isolated teaching/practice pass technical gates. Three authored tasks are
+being integrated; no accepted normal NAT unit is bundled yet; current CCNA4.1 stays **Open**, and140/35 and all1240
 issuer fingerprints/status totals remain unchanged. The planned unit separates
 static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
 It does not promise PAT, transport sessions, IOS or actual packet delivery. The
@@ -178,8 +179,11 @@ the separate future-blueprint plan.
 The [pure RPM foundation](RPM_PACKAGE_SUBSET.md) passes23 independent behavior/
 negative/bound groups and library integration checks. It distinguishes RPM EVR,
 capability providers and installed/local/repository sources, with atomic logical
-script-free sets. No command adapter or authored lesson exists; all LPIC-1 v5.0
-102.5 references remain **Open**. Real command fidelity, configuration sidecars,
-resolver/signature/archive behavior and practical teaching remain pending. Current
-140/35 inventory and all issuer fingerprints/status totals are unchanged. A
-library is not implemented learner coverage or complete package administration.
+script-free sets. The [command and separate-practice backend](RPM_PACKAGES_WORKSPACE.md)
+now passes guarded query, update/removal, alternate-outcome, isolation and saved-
+progress gates. Its native workspace and four authored tasks are under
+implementation; no RPM practice is bundled. All LPIC-1 v5.0 102.5 references
+remain **Open**. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency
+solving, signatures, binary archives and real transactions remain unmodeled.
+Current140/35 and issuer fingerprints/status totals are unchanged. Backend code
+is not implemented learner coverage or complete package administration.
