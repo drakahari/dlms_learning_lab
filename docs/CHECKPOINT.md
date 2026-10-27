@@ -18,21 +18,31 @@ Current work, in order:
    stale test metadata expectations. Their two complete targets rerun16PASS after
    narrow original-unit/current-missing-ID fixes. MAIN all13 explicit private and
    all-target Clippy20.09s pass. Do not relabel the retained full-run failure log.
-   Normal three-task native controller is under source-only implementation in
-   nat-teaching-143, on exact dc4cb6c, accepted plan4c63b462. No normal-lesson
-   native or new package acceptance yet. It must use real controls and full warm
-   readback, with strict visibility/pacing/context-lock rules unchanged.
+   Three-task native controller R4 passed its four event groups, then its first
+   real Fedora run retained18 captures but stopped at the bounded large-text
+   interaction phase39056. This is a failure, not native acceptance. Rendered
+   review also found unused dynamic fields and poorly placed current-state rows.
+   R7 fixes have independent source review; all41 NAT UI checks, Clippy9.08s
+   and development build pass. The old child-scroll fixture uses measured
+   smaller geometry and retains stronger actual overflow/offset assertions.
+   A repeated actual Fedora run is underway; no acceptance until it completes.
+   No new packaged acceptance; all queue/visibility/pacing bounds remain.
 3. RPM backend is pushed at8f5e5fa; exact private renderer basefbac26e is in
-   rpm-native-140. Renderer R1 compile found private within helper calls; frozen
-   R2 uses a UI-local streaming counter. Peer also found internal archive-ID
-   labels, possible old-command execution after same-frame aggregate edit refusal,
-   and a16-entry maximum-session proof gap. Author is fixing these for R3; no
-   renderer tests have executed successfully, no four-task registration/credit.
+   rpm-native-140. R3 fixes archive labels, same-frame rejected-edit execution
+   and maximum-session proof. First admission exposed four draft tasks with
+   one guide for three steps; R4 supplies task-specific guides and essential
+   epoch-query teaching. R4 UI gate14PASS/1FAIL: snapshot included a view=Example leaf just before
+   clicking Assignment. R5 explicitly expects that view change and retains exact
+   all-other-Attempt and Learning checks, including inverse reopening. R5 unrun. No four-task
+   registration, authored count, objective credit or native acceptance yet.
 4. LPIC-2 NFS next capability is source-only in nfs-core-143 atdb19495 (base140).
    Pure-core contract R2 (84f217b1/e380d1b7) explicitly limits NFSv3 ACCESS-style
-   decisions, numeric squash/DAC and ordinary existing-file operations. No host
-   NFS/mount commands or new dependency. Author may edit only pure module/export,
-   tests/fixed cases and subset doc. All16 NFS objective rows remain Open.
+   decisions, numeric squash/DAC and ordinary existing-file operations. First
+   gates93PASS/0FAIL/4ignored and R2 Clippy pass. Peer found tagged-unit unknown
+   fields and an imprecise unsquashed-root exclusion; frozen R3 fixes strict
+   decoding and documents/tests mode-denial ordering. Root R3 gates pass95 default plus4 explicit private; Clippy13.74s.
+   Exact four-path MAIN integration passes the same95 default checks.
+   No host NFS/mount commands or dependency; all16 objective rows remain Open.
 
 Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no
 build/test/native/reference grant. Check active sessions/markers before a run.

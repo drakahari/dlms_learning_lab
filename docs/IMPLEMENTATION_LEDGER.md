@@ -2626,3 +2626,23 @@ Latest installed acceptance remains140ddb. RPM renderer source is under revision
 after first-compile private API and independent review findings; no UI/data
 acceptance is claimed. The next NFS pure capability is isolated/source-only,
 with no normal scenarios, engine/progress/UI registration or objective credit.
+
+### M129 bounded NFS core integration (2026-10-26)
+
+Added a pure in-process NFSv3/AUTH_SYS ACCESS-style model, with separate editor,
+saved configuration, applied exports and live mounts. Numeric root/group squash,
+owner/group/other permissions, path search and existing virtual-file reads/writes
+are explicit state operations. Whole-document parser refusals and incompatible
+active-mount edits are disclosed simulator limitations, not Linux behavior.
+No host filesystem, mount, RPC, network, utility execution or dependency added.
+
+Independent review caught internally tagged unit variants accepting unknown
+fields and imprecise unsquashed-root wording. R3 uses strict empty-struct wire
+variants and explicitly tests read-only mode denial before unsupported root
+capability checks. Frozen source d6c63bfd: four owned paths,685 protected exact.
+Private73 library+22 NFS checks pass; four ignored historical progress-safety
+checks run explicitly and pass. All-target Clippy passes13.74s. Exact four-path
+MAIN integration passes73+22 checks. Existing143 labs, progress schema and28
+themes remain unchanged. All16 objective209.2 rows stay Open; only their gap
+text now acknowledges the implemented foundation. No NFS learner workspace,
+authored assignments, curriculum credit or packaged acceptance is claimed.
