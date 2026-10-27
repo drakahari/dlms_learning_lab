@@ -486,7 +486,7 @@ fn every_original125_definition_unit_and_actual_history_survives_optional_metada
         serde_json::from_str(include_str!("fixtures/debian-packages-original125.json")).unwrap();
     assert_eq!(baseline["scenarios"].as_array().unwrap().len(), 125);
     let current = bundled();
-    assert_eq!(current.len(), 140);
+    assert_eq!(current.len(), 143);
     for raw in baseline["scenarios"].as_array().unwrap() {
         let x = current
             .iter()

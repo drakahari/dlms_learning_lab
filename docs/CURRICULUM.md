@@ -2,7 +2,10 @@
 
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
-**140 authored assignments/35 units:42CCNA,28LPIC-1,24LPIC-2,46Bash/Shell**.
+**143 source assignments/36 units:45CCNA,28LPIC-1,24LPIC-2,46Bash/Shell**.
+Three Basic NAT assignments now have reviewed teaching, separate practice, meaningful
+current/future mapping tasks and passing model/widget checks. Their normal rendered
+lesson acceptance is pending; the latest scoped installed candidate still has140.
 The new four static-web and three reliable-text assignments pass model/content
 and actual-egui event checks plus all seven development-native Fedora flows.
 Final polished same-ELF installed140 acceptance passed at ddb886b: all seven new
@@ -274,8 +277,8 @@ The independently reviewed [pure model](NAT_SUBSET.md) and
 alternate-policy, bound, invalidation and progress-retention gates. They model
 inside-source static and pool address mappings. The [native workbench](NAT_NATIVE.md)
 now passes MAIN UI/model gates and a scoped actual Fedora technical flow. It remains
-unbundled while three authored tasks complete catalog/native gates; current CCNA4.1 stays **Open**, and140/35 and all1240
-issuer fingerprints/status totals remain unchanged. The planned unit separates
+bundled in the development source while three authored tasks complete native gates; current CCNA4.1 stays **Open**, and all1240 issuer fingerprints/status totals remain unchanged. The source143/36
+unit separates
 static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
 It does not promise PAT, transport sessions, IOS or actual packet delivery. The
 old plan's generic NAT/PAT-session label was not the issuer objective wording;

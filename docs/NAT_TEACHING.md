@@ -1,11 +1,11 @@
 # Independent Basic NAT practice
 
-2026-10-26. The teaching/practice backend and UI are integrated but unregistered.
-Private gates pass13 integration checks,331 complete UI tests and all-target
-Clippy. MAIN integration confirmation and native teaching flows remain separate
-gates. The normal catalog remains140 labs/35 units; CCNA4.1 receives no new credit. The accepted address workbench and
-technical native controller remain the foundation; this is not normal authored
-curriculum or novice/other-OS acceptance.
+2026-10-26. Teaching/practice is integrated into the three normal development
+assignments (143 labs/36 units). Private gates pass13 integration checks,331
+complete UI tests and all-target Clippy; registered-source checks add35 focused
+widget tests and12 explicit private checks. MAIN integration and regression
+evidence is in the ledger. Actual normal-lesson native captures and packaged
+acceptance are pending; CCNA4.1 receives no new objective credit yet.
 
 `Scenario.nat_teaching` and `WorkspaceData.nat_learning` are optional and omitted
 when absent. The existing140 packs/units and genuine historical fixtures remain

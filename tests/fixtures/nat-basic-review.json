@@ -1,0 +1,962 @@
+[
+  {
+    "id": "ccna-nat-static",
+    "reference": [
+      {
+        "kind": "Configure",
+        "configuration": {
+          "statics": {
+            "server": "198.51.100.40",
+            "observer": "198.51.100.44"
+          },
+          "dynamic": null
+        }
+      },
+      {
+        "kind": "Inbound",
+        "peer": "remote",
+        "global": "198.51.100.40"
+      },
+      {
+        "kind": "Outbound",
+        "inside": "server",
+        "peer": "remote"
+      }
+    ],
+    "alternatives": [
+      {
+        "name": "Rebuild just the server row in two applies",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.44"
+              },
+              "dynamic": null
+            }
+          },
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "server": "198.51.100.40",
+                "observer": "198.51.100.44"
+              },
+              "dynamic": null
+            }
+          },
+          {
+            "kind": "Inbound",
+            "peer": "remote",
+            "global": "198.51.100.44"
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "name": "Minimal current-policy repair, no action badge",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "server": "198.51.100.40",
+                "observer": "198.51.100.44"
+              },
+              "dynamic": null
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "wrong": [
+      {
+        "name": "Wrong supplied server global",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "server": "198.51.100.42",
+                "observer": "198.51.100.44"
+              },
+              "dynamic": null
+            }
+          }
+        ],
+        "expected": [
+          true,
+          false,
+          true,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "name": "Lose observer while fixing server",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "server": "198.51.100.40"
+              },
+              "dynamic": null
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          false
+        ]
+      },
+      {
+        "name": "Dynamic substitution for requested static",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.44"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.40.1.10",
+                  "length": 32
+                },
+                "pool": {
+                  "first": "198.51.100.40",
+                  "last": "198.51.100.42"
+                }
+              }
+            }
+          },
+          {
+            "kind": "Outbound",
+            "inside": "server",
+            "peer": "remote"
+          }
+        ],
+        "expected": [
+          true,
+          false,
+          true,
+          false,
+          true,
+          false
+        ]
+      },
+      {
+        "name": "Map the explicitly idle device",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "server": "198.51.100.40",
+                "observer": "198.51.100.44",
+                "idle": "198.51.100.42"
+              },
+              "dynamic": null
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          false,
+          true
+        ]
+      }
+    ],
+    "partial": {
+      "name": "Remove wrong server row but never replace it",
+      "actions": [
+        {
+          "kind": "Configure",
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.44"
+            },
+            "dynamic": null
+          }
+        }
+      ],
+      "expected": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    "pending": {
+      "name": "Unapplied static repair",
+      "actions": [],
+      "expected": [
+        false
+      ],
+      "pending": {
+        "statics": [
+          {
+            "inside": "observer",
+            "global": "198.51.100.44"
+          },
+          {
+            "inside": "server",
+            "global": "198.51.100.40"
+          }
+        ]
+      }
+    },
+    "broken": {
+      "name": "Change repaired server back after success",
+      "actions": [
+        {
+          "kind": "Configure",
+          "configuration": {
+            "statics": {
+              "server": "198.51.100.41",
+              "observer": "198.51.100.44"
+            },
+            "dynamic": null
+          }
+        }
+      ],
+      "expected": [
+        true,
+        false,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    "misconception": "A dynamic allocation or outbound click cannot stand in for the requested existing static map."
+  },
+  {
+    "id": "ccna-nat-pool",
+    "reference": [
+      {
+        "kind": "Configure",
+        "configuration": {
+          "statics": {
+            "observer": "198.51.100.60"
+          },
+          "dynamic": {
+            "source": {
+              "network": "10.50.0.8",
+              "length": 30
+            },
+            "pool": {
+              "first": "198.51.100.60",
+              "last": "198.51.100.62"
+            }
+          }
+        }
+      }
+    ],
+    "alternatives": [
+      {
+        "name": "Exact pair /31 and shifted supplied pool",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.0.10",
+                  "length": 31
+                },
+                "pool": {
+                  "first": "198.51.100.61",
+                  "last": "198.51.100.63"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "name": "Larger eligible block excluding guest; inspect beta first",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.0.8",
+                  "length": 29
+                },
+                "pool": {
+                  "first": "198.51.100.62",
+                  "last": "198.51.100.64"
+                }
+              }
+            }
+          },
+          {
+            "kind": "Outbound",
+            "inside": "beta",
+            "peer": "remote"
+          },
+          {
+            "kind": "Outbound",
+            "inside": "alpha",
+            "peer": "remote"
+          },
+          {
+            "kind": "Inbound",
+            "peer": "remote",
+            "global": "198.51.100.62"
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "wrong": [
+      {
+        "name": "Only repair the pool",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.1.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "198.51.100.60",
+                  "last": "198.51.100.62"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      {
+        "name": "Broad prefix also includes guest",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.0.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "198.51.100.60",
+                  "last": "198.51.100.62"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      {
+        "name": "Only alpha eligible despite spare capacity",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.0.10",
+                  "length": 32
+                },
+                "pool": {
+                  "first": "198.51.100.60",
+                  "last": "198.51.100.62"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      {
+        "name": "Static shortcuts keep cheap policy predicates true but fail fresh dynamic kind",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60",
+                "alpha": "198.51.100.61",
+                "beta": "198.51.100.62"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.0.8",
+                  "length": 30
+                },
+                "pool": {
+                  "first": "198.51.100.60",
+                  "last": "198.51.100.64"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ]
+      }
+    ],
+    "partial": {
+      "name": "Only repair the source prefix",
+      "actions": [
+        {
+          "kind": "Configure",
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.60"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.50.0.8",
+                "length": 30
+              },
+              "pool": {
+                "first": "198.51.100.60",
+                "last": "198.51.100.61"
+              }
+            }
+          }
+        }
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false
+      ]
+    },
+    "pending": {
+      "name": "Correct raw edits without Apply",
+      "actions": [],
+      "expected": [
+        false
+      ],
+      "pending": {
+        "network": "10.50.0.8",
+        "prefix": "30",
+        "first": "198.51.100.60",
+        "last": "198.51.100.62"
+      }
+    },
+    "broken": {
+      "name": "Shrink correct pool after success",
+      "actions": [
+        {
+          "kind": "Configure",
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.60"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.50.0.8",
+                "length": 30
+              },
+              "pool": {
+                "first": "198.51.100.60",
+                "last": "198.51.100.61"
+              }
+            }
+          }
+        }
+      ],
+      "expected": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        false,
+        false
+      ]
+    },
+    "misconception": "Pool endpoints do not determine usable dynamic capacity after static reservations, and static client maps do not prove dynamic policy."
+  },
+  {
+    "id": "ccna-nat-handover",
+    "reference": [
+      {
+        "kind": "ClearDynamic"
+      },
+      {
+        "kind": "Configure",
+        "configuration": {
+          "statics": {
+            "observer": "198.51.100.79"
+          },
+          "dynamic": {
+            "source": {
+              "network": "10.60.0.8",
+              "length": 30
+            },
+            "pool": {
+              "first": "198.51.100.70",
+              "last": "198.51.100.71"
+            }
+          }
+        }
+      },
+      {
+        "kind": "Outbound",
+        "inside": "alpha",
+        "peer": "remote"
+      },
+      {
+        "kind": "Outbound",
+        "inside": "beta",
+        "peer": "remote"
+      }
+    ],
+    "alternatives": [
+      {
+        "name": "Exact pair, shifted pool, beta first",
+        "actions": [
+          {
+            "kind": "ClearDynamic"
+          },
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.79"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.60.0.10",
+                  "length": 31
+                },
+                "pool": {
+                  "first": "198.51.100.72",
+                  "last": "198.51.100.74"
+                }
+              }
+            }
+          },
+          {
+            "kind": "Outbound",
+            "inside": "beta",
+            "peer": "remote"
+          },
+          {
+            "kind": "Outbound",
+            "inside": "alpha",
+            "peer": "remote"
+          },
+          {
+            "kind": "Inbound",
+            "peer": "remote",
+            "global": "198.51.100.72"
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      },
+      {
+        "name": "Larger valid block, different pool, alpha first",
+        "actions": [
+          {
+            "kind": "ClearDynamic"
+          },
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.79"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.60.0.8",
+                  "length": 29
+                },
+                "pool": {
+                  "first": "198.51.100.71",
+                  "last": "198.51.100.73"
+                }
+              }
+            }
+          },
+          {
+            "kind": "Outbound",
+            "inside": "alpha",
+            "peer": "remote"
+          },
+          {
+            "kind": "Outbound",
+            "inside": "beta",
+            "peer": "remote"
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ]
+      }
+    ],
+    "wrong": [
+      {
+        "name": "Apply incompatible policy without Clear",
+        "actions": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.79"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.60.0.8",
+                  "length": 30
+                },
+                "pool": {
+                  "first": "198.51.100.70",
+                  "last": "198.51.100.71"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          false
+        ],
+        "error_contains": "Clear dynamic bindings"
+      },
+      {
+        "name": "Only create missing beta under the broad old rule",
+        "actions": [
+          {
+            "kind": "Outbound",
+            "inside": "beta",
+            "peer": "remote"
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      {
+        "name": "Static substitutes after clearing old holdings",
+        "actions": [
+          {
+            "kind": "ClearDynamic"
+          },
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.79",
+                "alpha": "198.51.100.70",
+                "beta": "198.51.100.71"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.60.0.8",
+                  "length": 30
+                },
+                "pool": {
+                  "first": "198.51.100.70",
+                  "last": "198.51.100.73"
+                }
+              }
+            }
+          }
+        ],
+        "expected": [
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false
+        ]
+      },
+      {
+        "name": "Keep old broad eligibility after clearing",
+        "actions": [
+          {
+            "kind": "ClearDynamic"
+          },
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.79"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.60.0.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "198.51.100.70",
+                  "last": "198.51.100.73"
+                }
+              }
+            }
+          },
+          {
+            "kind": "Outbound",
+            "inside": "alpha",
+            "peer": "remote"
+          },
+          {
+            "kind": "Outbound",
+            "inside": "beta",
+            "peer": "remote"
+          }
+        ],
+        "expected": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          false,
+          false
+        ]
+      }
+    ],
+    "partial": {
+      "name": "Correct policy and absence but no active current mappings",
+      "actions": [
+        {
+          "kind": "ClearDynamic"
+        },
+        {
+          "kind": "Configure",
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.79"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.60.0.8",
+                "length": 30
+              },
+              "pool": {
+                "first": "198.51.100.70",
+                "last": "198.51.100.71"
+              }
+            }
+          }
+        }
+      ],
+      "expected": [
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "pending": {
+      "name": "Saved narrow policy without Apply",
+      "actions": [],
+      "expected": [
+        false
+      ],
+      "pending": {
+        "network": "10.60.0.8",
+        "prefix": "30",
+        "first": "198.51.100.70",
+        "last": "198.51.100.71"
+      }
+    },
+    "broken": {
+      "name": "Clear required current maps after success",
+      "actions": [
+        {
+          "kind": "ClearDynamic"
+        }
+      ],
+      "expected": [
+        true,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ]
+    },
+    "misconception": "Fresh copied-policy success cannot replace requested current entries, and retiring one identity does not permanently ban reuse of its old global."
+  }
+]

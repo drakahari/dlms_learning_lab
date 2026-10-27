@@ -54,7 +54,7 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 140);
+    assert_eq!(labs.len(), 143);
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -69,7 +69,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             "lpic2-web-routing",
             "lpic2-web-pages",
             "lpic2-web-access",
-            "lpic2-web-handover"
+            "lpic2-web-handover",
+            "ccna-nat-static",
+            "ccna-nat-pool",
+            "ccna-nat-handover"
         ])
     );
     assert_eq!(original.attempts.len(), 133);

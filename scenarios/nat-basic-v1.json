@@ -1,0 +1,1850 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-nat-static",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Basic NAT address mapping",
+      "unit": "basic-nat",
+      "title": "Give a server a stable translated address",
+      "summary": "Repair a static two-way map while preserving a neighboring server and an idle device.",
+      "objective": "Make server 10.40.1.10 use static global 198.51.100.40. Keep observer 10.40.1.20 mapped to 198.51.100.44, keep idle 10.40.1.30 unmapped and keep dynamic mapping disabled. The static server must reverse correctly before any outbound probe and must also rewrite outbound to the supplied remote. Check verifies your existing maps and also tries new sample requests without changing your current mappings. This is an address-mapping task, not a server connectivity test.",
+      "difficulty": "Beginner",
+      "minutes": 13,
+      "steps": [
+        "Read the introduction and try the independent example.",
+        "Inspect the full assignment, edit policy and explicitly apply or probe as needed.",
+        "Check every requested current and new-policy outcome; repair and retry."
+      ],
+      "guide": [
+        {
+          "title": "Read the existing row",
+          "why": "The server already has a static map, but its global is wrong.",
+          "action": "Find server and observer in Applied policy and existing maps; compare their local/global addresses.",
+          "commands": []
+        },
+        {
+          "title": "Repair the static global",
+          "why": "A policy edit only becomes current after Apply.",
+          "action": "Change only the server global to198.51.100.40 and Apply. Leave the observer row and disabled dynamic fields alone.",
+          "commands": []
+        },
+        {
+          "title": "Inspect both directions",
+          "why": "Static reversal does not need a prior outbound action.",
+          "action": "Select remote and reverse global 198.51.100.40. Then select server and Outbound. Check work reads the final state and fresh copied tests.",
+          "commands": []
+        }
+      ],
+      "retry_guidance": "Compare the server global with the requested address; keep observer and idle separate.",
+      "explanation": "The server now has the requested permanent address rewrite in either direction, including before outbound. Observer still has its original map, idle has none and dynamic mapping remains disabled. These mapping observations do not prove a route, connection or security policy.",
+      "hints": [
+        "Compare the server global with the requested address; keep observer and idle separate.",
+        "Edit the existing server row and Apply. Clear does not change static rows.",
+        "A static map is already reversible after Apply; an outbound click is not required to earn the requested final state."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc3022.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/13772-12.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/4606-8.html"
+      ],
+      "simplifications": "Sources checked 2026-10-26: current CCNA v1.1 objective4.1 and RFC3022/Cisco Basic NAT address terminology. One bounded offline supplied-address inventory: static maps, a single address-matching prefix and contiguous supplied pool, current dynamic bindings and explicit two-way rewrite observations. No PAT, ports, sessions, expiry, packets, routing, Internet or DNS connectivity, security authorization, IOS/Linux commands or equipment test. /31 and /32 are address selectors here, not interface usable-host-range exercises. Check reads current maps and tests independent copied policy; it does not create missing current entries. Typed basic-nat actions are an internal simulator-only authoring bridge, not the learner workflow.",
+      "initial": {
+        "kind": "BasicNat",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-static-hall",
+            "inside": {
+              "server": "10.40.1.10",
+              "observer": "10.40.1.20",
+              "idle": "10.40.1.30"
+            },
+            "outside": {
+              "remote": "192.0.2.201"
+            },
+            "globals": [
+              "198.51.100.40",
+              "198.51.100.41",
+              "198.51.100.42",
+              "198.51.100.43",
+              "198.51.100.44"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "server": "198.51.100.41",
+              "observer": "198.51.100.44"
+            },
+            "dynamic": null
+          },
+          "bindings": {}
+        }
+      },
+      "goal": {
+        "kind": "BasicNat",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-static-hall",
+              "inside": {
+                "server": "10.40.1.10",
+                "observer": "10.40.1.20",
+                "idle": "10.40.1.30"
+              },
+              "outside": {
+                "remote": "192.0.2.201"
+              },
+              "globals": [
+                "198.51.100.40",
+                "198.51.100.41",
+                "198.51.100.42",
+                "198.51.100.43",
+                "198.51.100.44"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "server": "198.51.100.41",
+                "observer": "198.51.100.44"
+              },
+              "dynamic": null
+            },
+            "bindings": {}
+          },
+          "requirements": [
+            {
+              "kind": "CurrentMapping",
+              "inside": "server",
+              "mapping_kind": "static",
+              "global": {
+                "kind": "Exact",
+                "address": "198.51.100.40"
+              }
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "observer"
+            },
+            {
+              "kind": "DynamicRulePreserved"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "idle"
+            }
+          ],
+          "trials": [
+            {
+              "name": "static reversal before outbound",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "server",
+                  "peer": "remote",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.40"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "server",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "198.51.100.40"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "server",
+                  "peer": "remote",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.40"
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "observer",
+                  "peer": "remote",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.44"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "observer",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "198.51.100.44"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "solution": [
+        "basic-nat {\"kind\":\"Configure\",\"configuration\":{\"statics\":{\"server\":\"198.51.100.40\",\"observer\":\"198.51.100.44\"},\"dynamic\":null}}",
+        "basic-nat {\"kind\":\"Inbound\",\"peer\":\"remote\",\"global\":\"198.51.100.40\"}",
+        "basic-nat {\"kind\":\"Outbound\",\"inside\":\"server\",\"peer\":\"remote\"}"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-vlsm",
+        "ccna-gateway"
+      ],
+      "nat_teaching": {
+        "prerequisites": [
+          "ccna-ipv4",
+          "ccna-vlsm",
+          "ccna-gateway"
+        ],
+        "prerequisite_note": "Build on Read an IPv4 address, Give each team a subnet and Reconnect the office client. This model rewrites supplied addresses; it does not test a route or connection.",
+        "concepts": [
+          {
+            "title": "Local and global addresses",
+            "text": "The applied translation rules are called policy in this workbench. The local address identifies a supplied inside device. Its global address is the address used in the rewritten observation. The outside peer keeps its supplied address. Inspect Before and After; no real packet is sent."
+          },
+          {
+            "title": "Static works in either direction",
+            "text": "A static map exists as soon as its policy is applied. Reverse can find it before any outbound probe. The static server map must use the requested supplied global; it is not a dynamic lease or port forward."
+          },
+          {
+            "title": "Draft, policy and observation",
+            "text": "Edit a static row, then Apply. Unapplied or malformed active fields block Check. Outbound and Reverse perform separate explicit observations; changing request selectors does not change applied policy. Check cannot repair a missing map."
+          },
+          {
+            "title": "Preserve the named work",
+            "text": "Keep the observer static map, leave the idle device unmapped and keep dynamic mapping disabled. Clear removes only dynamic maps and cannot repair a wrong static entry. Nothing here proves connectivity or permission to access a server."
+          }
+        ],
+        "example_description": "Repair the gallery archive to global 203.0.113.40, keep monitor 203.0.113.44 and leave spare unmapped. This is a different inventory from the assignment.",
+        "fixture": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-static-gallery",
+            "inside": {
+              "archive": "10.140.1.10",
+              "monitor": "10.140.1.20",
+              "spare": "10.140.1.30"
+            },
+            "outside": {
+              "gallery-peer": "192.0.2.231"
+            },
+            "globals": [
+              "203.0.113.40",
+              "203.0.113.41",
+              "203.0.113.44"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "archive": "203.0.113.41",
+              "monitor": "203.0.113.44"
+            },
+            "dynamic": null
+          },
+          "bindings": {}
+        },
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-static-gallery",
+              "inside": {
+                "archive": "10.140.1.10",
+                "monitor": "10.140.1.20",
+                "spare": "10.140.1.30"
+              },
+              "outside": {
+                "gallery-peer": "192.0.2.231"
+              },
+              "globals": [
+                "203.0.113.40",
+                "203.0.113.41",
+                "203.0.113.44"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "archive": "203.0.113.41",
+                "monitor": "203.0.113.44"
+              },
+              "dynamic": null
+            },
+            "bindings": {}
+          },
+          "requirements": [
+            {
+              "kind": "CurrentMapping",
+              "inside": "archive",
+              "mapping_kind": "static",
+              "global": {
+                "kind": "Exact",
+                "address": "203.0.113.40"
+              }
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "monitor"
+            },
+            {
+              "kind": "DynamicRulePreserved"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "spare"
+            }
+          ],
+          "trials": [
+            {
+              "name": "static reversal before outbound",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "archive",
+                  "peer": "gallery-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.40"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "archive",
+                  "peer": "gallery-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "203.0.113.40"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "archive",
+                  "peer": "gallery-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.40"
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "monitor",
+                  "peer": "gallery-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.44"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "monitor",
+                  "peer": "gallery-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "203.0.113.44"
+                    }
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Apply archive global",
+            "explanation": "Insert the static settings, then Apply. Do not change monitor or enable dynamic mapping.",
+            "action": {
+              "kind": "Configure",
+              "configuration": {
+                "statics": {
+                  "archive": "203.0.113.40",
+                  "monitor": "203.0.113.44"
+                },
+                "dynamic": null
+              }
+            }
+          },
+          {
+            "title": "Reverse before outbound",
+            "explanation": "Insert gallery-peer and global 203.0.113.40, then Reverse. A static rewrite is already available.",
+            "action": {
+              "kind": "Inbound",
+              "peer": "gallery-peer",
+              "global": "203.0.113.40"
+            }
+          },
+          {
+            "title": "Inspect outbound rewrite",
+            "explanation": "Insert archive and gallery-peer, then Outbound. Compare the unchanged peer and rewritten source.",
+            "action": {
+              "kind": "Outbound",
+              "inside": "archive",
+              "peer": "gallery-peer"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Change archive back to203.0.113.41 and Apply. The requested archive and new-request test fails, while monitor remains correct. Reinsert and Apply the worked settings to repair.",
+          "actions": [
+            {
+              "kind": "Configure",
+              "configuration": {
+                "statics": {
+                  "archive": "203.0.113.41",
+                  "monitor": "203.0.113.44"
+                },
+                "dynamic": null
+              }
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "archive": "203.0.113.40",
+                "monitor": "203.0.113.44"
+              },
+              "dynamic": null
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-nat-pool",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Basic NAT address mapping",
+      "unit": "basic-nat",
+      "title": "Repair translation eligibility and capacity",
+      "summary": "Diagnose a wrong source prefix and a pool partly reserved by a static neighbor.",
+      "objective": "Apply dynamic translation rules (policy) that include alpha 10.50.0.10 and beta 10.50.0.11, exclude guest 10.50.0.60 and provide at least two dynamic address slots after static reservations. Keep observer 10.50.0.50 mapped to 198.51.100.60 and keep guest currently unmapped. Check must translate new alpha-first and beta-first sample requests dynamically and reverse each resulting map; static substitutes do not count. You need not create current maps for alpha or beta. Any valid prefix and supplied pool meeting these outcomes may pass.",
+      "difficulty": "Intermediate",
+      "minutes": 17,
+      "steps": [
+        "Read the introduction and try the independent example.",
+        "Inspect the full assignment, edit policy and explicitly apply or probe as needed.",
+        "Check every requested current and new-policy outcome; repair and retry."
+      ],
+      "guide": [
+        {
+          "title": "Separate the two faults",
+          "why": "Eligibility comes from local addresses; capacity comes from unreserved supplied globals.",
+          "action": "Compare alpha/beta with the current source prefix, then count the globals left after observer reserves 198.51.100.60.",
+          "commands": []
+        },
+        {
+          "title": "Repair effective eligibility and capacity",
+          "why": "Several prefixes and pools satisfy the same named outcomes.",
+          "action": "For one method use 10.50.0.8/30 and pool198.51.100.60 through 62. Apply; .60 remains reserved, leaving .61 and .62.",
+          "commands": []
+        },
+        {
+          "title": "Check rules for new requests, optionally inspect current maps",
+          "why": "The final policy can pass before any workspace allocation.",
+          "action": "Check work. If you choose to Outbound a client, inspect its actual global before Reverse; do not infer one global for every request order.",
+          "commands": []
+        }
+      ],
+      "retry_guidance": "Diagnose both the source prefix and usable pool capacity; fixing only one leaves a different failure.",
+      "explanation": "The applied prefix includes both requested clients and excludes guest, while the supplied pool has at least two globals left after observer reserves its address. Independent copies succeed in both dynamic allocation orders and reverse the mappings actually allocated. No current alpha/beta holdings or probe-history badge is required.",
+      "hints": [
+        "Diagnose both the source prefix and usable pool capacity; fixing only one leaves a different failure.",
+        "Observer reserves .60. A pool of .60 through .61 contains only one usable dynamic address slot.",
+        "A /30 selecting .8 through .11 or /31 selecting .10 and .11 can include both named clients without including guest; the exact prefix text is not graded."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc3022.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/13772-12.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/4606-8.html"
+      ],
+      "simplifications": "Sources checked 2026-10-26: current CCNA v1.1 objective4.1 and RFC3022/Cisco Basic NAT address terminology. One bounded offline supplied-address inventory: static maps, a single address-matching prefix and contiguous supplied pool, current dynamic bindings and explicit two-way rewrite observations. No PAT, ports, sessions, expiry, packets, routing, Internet or DNS connectivity, security authorization, IOS/Linux commands or equipment test. /31 and /32 are address selectors here, not interface usable-host-range exercises. Check reads current maps and tests independent copied policy; it does not create missing current entries. Typed basic-nat actions are an internal simulator-only authoring bridge, not the learner workflow.",
+      "initial": {
+        "kind": "BasicNat",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-pool-office",
+            "inside": {
+              "alpha": "10.50.0.10",
+              "beta": "10.50.0.11",
+              "guest": "10.50.0.60",
+              "observer": "10.50.0.50"
+            },
+            "outside": {
+              "remote": "192.0.2.211"
+            },
+            "globals": [
+              "198.51.100.60",
+              "198.51.100.61",
+              "198.51.100.62",
+              "198.51.100.63",
+              "198.51.100.64"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.60"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.50.1.0",
+                "length": 24
+              },
+              "pool": {
+                "first": "198.51.100.60",
+                "last": "198.51.100.61"
+              }
+            }
+          },
+          "bindings": {}
+        }
+      },
+      "goal": {
+        "kind": "BasicNat",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-pool-office",
+              "inside": {
+                "alpha": "10.50.0.10",
+                "beta": "10.50.0.11",
+                "guest": "10.50.0.60",
+                "observer": "10.50.0.50"
+              },
+              "outside": {
+                "remote": "192.0.2.211"
+              },
+              "globals": [
+                "198.51.100.60",
+                "198.51.100.61",
+                "198.51.100.62",
+                "198.51.100.63",
+                "198.51.100.64"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.50.1.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "198.51.100.60",
+                  "last": "198.51.100.61"
+                }
+              }
+            },
+            "bindings": {}
+          },
+          "requirements": [
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "alpha",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "beta",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "guest",
+              "matches": false
+            },
+            {
+              "kind": "DynamicCapacity",
+              "minimum": 2
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "observer"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "guest"
+            }
+          ],
+          "trials": [
+            {
+              "name": "alpha then beta",
+              "steps": [
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "guest",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "beta then alpha",
+              "steps": [
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "guest",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "solution": [
+        "basic-nat {\"kind\":\"Configure\",\"configuration\":{\"statics\":{\"observer\":\"198.51.100.60\"},\"dynamic\":{\"source\":{\"network\":\"10.50.0.8\",\"length\":30},\"pool\":{\"first\":\"198.51.100.60\",\"last\":\"198.51.100.62\"}}}}"
+      ],
+      "prerequisites": [
+        "ccna-nat-static"
+      ],
+      "nat_teaching": {
+        "prerequisites": [
+          "ccna-nat-static"
+        ],
+        "prerequisite_note": "Build on Give a server a stable translated address. Now distinguish an eligible device, a dynamic address slot after static reservations and an existing held map.",
+        "concepts": [
+          {
+            "title": "Prefix selects supplied addresses",
+            "text": "Policy means the applied translation rules. The dynamic source prefix selects inside identities by their local address. It is not the pool and does not assign local addresses. Here /31 may select two supplied addresses and /32 one; this is not a link usable-host-range calculation."
+          },
+          {
+            "title": "Capacity excludes static reservations",
+            "text": "The pool is a contiguous range of supplied globals. An observer static map reserves its global even if that address is inside the range. Count usable dynamic address slots after all static reservations, not just range endpoints. This is total policy capacity: a global already held by a dynamic client still counts as one usable slot. Check does not require two additional unallocated addresses after the clients hold their maps."
+          },
+          {
+            "title": "Policy can be correct without current holdings",
+            "text": "This assignment asks for a policy that can serve alpha and beta dynamically in either request order. It does not require current maps for them. Static shortcuts are not dynamic translations. Keep guest outside the prefix and currently unmapped."
+          },
+          {
+            "title": "Check tries new requests",
+            "text": "Check tests new sample requests in both host orders, their reverse mappings and the excluded identity without changing current mappings in your workspace. Outbound may allocate/reuse a real current map; Reverse never allocates."
+          },
+          {
+            "title": "Apply versus request inputs",
+            "text": "Edit the prefix and pool, then Apply. Changing selectors or the reverse global is read-only until an explicit probe and does not make policy pending. Applying a compatible policy retains held maps; incompatible changes need Clear."
+          }
+        ],
+        "example_description": "In a separate studio, include desk-a and desk-b, exclude visitor and provide two dynamic globals after monitor reserves 203.0.113.60. Try policy alone, then inspect one real map.",
+        "fixture": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-pool-studio",
+            "inside": {
+              "desk-a": "10.150.0.20",
+              "desk-b": "10.150.0.21",
+              "visitor": "10.150.0.70",
+              "monitor": "10.150.0.50"
+            },
+            "outside": {
+              "studio-peer": "192.0.2.241"
+            },
+            "globals": [
+              "203.0.113.60",
+              "203.0.113.61",
+              "203.0.113.62",
+              "203.0.113.63",
+              "203.0.113.64"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "monitor": "203.0.113.60"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.150.1.0",
+                "length": 24
+              },
+              "pool": {
+                "first": "203.0.113.60",
+                "last": "203.0.113.61"
+              }
+            }
+          },
+          "bindings": {}
+        },
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-pool-studio",
+              "inside": {
+                "desk-a": "10.150.0.20",
+                "desk-b": "10.150.0.21",
+                "visitor": "10.150.0.70",
+                "monitor": "10.150.0.50"
+              },
+              "outside": {
+                "studio-peer": "192.0.2.241"
+              },
+              "globals": [
+                "203.0.113.60",
+                "203.0.113.61",
+                "203.0.113.62",
+                "203.0.113.63",
+                "203.0.113.64"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "monitor": "203.0.113.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.150.1.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "203.0.113.60",
+                  "last": "203.0.113.61"
+                }
+              }
+            },
+            "bindings": {}
+          },
+          "requirements": [
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "desk-a",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "desk-b",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "visitor",
+              "matches": false
+            },
+            {
+              "kind": "DynamicCapacity",
+              "minimum": 2
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "monitor"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "visitor"
+            }
+          ],
+          "trials": [
+            {
+              "name": "desk-a then desk-b",
+              "steps": [
+                {
+                  "kind": "Outbound",
+                  "inside": "desk-a",
+                  "peer": "studio-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "desk-a",
+                  "peer": "studio-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "desk-b",
+                  "peer": "studio-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "desk-b",
+                  "peer": "studio-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "visitor",
+                  "peer": "studio-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "desk-b then desk-a",
+              "steps": [
+                {
+                  "kind": "Outbound",
+                  "inside": "desk-b",
+                  "peer": "studio-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "desk-b",
+                  "peer": "studio-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "desk-a",
+                  "peer": "studio-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "desk-a",
+                  "peer": "studio-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "visitor",
+                  "peer": "studio-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Apply eligible prefix and sufficient pool",
+            "explanation": "Insert /31 selecting 20 and 21 with pool 60 through 62, then Apply. Monitor reserves 60, leaving 61 and62.",
+            "action": {
+              "kind": "Configure",
+              "configuration": {
+                "statics": {
+                  "monitor": "203.0.113.60"
+                },
+                "dynamic": {
+                  "source": {
+                    "network": "10.150.0.20",
+                    "length": 31
+                  },
+                  "pool": {
+                    "first": "203.0.113.60",
+                    "last": "203.0.113.62"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "title": "Inspect one current map",
+            "explanation": "Insert desk-a/studio-peer and Outbound. A current map may exist, but the goal is independent future capacity.",
+            "action": {
+              "kind": "Outbound",
+              "inside": "desk-a",
+              "peer": "studio-peer"
+            }
+          },
+          {
+            "title": "Reverse the actual selected map",
+            "explanation": "The first studio allocation is 203.0.113.61 because monitor reserves 60. Insert that global and Reverse.",
+            "action": {
+              "kind": "Inbound",
+              "peer": "studio-peer",
+              "global": "203.0.113.61"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Keep the eligible prefix but shrink the pool to 203.0.113.60 through 61 and Apply. The held desk-a map remains compatible, but the pool has only one dynamic address slot; capacity and both fresh-order tests fail. Reapply the worked pool to repair.",
+          "actions": [
+            {
+              "kind": "Configure",
+              "configuration": {
+                "statics": {
+                  "monitor": "203.0.113.60"
+                },
+                "dynamic": {
+                  "source": {
+                    "network": "10.150.0.20",
+                    "length": 31
+                  },
+                  "pool": {
+                    "first": "203.0.113.60",
+                    "last": "203.0.113.61"
+                  }
+                }
+              }
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            true,
+            true,
+            false,
+            true,
+            true,
+            false,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Configure",
+            "configuration": {
+              "statics": {
+                "monitor": "203.0.113.60"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.150.0.20",
+                  "length": 31
+                },
+                "pool": {
+                  "first": "203.0.113.60",
+                  "last": "203.0.113.62"
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "ccna-nat-handover",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Basic NAT address mapping",
+      "unit": "basic-nat",
+      "title": "Retire an old mapping and hand over the pool",
+      "summary": "Resolve incompatible held mappings, then verify live assignments and rules for new requests without losing a static neighbor.",
+      "objective": "Remove the current mapping of retired (10.60.0.20) and establish current dynamic maps for alpha 10.60.0.10 and beta 10.60.0.11. Keep retired and guest 10.60.0.60 currently unmapped and outside the dynamic prefix. Provide at least two dynamic address slots after static reservations, preserve observer 10.60.0.50 at static 198.51.100.79, and let Check translate and reverse new sample requests in both active-client orders without changing your current mappings. Valid prefixes, pool ranges, allocation order and active globals may vary. Retired’s former global may be reused; no particular click history or uninterrupted service is required.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Read the introduction, try the independent example and inspect the full assignment’s held maps.",
+        "Clear incompatible dynamic holdings, preserve observer and Apply eligible translation rules.",
+        "Create and inspect current dynamic maps for both active identities.",
+        "Check every requested outcome; if a map is cleared again, recreate it and retry."
+      ],
+      "guide": [
+        {
+          "title": "Inspect the held maps before editing",
+          "why": "Retired holds .70 and alpha holds .71 under the old broad rule. Narrowing that rule while retired remains held is incompatible.",
+          "action": "Compare applied policy and existing maps. Plan an eligible prefix and supplied pool for alpha/beta, excluding retired and guest.",
+          "commands": []
+        },
+        {
+          "title": "Resolve incompatible holdings and apply",
+          "why": "Clear affects all dynamic holdings, so alpha must also be re-established. Observer static must remain.",
+          "action": "Clear dynamic maps. One valid policy is10.60.0.8/30 with pool198.51.100.70 through 71; retain observer and Apply.",
+          "commands": []
+        },
+        {
+          "title": "Produce and verify current entries",
+          "why": "Apply alone leaves both required current maps missing.",
+          "action": "Outbound alpha and beta to remote in either order. Inspect their actual globals before Reverse. Check all current and copied-policy rows.",
+          "commands": []
+        },
+        {
+          "title": "Repair after breaking current state",
+          "why": "Future capacity cannot substitute for actual requested current maps.",
+          "action": "If Clear is used again, repeat the active outbound probes. Reusing the retired device’s former global for an allowed client is valid.",
+          "commands": []
+        }
+      ],
+      "retry_guidance": "Inspect retired’s held global and the old broad prefix; an incompatible Apply cannot silently remove its mapping.",
+      "explanation": "Retired no longer holds a map or matches the dynamic prefix, while both active identities have real current dynamic maps. The static observer is unchanged and the applied policy succeeds in either fresh allocation order with reverse checks. A cleared current map must be recreated even when rules for new requests remains correct; the retired device’s former global is not permanently reserved.",
+      "hints": [
+        "Inspect retired’s held global and the old broad prefix; an incompatible Apply cannot silently remove its mapping.",
+        "Clear only dynamic maps, then Apply an eligible rule and pool while retaining observer. Both active dynamic maps must be created again.",
+        "Current alpha/beta mappings and the rules for new sample requests are separate requirements. Valid globals and request order may differ, and an old global is reusable."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc3022.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/13772-12.html",
+        "https://www.cisco.com/c/en/us/support/docs/ip/network-address-translation-nat/4606-8.html"
+      ],
+      "simplifications": "Sources checked 2026-10-26: current CCNA v1.1 objective4.1 and RFC3022/Cisco Basic NAT address terminology. One bounded offline supplied-address inventory: static maps, a single address-matching prefix and contiguous supplied pool, current dynamic bindings and explicit two-way rewrite observations. No PAT, ports, sessions, expiry, packets, routing, Internet or DNS connectivity, security authorization, IOS/Linux commands or equipment test. /31 and /32 are address selectors here, not interface usable-host-range exercises. Check reads current maps and tests independent copied policy; it does not create missing current entries. Typed basic-nat actions are an internal simulator-only authoring bridge, not the learner workflow.",
+      "initial": {
+        "kind": "BasicNat",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-handover-office",
+            "inside": {
+              "alpha": "10.60.0.10",
+              "beta": "10.60.0.11",
+              "retired": "10.60.0.20",
+              "guest": "10.60.0.60",
+              "observer": "10.60.0.50"
+            },
+            "outside": {
+              "remote": "192.0.2.221"
+            },
+            "globals": [
+              "198.51.100.70",
+              "198.51.100.71",
+              "198.51.100.72",
+              "198.51.100.73",
+              "198.51.100.74",
+              "198.51.100.75",
+              "198.51.100.79"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.79"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.60.0.0",
+                "length": 24
+              },
+              "pool": {
+                "first": "198.51.100.70",
+                "last": "198.51.100.73"
+              }
+            }
+          },
+          "bindings": {
+            "retired": "198.51.100.70",
+            "alpha": "198.51.100.71"
+          }
+        }
+      },
+      "goal": {
+        "kind": "BasicNat",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-handover-office",
+              "inside": {
+                "alpha": "10.60.0.10",
+                "beta": "10.60.0.11",
+                "retired": "10.60.0.20",
+                "guest": "10.60.0.60",
+                "observer": "10.60.0.50"
+              },
+              "outside": {
+                "remote": "192.0.2.221"
+              },
+              "globals": [
+                "198.51.100.70",
+                "198.51.100.71",
+                "198.51.100.72",
+                "198.51.100.73",
+                "198.51.100.74",
+                "198.51.100.75",
+                "198.51.100.79"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.79"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.60.0.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "198.51.100.70",
+                  "last": "198.51.100.73"
+                }
+              }
+            },
+            "bindings": {
+              "retired": "198.51.100.70",
+              "alpha": "198.51.100.71"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentMapping",
+              "inside": "alpha",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "CurrentMapping",
+              "inside": "beta",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "retired"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "guest"
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "alpha",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "beta",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "retired",
+              "matches": false
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "guest",
+              "matches": false
+            },
+            {
+              "kind": "DynamicCapacity",
+              "minimum": 2
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "observer"
+            }
+          ],
+          "trials": [
+            {
+              "name": "alpha then beta",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "observer",
+                  "peer": "remote",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.79"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "retired",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "guest",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "beta then alpha",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "observer",
+                  "peer": "remote",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.79"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "remote",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "retired",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "guest",
+                  "peer": "remote",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "solution": [
+        "basic-nat {\"kind\":\"ClearDynamic\"}",
+        "basic-nat {\"kind\":\"Configure\",\"configuration\":{\"statics\":{\"observer\":\"198.51.100.79\"},\"dynamic\":{\"source\":{\"network\":\"10.60.0.8\",\"length\":30},\"pool\":{\"first\":\"198.51.100.70\",\"last\":\"198.51.100.71\"}}}}",
+        "basic-nat {\"kind\":\"Outbound\",\"inside\":\"alpha\",\"peer\":\"remote\"}",
+        "basic-nat {\"kind\":\"Outbound\",\"inside\":\"beta\",\"peer\":\"remote\"}"
+      ],
+      "prerequisites": [
+        "ccna-nat-pool"
+      ],
+      "nat_teaching": {
+        "prerequisites": [
+          "ccna-nat-pool"
+        ],
+        "prerequisite_note": "Build on Repair translation eligibility and capacity. Now the applied translation rules and current maps must both be repaired.",
+        "concepts": [
+          {
+            "title": "Policy and held entries are different",
+            "text": "The applied translation rules are called policy. The old broad prefix has real held maps. Apply does not rewrite or reallocate them. A policy that would exclude an occupied host or global is rejected atomically until incompatible dynamic maps are cleared."
+          },
+          {
+            "title": "Clear has a limited meaning",
+            "text": "Clear removes every current dynamic map in this workspace, including a still-needed client. Static maps remain. It is a model action, not session expiry, disconnection, a security ban or an assurance of uninterrupted service."
+          },
+          {
+            "title": "Re-establish the requested current maps",
+            "text": "After Clear and Apply, use Outbound for both active identities to create their real dynamic entries. A perfect rules for new requests with no current entries is incomplete for this task. Reverse uses each map actually held."
+          },
+          {
+            "title": "Retire an identity, not its old global",
+            "text": "Keep the retired and guest identities outside the prefix and without current maps. Another allowed device may reuse a global formerly held by the retired device. Allocation order and valid prefix/pool choices may differ."
+          },
+          {
+            "title": "Two kinds of evidence",
+            "text": "Check must see correct current active maps and preserved static data, also try new sample requests in both orders without changing those current maps. Neither a prior pass nor a record of clicking Clear is a credential; breaking current state makes the task incomplete again."
+          }
+        ],
+        "example_description": "A workshop has old-bench and bench-a holding dynamic maps. Exclude old-bench and visitor, retain monitor static, and hand two current dynamic maps to bench-a/bench-b. Their valid global addresses may vary.",
+        "fixture": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-handover-workshop",
+            "inside": {
+              "bench-a": "10.160.0.20",
+              "bench-b": "10.160.0.21",
+              "old-bench": "10.160.0.30",
+              "visitor": "10.160.0.70",
+              "monitor": "10.160.0.50"
+            },
+            "outside": {
+              "workshop-peer": "192.0.2.251"
+            },
+            "globals": [
+              "203.0.113.70",
+              "203.0.113.71",
+              "203.0.113.72",
+              "203.0.113.73",
+              "203.0.113.74",
+              "203.0.113.75",
+              "203.0.113.79"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "monitor": "203.0.113.79"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.160.0.0",
+                "length": 24
+              },
+              "pool": {
+                "first": "203.0.113.70",
+                "last": "203.0.113.73"
+              }
+            }
+          },
+          "bindings": {
+            "old-bench": "203.0.113.70",
+            "bench-a": "203.0.113.71"
+          }
+        },
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-handover-workshop",
+              "inside": {
+                "bench-a": "10.160.0.20",
+                "bench-b": "10.160.0.21",
+                "old-bench": "10.160.0.30",
+                "visitor": "10.160.0.70",
+                "monitor": "10.160.0.50"
+              },
+              "outside": {
+                "workshop-peer": "192.0.2.251"
+              },
+              "globals": [
+                "203.0.113.70",
+                "203.0.113.71",
+                "203.0.113.72",
+                "203.0.113.73",
+                "203.0.113.74",
+                "203.0.113.75",
+                "203.0.113.79"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "monitor": "203.0.113.79"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.160.0.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "203.0.113.70",
+                  "last": "203.0.113.73"
+                }
+              }
+            },
+            "bindings": {
+              "old-bench": "203.0.113.70",
+              "bench-a": "203.0.113.71"
+            }
+          },
+          "requirements": [
+            {
+              "kind": "CurrentMapping",
+              "inside": "bench-a",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "CurrentMapping",
+              "inside": "bench-b",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "old-bench"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "visitor"
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "bench-a",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "bench-b",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "old-bench",
+              "matches": false
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "visitor",
+              "matches": false
+            },
+            {
+              "kind": "DynamicCapacity",
+              "minimum": 2
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "monitor"
+            }
+          ],
+          "trials": [
+            {
+              "name": "bench-a then bench-b",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "monitor",
+                  "peer": "workshop-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.79"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "bench-a",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "bench-a",
+                  "peer": "workshop-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "bench-b",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "bench-b",
+                  "peer": "workshop-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "old-bench",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "visitor",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "bench-b then bench-a",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "monitor",
+                  "peer": "workshop-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.79"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "bench-b",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "bench-b",
+                  "peer": "workshop-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "bench-a",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "bench-a",
+                  "peer": "workshop-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "old-bench",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "visitor",
+                  "peer": "workshop-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                }
+              ]
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Clear incompatible held maps",
+            "explanation": "Use Clear dynamic maps. This removes old-bench and bench-a dynamic entries while preserving monitor.",
+            "action": {
+              "kind": "ClearDynamic"
+            }
+          },
+          {
+            "title": "Apply a policy for the active pair",
+            "explanation": "Insert /31 selecting 20 and 21, pool 70 through 71, then Apply.",
+            "action": {
+              "kind": "Configure",
+              "configuration": {
+                "statics": {
+                  "monitor": "203.0.113.79"
+                },
+                "dynamic": {
+                  "source": {
+                    "network": "10.160.0.20",
+                    "length": 31
+                  },
+                  "pool": {
+                    "first": "203.0.113.70",
+                    "last": "203.0.113.71"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "title": "Create the first active map",
+            "explanation": "Insert bench-a/workshop-peer and Outbound. The old global 70 may be reused.",
+            "action": {
+              "kind": "Outbound",
+              "inside": "bench-a",
+              "peer": "workshop-peer"
+            }
+          },
+          {
+            "title": "Create the second active map",
+            "explanation": "Insert bench-b/workshop-peer and Outbound, then Check example. Both current maps and new-request orders matter.",
+            "action": {
+              "kind": "Outbound",
+              "inside": "bench-b",
+              "peer": "workshop-peer"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "After success, Clear dynamic maps again. Both required current maps disappear, but new-request checks remain healthy. Repeat the two outbound probes to repair; do not change the policy or static monitor.",
+          "actions": [
+            {
+              "kind": "ClearDynamic"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Outbound",
+            "inside": "bench-a",
+            "peer": "workshop-peer"
+          },
+          {
+            "kind": "Outbound",
+            "inside": "bench-b",
+            "peer": "workshop-peer"
+          }
+        ]
+      }
+    }
+  ]
+}

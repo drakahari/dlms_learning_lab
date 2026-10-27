@@ -7,7 +7,7 @@ migration checks and all-target Clippy in the merged source worktree. MAIN scope
 confirmation and later rendered/packaged acceptance are separately recorded.
 The23 original pure-core tests and fixed VERSION-via-NVR observations are separate
 evidence. No renderer, authored unit, catalog registration, objective promotion,
-host package command, dependency or evaluator change is included. Existing140labs
+host package command, dependency or evaluator change is included. The original140labs
 and35units remain; the developer fixture is unbundled.
 
 The accepted private contract is app-terminal-contractR2 d7858b59, with additive
@@ -153,4 +153,5 @@ before key comparison or snapshot ownership; its own full Lesson/Learning key,
 reports, accounting and ordinary UI stay intact. No RPM renderer is introduced.
 The three mixed-control regressions and warm-memo regression pass in the guarded
 merged-source gates, including full caller/target preservation and valid controls.
-All140 normal labs/35 units and old histories remain unchanged.
+All original140 lab specifications/35 unit fields and old histories remain unchanged;
+the current143/36 development catalog adds only the separate NAT unit.

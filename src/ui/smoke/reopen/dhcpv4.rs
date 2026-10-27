@@ -95,12 +95,12 @@ impl LabApp {
             .scenarios
             .iter()
             .find(|s| s.id == LAB)
-            .expect("canonical133 DHCP catalog")
+            .expect("canonical DHCP assignment")
             .clone();
         let i = self.scenarios.iter().position(|s| s.id == LAB).unwrap();
         let lesson = s.dhcpv4_teaching.as_ref().unwrap();
         assert_eq!(s.version, 1);
-        assert_eq!(self.scenarios.len(), 140);
+        assert_eq!(self.scenarios.len(), 143);
         self.reopen_dhcp_private(session);
         let mut shot = None;
         if phase == 0 && !self.reopen_geometry(ctx) {

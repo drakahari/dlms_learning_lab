@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 140);
+    assert_eq!(all.len(), 143);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -419,7 +419,7 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
-        // like Apache, accounts, OSPF, multi-unit services and DHCP, require pinned goals
+        // like Apache, Basic NAT, accounts, OSPF, multi-unit services and DHCP, require pinned goals
         // and have dedicated context-rejection and goal-aware regression tests.
         .filter(|s| {
             !matches!(
@@ -431,6 +431,7 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::DebianPackages { .. }
                     | State::SpanningTree { .. }
                     | State::ApacheStatic { .. }
+                    | State::BasicNat { .. }
             )
         })
         .collect::<Vec<_>>();

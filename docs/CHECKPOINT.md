@@ -2,58 +2,40 @@
 
 2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
 No public release. Full curriculum/platform acceptance remains incomplete.
-Latest normal catalog: **140 authored labs / 35 units** — CCNA 42, LPIC-1 28,
-LPIC-2 24, Bash 46. The installed Fedora candidate `ddb886b4d418` remains the latest
-scoped accepted build; its exact launch command appears in INSTALLATION.md.
+Development source now has **143 authored labs /36 units** — CCNA45, LPIC-1 28,
+LPIC-2 24, Bash46. Latest scoped installed-accepted Fedora candidate remains140
+at `ddb886b4d418`; its exact absolute launch command is in INSTALLATION.md.
 
 Current work, in order:
-1. M124 five Bash teaching corrections are integrated and pushed (`ebae45f`).
-   MAIN full regression1653/0, all11 private checks explicitly, Clippy and211
-   Python checks pass. Actual native flows for all18 assignments in the five
-   affected units pass, plus72 shared alignment captures. The old reusable capture
-   clicked below the viewport; the existing reveal helper and a100/150/200 event
-   regression fix it. This follow-up is capture-only; normal workflows are unchanged.
-   Assignment identity/grading/inputs and old drafts/records remain intact.
-2. M125 NAT workbench is integrated in MAIN but remains unbundled. Renderer313 checks and controller R4 six
-   event groups, Clippy and actual72-stage Fedora flow pass. Measured scrolling
-   animation oscillation, rather than a hard limit, explained earlier failures;
-   bounded settling preserves strict visibility and original pacing. Actual images
-   exposed a cramped single-map list, duplicate status prefixes and an unsupported
-   arrow glyph. R5 fixes pass8 event groups and actual24-image wide/windowed flow.
-   Main12d87f5 is pushed;322 UI,43 model checks, Clippy and actual24-image main
-   native confirmation pass. Typed teaching/practice is source-frozen and peer-ACK
-   in nat-teaching-143. Backend13 checks (including actual9 migration),32 focused
-   UI/memo checks, full331 UI regression (98.55s) and all-target Clippy R5 pass.
-   The13-path teaching change is integrated into MAIN73b93e4 and pushed;
-   12 default+1 explicit private integration checks and32 focused UI/memo checks
-   pass there too. Complete MAIN regression1698PASS/0FAIL/12ignored,128 harnesses,
-   min21.25GiB available/PSI0/OOM0; explicit historical checks remain separately
-   evidenced, not counted as default passes.
-   Three distinct tasks are being authored privately, then registered only after
-   content/alternate/negative/native gates. All eight content groups now pass
-   (3.01s;33 review plans) and Clippy is clean after aligning handover’s four
-   optional guide entries with four step labels. Private exactbase489a044 anchors
-   the active143/36 registration work; original140/35 specs stay pinned.
-   Normal MAIN still has no new authored count.
-3. M126 corrected fixed-NVR reference is pushed (`78d5e1b`) and completed under the
-   default sandbox:28 strict orders match,12 ties inconclusive,0 mismatches. Original
-   wrong-domain capture remains exact. No fullEVR/equality/package-operation proof.
-4. RPM application/terminal/teaching backend is under source-only implementation
-   in `rpm-app-140`, from MAIN78d5e1b, after root/independent contractR2 ACK. Noarch
-   headers, quiet supported success versus explicit simulator limitations, no fake
-   failure status or -V. The additive borrowed query view preserves public guards
-   and validates once per grade batch. First15-path source review found and fixed NUL
-   save/load parity and initially customized package preservation. First scoped
-   gate121PASS/0FAIL/5ignored repeated successfully at R5; all-target Clippy
-   passes; all five private migration checks also pass. Native contract R2 is peer-ACK.
-   Narrow backend integration17paths into fresh rpm-native-140 base73b93e4 is
-   root/peer source-ACK;178 default model tests,33 UI/memo tests,seven explicit
-   private checks and all-target Clippy pass. MAIN confirms178+33+7. Private exact
-   source commitfbac26e is the renderer base; native UI implementation is active.
-   Native renderer implementation is active in rpm-native-140, using full separate
-   sessions and four unregistered authored contexts. MAIN8f5e5fa is pushed. All13
-   current private migration checks and211 Python workflow checks pass. No RPM
-   registration/credit yet.
+1. Five Bash teaching corrections are pushed (ebae45f), with full18-assignment
+   development-native teaching flows and72 alignment captures recorded. Accepted
+   original workspaces and all28 themes remain. Latest all-clean whole-project
+   default run before RPM/registration was1698PASS/0FAIL/12ignored at73b93e4.
+2. Three real NAT tasks are integrated into MAIN development source with exact
+   old140/35 preservation. Private registered source dc4cb6c passes lib70,
+   accounts17, model/catalog73, UI35, all12 explicit private checks and Clippy.
+   MAIN full143 run1743PASS/2FAIL/13ignored across134 harnesses; both failures were
+   stale test metadata expectations. Their two complete targets rerun16PASS after
+   narrow original-unit/current-missing-ID fixes. MAIN all13 explicit private and
+   all-target Clippy20.09s pass. Do not relabel the retained full-run failure log.
+   Normal three-task native controller is under source-only implementation in
+   nat-teaching-143, on exact dc4cb6c, accepted plan4c63b462. No normal-lesson
+   native or new package acceptance yet. It must use real controls and full warm
+   readback, with strict visibility/pacing/context-lock rules unchanged.
+3. RPM backend is pushed at8f5e5fa; exact private renderer basefbac26e is in
+   rpm-native-140. Renderer R1 compile found private within helper calls; frozen
+   R2 uses a UI-local streaming counter. Peer also found internal archive-ID
+   labels, possible old-command execution after same-frame aggregate edit refusal,
+   and a16-entry maximum-session proof gap. Author is fixing these for R3; no
+   renderer tests have executed successfully, no four-task registration/credit.
+4. LPIC-2 NFS next capability is source-only in nfs-core-143 atdb19495 (base140).
+   Pure-core contract R2 (84f217b1/e380d1b7) explicitly limits NFSv3 ACCESS-style
+   decisions, numeric squash/DAC and ordinary existing-file operations. No host
+   NFS/mount commands or new dependency. Author may edit only pure module/export,
+   tests/fixed cases and subset doc. All16 NFS objective rows remain Open.
+
+Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no
+build/test/native/reference grant. Check active sessions/markers before a run.
 
 The coverage matrix remains144Partial/1Supporting/1095Open; these are overlapping
 references, not percentages or completed exam objectives. Full curriculum, other

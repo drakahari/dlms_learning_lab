@@ -164,8 +164,8 @@ The independently reviewed [pure model](NAT_SUBSET.md) and
 alternate-policy, bound, invalidation and progress-retention gates. They model
 inside-source static and pool address mappings. The [native workbench](NAT_NATIVE.md)
 and isolated teaching/practice pass technical gates. Three authored tasks are
-being integrated; no accepted normal NAT unit is bundled yet; current CCNA4.1 stays **Open**, and140/35 and all1240
-issuer fingerprints/status totals remain unchanged. The planned unit separates
+bundled in development; actual normal-lesson native acceptance is pending; current CCNA4.1 stays **Open**, and all1240 issuer fingerprints/status totals remain unchanged. The source143/36
+unit separates
 static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
 It does not promise PAT, transport sessions, IOS or actual packet delivery. The
 old plan's generic NAT/PAT-session label was not the issuer objective wording;

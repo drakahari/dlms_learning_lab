@@ -1,13 +1,13 @@
 //! Source controller checks. Real input/Render/Save/SmokeTick, not PNG/native
-//! evidence. Runtime tests require root's normal140 registration first.
+//! evidence. Runtime tests require root's normal143 registration first.
 use super::super::smoke::apache_static_lessons::{FIRST, phases_for_test};
 use super::*;
 fn opened() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
     assert_eq!(
         a.scenarios.len(),
-        140,
-        "normal140 registration required, no fake filler scenarios"
+        143,
+        "normal143 registration required, no fake filler scenarios"
     );
     assert!(
         a.units

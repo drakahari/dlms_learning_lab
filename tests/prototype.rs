@@ -347,7 +347,43 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if matches!(a.state, State::ApacheStatic { .. }) {
+        if let State::BasicNat { simulation } = &a.state {
+            use dlms_learning_lab::{nat, nat_workspace};
+            let engine::Goal::BasicNat { definition } = &s.goal else {
+                panic!("NAT goal context");
+            };
+            let required = definition.requirements.iter().find_map(|r| match r {
+                nat_workspace::Requirement::CurrentMapping {
+                    inside,
+                    mapping_kind,
+                    ..
+                } => Some((inside, *mapping_kind)),
+                _ => None,
+            });
+            let action = match required {
+                Some((_, nat_workspace::Kind::Dynamic)) => nat::Action::ClearDynamic {},
+                Some((inside, nat_workspace::Kind::Static)) => {
+                    let mut configuration = simulation.configuration().clone();
+                    assert!(configuration.statics.remove(inside).is_some());
+                    nat::Action::Configure { configuration }
+                }
+                None => {
+                    let mut configuration = simulation.configuration().clone();
+                    assert!(configuration.dynamic.take().is_some());
+                    nat::Action::Configure { configuration }
+                }
+            };
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    nat_workspace::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
+        } else if matches!(a.state, State::ApacheStatic { .. }) {
             let action = dlms_learning_lab::apache_static::Action::Stop {};
             engine::execute_for_goal(
                 &mut a.state,

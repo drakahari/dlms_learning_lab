@@ -2599,3 +2599,30 @@ checks PASS7.827s. Coverage integrity passes1240 references:144Partial/1Supporti
 command/practice backends while retaining every Open status and source fingerprint.
 The objective-mapping narrative also corrects its stale no-native-NAT description.
 No practical coverage promotion or new packaged acceptance is claimed.
+
+### M127 normal143 MAIN integration and broader regression (2026-10-26)
+
+Private final registration005964e5/dc4cb6c passes unchanged lib70+accounts17,
+six-target73 model/catalog checks,35 native-widget checks, all12 explicit private
+checks and Clippy3.43s. Test-only corrections preserved original42CCNA in the old
+140 prefix, used child-first outer/inner scrolling with unchanged visibility caps,
+and added exact current missing IDs while retaining immutable old captures.
+
+MAIN merged51 paths from the accepted content/registration sets. Only pack.rs
+and ui/tests.rs needed mechanical three-way merge to retain newer RPM fields and
+the existing exhaustive State arm. One RPM test’s CURRENT count changes140→143.
+The full all-target/no-fail-fast run produced1743PASS/2FAIL/13ignored in134
+harnesses. Both failures were test metadata: the old116 unit projection needed
+to explicitly assert/remove appended basic-nat, and the current missing-after116
+set needed the three new IDs. Capture bytes, old unit fields, goals and real
+records were unchanged. Both complete targets rerun16PASS/0FAIL. All13 MAIN
+private checks explicitly PASS; all-target Clippy PASS20.09s. This combined
+evidence is not an all-clean relabeling of the retained initial full-run log.
+Memory464samples min21.42GiB, some/full PSI peak0.18%, OOM delta0.
+
+Source catalog is143/36 (45CCNA/28LPIC-1/24LPIC-2/46Bash). Normal NAT rendered
+lesson captures and a new packaged candidate are pending, so CCNA4.1 stays Open.
+Latest installed acceptance remains140ddb. RPM renderer source is under revision
+after first-compile private API and independent review findings; no UI/data
+acceptance is claimed. The next NFS pure capability is isolated/source-only,
+with no normal scenarios, engine/progress/UI registration or objective credit.

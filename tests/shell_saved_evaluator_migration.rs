@@ -139,7 +139,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 140);
+    assert_eq!(all.len(), 143);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -186,6 +186,9 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "ccna-nat-static",
+            "ccna-nat-pool",
+            "ccna-nat-handover",
             "lpic2-dns-reverse-investigation",
             "lpic2-dns-reverse-ipv6",
             "lpic2-dns-reverse-handover",
@@ -211,7 +214,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All24 later tasks remain absent and ungraded; no invented contexts.
+    ); // All27 later tasks remain absent and ungraded; no invented contexts.
     let original_histories = with_main_records(&p);
     for s in all
         .iter()

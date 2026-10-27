@@ -1,5 +1,5 @@
-//! Exact append-only normal140 registration; frozen133 data remains authored
-//! input metadata, never regenerated historical learner results.
+//! Verify the original140 registration prefix under current143.
+//! Pins authored input metadata, never regenerated historical learner results.
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::{
@@ -189,9 +189,9 @@ fn exact<A: serde::Serialize + ?Sized, B: serde::Serialize + ?Sized>(a: &A, b: &
     assert!(d.is_none(), "{label}: {}", d.unwrap_or_default());
 }
 #[test]
-fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current140() {
+fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current143() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 140);
+    assert_eq!(all.len(), 143);
     let old = index();
     let pins = old["packs"].as_array().unwrap();
     assert_eq!(pins.len(), 31);
@@ -227,11 +227,14 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current140(
         .collect::<Vec<_>>();
     exact(&ordered, &old["catalog"], "Frozen133 order/versions");
     assert_eq!(
-        all[133..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        all[133..140]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         NEW
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 35);
+    assert_eq!(units.len(), 36);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(old["units"]["units"].clone()).unwrap();
     assert_eq!(old_units.len(), 33);
@@ -255,7 +258,7 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current140(
         NEW[3..]
     );
     let mut tracks = BTreeMap::new();
-    for s in &all {
+    for s in &all[..140] {
         *tracks.entry(s.track.as_str()).or_insert(0usize) += 1;
     }
     assert_eq!(
@@ -312,7 +315,7 @@ fn new_unit_prerequisites_preserve_real_cross_unit_links_and_all_four_web_tasks(
             .collect::<BTreeSet<_>>(),
         needed
     );
-    for (id, s) in NEW.iter().zip(&all[133..]) {
+    for (id, s) in NEW.iter().zip(&all[133..140]) {
         assert_eq!(*id, s.id);
         assert!(!engine::solved(&s.initial, &s.goal));
     }
@@ -355,13 +358,13 @@ fn old_actual_profiles_keep_exact_contexts_and_do_not_receive_new_answers() {
             "Reading never stamps current receipts",
         );
         // Only this explicit constructor loop adds missing contexts. New histories
-        // remain empty and no current/historical result is fabricated for those7.
+        // remain empty and no current/historical result is fabricated for those10.
         for s in &all {
             p.attempts
                 .entry(s.id.clone())
                 .or_insert_with(|| Attempt::new(s, 1));
         }
-        assert_eq!(p.attempts.len(), 140);
+        assert_eq!(p.attempts.len(), 143);
         for (id, attempt) in old.as_object().unwrap() {
             exact(
                 &p.attempts[id],
@@ -386,13 +389,13 @@ fn old_actual_profiles_keep_exact_contexts_and_do_not_receive_new_answers() {
     }
 }
 #[test]
-fn all_new_reference_states_are_derived_and_goal_aware_breakage_stays_resumable() {
+fn original_seven_reference_states_are_derived_and_goal_aware_breakage_stays_resumable() {
     let all = pack::bundled().unwrap();
     let mut p = Progress {
         schema_version: 1,
         ..Default::default()
     };
-    for s in &all[133..] {
+    for s in &all[133..140] {
         let mut a = Attempt::new(s, 1);
         for line in &s.solution {
             engine::execute_for_goal(&mut a.state, &s.goal, line).unwrap();

@@ -601,7 +601,7 @@ impl LabApp {
         let phase = (stage - 7200) % 100;
         let ids = kind.ids();
         let id = ids[ordinal];
-        assert_eq!(self.scenarios.len(), 140, "normal registered catalogue");
+        assert_eq!(self.scenarios.len(), 143, "normal registered catalogue");
         assert!(
             GETOPTS_LESSON_IDS
                 .iter()
@@ -1174,8 +1174,8 @@ mod case_lesson_plan_tests {
                 .unwrap(),
             );
         }
-        assert_eq!(all.len(), 140);
-        assert_eq!(units.len(), 35);
+        assert_eq!(all.len(), 143);
+        assert_eq!(units.len(), 36);
         let rows: serde_json::Value = serde_json::from_str(include_str!(
             "../../../tests/fixtures/shell-case-content-review.json"
         ))

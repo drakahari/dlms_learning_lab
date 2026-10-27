@@ -629,8 +629,8 @@ impl LabApp {
         assert!((FIRST..END).contains(&stage));
         assert_eq!(
             self.scenarios.len(),
-            140,
-            "normal140 registration is a runtime prerequisite"
+            143,
+            "normal143 registration is a runtime prerequisite"
         );
         assert!(self._smoke_profile.is_some());
         assert_eq!(
