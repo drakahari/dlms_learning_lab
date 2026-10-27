@@ -71,6 +71,25 @@ Current work, in order:
    must wait on finalized147 base for the actual new RPM memo/foreign guards.
    No host NFS/mount commands or dependency; all16 objective rows remain Open.
 
+Next source-only milestones, based on verified/pushed32b0c59:
+- `rpm-normal-native-147`: ccna_discovery implements closed normal four-task
+  native controller/actual smoke_tick regressions (planbb93d8a8). No model/data/
+  progress changes. Actual Fedora and packaged RPM acceptance are still pending.
+- `nfs-engine-147`: independent_review implements Stage B percontractfbdc2805:
+  State/Goal/pack/progress hooks, exact2MiB Attempt preflight, reciprocal cache/
+  field guards and28 narrow old-prepare prefixes. No core, authored NFS unit,
+  renderer, new dependency or objective credit. Freeze/source-peer review first.
+- Both are isolated at `.build-artifacts/worktrees/NAME`; neither worker has a
+  build/test/native/reference grant. Root reviews and runs only one guarded
+  heavy invocation. All prior sessions are reaped at this checkpoint.
+
+Current development launch from any terminal directory:
+`"$HOME/Documents/dlms_learning_lab/target/debug/dlms-learning-lab"`
+ELF SHA256073fefeb470ca314a2392e454562fea827f418fa7e114428d4b6236a87480b24.
+This147 development build is not the installed-accepted140 candidate. Source
+32b0c59 passes1829 default/0failed/13ignored plus all13 explicitly run, Clippy,
+211Python checks, format/privacy/coverage and development build. No public release.
+
 Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no
 build/test/native/reference grant. Check active sessions/markers before a run.
 
