@@ -1388,6 +1388,260 @@ pub fn reset_practice(
     Ok(())
 }
 
+/// Borrowed request/view edits, never a file write or document publication.
+/// None retains the existing value; an explicit value wins over dependent clearing.
+#[derive(Clone, Copy, Default)]
+pub struct SessionEdit<'a> {
+    pub server: Option<&'a str>,
+    pub client: Option<&'a str>,
+    pub mountpoint: Option<&'a str>,
+    pub profile: Option<&'a str>,
+    pub relative: Option<&'a str>,
+    pub write_text: Option<&'a str>,
+}
+#[derive(Serialize)]
+struct BorrowedSession<'a> {
+    version: u32,
+    server: &'a str,
+    client: &'a str,
+    mountpoint: &'a str,
+    profile: &'a str,
+    relative: &'a str,
+    write_text: &'a str,
+    entries: &'a [Entry],
+}
+impl BorrowedSession<'_> {
+    fn owned(&self) -> Session {
+        #[cfg(test)]
+        SESSION_EDIT_COPIES.with(|n| n.set(n.get() + 1));
+        Session {
+            version: self.version,
+            server: self.server.into(),
+            client: self.client.into(),
+            mountpoint: self.mountpoint.into(),
+            profile: self.profile.into(),
+            relative: self.relative.into(),
+            write_text: self.write_text.into(),
+            entries: self.entries.to_vec(),
+        }
+    }
+}
+#[cfg(test)]
+thread_local! { static SESSION_EDIT_COPIES: std::cell::Cell<usize> = const {std::cell::Cell::new(0)}; }
+fn edit_session(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    edit: SessionEdit<'_>,
+    practice: bool,
+) -> Result<(), String> {
+    for (v, cap) in [
+        (edit.server, 32),
+        (edit.client, 32),
+        (edit.mountpoint, 160),
+        (edit.profile, 32),
+        (edit.relative, 160),
+        (edit.write_text, 4096),
+    ] {
+        if v.is_some_and(|v| !text(v, cap)) {
+            return Err(
+                "NFS request field exceeds its non-NUL byte bound; previous fields retained".into(),
+            );
+        }
+    }
+    context(a, s)?;
+    let blank = Session::default();
+    let (simulation, old) = if practice {
+        let l = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.nfs_learning.as_ref())
+            .ok_or("NFS practice unprepared")?;
+        (&l.simulation, &l.session)
+    } else {
+        let crate::engine::State::Nfs { simulation } = &a.state else {
+            return Err("NFS kind differs".into());
+        };
+        (
+            simulation,
+            a.workspace
+                .as_ref()
+                .and_then(|w| w.nfs_session.as_ref())
+                .unwrap_or(&blank),
+        )
+    };
+    let selected_client = edit.client.unwrap_or(&old.client);
+    let changed_client = selected_client != old.client;
+    let profile = edit.profile.unwrap_or_else(|| {
+        if changed_client
+            && !old.profile.is_empty()
+            && !client(simulation.inventory(), selected_client)
+                .is_some_and(|c| c.profiles.contains(&old.profile))
+        {
+            ""
+        } else {
+            &old.profile
+        }
+    });
+    let mountpoint = edit.mountpoint.unwrap_or_else(|| {
+        if changed_client
+            && !old.mountpoint.is_empty()
+            && !target(simulation.inventory(), selected_client, &old.mountpoint)
+        {
+            ""
+        } else {
+            &old.mountpoint
+        }
+    });
+    let proposed = BorrowedSession {
+        version: old.version,
+        server: edit.server.unwrap_or(&old.server),
+        client: selected_client,
+        mountpoint,
+        profile,
+        relative: edit.relative.unwrap_or(&old.relative),
+        write_text: edit.write_text.unwrap_or(&old.write_text),
+        entries: &old.entries,
+    };
+    if (!proposed.server.is_empty() && !server(simulation.inventory(), proposed.server))
+        || (!proposed.client.is_empty()
+            && client(simulation.inventory(), proposed.client).is_none())
+        || (!proposed.mountpoint.is_empty()
+            && !target(simulation.inventory(), proposed.client, proposed.mountpoint))
+        || (!proposed.profile.is_empty()
+            && !client(simulation.inventory(), proposed.client)
+                .is_some_and(|c| c.profiles.iter().any(|p| p == proposed.profile)))
+    {
+        return Err("NFS request selection differs from the supplied client/context".into());
+    }
+    let session_size = size(&proposed, MAX_SESSION)
+        .ok_or("NFS proposed Session aggregate; previous fields retained")?;
+    let crate::engine::State::Nfs {
+        simulation: assignment,
+    } = &a.state
+    else {
+        return Err("NFS kind differs".into());
+    };
+    if practice {
+        let l = a.workspace.as_ref().unwrap().nfs_learning.as_ref().unwrap();
+        #[derive(Serialize)]
+        struct Proposed<'a> {
+            version: u32,
+            view: crate::script_teaching::View,
+            context: &'a Definition,
+            simulation: &'a core::State,
+            session: &'a BorrowedSession<'a>,
+            selected_example: usize,
+            checked: bool,
+        }
+        let bytes = size(
+            &Proposed {
+                version: l.version,
+                view: l.view,
+                context: &l.context,
+                simulation: &l.simulation,
+                session: &proposed,
+                selected_example: l.selected_example,
+                checked: l.checked,
+            },
+            crate::nfs_teaching::MAX_LEARNING,
+        )
+        .ok_or("NFS proposed Learning aggregate; previous fields retained")?;
+        let retained = a
+            .workspace
+            .as_ref()
+            .and_then(|w| w.nfs_session.as_ref())
+            .map(|t| size(t, MAX_SESSION))
+            .transpose_option()
+            .ok_or("NFS retained Session bound")?;
+        admitted_projection(projected_attempt_size(a, assignment, retained, Some(bytes)))?;
+    } else {
+        admitted_projection(projected_attempt_size(
+            a,
+            assignment,
+            Some(session_size),
+            retained_learning_size(a).ok_or("NFS retained Learning bound")?,
+        ))?;
+    }
+    let owned = proposed.owned();
+    let w = a
+        .workspace
+        .get_or_insert_with(crate::workspace::WorkspaceData::new);
+    if practice {
+        w.nfs_learning.as_mut().unwrap().session = owned;
+    } else {
+        w.nfs_session = Some(owned);
+    }
+    Ok(())
+}
+pub fn edit_assignment_session(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    edit: SessionEdit<'_>,
+) -> Result<(), String> {
+    edit_session(a, s, edit, false)
+}
+pub fn edit_practice_session(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    edit: SessionEdit<'_>,
+) -> Result<(), String> {
+    edit_session(a, s, edit, true)
+}
+/// Bounded presentation-only metadata; no action, grading result or state is installed.
+pub fn set_practice_presentation(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    view: Option<crate::script_teaching::View>,
+    selected: Option<usize>,
+) -> Result<(), String> {
+    context(a, s)?;
+    let source = s.nfs_teaching.as_ref().ok_or("NFS lesson absent")?;
+    let l = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_learning.as_ref())
+        .ok_or("NFS practice unprepared")?;
+    let view = view.unwrap_or(l.view);
+    let selected = selected.unwrap_or(l.selected_example);
+    if selected >= source.example_actions.len() {
+        return Err("NFS example selection differs".into());
+    }
+    let bytes = l
+        .presentation_size(view, selected)
+        .ok_or("NFS practice presentation bound")?;
+    let crate::engine::State::Nfs { simulation } = &a.state else {
+        return Err("NFS kind differs".into());
+    };
+    let session = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_session.as_ref())
+        .map(|t| size(t, MAX_SESSION))
+        .transpose_option()
+        .ok_or("NFS Session bound")?;
+    admitted_projection(projected_attempt_size(a, simulation, session, Some(bytes)))?;
+    let l = a.workspace.as_mut().unwrap().nfs_learning.as_mut().unwrap();
+    l.view = view;
+    l.selected_example = selected;
+    Ok(())
+}
+
+/// Recency is presentation metadata too: a decimal digit boundary cannot exceed the Attempt cap.
+pub fn record_visit(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    visited: u64,
+) -> Result<(), String> {
+    context(a, s)?;
+    let old = size(a, MAX_ATTEMPT).ok_or("NFS saved capacity bound")?;
+    let previous = size(&a.visited, 32).ok_or("NFS prior recency count")?;
+    let next = size(&visited, 32).ok_or("NFS proposed recency count")?;
+    admitted_projection(old.checked_sub(previous).and_then(|n|n.checked_add(next)))
+      .map_err(|_|"Recency could not be updated within this NFS Attempt's saved capacity; all work and the earlier visit value are retained".to_string())?;
+    a.visited = visited;
+    Ok(())
+}
+
 #[cfg(test)]
 mod attempt_projection_tests {
     use super::*;
@@ -1502,5 +1756,51 @@ mod attempt_projection_tests {
             serde_json::to_value(&loaded.attempts[&s.id]).unwrap()
                 == serde_json::to_value(&p.attempts[&s.id]).unwrap()
         );
+    }
+    #[test]
+    fn borrowed_session_edit_whole_attempt_refusal_precedes_actual_copy_site() {
+        let source = scenario();
+        let mut a = Attempt::new(&source, 1);
+        teach::prepare(&mut a, &source, true).unwrap();
+        let mut good = a.clone();
+        let text = "\u{1}".repeat(4096);
+        SESSION_EDIT_COPIES.with(|n| n.set(0));
+        edit_assignment_session(
+            &mut good,
+            &source,
+            SessionEdit {
+                write_text: Some(&text),
+                ..Default::default()
+            },
+        )
+        .unwrap();
+        assert_eq!(SESSION_EDIT_COPIES.with(|n| n.get()), 1);
+        let mut lo = 0usize;
+        let mut hi = MAX_ATTEMPT;
+        while lo < hi {
+            let mid = (lo + hi).div_ceil(2);
+            a.transcript = vec!["x".repeat(mid)];
+            if serde_json::to_vec(&a).unwrap().len() <= MAX_ATTEMPT {
+                lo = mid;
+            } else {
+                hi = mid - 1;
+            }
+        }
+        a.transcript = vec!["x".repeat(lo)];
+        let before = serde_json::to_value(&a).unwrap();
+        SESSION_EDIT_COPIES.with(|n| n.set(0));
+        assert!(
+            edit_assignment_session(
+                &mut a,
+                &source,
+                SessionEdit {
+                    write_text: Some(&text),
+                    ..Default::default()
+                }
+            )
+            .is_err()
+        );
+        assert_eq!(SESSION_EDIT_COPIES.with(|n| n.get()), 0);
+        assert!(serde_json::to_value(&a).unwrap() == before);
     }
 }

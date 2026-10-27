@@ -163,3 +163,165 @@ as a Linux utility or shell. A context-free dispatcher cannot perform mutations.
 No result, Session display entry, checked bit, reference order or saved success
 flag substitutes for a fresh current/saved/new-mount outcome vector. Faults remain
 faults; no unsupported path can satisfy Expected::Denied.
+
+## Stage C native source proposal (unrun)
+
+The private Stage B backend passed Root's89 default library/integration checks,
+three UI admission checks, explicit retained private evidence and Clippy before
+this renderer branch. Stage C is source-only until independent review and guarded
+runtime/visual acceptance. Normal147 activities/37 units remain unchanged; the
+four existing technical fixture contexts are explicitly unregistered test inputs,
+not normal NFS lessons or practical objective credit. The newer MAIN RPM controller
+and console-font changes must be retained in a three-way merge of the narrow UI
+hooks; never replace a newer whole ui.rs/workspace.rs/tests.rs with this snapshot.
+
+The native workspace has a prominent assignment objective and Introduction /
+separate ungraded Example / Assignment. Shared controls and fonts measure two
+wide document columns or the same stacked narrow controls. Core alone owns raw
+exports and mount-document draft/saved strings. Save, Apply saved exports, Mount
+saved and Unmount are distinct explicit actions. Manual source/root/ro-rw choices
+are optional and temporary; they do not claim restart persistence. Replacement
+text is initially optional and is never written automatically. Read/Write target
+supplied existing virtual files with disclosed numeric profiles, not host users
+or a real NFS client. No terminal or JSON action form is displayed.
+
+Every real input edit uses a bounded local buffer and an actual typed SetDraft or
+source-aware borrowed Session admission. The latter validates both views' exact
+source, client-dependent selections, escaped Session/Learning and complete2MiB
+Attempt before copying fields or display history. Changing client clears only
+invalid profile/mountpoint dependencies; valid dependents and unrelated request
+text remain. No persisted Attempt is mutated then rolled back. A rejected edit
+vetoes all same-frame submitted operations, Read and Check; a later corrected
+input can retry. Plain Enter edits a document; Ctrl+Enter is consumed as Check
+before multiline handling, only with active workbench focus. All settings,
+appearance, chooser/restore and reset modals disable background mutations.
+
+Edits and final actions refresh the report before current layers/completion paint.
+Only an explicit Check reveals feedback, so idle checked frames do not force
+scrolling. Read-only request drafts do not revoke applied credit. A displayed
+last successful read is labeled as a past request, not a live credential.
+Buffers synchronize against actual selected core drafts, use explicit per-activity/
+mode/document IDs across font/width reflow and new generations after reset/restore.
+The renderer retains no more than two8KiB document buffers; checked exact-reserve
+String growth avoids speculative doubling beyond their scalar caps. Conservative
+64KiB accounting includes their edit shadows, both bounded request copies, a read
+result, notice and owner/struct overhead. Native egui's shared Undo/input machinery
+is outside this renderer-owned buffer ledger.
+
+The NFS-only memo retains one exact full Scenario+Attempt key and both assignment /
+practice reports per activity: four entries,8MiB each,32MiB total. It reserves64KiB
+for editor storage and128KiB for fixed-ID frame booleans plus one fallback report
+before key admission. Independent streaming owned-string/node and escaped-wire
+counts admit the larger charge plus report storage before cloning a key. A valid
+quota-exceeded key gets fresh truth and no snapshot. Up to1000 frame IDs are
+bounded fixed80-byte records; still larger developer catalogs fall back to fresh
+authoritative lookup, never false credit. Unchanged HIT paths compare exact
+borrowed values and do no serialization, admission or grading. A selected fallback
+is reused across idle page/library reads within that frame; a newly admitted input
+can require a fresh final-state vector. Foreign typed fields and source kind/version
+are rejected before HIT or snapshot. Reports never persist as credentials.
+
+Prospective tests include both full reports for all four complete technical keys
+with full16-entry plain/escaped Sessions, independent owned/wire meters, genuine
+old records, actual quota refusal, LRU, idle counters and frame reserves. Real-egui
+event tests cover all four references, worked examples/experiments/repairs, both
+source alternatives, wrong/partial/current invalidation, manual source paths,
+focused Enter/Check, modal/refused paste, release-frame Write refusal with a
+matching delivered positive sequence, reflow/Undo/scale/theme, raw saved drafts,
+actual backup review/cancel/restore and selected reset. These are UNRUN source
+assertions, not observations or native screenshots.
+
+The shared launch clock still advances normally. Its NFS visit assignment now
+uses exact borrowed numeric-byte substitution: a9-to10 digit boundary cannot
+push an exactly-full Attempt over capacity. Refusal retains the entire old Attempt
+and a bounded recency notice; older-family launch behavior is unchanged. Full
+Continue comparisons project only the legitimate visited leaf, keeping all other
+fields exact. A full imported NFS attempt missing optional new metadata remains
+readable without an unwrap panic or fabricated draft/learning.
+
+
+Source recovery after the development-session restart also checks the external
+editor lifecycle: a validated replacement of the selected raw document clears
+only its incompatible native Undo; Fill marks its actual target for that same
+reset, and Reset example establishes a new activity edit generation. Ordinary
+width/font/theme reflow and returning to unchanged live documents retain stable
+IDs and native Undo. Prospective paired real-event tests cover local Undo,
+external replacement, example reset and Tab/Shift+Tab before explicit Check.
+A source-readback caught a test helper parameter shadowing the existing keyboard
+helper; it is renamed without changing the delivered event. No runtime result is
+claimed from these source corrections.
+
+
+Source R2 follows the first actual Root gate (four scoped library PASS, sixteen
+binary PASS, three binary FAIL; retained m140 log). Those failures are not
+relabeled: the Undo harness now waits for the actual native stable checkpoint;
+Shift+Tab observes egui's documented next-frame handoff; the release-frame paired
+case uses a real held-button and Tab route so paste actually reaches the editor
+before release. Submission instrumentation distinguishes a real accepted Write
+from a rejected operation veto. No injected Undo/focus/clock or waived visibility.
+The confirmed cross-view transient read/status leak is fixed by clearing those
+outputs on owner rebinding and practice reset; actual Read in both views and Reset
+have a new event regression. Four independently reasoned full vectors now exercise
+actual plausible wrong client, persisted mode, retired admission and client-mode
+configurations, alongside meaningful partial prefixes. These additions remain
+UNRUN pending Root's next guarded gate.
+
+
+Root R2 gate retains four scoped library PASS/one ignored and twenty binary PASS /
+one FAIL. Undo, keyboard navigation, transient output isolation and the four wrong
+vectors now actually pass. The remaining release-frame positive did submit Write
+and change the Attempt, but did not write the new text. Source diagnosis corrects
+the R2 handoff's pointer-press assumption: pinned egui defaults to surrender on
+Clicks, so release can still discard pending Paste before TextEdit. R3 uses a real
+post-release movement back to the visible editor within the same event packet,
+retaining the actual held-button click target and natural focused-field delivery.
+It adds exact persisted/UI request-text and operation/file diagnostics while
+retaining both the real Write/new-content and full-capacity atomicity assertions.
+No input-policy/focus/Undo/global option is changed. R3 runtime remains UNRUN.
+
+
+Source R4 supersedes the failed R3 simultaneous pointer/Paste premise. Root R3
+again recorded twenty binary PASS/one FAIL and confirmed both UI and persisted
+request still held the32-byte old text while Write ran. The runtime evidence is
+retained. The native NFS page now observes borrowed pending Text/Paste plus the
+actual focused NFS field before its widgets run. Each bounded buffer records
+whether that same field actually received insertion, independently of value
+change. Nonempty Paste is considered; exact newline/carriage-return Text events
+that pinned egui deliberately ignores are excluded. Separate context reads avoid
+re-entry; no payload clone, focus/input-policy change or new shortcut is used.
+
+Dropped text and rejected/admission-overflow edits both veto every queued NFS
+submission in that frame. The dropped-text notice explains that the edit was not
+applied and must be entered again, rather than blaming saved capacity. Identical
+delivered text is not treated as a drop. Existing2MiB Attempt preflight and state/
+grading/history boundaries stay unchanged. The plan was independently reviewed
+(borrowed event/field capture, matching-field receipt and accurate retry wording).
+
+The corrected prospective regressions use honest observed event premises: a real
+dropped Paste+Write packet must leave the complete Attempt unchanged and never
+dispatch, at ordinary and full capacity; an ordinary later click without pending
+text really writes the documented old request; an accepted earlier-frame Paste
+followed by Write really writes the new text. A genuine same-frame Paste plus the
+existing Ctrl+Enter Check proves newest persisted request versus complete full-cap
+refusal. Delivered identical Paste and intentionally ignored newline Text packets
+have explicit no-false-veto controls. All former real Write/new-content and full
+atomicity guarantees remain; only the impossible delivery assumption was removed.
+R4 runtime remains UNRUN by the source worker.
+
+
+## Main renderer integration gate (2026-10-27)
+
+The reviewed renderer/session helper checkpointf00cb93 is integrated by an exact
+ten-path three-way delta, preserving newer RPM/native work. Main's complete
+regression passes1909/0/14ignored across146 harnesses; all14 retained historical
+checks explicitly pass, and all-target Clippy19.25s passes. Private renderer gates
+include22 real-event/memo/buffer checks,77 library defaults and four Session/cap/
+visit tests. The earlier R1–R3 failed event assumptions and one over-capacity test
+setup remain retained diagnostics, not passing evidence. Source review/readback
+covers the dropped-input guard, output isolation and literal wrong/partial paths.
+
+Normal NFS curriculum is still unbundled in Main. Four authored lessons and their
+private151-lab registration/controller are under the next source/runtime gates.
+No actual NFS Fedora render, packaged NFS, novice, physical screen-reader or other-
+platform acceptance follows from these compiler/event checks. Older source-only
+and UNRUN notes above describe their original handoffs, not a final current gate.

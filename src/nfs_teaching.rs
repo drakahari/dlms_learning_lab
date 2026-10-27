@@ -354,6 +354,20 @@ impl Learning {
             MAX_LEARNING,
         )
     }
+    pub(crate) fn presentation_size(&self, view: View, selected_example: usize) -> Option<usize> {
+        work::size(
+            &Proposed {
+                version: self.version,
+                view,
+                context: &self.context,
+                simulation: &self.simulation,
+                session: &self.session,
+                selected_example,
+                checked: self.checked,
+            },
+            MAX_LEARNING,
+        )
+    }
     pub(crate) fn proposed_size(
         &self,
         simulation: &core::State,

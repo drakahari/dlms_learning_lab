@@ -20,6 +20,7 @@ mod discovery_workspace;
 mod dns_workspace;
 mod legacy_learning;
 mod nat_workspace;
+mod nfs_workspace;
 mod ospf_workspace;
 mod process_learning;
 mod rpm_packages;
@@ -43,6 +44,7 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    nfs: nfs_workspace::NfsMetrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -313,6 +315,7 @@ pub struct LabApp {
     apache_presentation: apache_static_workspace::Presentation,
     nat_presentation: nat_workspace::Presentation,
     rpm_presentation: rpm_packages::Presentation,
+    nfs_presentation: nfs_workspace::Presentation,
     help_open: bool,
     extra_filters: bool,
     host_activity: bool,
@@ -455,6 +458,7 @@ impl LabApp {
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
             rpm_presentation: rpm_packages::Presentation::default(),
+            nfs_presentation: nfs_workspace::Presentation::default(),
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -697,6 +701,7 @@ impl LabApp {
         self.invalidate_apache_presentation();
         self.nat_presentation.clear();
         self.rpm_presentation.clear();
+        self.nfs_presentation.clear();
         self.script_job = None;
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
@@ -711,6 +716,7 @@ impl LabApp {
         model::prepare(a);
         Self::prepare_apache_static(a, s, new_attempt);
         Self::prepare_rpm(a, s, new_attempt);
+        Self::prepare_nfs(a, s, new_attempt);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated ACL lesson");
@@ -832,15 +838,22 @@ impl LabApp {
                 .unwrap()
                 .selected_device = device;
         }
-        a.visited = clock;
-        let data = a.workspace.as_ref().unwrap();
-        self.input = data.command.clone();
-        self.checked = data.checked;
+        let nfs_recency_notice = if matches!(a.state, engine::State::Nfs { .. }) {
+            self.input.clear();
+            self.checked = false;
+            dlms_learning_lab::nfs_workspace::record_visit(a, s, clock).err()
+        } else {
+            a.visited = clock;
+            let data = a.workspace.as_ref().unwrap();
+            self.input = data.command.clone();
+            self.checked = data.checked;
+            None
+        };
         self.selected = Some(i);
         self.reset_pending = false;
         self.focus_input = true;
         self.scroll_command = false;
-        self.notice = None;
+        self.notice = nfs_recency_notice;
         self.help_open = false;
         self.host_activity = false;
         self.load_ipv4_view(i);
@@ -877,6 +890,7 @@ impl LabApp {
         self.invalidate_apache_presentation();
         self.nat_presentation.clear();
         self.rpm_presentation.clear();
+        self.nfs_presentation.clear();
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
@@ -887,6 +901,7 @@ impl LabApp {
         model::prepare(a);
         Self::prepare_apache_static(a, s, true);
         Self::prepare_rpm(a, s, true);
+        Self::prepare_nfs(a, s, true);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
                 .expect("validated ACL lesson");
@@ -1159,7 +1174,7 @@ impl LabApp {
                         self.scenarios
                             .iter()
                             .find(|s| &s.id == *id)
-                            .is_some_and(|s| self.rpm_visible_solved(a, s))
+                            .is_some_and(|s| self.nfs_visible_solved(a, s))
                     })
                 })
                 .count();
@@ -1172,7 +1187,7 @@ impl LabApp {
                             .iter()
                             .find(|s| &s.id == *id)
                             .is_some_and(|s| {
-                                !self.rpm_visible_solved(a, s)
+                                !self.nfs_visible_solved(a, s)
                                     && progress::legacy_script_credit(a, s)
                             })
                     })
@@ -1220,7 +1235,7 @@ impl LabApp {
                                 .progress
                                 .attempts
                                 .get(id)
-                                .is_none_or(|a| !self.rpm_visible_solved(a, s))
+                                .is_none_or(|a| !self.nfs_visible_solved(a, s))
                     })
                 });
             ui.horizontal_wrapped(|ui| {
@@ -1272,6 +1287,7 @@ impl LabApp {
                 self.invalidate_apache_presentation();
                 self.nat_presentation.clear();
                 self.rpm_presentation.clear();
+                self.nfs_presentation.clear();
             }
         }
     }
@@ -1454,7 +1470,7 @@ impl LabApp {
                     s,
                     &self.filter,
                     a.is_some(),
-                    a.is_some_and(|a| self.rpm_visible_solved(a, s)),
+                    a.is_some_and(|a| self.nfs_visible_solved(a, s)),
                     self.progress.favorites.contains(&s.id),
                 )
             })
@@ -1546,7 +1562,8 @@ impl LabApp {
                         );
                         let a = self.progress.attempts.get(&s.id);
                         let complete = a.is_some_and(|a| {
-                            rpm_packages::solved_with_memos(
+                            nfs_workspace::solved_with_memos(
+                                &self.nfs_presentation.memo,
                                 &self.rpm_presentation.memo,
                                 &self.nat_presentation.memo,
                                 a,
@@ -1765,15 +1782,21 @@ impl LabApp {
         self.metrics = Metrics::default();
         self.nat_presentation.memo.begin_frame();
         self.rpm_presentation.memo.begin_frame();
+        self.nfs_presentation.memo.begin_frame();
         ctx.set_zoom_factor(self.scale);
         controls::configure(ctx);
         self.advance_scripts(ctx);
         let previous = (self.theme_id.clone(), self.scale);
         self.header(ctx);
         self.appearance_preview(ctx);
+        let nfs_selected_before_restore = self.selected;
         self.data_dialog(ctx);
+        if nfs_selected_before_restore.is_some() && self.selected.is_none() {
+            self.nfs_presentation.clear();
+        }
         self.sync_appearance(ctx, previous);
         self.rpm_prepass();
+        self.nfs_prepass();
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(palette(ui).error, error);

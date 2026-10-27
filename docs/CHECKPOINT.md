@@ -34,15 +34,18 @@ The new clean147 candidate87121151e82e now passes installation/upgrade/reinstall
 exact synthetic old-progress retention,10quiet plus1traced Wayland startup,
 72alignment captures and actual two-process script AND DHCP reopening. Installed
 ELF2418f835…; no diagnostic override or personal profile. All observed startup,
-readback/update markers and script/network draft repairs pass. Full packaged
-four-RPM acceptance is currently running; three packaged NAT flows remain queued.
+readback/update markers and script/network draft repairs pass. All four packaged
+RPM normal flows PASS,126 final captures hash-pinned. Three packaged NAT flows
+remain queued before full new-seven scoped acceptance.
 No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet.
 
 ### Immediate continuation
 
-1. Finish the active packaged147 RPM native command and reap it before ANY next
-   heavy run. Then verify packaged three-NAT flows and record scoped candidate
-   evidence/launch. Source builds, native QA and packaging remain serialized.
+1. Packaged147 RPM native command is REAPED/PASS. Main1909 default+14explicit
+   renderer checks andClippy also PASS. Active firstprivateBash150 catalog/content
+   test now occupies soleheavy slot; reap it before ANY next heavy command.
+   Verify remaining private source/runtime gates, packaged three-NAT flows and
+   scoped candidate evidence. Source builds/native/packaging stay serialized.
    Keep all older candidates/failed diagnostics. No release.
 2. NFS Stage B is integrated in7deb208: typed engine/loader/progress, exact2MiB
    Attempt admission, source-aware separate practice, foreign-field guards and
@@ -61,9 +64,11 @@ No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet
    corrects a new test setup that exceeded the real16mount cap (no cap change):
    all4 Session checks pass1.34s. Two lint-only edits pass all-target Clippy5.29s
    and actual Undo/focus regression1.36s; independent source-delta ACK67a0e485.
-   Tested private renderer checkpointf00cb93 is committed. Same W now has a
-   source-only normal151/38 registration/controller grant for4 canonical NFS
-   tasks,45000..46000 stage. No public NFS count/credit or native acceptance yet.
+   Tested private renderer checkpointf00cb93 merges cleanly into Main: full1909
+   defaults/0fail/14ignored and all14explicit plusClippy19.25s PASS. Same W now
+   has frozen normal151/38 source/controller R2b59ee7f5 for4 canonical NFS tasks,
+  45000..46000 stage. Sourcepeer64/665 ACK; missingResetreceipt guard closed.
+   New normal/runtime gates queued. No public NFS count or native acceptance yet.
    Other-family launch behavior stays unchanged.
 4. EtherChannel pure R1 passes22 focused groups/20 literal vectors and76 library
    checks, then the same98 defaults in Main; five retained library checks ignored
@@ -85,7 +90,8 @@ No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet
    reference/alternate/guard/example pairs), with93 shell defaults and211Python.
    SOURCE-ONLY private150/38 registration/controller is now authorized in that W,
    stages43000..43504. Original147/37/46 remain pinned; no public count/credit
-   before Root gates and actual native acceptance.
+   before Root gates and actual native acceptance. Normal150manifest e7d2e424
+   (64owned662protected) has peerACKc08c0b47; firstcatalog/contentgate active.
 
 Root owns ALL heavy commands through MAIN tools/dev.py; source workers have NO
 build/test/native/reference grant. Reap every running session before the next

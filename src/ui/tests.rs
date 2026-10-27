@@ -14,6 +14,7 @@ mod nat_lessons;
 mod nat_lessons_native;
 mod nat_native;
 mod nat_teaching;
+pub(in crate::ui) mod nfs_workspace;
 mod ospf;
 mod safe_automation_lessons;
 mod seed_learning;

@@ -2900,3 +2900,26 @@ proof of general shell export support. No learner-host execution or new capabili
 Private normal150 Bash and151 NFS integration/controller source batches are now
 authorized separately; Main normal inventory remains147/37 until reviewed gates
 and actual native acceptance. No public release.
+
+
+### M142 Main NFS renderer integration (2026-10-27)
+
+Exact ten-path f00cb93 renderer/session delta merges cleanly over25492b9. Main
+retains all current RPM controller/output/wording and pure LACP/reference proof
+work; no scenario or unit changes. Full all-target default run1909PASS/0FAIL/
+14ignored across146harnesses, then all14 retained historical checks explicitly
+PASS. Main all-target Clippy19.25s passes. No original historical source/record/
+fixture/receipt or learner answer is rewritten. Main normal catalog remains147/37;
+new NFS normal151 and Bash150 units remain separate private source batches.
+Private NFS normal review closes a missing explicit migration-receipt comparison
+after selected Reset, with a nondestructive snapshot-mutation negative control.
+
+Installed87121151e82e now passes all four complete normal RPM flows and126 final
+PNG captures in addition to install/upgrade/reinstall,11 startup/readbacks (one
+traced actual Wayland),72 shared alignment captures and real two-process script/
+DHCP reopening. Root visually reviewed representative finalized renders. A seeming
+missing-static-paint image-tool inconsistency was checked against exact stored
+RGB: toolbar/header/title pixels are identical across the compared captures and
+files/tags are stable, so no speculative renderer change was made. Stored captures
+remain private and hash-pinned. Packaged three-NAT flow and complete new-seven
+scoped receipt remain pending; no full curriculum/platform/release claim.
