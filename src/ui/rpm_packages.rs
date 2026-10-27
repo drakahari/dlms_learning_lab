@@ -432,10 +432,13 @@ fn simulated_inspector(
             {
                 ui.strong("Simulated payload comparison · This is not rpm -V");
                 ui.label(format!("Declared path: {path}"));
-                ui.label(format!(
-                    "Configuration file: {}",
-                    expected.kind != core::FileKind::Ordinary
-                ));
+                ui.label(match expected.kind {
+                    core::FileKind::Ordinary => "File role: Regular packaged file",
+                    core::FileKind::Config => "File role: Configuration file",
+                    core::FileKind::ConfigNoreplace => {
+                        "File role: Configuration file (no-replace flag)"
+                    }
+                });
                 let current = state.runtime().files.get(path);
                 let owned = state
                     .runtime()

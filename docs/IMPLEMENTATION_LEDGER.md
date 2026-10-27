@@ -2763,3 +2763,41 @@ coverage integrity pass. Source remains147/37 (45CCNA/32LPIC-1/24LPIC-2/46Bash),
 145Partial/1Supporting/1094Open references. NFS gap descriptions acknowledge the
 implemented backend while all16 NFS rows stay Open. New four-NFS lesson drafts
 are separately source-reviewed, unbundled and uncounted. No release publication.
+
+
+### M133–M136 actual RPM lesson acceptance and NFS content gates (2026-10-27)
+
+All four normal RPM lessons passed the actual Fedora native controller at source
+7deb208 (ELF5c697b8f…):126 actual PNGs, complete Start/intro/separate practice/
+assignment, wrong and partial outcomes, reference and two alternatives, broken
+success, visible real terminal output, optional inspector, modal blocking,
+whole-value warm persistence, selected reset and Challenge. Actual widths/heights
+were1920x1080/100 and946x929/150light/200dark. Representative rendered screens
+were inspected, not inferred from case lists. The prior zero-height terminal
+viewport fix retains shared font-derived controls and actual output semantics.
+Min available memory23.53GiB, peak sampled PSI avg101.26%, OOM delta0. This does
+not establish packaged, cold-process, novice, physical screen-reader or other-OS
+acceptance. Private run-e49d3nec and source/hash receipt are retained.
+
+Actual screen review prompted two small wording changes: readable payload file
+roles instead of booleans and a plain-language explanation of the simulator's
+whole-database prerequisite restriction. No transaction, grading or persistence
+semantics changed.58 scoped model/content/teaching/terminal/workspace checks pass,
+with one retained-history check explicitly covered by the earlier combined14.
+All-target Clippy and coverage integrity pass. A first wording-only run failed
+two checks for the explicit scope phrases; the final message preserves those
+limitations without weakening the assertions. Formatting correction was confined
+to the new match arm. Five LPIC-1v5.0 RPM references now have narrow Partial
+practice with evidence; signatures, integrity verification, solvers, YUM/Zypper/
+DNF remain open.147 labs,150Partial/1Supporting/1089Open references.
+
+Four NFS lessons remain private/unbundled. Peer review strengthened real grading
+for denial of other supplied clients and server-side read-only policy through
+fresh read-write-client trials; references and alternatives remain unchanged.
+The first compiler error was a test's guide field name. The first runtime then
+failed all11 groups at the same invalid guide schema; R4 corrects only twelve
+guide records to title/why/action/commands and retains empty command lists for
+native activities. After exact canonical-source recheck all11 groups pass4.58s,
+including alternatives, partial/wrong outcomes, state invalidation, independent
+future trials, separate drafts, genuine history, backup/resume and selected reset.
+No NFS normal lab, native acceptance or objective status is claimed yet.

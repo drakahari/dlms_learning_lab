@@ -1,115 +1,74 @@
 # Implementation continuation checkpoint
 
-2026-10-27. **ACTIVE: owner explicitly resumed the full application build.**
-No public release. Full curriculum/platform acceptance remains incomplete.
-Main development source now has **147 authored labs /37 units** — CCNA45, LPIC-1 32,
-LPIC-2 24, Bash46. Latest scoped installed-accepted Fedora candidate remains140
-at `ddb886b4d418`; its exact absolute launch command is in INSTALLATION.md.
+2026-10-27. **ACTIVE: the full application build remains authorized.**
+Do not stop at a status report or treat a Fedora package as curriculum completion.
+No public release. All ordinary milestones may continue without routine approval.
 
-Current work, in order:
-1. Five Bash teaching corrections are pushed (ebae45f), with full18-assignment
-   development-native teaching flows and72 alignment captures recorded. Accepted
-   original workspaces and all28 themes remain. Latest all-clean whole-project
-   default run before RPM/registration was1698PASS/0FAIL/12ignored at73b93e4.
-2. Three real NAT tasks are integrated into MAIN development source with exact
-   old140/35 preservation. Private registered source dc4cb6c passes lib70,
-   accounts17, model/catalog73, UI35, all12 explicit private checks and Clippy.
-   MAIN full143 run1743PASS/2FAIL/13ignored across134 harnesses; both failures were
-   stale test metadata expectations. Their two complete targets rerun16PASS after
-   narrow original-unit/current-missing-ID fixes. MAIN all13 explicit private and
-   all-target Clippy20.09s pass. Do not relabel the retained full-run failure log.
-   Normal native R10 passes all three complete Fedora lesson flows and80 actual
-   PNG captures: Intro/separate example/actions/adverse/repair/full assignment,
-   wrong/partial/reference/two alternatives/invalidation, warm whole-value
-   save/readback, reset/Challenge and observed100wide/150Light/200Dark. Actual
-   geometry was1920x1080 at100 and946x929 at150/200; requested widths are not
-   acceptance. Representative rendered fields/labels/focus/state were inspected.
-   Earlier failures proved fractional child/root stability disagreement, then
-   impossible whole-child containment at200%; R10 retains measured regressions,
-   original visibility tolerance,20wheel/60idle/300queue limits and pacing.
-   Eleven reviewed paths merged into MAIN with all before hashes checked and
-   clean three-way merges preserving newer RPM state handling. MAIN45 NAT UI
-   checks pass, plus142 default model/content/library/interop checks plus all6 scoped ignored
-   historical checks explicitly run and passed; Main Clippy12.17s and
-   development build5.36s pass. CCNA v1.1 4.1 is now narrowly Partial practice; no IOS/PAT/ports/
-   real-packet or full-objective claim. No new packaged/cold-process acceptance.
-3. RPM backend is pushed at8f5e5fa. Private renderer R7 in rpm-native-140 passes
-   all15 UI checks; four task content tests pass10 groups including references,
-   eight alternatives, wrong/partial/broken/preservation, isolation and backup.
-   All-target Clippy passes after equivalent test-only first() lint fixes.
-   Earlier failures are retained: guide count mismatch, explicit tab-view leaf,
-   egui Undo checkpoint wait and post-tab focus. Real stable Undo and actual
-   field clicks now preserve exact separate drafts; no time/focus injection.
-   Normal147/37 registration R5 has been merged into Main working source. Its
-   isolated full run is1804PASS/1FAIL/13ignored: only an old NAT test used an
-   unbounded tail after140; full affected target rerun12PASS after closing the
-   explicit Nat140..143 slice. All13 private checks and Clippy38.86s pass.
-   Main combined147+NFS StageA full regression passes1829/0/13ignored across
-   139 harnesses (m128-main147-first-full.log); Main Clippy20.41s passes.
-   All13 ignored checks explicitly pass; final development build,211 Python
-   checks, format/privacy and coverage integrity pass. This
-   new all-clean Main run does not relabel the retained earlier private failure.
-   Four RPM tasks are implemented/registered, but real normal RPM native and
-   packaged acceptance remain pending; LPIC-1 102.5 still Open.
-   Shared merge preserved accepted9149NAT source/evidence and allStageA modules;
-   two conflicted docs were resolved by retaining current Nat Partial/evidence.
+## Verified application and next actions
 
-4. LPIC-2 NFS foundations are pushed through4a32855; no learner NFS unit yet.
-   The original pure model review used nfs-core-143 atdb19495 (base140).
-   Pure-core contract R2 (84f217b1/e380d1b7) explicitly limits NFSv3 ACCESS-style
-   decisions, numeric squash/DAC and ordinary existing-file operations. First
-   gates93PASS/0FAIL/4ignored and R2 Clippy pass. Peer found tagged-unit unknown
-   fields and an imprecise unsquashed-root exclusion; frozen R3 fixes strict
-   decoding and documents/tests mode-denial ordering. Root R3 gates pass95 default plus4 explicit private; Clippy13.74s.
-   Exact four-path MAIN integration passes the same95 default checks.
-   Main all-target Clippy19.37s also passes. Source pushed asf7d1210.
-   Stage A adapter/separate-teaching R3 is merged into MAIN after peer review
-   and97 default checks privately and in Main; private Clippy21.64s passes.
-   Relevant saved/current/fresh outcomes, preserved layers, separate practice
-   and pre-copy limits are covered. No engine/progress/UI hooks or NFS scenario
-   registration yet; Stage B contractfbdc2805 is reviewed but implementation
-   must wait on finalized147 base for the actual new RPM memo/foreign guards.
-   No host NFS/mount commands or dependency; all16 objective rows remain Open.
+Main source has **147 authored labs /37 units: CCNA45, LPIC-1 32, LPIC-2 24,
+Bash46**. Pushed base7deb208 combines normal RPM lessons and NFS Stage B.
+The whole-project default regression passes1851/0/14ignored across142 harnesses;
+all14 retained private-history checks explicitly pass. Main all-target Clippy,
+format, development build and211 Python checks pass. Earlier failed logs remain;
+the new complete run does not relabel them.
 
-Current continuation, based on verified/pushed32b0c59 (latest docs25a164e):
-- `rpm-normal-native-147`: R1 first real-event gate2PASS/2FAIL exposed zero-height
-  terminal output viewport. R2 reserves font-derived minimum output space and
-  observes actual silent status/Unsupported reason; no fake stdout or relaxed
-  visibility. R2 five-event and20RPM scoped tests pass; privateClippy39.76s
-  passes. Combined Main default1851/0/14ignored andClippy20.28s pass. Actual
-  All14 combinedprivate, build, format,211Python and coverage checks pass.
-  Fedora RPM native acceptance is next; normal NFS still absent.
-- `nfs-engine-147`: Stage B R3 has89 default library/progress/interop/prepare
-  passes plus3 warm-cache/discovery UI passes. Peer verified28 old prepare
-  remainders unchanged and full source/context/admission guards. Two test items
-  moved to correct modules; Root removed one unused test import. All-target
-  Clippy passes after those no-behavior fixes. Private14 passes; combined Main
-  full regression1851/0/14ignored passes across142harnesses.
-  No NFS normal registration/UI or objective credit.
-- `nfs-content-147`: four NEW authored NFS tasks/review vectors/tests/guide only,
-  R2 closes two real grading gaps: all other supplied-client denial and
-  independent serverro proof via freshRWmount/write. Source peer recheck passes;
- 11 actual loader/model groups remain unrun in nfs-content-validation/a21522e.
-  Still unbundled and uncounted until content/native/registration gates.
-- Stage C native NFS contractfb067cd9 is drafted/review-pending, no renderer grant.
-  Root will choose a combined verified base after Stage B integration.
-- All workers remain source-only with NO build/test/native/reference grant.
-  Root owns one guarded heavy slot; inspect active-command marker on resumption.
+All four normal RPM lessons pass actual Fedora native Start/Introduction/separate
+practice/assignment flows, including wrong/partial/two alternatives, current
+success invalidation, warm full-progress readback, selected reset, Challenge and
+100/150/200 text scaling.126 PNGs are retained privately. Observed geometry was
+1920x1080 at100 and946x929 at150light/200dark. This is developer technical
+acceptance, not a novice study, cold-process or packaged acceptance. Source/ELF
+pins and memory observations are in the private actual-native-main-r2 receipt.
+Post-review polish replaces raw file-role booleans and an opaque unsupported
+transaction message. Its scoped model/content/teaching/terminal/workspace checks
+pass58/0/1ignored; the ignored retained-history check already passed explicitly
+on the combined source. All-target Clippy passes. Coverage integrity now reports
+**150 Partial practice /1 Supporting explanation /1089 Open references**. These
+are overlapping source references, not completed objectives or percentages.
 
-Current development launch from any terminal directory:
+Three normal NAT lessons already passed actual Fedora flows and80 screenshots,
+including separate practice, alternatives, invalidation, warm resume and scaling.
+The latest scoped installed-accepted Fedora candidate remains140 atddb886b4d418;
+prepare and test an updated147 candidate after committing this polish/evidence.
+No new installed, cold-process, Windows/macOS, screen-reader or novice acceptance
+is implied by the current development tests.
+
+### Immediate continuation
+
+1. Finish/commit the RPM wording, coverage and actual-native evidence update;
+   prepare a clean-source147 Fedora candidate through MAIN tools/dev.py. Test
+   the actual packaged executable, installation/reopen/progress and repeated
+   native launches. Keep older candidates and all diagnostics. No release.
+2. NFS Stage B is integrated in7deb208: typed engine/loader/progress, exact2MiB
+   Attempt admission, source-aware separate practice, foreign-field guards and
+   preserved old prepare bodies. No normal NFS registration or objective credit.
+   Four distinct authored NFS tasks are frozen in nfs-content-147 R4 manifest
+   246063cd (four owned paths,714 old paths exact). Independent review closed
+   real extra-client-access and server-read-only grading gaps. First runtime
+   attempts exposed a test field typo then invalid guide schema; both corrected
+   without changing model outcomes. R4 all11 content groups PASS4.58s in isolated
+   nfs-content-validation/a21522e. They remain unbundled and uncounted.
+3. independent_review owns SOURCE-ONLY native Stage C in nfs-native-147 on
+   a21522e, contractfb067cd9. Finish review/gates/native events before integrating
+   four normal NFS labs. The borrowed Session editor, bounded memo and NFS-only
+   visit digit-boundary preflight are approved; other-family launch logic stays.
+4. EtherChannel pure R1 is frozen in etherchannel-core-147 (5 paths,718 protected,
+   manifest1ef93d78).22 model groups/20 vectors are not yet run. teaching_audit
+   is independently reviewing source. ccna_discovery drafts the next adapter/
+   teaching contract only. No registered labs or objective credit yet.
+5. Bash-course-next/REVIEW.md privately maps all46 current scripts and five
+   distinct next batches. Read it before granting another content capability;
+   do not assume parser gaps or count variants as new assignments.
+
+Root owns ALL heavy commands through MAIN tools/dev.py; source workers have NO
+build/test/native/reference grant. Reap every running session before the next
+heavy command. Current logs/evidence live under ignored .build-artifacts/.
+
+Development launch from any terminal directory:
 `"$HOME/Documents/dlms_learning_lab/target/debug/dlms-learning-lab"`
-Current combined development ELF SHA2565c697b8f2532dacfbcf75f24dfc5ddb2aab27b05d806567c2a6715c82b5f2831.
-This147 development build is not the installed-accepted140 candidate. Source
-32b0c59 passes1829 default/0failed/13ignored plus all13 explicitly run, Clippy,
-211Python checks, format/privacy/coverage and development build. No public release.
-
-Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no
-build/test/native/reference grant. Check active sessions/markers before a run.
-
-The coverage matrix is now145Partial/1Supporting/1094Open; these are overlapping
-references, not percentages or completed exam objectives. Full curriculum, other
-OS desktop runtime, physical-device accessibility and novice acceptance remain open.
-Root alone runs heavy work; delegated workers remain source-only.
+Installed-accepted140 launch remains in INSTALLATION.md until a new candidate
+actually passes. Do not confuse source/catalog availability with packaged proof.
 
 ## Mandatory safety on resume
 

@@ -1436,7 +1436,7 @@ impl State {
                 {
                     return fail(
                         Code::UnsupportedSubset,
-                        "Logical whole-database health precondition fails; this is not a universal RPM transaction verdict",
+                        "This simulator accepts changes only when all installed requirements are met. This selection leaves requirements unmet. That whole-database rule is not a universal RPM install rule; compare the client's requirements with the archive's provided capabilities.",
                     );
                 }
             }
