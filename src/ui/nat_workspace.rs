@@ -562,6 +562,111 @@ pub(super) fn solved_with_memo(memo: &memo::Memo, a: &Attempt, s: &Scenario) -> 
         progress::current_solved(a, s)
     }
 }
+
+struct Workbench<'a> {
+    initial: &'a core::State,
+    simulation: &'a mut core::State,
+    draft: &'a mut work::Draft,
+    presentation: &'a mut Presentation,
+    metrics: &'a mut Metrics,
+    focus_input: &'a mut bool,
+    scope: egui::Id,
+    active: bool,
+    check_label: &'a str,
+}
+impl Workbench<'_> {
+    fn show(self, ui: &mut egui::Ui) -> (bool, bool) {
+        let Self {
+            initial,
+            simulation,
+            draft: d,
+            scope,
+            active,
+            presentation,
+            metrics,
+            focus_input,
+            check_label,
+        } = self;
+        let mut apply = false;
+        let mut request = None;
+        let mut changed = false;
+        ui.push_id(scope, |ui| {
+            ui.add_enabled_ui(active, |ui| {
+                if ui.available_width() >= controls::height(ui) * 18. {
+                    ui.columns(2, |columns| {
+                        let (c, p) = policy_panel(
+                            &mut columns[0],
+                            d,
+                            presentation,
+                            metrics,
+                            scope,
+                            focus_input,
+                        );
+                        changed |= c;
+                        apply = p;
+                        let (c, r) =
+                            requests_panel(&mut columns[1], d, metrics, scope, focus_input);
+                        changed |= c;
+                        request = r;
+                    });
+                } else {
+                    let (c, p) = policy_panel(ui, d, presentation, metrics, scope, focus_input);
+                    changed |= c;
+                    apply = p;
+                    ui.separator();
+                    let (c, r) = requests_panel(ui, d, metrics, scope, focus_input);
+                    changed |= c;
+                    request = r;
+                }
+            });
+        });
+        if active && apply {
+            // Always dirty on an actual Apply, including identical notice text.
+            changed = true;
+            match d.apply(initial, simulation) {
+                Ok(_) => {
+                    d.notice = Some("Policy applied".into());
+                    presentation.effect = Some(core::Effect::Configured);
+                }
+                Err(e) => {
+                    d.notice = Some(work::notice(&e));
+                    presentation.effect = None;
+                }
+            }
+        }
+        if active && let Some(request) = request {
+            changed = true;
+            match request.and_then(|r| work::perform(initial, simulation, &r)) {
+                Ok((_, effect)) => {
+                    d.notice = None;
+                    presentation.effect = Some(effect);
+                }
+                Err(e) => {
+                    d.notice = Some(work::notice(&e));
+                    presentation.effect = None;
+                }
+            }
+        }
+        if let Some(n) = &d.notice {
+            ui.label(n);
+        }
+        ui.push_id(scope, |ui| {
+            state_panel(ui, simulation, presentation, metrics)
+        });
+        let check = ui
+            .add_enabled_ui(active, |ui| action(ui, metrics, "check", check_label, true))
+            .inner
+            || active && ui.input(|i| i.modifiers.command && i.key_pressed(egui::Key::Enter));
+        metrics.check = metrics
+            .nat_controls
+            .iter()
+            .find(|r| r.0 == "check")
+            .map(|r| r.1);
+
+        (changed, check)
+    }
+}
+
 impl LabApp {
     pub(super) fn nat_library_prepass(&mut self) {
         let sources = [
@@ -593,6 +698,40 @@ impl LabApp {
     pub(super) fn visible_solved(&self, a: &Attempt, s: &Scenario) -> bool {
         solved_with_memo(&self.nat_presentation.memo, a, s)
     }
+    fn nat_help(&mut self, ui: &mut egui::Ui, i: usize) {
+        let s = &self.scenarios[i];
+        let a = self.progress.attempts.get_mut(&s.id).unwrap();
+        if ui
+            .add_enabled(a.hints < s.hints.len(), button("Show next hint"))
+            .clicked()
+        {
+            a.hints = (a.hints + 1).min(s.hints.len());
+            self.dirty = true;
+        }
+        if a.hints > 0
+            && let Some(h) = s.hints.get(a.hints - 1)
+        {
+            ui.label(h);
+        }
+        egui::CollapsingHeader::new("Optional walkthrough")
+            .id_salt((&s.id, a.challenge, "nat-guide"))
+            .show(ui, |ui| {
+                for step in &s.guide {
+                    ui.strong(&step.title);
+                    ui.label(&step.why);
+                    ui.label(&step.action);
+                }
+            });
+        egui::CollapsingHeader::new("Simulation scope and references")
+            .id_salt((&s.id, a.challenge, "nat-scope"))
+            .show(ui, |ui| {
+                ui.label(work::HELP);
+                ui.label(&s.simplifications);
+                for source in &s.sources {
+                    ui.add(egui::Label::new(source).wrap());
+                }
+            });
+    }
     pub(super) fn nat_page(&mut self, ui: &mut egui::Ui, i: usize) {
         let challenge = self.workspace_header(ui, i);
         let active = ui.is_enabled()
@@ -605,23 +744,168 @@ impl LabApp {
         }
         let s = &self.scenarios[i];
         ui.heading(&s.title);
-        ui.label(&s.objective);
         ui.label("Basic NAT: address-only simulation. No PAT, ports, sessions, timers, routing or security verdict.");
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
-        let (
-            engine::State::BasicNat {
-                simulation: initial,
-            },
-            engine::State::BasicNat { simulation },
-        ) = (&s.initial, &mut a.state)
-        else {
-            return;
+        let view = if challenge {
+            teaching::View::Assignment
+        } else {
+            a.workspace
+                .as_ref()
+                .and_then(|w| w.nat_learning.as_ref())
+                .map_or(teaching::View::Assignment, |l| l.view)
         };
-        let Some(d) = a.workspace.as_mut().and_then(|w| w.nat_draft.as_mut()) else {
-            ui.label(
-                "The saved NAT editor is missing; reset this selected workspace to prepare it.",
-            );
+        if !challenge && s.nat_teaching.is_some() {
+            let mut next = None;
+            ui.add_enabled_ui(active, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    for (v, label) in [
+                        (teaching::View::Introduction, "Introduction"),
+                        (teaching::View::Example, "Try example · ungraded"),
+                        (teaching::View::Assignment, "Assignment"),
+                    ] {
+                        let r = ui.selectable_label(view == v, label);
+                        self.metrics.lesson_tabs.push(r.rect);
+                        if r.clicked() {
+                            next = Some(v);
+                        }
+                    }
+                })
+            });
+            if let Some(v) = next {
+                if let Some(l) = a.workspace.as_mut().and_then(|w| w.nat_learning.as_mut()) {
+                    l.view = v;
+                }
+                self.nat_presentation.clear();
+                self.lesson_scroll_reset = true;
+                self.focus_input = false;
+                self.dirty = true;
+                return;
+            }
+        }
+        if view == teaching::View::Introduction {
+            if let Some(l) = &s.nat_teaching {
+                ui.label(&l.prerequisite_note);
+                for c in &l.concepts {
+                    ui.strong(&c.title);
+                    ui.label(&c.text);
+                }
+                ui.strong("A separate example to try");
+                ui.label(&l.example_description);
+                ui.add_enabled_ui(active, |ui| {
+                    ui.horizontal_wrapped(|ui| {
+                        let r = ui.add(primary(ui, "Try the separate example"));
+                        self.metrics.example_action = Some(r.rect);
+                        if r.clicked() {
+                            a.workspace
+                                .as_mut()
+                                .unwrap()
+                                .nat_learning
+                                .as_mut()
+                                .unwrap()
+                                .view = teaching::View::Example;
+                            self.lesson_scroll_reset = true;
+                            self.dirty = true;
+                        }
+                        let r = ui.add(button("Open full assignment"));
+                        self.metrics.assignment_action = Some(r.rect);
+                        if r.clicked() {
+                            a.workspace
+                                .as_mut()
+                                .unwrap()
+                                .nat_learning
+                                .as_mut()
+                                .unwrap()
+                                .view = teaching::View::Assignment;
+                            self.lesson_scroll_reset = true;
+                            self.dirty = true;
+                        }
+                    })
+                });
+            }
             return;
+        }
+        let practice = view == teaching::View::Example;
+        let mode_id = if practice {
+            format!("{}:example", s.id)
+        } else {
+            s.id.clone()
+        };
+        let (initial, simulation, d) = if practice {
+            let Some(l) = a.workspace.as_mut().and_then(|w| w.nat_learning.as_mut()) else {
+                ui.label(
+                    "The separate practice is missing; reset this selected activity to prepare it.",
+                );
+                return;
+            };
+            let Some(lesson) = &s.nat_teaching else {
+                return;
+            };
+            if l.selected_action >= lesson.example_actions.len() {
+                ui.label("The retained practice action has another context.");
+                return;
+            }
+            ui.label("Separate practice · Ungraded. Assignment state and drafts stay saved.");
+            ui.label(&lesson.example_description);
+            let old = l.selected_action;
+            ui.add_enabled_ui(active, |ui| {
+                controls::dropdown(ui, ("nat-example-action", &s.id), ui.available_width())
+                    .selected_text(&lesson.example_actions[l.selected_action].title)
+                    .show_ui(ui, |ui| {
+                        for (n, step) in lesson.example_actions.iter().enumerate() {
+                            let r = ui.selectable_value(&mut l.selected_action, n, &step.title);
+                            self.metrics
+                                .nat_choices
+                                .push((format!("example:{n}"), r.rect));
+                        }
+                    });
+                ui.label(&lesson.example_actions[l.selected_action].explanation);
+                ui.horizontal_wrapped(|ui| {
+                    let r = ui.add(button("Insert selected action"));
+                    self.metrics.insert = Some(r.rect);
+                    if r.clicked() {
+                        if let Err(e) = l.fill_selected(lesson) {
+                            l.notice = Some(work::notice(&e));
+                        }
+                        self.dirty = true;
+                    }
+                    let r = ui.add(button("Reset example only"));
+                    self.metrics.example_reset = Some(r.rect);
+                    if r.clicked()
+                        && let Ok(mut fresh) =
+                            dlms_learning_lab::nat_teaching::Learning::new(lesson)
+                    {
+                        fresh.view = teaching::View::Example;
+                        *l = fresh;
+                        self.nat_presentation.clear();
+                        self.dirty = true;
+                    }
+                });
+            });
+            self.dirty |= old != l.selected_action;
+            ui.label("Insert fills practice fields only. Apply or use the matching probe to perform the selected action.");
+            egui::CollapsingHeader::new("Try a change and repair it").id_salt((&s.id,"nat-experiment",challenge)).show(ui,|ui|{ui.label(&lesson.try_change.description);ui.label("Use the controls to make this change, check the example, then repeat the worked actions to repair it.");});
+            if let Some(n) = &l.notice {
+                ui.label(n);
+            }
+            (&l.fixture, &mut l.simulation, &mut l.draft)
+        } else {
+            ui.label(&s.objective);
+            let (
+                engine::State::BasicNat {
+                    simulation: initial,
+                },
+                engine::State::BasicNat { simulation },
+            ) = (&s.initial, &mut a.state)
+            else {
+                return;
+            };
+            let Some(d) = a.workspace.as_mut().and_then(|w| w.nat_draft.as_mut()) else {
+                ui.label(
+                    "The saved NAT editor is missing; reset this selected workspace to prepare it.",
+                );
+                return;
+            };
+            (initial, simulation, d)
         };
         if !memo::draft_shape(d) {
             ui.label("The retained NAT editor exceeds its bounds or has an unknown selector. Reset this selected workspace to repair it; its original draft is retained.");
@@ -629,128 +913,90 @@ impl LabApp {
             return;
         }
         self.nat_presentation
-            .bind(&s.id, challenge, a.visited, d.statics.len());
+            .bind(&mode_id, challenge, a.visited, d.statics.len());
         let scope = egui::Id::new((
             "nat-workspace",
-            &s.id,
+            &mode_id,
             challenge,
             self.nat_presentation.generation,
         ));
-        let mut apply = false;
-        let mut request = None;
-        let mut changed = false;
-        ui.push_id(scope, |ui| {
-            ui.add_enabled_ui(active, |ui| {
-                if ui.available_width() >= controls::height(ui) * 18. {
-                    ui.columns(2, |columns| {
-                        let (c, p) = policy_panel(
-                            &mut columns[0],
-                            d,
-                            &mut self.nat_presentation,
-                            &mut self.metrics,
-                            scope,
-                            &mut self.focus_input,
-                        );
-                        changed |= c;
-                        apply = p;
-                        let (c, r) = requests_panel(
-                            &mut columns[1],
-                            d,
-                            &mut self.metrics,
-                            scope,
-                            &mut self.focus_input,
-                        );
-                        changed |= c;
-                        request = r;
-                    });
-                } else {
-                    let (c, p) = policy_panel(
-                        ui,
-                        d,
-                        &mut self.nat_presentation,
-                        &mut self.metrics,
-                        scope,
-                        &mut self.focus_input,
-                    );
-                    changed |= c;
-                    apply = p;
-                    ui.separator();
-                    let (c, r) =
-                        requests_panel(ui, d, &mut self.metrics, scope, &mut self.focus_input);
-                    changed |= c;
-                    request = r;
-                }
-            });
-        });
-        self.dirty |= changed;
-        if active && apply {
-            // Always dirty on an actual Apply, including identical notice text.
-            self.dirty = true;
-            match d.apply(initial, simulation) {
-                Ok(_) => {
-                    d.notice = Some("Policy applied".into());
-                    self.nat_presentation.effect = Some(core::Effect::Configured);
-                }
-                Err(e) => {
-                    d.notice = Some(work::notice(&e));
-                    self.nat_presentation.effect = None;
-                }
-            }
+        let (changed, check) = Workbench {
+            initial,
+            simulation,
+            draft: d,
+            presentation: &mut self.nat_presentation,
+            metrics: &mut self.metrics,
+            focus_input: &mut self.focus_input,
+            scope,
+            active,
+            check_label: if practice {
+                "Check example"
+            } else {
+                "Check work"
+            },
         }
-        if active && let Some(request) = request {
-            self.dirty = true;
-            match request.and_then(|r| work::perform(initial, simulation, &r)) {
-                Ok((_, effect)) => {
-                    d.notice = None;
-                    self.nat_presentation.effect = Some(effect);
-                }
-                Err(e) => {
-                    d.notice = Some(work::notice(&e));
-                    self.nat_presentation.effect = None;
-                }
-            }
-        }
-        if let Some(n) = &d.notice {
-            ui.label(n);
-        }
-        ui.push_id(scope, |ui| {
-            state_panel(ui, simulation, &self.nat_presentation, &mut self.metrics)
-        });
-        let check = ui
-            .add_enabled_ui(active, |ui| {
-                action(ui, &mut self.metrics, "check", "Check work", true)
-            })
-            .inner
-            || active && ui.input(|i| i.modifiers.command && i.key_pressed(egui::Key::Enter));
-        self.metrics.check = self
-            .metrics
-            .nat_controls
-            .iter()
-            .find(|r| r.0 == "check")
-            .map(|r| r.1);
-        // Evaluate AFTER every possible editor/action mutation. Never reuse a
-        // library prepass from earlier in this frame as a post-action result.
+        .show(ui);
+        self.dirty |= changed || check;
         if check {
-            a.workspace.as_mut().unwrap().checked = true;
-            self.dirty = true;
+            let w = a.workspace.as_mut().unwrap();
+            if practice {
+                w.nat_learning.as_mut().unwrap().checked = true
+            } else {
+                w.checked = true;
+            }
         }
+        // FINAL inputs: assignment admission and practice rows share one bounded snapshot.
         self.nat_presentation.memo.evaluate(a, s, check);
-        let checked = a.workspace.as_ref().is_some_and(|w| w.checked);
+        let checked = if practice {
+            a.workspace
+                .as_ref()
+                .and_then(|w| w.nat_learning.as_ref())
+                .is_some_and(|l| l.checked)
+        } else {
+            a.workspace.as_ref().is_some_and(|w| w.checked)
+        };
         if checked {
-            let rows = self.nat_presentation.memo.rows(&s.id).unwrap();
+            let rows = if practice {
+                self.nat_presentation.memo.practice_rows(&s.id)
+            } else {
+                self.nat_presentation.memo.rows(&s.id)
+            }
+            .unwrap_or(&[]);
             let r = controls::feedback(ui, check, |ui| {
+                if practice {
+                    ui.strong("Example checks · No assignment credit");
+                }
                 for (ok, message) in rows {
                     ui.label(check_text(*ok, message));
                 }
             });
             self.metrics.nat_feedback = Some(r.response.rect);
             self.metrics.feedback = Some(r.response.rect);
-            self.metrics.completion = rows.iter().all(|r| r.0);
+            self.metrics.completion = !practice && !rows.is_empty() && rows.iter().all(|r| r.0);
+            if self.metrics.completion && !s.explanation.is_empty() {
+                egui::CollapsingHeader::new("Why this works")
+                    .id_salt((&s.id, challenge, "nat-completion"))
+                    .show(ui, |ui| {
+                        ui.label(&s.explanation);
+                    });
+            }
         }
-        if !challenge {
-            egui::CollapsingHeader::new("Why these controls?").id_salt(scope.with("why")).show(ui,|ui| {
-                ui.label("Applying edits does not make a dynamic map. Outbound can allocate one for an eligible supplied identity. Reverse observes an existing static or dynamic map. Check reads current maps and tests copied policy in independent fresh orders without changing this workspace.");
+        if !challenge && !practice {
+            ui.add_enabled_ui(active, |ui| {
+                ui.horizontal_wrapped(|ui| {
+                    let r = ui.add(button(if self.help_open {
+                        "Hide help"
+                    } else {
+                        "Help and hints"
+                    }));
+                    if r.clicked() {
+                        self.help_open = !self.help_open;
+                    }
+                })
             });
+            if self.help_open {
+                self.nat_help(ui, i);
+            }
         }
     }
 }

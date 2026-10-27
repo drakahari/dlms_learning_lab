@@ -20,9 +20,14 @@ Current work, in order:
    bounded settling preserves strict visibility and original pacing. Actual images
    exposed a cramped single-map list, duplicate status prefixes and an unsupported
    arrow glyph. R5 fixes pass8 event groups and actual24-image wide/windowed flow.
-   Main integration preserves all newer data/capture changes;322 UI,43 model checks
-   and Clippy pass. Source commit/fresh teaching worktree is next, then implement the
-   reviewed three-task unit (contractR3). No NAT authored count/objective credit yet.
+   Main12d87f5 is pushed;322 UI,43 model checks, Clippy and actual24-image main
+   native confirmation pass. Typed teaching/practice is source-frozen and peer-ACK
+   in nat-teaching-143. Backend13 checks (including actual9 migration),32 focused
+   UI/memo checks, full331 UI regression (98.55s) and all-target Clippy R5 pass.
+   The13-path teaching change is integrated into MAIN;12 default+1 explicit
+   private integration checks and32 focused UI/memo checks pass there too.
+   Three distinct tasks are being authored privately, then registered only after
+   content/alternate/negative/native gates. No new count.
 3. M126 corrected fixed-NVR reference is pushed (`78d5e1b`) and completed under the
    default sandbox:28 strict orders match,12 ties inconclusive,0 mismatches. Original
    wrong-domain capture remains exact. No fullEVR/equality/package-operation proof.
@@ -30,7 +35,11 @@ Current work, in order:
    in `rpm-app-140`, from MAIN78d5e1b, after root/independent contractR2 ACK. Noarch
    headers, quiet supported success versus explicit simulator limitations, no fake
    failure status or -V. The additive borrowed query view preserves public guards
-   and validates once per grade batch. No renderer/registration/credit yet.
+   and validates once per grade batch. First15-path source review found and fixed NUL
+   save/load parity and initially customized package preservation. First scoped
+   gate121PASS/0FAIL/5ignored repeated successfully at R5; all-target Clippy
+   passes; all five private migration checks also pass. Native contract is being clarified after
+   peer review; no renderer/registration/credit yet.
 
 The coverage matrix remains144Partial/1Supporting/1095Open; these are overlapping
 references, not percentages or completed exam objectives. Full curriculum, other

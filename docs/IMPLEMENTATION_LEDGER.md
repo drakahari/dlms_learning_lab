@@ -2495,3 +2495,56 @@ fingerprint or objective status changed.4.1 remains Open; planned static/pool/
 handover assignments and their teaching/practice are not authored coverage yet.
 The additional Settings Close and chooser Cancel are real controls; no click-through
 or hidden flag switch substitutes for them in native checks.
+
+
+M125 MAIN12d87f5 is pushed. Its actual technical native confirmation passes24
+captures in `run-plsqb4ho`:1920×1080/fullscreen100 and946×929/windowed150/200,
+strict controls/partial/alternate/current-invalidation/reset/warm readback. MAIN UI
+memory114samples min22.26GiB, some PSI peak0.36%, OOM delta0. No new candidate or
+curriculum claim. Fresh nat-teaching-143 was created from that exact source; peer
+accepted its first typed teaching/practice source13paths/664protected, contractR3.
+First guarded lib/integration run is underway, with an exclusive cold target and
+2jobs/2runtime threads. Normal count remains140 until three real tasks are authored.
+
+RPM first app source15paths was independently reviewed before compilation. Two
+medium fixes are pending: direct Session/Outcome NUL acceptance differed from JSON
+reload, and PreserveInitialPackage wrongly demanded pristine initial payloads
+rather than preserving supplied current state. No runtime pass is claimed yet.
+Pure EVR/provides/transaction logic and all659 protected source files remain exact.
+Reciprocal new-family metadata and NAT memo integration need explicit later tests.
+
+
+### M127/M128 resumed guarded gates (2026-10-26)
+
+NAT teaching source R5 (`321f6916`) has13 backend checks passing, including the
+retained actual9 migration replay,32 focused native-event/memo checks passing
+(7.26s), and all-target Clippy passing (8.78s). The full331 UI regression remains
+in progress at this entry. Earlier failures are retained: example action JSON
+used an endpoint name as a schema key, one test malformed string exceeded the
+existing bound, and a cache test omitted the newly charged Lesson option. Fixes
+preserve production bounds, eviction assertions and grading. Two final let-chain
+lint fixes preserve hint/reset behavior. Three authored tasks remain private
+drafts, unregistered and uncredited; normal140/35 is unchanged.
+
+RPM app source R2 scoped gate121PASS/0FAIL/5ignored (library/query-view, pure
+core, terminal, workspace and teaching). Independent source review corrections
+for NUL validation and preserving initially customized or missing payloads are
+covered. Clippy exposed test-only construction/style corrections; the first
+div_ceil correction needed an explicit usize type, retained as R5. Root verified
+15 owned and659 protected hashes before rerun. No production/core semantics or
+quotas changed in those lint corrections. Native contract peer review requested
+public borrowed inspection instead of a crate-private query view and an explicit
+one-entry-per-activity memory proof. No new UI or RPM authored coverage claimed.
+
+M127 final source R5 private full331 UI PASS98.55s. MAIN exact13-path integration
+preserves661 other source files and the three intentional documentation updates;
+12 default+1 explicit actual9 integration checks and32 focused UI/memo checks pass
+(7.15s). The private full UI and Clippy results belong to exact same source; MAIN
+confirmation is scoped, not another claimed whole-project regression. No normal
+NAT registration or native teaching acceptance yet.
+
+M128 R5 all-target Clippy PASS3.84s, scoped121PASS/0FAIL/5ignored and explicit
+five private checks PASS including actual9. Native contract R2 peer-ACK resolves
+public binary-inspector access and counts one exact activity entry containing both
+assignment/practice reports in the complete four-context bound. MAIN integration
+and renderer/content gates remain pending.

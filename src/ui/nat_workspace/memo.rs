@@ -25,6 +25,8 @@ struct Entry {
     id: String,
     initial: core::State,
     definition: work::Definition,
+    lesson: Option<dlms_learning_lab::nat_teaching::Lesson>,
+    practice_rows: Vec<(bool, String)>,
     attempt: Attempt,
     rows: Vec<(bool, String)>,
     charge: usize,
@@ -39,11 +41,13 @@ pub(in crate::ui) struct Memo {
     // Frame-local booleans only. Uncacheable inputs never become owned snapshots.
     frame: std::collections::BTreeMap<String, bool>,
     fallback_rows: Option<(String, Vec<(bool, String)>)>,
+    fallback_practice: Option<(String, Vec<(bool, String)>)>,
 }
 impl Memo {
     pub fn begin_frame(&mut self) {
         self.frame.clear();
         self.fallback_rows = None;
+        self.fallback_practice = None;
     }
     pub fn retain(&mut self, keep: impl Fn(&str) -> bool) {
         self.entries.retain(|e| keep(&e.id));
@@ -61,6 +65,18 @@ impl Memo {
                 self.fallback_rows
                     .as_ref()
                     .filter(|(key, _)| key == id)
+                    .map(|(_, r)| r.as_slice())
+            })
+    }
+    pub fn practice_rows(&self, id: &str) -> Option<&[(bool, String)]> {
+        self.entries
+            .iter()
+            .find(|e| e.id == id)
+            .map(|e| e.practice_rows.as_slice())
+            .or_else(|| {
+                self.fallback_practice
+                    .as_ref()
+                    .filter(|(k, _)| k == id)
                     .map(|(_, r)| r.as_slice())
             })
     }
@@ -110,13 +126,18 @@ impl Memo {
         };
         let definition = definition.as_ref();
         self.tick = self.tick.saturating_add(1);
-        let shape = storage_shape(a, definition) && s.id.len() <= 80;
+        let shape = storage_shape(a, definition)
+            && s.id.len() <= 80
+            && s.nat_teaching
+                .as_ref()
+                .is_none_or(|l| l.shape() && storage_shape(a, &l.definition));
         if !force
             && shape
             && let Some(e) = self.entries.iter_mut().find(|e| {
                 e.id == s.id
                     && &e.initial == initial
                     && &e.definition == definition
+                    && e.lesson.as_ref() == s.nat_teaching.as_ref()
                     && same_attempt(&e.attempt, a)
             })
         {
@@ -128,10 +149,29 @@ impl Memo {
         }
         self.counters.evaluations += 1;
         let rows = progress::current_nat_checks(a, s);
+        let practice_rows = match (
+            a.workspace.as_ref().and_then(|w| w.nat_learning.as_ref()),
+            s.nat_teaching.as_ref(),
+        ) {
+            (Some(l), Some(lesson)) if lesson.shape() => l.checks(lesson),
+            _ => Vec::new(),
+        };
+        if s.id.len() <= 80
+            && practice_rows.len() <= 37
+            && practice_rows
+                .iter()
+                .try_fold(0usize, |n, r| n.checked_add(r.1.len()))
+                .is_some_and(|n| n <= 32 * 1024)
+        {
+            self.fallback_practice = Some((s.id.clone(), practice_rows.clone()));
+        } else {
+            self.fallback_practice = None;
+        }
         // The authoritative helper retains bounded feedback; guard its storage too.
-        let report_ok = rows.len() <= 128
+        let report_ok = rows.len().saturating_add(practice_rows.len()) <= 128
             && rows
                 .iter()
+                .chain(practice_rows.iter())
                 .try_fold(0usize, |n, r| n.checked_add(r.1.len()))
                 .is_some_and(|n| n <= 32 * 1024);
         let passed = rows.iter().all(|r| r.0);
@@ -153,8 +193,10 @@ impl Memo {
             return;
         }
         self.counters.meters += 1;
-        let Some(charge) = charged(&(&s.id, initial, definition, a), entry_cap.min(total_cap))
-        else {
+        let Some(charge) = charged(
+            &(&s.id, initial, definition, &s.nat_teaching, a),
+            entry_cap.min(total_cap),
+        ) else {
             self.fallback(&s.id, rows);
             return;
         };
@@ -180,6 +222,8 @@ impl Memo {
             id: s.id.clone(),
             initial: initial.clone(),
             definition: definition.clone(),
+            lesson: s.nat_teaching.clone(),
+            practice_rows,
             attempt: a.clone(),
             rows,
             charge,
@@ -193,6 +237,7 @@ impl Memo {
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
         nat_draft: _,
+        nat_learning: _,
         version: _,
         command: _,
         service_port: _,
@@ -328,6 +373,7 @@ fn same_workspace(a: &model::WorkspaceData, b: &model::WorkspaceData) -> bool {
         && a.legacy_host_reviewed == b.legacy_host_reviewed
         && a.legacy_practice_reviewed == b.legacy_practice_reviewed
         && a.migrated_practice_host == b.migrated_practice_host
+        && a.nat_learning == b.nat_learning
         && a.script_history == b.script_history
         && a.script_history_more == b.script_history_more
         && match (&a.nat_draft, &b.nat_draft) {
@@ -429,6 +475,14 @@ fn storage_shape(a: &Attempt, d: &work::Definition) -> bool {
         !foreign(w)
             && w.command.len() <= 4096
             && w.nat_draft.as_ref().is_none_or(draft_shape)
+            && w.nat_learning.as_ref().is_none_or(|l| {
+                l.version == 1
+                    && l.selected_action < 16
+                    && l.notice.as_ref().is_none_or(|s| s.len() <= 512)
+                    && draft_shape(&l.draft)
+                    && l.fixture.inventory() == l.simulation.inventory()
+                    && &l.draft.context == l.simulation.inventory()
+            })
             && [
                 &w.service_port,
                 &w.dns_address,
@@ -734,6 +788,161 @@ mod tests {
         }
         assert!(progress::current_solved(a, s));
     }
+    fn teaching_fixture() -> (Scenario, Attempt) {
+        let s = pack::load(include_str!(
+            "../../../tests/fixtures/nat-teaching-preview.json"
+        ))
+        .unwrap()
+        .remove(0);
+        let mut a = Attempt::new(&s, 1);
+        model::prepare(&mut a);
+        dlms_learning_lab::nat_teaching::prepare(&mut a, s.nat_teaching.as_ref().unwrap(), true)
+            .unwrap();
+        (s, a)
+    }
+    #[test]
+    fn exact_learning_and_lesson_key_hits_do_not_run_admission_checks_or_copy_inputs() {
+        let (mut s, mut a) = teaching_fixture();
+        solve(&s, &mut a);
+        let mut m = Memo::default();
+        m.evaluate(&a, &s, false);
+        let before = m.counters;
+        for _ in 0..10 {
+            m.begin_frame();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+        }
+        assert_eq!(m.counters.evaluations, before.evaluations);
+        assert_eq!(m.counters.meters, before.meters);
+        assert_eq!(m.counters.snapshots, before.snapshots);
+        a.workspace
+            .as_mut()
+            .unwrap()
+            .nat_learning
+            .as_mut()
+            .unwrap()
+            .draft
+            .network = "unfinished example only".into();
+        m.evaluate(&a, &s, false);
+        assert_eq!(m.prepared(&s.id), Some(true));
+        assert_eq!(m.counters.evaluations, before.evaluations + 1);
+        let good = a.clone();
+        a.workspace
+            .as_mut()
+            .unwrap()
+            .nat_learning
+            .as_mut()
+            .unwrap()
+            .version = 2;
+        m.evaluate(&a, &s, false);
+        assert_eq!(m.prepared(&s.id), Some(false));
+        a = good;
+        s.nat_teaching.as_mut().unwrap().prerequisite_note.clear();
+        m.evaluate(&a, &s, false);
+        assert_eq!(m.prepared(&s.id), Some(false));
+    }
+    #[test]
+    fn practice_result_is_separate_final_input_and_truthful_when_storage_is_unavailable() {
+        let (s, mut a) = teaching_fixture();
+        solve(&s, &mut a);
+        let mut m = Memo::default();
+        m.evaluate_limits(&a, &s, false, 1, 1, 0);
+        assert_eq!(m.prepared(&s.id), Some(true));
+        assert!(m.practice_rows(&s.id).unwrap().iter().any(|r| !r.0));
+        let lesson = s.nat_teaching.as_ref().unwrap();
+        let l = a.workspace.as_mut().unwrap().nat_learning.as_mut().unwrap();
+        for step in &lesson.example_actions {
+            work::perform(&l.fixture, &mut l.simulation, &step.action).unwrap();
+        }
+        l.draft = work::Draft::new(&l.simulation).unwrap();
+        m.evaluate_limits(&a, &s, false, 1, 1, 0);
+        assert_eq!(m.prepared(&s.id), Some(true));
+        assert!(m.practice_rows(&s.id).unwrap().iter().all(|r| r.0));
+        assert_eq!(m.counters.snapshots, 0);
+        let l = a.workspace.as_mut().unwrap().nat_learning.as_mut().unwrap();
+        work::perform(
+            &l.fixture,
+            &mut l.simulation,
+            &core::Action::ClearDynamic {},
+        )
+        .unwrap();
+        m.evaluate_limits(&a, &s, false, 1, 1, 0);
+        assert_eq!(m.prepared(&s.id), Some(true));
+        assert!(m.practice_rows(&s.id).unwrap().iter().any(|r| !r.0));
+    }
+    #[test]
+    fn teaching_maximum_lists_prose_raw_drafts_and_three_owned_keys_are_fully_charged() {
+        let (mut s, mut a) = teaching_fixture();
+        let lesson = s.nat_teaching.as_mut().unwrap();
+        lesson.prerequisites = (0..16).map(|n| format!("p{n}")).collect();
+        lesson.prerequisite_note = "x".repeat(1600);
+        lesson.example_description = "x".repeat(1600);
+        lesson.concepts = vec![
+            dlms_learning_lab::nat_teaching::Concept {
+                title: "t".repeat(160),
+                text: "c".repeat(2400)
+            };
+            6
+        ];
+        while lesson.example_actions.len() < 16 {
+            lesson
+                .example_actions
+                .push(lesson.example_actions.last().unwrap().clone());
+        }
+        for step in &mut lesson.example_actions {
+            step.title = "t".repeat(160);
+            step.explanation = "e".repeat(800);
+        }
+        lesson.try_change.description = "e".repeat(1600);
+        lesson.try_change.actions = vec![core::Action::ClearDynamic {}; 16];
+        while lesson.repair.len() < 16 {
+            lesson.repair.push(lesson.repair.last().unwrap().clone());
+        }
+        lesson.validate().unwrap();
+        a.workspace.as_mut().unwrap().nat_learning =
+            Some(dlms_learning_lab::nat_teaching::Learning::new(lesson).unwrap());
+        solve(&s, &mut a);
+        let learning = a.workspace.as_mut().unwrap().nat_learning.as_mut().unwrap();
+        learning.draft.network = "x".repeat(64);
+        learning.draft.notice = Some("n".repeat(512));
+        learning.notice = Some("n".repeat(512));
+        assert!(learning.valid());
+        let engine::State::BasicNat {
+            simulation: initial,
+        } = &s.initial
+        else {
+            panic!()
+        };
+        let engine::Goal::BasicNat { definition } = &s.goal else {
+            panic!()
+        };
+        let key = (&s.id, initial, definition.as_ref(), &s.nat_teaching, &a);
+        let (strings, tokens) = independent(&serde_json::to_value(key).unwrap());
+        let charge = charged(&key, ENTRY_BYTES).unwrap();
+        assert_eq!(charge, strings + 128 * tokens + 4096 + REPORT_RESERVE);
+        assert!(charge * 3 + FRAME_RESERVE < TOTAL_BYTES);
+        let mut m = Memo::default();
+        for n in 0..3 {
+            let mut next = s.clone();
+            next.id = format!("nat-teaching-budget-{n}");
+            m.evaluate(&a, &next, false);
+            assert_eq!(m.prepared(&next.id), Some(true));
+        }
+        assert_eq!(m.entries.len(), 3);
+        assert!(m.bytes + FRAME_RESERVE <= TOTAL_BYTES);
+        let before = m.counters;
+        for _ in 0..5 {
+            m.begin_frame();
+            for n in 0..3 {
+                let mut next = s.clone();
+                next.id = format!("nat-teaching-budget-{n}");
+                m.evaluate(&a, &next, false);
+            }
+        }
+        assert_eq!(m.counters.evaluations, before.evaluations);
+        assert_eq!(m.counters.meters, before.meters);
+        assert_eq!(m.counters.snapshots, before.snapshots);
+    }
     #[test]
     fn hits_use_real_helpers_without_recount_copy_or_trials_and_readonly_meaning_is_exact() {
         let (s, mut a) = fixture();
@@ -912,9 +1121,10 @@ mod tests {
                     _ => panic!(),
                 },
                 match &s.goal {
-                    engine::Goal::BasicNat { definition } => definition,
+                    engine::Goal::BasicNat { definition } => definition.as_ref(),
                     _ => panic!(),
                 },
+                &s.nat_teaching,
                 &a,
             ),
             ENTRY_BYTES,

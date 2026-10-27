@@ -5,6 +5,8 @@ use std::collections::BTreeSet;
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nat_teaching: Option<crate::nat_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub apache_static_teaching: Option<crate::apache_static_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub spanning_tree_teaching: Option<crate::spanning_tree_teaching::Lesson>,
@@ -392,7 +394,13 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             if s.guide.iter().any(|g| !g.commands.is_empty()) {
                 return Err("NAT stage1 has no learner command guidance".into());
             }
-        } else if matches!(s.goal, Goal::BasicNat { .. }) {
+            if let Some(l) = &s.nat_teaching {
+                l.validate_for(simulation)?;
+                if l.prerequisites != s.prerequisites {
+                    return Err("NAT lesson prerequisites differ from actual IDs".into());
+                }
+            }
+        } else if s.nat_teaching.is_some() || matches!(s.goal, Goal::BasicNat { .. }) {
             return Err("NAT goal on another activity".into());
         }
         if let State::ApacheStatic { simulation } = &s.initial {

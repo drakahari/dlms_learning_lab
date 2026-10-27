@@ -746,6 +746,10 @@ impl LabApp {
             dlms_learning_lab::debian_packages_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated package lesson");
         }
+        if let Some(lesson) = &s.nat_teaching {
+            dlms_learning_lab::nat_teaching::prepare(a, lesson, new_attempt)
+                .expect("validated NAT teaching");
+        }
         if let Some(lesson) = &s.dhcpv4_teaching {
             dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated DHCP teaching");
@@ -915,6 +919,10 @@ impl LabApp {
         if let Some(lesson) = &s.debian_packages_teaching {
             dlms_learning_lab::debian_packages_teaching::prepare(a, lesson, true)
                 .expect("validated package lesson");
+        }
+        if let Some(lesson) = &s.nat_teaching {
+            dlms_learning_lab::nat_teaching::prepare(a, lesson, true)
+                .expect("validated NAT teaching");
         }
         if let Some(lesson) = &s.dhcpv4_teaching {
             dlms_learning_lab::dhcpv4_teaching::prepare(a, lesson, true)

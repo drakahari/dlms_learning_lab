@@ -340,11 +340,8 @@ pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     rows.extend(definition.checks(simulation));
     rows
 }
-pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
-    let fail = |m: &str| vec![(false, crate::nat_workspace::notice(m))];
-    if let Err(e) = validate_nat_workspace(a) {
-        return fail(&e);
-    }
+pub(crate) fn validate_nat_metadata(a: &Attempt) -> Result<(), String> {
+    validate_nat_workspace(a)?;
     // Existing family validators are admission only; none calls a grader.
     for validate in [
         validate_apache_static_workspace,
@@ -367,9 +364,14 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
         validate_routing_workspace,
         validate_mac_workspace,
     ] {
-        if let Err(e) = validate(a) {
-            return fail(&e);
-        }
+        validate(a)?;
+    }
+    Ok(())
+}
+pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |m: &str| vec![(false, crate::nat_workspace::notice(m))];
+    if let Err(e) = validate_nat_metadata(a) {
+        return fail(&e);
     }
     let (
         State::BasicNat { simulation },
@@ -383,6 +385,20 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     };
     if authored != &definition.initial || !definition.same_assignment(simulation) {
         return fail("NAT immutable origin differs from authored assignment");
+    }
+    if s.nat_teaching
+        .as_ref()
+        .is_some_and(|l| l.validate_for(authored).is_err())
+        || a.workspace
+            .as_ref()
+            .and_then(|w| w.nat_learning.as_ref())
+            .is_some_and(|l| {
+                s.nat_teaching
+                    .as_ref()
+                    .is_none_or(|lesson| !l.valid_for(lesson))
+            })
+    {
+        return fail("NAT practice metadata differs from the authored separate example");
     }
     if a.workspace
         .as_ref()
@@ -849,6 +865,20 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             if authored != &definition.initial || !definition.same_assignment(simulation) {
                 return Err("Saved NAT origin differs from authored inventory".into());
             }
+            if s.nat_teaching
+                .as_ref()
+                .is_some_and(|l| l.validate_for(authored).is_err())
+                || a.workspace
+                    .as_ref()
+                    .and_then(|w| w.nat_learning.as_ref())
+                    .is_some_and(|l| {
+                        s.nat_teaching
+                            .as_ref()
+                            .is_none_or(|lesson| !l.valid_for(lesson))
+                    })
+            {
+                return Err("Saved NAT practice differs from authored independent fixture".into());
+            }
         }
         if let State::ApacheStatic { simulation } = &a.state {
             let (
@@ -1285,7 +1315,11 @@ fn validate_unit_manager_workspace(a: &Attempt) -> Result<(), String> {
 fn validate_nat_workspace(a: &Attempt) -> Result<(), String> {
     let draft = a.workspace.as_ref().and_then(|w| w.nat_draft.as_ref());
     let State::BasicNat { simulation } = &a.state else {
-        return if draft.is_some() {
+        return if draft.is_some()
+            || a.workspace
+                .as_ref()
+                .is_some_and(|w| w.nat_learning.is_some())
+        {
             Err("NAT editor metadata on another activity".into())
         } else {
             Ok(())
@@ -1307,6 +1341,10 @@ fn validate_nat_workspace(a: &Attempt) -> Result<(), String> {
     if a.workspace.as_ref().is_some_and(|w| !w.valid())
         || !crate::nat_workspace::admitted(simulation)
         || draft.is_some_and(|d| !d.valid_for(simulation))
+        || a.workspace
+            .as_ref()
+            .and_then(|w| w.nat_learning.as_ref())
+            .is_some_and(|l| !l.valid() || !l.separate_from(simulation))
     {
         return Err("NAT state/editor bounds or immutable inventory differ".into());
     }

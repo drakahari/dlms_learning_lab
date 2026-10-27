@@ -1,0 +1,801 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "nat-teaching-preview",
+      "version": 1,
+      "track": "CCNA",
+      "unit": "",
+      "topic": "Unbundled Basic NAT adapter",
+      "title": "Try independent address mapping practice",
+      "summary": "Technical context and persistence fixture, not registered curriculum.",
+      "objective": "Keep observer static. Apply policy that dynamically maps alpha and beta, establish both current maps and pass independent two-way policy tests; unused stays unmapped and is outside the dynamic prefix. Allowed assigned globals and eligible-prefix/pool alternatives may vary. No routing or security verdict is requested.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Inspect immutable endpoint roles and applied mappings.",
+        "Apply a bounded policy and explicitly probe alpha and beta.",
+        "Check current mappings and independent copied-policy trials."
+      ],
+      "guide": [],
+      "hints": [
+        "Current bindings and future policy differ.",
+        "The Basic NAT eligibility prefix can use /31 or /32; it is not an interface host mask exercise."
+      ],
+      "sources": [
+        "https://www.rfc-editor.org/rfc/rfc3022.html"
+      ],
+      "simplifications": "Unbundled technical fixture only; address-only Basic NAT. No ports/PAT/sessions/timers/routing/connectivity/security or real router commands.",
+      "initial": {
+        "kind": "BasicNat",
+        "simulation": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-adapter-assignment",
+            "inside": {
+              "alpha": "10.0.0.10",
+              "beta": "10.0.0.11",
+              "observer": "10.0.0.50",
+              "unused": "10.0.0.60"
+            },
+            "outside": {
+              "peer": "203.0.113.1",
+              "peer-two": "203.0.113.2"
+            },
+            "globals": [
+              "198.51.100.10",
+              "198.51.100.11",
+              "198.51.100.12",
+              "198.51.100.13",
+              "198.51.100.14",
+              "198.51.100.15",
+              "198.51.100.50"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "observer": "198.51.100.50"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.0.1.0",
+                "length": 24
+              },
+              "pool": {
+                "first": "198.51.100.10",
+                "last": "198.51.100.12"
+              }
+            }
+          },
+          "bindings": {}
+        }
+      },
+      "goal": {
+        "kind": "BasicNat",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-adapter-assignment",
+              "inside": {
+                "alpha": "10.0.0.10",
+                "beta": "10.0.0.11",
+                "observer": "10.0.0.50",
+                "unused": "10.0.0.60"
+              },
+              "outside": {
+                "peer": "203.0.113.1",
+                "peer-two": "203.0.113.2"
+              },
+              "globals": [
+                "198.51.100.10",
+                "198.51.100.11",
+                "198.51.100.12",
+                "198.51.100.13",
+                "198.51.100.14",
+                "198.51.100.15",
+                "198.51.100.50"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "observer": "198.51.100.50"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.0.1.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "198.51.100.10",
+                  "last": "198.51.100.12"
+                }
+              }
+            },
+            "bindings": {}
+          },
+          "requirements": [
+            {
+              "kind": "CurrentMapping",
+              "inside": "alpha",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "CurrentMapping",
+              "inside": "beta",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "DynamicCapacity",
+              "minimum": 2
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "alpha",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "beta",
+              "matches": true
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "observer"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "unused"
+            }
+          ],
+          "trials": [
+            {
+              "name": "alpha before beta",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "observer",
+                  "peer": "peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.50"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "observer",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "198.51.100.50"
+                    }
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "peer-two",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "peer-two",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "unused",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "NoMapping",
+                  "peer": "peer",
+                  "global": "198.51.100.99"
+                }
+              ]
+            },
+            {
+              "name": "beta before alpha",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "observer",
+                  "peer": "peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "198.51.100.50"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "observer",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "198.51.100.50"
+                    }
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "alpha",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "alpha",
+                  "peer": "peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "beta",
+                  "peer": "peer-two",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "beta",
+                  "peer": "peer-two",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "unused",
+                  "peer": "peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "NoMapping",
+                  "peer": "peer",
+                  "global": "198.51.100.99"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "solution": [
+        "basic-nat {\"kind\":\"Configure\",\"configuration\":{\"statics\":{\"observer\":\"198.51.100.50\"},\"dynamic\":{\"source\":{\"network\":\"10.0.0.8\",\"length\":30},\"pool\":{\"first\":\"198.51.100.10\",\"last\":\"198.51.100.12\"}}}}",
+        "basic-nat {\"kind\":\"Outbound\",\"inside\":\"alpha\",\"peer\":\"peer\"}",
+        "basic-nat {\"kind\":\"Outbound\",\"inside\":\"beta\",\"peer\":\"peer\"}"
+      ],
+      "prerequisites": [],
+      "explanation": "Applied policy matches alpha and beta, their real current dynamic entries exist and independent allocation orders reverse correctly. The supplied static observer and excluded unused host are separate checks.",
+      "nat_teaching": {
+        "prerequisites": [],
+        "prerequisite_note": "Use the supplied local and global addresses. This example has different identities and addresses from the assignment.",
+        "concepts": [
+          {
+            "title": "Applied policy and current maps",
+            "text": "Apply changes policy without allocating. An outbound address probe may allocate a dynamic map; a reverse probe only reads an existing map. Check tests copied policy without altering current maps."
+          },
+          {
+            "title": "Two independent workspaces",
+            "text": "Practice is ungraded. Its policy, held maps and raw draft persist separately from the full assignment."
+          }
+        ],
+        "example_description": "Include demo-a and demo-b, keep the supplied observer static map, then create both current dynamic maps. A copied fresh policy must support either host order.",
+        "fixture": {
+          "schema_version": 1,
+          "inventory": {
+            "fixture": "nat-independent-practice",
+            "inside": {
+              "demo-a": "10.80.0.10",
+              "demo-b": "10.80.0.11",
+              "demo-observer": "10.80.0.50",
+              "demo-idle": "10.80.0.60"
+            },
+            "outside": {
+              "demo-peer": "192.0.2.80",
+              "demo-peer-two": "192.0.2.81"
+            },
+            "globals": [
+              "203.0.113.10",
+              "203.0.113.11",
+              "203.0.113.12",
+              "203.0.113.13",
+              "203.0.113.14",
+              "203.0.113.15",
+              "203.0.113.50"
+            ]
+          },
+          "configuration": {
+            "statics": {
+              "demo-observer": "203.0.113.50"
+            },
+            "dynamic": {
+              "source": {
+                "network": "10.80.1.0",
+                "length": 24
+              },
+              "pool": {
+                "first": "203.0.113.10",
+                "last": "203.0.113.12"
+              }
+            }
+          },
+          "bindings": {}
+        },
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "inventory": {
+              "fixture": "nat-independent-practice",
+              "inside": {
+                "demo-a": "10.80.0.10",
+                "demo-b": "10.80.0.11",
+                "demo-observer": "10.80.0.50",
+                "demo-idle": "10.80.0.60"
+              },
+              "outside": {
+                "demo-peer": "192.0.2.80",
+                "demo-peer-two": "192.0.2.81"
+              },
+              "globals": [
+                "203.0.113.10",
+                "203.0.113.11",
+                "203.0.113.12",
+                "203.0.113.13",
+                "203.0.113.14",
+                "203.0.113.15",
+                "203.0.113.50"
+              ]
+            },
+            "configuration": {
+              "statics": {
+                "demo-observer": "203.0.113.50"
+              },
+              "dynamic": {
+                "source": {
+                  "network": "10.80.1.0",
+                  "length": 24
+                },
+                "pool": {
+                  "first": "203.0.113.10",
+                  "last": "203.0.113.12"
+                }
+              }
+            },
+            "bindings": {}
+          },
+          "requirements": [
+            {
+              "kind": "CurrentMapping",
+              "inside": "demo-a",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "CurrentMapping",
+              "inside": "demo-b",
+              "mapping_kind": "dynamic",
+              "global": {
+                "kind": "Any"
+              }
+            },
+            {
+              "kind": "DynamicCapacity",
+              "minimum": 2
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "demo-a",
+              "matches": true
+            },
+            {
+              "kind": "DynamicPrefixMatches",
+              "inside": "demo-b",
+              "matches": true
+            },
+            {
+              "kind": "StaticPreserved",
+              "inside": "demo-observer"
+            },
+            {
+              "kind": "NoCurrentMapping",
+              "inside": "demo-idle"
+            }
+          ],
+          "trials": [
+            {
+              "name": "alpha before beta",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-observer",
+                  "peer": "demo-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.50"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-observer",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "203.0.113.50"
+                    }
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-a",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-a",
+                  "peer": "demo-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-b",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-b",
+                  "peer": "demo-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-a",
+                  "peer": "demo-peer-two",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-a",
+                  "peer": "demo-peer-two",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-idle",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "NoMapping",
+                  "peer": "demo-peer",
+                  "global": "203.0.113.99"
+                }
+              ]
+            },
+            {
+              "name": "beta before alpha",
+              "steps": [
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-observer",
+                  "peer": "demo-peer",
+                  "mapping_kind": "static",
+                  "global": {
+                    "kind": "Exact",
+                    "address": "203.0.113.50"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-observer",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "static",
+                    "global": {
+                      "kind": "Exact",
+                      "address": "203.0.113.50"
+                    }
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-b",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-b",
+                  "peer": "demo-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-a",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-a",
+                  "peer": "demo-peer",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-b",
+                  "peer": "demo-peer-two",
+                  "expected": {
+                    "kind": "Translated",
+                    "mapping_kind": "dynamic",
+                    "global": {
+                      "kind": "Any"
+                    }
+                  }
+                },
+                {
+                  "kind": "Reverse",
+                  "inside": "demo-b",
+                  "peer": "demo-peer-two",
+                  "mapping_kind": "dynamic",
+                  "global": {
+                    "kind": "Any"
+                  }
+                },
+                {
+                  "kind": "Outbound",
+                  "inside": "demo-idle",
+                  "peer": "demo-peer",
+                  "expected": {
+                    "kind": "Untranslated"
+                  }
+                },
+                {
+                  "kind": "NoMapping",
+                  "peer": "demo-peer",
+                  "global": "203.0.113.99"
+                }
+              ]
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Apply eligible policy",
+            "explanation": "Insert the supplied /30 and pool, then use Apply. No dynamic map exists yet.",
+            "action": {
+              "kind": "Configure",
+              "configuration": {
+                "statics": {
+                  "demo-observer": "203.0.113.50"
+                },
+                "dynamic": {
+                  "source": {
+                    "network": "10.80.0.8",
+                    "length": 30
+                  },
+                  "pool": {
+                    "first": "203.0.113.10",
+                    "last": "203.0.113.12"
+                  }
+                }
+              }
+            }
+          },
+          {
+            "title": "Create demo-a map",
+            "explanation": "Insert demo-a and demo-peer, then use Outbound. Inspect the current map.",
+            "action": {
+              "kind": "Outbound",
+              "inside": "demo-a",
+              "peer": "demo-peer"
+            }
+          },
+          {
+            "title": "Create demo-b map",
+            "explanation": "Insert demo-b and demo-peer, then use Outbound. Check the example.",
+            "action": {
+              "kind": "Outbound",
+              "inside": "demo-b",
+              "peer": "demo-peer"
+            }
+          }
+        ],
+        "try_change": {
+          "description": "Clear dynamic maps. Current demo-a and demo-b checks fail, while the applied policy still passes copied fresh tests. Repeat the two outbound probes to repair the current maps.",
+          "actions": [
+            {
+              "kind": "ClearDynamic"
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            false,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "kind": "Outbound",
+            "inside": "demo-a",
+            "peer": "demo-peer"
+          },
+          {
+            "kind": "Outbound",
+            "inside": "demo-b",
+            "peer": "demo-peer"
+          }
+        ]
+      }
+    }
+  ]
+}

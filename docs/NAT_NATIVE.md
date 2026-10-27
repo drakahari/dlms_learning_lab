@@ -172,5 +172,6 @@ this UI addition and is not relabeled as a new whole-project count.
 Private technical R5 source manifest7bce41b62ad79e024f694404930a85bd2ed26df4580ccdccc07e1b28f2b12e1b;
 actual run `run-_146_j9a`,24PNGs. Earlier R1/R2 failures and R3 motion traces remain
 retained; R4 actual24PNGs are also retained. Bounds, genuine UI actions and original
-pacing were never relaxed to obtain a pass. Normal MAIN native confirmation and
-future packaged acceptance are separate gates, recorded in the ledger.
+pacing were never relaxed to obtain a pass. Normal MAIN12d87f5 native confirmation also passed24 captures in `run-plsqb4ho`,
+with the same observed dimensions/scales and strict warm readback. Future packaged
+acceptance remains a separate gate recorded in the ledger.
