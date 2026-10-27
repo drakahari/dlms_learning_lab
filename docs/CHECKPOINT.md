@@ -27,23 +27,23 @@ on the combined source. All-target Clippy passes. Coverage integrity now reports
 **150 Partial practice /1 Supporting explanation /1089 Open references**. These
 are overlapping source references, not completed objectives or percentages.
 
-Three normal NAT lessons already passed actual Fedora flows and80 screenshots,
-including separate practice, alternatives, invalidation, warm resume and scaling.
-The latest scoped installed-accepted Fedora candidate remains140 atddb886b4d418;
-new clean87121151e82e candidate has now built and passes installation lifecycle,
-   upgrade from140, catalog identity and exact synthetic old-progress retention.
-   Installed ELF2418f835… passes10 quiet native startups and72 alignment captures.
-   Representative actual light/dark100/150/200/wide/narrow renders inspected.
-   Full new-seven packaged lesson and two-process reopen checks remain queued.
-No new installed, cold-process, Windows/macOS, screen-reader or novice acceptance
-is implied by the current development tests.
+Three normal NAT lessons already passed development-native Fedora flows and80
+screenshots, including separate practice, alternatives, invalidation and scaling.
+The latest fully scoped installed-accepted candidate remains140 atddb886b4d418.
+The new clean147 candidate87121151e82e now passes installation/upgrade/reinstall,
+exact synthetic old-progress retention,10quiet plus1traced Wayland startup,
+72alignment captures and actual two-process script AND DHCP reopening. Installed
+ELF2418f835…; no diagnostic override or personal profile. All observed startup,
+readback/update markers and script/network draft repairs pass. Full packaged
+four-RPM acceptance is currently running; three packaged NAT flows remain queued.
+No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet.
 
 ### Immediate continuation
 
-1. Finish/commit the RPM wording, coverage and actual-native evidence update;
-   prepare a clean-source147 Fedora candidate through MAIN tools/dev.py. Test
-   the actual packaged executable, installation/reopen/progress and repeated
-   native launches. Keep older candidates and all diagnostics. No release.
+1. Finish the active packaged147 RPM native command and reap it before ANY next
+   heavy run. Then verify packaged three-NAT flows and record scoped candidate
+   evidence/launch. Source builds, native QA and packaging remain serialized.
+   Keep all older candidates/failed diagnostics. No release.
 2. NFS Stage B is integrated in7deb208: typed engine/loader/progress, exact2MiB
    Attempt admission, source-aware separate practice, foreign-field guards and
    preserved old prepare bodies. No normal NFS registration or objective credit.
@@ -54,29 +54,38 @@ is implied by the current development tests.
    without changing model outcomes. R4 all11 content groups PASS4.58s in isolated
    nfs-content-validation/a21522e. They remain unbundled and uncounted.
 3. Recovered nfs_native_resume owns SOURCE-ONLY native Stage C in nfs-native-147
-   on a21522e, contractfb067cd9. R1af4fceab compiles:4 library checks pass (one
-   retained-history ignored);16 bin checks pass,3 fail at genuine Undo, ShiftTab
-   and same-release positive Write. Do not relabel that failure log. Independent
-   review also finds transient read/notice leakage across practice/assignment
-   and missing real wrong-repair UI vectors. Narrow R2 fixes are authorized;
-   no weakened controls, forced focus or expected-state installation. Finish
-   source review/gates/native before integration. Other-family launch stays.
+   on a21522e, contractfb067cd9. R1–R3 failed Undo/focus/event assumptions;
+   logs are retained, never relabeled. R4 adds real native checkpoints, scoped
+   transient output, literal wrong/partial vectors and a reviewed dropped-input
+   guard. Final22 bin checks pass34.80s;77 library checks pass/5ignored. Root
+   corrects a new test setup that exceeded the real16mount cap (no cap change):
+   all4 Session checks pass1.34s. Two lint-only edits pass all-target Clippy5.29s
+   and actual Undo/focus regression1.36s; independent source-delta ACK67a0e485.
+   Tested private renderer checkpointf00cb93 is committed. Same W now has a
+   source-only normal151/38 registration/controller grant for4 canonical NFS
+   tasks,45000..46000 stage. No public NFS count/credit or native acceptance yet.
+   Other-family launch behavior stays unchanged.
 4. EtherChannel pure R1 passes22 focused groups/20 literal vectors and76 library
    checks, then the same98 defaults in Main; five retained library checks ignored
    in this scoped run were previously covered explicitly on the combined source.
    Private all-target Clippy40.95s and Main all-target Clippy21.61s pass.
    Independent source review verifies5owned/718protected. No app/count/coverage.
    Adapter contract548b7346 plus Root4d65d44f (whole2MiB Attempt and same-pair/source
-   VLAN anchors) has independent design ACK. Source-only adapter grant follows
-   final pure integration commit; no old VLAN/STP model composition.
+   VLAN anchors) has independent design ACK. Adapter StageB R1 is now frozen in
+   etherchannel-adapter-147 manifest9a37b241:41owned/687protected,28oldprepare
+   bodies exact after guards. All24 prospective groups/compiler remain unrun.
+   First gates queued after native slot; no old VLAN/STP model composition.
 5. Bash-course-next/REVIEW.md privately maps46 scripts/five next batches.
    Root6 command-head probes and6 utility groups (32 literal cases/63 pairs)
    pass on exact current VM source. No new language feature/evaluator change.
    bash_vectors_review owns source-only3 distinct construction/dispatch/validated
    publication lessons in bash-command-vectors-147 under reviewed contract8a990cc3.
-   Four new pack/test/fixture/guide paths only; no registry/count/old46 changes.
-   Root fixed reference extension passes720 Bash5.3.9 comparisons (657 original
-   byte-exact+63new),93 scoped shell defaults, all-target Clippy and211Python.
+   ContentR2 passes11 scoped groups4.52s and independent source review. Root
+   fixed comparisons pass849 (657 original byte-exact+63 capability+129 authored
+   reference/alternate/guard/example pairs), with93 shell defaults and211Python.
+   SOURCE-ONLY private150/38 registration/controller is now authorized in that W,
+   stages43000..43504. Original147/37/46 remain pinned; no public count/credit
+   before Root gates and actual native acceptance.
 
 Root owns ALL heavy commands through MAIN tools/dev.py; source workers have NO
 build/test/native/reference grant. Reap every running session before the next
@@ -84,8 +93,10 @@ heavy command. Current logs/evidence live under ignored .build-artifacts/.
 
 Development launch from any terminal directory:
 `"$HOME/Documents/dlms_learning_lab/target/debug/dlms-learning-lab"`
-Installed-accepted140 launch remains in INSTALLATION.md until a new candidate
-actually passes. Do not confuse source/catalog availability with packaged proof.
+Fully scoped installed-accepted140 remains in INSTALLATION.md until all147
+new-seven flows pass; the currently available147 launch is:
+`"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g87121151e82e-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"`
+Do not confuse source/catalog availability with packaged proof.
 
 ## Mandatory safety on resume
 

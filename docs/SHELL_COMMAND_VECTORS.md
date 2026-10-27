@@ -40,12 +40,16 @@ expansion-limit and safe-automation checks:93PASS/0FAIL across nine targets.
 
 The existing fixed development reference helper now also reads a second immutable
 fixture file. Original657 comparison fixtures remain byte-exact;63 explicitly
-reviewed utility/source/case pairs bring the controlled Bash5.3.9 comparison to720,
-all matching output, diagnostics, status and complete disposable file state.
+reviewed utility/source/case pairs first brought the controlled Bash5.3.9 check
+to720. A third fixed file adds129 independently reviewed authored reference,
+alternative, guard and separate-example pairs, bringing the comparison to849.
+All match output, diagnostics, status and complete disposable file state.
 Only checked-in fixed programs and sample inputs run through that helper, under
 the MAIN memory-safe workflow and disk-backed temporary directories. Unsupported
 external-head simulator tests are deliberately excluded from host comparisons.
-Reference Bash never becomes the learner execution engine.
+Reference Bash never becomes the learner execution engine. The fixed reference
+environment exports C locale; these comparisons do not prove general Bash export
+semantics, which the simulator does not implement.
 
 Primary sources: original installed GNU Bash Reference Manual5.3 (Arrays, Simple
 Command Expansion, Command Search and Execution), and GNU Coreutils9.10 manual

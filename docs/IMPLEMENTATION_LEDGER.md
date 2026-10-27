@@ -2865,3 +2865,38 @@ no host execution path. Main all-target Clippy0.16s, format and211 Python toolin
 checks7.815s pass. Independent authored three-task content remains source-only in
 its own worktree and uncounted; existing46 script Goals/drafts/evaluator10 and
 147/37 normal inventory remain unchanged. See SHELL_COMMAND_VECTORS.md.
+
+
+### M140 NFS workbench gate; M141 authored scripting validation (2026-10-27)
+
+Private NFS renderer checkpointf00cb93 passes final22 real-event/memo/buffer and
+foreign-cache checks34.80s,77 library defaults/5ignored, four Session/cap/recency
+checks1.34s, all-target Clippy5.29s and final affected Undo/focus1.36s. R1–R3 failure
+logs stay retained. Real egui click-focus surrender could ignore Paste yet submit
+old Write; inventing focus or a fake input policy was rejected. Reviewed R4 captures
+borrowed pending text/focus before widgets, observes exact bounded-buffer receipt
+(including identical values) and vetoes every same-frame action on dropped/rejected
+text. Actual ordinary old-text and prior-admitted-new-text Writes, genuine same-frame
+Paste+CtrlEnterCheck admission/refusal, exact full-Attempt preservation and explicit
+retry messages are tested. No new shortcut, simulator or global input policy.
+Source review also closed cross-activity read/status leakage and added literal full
+wrong/partial vectors for all four technical contexts. Root's one setup fix removes
+an unused supplied mount slot before adding an independent client, retaining the
+real16-slot bound; two lint fixes preserve behavior. Eight other owned paths and711
+protected files remain exact. No NFS normal/public count or native capture yet.
+
+Three new Bash tasks are independently source-reviewed (four new files/719 old
+paths exact) and pass11 content groups, first4.47s then wording-only R2 at4.52s.
+Thirty-six graded cases plus five extra guard cases include references/two genuine
+alternatives, negative full vectors, file damage, hardcodes, partial state, separate
+example/change/repair, genuine older records, reset/resume and backup/restore.
+Two unexplained command-list terms and scoped locale/export wording are corrected
+without changing any cases, recipes, prerequisites or version. Root's fixed129-pair
+curation is byte-exact and independently reviewed: only15 trusted reference,
+alternative and separate-example programs; no incorrect/damage scripts reach Bash.
+All849 controlled comparisons pass, including these129 authored contexts; original
+657 and earlier63 fixtures stay exact. Exported C in the reference harness is not
+proof of general shell export support. No learner-host execution or new capability.
+Private normal150 Bash and151 NFS integration/controller source batches are now
+authorized separately; Main normal inventory remains147/37 until reviewed gates
+and actual native acceptance. No public release.
