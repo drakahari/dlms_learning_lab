@@ -396,6 +396,7 @@ pub fn prepare(
     lesson: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    crate::workspace::reject_nfs_metadata(a)?;
     if !matches!(a.state, crate::engine::State::DhcpV4 { .. }) {
         return Err("DHCP teaching requires the DHCP workspace".into());
     }

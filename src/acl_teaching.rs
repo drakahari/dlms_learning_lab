@@ -204,6 +204,7 @@ pub fn prepare(
     lesson: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    crate::workspace::reject_nfs_metadata(attempt)?;
     if !matches!(attempt.state, crate::engine::State::Ipv4Acl { .. }) {
         return Err("ACL teaching metadata belongs only to an ACL assignment".into());
     }

@@ -151,6 +151,9 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
 /// No result survives a state/draft change or becomes a persisted credential.
 /// Reject context and pending draft first; do not run new-client probes for them.
 pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nfs_workspace(a) {
+        return vec![(false, crate::nfs_workspace::notice(e))];
+    }
     if let Err(e) = validate_rpm_workspace(a) {
         return vec![(false, crate::rpm_packages_workspace::notice(&e))];
     }
@@ -205,6 +208,9 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Current applied draft/context first; snapshot predicates are derived once per batch.
 pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nfs_workspace(a) {
+        return vec![(false, crate::nfs_workspace::notice(e))];
+    }
     if let Err(e) = validate_rpm_workspace(a) {
         return vec![(false, crate::rpm_packages_workspace::notice(&e))];
     }
@@ -260,8 +266,58 @@ pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     ));
     rows
 }
+/// NFS metadata admission only: no grader recursion and no inferred completion.
+pub(crate) fn validate_nfs_metadata(a: &Attempt) -> Result<(), String> {
+    let present = crate::workspace::has_nfs_metadata(a);
+    let State::Nfs { simulation } = &a.state else {
+        return if present {
+            Err("NFS editor/practice metadata on another activity; previous work retained".into())
+        } else {
+            Ok(())
+        };
+    };
+    if a.ipv4.is_some()
+        || a.workspace.as_ref().is_some_and(|w| {
+            crate::nfs_workspace::foreign(w)
+                || !w.valid()
+                || w.nfs_session
+                    .as_ref()
+                    .is_some_and(|t| !t.valid_for(simulation))
+                || w.nfs_learning
+                    .as_ref()
+                    .is_some_and(|l| !crate::nfs_teaching::separate(&l.context.initial, simulation))
+        })
+        || !crate::nfs_workspace::within(a, crate::nfs_workspace::MAX_ATTEMPT)
+    {
+        return Err("NFS bounds or foreign metadata differ; previous work retained".into());
+    }
+    Ok(())
+}
+pub(crate) fn validate_nfs_workspace(a: &Attempt) -> Result<(), String> {
+    validate_nfs_metadata(a)?;
+    if let State::Nfs { simulation } = &a.state {
+        simulation
+            .validate()
+            .map_err(|e| crate::nfs_workspace::notice(e.message))?;
+    }
+    Ok(())
+}
+/// Snapshot grading uses actual current files/mounts plus independent next-mount trials.
+pub fn current_nfs_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let d = match crate::nfs_workspace::context(a, s) {
+        Ok(d) => d,
+        Err(e) => return vec![(false, crate::nfs_workspace::notice(e))],
+    };
+    let State::Nfs { simulation } = &a.state else {
+        return vec![(false, "NFS assignment kind differs".into())];
+    };
+    d.checks(simulation)
+}
 /// Fresh RPM current outcomes. A transcript, raw command or checked flag never grants credit.
 pub fn current_rpm_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nfs_workspace(a) {
+        return vec![(false, crate::nfs_workspace::notice(e))];
+    }
     let fail = |e: &str| vec![(false, crate::rpm_packages_workspace::notice(e))];
     if let Err(e) = validate_rpm_metadata(a) {
         return fail(&e);
@@ -329,6 +385,9 @@ fn validate_rpm_workspace(a: &Attempt) -> Result<(), String> {
 }
 /// Fresh package outcomes with context/session guards; display history is never credit.
 pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nfs_workspace(a) {
+        return vec![(false, crate::nfs_workspace::notice(e))];
+    }
     if let Err(e) = validate_rpm_workspace(a) {
         return vec![(false, crate::rpm_packages_workspace::notice(&e))];
     }
@@ -369,6 +428,9 @@ pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, S
     definition.checks(simulation)
 }
 pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_nfs_workspace(a) {
+        return vec![(false, crate::nfs_workspace::notice(e))];
+    }
     if let Err(e) = validate_rpm_workspace(a) {
         return vec![(false, crate::rpm_packages_workspace::notice(&e))];
     }
@@ -420,6 +482,7 @@ pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     rows
 }
 pub(crate) fn validate_nat_metadata(a: &Attempt) -> Result<(), String> {
+    validate_nfs_workspace(a)?;
     validate_nat_workspace(a)?;
     // Existing family validators are admission only; none calls a grader.
     for validate in [
@@ -495,6 +558,14 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::Nfs { .. }) {
+        let rows = current_nfs_checks(a, s);
+        return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
+    if validate_nfs_workspace(a).is_err() {
+        return false;
+    }
+
     if matches!(a.state, State::RpmPackages { .. }) {
         return current_rpm_checks(a, s).iter().all(|r| r.0);
     }
@@ -823,6 +894,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        validate_nfs_workspace(a)?;
         validate_rpm_workspace(a)?;
         validate_nat_workspace(a)?;
         validate_apache_static_workspace(a)?;
@@ -853,6 +925,9 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if matches!(a.state, State::Nfs { .. }) {
+            crate::nfs_workspace::context(a, s)?;
         }
         if let State::RpmPackages { simulation } = &a.state {
             let (
@@ -1860,6 +1935,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
+        validate_nfs_workspace(a)?;
         validate_rpm_workspace(a)?;
         validate_nat_workspace(a)?;
         validate_apache_static_workspace(a)?;

@@ -5,6 +5,8 @@ use std::collections::BTreeSet;
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub nfs_teaching: Option<crate::nfs_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nat_teaching: Option<crate::nat_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub rpm_packages_teaching: Option<crate::rpm_packages_teaching::Lesson>,
@@ -174,7 +176,9 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || s.solution.iter().any(|v| {
                 v.trim().is_empty()
                     || v.len()
-                        > if matches!(s.initial, State::RpmPackages { .. }) {
+                        > if matches!(s.initial, State::Nfs { .. }) {
+                            crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION
+                        } else if matches!(s.initial, State::RpmPackages { .. }) {
                             crate::rpm_packages_terminal::MAX_COMMAND
                         } else if matches!(s.initial, State::BasicNat { .. }) {
                             crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON
@@ -360,6 +364,30 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || matches!(s.goal, Goal::DebianPackages { .. })
         {
             return Err("Package teaching/objectives on another activity".into());
+        }
+        if let State::Nfs { simulation } = &s.initial {
+            let Goal::Nfs { definition } = &s.goal else {
+                return Err("NFS State needs its matching authored goal".into());
+            };
+            if simulation != &definition.initial
+                || definition.validate().is_err()
+                || !crate::nfs_workspace::within(s, crate::nfs_workspace::MAX_SCENARIO)
+            {
+                return Err("NFS exact initial context or full Scenario bound differs".into());
+            }
+            if s.guide.iter().any(|g| !g.commands.is_empty()) {
+                return Err(
+                    "NFS uses explicit virtual editors/actions, not learner JSON commands".into(),
+                );
+            }
+            if let Some(l) = &s.nfs_teaching {
+                l.validate()?;
+                if !l.separate_from(simulation) {
+                    return Err("NFS practice must use separate complete supplied context".into());
+                }
+            }
+        } else if s.nfs_teaching.is_some() || matches!(s.goal, Goal::Nfs { .. }) {
+            return Err("NFS goal or teaching on another activity".into());
         }
         if let State::RpmPackages { simulation } = &s.initial {
             let Goal::RpmPackages { definition } = &s.goal else {
@@ -815,6 +843,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::Nfs { simulation } => simulation.validate().is_ok(),
         State::RpmPackages { simulation } => crate::rpm_packages_workspace::admitted(simulation),
         State::BasicNat { simulation } => crate::nat_workspace::admitted(simulation),
         State::ApacheStatic { simulation } => crate::apache_static_workspace::admitted(simulation),

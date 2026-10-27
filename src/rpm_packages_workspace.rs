@@ -446,6 +446,8 @@ pub fn apply(d: &Definition, s: &mut State, a: &core::Action) -> Result<core::Pl
 // Exhaustive classification: new typed metadata requires a deliberate admission decision.
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
+        nfs_session,
+        nfs_learning,
         rpm_session: _,
         rpm_learning: _,
         nat_draft,
@@ -509,6 +511,8 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || nfs_session.is_some()
+        || nfs_learning.is_some()
         || nat_draft.is_some()
         || nat_learning.is_some()
         || debian_packages_terminal.is_some()

@@ -128,6 +128,9 @@ impl Learning {
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if crate::workspace::has_nfs_metadata(attempt) {
+        return;
+    }
     let workspace = attempt.workspace.as_mut().expect("workspace prepared");
     if new_attempt && let Some(draft) = &mut workspace.ipv6_draft {
         draft.show_routes = lesson.start_with_routes;

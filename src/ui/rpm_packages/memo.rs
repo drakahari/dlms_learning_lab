@@ -248,6 +248,8 @@ impl Memo {
 }
 pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        nfs_session,
+        nfs_learning,
         rpm_session: _,
         rpm_learning: _,
         nat_draft,
@@ -311,6 +313,8 @@ pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || nfs_session.is_some()
+        || nfs_learning.is_some()
         || nat_draft.is_some()
         || nat_learning.is_some()
         || debian_packages_terminal.is_some()
@@ -968,5 +972,51 @@ mod tests {
         );
         n.retain(|_| false);
         assert_eq!(n.bytes, 0);
+    }
+    #[test]
+    fn admitted_nfs_metadata_cannot_hit_warm_success_or_copy_a_foreign_snapshot() {
+        let s = lessons().remove(0);
+        let mut a = attempt(&s);
+        solve(&s, &mut a);
+        let good = a.clone();
+        let raw: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/nfs-workbench-v1.json"
+        ))
+        .unwrap();
+        let lesson: dlms_learning_lab::nfs_teaching::Lesson =
+            serde_json::from_value(raw["cases"][0]["lesson"].clone()).unwrap();
+        let learning = dlms_learning_lab::nfs_teaching::Learning::new(&lesson).unwrap();
+        assert!(learning.valid());
+        for (session, practice) in [(true, false), (false, true), (true, true)] {
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            let w = a.workspace.as_mut().unwrap();
+            if session {
+                w.nfs_session = Some(dlms_learning_lab::nfs_workspace::Session::default());
+            }
+            if practice {
+                w.nfs_learning = Some(learning.clone());
+            }
+            assert!(w.valid());
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.evaluations, before.evaluations + 1);
+            assert!(m.entries.is_empty());
+            assert!(
+                serde_json::to_value(&a).unwrap() == caller,
+                "complete caller unchanged"
+            );
+            assert!(!progress::current_solved(&a, &s));
+            a = good.clone();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            assert_eq!(m.counters.snapshots, before.snapshots + 1);
+        }
     }
 }

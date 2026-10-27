@@ -38,6 +38,9 @@ pub(super) struct RpmMetrics {
     pub check_enabled: bool,
     pub output: Option<egui::Rect>,
     pub result: Option<egui::Rect>,
+    pub result_rows: Vec<(usize, bool, egui::Rect, egui::Rect)>,
+    pub output_rows: Vec<(String, egui::Rect, egui::Rect)>,
+    pub inspect_selected: Option<(String, Option<String>)>,
     pub inspector: Option<egui::Rect>,
     pub inspect_header: Option<egui::Rect>,
     pub inspect_available: Option<egui::Rect>,
@@ -175,14 +178,39 @@ fn console(
     let height = (metrics.main_available_height * 0.30)
         .max(controls::height(ui) * 2.)
         .min(controls::height(ui) * 7.);
-    let output=egui::ScrollArea::both().id_salt(scope.with("output")).max_height(height).min_scrolled_height(0.).auto_shrink([false,false]).stick_to_bottom(true).show(ui,|ui|{
-  if t.entries.is_empty(){ui.label("Read installed/local metadata with the disclosed rpm queries. Nothing runs on the host.");}
-  for e in &t.entries {ui.add(egui::Label::new(RichText::new(format!("$ {}",display(&e.command))).monospace()).extend().selectable(true));match &e.output{
-   Outcome::Utility{stdout,stderr,status,summary}=>{if !stdout.is_empty(){ui.add(egui::Label::new(RichText::new(display(stdout).as_ref()).monospace()).extend().selectable(true));}
-   if !stderr.is_empty(){ui.label(RichText::new(display(stderr).as_ref()).color(palette(ui).error));}ui.label(RichText::new(format!("RPM command success · status {status}")).small());if let Some(text)=summary{ui.add(egui::Label::new(RichText::new(format!("Simulation operation summary: {text}")).small()).wrap());}}
-   Outcome::SimulatorUnsupported{reason}=>{ui.add(egui::Label::new(RichText::new(format!("Command not run by this simulation: {reason}")).color(palette(ui).error)).wrap());}
-  }}
- });
+    // An inner ScrollArea in the outer auto-sized workspace can otherwise
+    // receive zero height despite retained output. Reserve readable rows from
+    // shared native control metrics, without exceeding the existing maximum.
+    let minimum_output = (controls::height(ui) * 3.).min(height);
+    let output = egui::ScrollArea::both().id_salt(scope.with("output")).max_height(height).min_scrolled_height(minimum_output).auto_shrink([false,false]).stick_to_bottom(true).show(ui, |ui| {
+        if t.entries.is_empty(){ ui.label("Read installed/local metadata with the disclosed rpm queries. Nothing runs on the host."); }
+        for (index,e) in t.entries.iter().enumerate() {
+            let r=ui.add(egui::Label::new(RichText::new(format!("$ {}",display(&e.command))).monospace()).extend().selectable(true));
+            metrics.rpm.output_rows.push((format!("{index}:command"),r.rect,ui.clip_rect()));
+            match &e.output {
+                Outcome::Utility{stdout,stderr,status,summary} => {
+                    if !stdout.is_empty() {
+                        let r=ui.add(egui::Label::new(RichText::new(display(stdout).as_ref()).monospace()).extend().selectable(true));
+                        metrics.rpm.output_rows.push((format!("{index}:stdout"),r.rect,ui.clip_rect()));
+                    }
+                    if !stderr.is_empty() {
+                        let r=ui.label(RichText::new(display(stderr).as_ref()).color(palette(ui).error));
+                        metrics.rpm.output_rows.push((format!("{index}:stderr"),r.rect,ui.clip_rect()));
+                    }
+                    let r=ui.label(RichText::new(format!("RPM command success · status {status}")).small());
+                    metrics.rpm.output_rows.push((format!("{index}:status"),r.rect,ui.clip_rect()));
+                    if let Some(text)=summary {
+                        let r=ui.add(egui::Label::new(RichText::new(format!("Simulation operation summary: {text}")).small()).wrap());
+                        metrics.rpm.output_rows.push((format!("{index}:summary"),r.rect,ui.clip_rect()));
+                    }
+                }
+                Outcome::SimulatorUnsupported{reason} => {
+                    let r=ui.add(egui::Label::new(RichText::new(format!("Command not run by this simulation: {reason}")).color(palette(ui).error)).wrap());
+                    metrics.rpm.output_rows.push((format!("{index}:unsupported"),r.rect,ui.clip_rect()));
+                }
+            }
+        }
+    });
     metrics.rpm.output = Some(output.inner_rect);
     metrics.output = Some(output.inner_rect);
     let id = scope.with("command");
@@ -398,6 +426,7 @@ fn simulated_inspector(
                     });
                 metrics.rpm.inspect_path = Some(response.response.rect);
             });
+            metrics.rpm.inspect_selected = Some((id.clone(), selection.path.clone()));
             if let Some(path) = selection.path.as_ref()
                 && let Some(expected) = a.files.get(path)
             {
@@ -959,7 +988,7 @@ fn page_body(
                 .rect,
             );
             let mut first_failure = true;
-            for (ok, text) in rows {
+            for (index, (ok, text)) in rows.iter().enumerate() {
                 let row = ui.colored_label(
                     if *ok {
                         palette(ui).success
@@ -968,6 +997,9 @@ fn page_body(
                     },
                     text,
                 );
+                m.rpm
+                    .result_rows
+                    .push((index, *ok, row.rect, ui.clip_rect()));
                 if !ok && first_failure {
                     result = result.union(row.rect);
                     first_failure = false;

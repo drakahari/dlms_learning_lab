@@ -118,6 +118,9 @@ impl Learning {
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if crate::workspace::has_nfs_metadata(attempt) {
+        return;
+    }
     let workspace = attempt.workspace.as_mut().expect("workspace prepared");
     if workspace.process_learning.is_none() {
         let mut learning = Learning::new(lesson);

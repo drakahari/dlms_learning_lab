@@ -141,6 +141,9 @@ impl Learning {
     }
 }
 pub fn prepare(a: &mut crate::progress::Attempt, l: &Lesson, new_attempt: bool) {
+    if crate::workspace::has_nfs_metadata(a) {
+        return;
+    }
     let w = a.workspace.as_mut().expect("workspace prepared");
     if w.mac_learning.is_none() {
         let mut learning = Learning::new(l).expect("validated lesson");

@@ -15,6 +15,10 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub nfs_session: Option<crate::nfs_workspace::Session>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub nfs_learning: Option<crate::nfs_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nat_learning: Option<crate::nat_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub rpm_session: Option<crate::rpm_packages_terminal::Session>,
@@ -136,6 +140,8 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.nfs_session.as_ref().is_none_or(|s| s.valid())
+            && self.nfs_learning.as_ref().is_none_or(|l| l.valid())
             && self.rpm_session.as_ref().is_none_or(|s| s.valid())
             && self.rpm_learning.as_ref().is_none_or(|l| l.valid())
             && self.nat_draft.as_ref().is_none_or(|d| d.valid())
@@ -274,7 +280,27 @@ pub fn preserve_script_history(a: &mut Attempt) {
         w.checked = false;
     }
 }
+/// Presence only: no grading, serialization, mutation or validation credential.
+pub fn has_nfs_metadata(a: &Attempt) -> bool {
+    a.workspace
+        .as_ref()
+        .is_some_and(|w| w.nfs_session.is_some() || w.nfs_learning.is_some())
+}
+pub(crate) fn reject_nfs_metadata(a: &Attempt) -> Result<(), String> {
+    if has_nfs_metadata(a) {
+        Err("NFS workspace metadata belongs to its NFS activity; previous work retained".into())
+    } else {
+        Ok(())
+    }
+}
 pub fn prepare(a: &mut Attempt) {
+    if matches!(a.state, State::Nfs { .. }) {
+        let _ = crate::nfs_workspace::prepare_session(a);
+        return;
+    }
+    if has_nfs_metadata(a) {
+        return;
+    }
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
     if matches!(&a.state, State::RpmPackages { .. }) && w.rpm_session.is_none() {

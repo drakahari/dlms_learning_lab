@@ -143,6 +143,9 @@ pub fn save_action(text: String) -> String {
 }
 
 pub fn prepare(attempt: &mut crate::progress::Attempt, lesson: &Lesson, new_attempt: bool) {
+    if crate::workspace::has_nfs_metadata(attempt) {
+        return;
+    }
     let w = attempt.workspace.as_mut().expect("workspace prepared");
     if w.storage_learning.is_none() {
         let mut learning = Learning::new(lesson);

@@ -1,6 +1,6 @@
 # Implementation continuation checkpoint
 
-2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
+2026-10-27. **ACTIVE: owner explicitly resumed the full application build.**
 No public release. Full curriculum/platform acceptance remains incomplete.
 Main development source now has **147 authored labs /37 units** — CCNA45, LPIC-1 32,
 LPIC-2 24, Bash46. Latest scoped installed-accepted Fedora candidate remains140
@@ -71,21 +71,34 @@ Current work, in order:
    must wait on finalized147 base for the actual new RPM memo/foreign guards.
    No host NFS/mount commands or dependency; all16 objective rows remain Open.
 
-Next source-only milestones, based on verified/pushed32b0c59:
-- `rpm-normal-native-147`: ccna_discovery implements closed normal four-task
-  native controller/actual smoke_tick regressions (planbb93d8a8). No model/data/
-  progress changes. Actual Fedora and packaged RPM acceptance are still pending.
-- `nfs-engine-147`: independent_review implements Stage B percontractfbdc2805:
-  State/Goal/pack/progress hooks, exact2MiB Attempt preflight, reciprocal cache/
-  field guards and28 narrow old-prepare prefixes. No core, authored NFS unit,
-  renderer, new dependency or objective credit. Freeze/source-peer review first.
-- Both are isolated at `.build-artifacts/worktrees/NAME`; neither worker has a
-  build/test/native/reference grant. Root reviews and runs only one guarded
-  heavy invocation. All prior sessions are reaped at this checkpoint.
+Current continuation, based on verified/pushed32b0c59 (latest docs25a164e):
+- `rpm-normal-native-147`: R1 first real-event gate2PASS/2FAIL exposed zero-height
+  terminal output viewport. R2 reserves font-derived minimum output space and
+  observes actual silent status/Unsupported reason; no fake stdout or relaxed
+  visibility. R2 five-event and20RPM scoped tests pass; privateClippy39.76s
+  passes. Combined Main default1851/0/14ignored andClippy20.28s pass. Actual
+  All14 combinedprivate, build, format,211Python and coverage checks pass.
+  Fedora RPM native acceptance is next; normal NFS still absent.
+- `nfs-engine-147`: Stage B R3 has89 default library/progress/interop/prepare
+  passes plus3 warm-cache/discovery UI passes. Peer verified28 old prepare
+  remainders unchanged and full source/context/admission guards. Two test items
+  moved to correct modules; Root removed one unused test import. All-target
+  Clippy passes after those no-behavior fixes. Private14 passes; combined Main
+  full regression1851/0/14ignored passes across142harnesses.
+  No NFS normal registration/UI or objective credit.
+- `nfs-content-147`: four NEW authored NFS tasks/review vectors/tests/guide only,
+  R2 closes two real grading gaps: all other supplied-client denial and
+  independent serverro proof via freshRWmount/write. Source peer recheck passes;
+ 11 actual loader/model groups remain unrun in nfs-content-validation/a21522e.
+  Still unbundled and uncounted until content/native/registration gates.
+- Stage C native NFS contractfb067cd9 is drafted/review-pending, no renderer grant.
+  Root will choose a combined verified base after Stage B integration.
+- All workers remain source-only with NO build/test/native/reference grant.
+  Root owns one guarded heavy slot; inspect active-command marker on resumption.
 
 Current development launch from any terminal directory:
 `"$HOME/Documents/dlms_learning_lab/target/debug/dlms-learning-lab"`
-ELF SHA256073fefeb470ca314a2392e454562fea827f418fa7e114428d4b6236a87480b24.
+Current combined development ELF SHA2565c697b8f2532dacfbcf75f24dfc5ddb2aab27b05d806567c2a6715c82b5f2831.
 This147 development build is not the installed-accepted140 candidate. Source
 32b0c59 passes1829 default/0failed/13ignored plus all13 explicitly run, Clippy,
 211Python checks, format/privacy/coverage and development build. No public release.

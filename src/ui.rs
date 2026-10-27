@@ -468,6 +468,10 @@ impl LabApp {
             smoke_stage: if is_reopen {
                 17000
             } else if let Some(stage) =
+                Self::rpm_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::nat_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage

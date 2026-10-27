@@ -236,6 +236,8 @@ impl Memo {
 // All typed foreign-family payloads are rejected by NAT admission. Never copy them.
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        nfs_session,
+        nfs_learning,
         rpm_session,
         rpm_learning,
         nat_draft: _,
@@ -300,6 +302,8 @@ fn foreign(w: &model::WorkspaceData) -> bool {
     } = w;
     macro_rules! any { ($($v:ident),* $(,)?) => { false $(|| $v.is_some())* }; }
     any!(
+        nfs_session,
+        nfs_learning,
         rpm_session,
         rpm_learning,
         debian_packages_terminal,
@@ -1347,6 +1351,51 @@ mod tests {
         assert_eq!(m.counters.evaluations, before.evaluations);
         assert_eq!(m.counters.snapshots, before.snapshots);
         assert_eq!(m.counters.meters, before.meters);
+    }
+    #[test]
+    fn admitted_nfs_metadata_cannot_hit_warm_success_or_copy_a_foreign_snapshot() {
+        let (s, mut a) = teaching_fixture();
+        solve(&s, &mut a);
+        let good = a.clone();
+        let raw: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/nfs-workbench-v1.json"
+        ))
+        .unwrap();
+        let lesson: dlms_learning_lab::nfs_teaching::Lesson =
+            serde_json::from_value(raw["cases"][0]["lesson"].clone()).unwrap();
+        let learning = dlms_learning_lab::nfs_teaching::Learning::new(&lesson).unwrap();
+        assert!(learning.valid());
+        for (session, practice) in [(true, false), (false, true), (true, true)] {
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            let w = a.workspace.as_mut().unwrap();
+            if session {
+                w.nfs_session = Some(dlms_learning_lab::nfs_workspace::Session::default());
+            }
+            if practice {
+                w.nfs_learning = Some(learning.clone());
+            }
+            assert!(w.valid());
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.evaluations, before.evaluations + 1);
+            assert!(m.entries.is_empty());
+            assert!(
+                serde_json::to_value(&a).unwrap() == caller,
+                "complete caller unchanged"
+            );
+            assert!(!progress::current_solved(&a, &s));
+            a = good.clone();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            assert_eq!(m.counters.snapshots, before.snapshots + 1);
+        }
     }
 }
 

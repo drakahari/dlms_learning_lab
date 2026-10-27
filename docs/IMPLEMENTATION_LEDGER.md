@@ -2729,3 +2729,37 @@ Main all-target Clippy20.41s passes. Actual RPM native, a new packaged Fedora
 candidate, other-OS runtime, physical-device/accessibility and novice acceptance
 remain pending. Source147/37 =45CCNA/32LPIC-1/24LPIC-2/46Bash; installed140 remains
 the latest scoped accepted Fedora candidate. No release publication.
+
+### M130–M132 continued native RPM and NFS integration (2026-10-27)
+
+Resumed sustained implementation after correcting the premature status-turn end.
+The normal four-RPM event controller uses real Start, Introduction, independent
+example Insert/Run, wrong/partial/reference/two alternatives, post-pass breaking,
+query/Unsupported output, inspector, modal blocking, warm full-value readback,
+selected reset, Challenge and measured scaling. Its first2/4 event groups failed
+on a zero-height output reveal. Source diagnosis identified a collapsed terminal
+viewport, not a failed package transaction. A font-derived three-control-row
+minimum, capped by the existing maximum, fixes actual output allocation. Real
+Run/status and Unsupported-reason visibility pass100/150/200 event regressions;
+silent success retains empty stdout. All20 RPM-scoped groups and Clippy pass.
+Actual native RPM and packaged acceptance still require a real desktop run.
+
+NFS Stage B adds typed State/Goal/loader, optional Session/Learning wire and safe
+source-aware progress/actions. Exact streamed complete Attempt accounting keeps
+the2MiB family limit; no global capacity increase.28 old prepare functions get
+only early borrowed foreign-field rejection, with their remaining bodies exact.
+Existing current/save/decode and Nat/RPM warm-cache paths reject foreign NFS data
+before success or snapshots. New source/current/fresh/capacity/backup tests pass;
+no output/history/checked bit is completion authority. Peer caught a context-row
+index in a test, corrected before runtime; two test items were relocated without
+body changes and one unused import removed.89 scoped defaults+3 UI groups and
+all14 explicit private-history checks pass. Core/147 definitions/37units and old
+writer/record sources remain exact. No normal NFS lesson or renderer is claimed.
+
+Forty-six unique source paths merge cleanly into Main. Complete combined default
+run1851PASS/0FAIL/14ignored across142 harnesses; all14 ignored checks explicitly
+PASS. Main all-target Clippy20.28s, format, development build,211Python checks and
+coverage integrity pass. Source remains147/37 (45CCNA/32LPIC-1/24LPIC-2/46Bash),
+145Partial/1Supporting/1094Open references. NFS gap descriptions acknowledge the
+implemented backend while all16 NFS rows stay Open. New four-NFS lesson drafts
+are separately source-reviewed, unbundled and uncounted. No release publication.

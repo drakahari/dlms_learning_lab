@@ -326,6 +326,52 @@ impl Learning {
         }
         serde_json::from_slice(raw).map_err(|_| "Invalid bounded NFS Learning".into())
     }
+    pub(crate) fn new_size(l: &Lesson, new: bool) -> Option<usize> {
+        Self::new_size_view(
+            l,
+            if new {
+                View::Introduction
+            } else {
+                View::Assignment
+            },
+        )
+    }
+    pub(crate) fn new_size_view(l: &Lesson, view: View) -> Option<usize> {
+        if !l.bounded() {
+            return None;
+        }
+        let session = work::Session::default();
+        work::size(
+            &Proposed {
+                version: 1,
+                view,
+                context: &l.definition,
+                simulation: &l.definition.initial,
+                session: &session,
+                selected_example: 0,
+                checked: false,
+            },
+            MAX_LEARNING,
+        )
+    }
+    pub(crate) fn proposed_size(
+        &self,
+        simulation: &core::State,
+        session: &work::Session,
+    ) -> Option<usize> {
+        work::size(
+            &Proposed {
+                version: self.version,
+                view: self.view,
+                context: &self.context,
+                simulation,
+                session,
+                selected_example: self.selected_example,
+                checked: self.checked && simulation == &self.simulation,
+            },
+            MAX_LEARNING,
+        )
+    }
     pub fn new(l: &Lesson) -> Result<Self, String> {
         if !l.bounded() {
             return Err("NFS Lesson differs".into());
@@ -379,7 +425,11 @@ impl Learning {
         }
         self.context.checks(&self.simulation)
     }
-    fn commit(&mut self, simulation: core::State, session: work::Session) -> Result<(), String> {
+    pub(crate) fn commit(
+        &mut self,
+        simulation: core::State,
+        session: work::Session,
+    ) -> Result<(), String> {
         let changed = simulation != self.simulation;
         let checked = self.checked && !changed;
         if !work::within(
@@ -411,6 +461,13 @@ impl Learning {
     }
     /// Fill editor/request fields only. Save/Apply/Mount/Read/Write still require their explicit control.
     pub fn fill_selected(&mut self, l: &Lesson) -> Result<(), String> {
+        self.fill_with_budget(l, |_| true)
+    }
+    pub(crate) fn fill_with_budget(
+        &mut self,
+        l: &Lesson,
+        mut admit: impl FnMut(usize) -> bool,
+    ) -> Result<(), String> {
         if !self.valid_for(l) {
             return Err("Foreign NFS practice".into());
         }
@@ -427,7 +484,13 @@ impl Learning {
                 .find(|s| s.server == *server)
                 .expect("admitted editor server")
                 .draft;
-            self.editor_fill_preflight(old, text)?;
+            let bytes = self.editor_fill_preflight(old, text)?;
+            if !admit(bytes) {
+                return Err(
+                    "NFS containing Attempt exceeds2MiB before copying; previous fields retained"
+                        .into(),
+                );
+            }
             #[cfg(test)]
             FILL_COPIES.with(|n| n.set(n.get() + 1));
             let mut simulation = self.simulation.clone();
@@ -443,7 +506,13 @@ impl Learning {
                 .find(|s| s.client == *client)
                 .expect("admitted editor client")
                 .draft;
-            self.editor_fill_preflight(old, text)?;
+            let bytes = self.editor_fill_preflight(old, text)?;
+            if !admit(bytes) {
+                return Err(
+                    "NFS containing Attempt exceeds2MiB before copying; previous fields retained"
+                        .into(),
+                );
+            }
             #[cfg(test)]
             FILL_COPIES.with(|n| n.set(n.get() + 1));
             let mut simulation = self.simulation.clone();
@@ -519,19 +588,17 @@ impl Learning {
             selected_example: usize,
             checked: bool,
         }
+        let learning = FillLearning {
+            version: self.version,
+            view: self.view,
+            context: &self.context,
+            simulation: &self.simulation,
+            session: &proposed,
+            selected_example: self.selected_example,
+            checked: self.checked,
+        };
         if !work::within(&proposed, work::MAX_SESSION)
-            || !work::within(
-                &FillLearning {
-                    version: self.version,
-                    view: self.view,
-                    context: &self.context,
-                    simulation: &self.simulation,
-                    session: &proposed,
-                    selected_example: self.selected_example,
-                    checked: self.checked,
-                },
-                MAX_LEARNING,
-            )
+            || work::size(&learning, MAX_LEARNING).is_none_or(|n| !admit(n))
         {
             return Err(
                 "NFS filled Session or practice aggregate; previous fields retained".into(),
@@ -542,7 +609,7 @@ impl Learning {
         self.session = proposed.to_owned_session();
         Ok(())
     }
-    fn editor_fill_preflight(&self, old: &str, new: &str) -> Result<(), String> {
+    fn editor_fill_preflight(&self, old: &str, new: &str) -> Result<usize, String> {
         let changed = old != new;
         let old = compact_size(old).ok_or("NFS previous editor aggregate")?;
         let new = compact_size(new).ok_or("NFS proposed editor aggregate")?;
@@ -561,7 +628,7 @@ impl Learning {
                     .into(),
             );
         }
-        Ok(())
+        learning.ok_or_else(|| "NFS editor count overflow".into())
     }
     pub fn reset(&mut self, l: &Lesson) -> Result<(), String> {
         if !self.valid_for(l) {
@@ -572,6 +639,15 @@ impl Learning {
         *self = fresh;
         Ok(())
     }
+}
+
+/// Full Scenario/version-aware preparation; no work is copied before cumulative admission.
+pub fn prepare(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    new_attempt: bool,
+) -> Result<(), String> {
+    work::prepare_attempt(a, s, new_attempt)
 }
 
 #[cfg(test)]

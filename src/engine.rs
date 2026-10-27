@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    Nfs {
+        simulation: crate::nfs::State,
+    },
     RpmPackages {
         simulation: crate::rpm_packages::State,
     },
@@ -145,6 +148,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    Nfs {
+        definition: Box<crate::nfs_workspace::Definition>,
+    },
     RpmPackages {
         definition: Box<crate::rpm_packages_workspace::Definition>,
     },
@@ -313,6 +319,7 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::Nfs { simulation }, Goal::Nfs { definition }) => definition.checks(simulation),
         (State::RpmPackages { simulation }, Goal::RpmPackages { definition }) => {
             definition.checks(simulation)
         }
@@ -636,6 +643,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::Nfs { .. } => crate::nfs_workspace::HELP,
         State::RpmPackages { .. } => crate::rpm_packages_workspace::HELP,
         State::BasicNat { .. } => crate::nat_workspace::HELP,
         State::ApacheStatic { .. } => crate::apache_static_workspace::HELP,
@@ -697,6 +705,15 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::Nfs { simulation } = s {
+        if input.len() > crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION {
+            return Err("NFS typed input exceeds raw bound before trimming".into());
+        }
+        let Goal::Nfs { definition } = goal else {
+            return Err("NFS action needs its authored context".into());
+        };
+        return crate::nfs_workspace::execute(definition, simulation, input);
+    }
     if let State::RpmPackages { simulation } = s {
         if input.len() > crate::rpm_packages_terminal::MAX_COMMAND {
             return Err("RPM input exceeds2048 bytes before any trimming".into());
@@ -867,6 +884,18 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::Nfs { .. }) {
+        if input.len() > crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION {
+            return Err("NFS typed input exceeds raw bound before trimming".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::nfs_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "NFS mutations need goal-aware supplied context; no host NFS command runs".into(),
+            ),
+        };
+    }
     if matches!(s, State::RpmPackages { .. }) {
         return Err(
             "RPM commands require goal-aware supplied archive context; no host execution".into(),
@@ -1029,7 +1058,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::RpmPackages { .. }
+        State::Nfs { .. }
+        | State::RpmPackages { .. }
         | State::BasicNat { .. }
         | State::ApacheStatic { .. }
         | State::DebianPackages { .. }
@@ -1476,6 +1506,13 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::Nfs { simulation } => format!(
+            "Supplied virtual NFS inventory: {} servers, {} clients, {} current mounts and {} existing text files. No host mount, RPC or trusted identity",
+            simulation.inventory().servers.len(),
+            simulation.inventory().clients.len(),
+            simulation.runtime().mounts.len(),
+            simulation.runtime().contents.len()
+        ),
         State::RpmPackages { simulation } => format!(
             "Restricted script-free RPM simulation: {} installed records, {} virtual files; no host RPM or full verification",
             simulation.runtime().installed.len(),

@@ -1,0 +1,357 @@
+use dlms_learning_lab::{
+    engine::{self, State},
+    nfs as core, nfs_teaching as teach, nfs_workspace as work, pack,
+    progress::{self, Attempt, Progress},
+};
+use serde_json::json;
+fn scenario(index: usize) -> pack::Scenario {
+    let raw: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/nfs-workbench-v1.json")).unwrap();
+    let c = &raw["cases"][index];
+    let solution = c["reference"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|a| format!("{}{}", work::PREFIX, serde_json::to_string(a).unwrap()))
+        .collect::<Vec<_>>();
+    let v = json!({"schema_version":1,"scenarios":[{"id":format!("nfs-technical-{index}"),"version":1,"track":"LPIC-2","topic":"Virtual NFS","unit":"","title":"Technical NFS adapter","summary":"Inspect supplied NFS layers","objective":"Complete actual current and new-mount outcomes","retry_guidance":"Inspect saved, applied and live values","difficulty":"Intermediate","minutes":15,"steps":["Inspect","Edit","Check"],"guide":[],"explanation":"Virtual existing files only","hints":["Save differs from Apply"],"sources":["https://www.rfc-editor.org/rfc/rfc1813.html"],"simplifications":"Supplied virtual NFSv3 ACCESS-style model; no host mount or RPC","initial":{"kind":"Nfs","simulation":c["definition"]["initial"]},"goal":{"kind":"Nfs","definition":c["definition"]},"solution":solution,"prerequisites":[],"nfs_teaching":c["lesson"]}]});
+    pack::load(&v.to_string()).unwrap().remove(0)
+}
+fn exact<T: serde::Serialize>(a: &T, b: &serde_json::Value) {
+    assert!(
+        serde_json::to_value(a).unwrap() == *b,
+        "complete caller differs"
+    );
+}
+fn solved(s: &pack::Scenario) -> Attempt {
+    let mut a = Attempt::new(s, 7);
+    teach::prepare(&mut a, s, true).unwrap();
+    for command in &s.solution {
+        let action = core::Action::from_json(command.strip_prefix(work::PREFIX).unwrap()).unwrap();
+        work::perform_attempt(&mut a, s, &action).unwrap();
+    }
+    assert!(progress::current_solved(&a, s));
+    a
+}
+#[test]
+fn all_four_loaded_references_current_invalidation_and_raw_request_drafts() {
+    for n in 0..4 {
+        let s = scenario(n);
+        let mut a = solved(&s);
+        let before = a.state.clone();
+        let w = a.workspace.as_mut().unwrap();
+        let session = w.nfs_session.as_mut().unwrap();
+        session.relative = "../unfinished".into();
+        session.write_text = "unsent replacement".into();
+        assert!(progress::current_solved(&a, &s));
+        assert_eq!(a.state, before);
+        let dlms_learning_lab::engine::Goal::Nfs { definition } = &s.goal else {
+            panic!()
+        };
+        let (client, specification) = definition
+            .requirements
+            .iter()
+            .find_map(|r| match r {
+                work::Requirement::CurrentMount {
+                    client,
+                    specification,
+                } => Some((client, specification)),
+                _ => None,
+            })
+            .unwrap();
+        let action = core::Action::Unmount {
+            client: client.clone(),
+            mountpoint: specification.mountpoint.clone(),
+        };
+        work::perform_attempt(&mut a, &s, &action).unwrap();
+        assert!(!progress::current_solved(&a, &s));
+    }
+}
+#[test]
+fn full_source_version_kind_initial_and_lesson_pins_reject_before_mutation() {
+    let s = scenario(0);
+    let a = solved(&s);
+    let mut wrong = s.clone();
+    wrong.version += 1;
+    assert!(!progress::current_solved(&a, &wrong));
+    let mut attempt = a.clone();
+    let before = serde_json::to_value(&attempt).unwrap();
+    assert!(teach::prepare(&mut attempt, &wrong, false).is_err());
+    exact(&attempt, &before);
+    let mut wrong = s.clone();
+    let other = scenario(1);
+    wrong.nfs_teaching = other.nfs_teaching;
+    assert!(!progress::current_solved(&a, &wrong));
+    assert!(teach::prepare(&mut attempt, &wrong, false).is_err());
+    exact(&attempt, &before);
+    let mut wrong = s.clone();
+    if let State::Nfs { simulation } = &mut wrong.initial {
+        let mut inventory = simulation.inventory().clone();
+        inventory.profiles[0].uid += 1;
+        *simulation = core::State::new(inventory, simulation.runtime().clone()).unwrap();
+    }
+    assert!(!progress::current_solved(&a, &wrong));
+    assert!(teach::prepare(&mut attempt, &wrong, false).is_err());
+    exact(&attempt, &before);
+    assert!(engine::execute(&mut attempt.state, &s.solution[0]).is_err());
+    exact(&attempt, &before);
+    assert!(
+        engine::execute_for_goal(
+            &mut attempt.state,
+            &s.goal,
+            &" ".repeat(work::PREFIX.len() + core::MAX_ACTION + 1)
+        )
+        .is_err()
+    );
+    exact(&attempt, &before);
+}
+#[test]
+fn old147_wire_none_fields_and_existing_solved_nfs_without_metadata_remain_truthful() {
+    let all = pack::bundled().unwrap();
+    assert_eq!(all.len(), 147);
+    assert_eq!(dlms_learning_lab::course::bundled(&all).unwrap().len(), 37);
+    for s in &all {
+        assert!(s.nfs_teaching.is_none());
+        assert!(
+            !serde_json::to_string(s)
+                .unwrap()
+                .contains("\"nfs_teaching\"")
+        );
+        let a = Attempt::new(s, 1);
+        assert!(
+            !serde_json::to_string(&a)
+                .unwrap()
+                .contains("\"nfs_session\"")
+        );
+    }
+    let s = scenario(0);
+    let mut a = solved(&s);
+    a.workspace = None;
+    assert!(progress::current_solved(&a, &s));
+    let state = a.state.clone();
+    teach::prepare(&mut a, &s, false).unwrap();
+    assert_eq!(a.state, state);
+    assert_eq!(
+        a.workspace
+            .as_ref()
+            .unwrap()
+            .nfs_learning
+            .as_ref()
+            .unwrap()
+            .view,
+        dlms_learning_lab::script_teaching::View::Assignment
+    );
+    assert!(progress::current_solved(&a, &s));
+}
+#[test]
+fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before_reset() {
+    use dlms_learning_lab::backup;
+    use std::sync::atomic::{AtomicBool, AtomicUsize};
+    let raw = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
+    let mut all = pack::bundled().unwrap();
+    let s = scenario(0);
+    all.push(s.clone());
+    let mut p = progress::decode(raw, &all).unwrap();
+    // Missing later activities get only their normal initial Attempt, never a run/history.
+    for source in all.iter().filter(|source| source.id != s.id) {
+        p.attempts
+            .entry(source.id.clone())
+            .or_insert_with(|| Attempt::new(source, 7));
+    }
+    assert_eq!(p.attempts.len(), 147);
+    let old = serde_json::to_value(&p.attempts).unwrap();
+    let mut a = solved(&s);
+    let source = s.nfs_teaching.as_ref().unwrap();
+    for step in &source.example_actions {
+        work::perform_practice(&mut a, &s, &step.action).unwrap();
+    }
+    let w = a.workspace.as_mut().unwrap();
+    w.nfs_session.as_mut().unwrap().relative = "/unfinished assigned query".into();
+    let l = w.nfs_learning.as_mut().unwrap();
+    l.session.relative = "../unfinished example query".into();
+    l.session.write_text = "unsubmitted example replacement".into();
+    p.attempts.insert(s.id.clone(), a);
+    p.favorites.insert(s.id.clone());
+    p.clock = 91;
+    let favorites = p.favorites.clone();
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("synthetic.json");
+    std::fs::write(&path, raw).unwrap();
+    progress::save(&path, &p).unwrap();
+    assert_eq!(
+        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        raw
+    );
+    let saved = std::fs::read(&path).unwrap();
+    let loaded = progress::load(&path, &all).unwrap();
+    assert_eq!(std::fs::read(&path).unwrap(), saved);
+    for (id, value) in old.as_object().unwrap() {
+        exact(&loaded.attempts[id], value);
+    }
+    let selected = serde_json::to_value(&loaded.attempts[&s.id]).unwrap();
+    exact(&p.attempts[&s.id], &selected);
+    let export = dir.path().join("portable.json");
+    backup::export(&export, &loaded, &all).unwrap();
+    let candidate =
+        backup::inspect(&export, &all, &AtomicBool::new(false), &AtomicUsize::new(0)).unwrap();
+    exact(&candidate.progress.attempts[&s.id], &selected);
+    // Independent old-only inspection accounts for the existing explicit shell rechecks.
+    let mut old_only = progress::decode(&saved, &all).unwrap();
+    old_only.attempts.remove(&s.id);
+    old_only.favorites.remove(&s.id);
+    let old_export = dir.path().join("old-only.json");
+    backup::export(&old_export, &old_only, &all).unwrap();
+    let control = backup::inspect(
+        &old_export,
+        &all,
+        &AtomicBool::new(false),
+        &AtomicUsize::new(0),
+    )
+    .unwrap();
+    let expected_old = serde_json::to_value(&control.progress.attempts).unwrap();
+    for (id, value) in expected_old.as_object().unwrap() {
+        exact(&candidate.progress.attempts[id], value);
+    }
+    backup::restore(&path, &candidate, &all).unwrap();
+    let mut restored = progress::load(&path, &all).unwrap();
+    assert_eq!(restored.favorites, favorites);
+    assert_eq!(restored.clock, 91);
+    exact(&restored.attempts[&s.id], &selected);
+    for (id, value) in expected_old.as_object().unwrap() {
+        exact(&restored.attempts[id], value);
+    }
+    restored.attempts.insert(s.id.clone(), Attempt::new(&s, 7));
+    teach::prepare(restored.attempts.get_mut(&s.id).unwrap(), &s, true).unwrap();
+    for (id, value) in expected_old.as_object().unwrap() {
+        exact(&restored.attempts[id], value);
+    }
+    assert!(!progress::current_solved(&restored.attempts[&s.id], &s));
+    assert!(restored.favorites.contains(&s.id));
+}
+#[test]
+fn whole_attempt_escaped_capacity_refusal_has_same_action_positive_and_exact_target() {
+    let s = scenario(0);
+    let mut low = Attempt::new(&s, 1);
+    teach::prepare(&mut low, &s, true).unwrap();
+    let server = if let State::Nfs { simulation } = &low.state {
+        simulation.inventory().servers[0].id.clone()
+    } else {
+        panic!()
+    };
+    let action = core::Action::SetExportsDraft {
+        server,
+        text: ("\t".repeat(511) + "\n").repeat(16),
+    };
+    let mut positive = low.clone();
+    work::perform_attempt(&mut positive, &s, &action).unwrap();
+    assert_ne!(positive.state, low.state);
+    let mut lo = 0usize;
+    let mut hi = work::MAX_ATTEMPT;
+    while lo < hi {
+        let mid = (lo + hi).div_ceil(2);
+        low.transcript = vec!["x".repeat(mid)];
+        if serde_json::to_vec(&low).unwrap().len() <= work::MAX_ATTEMPT {
+            lo = mid;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    low.transcript = vec!["x".repeat(lo)];
+    assert_eq!(serde_json::to_vec(&low).unwrap().len(), work::MAX_ATTEMPT);
+    let before = serde_json::to_value(&low).unwrap();
+    let e = work::perform_attempt(&mut low, &s, &action).unwrap_err();
+    assert!(e.contains("Attempt"));
+    exact(&low, &before);
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("synthetic.json");
+    let mut p = Progress {
+        schema_version: 1,
+        ..Default::default()
+    };
+    p.attempts.insert(s.id.clone(), low);
+    progress::save(&path, &p).unwrap();
+    let saved = std::fs::read(&path).unwrap();
+    let mut oversized = p.attempts[&s.id].clone();
+    oversized.transcript[0].push('x');
+    p.attempts.insert(s.id.clone(), oversized);
+    assert!(progress::save(&path, &p).is_err());
+    assert_eq!(std::fs::read(&path).unwrap(), saved);
+}
+
+#[test]
+fn saved_pending_publication_and_faults_do_not_masquerade_as_current_or_denied() {
+    let s = scenario(0);
+    let mut a = solved(&s);
+    let dlms_learning_lab::engine::Goal::Nfs { definition } = &s.goal else {
+        panic!()
+    };
+    let State::Nfs { simulation } = &a.state else {
+        panic!()
+    };
+    let live = simulation.runtime().mounts.clone();
+    let server = simulation.inventory().servers[0].id.clone();
+    work::perform_attempt(
+        &mut a,
+        &s,
+        &core::Action::SetExportsDraft {
+            server: server.clone(),
+            text: "unfinished unsupported text".into(),
+        },
+    )
+    .unwrap();
+    work::perform_attempt(
+        &mut a,
+        &s,
+        &core::Action::SaveExportsDraft {
+            server: server.clone(),
+        },
+    )
+    .unwrap();
+    let rows = progress::current_nfs_checks(&a, &s);
+    assert_eq!(
+        rows.len(),
+        1 + definition.requirements.len() + definition.fresh.len()
+    );
+    assert!(!progress::current_solved(&a, &s));
+    for (i, r) in definition.requirements.iter().enumerate() {
+        if matches!(
+            r,
+            work::Requirement::CurrentMount { .. }
+                | work::Requirement::CurrentAccess { .. }
+                | work::Requirement::CurrentFileText { .. }
+        ) {
+            assert!(
+                rows[i + 1].0,
+                "held current mount/file/access remains truthful"
+            );
+        }
+    }
+    let State::Nfs { simulation } = &a.state else {
+        panic!()
+    };
+    assert_eq!(simulation.runtime().mounts, live);
+    let before = serde_json::to_value(&a).unwrap();
+    assert!(
+        work::perform_attempt(&mut a, &s, &core::Action::ApplySavedExports { server }).is_err()
+    );
+    exact(&a, &before);
+    // Practice cannot be installed as the assignment, and a wrong supplied action is atomic.
+    let source = s.nfs_teaching.as_ref().unwrap();
+    for step in &source.example_actions {
+        work::perform_practice(&mut a, &s, &step.action).unwrap();
+    }
+    exact(&a.state, &before["state"]);
+    let before = serde_json::to_value(&a).unwrap();
+    assert!(
+        work::perform_attempt(
+            &mut a,
+            &s,
+            &core::Action::Unmount {
+                client: "not-a-supplied-client".into(),
+                mountpoint: "/mnt/absent".into()
+            }
+        )
+        .is_err()
+    );
+    exact(&a, &before);
+}

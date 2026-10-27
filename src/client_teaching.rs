@@ -453,6 +453,7 @@ impl Learning {
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) -> Result<(), String> {
+    crate::workspace::reject_nfs_metadata(attempt)?;
     if lesson.validate().is_err() || Client::from_state(&attempt.state).is_none() {
         return Err("Client teaching needs the original single-client activity".into());
     }

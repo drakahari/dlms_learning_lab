@@ -35,7 +35,12 @@ impl Write for Counter {
     }
 }
 pub(crate) fn within<T: Serialize + ?Sized>(v: &T, cap: usize) -> bool {
-    serde_json::to_writer(Counter { used: 0, cap }, v).is_ok()
+    size(v, cap).is_some()
+}
+pub(crate) fn size<T: Serialize + ?Sized>(v: &T, cap: usize) -> Option<usize> {
+    let mut c = Counter { used: 0, cap };
+    serde_json::to_writer(&mut c, v).ok()?;
+    Some(c.used)
 }
 pub(crate) fn text(s: &str, n: usize) -> bool {
     s.len() <= n && !s.contains('\0')
@@ -912,4 +917,590 @@ pub fn perform(
     *s = candidate;
     *session = next;
     Ok(decision)
+}
+
+pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
+    let crate::workspace::WorkspaceData {
+        nfs_session: _,
+        nfs_learning: _,
+        rpm_session,
+        rpm_learning,
+        nat_draft,
+        nat_learning,
+        debian_packages_terminal,
+        apache_static_draft,
+        apache_static_learning,
+        debian_packages_draft,
+        debian_packages_learning,
+        spanning_tree_draft,
+        spanning_tree_learning,
+        dhcpv4_draft,
+        dhcpv4_learning,
+        version: _,
+        unit_manager_draft,
+        unit_manager_learning,
+        unit_manager_terminal,
+        ospf_draft,
+        ospf_learning,
+        acl_draft,
+        acl_learning,
+        script_learning,
+        script_history: _,
+        script_history_more: _,
+        terminal_learning,
+        process_learning,
+        accounts_learning,
+        discovery_draft,
+        discovery_learning,
+        storage_draft,
+        storage_learning,
+        ipv6_draft,
+        ipv6_learning,
+        routing_v4_draft,
+        routing_v4_learning,
+        address_learning,
+        service_learning,
+        client_learning,
+        seed_dns_learning,
+        seed_mount_learning,
+        legacy_access_learning,
+        legacy_logs_learning,
+        client_draft,
+        dns_learning,
+        dns_draft,
+        switching_draft,
+        switching_learning,
+        mac_draft,
+        mac_learning,
+        command: _,
+        service_port: _,
+        dns_address: _,
+        dns_serial: _,
+        mount_device: _,
+        checked: _,
+        ipv4_check: _,
+        practice_check: _,
+        migrated_host: _,
+        legacy_host_reviewed: _,
+        legacy_practice_reviewed: _,
+        migrated_practice_host: _,
+    } = w;
+    false
+        || rpm_session.is_some()
+        || rpm_learning.is_some()
+        || nat_draft.is_some()
+        || nat_learning.is_some()
+        || debian_packages_terminal.is_some()
+        || apache_static_draft.is_some()
+        || apache_static_learning.is_some()
+        || debian_packages_draft.is_some()
+        || debian_packages_learning.is_some()
+        || spanning_tree_draft.is_some()
+        || spanning_tree_learning.is_some()
+        || dhcpv4_draft.is_some()
+        || dhcpv4_learning.is_some()
+        || unit_manager_draft.is_some()
+        || unit_manager_learning.is_some()
+        || unit_manager_terminal.is_some()
+        || ospf_draft.is_some()
+        || ospf_learning.is_some()
+        || acl_draft.is_some()
+        || acl_learning.is_some()
+        || script_learning.is_some()
+        || terminal_learning.is_some()
+        || process_learning.is_some()
+        || accounts_learning.is_some()
+        || discovery_draft.is_some()
+        || discovery_learning.is_some()
+        || storage_draft.is_some()
+        || storage_learning.is_some()
+        || ipv6_draft.is_some()
+        || ipv6_learning.is_some()
+        || routing_v4_draft.is_some()
+        || routing_v4_learning.is_some()
+        || address_learning.is_some()
+        || service_learning.is_some()
+        || client_learning.is_some()
+        || seed_dns_learning.is_some()
+        || seed_mount_learning.is_some()
+        || legacy_access_learning.is_some()
+        || legacy_logs_learning.is_some()
+        || client_draft.is_some()
+        || dns_learning.is_some()
+        || dns_draft.is_some()
+        || switching_draft.is_some()
+        || switching_learning.is_some()
+        || mac_draft.is_some()
+        || mac_learning.is_some()
+}
+
+pub const PREFIX: &str = "nfs ";
+pub const HELP: &str = "Supplied virtual NFS exports/fstab editors and explicit Save/Apply/Mount/Unmount/Read/Write actions. Internal simulator-only nfs JSON is an authored/test codec, not a Linux command. No host mount, RPC, daemon, network or trusted credentials.";
+pub fn execute(d: &Definition, s: &mut core::State, input: &str) -> Result<String, String> {
+    if input.len() > PREFIX.len() + core::MAX_ACTION {
+        return Err("NFS input exceeds raw action bound before trimming".into());
+    }
+    d.validate()?;
+    if !d.same_assignment(s) {
+        return Err("NFS supplied inventory differs".into());
+    }
+    match input.trim() {
+        "help" => return Ok(HELP.into()),
+        "show" => {
+            return Ok(format!(
+                "Virtual NFS: {} current mounts, {} existing text files",
+                s.runtime().mounts.len(),
+                s.runtime().contents.len()
+            ));
+        }
+        _ => {}
+    }
+    let raw = input
+        .trim()
+        .strip_prefix(PREFIX)
+        .ok_or("NFS requires its labeled simulator-only typed action")?;
+    let a = core::Action::from_json(raw).map_err(|e| notice(e.message))?;
+    let decision = perform(d, s, &mut Session::default(), &a)?;
+    Ok(match decision {
+        core::Decision::AllowedRead { text, .. } => text,
+        core::Decision::Denied { stage, .. } => format!("Simulated NFS denial: {}", denial(stage)),
+        core::Decision::AllowedWrite { .. } => "Existing virtual file written".into(),
+        core::Decision::Mounted {} => "Virtual mount added".into(),
+        core::Decision::Unmounted {} => "Virtual mount removed".into(),
+        core::Decision::Changed { changed } => {
+            format!("Declared NFS operation changed data: {changed}")
+        }
+    })
+}
+/// Full authored source admission, shared by current checks and writable NFS entry points.
+pub(crate) fn context<'a>(
+    a: &crate::progress::Attempt,
+    s: &'a crate::pack::Scenario,
+) -> Result<&'a Definition, String> {
+    if a.scenario_version != s.version || !within(s, MAX_SCENARIO) {
+        return Err("NFS source version or complete Scenario bound differs".into());
+    }
+    crate::progress::validate_nfs_metadata(a)?;
+    let (
+        crate::engine::State::Nfs { simulation },
+        crate::engine::State::Nfs {
+            simulation: authored,
+        },
+        crate::engine::Goal::Nfs { definition },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return Err("NFS State/Goal kind differs".into());
+    };
+    if authored != &definition.initial
+        || !definition.same_assignment(simulation)
+        || definition.validate().is_err()
+    {
+        return Err("NFS exact authored initial or full Inventory differs".into());
+    }
+    if s.nfs_teaching
+        .as_ref()
+        .is_some_and(|l| !l.bounded() || !l.separate_from(authored))
+        || a.workspace
+            .as_ref()
+            .and_then(|w| w.nfs_learning.as_ref())
+            .is_some_and(|l| {
+                s.nfs_teaching
+                    .as_ref()
+                    .is_none_or(|source| !l.valid_for(source))
+            })
+    {
+        return Err("NFS practice differs from its exact authored context".into());
+    }
+    Ok(definition.as_ref())
+}
+#[derive(Serialize)]
+#[serde(tag = "kind")]
+enum NfsRef<'a> {
+    Nfs { simulation: &'a core::State },
+}
+fn field_bytes(name: &str, value: Option<usize>) -> Option<usize> {
+    match value {
+        None => Some(0),
+        Some(n) => n.checked_add(name.len() + 4),
+    }
+}
+/// Exact serde-size substitution. Mandatory Workspace fields guarantee a nonempty object.
+/// This is admission math, not a cached validator or completion credential.
+pub(crate) fn projected_attempt_size(
+    a: &crate::progress::Attempt,
+    simulation: &core::State,
+    session: Option<usize>,
+    learning: Option<usize>,
+) -> Option<usize> {
+    if !matches!(a.state, crate::engine::State::Nfs { .. }) {
+        return None;
+    }
+    let old = size(a, MAX_ATTEMPT)?;
+    let state_old = size(&a.state, MAX_ATTEMPT)?;
+    let state_new = size(&NfsRef::Nfs { simulation }, MAX_ATTEMPT)?;
+    let blank = crate::workspace::WorkspaceData::new();
+    let w = a.workspace.as_ref().unwrap_or(&blank);
+    let old_w = size(w, MAX_ATTEMPT)?;
+    let old_session = w
+        .nfs_session
+        .as_ref()
+        .map(|x| size(x, MAX_ATTEMPT))
+        .transpose_option()?;
+    let old_learning = w
+        .nfs_learning
+        .as_ref()
+        .map(|x| size(x, MAX_ATTEMPT))
+        .transpose_option()?;
+    let next_w = old_w
+        .checked_sub(field_bytes("nfs_session", old_session)?)?
+        .checked_sub(field_bytes("nfs_learning", old_learning)?)?
+        .checked_add(field_bytes("nfs_session", session)?)?
+        .checked_add(field_bytes("nfs_learning", learning)?)?;
+    let next = old.checked_sub(state_old)?.checked_add(state_new)?;
+    if a.workspace.is_some() {
+        next.checked_sub(old_w)?.checked_add(next_w)
+    } else {
+        next.checked_add("workspace".len() + 4)?.checked_add(next_w)
+    }
+}
+trait OptionalSize {
+    fn transpose_option(self) -> Option<Option<usize>>;
+}
+impl OptionalSize for Option<Option<usize>> {
+    fn transpose_option(self) -> Option<Option<usize>> {
+        match self {
+            None => Some(None),
+            Some(Some(n)) => Some(Some(n)),
+            Some(None) => None,
+        }
+    }
+}
+fn retained_learning_size(a: &crate::progress::Attempt) -> Option<Option<usize>> {
+    a.workspace
+        .as_ref()
+        .and_then(|w| w.nfs_learning.as_ref())
+        .map(|l| size(l, crate::nfs_teaching::MAX_LEARNING))
+        .transpose_option()
+}
+fn admitted_projection(n: Option<usize>) -> Result<(), String> {
+    if n.is_some_and(|n| n <= MAX_ATTEMPT) {
+        Ok(())
+    } else {
+        Err("NFS whole Attempt exceeds2MiB; previous work retained".into())
+    }
+}
+/// Common void workspace prepare delegates here before any legacy preservation/mutation.
+pub(crate) fn prepare_session(a: &mut crate::progress::Attempt) -> Result<(), String> {
+    crate::progress::validate_nfs_workspace(a)?;
+    let crate::engine::State::Nfs { simulation } = &a.state else {
+        return Err("Not an NFS attempt".into());
+    };
+    if a.workspace
+        .as_ref()
+        .is_some_and(|w| w.nfs_session.is_some())
+    {
+        return Ok(());
+    }
+    let session = Session::default();
+    admitted_projection(projected_attempt_size(
+        a,
+        simulation,
+        Some(size(&session, MAX_SESSION).ok_or("NFS Session bound")?),
+        retained_learning_size(a).ok_or("NFS Learning bound")?,
+    ))?;
+    a.workspace
+        .get_or_insert_with(crate::workspace::WorkspaceData::new)
+        .nfs_session = Some(session);
+    Ok(())
+}
+pub fn perform_attempt(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    action: &core::Action,
+) -> Result<core::Decision, String> {
+    let d = context(a, s)?;
+    let crate::engine::State::Nfs { simulation } = &a.state else {
+        return Err("NFS kind differs".into());
+    };
+    let blank = Session::default();
+    let session = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_session.as_ref())
+        .unwrap_or(&blank);
+    let (candidate, next, decision) = propose(d, simulation, session, action)?;
+    admitted_projection(projected_attempt_size(
+        a,
+        &candidate,
+        Some(size(&next, MAX_SESSION).ok_or("NFS Session bound")?),
+        retained_learning_size(a).ok_or("NFS Learning bound")?,
+    ))?;
+    a.state = crate::engine::State::Nfs {
+        simulation: candidate,
+    };
+    a.workspace
+        .get_or_insert_with(crate::workspace::WorkspaceData::new)
+        .nfs_session = Some(next);
+    Ok(decision)
+}
+pub(crate) fn prepare_attempt(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    new: bool,
+) -> Result<(), String> {
+    context(a, s)?;
+    let crate::engine::State::Nfs { simulation } = &a.state else {
+        return Err("NFS kind differs".into());
+    };
+    let blank = Session::default();
+    let session = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_session.as_ref())
+        .unwrap_or(&blank);
+    let learning = a.workspace.as_ref().and_then(|w| w.nfs_learning.as_ref());
+    let learned_size = if let Some(old) = learning {
+        Some(size(old, crate::nfs_teaching::MAX_LEARNING).ok_or("NFS retained practice bound")?)
+    } else if let Some(l) = &s.nfs_teaching {
+        Some(crate::nfs_teaching::Learning::new_size(l, new).ok_or("NFS new practice bound")?)
+    } else {
+        None
+    };
+    admitted_projection(projected_attempt_size(
+        a,
+        simulation,
+        Some(size(session, MAX_SESSION).ok_or("NFS Session bound")?),
+        learned_size,
+    ))?;
+    let fresh = if learning.is_none() {
+        s.nfs_teaching
+            .as_ref()
+            .map(|l| {
+                let mut p = crate::nfs_teaching::Learning::new(l)?;
+                if !new {
+                    p.view = crate::script_teaching::View::Assignment;
+                }
+                Ok::<_, String>(p)
+            })
+            .transpose()?
+    } else {
+        None
+    };
+    let w = a
+        .workspace
+        .get_or_insert_with(crate::workspace::WorkspaceData::new);
+    if w.nfs_session.is_none() {
+        w.nfs_session = Some(blank);
+    }
+    if let Some(f) = fresh {
+        w.nfs_learning = Some(f);
+    }
+    Ok(())
+}
+pub fn perform_practice(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    action: &core::Action,
+) -> Result<core::Decision, String> {
+    context(a, s)?;
+    let l = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_learning.as_ref())
+        .ok_or("NFS practice is not prepared")?;
+    let (candidate, next, decision) = propose(&l.context, &l.simulation, &l.session, action)?;
+    let bytes = l
+        .proposed_size(&candidate, &next)
+        .ok_or("NFS proposed practice bound")?;
+    let crate::engine::State::Nfs { simulation } = &a.state else {
+        return Err("NFS kind differs".into());
+    };
+    let session = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_session.as_ref())
+        .map(|x| size(x, MAX_SESSION))
+        .transpose_option()
+        .ok_or("NFS retained Session bound")?;
+    admitted_projection(projected_attempt_size(a, simulation, session, Some(bytes)))?;
+    a.workspace
+        .as_mut()
+        .unwrap()
+        .nfs_learning
+        .as_mut()
+        .unwrap()
+        .commit(candidate, next)?;
+    Ok(decision)
+}
+pub fn fill_practice(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+) -> Result<(), String> {
+    context(a, s)?;
+    let source = s.nfs_teaching.as_ref().ok_or("NFS lesson absent")?;
+    let old = size(a, MAX_ATTEMPT).ok_or("NFS Attempt bound")?;
+    let old_l = size(
+        a.workspace
+            .as_ref()
+            .and_then(|w| w.nfs_learning.as_ref())
+            .ok_or("NFS practice unprepared")?,
+        crate::nfs_teaching::MAX_LEARNING,
+    )
+    .ok_or("NFS practice bound")?;
+    a.workspace
+        .as_mut()
+        .unwrap()
+        .nfs_learning
+        .as_mut()
+        .unwrap()
+        .fill_with_budget(source, |new| {
+            old.checked_sub(old_l)
+                .and_then(|n| n.checked_add(new))
+                .is_some_and(|n| n <= MAX_ATTEMPT)
+        })
+}
+pub fn reset_practice(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+) -> Result<(), String> {
+    context(a, s)?;
+    let source = s.nfs_teaching.as_ref().ok_or("NFS lesson absent")?;
+    let crate::engine::State::Nfs { simulation } = &a.state else {
+        return Err("NFS kind differs".into());
+    };
+    let session = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.nfs_session.as_ref())
+        .map(|x| size(x, MAX_SESSION))
+        .transpose_option()
+        .ok_or("NFS Session bound")?;
+    // Reset opens Example; new_size_view computes that exact borrowed wire before any fixture copy.
+    let bytes =
+        crate::nfs_teaching::Learning::new_size_view(source, crate::script_teaching::View::Example)
+            .ok_or("NFS reset practice bound")?;
+    admitted_projection(projected_attempt_size(a, simulation, session, Some(bytes)))?;
+    let mut fresh = crate::nfs_teaching::Learning::new(source)?;
+    fresh.view = crate::script_teaching::View::Example;
+    a.workspace
+        .get_or_insert_with(crate::workspace::WorkspaceData::new)
+        .nfs_learning = Some(fresh);
+    Ok(())
+}
+
+#[cfg(test)]
+mod attempt_projection_tests {
+    use super::*;
+    use crate::{
+        engine::State,
+        nfs_teaching as teach,
+        pack::{self, Scenario},
+        progress::{self, Attempt},
+        workspace::WorkspaceData,
+    };
+    fn scenario() -> Scenario {
+        let v: serde_json::Value =
+            serde_json::from_str(include_str!("../tests/fixtures/nfs-workbench-v1.json")).unwrap();
+        let c = &v["cases"][0];
+        serde_json::from_value(serde_json::json!({"id":"nfs-technical-progress","version":1,"track":"LPIC-2","topic":"Virtual NFS","unit":"","title":"Technical NFS adapter","summary":"Supplied existing-file model","objective":"Complete current and next-mount outcomes","retry_guidance":"Inspect the separate layers","difficulty":"Intermediate","minutes":15,"steps":["Inspect","Edit","Check"],"guide":[],"explanation":"No host service","hints":["Save and Apply differ"],"sources":["https://www.rfc-editor.org/rfc/rfc1813.html"],"simplifications":"Supplied virtual ACCESS-style decisions; no host mount","initial":{"kind":"Nfs","simulation":c["definition"]["initial"]},"goal":{"kind":"Nfs","definition":c["definition"]},"solution":[],"prerequisites":[],"nfs_teaching":c["lesson"]})).unwrap()
+    }
+    #[test]
+    fn exact_projection_matches_independent_serde_all_optional_shapes_and_genuine_history() {
+        let s = scenario();
+        let source = s.nfs_teaching.as_ref().unwrap();
+        let learning = teach::Learning::new(source).unwrap();
+        let raw: serde_json::Value = serde_json::from_str(include_str!(
+            "../tests/fixtures/shell-v8-synthetic-writer-progress.json"
+        ))
+        .unwrap();
+        let genuine = raw["attempts"]
+            .as_object()
+            .unwrap()
+            .values()
+            .filter_map(|a| a["state"].get("run").filter(|r| !r.is_null()))
+            .take(24)
+            .map(|v| serde_json::from_value::<crate::shell::Record>(v.clone()).unwrap())
+            .collect::<Vec<_>>();
+        assert!(!genuine.is_empty());
+        for workspace in [false, true] {
+            for old_session in [false, true] {
+                for old_learning in [false, true] {
+                    if !workspace && (old_session || old_learning) {
+                        continue;
+                    }
+                    let mut a = Attempt::new(&s, 11);
+                    if workspace {
+                        let mut w = WorkspaceData::new();
+                        if old_session {
+                            w.nfs_session = Some(Session::default());
+                        }
+                        if old_learning {
+                            w.nfs_learning = Some(learning.clone());
+                        }
+                        w.script_history = genuine.first().cloned();
+                        w.script_history_more = genuine.iter().skip(1).cloned().collect();
+                        assert!(w.valid());
+                        a.workspace = Some(w);
+                    }
+                    let State::Nfs { simulation } = &a.state else {
+                        panic!()
+                    };
+                    for new_session in [false, true] {
+                        for new_learning in [false, true] {
+                            let session = new_session.then(Session::default);
+                            let l = new_learning.then(|| learning.clone());
+                            let predicted = projected_attempt_size(
+                                &a,
+                                simulation,
+                                session
+                                    .as_ref()
+                                    .map(|x| serde_json::to_vec(x).unwrap().len()),
+                                l.as_ref().map(|x| serde_json::to_vec(x).unwrap().len()),
+                            )
+                            .unwrap();
+                            let mut expected = a.clone();
+                            let w = expected.workspace.get_or_insert_with(WorkspaceData::new);
+                            w.nfs_session = session;
+                            w.nfs_learning = l;
+                            assert_eq!(
+                                predicted,
+                                serde_json::to_vec(&expected).unwrap().len(),
+                                "full optional-field size equality"
+                            );
+                        }
+                    }
+                }
+            }
+        }
+    }
+    #[test]
+    #[ignore = "Requires the retained accepted private actual9 capture; never fabricates a run"]
+    fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
+        let raw = crate::actual9_test_evidence::original9();
+        let mut all = pack::bundled().unwrap();
+        assert_eq!(all.len(), 147);
+        let s = scenario();
+        all.push(s.clone());
+        let mut p = progress::decode(&raw, &all).unwrap();
+        let old = serde_json::to_value(&p.attempts).unwrap();
+        let mut a = Attempt::new(&s, 17);
+        teach::prepare(&mut a, &s, true).unwrap();
+        p.attempts.insert(s.id.clone(), a);
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("synthetic.json");
+        std::fs::write(&path, &raw).unwrap();
+        progress::save(&path, &p).unwrap();
+        assert_eq!(
+            std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+            raw
+        );
+        let loaded = progress::load(&path, &all).unwrap();
+        let mut old_loaded = serde_json::to_value(&loaded.attempts).unwrap();
+        old_loaded.as_object_mut().unwrap().remove(&s.id);
+        assert!(old_loaded == old);
+        assert!(
+            serde_json::to_value(&loaded.attempts[&s.id]).unwrap()
+                == serde_json::to_value(&p.attempts[&s.id]).unwrap()
+        );
+    }
 }

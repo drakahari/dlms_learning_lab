@@ -377,6 +377,7 @@ impl Learning {
     }
 }
 pub fn prepare(a: &mut crate::progress::Attempt, l: &Lesson) -> Result<(), String> {
+    crate::workspace::reject_nfs_metadata(a)?;
     let crate::engine::State::ApacheStatic { simulation } = &a.state else {
         return Err("Apache teaching belongs to a different activity kind".into());
     };

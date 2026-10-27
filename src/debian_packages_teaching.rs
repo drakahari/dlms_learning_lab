@@ -478,6 +478,7 @@ pub fn prepare(
     l: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    crate::workspace::reject_nfs_metadata(a)?;
     let crate::engine::State::DebianPackages { simulation } = &a.state else {
         return Err(
             "Package practice needs a logical package assignment; original retained".into(),

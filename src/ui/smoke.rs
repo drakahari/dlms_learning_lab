@@ -23,6 +23,7 @@ pub(in crate::ui) mod nat_lessons;
 mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
+pub(in crate::ui) mod rpm_lessons;
 mod safe_automation_lessons;
 mod seed_teaching;
 pub(super) mod spanning_tree;
@@ -559,6 +560,13 @@ impl LabApp {
             }
             n @ (7600..=7639 | 7660..=7666) => {
                 let (advance, capture) = self.acl_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n if self.rpm_lessons_contains_stage(n) => {
+                let (advance, capture) = self.rpm_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

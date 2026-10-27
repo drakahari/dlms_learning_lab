@@ -6,6 +6,9 @@ use dlms_learning_lab::{
 };
 
 pub(super) fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if dlms_learning_lab::workspace::has_nfs_metadata(a) {
+        return;
+    }
     let w = a.workspace.as_mut().expect("workspace prepared");
     if w.discovery_learning.is_none() {
         let mut l = Learning::new(lesson);
@@ -644,5 +647,61 @@ fn topology_cards(ui: &mut egui::Ui, t: &net::Topology) {
                 "Direct physical link · Down"
             },
         );
+    }
+}
+
+#[cfg(test)]
+mod nfs_prepare_guard_tests {
+    use super::*;
+    #[test]
+    fn direct_discovery_prepare_has_normal_control_and_atomic_nfs_refusal() {
+        let s = dlms_learning_lab::pack::bundled()
+            .unwrap()
+            .into_iter()
+            .find(|s| s.discovery_teaching.is_some())
+            .unwrap();
+        let lesson = s.discovery_teaching.as_ref().unwrap();
+        let raw: serde_json::Value =
+            serde_json::from_str(include_str!("../../tests/fixtures/nfs-workbench-v1.json"))
+                .unwrap();
+        let nfs: dlms_learning_lab::nfs_teaching::Lesson =
+            serde_json::from_value(raw["cases"][0]["lesson"].clone()).unwrap();
+        let learning = dlms_learning_lab::nfs_teaching::Learning::new(&nfs).unwrap();
+        for new in [false, true] {
+            for existing in [false, true] {
+                let mut a = Attempt::new(&s, 7);
+                model::prepare(&mut a);
+                if existing {
+                    prepare(&mut a, lesson, new);
+                }
+                let mut normal = a.clone();
+                prepare(&mut normal, lesson, new);
+                assert!(
+                    normal
+                        .workspace
+                        .as_ref()
+                        .unwrap()
+                        .discovery_learning
+                        .is_some()
+                );
+                for (session, practice) in [(true, false), (false, true), (true, true)] {
+                    let mut mixed = a.clone();
+                    let w = mixed.workspace.as_mut().unwrap();
+                    if session {
+                        w.nfs_session = Some(dlms_learning_lab::nfs_workspace::Session::default());
+                    }
+                    if practice {
+                        w.nfs_learning = Some(learning.clone());
+                    }
+                    assert!(w.valid());
+                    let before = serde_json::to_value(&mixed).unwrap();
+                    prepare(&mut mixed, lesson, new);
+                    assert!(
+                        serde_json::to_value(&mixed).unwrap() == before,
+                        "complete caller unchanged"
+                    );
+                }
+            }
+        }
     }
 }
