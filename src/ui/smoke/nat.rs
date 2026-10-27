@@ -140,8 +140,16 @@ const PLAN: [Step; 72] = [
 ];
 const _: () = assert!(FIRST > 37504 && LAST == 38071 && LAST < 39000);
 #[derive(Clone, Debug)]
-enum Target {
+pub(in crate::ui) enum Target {
     Control(&'static str),
+    LessonTab(usize),
+    ExamplePicker,
+    Insert,
+    ExampleReset,
+    ResultRow(usize),
+    ResultsSpan,
+    Observation,
+    CardAt(usize),
     Field(String),
     RemoveRow(usize),
     Choice(String),
@@ -161,10 +169,12 @@ enum Target {
     FileCancel,
 }
 #[derive(Clone, Debug)]
-enum Op {
+pub(in crate::ui) enum Op {
     Click(Target),
     Text(&'static str, String),
     Choose(&'static str, &'static str),
+    Select(&'static str, String),
+    Example(usize),
     FileText(String),
     RowText(usize, bool, String),
     Undo,
@@ -203,7 +213,7 @@ impl ScrollGeometry {
     }
 }
 #[derive(Clone, Default)]
-struct Queue {
+pub(in crate::ui) struct Queue {
     next: usize,
     sub: u8,
     ticks: usize,
@@ -218,11 +228,11 @@ struct Queue {
     settled_frames: usize,
 }
 #[derive(Clone)]
-struct Warm {
-    raw: Vec<u8>,
-    portable: Value,
-    raw_receipts: Value,
-    caller_receipts: Value,
+pub(in crate::ui) struct Warm {
+    pub(in crate::ui) raw: Vec<u8>,
+    pub(in crate::ui) portable: Value,
+    pub(in crate::ui) raw_receipts: Value,
+    pub(in crate::ui) caller_receipts: Value,
 }
 fn ctrl_key(key: egui::Key, pressed: bool) -> egui::Event {
     egui::Event::Key {
@@ -268,7 +278,11 @@ fn difference(a: &Value, b: &Value) -> Option<String> {
         _ => Some("scalar/type (values withheld)".into()),
     }
 }
-fn exact<A: serde::Serialize + ?Sized, B: serde::Serialize + ?Sized>(a: &A, b: &B, label: &str) {
+pub(in crate::ui) fn exact<A: serde::Serialize + ?Sized, B: serde::Serialize + ?Sized>(
+    a: &A,
+    b: &B,
+    label: &str,
+) {
     let a = serde_json::to_value(a).unwrap();
     let b = serde_json::to_value(b).unwrap();
     let d = difference(&a, &b);
@@ -298,11 +312,39 @@ fn mappings(alpha_first: bool) -> Vec<Op> {
         click(Target::Control("check")),
     ]
 }
+// The controller uses this exact geometry decision; it is not a grade or an
+// expanded viewport. Tests can replay measured edges without fabricating widgets.
+pub(in crate::ui) fn static_root_reveal_piece(
+    target: egui::Rect,
+    visible: egui::Rect,
+    child: egui::Rect,
+    root: egui::Rect,
+    ppp: f32,
+) -> Option<egui::Rect> {
+    let already_visible = smoke_control_visible(target, visible, ppp);
+    let room_for_target = visible.height() >= target.height() && visible.width() >= target.width();
+    if already_visible || room_for_target {
+        return None;
+    }
+    // Reveal enough of a mostly/wholly offscreen child before routing inside.
+    // A taller child need never be wholly contained to expose a complete field.
+    let height = child.height().min(root.height());
+    let width = child.width().min(root.width());
+    let top = if child.top() < root.top() {
+        child.bottom() - height
+    } else {
+        child.top()
+    };
+    Some(egui::Rect::from_min_size(
+        egui::pos2(child.left(), top),
+        egui::vec2(width, height),
+    ))
+}
 impl LabApp {
     pub(in crate::ui) fn nat_stage(smoke: bool, name: Option<&str>) -> Option<usize> {
         (smoke && name == Some("nat-workspace")).then_some(FIRST)
     }
-    fn nat_private(&self) {
+    pub(in crate::ui) fn nat_private(&self) {
         assert!(
             self.smoke && self._smoke_profile.is_some(),
             "closed smoke-private fixture only"
@@ -351,7 +393,7 @@ impl LabApp {
         ctx.data(|d| d.get_temp::<Value>(egui::Id::new(("nat-observed", name))))
             .expect("earlier actual observation")
     }
-    fn nat_geometry(&self, ctx: &egui::Context) -> bool {
+    pub(in crate::ui) fn nat_geometry(&self, ctx: &egui::Context) -> bool {
         let rect = ctx.content_rect();
         let zoom = ctx.zoom_factor();
         let ppp = ctx.pixels_per_point();
@@ -378,13 +420,55 @@ impl LabApp {
         }
         ready
     }
-    fn nat_target(&self, ctx: &egui::Context, t: &Target) -> (egui::Rect, egui::Rect, bool) {
+    pub(in crate::ui) fn nat_target(
+        &self,
+        ctx: &egui::Context,
+        t: &Target,
+    ) -> (egui::Rect, egui::Rect, bool) {
         let root = self
             .metrics
             .main_viewport
             .unwrap()
             .intersect(ctx.content_rect());
         match t {
+            Target::ResultsSpan => {
+                let first = self.metrics.nat_result_rows.first().unwrap();
+                let last = self.metrics.nat_result_rows.last().unwrap();
+                (
+                    first.2.union(last.2),
+                    first.3.intersect(last.3).intersect(root),
+                    false,
+                )
+            }
+            Target::Observation => (
+                self.metrics.nat_observation.expect("actual observation"),
+                root,
+                false,
+            ),
+            Target::CardAt(n) => (self.metrics.card_actions[*n].0, root, false),
+            Target::LessonTab(n) => (self.metrics.lesson_tabs[*n], root, false),
+            Target::ExamplePicker => {
+                let (r, c) = self
+                    .metrics
+                    .nat_example_picker
+                    .expect("actual example picker");
+                (r, c.intersect(root), false)
+            }
+            Target::Insert => (self.metrics.insert.expect("actual Insert"), root, false),
+            Target::ExampleReset => (
+                self.metrics.example_reset.expect("actual example reset"),
+                root,
+                false,
+            ),
+            Target::ResultRow(n) => {
+                let r = self
+                    .metrics
+                    .nat_result_rows
+                    .iter()
+                    .find(|r| r.0 == *n)
+                    .expect("actual result row");
+                (r.2, r.3.intersect(root), false)
+            }
             Target::Field(k) => {
                 let r = self
                     .metrics
@@ -445,10 +529,13 @@ impl LabApp {
                     .expect("actual option");
                 (
                     r.1,
-                    self.metrics
-                        .nat_popup
-                        .unwrap()
-                        .intersect(ctx.content_rect()),
+                    (if k.starts_with("example:") {
+                        self.metrics.nat_example_popup
+                    } else {
+                        self.metrics.nat_popup
+                    })
+                    .unwrap()
+                    .intersect(ctx.content_rect()),
                     true,
                 )
             }
@@ -526,7 +613,7 @@ impl LabApp {
             }
         }
     }
-    fn nat_reveal(
+    pub(in crate::ui) fn nat_reveal(
         &mut self,
         ctx: &egui::Context,
         target: egui::Rect,
@@ -669,15 +756,105 @@ impl LabApp {
         self.click_smoke_control(ctx, Some(r))
     }
     fn nat_queue(&mut self, ctx: &egui::Context, ops: Vec<Op>) -> bool {
+        self.nat_queue_for(ctx, ops, ID, false)
+    }
+    pub(in crate::ui) fn nat_event_draft(&self, id: &str, practice: bool) -> &work::Draft {
+        let w = self.progress.attempts[id].workspace.as_ref().unwrap();
+        if practice {
+            &w.nat_learning.as_ref().unwrap().draft
+        } else {
+            w.nat_draft.as_ref().unwrap()
+        }
+    }
+    fn nat_event_raw(&self, id: &str, practice: bool, key: &str) -> &str {
+        let d = self.nat_event_draft(id, practice);
+        match key {
+            "network" => &d.network,
+            "prefix" => &d.prefix,
+            "first" => &d.first,
+            "last" => &d.last,
+            "inbound-global" => &d.inbound_global,
+            _ => panic!("closed field"),
+        }
+    }
+    pub(in crate::ui) fn nat_reset_queue(&self, ctx: &egui::Context) {
+        let key = egui::Id::new(("nat-queue", self.smoke_stage));
+        ctx.data_mut(|d| d.remove::<Queue>(key));
+    }
+    fn nat_click_for(&mut self, ctx: &egui::Context, t: &Target, q: &mut Queue, id: &str) -> bool {
+        if id != ID && matches!(t, Target::RemoveRow(_) | Target::Field(_)) {
+            let is_static = matches!(t, Target::RemoveRow(_))
+                || matches!(t,Target::Field(k) if k.starts_with("static:"));
+            let phase = ctx
+                .data(|d| {
+                    d.get_temp::<u8>(egui::Id::new(("native-click-phases", self.smoke_stage)))
+                })
+                .unwrap_or(0);
+            if is_static && phase < 2 {
+                let root = self
+                    .metrics
+                    .main_viewport
+                    .unwrap()
+                    .intersect(ctx.content_rect());
+                let child = self.metrics.nat_static_viewport.unwrap();
+                let (target, visible, _) = self.nat_target(ctx, t);
+                if let Some(piece) =
+                    static_root_reveal_piece(target, visible, child, root, ctx.pixels_per_point())
+                    && !self.nat_reveal(ctx, piece, root, false, q)
+                {
+                    return false;
+                }
+            }
+        }
+        self.nat_click(ctx, t, q)
+    }
+    pub(in crate::ui) fn nat_queue_for(
+        &mut self,
+        ctx: &egui::Context,
+        ops: Vec<Op>,
+        id: &str,
+        practice: bool,
+    ) -> bool {
         assert!(ops.len() <= 24);
         let key = egui::Id::new(("nat-queue", self.smoke_stage));
         let mut q = ctx.data(|d| d.get_temp::<Queue>(key)).unwrap_or_default();
         q.ticks += 1;
+        let click_phase = ctx
+            .data(|d| d.get_temp::<u8>(egui::Id::new(("native-click-phases", self.smoke_stage))));
+        let focus = ctx.memory(|m| m.focused());
+        let pointer = ctx.input(|i| i.pointer.hover_pos());
+        let fields = self
+            .metrics
+            .nat_fields
+            .iter()
+            .map(|r| (r.0.as_str(), r.1, r.2, r.4))
+            .filter(|r| {
+                Some(r.2) == focus
+                    || match ops.get(q.next) {
+                        Some(Op::RowText(row, global, _)) => {
+                            let suffix = if *global { ":global" } else { ":inside" };
+                            self.metrics
+                                .nat_fields
+                                .iter()
+                                .filter(|r| r.0.starts_with("static:") && r.0.ends_with(suffix))
+                                .nth(*row)
+                                .is_some_and(|target| target.2 == r.2)
+                        }
+                        Some(Op::Text(k, _)) => r.0 == *k,
+                        _ => false,
+                    }
+            })
+            .collect::<Vec<_>>();
+        if q.trace.len() == 3 {
+            q.trace.pop_front();
+        }
+        q.trace.push_back(format!("queue tick{} item{} sub{} op{:?} click_phase{click_phase:?} focus{focus:?} pointer{pointer:?} fields{fields:?} root{:?} child{:?} scroll{:?} stable{:?}/{} waiting_wheel{} idle{} zoom{} PPP{}",q.ticks,q.next,q.sub,ops.get(q.next),self.metrics.main_viewport,self.metrics.nat_static_viewport,self.metrics.nat_static_scroll,q.stable,q.stable_frames,q.waiting_wheel,q.idle_frames,ctx.zoom_factor(),ctx.pixels_per_point()));
         assert!(
             q.ticks <= 300,
-            "NAT event queue bounded at stage{} item{}",
+            "NAT event queue bounded at stage{} item{}; last3 {:?}",
             self.smoke_stage,
-            q.next
+            q.next,
+            q.trace
         );
         if q.next >= ops.len() {
             return true;
@@ -687,9 +864,9 @@ impl LabApp {
             Op::Click(t) => {
                 let structural = matches!(t, Target::RemoveRow(_) | Target::Control("add-static"));
                 if structural && q.list_before.is_none() {
-                    q.list_before = Some(self.nat_draft().statics.len());
+                    q.list_before = Some(self.nat_event_draft(id, practice).statics.len());
                 }
-                let done = self.nat_click(ctx, t, &mut q);
+                let done = self.nat_click_for(ctx, t, &mut q, id);
                 if done && structural {
                     let before = q.list_before.unwrap();
                     let expected = if matches!(t, Target::RemoveRow(_)) {
@@ -698,7 +875,7 @@ impl LabApp {
                         before + 1
                     };
                     assert_eq!(
-                        self.nat_draft().statics.len(),
+                        self.nat_event_draft(id, practice).statics.len(),
                         expected,
                         "Actual row delta before queue advance"
                     );
@@ -708,7 +885,7 @@ impl LabApp {
             Op::Text(k, text) => {
                 assert!(text.len() <= 64);
                 if q.sub == 0 {
-                    if self.nat_click(ctx, &Target::Field((*k).into()), &mut q) {
+                    if self.nat_click_for(ctx, &Target::Field((*k).into()), &mut q, id) {
                         let id = self
                             .metrics
                             .nat_fields
@@ -729,25 +906,80 @@ impl LabApp {
                     q.sub = 2;
                     false
                 } else {
-                    assert_eq!(self.nat_raw(k), text);
+                    assert_eq!(self.nat_event_raw(id, practice, k), text);
                     true
                 }
             }
-            Op::Choose(control, id) => {
+            Op::Choose(control, selected_id) => {
                 if q.sub == 0 {
-                    if self.nat_click(ctx, &Target::Control(control), &mut q) {
+                    if self.nat_click_for(ctx, &Target::Control(control), &mut q, id) {
                         q.sub = 1;
                         q.stable = None;
                         q.scrolls = 0;
                     }
                     false
-                } else if self.nat_click(ctx, &Target::Choice(format!("{control}:{id}")), &mut q) {
+                } else if self.nat_click(
+                    ctx,
+                    &Target::Choice(format!("{control}:{selected_id}")),
+                    &mut q,
+                ) {
                     let selected = if *control == "inside" {
-                        self.nat_draft().inside.as_deref()
+                        self.nat_event_draft(id, practice).inside.as_deref()
                     } else {
-                        self.nat_draft().peer.as_deref()
+                        self.nat_event_draft(id, practice).peer.as_deref()
                     };
-                    assert_eq!(selected, Some(*id));
+                    assert_eq!(selected, Some(*selected_id));
+                    true
+                } else {
+                    false
+                }
+            }
+            Op::Select(control, selected_id) => {
+                assert!(selected_id.len() <= 32);
+                if q.sub == 0 {
+                    if self.nat_click_for(ctx, &Target::Control(control), &mut q, id) {
+                        q.sub = 1;
+                        q.stable = None;
+                        q.scrolls = 0;
+                    }
+                    false
+                } else if self.nat_click(
+                    ctx,
+                    &Target::Choice(format!("{control}:{selected_id}")),
+                    &mut q,
+                ) {
+                    let selected = if *control == "inside" {
+                        self.nat_event_draft(id, practice).inside.as_deref()
+                    } else {
+                        self.nat_event_draft(id, practice).peer.as_deref()
+                    };
+                    assert_eq!(selected, Some(selected_id.as_str()));
+                    true
+                } else {
+                    false
+                }
+            }
+            Op::Example(index) => {
+                assert!(*index < 16);
+                if q.sub == 0 {
+                    if self.nat_click(ctx, &Target::ExamplePicker, &mut q) {
+                        q.sub = 1;
+                        q.stable = None;
+                        q.scrolls = 0;
+                    }
+                    false
+                } else if self.nat_click(ctx, &Target::Choice(format!("example:{index}")), &mut q) {
+                    assert_eq!(
+                        self.progress.attempts[id]
+                            .workspace
+                            .as_ref()
+                            .unwrap()
+                            .nat_learning
+                            .as_ref()
+                            .unwrap()
+                            .selected_action,
+                        *index
+                    );
                     true
                 } else {
                     false
@@ -764,10 +996,10 @@ impl LabApp {
                     .nth(*row)
                     .expect("actual static row field");
                 let key = actual.0.clone();
-                let id = actual.2;
+                let field_id = actual.2;
                 if q.sub == 0 {
-                    if self.nat_click(ctx, &Target::Field(key), &mut q) {
-                        assert!(ctx.memory(|m| m.has_focus(id)));
+                    if self.nat_click_for(ctx, &Target::Field(key), &mut q, id) {
+                        assert!(ctx.memory(|m| m.has_focus(field_id)));
                         q.sub = 1;
                     }
                     false
@@ -780,7 +1012,7 @@ impl LabApp {
                     q.sub = 2;
                     false
                 } else {
-                    let r = &self.nat_draft().statics[*row];
+                    let r = &self.nat_event_draft(id, practice).statics[*row];
                     assert_eq!(if *global { &r.global } else { &r.inside }, text);
                     true
                 }
@@ -816,7 +1048,7 @@ impl LabApp {
                 }
             }
             Op::Expect(k, text) => {
-                assert_eq!(self.nat_raw(k), text);
+                assert_eq!(self.nat_event_raw(id, practice, k), text);
                 true
             }
         };
@@ -850,7 +1082,7 @@ impl LabApp {
         assert_eq!(self.nat_presentation.memo.prepared(ID), Some(pass));
         assert_eq!(self.metrics.completion, pass);
     }
-    fn nat_files(&self) -> std::collections::BTreeMap<String, Vec<u8>> {
+    pub(in crate::ui) fn nat_files(&self) -> std::collections::BTreeMap<String, Vec<u8>> {
         let mut files = std::collections::BTreeMap::new();
         let mut total = 0usize;
         let mut actual_total = 0usize;
@@ -875,7 +1107,7 @@ impl LabApp {
         }
         files
     }
-    fn nat_warm(&mut self) -> Warm {
+    pub(in crate::ui) fn nat_warm(&mut self) -> Warm {
         let portable = serde_json::to_value(&self.progress).unwrap();
         let caller_receipts = serde_json::to_value(&self.progress.migration_receipts).unwrap();
         self.save();

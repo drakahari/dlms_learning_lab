@@ -157,21 +157,25 @@ Fedora catalog is now140/35 at ddb886b after the final same-ELF candidate gates.
 text scripts add real practice but no new issuer-row or universal POSIX claim.
 
 
-### Basic NAT backend foundation — 2026-10-26
+### Basic NAT practical subset — 2026-10-26
 
-The independently reviewed [pure model](NAT_SUBSET.md) and
-[typed workspace backend](NAT_WORKSPACE_SUBSET.md) pass their compiler, outcome,
-alternate-policy, bound, invalidation and progress-retention gates. They model
-inside-source static and pool address mappings. The [native workbench](NAT_NATIVE.md)
-and isolated teaching/practice pass technical gates. Three authored tasks are
-bundled in development; actual normal-lesson native acceptance is pending; current CCNA4.1 stays **Open**, and all1240 issuer fingerprints/status totals remain unchanged. The source143/36
-unit separates
-static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
-It does not promise PAT, transport sessions, IOS or actual packet delivery. The
-old plan's generic NAT/PAT-session label was not the issuer objective wording;
-current4.1 explicitly concerns inside-source static mappings and pools. This
-clarifies the implementation boundary without granting practice credit or altering
-the separate future-blueprint plan.
+The independently reviewed [pure model](NAT_SUBSET.md),
+[typed backend](NAT_WORKSPACE_SUBSET.md) and [native workspace](NAT_NATIVE.md)
+support three distinct assignments: stable static mapping, dynamic eligibility
+and pool capacity, and preserving mappings during a policy handover. All three
+pass actual Fedora Introduction → separate practice → full assignment flows,
+including wrong/partial answers, two alternatives each, success invalidation,
+warm save/resume/reset, Challenge and observed 100%/150%/200% light/dark screens.
+The complete native run captured 80 private PNGs. Main integration passes 45
+scoped UI checks; packaged and cold-process acceptance remain pending.
+
+Current CCNA v1.1 objective 4.1 receives **Partial practice** for this bounded
+inside-source static/pool model. It does not implement IOS CLI/interface setup,
+PAT, ports, sessions, routing, connectivity or real packets. All issuer source
+fingerprints remain unchanged; the separate future-blueprint plan receives no
+credit. Source inventory remains 143 assignments in 36 units. Coverage totals
+are 145 Partial, 1 Supporting and 1094 Open overlapping references, not percentages
+or completed certification objectives.
 
 
 ### RPM foundation — no practical credit yet
@@ -185,5 +189,6 @@ progress gates. Its native workspace and four authored tasks are under
 implementation; no RPM practice is bundled. All LPIC-1 v5.0 102.5 references
 remain **Open**. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency
 solving, signatures, binary archives and real transactions remain unmodeled.
-Current140/35 and issuer fingerprints/status totals are unchanged. Backend code
+Current source remains143/36; the accepted Fedora package remains140. Issuer
+fingerprints and all RPM Open statuses are unchanged. Backend code
 is not implemented learner coverage or complete package administration.

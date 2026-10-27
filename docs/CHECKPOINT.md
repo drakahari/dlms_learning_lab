@@ -18,23 +18,31 @@ Current work, in order:
    stale test metadata expectations. Their two complete targets rerun16PASS after
    narrow original-unit/current-missing-ID fixes. MAIN all13 explicit private and
    all-target Clippy20.09s pass. Do not relabel the retained full-run failure log.
-   Three-task native controller R4 passed its four event groups, then its first
-   real Fedora run retained18 captures but stopped at the bounded large-text
-   interaction phase39056. This is a failure, not native acceptance. Rendered
-   review also found unused dynamic fields and poorly placed current-state rows.
-   R7 fixes have independent source review; all41 NAT UI checks, Clippy9.08s
-   and development build pass. The old child-scroll fixture uses measured
-   smaller geometry and retains stronger actual overflow/offset assertions.
-   A repeated actual Fedora run is underway; no acceptance until it completes.
-   No new packaged acceptance; all queue/visibility/pacing bounds remain.
-3. RPM backend is pushed at8f5e5fa; exact private renderer basefbac26e is in
-   rpm-native-140. R3 fixes archive labels, same-frame rejected-edit execution
-   and maximum-session proof. First admission exposed four draft tasks with
-   one guide for three steps; R4 supplies task-specific guides and essential
-   epoch-query teaching. R4 UI gate14PASS/1FAIL: snapshot included a view=Example leaf just before
-   clicking Assignment. R5 explicitly expects that view change and retains exact
-   all-other-Attempt and Learning checks, including inverse reopening. R5 unrun. No four-task
-   registration, authored count, objective credit or native acceptance yet.
+   Normal native R10 passes all three complete Fedora lesson flows and80 actual
+   PNG captures: Intro/separate example/actions/adverse/repair/full assignment,
+   wrong/partial/reference/two alternatives/invalidation, warm whole-value
+   save/readback, reset/Challenge and observed100wide/150Light/200Dark. Actual
+   geometry was1920x1080 at100 and946x929 at150/200; requested widths are not
+   acceptance. Representative rendered fields/labels/focus/state were inspected.
+   Earlier failures proved fractional child/root stability disagreement, then
+   impossible whole-child containment at200%; R10 retains measured regressions,
+   original visibility tolerance,20wheel/60idle/300queue limits and pacing.
+   Eleven reviewed paths merged into MAIN with all before hashes checked and
+   clean three-way merges preserving newer RPM state handling. MAIN45 NAT UI
+   checks pass, plus142 default model/content/library/interop checks (4 ignored
+   historical checks retain prior explicit receipts); Main Clippy12.17s and
+   development build5.36s pass. CCNA v1.1 4.1 is now narrowly Partial practice; no IOS/PAT/ports/
+   real-packet or full-objective claim. No new packaged/cold-process acceptance.
+3. RPM backend is pushed at8f5e5fa. Private renderer R7 in rpm-native-140 passes
+   all15 UI checks; four task content tests pass10 groups including references,
+   eight alternatives, wrong/partial/broken/preservation, isolation and backup.
+   All-target Clippy passes after equivalent test-only first() lint fixes.
+   Earlier failures are retained: guide count mismatch, explicit tab-view leaf,
+   egui Undo checkpoint wait and post-tab focus. Real stable Undo and actual
+   field clicks now preserve exact separate drafts; no time/focus injection.
+   SOURCE-ONLY normal integration into147/37 is underway in rpm-register-147;
+   normal MAIN remains143, no four-task count/credit/native acceptance yet.
+
 4. LPIC-2 NFS next capability is source-only in nfs-core-143 atdb19495 (base140).
    Pure-core contract R2 (84f217b1/e380d1b7) explicitly limits NFSv3 ACCESS-style
    decisions, numeric squash/DAC and ordinary existing-file operations. First
@@ -42,12 +50,15 @@ Current work, in order:
    fields and an imprecise unsquashed-root exclusion; frozen R3 fixes strict
    decoding and documents/tests mode-denial ordering. Root R3 gates pass95 default plus4 explicit private; Clippy13.74s.
    Exact four-path MAIN integration passes the same95 default checks.
+   Main all-target Clippy19.37s also passes. Source pushed asf7d1210.
+   Stage A adapter/separate-teaching source work is authorized only in isolated
+   nfs-app-143 atf7d1210, contract9486b5c7. No normal scenarios/credit yet.
    No host NFS/mount commands or dependency; all16 objective rows remain Open.
 
 Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no
 build/test/native/reference grant. Check active sessions/markers before a run.
 
-The coverage matrix remains144Partial/1Supporting/1095Open; these are overlapping
+The coverage matrix is now145Partial/1Supporting/1094Open; these are overlapping
 references, not percentages or completed exam objectives. Full curriculum, other
 OS desktop runtime, physical-device accessibility and novice acceptance remain open.
 Root alone runs heavy work; delegated workers remain source-only.

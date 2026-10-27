@@ -566,8 +566,7 @@ fn nat_disabled_invalid_text_is_retained_and_only_enabled_fields_are_applied() {
         a.metrics
             .nat_fields
             .iter()
-            .filter(|r| ["network", "prefix", "first", "last"].contains(&r.0.as_str()))
-            .all(|r| !r.3)
+            .all(|r| !["network", "prefix", "first", "last"].contains(&r.0.as_str()))
     );
     ctrl(&ctx, &mut a, "apply");
     assert!(live(&a).configuration().dynamic.is_none());
@@ -584,6 +583,18 @@ fn nat_disabled_invalid_text_is_retained_and_only_enabled_fields_are_applied() {
     let before = live(&a).clone();
     ctrl(&ctx, &mut a, "dynamic");
     assert!(draft(&a).dynamic_enabled);
+    assert_eq!(
+        draft(&a).prefix,
+        "bad",
+        "Re-enable restores exact retained invalid text"
+    );
+    assert!(
+        ["network", "prefix", "first", "last"].iter().all(|key| a
+            .metrics
+            .nat_fields
+            .iter()
+            .any(|r| r.0 == *key && r.3))
+    );
     ctrl(&ctx, &mut a, "apply");
     assert_eq!(live(&a), &before);
     assert!(!progress::current_nat_checks(&a.progress.attempts[ID], &a.scenarios[i])[0].0);

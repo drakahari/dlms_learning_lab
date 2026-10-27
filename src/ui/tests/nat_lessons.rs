@@ -436,3 +436,205 @@ fn real_continue_retains_distinct_drafts_reset_cancel_and_confirm_keep_favorite(
         assert_eq!(draft(&a, id, true).inbound_global, "");
     }
 }
+
+fn layout_frame(
+    ctx: &egui::Context,
+    a: &mut LabApp,
+    width: f32,
+    height: f32,
+    events: Vec<egui::Event>,
+) -> egui::FullOutput {
+    ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(width / a.scale, height / a.scale),
+            )),
+            events,
+            ..Default::default()
+        },
+        |ctx| a.render(ctx),
+    )
+}
+fn painted_labels(output: &egui::FullOutput, text: &str) -> Vec<egui::Rect> {
+    fn collect(shape: &egui::Shape, text: &str, result: &mut Vec<egui::Rect>) {
+        match shape {
+            egui::Shape::Text(t) if t.galley.text() == text => {
+                result.push(egui::Rect::from_min_size(t.pos, t.galley.size()));
+            }
+            egui::Shape::Vec(shapes) => {
+                for shape in shapes {
+                    collect(shape, text, result);
+                }
+            }
+            _ => {}
+        }
+    }
+    let mut result = Vec::new();
+    for shape in &output.shapes {
+        collect(&shape.shape, text, &mut result);
+    }
+    result
+}
+#[test]
+fn ordinary_two_static_maps_fit_measured_child_and_current_maps_use_wide_right_column() {
+    for scale in [1., 1.5, 2.] {
+        let (ctx, mut a, _) = opened(IDS[0]);
+        tab(&ctx, &mut a, 2);
+        a.scale = scale;
+        for _ in 0..4 {
+            layout_frame(&ctx, &mut a, 1920., 1500., vec![]);
+        }
+        let mut visible = false;
+        for attempt in 0..=20 {
+            let output = layout_frame(&ctx, &mut a, 1920., 1500., vec![]);
+            assert!(
+                a.metrics
+                    .nat_fields
+                    .iter()
+                    .all(|r| !["network", "prefix", "first", "last"].contains(&r.0.as_str()))
+            );
+            let fields: Vec<_> = a
+                .metrics
+                .nat_fields
+                .iter()
+                .filter(|r| r.0.starts_with("static:"))
+                .map(|r| r.1)
+                .collect();
+            assert_eq!(
+                fields.len(),
+                4,
+                "Both ordinary inside/global pairs remain present"
+            );
+            let child = a.metrics.nat_static_viewport.unwrap();
+            let root = a
+                .metrics
+                .main_viewport
+                .unwrap()
+                .intersect(ctx.content_rect());
+            let viewport = child.intersect(root);
+            if fields.iter().all(|r| {
+                super::super::smoke::smoke_control_visible(*r, viewport, ctx.pixels_per_point())
+            }) {
+                assert!(
+                    a.metrics.nat_static_scroll.unwrap().1.y.abs() <= 1. / ctx.pixels_per_point(),
+                    "Both maps need no inner scroll when there is room"
+                );
+                let maps = painted_labels(&output, "Applied policy and existing maps");
+                assert_eq!(maps.len(), 1);
+                let requests = painted_labels(&output, "Address observations");
+                assert_eq!(requests.len(), 1);
+                let static_right = fields
+                    .iter()
+                    .map(|r| r.right())
+                    .fold(f32::NEG_INFINITY, f32::max);
+                assert!(
+                    maps[0].left() > static_right,
+                    "Current maps occupy the actual right column"
+                );
+                assert!((maps[0].left() - requests[0].left()).abs() <= 1. / ctx.pixels_per_point());
+                let last_tool = a
+                    .metrics
+                    .nat_controls
+                    .iter()
+                    .filter(|r| ["outbound", "inbound", "clear"].contains(&r.0.as_str()))
+                    .map(|r| r.1.bottom())
+                    .fold(f32::NEG_INFINITY, f32::max);
+                assert!(
+                    maps[0].top() >= last_tool,
+                    "Current State follows the real request tools"
+                );
+                visible = true;
+                break;
+            }
+            assert!(
+                attempt < 20,
+                "Two-map measured viewport still clipped: fields{fields:?} child{child:?} root{root:?}"
+            );
+            let target = fields.into_iter().reduce(|a, b| a.union(b)).unwrap();
+            let delta = if target.bottom() > root.bottom() {
+                root.bottom() - target.bottom()
+            } else {
+                root.top() - target.top()
+            };
+            layout_frame(
+                &ctx,
+                &mut a,
+                1920.,
+                1500.,
+                vec![
+                    egui::Event::PointerMoved(egui::pos2(root.left() + 1., root.center().y)),
+                    egui::Event::MouseWheel {
+                        unit: egui::MouseWheelUnit::Point,
+                        delta: egui::vec2(0., delta.clamp(-350., 350.)),
+                        modifiers: Default::default(),
+                    },
+                ],
+            );
+            for _ in 0..60 {
+                layout_frame(&ctx, &mut a, 1920., 1500., vec![]);
+            }
+        }
+        assert!(visible);
+    }
+}
+fn release_frame_for_control(ctx: &egui::Context, a: &mut LabApp, key: &str) -> egui::FullOutput {
+    let r = locate(ctx, a, key, false);
+    let press = |pressed| {
+        vec![
+            egui::Event::PointerMoved(r.center()),
+            egui::Event::PointerButton {
+                pos: r.center(),
+                button: egui::PointerButton::Primary,
+                pressed,
+                modifiers: Default::default(),
+            },
+        ]
+    };
+    layout_frame(ctx, a, 1200., 850., press(true));
+    layout_frame(ctx, a, 1200., 850., press(false))
+}
+#[test]
+fn real_apply_and_reverse_paint_final_state_in_the_same_event_frame() {
+    let (ctx, mut a, _) = opened(IDS[0]);
+    tab(&ctx, &mut a, 2);
+    let global = row_key(&a, IDS[0], false, "server", "global");
+    input(&ctx, &mut a, &global, "198.51.100.40");
+    let State::BasicNat { simulation } = &a.progress.attempts[IDS[0]].state else {
+        panic!()
+    };
+    assert_eq!(
+        simulation.configuration().statics["server"].to_string(),
+        "198.51.100.41"
+    );
+    let output = release_frame_for_control(&ctx, &mut a, "apply");
+    let State::BasicNat { simulation } = &a.progress.attempts[IDS[0]].state else {
+        panic!()
+    };
+    assert_eq!(
+        simulation.configuration().statics["server"].to_string(),
+        "198.51.100.40"
+    );
+    assert_eq!(
+        painted_labels(&output, "198.51.100.40 · Static").len(),
+        1,
+        "The release frame paints the newly applied map"
+    );
+    assert!(
+        painted_labels(&output, "198.51.100.41 · Static").is_empty(),
+        "No stale applied map survives the real Apply frame"
+    );
+    choose(&ctx, &mut a, "peer", "remote");
+    input(&ctx, &mut a, "inbound-global", "198.51.100.40");
+    let before = serde_json::to_value(&a.progress.attempts[IDS[0]].state).unwrap();
+    let output = release_frame_for_control(&ctx, &mut a, "inbound");
+    assert!(
+        serde_json::to_value(&a.progress.attempts[IDS[0]].state).unwrap() == before,
+        "Reverse never allocates"
+    );
+    assert_eq!(
+        painted_labels(&output, "After: 192.0.2.201 -> 10.40.1.10").len(),
+        1,
+        "The real reverse release frame paints its current observation"
+    );
+}

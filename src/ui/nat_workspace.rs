@@ -229,7 +229,7 @@ fn static_row_height(ui: &egui::Ui) -> f32 {
     } else {
         control
     };
-    heading + row("Inside identity") + row("Global address") + 4. * gap
+    heading + row("Inside device") + row("Global address") + 4. * gap
 }
 fn policy_panel(
     ui: &mut egui::Ui,
@@ -258,10 +258,21 @@ fn policy_panel(
         });
     });
     let row_height = static_row_height(ui);
+    // The ordinary two-map exercise can show both complete aligned rows.
+    // Larger inventories retain the same bounded inner scroll area.
+    let list_height = row_height * d.statics.len().clamp(1, 2) as f32;
+    // max_height alone does not reserve room inside auto-sized columns. Give
+    // both ordinary rows a measured minimum only when their full height fits
+    // the actual viewport; a smaller viewport keeps one complete row and scroll.
+    let minimum_height = if list_height <= ui.clip_rect().height() {
+        list_height
+    } else {
+        row_height
+    };
     let static_list = egui::ScrollArea::vertical()
         .id_salt(scope.with("static-list"))
-        .min_scrolled_height(row_height)
-        .max_height(row_height.max(240.))
+        .min_scrolled_height(minimum_height)
+        .max_height(list_height)
         .show(ui, |ui| {
             for (n, row) in d.statics.iter_mut().enumerate() {
                 let token = p.tokens[n];
@@ -278,7 +289,7 @@ fn policy_panel(
                         scope.with(("static", token)),
                         FieldSpec {
                             key: &format!("static:{token}:inside"),
-                            label: "Inside identity",
+                            label: "Inside device",
                             cap: 32,
                         },
                         &mut row.inside,
@@ -321,7 +332,7 @@ fn policy_panel(
         ui.clip_rect(),
     ));
     // Retain disabled text verbatim. It has no policy meaning until enabled.
-    ui.add_enabled_ui(d.dynamic_enabled, |ui| {
+    if d.dynamic_enabled {
         changed |= edit(
             ui,
             metrics,
@@ -370,7 +381,7 @@ fn policy_panel(
             &mut d.last,
             focus,
         );
-    });
+    }
     let apply = action(ui, metrics, "apply", "Apply policy", false);
     (changed, apply)
 }
@@ -388,7 +399,7 @@ fn requests_panel(
         metrics,
         scope,
         "inside",
-        "Inside identity",
+        "Inside device",
         &mut d.inside,
         &d.context.inside,
     );
@@ -397,7 +408,7 @@ fn requests_panel(
         metrics,
         scope,
         "peer",
-        "Outside peer",
+        "Remote device",
         &mut d.peer,
         &d.context.outside,
     );
@@ -424,7 +435,7 @@ fn requests_panel(
                         inside: i.clone(),
                         peer: p.clone(),
                     })
-                    .ok_or_else(|| "Choose an inside identity and outside peer".into()),
+                    .ok_or_else(|| "Choose an inside device and remote device".into()),
             );
         }
         if action(ui, metrics, "inbound", "Reverse", false) {
@@ -575,94 +586,121 @@ struct Workbench<'a> {
     check_label: &'a str,
 }
 impl Workbench<'_> {
-    fn show(self, ui: &mut egui::Ui) -> (bool, bool) {
-        let Self {
-            initial,
-            simulation,
-            draft: d,
-            scope,
-            active,
-            presentation,
-            metrics,
-            focus_input,
-            check_label,
-        } = self;
-        let mut apply = false;
-        let mut request = None;
+    // Commit actual button requests before drawing current observations, so
+    // the adjacent view always describes this frame's final applied State.
+    fn perform_pending(
+        &mut self,
+        apply: bool,
+        request: Option<Result<core::Action, String>>,
+    ) -> bool {
         let mut changed = false;
-        ui.push_id(scope, |ui| {
-            ui.add_enabled_ui(active, |ui| {
-                if ui.available_width() >= controls::height(ui) * 18. {
-                    ui.columns(2, |columns| {
-                        let (c, p) = policy_panel(
-                            &mut columns[0],
-                            d,
-                            presentation,
-                            metrics,
-                            scope,
-                            focus_input,
-                        );
-                        changed |= c;
-                        apply = p;
-                        let (c, r) =
-                            requests_panel(&mut columns[1], d, metrics, scope, focus_input);
-                        changed |= c;
-                        request = r;
-                    });
-                } else {
-                    let (c, p) = policy_panel(ui, d, presentation, metrics, scope, focus_input);
-                    changed |= c;
-                    apply = p;
-                    ui.separator();
-                    let (c, r) = requests_panel(ui, d, metrics, scope, focus_input);
-                    changed |= c;
-                    request = r;
-                }
-            });
-        });
-        if active && apply {
-            // Always dirty on an actual Apply, including identical notice text.
+        if self.active && apply {
             changed = true;
-            match d.apply(initial, simulation) {
+            match self.draft.apply(self.initial, self.simulation) {
                 Ok(_) => {
-                    d.notice = Some("Policy applied".into());
-                    presentation.effect = Some(core::Effect::Configured);
+                    self.draft.notice = Some("Policy applied".into());
+                    self.presentation.effect = Some(core::Effect::Configured);
                 }
                 Err(e) => {
-                    d.notice = Some(work::notice(&e));
-                    presentation.effect = None;
+                    self.draft.notice = Some(work::notice(&e));
+                    self.presentation.effect = None;
                 }
             }
         }
-        if active && let Some(request) = request {
+        if self.active
+            && let Some(request) = request
+        {
             changed = true;
-            match request.and_then(|r| work::perform(initial, simulation, &r)) {
+            match request.and_then(|r| work::perform(self.initial, self.simulation, &r)) {
                 Ok((_, effect)) => {
-                    d.notice = None;
-                    presentation.effect = Some(effect);
+                    self.draft.notice = None;
+                    self.presentation.effect = Some(effect);
                 }
                 Err(e) => {
-                    d.notice = Some(work::notice(&e));
-                    presentation.effect = None;
+                    self.draft.notice = Some(work::notice(&e));
+                    self.presentation.effect = None;
                 }
             }
         }
-        if let Some(n) = &d.notice {
-            ui.label(n);
-        }
+        changed
+    }
+    fn show(mut self, ui: &mut egui::Ui) -> (bool, bool) {
+        let mut changed = false;
+        let scope = self.scope;
+        let active = self.active;
         ui.push_id(scope, |ui| {
-            state_panel(ui, simulation, presentation, metrics)
+            if ui.available_width() >= controls::height(ui) * 18. {
+                ui.columns(2, |columns| {
+                    let (c, apply) = columns[0]
+                        .add_enabled_ui(active, |ui| {
+                            policy_panel(
+                                ui,
+                                self.draft,
+                                self.presentation,
+                                self.metrics,
+                                scope,
+                                self.focus_input,
+                            )
+                        })
+                        .inner;
+                    changed |= c;
+                    let (c, request) = columns[1]
+                        .add_enabled_ui(active, |ui| {
+                            requests_panel(ui, self.draft, self.metrics, scope, self.focus_input)
+                        })
+                        .inner;
+                    changed |= c;
+                    changed |= self.perform_pending(apply, request);
+                    if let Some(n) = &self.draft.notice {
+                        columns[1].label(n);
+                    }
+                    state_panel(
+                        &mut columns[1],
+                        self.simulation,
+                        self.presentation,
+                        self.metrics,
+                    );
+                });
+            } else {
+                let (c, apply) = ui
+                    .add_enabled_ui(active, |ui| {
+                        policy_panel(
+                            ui,
+                            self.draft,
+                            self.presentation,
+                            self.metrics,
+                            scope,
+                            self.focus_input,
+                        )
+                    })
+                    .inner;
+                changed |= c;
+                ui.separator();
+                let (c, request) = ui
+                    .add_enabled_ui(active, |ui| {
+                        requests_panel(ui, self.draft, self.metrics, scope, self.focus_input)
+                    })
+                    .inner;
+                changed |= c;
+                changed |= self.perform_pending(apply, request);
+                if let Some(n) = &self.draft.notice {
+                    ui.label(n);
+                }
+                state_panel(ui, self.simulation, self.presentation, self.metrics);
+            }
         });
         let check = ui
-            .add_enabled_ui(active, |ui| action(ui, metrics, "check", check_label, true))
+            .add_enabled_ui(active, |ui| {
+                action(ui, self.metrics, "check", self.check_label, true)
+            })
             .inner
             || active && ui.input(|i| i.modifiers.command && i.key_pressed(egui::Key::Enter));
-        metrics.check = metrics
+        self.metrics.check = self
+            .metrics
             .nat_controls
             .iter()
             .find(|r| r.0 == "check")
             .map(|r| r.1);
-
         (changed, check)
     }
 }
@@ -744,7 +782,7 @@ impl LabApp {
         }
         let s = &self.scenarios[i];
         ui.heading(&s.title);
-        ui.label("Basic NAT: address-only simulation. No PAT, ports, sessions, timers, routing or security verdict.");
+        ui.label("Basic NAT: simulated address rewrites, not real network traffic.");
         let a = self.progress.attempts.get_mut(&s.id).unwrap();
         let view = if challenge {
             teaching::View::Assignment
@@ -848,16 +886,19 @@ impl LabApp {
             ui.label(&lesson.example_description);
             let old = l.selected_action;
             ui.add_enabled_ui(active, |ui| {
-                controls::dropdown(ui, ("nat-example-action", &s.id), ui.available_width())
-                    .selected_text(&lesson.example_actions[l.selected_action].title)
-                    .show_ui(ui, |ui| {
-                        for (n, step) in lesson.example_actions.iter().enumerate() {
-                            let r = ui.selectable_value(&mut l.selected_action, n, &step.title);
-                            self.metrics
-                                .nat_choices
-                                .push((format!("example:{n}"), r.rect));
-                        }
-                    });
+                let picker =
+                    controls::dropdown(ui, ("nat-example-action", &s.id), ui.available_width())
+                        .selected_text(&lesson.example_actions[l.selected_action].title)
+                        .show_ui(ui, |ui| {
+                            for (n, step) in lesson.example_actions.iter().enumerate() {
+                                let r = ui.selectable_value(&mut l.selected_action, n, &step.title);
+                                self.metrics
+                                    .nat_choices
+                                    .push((format!("example:{n}"), r.rect));
+                            }
+                            self.metrics.nat_example_popup = Some(controls::popup_content_clip(ui));
+                        });
+                self.metrics.nat_example_picker = Some((picker.response.rect, ui.clip_rect()));
                 ui.label(&lesson.example_actions[l.selected_action].explanation);
                 ui.horizontal_wrapped(|ui| {
                     let r = ui.add(button("Insert selected action"));
@@ -966,8 +1007,11 @@ impl LabApp {
                 if practice {
                     ui.strong("Example checks · No assignment credit");
                 }
-                for (ok, message) in rows {
-                    ui.label(check_text(*ok, message));
+                for (index, (ok, message)) in rows.iter().enumerate() {
+                    let response = ui.label(check_text(*ok, message));
+                    self.metrics
+                        .nat_result_rows
+                        .push((index, *ok, response.rect, ui.clip_rect()));
                 }
             });
             self.metrics.nat_feedback = Some(r.response.rect);

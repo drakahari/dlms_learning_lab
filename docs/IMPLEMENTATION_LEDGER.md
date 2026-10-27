@@ -2646,3 +2646,30 @@ MAIN integration passes73+22 checks. Existing143 labs, progress schema and28
 themes remain unchanged. All16 objective209.2 rows stay Open; only their gap
 text now acknowledges the implemented foundation. No NFS learner workspace,
 authored assignments, curriculum credit or packaged acceptance is claimed.
+
+### M127 normal native NAT acceptance and MAIN workspace merge (2026-10-26)
+
+R10 passes44 private UI checks, Clippy/build and a complete actual Fedora native
+run across all three normal authored tasks:80 captured PNGs. Actual observed
+windows were1920x1080 at100% and946x929 at150% light/200% dark. The driver uses
+real Start/tabs/pickers/fields/actions, adverse example repair, wrong/partial
+checks, reference/two alternatives, success invalidation, whole-value warm saved
+readback, selected reset and Challenge. It installs no expected State. Reviewed
+rendered static/pool layouts and focused light150/dark200 controls; original
+shared IPv4/VLAN alignment was independently inspected in72 Main captures.
+
+Retained R4/R7 failures exposed a fractional containment versus visibility
+disagreement; R8 confirmed150% then failed trying to reveal an entire child
+taller than the200% root. R10 routes according to actual target visibility and
+measured usable child intersection, preserving existing physical-pixel tolerance,
+all wheel/settle/queue limits and event pacing. Separate strict-edge queue and
+actual150/200 rendered regressions remain. No product layout was shrunk to pass.
+
+Eleven paths merged to MAIN by clean three-way merge against dc4cb6c, checking
+every source-before hash; newer RPM arms and original records stay intact. Main
+45 scoped NAT UI checks pass. One first Intro concept text was intentionally
+clarified; all original140 source packs remain byte-exact. Current CCNA v1.1
+4.1 receives only Partial practice: static and pool outcomes in the disclosed
+Basic NAT model, no IOS/PAT/ports/routing/connectivity or full exam coverage.
+No new packaged, cold-process, other-OS, physical-device, screen-reader or novice
+acceptance is claimed. Failed diagnostics and all screenshots remain private.

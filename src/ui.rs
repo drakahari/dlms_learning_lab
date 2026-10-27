@@ -46,6 +46,9 @@ struct Metrics {
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
     nat_choices: Vec<(String, egui::Rect)>,
     nat_popup: Option<egui::Rect>,
+    nat_example_picker: Option<(egui::Rect, egui::Rect)>,
+    nat_example_popup: Option<egui::Rect>,
+    nat_result_rows: Vec<(usize, bool, egui::Rect, egui::Rect)>,
     nat_static_viewport: Option<egui::Rect>,
     nat_static_scroll: Option<(egui::Id, egui::Vec2, egui::Vec2)>,
     nat_feedback: Option<egui::Rect>,
@@ -460,6 +463,10 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if let Some(stage) =
+                Self::nat_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
             } else if let Some(stage) =
                 Self::nat_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {

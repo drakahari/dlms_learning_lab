@@ -6,6 +6,9 @@ use dlms_learning_lab::nat as core;
 struct Witness {
     shots: Vec<String>,
     inner_wheel: bool,
+    overflowing_inner_wheel: bool,
+    child_offset_moved: bool,
+    viewport_height: Option<f32>,
     frames: usize,
     wheel_frames: Vec<usize>,
     fullscreen_requests: Vec<bool>,
@@ -63,6 +66,10 @@ fn actual_tick(
             .is_some_and(|r| r.contains(point))
     {
         w.inner_wheel = true;
+        w.overflowing_inner_wheel |= a.metrics.nat_static_scroll.is_some_and(|(_, _, content)| {
+            content.y
+                > a.metrics.nat_static_viewport.unwrap().height() + 1. / ctx.pixels_per_point()
+        });
     }
     let modifiers = events
         .iter()
@@ -86,7 +93,7 @@ fn actual_tick(
         egui::RawInput {
             screen_rect: Some(egui::Rect::from_min_size(
                 egui::Pos2::ZERO,
-                egui::vec2(width / a.scale, 950. / a.scale),
+                egui::vec2(width / a.scale, w.viewport_height.unwrap_or(950.) / a.scale),
             )),
             events,
             modifiers,
@@ -94,6 +101,10 @@ fn actual_tick(
         },
         |ctx| {
             a.render(ctx);
+            w.child_offset_moved |= a
+                .metrics
+                .nat_static_scroll
+                .is_some_and(|(_, offset, _)| offset.y > 1. / ctx.pixels_per_point());
             a.save();
             if age {
                 a.started = Instant::now() - std::time::Duration::from_secs(1);
@@ -211,6 +222,24 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
 fn nat_actual_first_flow_scrolls_real_static_child_and_runs_partial_then_current_plus_fresh() {
     let (ctx, mut a) = app_native();
     let mut w = Witness::default();
+    until(&ctx, &mut a, FIRST + 6, &mut w);
+    // The ordinary two-row layout intentionally fits in the normal window.
+    // During the existing real Add/edit/Remove phase, give the root one and a
+    // half measured row heights: one complete row fits, while the second must
+    // be reached through the actual child scroller. No fixture/state injection.
+    let row_height = a.metrics.nat_static_viewport.unwrap().height();
+    let chrome = ctx.content_rect().height() - a.metrics.main_viewport.unwrap().height();
+    w.viewport_height = Some(chrome + row_height * 1.5);
+    until(&ctx, &mut a, FIRST + 7, &mut w);
+    assert!(
+        w.overflowing_inner_wheel,
+        "A real wheel must reach a child whose content exceeds its viewport"
+    );
+    assert!(
+        w.child_offset_moved,
+        "The real child scroll offset must move before edit/Remove acknowledgement"
+    );
+    w.viewport_height = None;
     until(&ctx, &mut a, FIRST + 22, &mut w);
     assert!(
         w.inner_wheel,

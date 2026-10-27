@@ -11,6 +11,7 @@ mod getopts_lessons;
 mod mac_learning;
 mod nat;
 mod nat_lessons;
+mod nat_lessons_native;
 mod nat_native;
 mod nat_teaching;
 mod ospf;

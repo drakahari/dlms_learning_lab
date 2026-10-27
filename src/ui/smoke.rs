@@ -19,6 +19,7 @@ mod mac_layout;
 mod mac_learning;
 mod mac_lessons;
 pub(in crate::ui) mod nat;
+pub(in crate::ui) mod nat_lessons;
 mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
@@ -32,7 +33,11 @@ mod unit_manager_lessons;
 
 /// Native input targets may straddle a rounded clip edge by one physical pixel.
 /// Their click center must still be inside the actual, unexpanded viewport.
-fn smoke_control_visible(target: egui::Rect, visible: egui::Rect, pixels_per_point: f32) -> bool {
+pub(super) fn smoke_control_visible(
+    target: egui::Rect,
+    visible: egui::Rect,
+    pixels_per_point: f32,
+) -> bool {
     if !pixels_per_point.is_finite() || pixels_per_point <= 0. {
         return false;
     }
@@ -554,6 +559,13 @@ impl LabApp {
             }
             n @ (7600..=7639 | 7660..=7666) => {
                 let (advance, capture) = self.acl_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ nat_lessons::FIRST..=nat_lessons::LAST => {
+                let (advance, capture) = self.nat_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }
