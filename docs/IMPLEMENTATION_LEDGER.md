@@ -2696,3 +2696,36 @@ The four-shape technical fixture is not bundled curriculum. Engine/progress/pack
 native integration, complete Attempt admission and authored NFS lessons remain
 future Stage B work. No NFS objective credit, learner-facing workspace, normal
 registration, source count increase or packaged acceptance is claimed.
+
+### M128 normal RPM unit and combined147 integration (2026-10-26)
+
+Four distinct investigations are now registered: capability provider selection,
+epoch-aware coherent update, recorded-versus-current payload repair, and a
+provider handover. The native terminal retains separate examples, actual
+query/Run/Check behavior, bounded histories and an optional explicitly simulated
+header/payload inspector. Scope excludes rpm -V, dependency solving, signatures,
+archive software execution and host utilities. All LPIC-1 102.5 rows remain Open
+until actual native content acceptance; registration alone does not earn credit.
+
+Accepted donor15 UI groups and10 content groups cover references/eight distinct
+alternatives, partial/wrong/no-op/preservation/broken/repaired outcomes, output
+forgery, separate raw drafts and full save/export/restore/reset. Independent
+review caught three integration test adaptations: append-only unit projection,
+duplicate RPM catalog extension and old context-free kind filtering. All were
+corrected with original comparisons intact. The first complete isolated147 run
+was1804PASS/1FAIL/13ignored: only an old open-ended NAT tail expected three IDs
+after140. R5 closes exactly140..143 and asserts the RPM tail has no NAT teaching;
+its complete affected target reruns12PASS. All13 private checks and all-target
+Clippy38.86s pass. Retain that original failure log as failed.
+
+Seventy paths merged into Main with source-before hashes checked. Two existing
+NAT files created since the f7d base used accepted9149 as their merge base.
+Two documentation conflicts retained current80-capture/45UI NAT evidence and
+Partial status while adding147 inventory. The seven NFS Stage A files remain
+intact. Original143/36 preservation permits only the approved one-leaf NAT Intro
+clarification; all original140 raw pack bytes and historical writer evidence
+remain exact. Main combined run passes1829/0/13ignored across139 harnesses;
+Main all-target Clippy20.41s passes. Actual RPM native, a new packaged Fedora
+candidate, other-OS runtime, physical-device/accessibility and novice acceptance
+remain pending. Source147/37 =45CCNA/32LPIC-1/24LPIC-2/46Bash; installed140 remains
+the latest scoped accepted Fedora candidate. No release publication.

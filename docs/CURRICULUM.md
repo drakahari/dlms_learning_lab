@@ -2,7 +2,7 @@
 
 Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
 This is a plan and evidence ledger, not complete exam preparation. Source inventory:
-**143 source assignments/36 units:45CCNA,28LPIC-1,24LPIC-2,46Bash/Shell**.
+**147 source assignments/37 units:45CCNA,32LPIC-1,24LPIC-2,46Bash/Shell**.
 Three Basic NAT assignments now have reviewed teaching, separate practice, meaningful
 current/future mapping tasks and passing model/widget checks. Their normal rendered
 lesson acceptance is pending; the latest scoped installed candidate still has140.
@@ -294,9 +294,12 @@ negative/bound groups and library integration checks. It distinguishes RPM EVR,
 capability providers and installed/local/repository sources, with atomic logical
 script-free sets. The [command and separate-practice backend](RPM_PACKAGES_WORKSPACE.md)
 now passes guarded query, update/removal, alternate-outcome, isolation and saved-
-progress gates. Its native workspace and four authored tasks are under
-implementation; no RPM practice is bundled. All LPIC-1 v5.0 102.5 references
+progress gates. Four RPM investigations and their separate practice are now
+registered in source with one unit: versioned providers, epoch-aware updates,
+recorded ownership/payload repair and provider handover. Prior scoped four-task
+content and real-egui checks passed on the accepted donor; normal147/37 integration
+and rendered RPM acceptance remain unverified. All LPIC-1 v5.0 102.5 references
 remain **Open**. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency
 solving, signatures, binary archives and real transactions remain unmodeled.
-Current140/35 and issuer fingerprints/status totals are unchanged. Backend code
-is not implemented learner coverage or complete package administration.
+Issuer fingerprints/status totals are unchanged; source registration is not
+completed learner coverage or complete package administration.

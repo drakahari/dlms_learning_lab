@@ -1,0 +1,716 @@
+{
+  "schema_version": 1,
+  "expected_origin": "Independently authored source reasoning, not recorded utility output or execution evidence",
+  "lessons": [
+    {
+      "id": "lpic1-rpm-provider",
+      "initial": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "reference": {
+        "name": "reference",
+        "commands": [
+          "rpm -i /rpms/bridge-a.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "alternatives": [
+        {
+          "name": "different eligible versioned provider",
+          "commands": [
+            "rpm -i /rpms/bridge-b.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility"
+          ]
+        },
+        {
+          "name": "temporarily remove then coherently reinstall consumer",
+          "commands": [
+            "rpm -e ledger-client",
+            "rpm -i /rpms/client.rpm /rpms/bridge-a.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility"
+          ]
+        }
+      ],
+      "wrong": {
+        "name": "wrong",
+        "commands": [
+          "rpm -i /rpms/lookalike.rpm"
+        ],
+        "rows": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "outcomes": [
+          "unsupported"
+        ]
+      },
+      "partial": {
+        "name": "partial",
+        "commands": [
+          "rpm -e ledger-client",
+          "rpm -i /rpms/bridge-a.rpm"
+        ],
+        "rows": [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "outcomes": [
+          "utility",
+          "utility"
+        ]
+      },
+      "read_only": {
+        "name": "read_only",
+        "commands": [
+          "rpm -q --requires ledger-client"
+        ],
+        "rows": [
+          true,
+          false,
+          false,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "after_pass_break": {
+        "name": "after_pass_break",
+        "commands": [
+          "rpm -e ledger-client"
+        ],
+        "rows": [
+          false,
+          true,
+          true,
+          true,
+          false
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "repair": {
+        "name": "repair",
+        "commands": [
+          "rpm -i /rpms/client.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "practice_initial": [
+        true,
+        false,
+        false,
+        true,
+        true
+      ],
+      "configuration_path": "/etc/ledger-client.conf",
+      "configuration_tamper_rows": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ],
+      "neighbor_path": "/usr/share/ledger-note/report",
+      "neighbor_tamper_rows": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
+    },
+    {
+      "id": "lpic1-rpm-epoch",
+      "initial": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "reference": {
+        "name": "reference",
+        "commands": [
+          "rpm -U /rpms/client-new.rpm /rpms/engine-new.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "alternatives": [
+        {
+          "name": "upgrade provider before consumer",
+          "commands": [
+            "rpm -U /rpms/engine-new.rpm",
+            "rpm -U /rpms/client-new.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility"
+          ]
+        },
+        {
+          "name": "remove consumer then replace provider and reinstall consumer",
+          "commands": [
+            "rpm -e chart-client",
+            "rpm -U /rpms/engine-new.rpm",
+            "rpm -i /rpms/client-new.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility",
+            "utility"
+          ]
+        }
+      ],
+      "wrong": {
+        "name": "wrong",
+        "commands": [
+          "rpm -U /rpms/engine-larger-text.rpm"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "partial": {
+        "name": "partial",
+        "commands": [
+          "rpm -U /rpms/engine-new.rpm"
+        ],
+        "rows": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "read_only": {
+        "name": "read_only",
+        "commands": [
+          "rpm -q --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' chart-client"
+        ],
+        "rows": [
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "after_pass_break": {
+        "name": "after_pass_break",
+        "commands": [
+          "rpm -e chart-client"
+        ],
+        "rows": [
+          false,
+          true,
+          true,
+          false,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "repair": {
+        "name": "repair",
+        "commands": [
+          "rpm -i /rpms/client-new.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "practice_initial": [
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "configuration_path": "/etc/chart-client.conf",
+      "configuration_tamper_rows": [
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "neighbor_path": "/usr/share/chart-note/report",
+      "neighbor_tamper_rows": [
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "id": "lpic1-rpm-payload",
+      "initial": [
+        true,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "reference": {
+        "name": "reference",
+        "commands": [
+          "rpm --reinstall /rpms/client.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "alternatives": [
+        {
+          "name": "erase then install exact recorded version",
+          "commands": [
+            "rpm -e archive-client",
+            "rpm -i /rpms/client.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility"
+          ]
+        },
+        {
+          "name": "temporary newer version then erase and restore required version",
+          "commands": [
+            "rpm -U /rpms/client-new.rpm",
+            "rpm -e archive-client",
+            "rpm -i /rpms/client.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility",
+            "utility"
+          ]
+        }
+      ],
+      "wrong": {
+        "name": "wrong",
+        "commands": [
+          "rpm -qf /usr/share/archive-client/manual"
+        ],
+        "rows": [
+          true,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "unsupported"
+        ]
+      },
+      "partial": {
+        "name": "partial",
+        "commands": [
+          "rpm -U /rpms/client-new.rpm"
+        ],
+        "rows": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "read_only": {
+        "name": "read_only",
+        "commands": [
+          "rpm -q --path /usr/share/archive-client/manual"
+        ],
+        "rows": [
+          true,
+          false,
+          false,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "after_pass_break": {
+        "name": "after_pass_break",
+        "commands": [
+          "rpm -e archive-client"
+        ],
+        "rows": [
+          false,
+          false,
+          false,
+          true,
+          false,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "repair": {
+        "name": "repair",
+        "commands": [
+          "rpm -i /rpms/client.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "practice_initial": [
+        true,
+        false,
+        false,
+        true,
+        true,
+        true
+      ],
+      "configuration_path": "/etc/archive-client.conf",
+      "configuration_tamper_rows": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ],
+      "neighbor_path": "/usr/share/archive-note/report",
+      "neighbor_tamper_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false
+      ]
+    },
+    {
+      "id": "lpic1-rpm-handover",
+      "initial": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "reference": {
+        "name": "reference",
+        "commands": [
+          "rpm -i /rpms/new-a.rpm",
+          "rpm -e desk-legacy"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility",
+          "utility"
+        ]
+      },
+      "alternatives": [
+        {
+          "name": "different eligible replacement provider",
+          "commands": [
+            "rpm -i /rpms/new-b.rpm",
+            "rpm -e desk-legacy"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility"
+          ]
+        },
+        {
+          "name": "retire consumer and provider together then coherently reinstall consumer",
+          "commands": [
+            "rpm -e desk-client desk-legacy",
+            "rpm -i /rpms/client.rpm /rpms/new-a.rpm"
+          ],
+          "rows": [
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true
+          ],
+          "outcomes": [
+            "utility",
+            "utility"
+          ]
+        }
+      ],
+      "wrong": {
+        "name": "wrong",
+        "commands": [
+          "rpm -e desk-legacy"
+        ],
+        "rows": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "unsupported"
+        ]
+      },
+      "partial": {
+        "name": "partial",
+        "commands": [
+          "rpm -i /rpms/new-a.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "read_only": {
+        "name": "read_only",
+        "commands": [
+          "rpm -q --whatprovides desk-api"
+        ],
+        "rows": [
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "after_pass_break": {
+        "name": "after_pass_break",
+        "commands": [
+          "rpm -e desk-client"
+        ],
+        "rows": [
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          false
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "repair": {
+        "name": "repair",
+        "commands": [
+          "rpm -i /rpms/client.rpm"
+        ],
+        "rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "outcomes": [
+          "utility"
+        ]
+      },
+      "practice_initial": [
+        true,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true
+      ],
+      "configuration_path": "/etc/desk-client.conf",
+      "configuration_tamper_rows": [
+        true,
+        true,
+        true,
+        true,
+        false,
+        true,
+        false
+      ],
+      "neighbor_path": "/usr/share/desk-note/report",
+      "neighbor_tamper_rows": [
+        true,
+        true,
+        true,
+        true,
+        true,
+        false,
+        true
+      ]
+    }
+  ]
+}

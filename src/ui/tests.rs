@@ -7127,3 +7127,5 @@ fn scripting_capture_reveals_a_tall_introduction_before_clicking_its_example_act
         ));
     }
 }
+
+mod rpm_packages;

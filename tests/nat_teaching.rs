@@ -307,13 +307,17 @@ fn foreign_practice_rejects_current_save_decode_and_good_file_is_unchanged() {
 #[test]
 fn old_140_wire_and_views_are_unchanged_and_technical_fixture_unregistered() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 143);
+    assert_eq!(all.len(), 147);
     assert!(all[..140].iter().all(|s| s.nat_teaching.is_none()));
     assert_eq!(
-        all[140..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        all[140..143]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         ["ccna-nat-static", "ccna-nat-pool", "ccna-nat-handover"]
     );
-    assert!(all[140..].iter().all(|s| s.nat_teaching.is_some()));
+    assert!(all[140..143].iter().all(|s| s.nat_teaching.is_some()));
+    assert!(all[143..147].iter().all(|s| s.nat_teaching.is_none()));
     assert!(all.iter().all(|s| s.id != "nat-teaching-preview"));
     let w = workspace::WorkspaceData::new();
     assert!(

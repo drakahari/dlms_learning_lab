@@ -537,7 +537,7 @@ fn original125_typed_specs_relative_order_units_and_optional_nil_wire_are_exact(
     let old_units = baseline["units"]["units"].as_array().unwrap();
     let all_units = current_units["units"].as_array().unwrap();
     assert_eq!(old_units.len(), 31);
-    assert_eq!(all_units.len(), 36);
+    assert_eq!(all_units.len(), 37);
     assert_eq!(&all_units[..old_units.len()], old_units.as_slice());
 }
 
@@ -719,7 +719,7 @@ fn current_real_script_records_genuine678_histories_both_editors_backup_restore_
         )
     }
     assert_eq!(restored.attempts[&s.id].state, s.initial);
-    assert_eq!(originals.len(), 143);
+    assert_eq!(originals.len(), 147);
 }
 #[test]
 fn context_corruption_and_wrong_kind_save_never_overwrite_a_valid_profile() {
@@ -851,7 +851,7 @@ fn direct_oversized_whitespace_teaching_rejects_before_trim_without_publishing()
 fn both_family_current_helpers_reject_foreign_valid_metadata_without_mutating_or_saving() {
     let apache_scenario = scenario();
     let mut all = catalog();
-    assert_eq!(all.len(), 143);
+    assert_eq!(all.len(), 147);
     let package_scenario = all
         .iter()
         .find(|s| s.id == "lpic1-package-install")

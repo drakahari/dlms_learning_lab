@@ -22,6 +22,7 @@ mod legacy_learning;
 mod nat_workspace;
 mod ospf_workspace;
 mod process_learning;
+mod rpm_packages;
 mod script_learning;
 mod scripting;
 mod seed_learning;
@@ -42,6 +43,7 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
     nat_choices: Vec<(String, egui::Rect)>,
@@ -310,6 +312,7 @@ pub struct LabApp {
     metrics: Metrics,
     apache_presentation: apache_static_workspace::Presentation,
     nat_presentation: nat_workspace::Presentation,
+    rpm_presentation: rpm_packages::Presentation,
     help_open: bool,
     extra_filters: bool,
     host_activity: bool,
@@ -451,6 +454,7 @@ impl LabApp {
             metrics: Metrics::default(),
             apache_presentation: apache_static_workspace::Presentation::default(),
             nat_presentation: nat_workspace::Presentation::default(),
+            rpm_presentation: rpm_packages::Presentation::default(),
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -688,6 +692,7 @@ impl LabApp {
     fn launch(&mut self, i: usize) {
         self.invalidate_apache_presentation();
         self.nat_presentation.clear();
+        self.rpm_presentation.clear();
         self.script_job = None;
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
@@ -701,6 +706,7 @@ impl LabApp {
             .or_insert_with(|| Attempt::new(s, clock));
         model::prepare(a);
         Self::prepare_apache_static(a, s, new_attempt);
+        Self::prepare_rpm(a, s, new_attempt);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated ACL lesson");
@@ -866,6 +872,7 @@ impl LabApp {
     fn reset_attempt(&mut self, i: usize) {
         self.invalidate_apache_presentation();
         self.nat_presentation.clear();
+        self.rpm_presentation.clear();
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
@@ -875,6 +882,7 @@ impl LabApp {
         *a = Attempt::new(s, a.visited);
         model::prepare(a);
         Self::prepare_apache_static(a, s, true);
+        Self::prepare_rpm(a, s, true);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
                 .expect("validated ACL lesson");
@@ -1147,7 +1155,7 @@ impl LabApp {
                         self.scenarios
                             .iter()
                             .find(|s| &s.id == *id)
-                            .is_some_and(|s| self.visible_solved(a, s))
+                            .is_some_and(|s| self.rpm_visible_solved(a, s))
                     })
                 })
                 .count();
@@ -1160,7 +1168,8 @@ impl LabApp {
                             .iter()
                             .find(|s| &s.id == *id)
                             .is_some_and(|s| {
-                                !self.visible_solved(a, s) && progress::legacy_script_credit(a, s)
+                                !self.rpm_visible_solved(a, s)
+                                    && progress::legacy_script_credit(a, s)
                             })
                     })
                 })
@@ -1207,7 +1216,7 @@ impl LabApp {
                                 .progress
                                 .attempts
                                 .get(id)
-                                .is_none_or(|a| !self.visible_solved(a, s))
+                                .is_none_or(|a| !self.rpm_visible_solved(a, s))
                     })
                 });
             ui.horizontal_wrapped(|ui| {
@@ -1258,6 +1267,7 @@ impl LabApp {
                 self.selected = None;
                 self.invalidate_apache_presentation();
                 self.nat_presentation.clear();
+                self.rpm_presentation.clear();
             }
         }
     }
@@ -1440,7 +1450,7 @@ impl LabApp {
                     s,
                     &self.filter,
                     a.is_some(),
-                    a.is_some_and(|a| self.visible_solved(a, s)),
+                    a.is_some_and(|a| self.rpm_visible_solved(a, s)),
                     self.progress.favorites.contains(&s.id),
                 )
             })
@@ -1532,7 +1542,12 @@ impl LabApp {
                         );
                         let a = self.progress.attempts.get(&s.id);
                         let complete = a.is_some_and(|a| {
-                            nat_workspace::solved_with_memo(&self.nat_presentation.memo, a, s)
+                            rpm_packages::solved_with_memos(
+                                &self.rpm_presentation.memo,
+                                &self.nat_presentation.memo,
+                                a,
+                                s,
+                            )
                         });
                         let favorite = self.progress.favorites.contains(&s.id);
                         let status = if a.is_some_and(|a| progress::legacy_script_credit(a, s))
@@ -1745,6 +1760,7 @@ impl LabApp {
     fn render(&mut self, ctx: &egui::Context) {
         self.metrics = Metrics::default();
         self.nat_presentation.memo.begin_frame();
+        self.rpm_presentation.memo.begin_frame();
         ctx.set_zoom_factor(self.scale);
         controls::configure(ctx);
         self.advance_scripts(ctx);
@@ -1753,6 +1769,7 @@ impl LabApp {
         self.appearance_preview(ctx);
         self.data_dialog(ctx);
         self.sync_appearance(ctx, previous);
+        self.rpm_prepass();
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(palette(ui).error, error);

@@ -1,0 +1,3555 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-rpm-provider",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "RPM records, providers and explicit local operations",
+      "unit": "rpm-package-investigation",
+      "title": "Find a provider beyond its package name",
+      "summary": "Satisfy the ledger client's versioned API requirement using a supplied eligible provider. At the end retain the ledger client, its initial configuration and the neighboring note package/files.",
+      "objective": "Satisfy the ledger client's versioned API requirement using a supplied eligible provider. At the end retain the ledger client, its initial configuration and the neighboring note package/files.",
+      "retry_guidance": "Read the actual installed/local header data, compare the specific failed check, then use an admitted coherent command. No command runs on the host.",
+      "difficulty": "Intermediate",
+      "minutes": 12,
+      "steps": [
+        "Inspect the supplied and installed metadata",
+        "Perform explicit admitted local operations",
+        "Check current outcomes and stated preservation"
+      ],
+      "guide": [
+        {
+          "title": "Read the ledger API requirement",
+          "why": "The consumer needs a versioned capability, not merely a package with a similar name.",
+          "action": "Compare the client requirement with a supplied candidate header. The read-only inspector lists the available canonical archive paths.",
+          "commands": [
+            {
+              "command": "rpm -q --requires ledger-client",
+              "explanation": "Read the installed consumer requirement.",
+              "simulator_only": false
+            },
+            {
+              "command": "rpm -qp --provides /rpms/bridge-b.rpm",
+              "explanation": "Inspect one alternative candidate without installing it.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Install an eligible ledger provider",
+          "why": "A versioned provide must satisfy the displayed requirement while all installed dependencies remain healthy.",
+          "action": "Choose an eligible supplied archive and Run its explicit install. This command is one valid option; another eligible provider is acceptable.",
+          "commands": [
+            {
+              "command": "rpm -i /rpms/bridge-a.rpm",
+              "explanation": "Install the supplied ledger-ink provider without replacing the client or note.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check the retained ledger result",
+          "why": "Successful old output does not prove the required packages and files still exist now.",
+          "action": "Use Check work to inspect current dependency health, the exact client version, retained configuration and note. Read the client record again if needed.",
+          "commands": [
+            {
+              "command": "rpm -q ledger-client",
+              "explanation": "Read the current installed client; this query itself grants no completion.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "An eligible installed capability provider satisfies the consumer even when its package name differs; the unversioned lookalike cannot meet a versioned requirement.",
+      "hints": [
+        "Installed and local package-file queries read different sources.",
+        "The optional Header/Payload inspector is simulated evidence, not rpm -V or a host filesystem view."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/man/rpm-queryformat.7",
+        "https://rpm.org/docs/6.0.x/manual/spec.html",
+        "https://rpm.org/docs/6.0.x/man/rpm-version.7"
+      ],
+      "simplifications": "Declared script-free noarch metadata and in-memory regular files. No host RPM, resolver, scripts, signatures, archive parsing, rpm -V, sidecars, multilib, YUM or DNF. Extra whole-database health restriction belongs to this logical planner; refused forms are simulator diagnostics, not invented RPM error codes.",
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "ledger-catalog",
+            "target": "x86_64",
+            "published": "supplied",
+            "archives": {
+              "client": {
+                "identity": {
+                  "name": "ledger-client",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [
+                  {
+                    "capability": "ledger-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "1.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/usr/share/ledger-client/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "ledger-client ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/etc/ledger-client.conf": {
+                    "kind": "config",
+                    "file": {
+                      "contents": "layout=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "bridge-a": {
+                "identity": {
+                  "name": "ledger-ink",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {
+                  "ledger-api": "1.0-1"
+                },
+                "files": {
+                  "/usr/share/ledger-ink/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "ledger-ink ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "bridge-b": {
+                "identity": {
+                  "name": "ledger-vector",
+                  "arch": "noarch"
+                },
+                "evr": "1.3-1",
+                "requires": [],
+                "provides": {
+                  "ledger-api": "1.3-1"
+                },
+                "files": {
+                  "/usr/share/ledger-vector/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "ledger-vector ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "lookalike": {
+                "identity": {
+                  "name": "ledger-lookalike",
+                  "arch": "noarch"
+                },
+                "evr": "9.0-1",
+                "requires": [],
+                "provides": {
+                  "ledger-api": null
+                },
+                "files": {
+                  "/usr/share/ledger-lookalike/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "ledger-lookalike ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "note": {
+                "identity": {
+                  "name": "ledger-note",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/ledger-note/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "ledger-note ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "supplied": {
+                "archives": [
+                  "client",
+                  "bridge-a",
+                  "bridge-b",
+                  "lookalike",
+                  "note"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/etc/ledger-client.conf",
+              "/usr/share/ledger-client/report",
+              "/usr/share/ledger-ink/report",
+              "/usr/share/ledger-lookalike/report",
+              "/usr/share/ledger-note/report",
+              "/usr/share/ledger-vector/report"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "ledger-client",
+                  "arch": "noarch"
+                },
+                "archive": "client"
+              },
+              {
+                "identity": {
+                  "name": "ledger-note",
+                  "arch": "noarch"
+                },
+                "archive": "note"
+              }
+            ],
+            "available": [
+              "client",
+              "bridge-a",
+              "bridge-b",
+              "lookalike",
+              "note"
+            ],
+            "cached": null,
+            "files": {
+              "/usr/share/ledger-client/report": {
+                "contents": "ledger-client ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/etc/ledger-client.conf": {
+                "contents": "layout=plain\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/usr/share/ledger-note/report": {
+                "contents": "ledger-note ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "ledger-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "client": {
+                  "identity": {
+                    "name": "ledger-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "ledger-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/ledger-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "ledger-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/ledger-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "bridge-a": {
+                  "identity": {
+                    "name": "ledger-ink",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {
+                    "ledger-api": "1.0-1"
+                  },
+                  "files": {
+                    "/usr/share/ledger-ink/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "ledger-ink ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "bridge-b": {
+                  "identity": {
+                    "name": "ledger-vector",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.3-1",
+                  "requires": [],
+                  "provides": {
+                    "ledger-api": "1.3-1"
+                  },
+                  "files": {
+                    "/usr/share/ledger-vector/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "ledger-vector ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "lookalike": {
+                  "identity": {
+                    "name": "ledger-lookalike",
+                    "arch": "noarch"
+                  },
+                  "evr": "9.0-1",
+                  "requires": [],
+                  "provides": {
+                    "ledger-api": null
+                  },
+                  "files": {
+                    "/usr/share/ledger-lookalike/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "ledger-lookalike ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "note": {
+                  "identity": {
+                    "name": "ledger-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/ledger-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "ledger-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "client",
+                    "bridge-a",
+                    "bridge-b",
+                    "lookalike",
+                    "note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/ledger-client.conf",
+                "/usr/share/ledger-client/report",
+                "/usr/share/ledger-ink/report",
+                "/usr/share/ledger-lookalike/report",
+                "/usr/share/ledger-note/report",
+                "/usr/share/ledger-vector/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "ledger-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "client"
+                },
+                {
+                  "identity": {
+                    "name": "ledger-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "note"
+                }
+              ],
+              "available": [
+                "client",
+                "bridge-a",
+                "bridge-b",
+                "lookalike",
+                "note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/ledger-client/report": {
+                  "contents": "ledger-client ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/ledger-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/ledger-note/report": {
+                  "contents": "ledger-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/rpms/client.rpm": "client",
+            "/rpms/bridge-a.rpm": "bridge-a",
+            "/rpms/bridge-b.rpm": "bridge-b",
+            "/rpms/lookalike.rpm": "lookalike",
+            "/rpms/note.rpm": "note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "ledger-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "SatisfiesCapability",
+              "requirement": {
+                "capability": "ledger-api",
+                "constraint": {
+                  "relation": "Ge",
+                  "evr": "1.0-1"
+                }
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "ledger-note",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/ledger-client.conf"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "rpm -i /rpms/bridge-a.rpm"
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation"
+      ],
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "gallery-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "example-client": {
+                  "identity": {
+                    "name": "gallery-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "gallery-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/gallery-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "gallery-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/gallery-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-bridge-a": {
+                  "identity": {
+                    "name": "gallery-ink",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {
+                    "gallery-api": "1.0-1"
+                  },
+                  "files": {
+                    "/usr/share/gallery-ink/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "gallery-ink ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-bridge-b": {
+                  "identity": {
+                    "name": "gallery-vector",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.3-1",
+                  "requires": [],
+                  "provides": {
+                    "gallery-api": "1.3-1"
+                  },
+                  "files": {
+                    "/usr/share/gallery-vector/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "gallery-vector ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-lookalike": {
+                  "identity": {
+                    "name": "gallery-lookalike",
+                    "arch": "noarch"
+                  },
+                  "evr": "9.0-1",
+                  "requires": [],
+                  "provides": {
+                    "gallery-api": null
+                  },
+                  "files": {
+                    "/usr/share/gallery-lookalike/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "gallery-lookalike ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-note": {
+                  "identity": {
+                    "name": "gallery-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/gallery-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "gallery-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "example-client",
+                    "example-bridge-a",
+                    "example-bridge-b",
+                    "example-lookalike",
+                    "example-note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/gallery-client.conf",
+                "/usr/share/gallery-client/report",
+                "/usr/share/gallery-ink/report",
+                "/usr/share/gallery-lookalike/report",
+                "/usr/share/gallery-note/report",
+                "/usr/share/gallery-vector/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "gallery-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-client"
+                },
+                {
+                  "identity": {
+                    "name": "gallery-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-note"
+                }
+              ],
+              "available": [
+                "example-client",
+                "example-bridge-a",
+                "example-bridge-b",
+                "example-lookalike",
+                "example-note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/gallery-client/report": {
+                  "contents": "gallery-client ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/gallery-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/gallery-note/report": {
+                  "contents": "gallery-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum-rpms/example-client.rpm": "example-client",
+            "/museum-rpms/example-bridge-a.rpm": "example-bridge-a",
+            "/museum-rpms/example-bridge-b.rpm": "example-bridge-b",
+            "/museum-rpms/example-lookalike.rpm": "example-lookalike",
+            "/museum-rpms/example-note.rpm": "example-note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "gallery-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "SatisfiesCapability",
+              "requirement": {
+                "capability": "gallery-api",
+                "constraint": {
+                  "relation": "Ge",
+                  "evr": "1.0-1"
+                }
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "gallery-note",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/gallery-client.conf"
+            }
+          ]
+        },
+        "prerequisite_note": "Before this task: Find a project and prepare its handover. Read the three concepts below before using the different gallery example.",
+        "concepts": [
+          {
+            "title": "Installed records and supplied archives",
+            "text": "rpm -q NAME reads an installed record. rpm -qp /absolute/file.rpm reads an available local package header without installing it. NAME means the header package name; PATH in archive commands means a supplied absolute archive path. In the read-only inspector, choose Available local archives to find those paths. A filename is not proof of its package name. -ql lists recorded paths and -qpl lists a local archive manifest."
+          },
+          {
+            "title": "A requirement names a capability",
+            "text": "rpm -q --requires NAME shows the consumer's declared requirements. rpm -qp --provides PATH shows what a local package can provide. A package's own name is one capability, but another package name may provide the needed versioned API. >= means the capability version must be at least the displayed version. A high package version with only an unversioned provide does not satisfy a versioned requirement."
+          },
+          {
+            "title": "Choose explicitly, then check the current result",
+            "text": "rpm -i PATH installs absent names from the supplied local archives; it does not download or solve dependencies. Multiple paths form one explicit logical set. This simulation requires the resulting whole installed database to be healthy, an extra restriction rather than a universal RPM transaction rule. Unmodeled or refused forms show a simulator explanation without an invented RPM failure number. rpm -e NAME erases the named installed package; at the end retain the stated records/files."
+          }
+        ],
+        "example_description": "Work only with the separate gallery packages. Provide gallery-api >= 1.0-1 for gallery-client at exactly 1.0-1, satisfy all installed requirements, and retain gallery-note and /etc/gallery-client.conf. Then erase gallery-client to observe which current checks fail, and use the supplied coherent archive to repair the example.",
+        "example_commands": [
+          {
+            "command": "rpm -q --requires gallery-client",
+            "explanation": "Inspect real declared metadata before choosing a package operation."
+          },
+          {
+            "command": "rpm -i /museum-rpms/example-bridge-a.rpm",
+            "explanation": "Perform this explicit operation in the separate example; Insert fills only, Run performs it."
+          }
+        ],
+        "try_change": {
+          "description": "After the example checks pass, erase gallery-client. Compare the missing installed record/file outcomes; this does not change assignment credit.",
+          "commands": [
+            {
+              "command": "rpm -e gallery-client",
+              "explanation": "Erase only the separate example consumer to create a real different model state."
+            }
+          ],
+          "expected": [
+            false,
+            true,
+            true,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /museum-rpms/example-client.rpm",
+            "explanation": "Restore the separate consumer using its supplied exact/coherent archive."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-rpm-epoch",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "RPM records, providers and explicit local operations",
+      "unit": "rpm-package-investigation",
+      "title": "Update a client when epoch changes the order",
+      "summary": "Install epoch 1 or newer releases of the chart client and engine, satisfying all installed requirements. Retain the initial chart configuration and neighboring note record/files.",
+      "objective": "Install epoch 1 or newer releases of the chart client and engine, satisfying all installed requirements. Retain the initial chart configuration and neighboring note record/files.",
+      "retry_guidance": "Read the actual installed/local header data, compare the specific failed check, then use an admitted coherent command. No command runs on the host.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied and installed metadata",
+        "Perform explicit admitted local operations",
+        "Check current outcomes and stated preservation"
+      ],
+      "guide": [
+        {
+          "title": "Compare numeric chart epochs",
+          "why": "A larger printed version can still have the older epoch.",
+          "action": "Read the installed client and a local candidate with the fixed format from Introduction; compare epoch before version and release.",
+          "commands": [
+            {
+              "command": "rpm -q --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' chart-client",
+              "explanation": "Show the installed numeric epoch explicitly.",
+              "simulator_only": false
+            },
+            {
+              "command": "rpm -qp --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' /rpms/engine-larger-text.rpm",
+              "explanation": "Inspect the candidate whose version text is large but whose epoch is zero.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Upgrade a coherent chart pair",
+          "why": "The new consumer requires the matching epoch-aware API; an unsupported partial set is not a repair.",
+          "action": "Run one coherent explicit local upgrade, or choose an eligible provider-first sequence. Keep the existing chart configuration.",
+          "commands": [
+            {
+              "command": "rpm -U /rpms/client-new.rpm /rpms/engine-new.rpm",
+              "explanation": "Supply both newer records in one logical operation.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check both epochs and preservation",
+          "why": "Both client and engine must meet the requested epoch-aware versions at completion.",
+          "action": "Use Check work, then inspect both current records rather than their filenames. Confirm the chart configuration and note remain unchanged.",
+          "commands": [
+            {
+              "command": "rpm -q --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' chart-client",
+              "explanation": "Read the current client epoch/version/release.",
+              "simulator_only": false
+            },
+            {
+              "command": "rpm -q --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' chart-engine",
+              "explanation": "Read the current provider epoch/version/release.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "Epoch precedes version/release, and a coherent explicit set satisfies the current consumer while preserving unchanged configuration.",
+      "hints": [
+        "Installed and local package-file queries read different sources.",
+        "The optional Header/Payload inspector is simulated evidence, not rpm -V or a host filesystem view."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/man/rpm-queryformat.7",
+        "https://rpm.org/docs/6.0.x/manual/spec.html",
+        "https://rpm.org/docs/6.0.x/man/rpm-version.7"
+      ],
+      "simplifications": "Declared script-free noarch metadata and in-memory regular files. No host RPM, resolver, scripts, signatures, archive parsing, rpm -V, sidecars, multilib, YUM or DNF. Extra whole-database health restriction belongs to this logical planner; refused forms are simulator diagnostics, not invented RPM error codes.",
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "chart-catalog",
+            "target": "x86_64",
+            "published": "supplied",
+            "archives": {
+              "client-old": {
+                "identity": {
+                  "name": "chart-client",
+                  "arch": "noarch"
+                },
+                "evr": "9.0-1",
+                "requires": [
+                  {
+                    "capability": "chart-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "8.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/usr/share/chart-client/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "chart-client ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/etc/chart-client.conf": {
+                    "kind": "config",
+                    "file": {
+                      "contents": "layout=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "engine-old": {
+                "identity": {
+                  "name": "chart-engine",
+                  "arch": "noarch"
+                },
+                "evr": "9.0-1",
+                "requires": [],
+                "provides": {
+                  "chart-api": "9.0-1"
+                },
+                "files": {
+                  "/usr/share/chart-engine/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "chart-engine ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "client-new": {
+                "identity": {
+                  "name": "chart-client",
+                  "arch": "noarch"
+                },
+                "evr": "1:1.0-1",
+                "requires": [
+                  {
+                    "capability": "chart-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "1:1.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/usr/share/chart-client/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "chart-client ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/etc/chart-client.conf": {
+                    "kind": "config",
+                    "file": {
+                      "contents": "layout=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "engine-new": {
+                "identity": {
+                  "name": "chart-engine",
+                  "arch": "noarch"
+                },
+                "evr": "1:1.0-1",
+                "requires": [],
+                "provides": {
+                  "chart-api": "1:1.0-1"
+                },
+                "files": {
+                  "/usr/share/chart-engine/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "chart-engine ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "engine-larger-text": {
+                "identity": {
+                  "name": "chart-engine",
+                  "arch": "noarch"
+                },
+                "evr": "99.0-1",
+                "requires": [],
+                "provides": {
+                  "chart-api": "99.0-1"
+                },
+                "files": {
+                  "/usr/share/chart-engine/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "chart-engine ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "note": {
+                "identity": {
+                  "name": "chart-note",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/chart-note/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "chart-note ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "supplied": {
+                "archives": [
+                  "client-old",
+                  "engine-old",
+                  "client-new",
+                  "engine-new",
+                  "engine-larger-text",
+                  "note"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/etc/chart-client.conf",
+              "/usr/share/chart-client/report",
+              "/usr/share/chart-engine/report",
+              "/usr/share/chart-note/report"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "chart-client",
+                  "arch": "noarch"
+                },
+                "archive": "client-old"
+              },
+              {
+                "identity": {
+                  "name": "chart-engine",
+                  "arch": "noarch"
+                },
+                "archive": "engine-old"
+              },
+              {
+                "identity": {
+                  "name": "chart-note",
+                  "arch": "noarch"
+                },
+                "archive": "note"
+              }
+            ],
+            "available": [
+              "client-old",
+              "engine-old",
+              "client-new",
+              "engine-new",
+              "engine-larger-text",
+              "note"
+            ],
+            "cached": null,
+            "files": {
+              "/usr/share/chart-client/report": {
+                "contents": "chart-client ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/etc/chart-client.conf": {
+                "contents": "layout=plain\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/usr/share/chart-engine/report": {
+                "contents": "chart-engine ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/usr/share/chart-note/report": {
+                "contents": "chart-note ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "chart-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "client-old": {
+                  "identity": {
+                    "name": "chart-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "9.0-1",
+                  "requires": [
+                    {
+                      "capability": "chart-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "8.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/chart-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "chart-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/chart-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "engine-old": {
+                  "identity": {
+                    "name": "chart-engine",
+                    "arch": "noarch"
+                  },
+                  "evr": "9.0-1",
+                  "requires": [],
+                  "provides": {
+                    "chart-api": "9.0-1"
+                  },
+                  "files": {
+                    "/usr/share/chart-engine/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "chart-engine ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "client-new": {
+                  "identity": {
+                    "name": "chart-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1:1.0-1",
+                  "requires": [
+                    {
+                      "capability": "chart-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1:1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/chart-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "chart-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/chart-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "engine-new": {
+                  "identity": {
+                    "name": "chart-engine",
+                    "arch": "noarch"
+                  },
+                  "evr": "1:1.0-1",
+                  "requires": [],
+                  "provides": {
+                    "chart-api": "1:1.0-1"
+                  },
+                  "files": {
+                    "/usr/share/chart-engine/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "chart-engine ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "engine-larger-text": {
+                  "identity": {
+                    "name": "chart-engine",
+                    "arch": "noarch"
+                  },
+                  "evr": "99.0-1",
+                  "requires": [],
+                  "provides": {
+                    "chart-api": "99.0-1"
+                  },
+                  "files": {
+                    "/usr/share/chart-engine/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "chart-engine ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "note": {
+                  "identity": {
+                    "name": "chart-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/chart-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "chart-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "client-old",
+                    "engine-old",
+                    "client-new",
+                    "engine-new",
+                    "engine-larger-text",
+                    "note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/chart-client.conf",
+                "/usr/share/chart-client/report",
+                "/usr/share/chart-engine/report",
+                "/usr/share/chart-note/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "chart-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "client-old"
+                },
+                {
+                  "identity": {
+                    "name": "chart-engine",
+                    "arch": "noarch"
+                  },
+                  "archive": "engine-old"
+                },
+                {
+                  "identity": {
+                    "name": "chart-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "note"
+                }
+              ],
+              "available": [
+                "client-old",
+                "engine-old",
+                "client-new",
+                "engine-new",
+                "engine-larger-text",
+                "note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/chart-client/report": {
+                  "contents": "chart-client ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/chart-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/chart-engine/report": {
+                  "contents": "chart-engine ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/chart-note/report": {
+                  "contents": "chart-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/rpms/client-old.rpm": "client-old",
+            "/rpms/engine-old.rpm": "engine-old",
+            "/rpms/client-new.rpm": "client-new",
+            "/rpms/engine-new.rpm": "engine-new",
+            "/rpms/engine-larger-text.rpm": "engine-larger-text",
+            "/rpms/note.rpm": "note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "chart-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Ge",
+                "evr": "1:1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "chart-engine",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Ge",
+                "evr": "1:1.0-1"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/chart-client.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "chart-note",
+                "arch": "noarch"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "rpm -U /rpms/client-new.rpm /rpms/engine-new.rpm"
+      ],
+      "prerequisites": [
+        "lpic1-rpm-provider"
+      ],
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "print-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "example-client-old": {
+                  "identity": {
+                    "name": "print-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "8.0-1",
+                  "requires": [
+                    {
+                      "capability": "print-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "8.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/print-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "print-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/print-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-engine-old": {
+                  "identity": {
+                    "name": "print-engine",
+                    "arch": "noarch"
+                  },
+                  "evr": "9.0-1",
+                  "requires": [],
+                  "provides": {
+                    "print-api": "9.0-1"
+                  },
+                  "files": {
+                    "/usr/share/print-engine/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "print-engine ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-client-new": {
+                  "identity": {
+                    "name": "print-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1:1.0-1",
+                  "requires": [
+                    {
+                      "capability": "print-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1:1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/print-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "print-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/print-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-engine-new": {
+                  "identity": {
+                    "name": "print-engine",
+                    "arch": "noarch"
+                  },
+                  "evr": "1:1.0-1",
+                  "requires": [],
+                  "provides": {
+                    "print-api": "1:1.0-1"
+                  },
+                  "files": {
+                    "/usr/share/print-engine/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "print-engine ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-engine-larger-text": {
+                  "identity": {
+                    "name": "print-engine",
+                    "arch": "noarch"
+                  },
+                  "evr": "99.0-1",
+                  "requires": [],
+                  "provides": {
+                    "print-api": "99.0-1"
+                  },
+                  "files": {
+                    "/usr/share/print-engine/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "print-engine ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-note": {
+                  "identity": {
+                    "name": "print-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/print-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "print-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "example-client-old",
+                    "example-engine-old",
+                    "example-client-new",
+                    "example-engine-new",
+                    "example-engine-larger-text",
+                    "example-note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/print-client.conf",
+                "/usr/share/print-client/report",
+                "/usr/share/print-engine/report",
+                "/usr/share/print-note/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "print-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-client-old"
+                },
+                {
+                  "identity": {
+                    "name": "print-engine",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-engine-old"
+                },
+                {
+                  "identity": {
+                    "name": "print-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-note"
+                }
+              ],
+              "available": [
+                "example-client-old",
+                "example-engine-old",
+                "example-client-new",
+                "example-engine-new",
+                "example-engine-larger-text",
+                "example-note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/print-client/report": {
+                  "contents": "print-client ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/print-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/print-engine/report": {
+                  "contents": "print-engine ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/print-note/report": {
+                  "contents": "print-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum-rpms/example-client-old.rpm": "example-client-old",
+            "/museum-rpms/example-engine-old.rpm": "example-engine-old",
+            "/museum-rpms/example-client-new.rpm": "example-client-new",
+            "/museum-rpms/example-engine-new.rpm": "example-engine-new",
+            "/museum-rpms/example-engine-larger-text.rpm": "example-engine-larger-text",
+            "/museum-rpms/example-note.rpm": "example-note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "print-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Ge",
+                "evr": "1:1.0-1"
+              }
+            },
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "print-engine",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Ge",
+                "evr": "1:1.0-1"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/print-client.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "print-note",
+                "arch": "noarch"
+              }
+            }
+          ]
+        },
+        "prerequisite_note": "Before this task: Find a provider beyond its package name. Read the three concepts below before using the different print example.",
+        "concepts": [
+          {
+            "title": "Version has three parts",
+            "text": "RPM compares epoch, then version, then release. An omitted epoch means zero. Epoch 1 with version 1.0 can be newer than epoch 0 with version 99.0. This is RPM ordering, not semantic version ordering; arbitrary letter-by-letter or decimal ordering is unsafe."
+          },
+          {
+            "title": "Read epoch explicitly",
+            "text": "Default rpm -q output is name-version-release.arch and hides epoch. To display it, use rpm -q --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' NAME. NAME is the installed package; each %{...} selects that header field and EPOCHNUM prints numeric epoch, including zero. Single quotes keep the format literal; its backslash-t and backslash-n produce a tab and newline. With the same format, -qp and a supplied archive path inspect a local candidate. Other formats are outside this subset."
+          },
+          {
+            "title": "Upgrade a coherent explicit set",
+            "text": "rpm -U PATH may install an absent name or replace a same-architecture record with a strictly newer version. It is not an exact-reinstall or downgrade option. Give the consumer and needed provider paths together, or update a compatible provider first. Configuration contents/manifests are unchanged here; modified-config sidecars are not modeled."
+          }
+        ],
+        "example_description": "Work only with the separate print packages. Install epoch 1 or newer releases of print-client and print-engine, keep all installed requirements satisfied, and retain print-note and /etc/print-client.conf. Then erase print-client to observe which current checks fail, and use the supplied coherent archive to repair the example.",
+        "example_commands": [
+          {
+            "command": "rpm -q --queryformat '%{NAME}\\t%{EPOCHNUM}:%{VERSION}-%{RELEASE}.%{ARCH}\\n' print-client",
+            "explanation": "Inspect real declared metadata before choosing a package operation."
+          },
+          {
+            "command": "rpm -U /museum-rpms/example-client-new.rpm /museum-rpms/example-engine-new.rpm",
+            "explanation": "Perform this explicit operation in the separate example; Insert fills only, Run performs it."
+          }
+        ],
+        "try_change": {
+          "description": "After the example checks pass, erase print-client. Compare the missing installed record/file outcomes; this does not change assignment credit.",
+          "commands": [
+            {
+              "command": "rpm -e print-client",
+              "explanation": "Erase only the separate example consumer to create a real different model state."
+            }
+          ],
+          "expected": [
+            false,
+            true,
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /museum-rpms/example-client-new.rpm",
+            "explanation": "Restore the separate consumer using its supplied exact/coherent archive."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-rpm-payload",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "RPM records, providers and explicit local operations",
+      "unit": "rpm-package-investigation",
+      "title": "Repair recorded payload without upgrading it",
+      "summary": "Restore both the damaged report and missing manual for the recorded archive client at exactly version 1.0-1. Retain its initial configuration and neighboring note record/files.",
+      "objective": "Restore both the damaged report and missing manual for the recorded archive client at exactly version 1.0-1. Retain its initial configuration and neighboring note record/files.",
+      "retry_guidance": "Read the actual installed/local header data, compare the specific failed check, then use an admitted coherent command. No command runs on the host.",
+      "difficulty": "Intermediate",
+      "minutes": 14,
+      "steps": [
+        "Inspect the supplied and installed metadata",
+        "Perform explicit admitted local operations",
+        "Check current outcomes and stated preservation"
+      ],
+      "guide": [
+        {
+          "title": "Separate recorded owner from current payload",
+          "why": "The missing manual can still belong to an installed record; the report may exist with wrong bytes.",
+          "action": "Read recorded ownership, then use the read-only inspector to compare the report and manual with the currently recorded payload.",
+          "commands": [
+            {
+              "command": "rpm -q --path /usr/share/archive-client/manual",
+              "explanation": "Find recorded ownership without requiring the missing virtual file to exist.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Reinstall the exact recorded archive",
+          "why": "The required result keeps archive-client at 1.0-1 and repairs its ordinary files.",
+          "action": "Run the supplied exact-version reinstall. Do not use an upgrade to replace the required record; retain its unchanged configuration.",
+          "commands": [
+            {
+              "command": "rpm --reinstall /rpms/client.rpm",
+              "explanation": "Restore the recorded report and manual from the supplied payload.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check actual files and retained neighbors",
+          "why": "A manifest lists recorded paths even when their current bytes are absent or damaged.",
+          "action": "Use Check work and the inspector to verify both actual payload matches, the exact recorded version, configuration and note preservation.",
+          "commands": [
+            {
+              "command": "rpm -ql archive-client",
+              "explanation": "Review recorded paths; this list alone is not a payload verification.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "Installed manifests and current files are separate evidence. Exact reinstall restores this recorded ordinary payload without changing the required package version.",
+      "hints": [
+        "Installed and local package-file queries read different sources.",
+        "The optional Header/Payload inspector is simulated evidence, not rpm -V or a host filesystem view."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/man/rpm-queryformat.7",
+        "https://rpm.org/docs/6.0.x/manual/spec.html",
+        "https://rpm.org/docs/6.0.x/man/rpm-version.7"
+      ],
+      "simplifications": "Declared script-free noarch metadata and in-memory regular files. No host RPM, resolver, scripts, signatures, archive parsing, rpm -V, sidecars, multilib, YUM or DNF. Extra whole-database health restriction belongs to this logical planner; refused forms are simulator diagnostics, not invented RPM error codes.",
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "archive-catalog",
+            "target": "x86_64",
+            "published": "supplied",
+            "archives": {
+              "client": {
+                "identity": {
+                  "name": "archive-client",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/archive-client/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "archive-client ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/etc/archive-client.conf": {
+                    "kind": "config",
+                    "file": {
+                      "contents": "layout=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/usr/share/archive-client/manual": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "read me\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "client-new": {
+                "identity": {
+                  "name": "archive-client",
+                  "arch": "noarch"
+                },
+                "evr": "2.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/archive-client/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "archive-client ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/etc/archive-client.conf": {
+                    "kind": "config",
+                    "file": {
+                      "contents": "layout=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/usr/share/archive-client/manual": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "read me\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "note": {
+                "identity": {
+                  "name": "archive-note",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/archive-note/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "archive-note ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "supplied": {
+                "archives": [
+                  "client",
+                  "client-new",
+                  "note"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/etc/archive-client.conf",
+              "/usr/share/archive-client/manual",
+              "/usr/share/archive-client/report",
+              "/usr/share/archive-note/report"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "archive-client",
+                  "arch": "noarch"
+                },
+                "archive": "client"
+              },
+              {
+                "identity": {
+                  "name": "archive-note",
+                  "arch": "noarch"
+                },
+                "archive": "note"
+              }
+            ],
+            "available": [
+              "client",
+              "client-new",
+              "note"
+            ],
+            "cached": null,
+            "files": {
+              "/usr/share/archive-client/report": {
+                "contents": "incomplete copy\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/etc/archive-client.conf": {
+                "contents": "layout=plain\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/usr/share/archive-note/report": {
+                "contents": "archive-note ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "archive-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "client": {
+                  "identity": {
+                    "name": "archive-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/archive-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "archive-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/archive-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/usr/share/archive-client/manual": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "read me\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "client-new": {
+                  "identity": {
+                    "name": "archive-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/archive-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "archive-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/archive-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/usr/share/archive-client/manual": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "read me\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "note": {
+                  "identity": {
+                    "name": "archive-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/archive-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "archive-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "client",
+                    "client-new",
+                    "note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/archive-client.conf",
+                "/usr/share/archive-client/manual",
+                "/usr/share/archive-client/report",
+                "/usr/share/archive-note/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "archive-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "client"
+                },
+                {
+                  "identity": {
+                    "name": "archive-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "note"
+                }
+              ],
+              "available": [
+                "client",
+                "client-new",
+                "note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/archive-client/report": {
+                  "contents": "incomplete copy\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/archive-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/archive-note/report": {
+                  "contents": "archive-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/rpms/client.rpm": "client",
+            "/rpms/client-new.rpm": "client-new",
+            "/rpms/note.rpm": "note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "archive-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "archive-client",
+                "arch": "noarch"
+              },
+              "path": "/usr/share/archive-client/report"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "archive-client",
+                "arch": "noarch"
+              },
+              "path": "/usr/share/archive-client/manual"
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/archive-client.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "archive-note",
+                "arch": "noarch"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "rpm --reinstall /rpms/client.rpm"
+      ],
+      "prerequisites": [
+        "lpic1-rpm-epoch"
+      ],
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "garden-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "example-client": {
+                  "identity": {
+                    "name": "garden-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/garden-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "garden-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/garden-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/usr/share/garden-client/manual": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "read me\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-client-new": {
+                  "identity": {
+                    "name": "garden-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/garden-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "garden-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/garden-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/usr/share/garden-client/manual": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "read me\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-note": {
+                  "identity": {
+                    "name": "garden-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/garden-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "garden-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "example-client",
+                    "example-client-new",
+                    "example-note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/garden-client.conf",
+                "/usr/share/garden-client/manual",
+                "/usr/share/garden-client/report",
+                "/usr/share/garden-note/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "garden-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-client"
+                },
+                {
+                  "identity": {
+                    "name": "garden-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-note"
+                }
+              ],
+              "available": [
+                "example-client",
+                "example-client-new",
+                "example-note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/garden-client/report": {
+                  "contents": "incomplete copy\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/garden-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/garden-note/report": {
+                  "contents": "garden-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum-rpms/example-client.rpm": "example-client",
+            "/museum-rpms/example-client-new.rpm": "example-client-new",
+            "/museum-rpms/example-note.rpm": "example-note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "garden-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "garden-client",
+                "arch": "noarch"
+              },
+              "path": "/usr/share/garden-client/report"
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "garden-client",
+                "arch": "noarch"
+              },
+              "path": "/usr/share/garden-client/manual"
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/garden-client.conf"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "garden-note",
+                "arch": "noarch"
+              }
+            }
+          ]
+        },
+        "prerequisite_note": "Before this task: Update a client when epoch changes the order. Read the three concepts below before using the different garden example.",
+        "concepts": [
+          {
+            "title": "Recorded ownership can outlive a file",
+            "text": "rpm -ql NAME lists its recorded manifest even when a current virtual file is missing. rpm -q --path PATH finds recorded ownership of an absolute virtual file path, including a missing file. rpm -qf PATH is admitted only for an existing owned regular virtual file; on a missing path this subset gives a simulator explanation, not a claimed real RPM error code."
+          },
+          {
+            "title": "Compare virtual payload separately",
+            "text": "The optional inspector compares declared header payload with actual simulated file bytes and attributes. A package record alone does not prove those files match. This is explicitly not rpm -V, a signature check or evidence that software runs."
+          },
+          {
+            "title": "Repair the recorded version",
+            "text": "rpm --reinstall PATH uses the exact currently recorded local archive. It restores ordinary virtual payload files. Here the configuration is unchanged and must remain so; modified/missing configuration or changed configuration manifests require deferred behavior and are refused. rpm -U would change the installed version and is not this exact repair."
+          }
+        ],
+        "example_description": "Work only with the separate garden packages. Keep garden-client at exactly 1.0-1, restore its report and missing manual, and retain garden-note and /etc/garden-client.conf. Then erase garden-client to observe which current checks fail, and use the supplied coherent archive to repair the example.",
+        "example_commands": [
+          {
+            "command": "rpm -q --path /usr/share/garden-client/manual",
+            "explanation": "Inspect real declared metadata before choosing a package operation."
+          },
+          {
+            "command": "rpm --reinstall /museum-rpms/example-client.rpm",
+            "explanation": "Perform this explicit operation in the separate example; Insert fills only, Run performs it."
+          }
+        ],
+        "try_change": {
+          "description": "After the example checks pass, erase garden-client. Compare the missing installed record/file outcomes; this does not change assignment credit.",
+          "commands": [
+            {
+              "command": "rpm -e garden-client",
+              "explanation": "Erase only the separate example consumer to create a real different model state."
+            }
+          ],
+          "expected": [
+            false,
+            false,
+            false,
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /museum-rpms/example-client.rpm",
+            "explanation": "Restore the separate consumer using its supplied exact/coherent archive."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-rpm-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "RPM records, providers and explicit local operations",
+      "unit": "rpm-package-investigation",
+      "title": "Hand an API over before retiring its provider",
+      "summary": "Retire the desk legacy provider while keeping its API satisfied, the desk consumer's initial record/files and the neighboring note record/files at completion. Another eligible provider is acceptable.",
+      "objective": "Retire the desk legacy provider while keeping its API satisfied, the desk consumer's initial record/files and the neighboring note record/files at completion. Another eligible provider is acceptable.",
+      "retry_guidance": "Read the actual installed/local header data, compare the specific failed check, then use an admitted coherent command. No command runs on the host.",
+      "difficulty": "Intermediate",
+      "minutes": 17,
+      "steps": [
+        "Inspect the supplied and installed metadata",
+        "Perform explicit admitted local operations",
+        "Check current outcomes and stated preservation"
+      ],
+      "guide": [
+        {
+          "title": "Identify the desk API providers",
+          "why": "The consumer requirement and provider capability can have different package names.",
+          "action": "Read the installed providers and consumer requirement. Inspect eligible local candidate headers before selecting a replacement.",
+          "commands": [
+            {
+              "command": "rpm -q --whatprovides desk-api",
+              "explanation": "List installed providers of the desk capability.",
+              "simulator_only": false
+            },
+            {
+              "command": "rpm -q --requires desk-client",
+              "explanation": "Read the versioned requirement that must survive the handover.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Install a replacement before retiring legacy",
+          "why": "Removing the only needed provider would leave the consumer dependency unsatisfied.",
+          "action": "Install an eligible alternative, then erase the legacy package. This is one valid replacement; another eligible provider also works.",
+          "commands": [
+            {
+              "command": "rpm -i /rpms/new-a.rpm",
+              "explanation": "Add the supplied replacement provider explicitly.",
+              "simulator_only": false
+            },
+            {
+              "command": "rpm -e desk-legacy",
+              "explanation": "Retire only the old provider after its replacement is installed.",
+              "simulator_only": false
+            }
+          ]
+        },
+        {
+          "title": "Check the completed desk handover",
+          "why": "The old provider must be absent while the same consumer and neighboring note remain intact.",
+          "action": "Use Check work for current absence, API/dependency health and full preservation. Re-read the current provider set; a command history entry is not proof.",
+          "commands": [
+            {
+              "command": "rpm -q --whatprovides desk-api",
+              "explanation": "Read the current installed replacement provider.",
+              "simulator_only": false
+            }
+          ]
+        }
+      ],
+      "explanation": "A valid installed alternative continues to satisfy the consumer after the named provider is removed; completion checks current records/files, not a chosen command order.",
+      "hints": [
+        "Installed and local package-file queries read different sources.",
+        "The optional Header/Payload inspector is simulated evidence, not rpm -V or a host filesystem view."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/man/rpm-queryformat.7",
+        "https://rpm.org/docs/6.0.x/manual/spec.html",
+        "https://rpm.org/docs/6.0.x/man/rpm-version.7"
+      ],
+      "simplifications": "Declared script-free noarch metadata and in-memory regular files. No host RPM, resolver, scripts, signatures, archive parsing, rpm -V, sidecars, multilib, YUM or DNF. Extra whole-database health restriction belongs to this logical planner; refused forms are simulator diagnostics, not invented RPM error codes.",
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "desk-catalog",
+            "target": "x86_64",
+            "published": "supplied",
+            "archives": {
+              "client": {
+                "identity": {
+                  "name": "desk-client",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [
+                  {
+                    "capability": "desk-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "2.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/usr/share/desk-client/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "desk-client ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  },
+                  "/etc/desk-client.conf": {
+                    "kind": "config",
+                    "file": {
+                      "contents": "layout=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "legacy": {
+                "identity": {
+                  "name": "desk-legacy",
+                  "arch": "noarch"
+                },
+                "evr": "2.0-1",
+                "requires": [],
+                "provides": {
+                  "desk-api": "2.0-1"
+                },
+                "files": {
+                  "/usr/share/desk-legacy/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "desk-legacy ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "new-a": {
+                "identity": {
+                  "name": "desk-new",
+                  "arch": "noarch"
+                },
+                "evr": "3.0-1",
+                "requires": [],
+                "provides": {
+                  "desk-api": "3.0-1"
+                },
+                "files": {
+                  "/usr/share/desk-new/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "desk-new ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "new-b": {
+                "identity": {
+                  "name": "desk-other",
+                  "arch": "noarch"
+                },
+                "evr": "2.5-1",
+                "requires": [],
+                "provides": {
+                  "desk-api": "2.5-1"
+                },
+                "files": {
+                  "/usr/share/desk-other/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "desk-other ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              },
+              "note": {
+                "identity": {
+                  "name": "desk-note",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/desk-note/report": {
+                    "kind": "ordinary",
+                    "file": {
+                      "contents": "desk-note ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 120
+                    }
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "supplied": {
+                "archives": [
+                  "client",
+                  "legacy",
+                  "new-a",
+                  "new-b",
+                  "note"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/etc/desk-client.conf",
+              "/usr/share/desk-client/report",
+              "/usr/share/desk-legacy/report",
+              "/usr/share/desk-new/report",
+              "/usr/share/desk-note/report",
+              "/usr/share/desk-other/report"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "desk-client",
+                  "arch": "noarch"
+                },
+                "archive": "client"
+              },
+              {
+                "identity": {
+                  "name": "desk-legacy",
+                  "arch": "noarch"
+                },
+                "archive": "legacy"
+              },
+              {
+                "identity": {
+                  "name": "desk-note",
+                  "arch": "noarch"
+                },
+                "archive": "note"
+              }
+            ],
+            "available": [
+              "client",
+              "legacy",
+              "new-a",
+              "new-b",
+              "note"
+            ],
+            "cached": null,
+            "files": {
+              "/usr/share/desk-client/report": {
+                "contents": "desk-client ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/etc/desk-client.conf": {
+                "contents": "layout=plain\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/usr/share/desk-legacy/report": {
+                "contents": "desk-legacy ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              },
+              "/usr/share/desk-note/report": {
+                "contents": "desk-note ready\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 120
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "desk-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "client": {
+                  "identity": {
+                    "name": "desk-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "desk-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "2.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/desk-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "desk-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/desk-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "legacy": {
+                  "identity": {
+                    "name": "desk-legacy",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {
+                    "desk-api": "2.0-1"
+                  },
+                  "files": {
+                    "/usr/share/desk-legacy/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "desk-legacy ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "new-a": {
+                  "identity": {
+                    "name": "desk-new",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-1",
+                  "requires": [],
+                  "provides": {
+                    "desk-api": "3.0-1"
+                  },
+                  "files": {
+                    "/usr/share/desk-new/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "desk-new ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "new-b": {
+                  "identity": {
+                    "name": "desk-other",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.5-1",
+                  "requires": [],
+                  "provides": {
+                    "desk-api": "2.5-1"
+                  },
+                  "files": {
+                    "/usr/share/desk-other/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "desk-other ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "note": {
+                  "identity": {
+                    "name": "desk-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/desk-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "desk-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "client",
+                    "legacy",
+                    "new-a",
+                    "new-b",
+                    "note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/desk-client.conf",
+                "/usr/share/desk-client/report",
+                "/usr/share/desk-legacy/report",
+                "/usr/share/desk-new/report",
+                "/usr/share/desk-note/report",
+                "/usr/share/desk-other/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "desk-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "client"
+                },
+                {
+                  "identity": {
+                    "name": "desk-legacy",
+                    "arch": "noarch"
+                  },
+                  "archive": "legacy"
+                },
+                {
+                  "identity": {
+                    "name": "desk-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "note"
+                }
+              ],
+              "available": [
+                "client",
+                "legacy",
+                "new-a",
+                "new-b",
+                "note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/desk-client/report": {
+                  "contents": "desk-client ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/desk-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/desk-legacy/report": {
+                  "contents": "desk-legacy ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/desk-note/report": {
+                  "contents": "desk-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/rpms/client.rpm": "client",
+            "/rpms/legacy.rpm": "legacy",
+            "/rpms/new-a.rpm": "new-a",
+            "/rpms/new-b.rpm": "new-b",
+            "/rpms/note.rpm": "note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "desk-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "SatisfiesCapability",
+              "requirement": {
+                "capability": "desk-api",
+                "constraint": {
+                  "relation": "Ge",
+                  "evr": "2.0-1"
+                }
+              }
+            },
+            {
+              "kind": "Absent",
+              "package": {
+                "name": "desk-legacy",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "desk-client",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "desk-note",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/desk-client.conf"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "rpm -i /rpms/new-a.rpm",
+        "rpm -e desk-legacy"
+      ],
+      "prerequisites": [
+        "lpic1-rpm-payload"
+      ],
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "hall-catalog",
+              "target": "x86_64",
+              "published": "supplied",
+              "archives": {
+                "example-client": {
+                  "identity": {
+                    "name": "hall-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "hall-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "2.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/hall-client/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "hall-client ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    },
+                    "/etc/hall-client.conf": {
+                      "kind": "config",
+                      "file": {
+                        "contents": "layout=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-legacy": {
+                  "identity": {
+                    "name": "hall-legacy",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [],
+                  "provides": {
+                    "hall-api": "2.0-1"
+                  },
+                  "files": {
+                    "/usr/share/hall-legacy/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "hall-legacy ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-new-a": {
+                  "identity": {
+                    "name": "hall-new",
+                    "arch": "noarch"
+                  },
+                  "evr": "3.0-1",
+                  "requires": [],
+                  "provides": {
+                    "hall-api": "3.0-1"
+                  },
+                  "files": {
+                    "/usr/share/hall-new/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "hall-new ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-new-b": {
+                  "identity": {
+                    "name": "hall-other",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.5-1",
+                  "requires": [],
+                  "provides": {
+                    "hall-api": "2.5-1"
+                  },
+                  "files": {
+                    "/usr/share/hall-other/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "hall-other ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                },
+                "example-note": {
+                  "identity": {
+                    "name": "hall-note",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/hall-note/report": {
+                      "kind": "ordinary",
+                      "file": {
+                        "contents": "hall-note ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 120
+                      }
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "supplied": {
+                  "archives": [
+                    "example-client",
+                    "example-legacy",
+                    "example-new-a",
+                    "example-new-b",
+                    "example-note"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/hall-client.conf",
+                "/usr/share/hall-client/report",
+                "/usr/share/hall-legacy/report",
+                "/usr/share/hall-new/report",
+                "/usr/share/hall-note/report",
+                "/usr/share/hall-other/report"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "hall-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-client"
+                },
+                {
+                  "identity": {
+                    "name": "hall-legacy",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-legacy"
+                },
+                {
+                  "identity": {
+                    "name": "hall-note",
+                    "arch": "noarch"
+                  },
+                  "archive": "example-note"
+                }
+              ],
+              "available": [
+                "example-client",
+                "example-legacy",
+                "example-new-a",
+                "example-new-b",
+                "example-note"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/hall-client/report": {
+                  "contents": "hall-client ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/etc/hall-client.conf": {
+                  "contents": "layout=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/hall-legacy/report": {
+                  "contents": "hall-legacy ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                },
+                "/usr/share/hall-note/report": {
+                  "contents": "hall-note ready\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 120
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum-rpms/example-client.rpm": "example-client",
+            "/museum-rpms/example-legacy.rpm": "example-legacy",
+            "/museum-rpms/example-new-a.rpm": "example-new-a",
+            "/museum-rpms/example-new-b.rpm": "example-new-b",
+            "/museum-rpms/example-note.rpm": "example-note"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "hall-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "SatisfiesCapability",
+              "requirement": {
+                "capability": "hall-api",
+                "constraint": {
+                  "relation": "Ge",
+                  "evr": "2.0-1"
+                }
+              }
+            },
+            {
+              "kind": "Absent",
+              "package": {
+                "name": "hall-legacy",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "hall-client",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "hall-note",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/hall-client.conf"
+            }
+          ]
+        },
+        "prerequisite_note": "Before this task: Repair recorded payload without upgrading it. Read the three concepts below before using the different hall example.",
+        "concepts": [
+          {
+            "title": "Find actual installed providers",
+            "text": "rpm -q --whatprovides CAPABILITY lists installed providers, not candidates in local files. rpm -q --provides NAME reads an installed provider's capabilities; rpm -qp --provides PATH reads a local candidate. Compare these with the consumer's rpm -q --requires NAME requirement. The header package name and provided capability can differ."
+          },
+          {
+            "title": "Stage the handover before erase",
+            "text": "Install an eligible alternative explicitly with rpm -i PATH, then erase the old package with rpm -e NAME. Erasing the only needed provider is refused by this logical whole-database-health rule, without pretending to produce universal real-RPM failure output."
+          },
+          {
+            "title": "Preserve outcomes, not a method badge",
+            "text": "At completion the consumer must still be installed with its initial record/files, all its requirements satisfied, the retired provider absent and the neighboring package retained. Other coherent explicit command sets that reach these outcomes are valid. No action history, resolver, package execution or service availability is assessed."
+          }
+        ],
+        "example_description": "Work only with the separate hall packages. Retire hall-legacy while keeping hall-api >= 2.0-1 satisfied, all installed requirements healthy, and the initial hall-client record/files and hall-note retained. Then erase hall-client to observe which current checks fail, and use the supplied coherent archive to repair the example.",
+        "example_commands": [
+          {
+            "command": "rpm -q --whatprovides hall-api",
+            "explanation": "Inspect real declared metadata before choosing a package operation."
+          },
+          {
+            "command": "rpm -i /museum-rpms/example-new-a.rpm",
+            "explanation": "Perform this explicit operation in the separate example; Insert fills only, Run performs it."
+          },
+          {
+            "command": "rpm -e hall-legacy",
+            "explanation": "Perform this explicit operation in the separate example; Insert fills only, Run performs it."
+          }
+        ],
+        "try_change": {
+          "description": "After the example checks pass, erase hall-client. Compare the missing installed record/file outcomes; this does not change assignment credit.",
+          "commands": [
+            {
+              "command": "rpm -e hall-client",
+              "explanation": "Erase only the separate example consumer to create a real different model state."
+            }
+          ],
+          "expected": [
+            false,
+            true,
+            true,
+            true,
+            false,
+            true,
+            false
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /museum-rpms/example-client.rpm",
+            "explanation": "Restore the separate consumer using its supplied exact/coherent archive."
+          }
+        ]
+      }
+    }
+  ]
+}

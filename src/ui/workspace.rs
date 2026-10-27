@@ -18,6 +18,7 @@ impl LabApp {
                 self.selected = None;
                 self.invalidate_apache_presentation();
                 self.nat_presentation.clear();
+                self.rpm_presentation.clear();
             }
             ui.label(
                 RichText::new(format!("{} / {}", track, topic))
@@ -51,6 +52,7 @@ impl LabApp {
                 self.dirty = true;
                 self.invalidate_apache_presentation();
                 self.nat_presentation.clear();
+                self.rpm_presentation.clear();
             }
             let r = ui.add(button("Reset"));
             self.metrics.reset = Some(r.rect);
@@ -88,6 +90,11 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::RpmPackages { .. }) {
+            self.rpm_page(ui, i);
+            Self::workspace_footer(ui);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::BasicNat { .. }) {
             self.nat_page(ui, i);
             Self::workspace_footer(ui);

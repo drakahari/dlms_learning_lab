@@ -2,7 +2,7 @@
 
 2026-10-26. **ACTIVE: owner explicitly resumed the full application build.**
 No public release. Full curriculum/platform acceptance remains incomplete.
-Development source now has **143 authored labs /36 units** — CCNA45, LPIC-1 28,
+Main development source now has **147 authored labs /37 units** — CCNA45, LPIC-1 32,
 LPIC-2 24, Bash46. Latest scoped installed-accepted Fedora candidate remains140
 at `ddb886b4d418`; its exact absolute launch command is in INSTALLATION.md.
 
@@ -40,10 +40,22 @@ Current work, in order:
    Earlier failures are retained: guide count mismatch, explicit tab-view leaf,
    egui Undo checkpoint wait and post-tab focus. Real stable Undo and actual
    field clicks now preserve exact separate drafts; no time/focus injection.
-   SOURCE-ONLY normal integration into147/37 is underway in rpm-register-147;
-   normal MAIN remains143, no four-task count/credit/native acceptance yet.
+   Normal147/37 registration R5 has been merged into Main working source. Its
+   isolated full run is1804PASS/1FAIL/13ignored: only an old NAT test used an
+   unbounded tail after140; full affected target rerun12PASS after closing the
+   explicit Nat140..143 slice. All13 private checks and Clippy38.86s pass.
+   Main combined147+NFS StageA full regression passes1829/0/13ignored across
+   139 harnesses (m128-main147-first-full.log); Main Clippy20.41s passes.
+   All13 ignored checks explicitly pass; final development build,211 Python
+   checks, format/privacy and coverage integrity pass. This
+   new all-clean Main run does not relabel the retained earlier private failure.
+   Four RPM tasks are implemented/registered, but real normal RPM native and
+   packaged acceptance remain pending; LPIC-1 102.5 still Open.
+   Shared merge preserved accepted9149NAT source/evidence and allStageA modules;
+   two conflicted docs were resolved by retaining current Nat Partial/evidence.
 
-4. LPIC-2 NFS next capability is source-only in nfs-core-143 atdb19495 (base140).
+4. LPIC-2 NFS foundations are pushed through4a32855; no learner NFS unit yet.
+   The original pure model review used nfs-core-143 atdb19495 (base140).
    Pure-core contract R2 (84f217b1/e380d1b7) explicitly limits NFSv3 ACCESS-style
    decisions, numeric squash/DAC and ordinary existing-file operations. First
    gates93PASS/0FAIL/4ignored and R2 Clippy pass. Peer found tagged-unit unknown
@@ -55,7 +67,8 @@ Current work, in order:
    and97 default checks privately and in Main; private Clippy21.64s passes.
    Relevant saved/current/fresh outcomes, preserved layers, separate practice
    and pre-copy limits are covered. No engine/progress/UI hooks or NFS scenario
-   registration yet; Stage B must use finalized147 base for reciprocal guards.
+   registration yet; Stage B contractfbdc2805 is reviewed but implementation
+   must wait on finalized147 base for the actual new RPM memo/foreign guards.
    No host NFS/mount commands or dependency; all16 objective rows remain Open.
 
 Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no

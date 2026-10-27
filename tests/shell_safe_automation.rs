@@ -430,7 +430,7 @@ fn all43_existing_scripts282_cases_and43_examples_keep_exact_authored_inputs_and
     ))
     .unwrap();
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 143);
+    assert_eq!(current.len(), 147);
     let labs = &current[..133];
     let catalog = labs
         .iter()

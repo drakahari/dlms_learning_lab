@@ -1,4 +1,4 @@
-//! Exact current143 registration with full original140 specification preservation.
+//! Original143 registration scope retained under current147, with full original140 preservation.
 use dlms_learning_lab::{
     course,
     engine::{self, State},
@@ -152,7 +152,7 @@ fn exact<A: serde::Serialize + ?Sized, B: serde::Serialize + ?Sized>(a: &A, b: &
     );
 }
 #[test]
-fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of143() {
+fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of147() {
     let index: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/nat-original140-source-index.json")).unwrap();
     let pins = index["packs"].as_array().unwrap();
@@ -175,16 +175,19 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of143() {
     .unwrap();
     assert_eq!(original.len(), 140);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 143);
+    assert_eq!(all.len(), 147);
     exact(&all[..140], &original);
     assert_eq!(
-        all[140..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        all[140..143]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         IDS
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [45, 28, 24, 46]
+        [45, 32, 24, 46]
     );
     let versions = original
         .iter()
@@ -193,7 +196,7 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of143() {
     exact(&versions, &index["catalog"]);
     assert!(original.iter().all(|s| s.nat_teaching.is_none()));
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 36);
+    assert_eq!(units.len(), 37);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(index["units"]["units"].clone()).unwrap();
     assert_eq!(index["units"]["version"], 1);
@@ -202,7 +205,7 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of143() {
     assert_eq!(units[35].id, "basic-nat");
     assert_eq!(units[35].labs, IDS.map(String::from));
     assert_eq!(units[35].prerequisites, ["ipv4-foundations"]);
-    for s in &all[140..] {
+    for s in &all[140..143] {
         assert!(s.nat_teaching.is_some());
         assert!(s.guide.iter().all(|g| g.commands.is_empty()));
         assert!(!engine::solved(&s.initial, &s.goal));
@@ -237,11 +240,11 @@ fn genuine_old_profiles_keep_exact_attempts_and_receive_no_nat_answers_on_open()
                 .entry(s.id.clone())
                 .or_insert_with(|| Attempt::new(s, 1));
         }
-        assert_eq!(loaded.attempts.len(), 143);
+        assert_eq!(loaded.attempts.len(), 147);
         for (id, value) in before.as_object().unwrap() {
             exact(&loaded.attempts[id], value);
         }
-        for s in &all[140..] {
+        for s in &all[140..143] {
             let a = &loaded.attempts[&s.id];
             assert_eq!(a.state, s.initial);
             assert!(a.workspace.is_none());
@@ -258,7 +261,7 @@ fn three_new_reference_and_real_goal_breakage_use_current_state_and_preserve_fav
         schema_version: 1,
         ..Default::default()
     };
-    for (s, row) in all[140..].iter().zip(review.as_array().unwrap()) {
+    for (s, row) in all[140..143].iter().zip(review.as_array().unwrap()) {
         assert_eq!(s.id, row["id"].as_str().unwrap());
         let mut a = Attempt::new(s, 2);
         for line in &s.solution {

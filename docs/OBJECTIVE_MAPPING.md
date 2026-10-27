@@ -173,7 +173,8 @@ Current CCNA v1.1 objective 4.1 receives **Partial practice** for this bounded
 inside-source static/pool model. It does not implement IOS CLI/interface setup,
 PAT, ports, sessions, routing, connectivity or real packets. All issuer source
 fingerprints remain unchanged; the separate future-blueprint plan receives no
-credit. Source inventory remains 143 assignments in 36 units. Coverage totals
+credit. The accepted NAT run used 143 assignments in 36 units; current source has
+147 assignments in 37 units after the four RPM additions. Coverage totals
 are 145 Partial, 1 Supporting and 1094 Open overlapping references, not percentages
 or completed certification objectives.
 
@@ -185,10 +186,11 @@ negative/bound groups and library integration checks. It distinguishes RPM EVR,
 capability providers and installed/local/repository sources, with atomic logical
 script-free sets. The [command and separate-practice backend](RPM_PACKAGES_WORKSPACE.md)
 now passes guarded query, update/removal, alternate-outcome, isolation and saved-
-progress gates. Its native workspace and four authored tasks are under
-implementation; no RPM practice is bundled. All LPIC-1 v5.0 102.5 references
+progress gates. Its native workspace and four distinct authored tasks are now registered in
+development source. Content and widget gates pass; actual rendered RPM and
+packaged acceptance remain pending. All LPIC-1 v5.0 102.5 references
 remain **Open**. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency
 solving, signatures, binary archives and real transactions remain unmodeled.
-Current source remains143/36; the accepted Fedora package remains140. Issuer
+Current source is147/37; the accepted Fedora package remains140. Issuer
 fingerprints and all RPM Open statuses are unchanged. Backend code
 is not implemented learner coverage or complete package administration.

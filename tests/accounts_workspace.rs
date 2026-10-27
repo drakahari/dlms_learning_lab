@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 143);
+    assert_eq!(all.len(), 147);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -416,6 +416,12 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
             .count(),
         4
     );
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.initial, State::RpmPackages { .. }))
+            .count(),
+        4
+    );
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -429,6 +435,7 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::UnitManager { .. }
                     | State::DhcpV4 { .. }
                     | State::DebianPackages { .. }
+                    | State::RpmPackages { .. }
                     | State::SpanningTree { .. }
                     | State::ApacheStatic { .. }
                     | State::BasicNat { .. }

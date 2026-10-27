@@ -17,9 +17,9 @@ const NEW: [&str; 8] = [
 ];
 
 #[test]
-fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current143() {
+fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current147() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 143);
+    assert_eq!(current.len(), 147);
     let all = &current[..133];
     assert_eq!(all.len(), 133);
     let baseline: serde_json::Value =
@@ -35,7 +35,7 @@ fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current143
         NEW
     );
     let current_units = course::bundled(&current).unwrap();
-    assert_eq!(current_units.len(), 36);
+    assert_eq!(current_units.len(), 37);
     let units = &current_units[..33];
     assert_eq!(units.len(), 33);
     assert_eq!(

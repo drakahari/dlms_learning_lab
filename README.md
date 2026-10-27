@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **143 authored assignments in development:**45 CCNA,28 LPIC-1,24 LPIC-2 and46 Bash/Shell in36 source units. The three new [Basic NAT assignments](docs/NAT_LESSONS.md) pass model and native-widget checks; rendered lesson acceptance is pending. The latest scoped accepted Fedora candidate, ddb886b, contains140 labs and passes installed lifecycle, eleven Wayland starts, script/DHCP reopening, shared alignment and seven static-web/reliable-text lesson flows. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **147 authored assignments in development:**45 CCNA,32 LPIC-1,24 LPIC-2 and46 Bash/Shell in37 source units. The three new [Basic NAT assignments](docs/NAT_LESSONS.md) pass model and native-widget checks; rendered lesson acceptance is pending. The four [RPM investigations](docs/RPM_NATIVE.md) have prior scoped content/widget gates and are now registered in source; this normal147 integration and rendered RPM acceptance remain unverified. The latest scoped accepted Fedora candidate, ddb886b, contains140 labs and passes installed lifecycle, eleven Wayland starts, script/DHCP reopening, shared alignment and seven static-web/reliable-text lesson flows. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 

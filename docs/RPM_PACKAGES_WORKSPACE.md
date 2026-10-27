@@ -153,5 +153,8 @@ before key comparison or snapshot ownership; its own full Lesson/Learning key,
 reports, accounting and ordinary UI stay intact. No RPM renderer is introduced.
 The three mixed-control regressions and warm-memo regression pass in the guarded
 merged-source gates, including full caller/target preservation and valid controls.
-All original140 lab specifications/35 unit fields and old histories remain unchanged;
-the current143/36 development catalog adds only the separate NAT unit.
+That earlier integration preserved all original140 specifications/35 unit fields
+and histories while registering the separate NAT unit at143/36. The later RPM
+renderer and four-task source registration bring development to147/37; its
+normal-catalog and rendered acceptance gates are still pending. No historical
+record or objective status is rewritten by source registration.

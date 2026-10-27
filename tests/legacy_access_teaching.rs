@@ -341,7 +341,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 36);
+    assert_eq!(units.len(), 37);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -363,6 +363,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
         "shell-safe-automation",
         "static-web-services",
         "basic-nat",
+        "rpm-package-investigation",
     ] {
         assert_eq!(units.iter().filter(|u| u["id"] == id).count(), 1);
     }
@@ -375,6 +376,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
             && u["id"] != "shell-safe-automation"
             && u["id"] != "static-web-services"
             && u["id"] != "basic-nat"
+            && u["id"] != "rpm-package-investigation"
     });
     assert!(
         current == old["units"],

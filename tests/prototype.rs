@@ -383,6 +383,26 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                 ),
             )
             .unwrap();
+        } else if matches!(a.state, State::RpmPackages { .. }) {
+            let engine::Goal::RpmPackages { definition } = &s.goal else {
+                panic!("RPM goal context");
+            };
+            let target = definition
+                .requirements
+                .iter()
+                .find_map(|r| {
+                    if let dlms_learning_lab::rpm_packages_workspace::Requirement::Installed {
+                        package,
+                        ..
+                    } = r
+                    {
+                        Some(package.name.as_str())
+                    } else {
+                        None
+                    }
+                })
+                .expect("Authored RPM tasks require a consumer record");
+            engine::execute_for_goal(&mut a.state, &s.goal, &format!("rpm -e {target}")).unwrap();
         } else if matches!(a.state, State::ApacheStatic { .. }) {
             let action = dlms_learning_lab::apache_static::Action::Stop {};
             engine::execute_for_goal(

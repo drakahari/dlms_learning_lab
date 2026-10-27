@@ -642,9 +642,9 @@ impl LabApp {
     fn nl_fixed_context(&self, lesson: usize) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (143, 36));
+        assert_eq!((self.scenarios.len(), self.units.len()), (147, 37));
         assert_eq!(
-            self.scenarios[140..]
+            self.scenarios[140..143]
                 .iter()
                 .map(|s| s.id.as_str())
                 .collect::<Vec<_>>(),
@@ -1325,7 +1325,7 @@ impl LabApp {
                 exact(
                     &self.scenarios,
                     &pack::bundled().unwrap(),
-                    "All143 authored specs remain exact, no injected fixture",
+                    "All147 authored specs remain exact, no injected fixture",
                 );
                 ctx.data_mut(|d| {
                     d.insert_temp(k, true);
