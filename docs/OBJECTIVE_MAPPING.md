@@ -2,13 +2,15 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are144 narrowly evidenced Partial practice rows, one Supporting explanation row and1095 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package ddb886b contains140 authored assignments/35 units. Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are150 narrowly evidenced Partial practice rows, one Supporting explanation row and1089 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package ddb886b contains140 authored assignments/35 units. Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
 Rows record exact authored IDs, a short verified scope, relevant test files, the remaining capability/fidelity gap and the proposed parent assignment. Evidence is **explicit for each row**: it is never propagated from parent to child, a tool name to its complete utility, or an implemented command to all related objectives. Open means required teaching/model/content is absent or not accepted. Partial practice means only the named behavior has reviewed instruction/practice or accepted alternatives. The existence of test files validates reference integrity, not the truth of a pedagogical claim; independent content review remains necessary.
 
 The finer review corrected an earlier misleading association: `lpic2-storage` demonstrates capacity and one saved/applied mount, not ext-family/Btrfs/XFS/ZFS/SMART maintenance. LPIC-2 203.2 is now Planned/Open rather than Partial. Narrow actual IPv6 route components/selection, reusable functions, service-journal filtering and zone reload are recorded without promoting their wider objectives.
+
+Parent planning and granular scope are checked together. The parent CSV records the same narrow Basic NAT and RPM evidence as the granular parent rows; broader command/protocol gaps stay explicit. A2026-10-27 review corrected one unquoted-comma row and two stale parent statuses. The checker now rejects mismatched CSV widths and parent status/credited-ID disagreement, so a planning row cannot quietly hide or expand accepted evidence. Version boundaries were rechecked separately on2026-10-27; the original item fingerprints retain their actual snapshot date.
 
 ## Source change detection
 
@@ -174,23 +176,27 @@ inside-source static/pool model. It does not implement IOS CLI/interface setup,
 PAT, ports, sessions, routing, connectivity or real packets. All issuer source
 fingerprints remain unchanged; the separate future-blueprint plan receives no
 credit. The accepted NAT run used 143 assignments in 36 units; current source has
-147 assignments in 37 units after the four RPM additions. Coverage totals
-are 145 Partial, 1 Supporting and 1094 Open overlapping references, not percentages
+147 assignments in 37 units after the four RPM additions. Current coverage totals
+are 150 Partial, 1 Supporting and 1089 Open overlapping references, not percentages
 or completed certification objectives.
 
 
-### RPM foundation — no practical credit yet
+### RPM practical subset — 2026-10-27
 
-The [pure RPM foundation](RPM_PACKAGE_SUBSET.md) passes23 independent behavior/
-negative/bound groups and library integration checks. It distinguishes RPM EVR,
-capability providers and installed/local/repository sources, with atomic logical
-script-free sets. The [command and separate-practice backend](RPM_PACKAGES_WORKSPACE.md)
-now passes guarded query, update/removal, alternate-outcome, isolation and saved-
-progress gates. Its native workspace and four distinct authored tasks are now registered in
-development source. Content and widget gates pass; actual rendered RPM and
-packaged acceptance remain pending. All LPIC-1 v5.0 102.5 references
-remain **Open**. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency
-solving, signatures, binary archives and real transactions remain unmodeled.
-Current source is147/37; the accepted Fedora package remains140. Issuer
-fingerprints and all RPM Open statuses are unchanged. Backend code
-is not implemented learner coverage or complete package administration.
+The [pure RPM foundation](RPM_PACKAGE_SUBSET.md),
+[command and separate-practice backend](RPM_PACKAGES_WORKSPACE.md), native
+workspace and four authored tasks are integrated in the normal147/37 catalog.
+They cover bounded package inventory, provider inspection, local script-free
+transaction planning and troubleshooting against modeled package state. All four
+pass actual Fedora Introduction → separate practice → full assignment flows,
+including wrong/partial/two alternate solutions, current-success invalidation,
+save/readback, selected Reset and Challenge. The installed87121151e82e candidate
+also passes these four flows and126 captured screens; this is technical developer
+acceptance, not novice or other-platform acceptance.
+
+LPIC-1 v5.0 102.5 parent and K1/K2/K3/T1 receive narrowly **Partial practice**,
+as recorded individually in SKILL_COVERAGE.csv. No other RPM reference inherits
+credit. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency solving,
+signatures, binary archives and real transactions remain unmodeled. The model
+executes no package scripts or host transactions. Issuer fingerprints are unchanged;
+backend existence alone does not count as implemented practical coverage.

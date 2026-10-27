@@ -2923,3 +2923,40 @@ RGB: toolbar/header/title pixels are identical across the compared captures and
 files/tags are stable, so no speculative renderer change was made. Stored captures
 remain private and hash-pinned. Packaged three-NAT flow and complete new-seven
 scoped receipt remain pending; no full curriculum/platform/release claim.
+
+
+### M143–M146 pending-seven integration and honest coverage guards (2026-10-27)
+
+Main remains147 authored labs/37 units (CCNA45, LPIC-1 32, LPIC-2 24, Bash46).
+Private normal Bash150 passes6 catalog +11 content groups and9 complete headless
+widget/controller groups. Its subsequent all-target regression fails11 tests in
+seven targets; the failure is retained and blocks integration. Five RPM constructor
+assertions and one RPM content assertion use an unclosed historical tail; accounts
+and preserved-unit fixtures need exact new-family accounting. Generic script
+teaching/content reviews must actually exercise the three new examples and
+alternatives, not just change counts. The maximum DHCP fixture incorrectly
+coalesces all validated source packs into one input exceeding the2MiB per-pack
+limit; repair must validate the technical scenario separately, retain the limit,
+prove unique ID/empty prerequisites and preserve the old catalog prefix. No app
+behavior, grading, VM, historical evidence or resource limit is being relaxed.
+The sole full-regression process is reaped; exact seven-path source repair is
+delegated without build/native permission.
+
+Four private normal NFS151 tasks pass5 catalog +11 content groups and final5
+complete headless native-widget groups. Controller corrections preserve real
+widget actions: empty no-op is intentional, bound redundant waits rather than
+raise phase limits, Reset preserves launch clock/visited, and post-handover read
+uses the actual positive goal rather than the retired initial mount. These are
+controller/test assumptions, not modified learner outcomes. Actual native Fedora
+acceptance and combined full regression remain pending; no new seven counted.
+
+Coverage integrity now rejects surplus/missing CSV columns and contradictory
+parent planning status/scenario IDs. Correct two existing parent rows (CCNA4.1,
+LPIC-1 102.5) to their already scoped Partial evidence, including correct CSV
+quoting; no new objective credit. All215 Python checks PASS (including duplicate-parent/future separation) and coverage validator
+PASS (150 Partial/1 Supporting/1089 Open of1240 source references). Official
+version boundaries rechecked2026-10-27; granular source fingerprints remain their
+original check dates, not a claimed fresh full-objective extraction. Current
+versions remain CCNA1.1, LPIC-1 5.0, LPIC-2 4.5; future CCNA2.0 stays separate.
+All commands use the shared two-job/two-runtime-thread disk-backed runner.
+No release, Windows/macOS runtime, screen-reader or novice acceptance claim.

@@ -12,7 +12,12 @@ ROOT = Path(__file__).resolve().parents[1]
 
 def csv_rows(path):
     with path.open(newline="", encoding="utf-8") as stream:
-        return list(csv.DictReader(stream))
+        reader = csv.DictReader(stream)
+        rows = list(reader)
+        if (not reader.fieldnames or len(reader.fieldnames) != len(set(reader.fieldnames))
+                or any(None in row or any(value is None for value in row.values()) for row in rows)):
+            raise ValueError('CSV columns do not match the declared header: ' + path.name)
+        return rows
 
 
 def validate(root):
@@ -31,6 +36,9 @@ def validate(root):
             expected[key] = item
             source_urls[key] = source['url'] + ('#' + item['anchor'] if item['anchor'] else '')
     parents = csv_rows(root / 'docs/CURRICULUM.csv')
+    parent_keys = [(row['blueprint'], row['objective_id']) for row in parents]
+    if len(parent_keys) != len(set(parent_keys)):
+        raise ValueError('Duplicate parent planning objective')
     current = {(r['blueprint'], r['objective_id']) for r in parents if 'upcoming' not in r['blueprint']}
     indexed = {key for key, item in expected.items() if item['kind'] == 'objective'}
     if current != indexed:
@@ -72,6 +80,21 @@ def validate(root):
                     or not (root / path).is_file() or not (root / path).resolve().is_relative_to(root.resolve())
                     or any((root / Path(*path.parts[:n])).is_symlink() for n in range(1, len(path.parts) + 1))):
                 raise ValueError('Missing or unsafe test evidence: ' + name)
+    coverage = {(row['blueprint'], row['reference']): row for row in rows}
+    status = {'Open': 'Planned', 'Partial practice': 'Partial',
+              'Supporting explanation': 'Supporting explanation'}
+    for parent in parents:
+        key = (parent['blueprint'], parent['objective_id'])
+        if key not in current:
+            continue
+        scoped = coverage[key]
+        if parent.get('status') != status[scoped['status']]:
+            raise ValueError('Parent planning status disagrees with scoped evidence: ' + str(key))
+        credited = parent.get('implemented_scenarios', '')
+        if credited == 'None':
+            credited = ''
+        if credited != scoped['implemented_scenarios']:
+            raise ValueError('Parent planning scenarios disagree with scoped evidence: ' + str(key))
     return dict(references=len(rows), current_objectives=len(current),
                 partial=sum(r['status'] == 'Partial practice' for r in rows),
                 supporting=sum(r['status'] == 'Supporting explanation' for r in rows),

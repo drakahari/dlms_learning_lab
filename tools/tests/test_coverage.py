@@ -74,9 +74,14 @@ class CoverageTests(unittest.TestCase):
         (self.root / 'scenarios/sample.json').write_text(json.dumps({'scenarios': [{'id': 'sample'}]}))
         items = [objective.item('1.1', '1.1', 'objective', 0, 'Example'), objective.item('1.1.a', '1.1', 'subobjective', 0, 'Child')]
         (self.root / 'docs/OBJECTIVE_SOURCES.json').write_text(json.dumps({'schema_version': 1, 'sources': [{'blueprint': 'Sample v1', 'url': 'https://example.test/objectives', 'items': items}]}))
-        with (self.root / 'docs/CURRICULUM.csv').open('w', newline='') as f:
-            writer = csv.DictWriter(f, ['blueprint', 'objective_id']);writer.writeheader();writer.writerow({'blueprint': 'Sample v1', 'objective_id': '1.1'})
+        self.parent('Planned', 'None')
         self.rows = [dict(blueprint='Sample v1', reference=i['reference'], parent='1.1', kind=i['kind'], source_sha256=i['normalized_sha256'], source_url='https://example.test/objectives', source_position='0', status='Open', implemented_scenarios='', verified_scope='', evidence_tests='', remaining='Required model is not implemented.', planned_assignment='Investigate sample state') for i in items]
+
+    def parent(self, status, labs):
+        with (self.root / 'docs/CURRICULUM.csv').open('w', newline='') as stream:
+            writer = csv.DictWriter(stream, ['blueprint', 'objective_id', 'status', 'implemented_scenarios'])
+            writer.writeheader()
+            writer.writerow(dict(blueprint='Sample v1', objective_id='1.1', status=status, implemented_scenarios=labs))
 
     def write(self, rows):
         with (self.root / 'docs/SKILL_COVERAGE.csv').open('w', newline='') as f:
@@ -88,6 +93,52 @@ class CoverageTests(unittest.TestCase):
         rows = copy.deepcopy(self.rows)
         rows[0].update(status='Partial practice', implemented_scenarios='sample', verified_scope='One deterministic sample only.', evidence_tests='tests/example.rs')
         self.write(rows)
+        self.parent('Partial', 'sample')
+        self.assertEqual(verify_coverage.validate(self.root)['partial'], 1)
+
+    def test_csv_surplus_or_missing_columns_cannot_silently_change_scope(self):
+        self.write(self.rows)
+        for name in ['CURRICULUM.csv', 'SKILL_COVERAGE.csv']:
+            path = self.root / 'docs' / name
+            original = path.read_text()
+            for corrupt in [lambda line: line + ',unquoted extra field', lambda line: line.rsplit(',', 1)[0]]:
+                lines = original.splitlines()
+                lines[1] = corrupt(lines[1])
+                path.write_text('\n'.join(lines) + '\n')
+                with self.assertRaisesRegex(ValueError, 'CSV columns'):
+                    verify_coverage.validate(self.root)
+            path.write_text(original)
+
+    def test_duplicate_parent_objective_is_rejected(self):
+        self.write(self.rows)
+        path = self.root / 'docs/CURRICULUM.csv'
+        source = path.read_text()
+        for blueprint in ['Sample v1', 'Sample v2 upcoming']:
+            lines = source.splitlines()
+            row = lines[1].replace('Sample v1', blueprint)
+            path.write_text(source + (row + '\n') * (2 if 'upcoming' in blueprint else 1))
+            with self.assertRaisesRegex(ValueError, 'Duplicate parent'):
+                verify_coverage.validate(self.root)
+
+    def test_distinct_future_parent_does_not_inherit_current_coverage(self):
+        self.write(self.rows)
+        path = self.root / 'docs/CURRICULUM.csv'
+        source = path.read_text()
+        path.write_text(source + source.splitlines()[1].replace('Sample v1', 'Sample v2 upcoming') + '\n')
+        result = verify_coverage.validate(self.root)
+        self.assertEqual(result['references'], 2)
+        self.assertEqual(result['current_objectives'], 1)
+        self.assertEqual(result['open'], 2)
+
+    def test_parent_status_and_credited_labs_must_match_scoped_current_evidence(self):
+        rows = copy.deepcopy(self.rows)
+        rows[0].update(status='Partial practice', implemented_scenarios='sample', verified_scope='Bounded sample.', evidence_tests='tests/example.rs')
+        self.write(rows)
+        for status, labs in [('Planned', 'None'), ('Partial', 'None'), ('Partial', 'other')]:
+            self.parent(status, labs)
+            with self.assertRaisesRegex(ValueError, 'Parent planning'):
+                verify_coverage.validate(self.root)
+        self.parent('Partial', 'sample')
         self.assertEqual(verify_coverage.validate(self.root)['partial'], 1)
 
     def test_missing_duplicate_wrong_source_or_inherited_claim_is_rejected(self):

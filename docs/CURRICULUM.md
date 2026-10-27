@@ -1,22 +1,20 @@
 # Curriculum plan and coverage ledger
 
-Rechecked **2026-10-22**; scoped shell/DHCP primary references checked2026-10-25.
-This is a plan and evidence ledger, not complete exam preparation. Source inventory:
-**147 source assignments/37 units:45CCNA,32LPIC-1,24LPIC-2,46Bash/Shell**.
-Three Basic NAT assignments now have reviewed teaching, separate practice, meaningful
-current/future mapping tasks and passing model/widget checks. Their normal rendered
-lesson acceptance is pending; the latest scoped installed candidate still has140.
-The new four static-web and three reliable-text assignments pass model/content
-and actual-egui event checks plus all seven development-native Fedora flows.
-Final polished same-ELF installed140 acceptance passed at ddb886b: all seven new
-lesson flows, lifecycle, eleven starts, script/DHCP two-process reopening and shared
-alignment. This is scoped Fedora technical acceptance, not completed curriculum.
-All eight package/STP assignments pass model/content and full installed native
-flows (69 package and48 STP captures) on Fedora38a8098. That same133-lab candidate
-passes lifecycle,11normal Wayland starts, real script/DHCP process reopening and
-72shared alignment captures. Original IDs/progress remain; numeric practice and
-900 synthetic catalog previews are not authored labs. Planned work stays separate.
-The scripting path has twelve units.
+Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
+retain their separately documented2026-10-22 source snapshot. This is a plan and
+evidence ledger, not complete exam preparation. Main has **147 authored assignments
+/37 units:45CCNA,32LPIC-1,24LPIC-2,46Bash/Shell**. The scripting path has twelve units.
+Generated numerical practice and the developer-only large catalog are not authored
+labs. Three new scripting and four NFS lessons remain private/unaccepted additions.
+
+Three Basic NAT lessons have complete development-native Fedora flows; their
+packaged acceptance remains pending. Four RPM lessons have complete development
+AND installed147 native flows, including separate practice, alternate solutions,
+wrong/partial work, invalidation, reset/resume and scaling. Current147 candidate
+87121151e82e also passes lifecycle,11startups, real script/DHCP reopening and72
+shared alignment captures. Prior140 candidate ddb886b retains its scoped accepted
+new-seven/static-web/safe-text evidence; it is not evidence for later units.
+No candidate/test count establishes complete curriculum or novice/platform mastery.
 See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
 
 ## Primary sources and version boundaries
@@ -32,6 +30,8 @@ See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION
 The Cisco PDF and LPI objective pages were inspected, including versions and complete top-level objective identifiers. Cisco's dynamic learning-network page failed to render; official PDFs and the dated Cisco transition article supplied the evidence. Some GNU `software/` URLs timed out; the official `/s/bash/` manual and POSIX reference supplied the language reference. Do not infer objectives from an old training course or exam dumps. Recheck sources before every reviewed content batch, and attach finer subobjective evidence during authoring.
 
 Recheck evidence (2026-10-22): both official PDFs identify their blueprint versions; [Cisco’s certification page](https://www.cisco.com/web/go/ccna/) states the last v1.1 and first v2.0 testing dates. Both LPI overview/objective pages retain the versions above. No version changed in this recheck.
+
+Version-only recheck2026-10-27: official [LPIC-1 overview](https://www.lpi.org/our-certifications/lpic-1-overview/) and [LPIC-2 overview](https://www.lpi.org/our-certifications/lpic-2-overview/) still identify5.0 (101-500/102-500) and4.5 (201-450/202-450). [Cisco's dated transition notice](https://blogs.cisco.com/learning/stay-on-track-get-certified-before-the-ccna-refresh) still separates currentv1.1 through2027-02-02 fromv2.0 starting2027-02-03. The shortcut page currently redirects; its cached text alone is not this check. This check does not recompute or redate every objective fingerprint.
 
 ## Complete planning crosswalk
 

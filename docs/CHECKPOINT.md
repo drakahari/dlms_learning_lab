@@ -42,11 +42,17 @@ No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet
 ### Immediate continuation
 
 1. Packaged147 RPM native command is REAPED/PASS. Main1909 default+14explicit
-   renderer checks andClippy also PASS. Active firstprivateBash150 catalog/content
-   test now occupies soleheavy slot; reap it before ANY next heavy command.
-   Verify remaining private source/runtime gates, packaged three-NAT flows and
-   scoped candidate evidence. Source builds/native/packaging stay serialized.
-   Keep all older candidates/failed diagnostics. No release.
+   renderer checks and Clippy also PASS. Private Bash150 full regression is now
+   REAPED/FAIL: 11 tests in seven targets, not a clean integration. The failures
+   are five unbounded RPM-tail assertions, accounts count, preserved-unit comparison,
+   RPM content tail, oversized synthetic DHCP aggregate pack, and missing new-three
+   generic teaching/content inventories. Preserve the existing assertions, pack
+   limits and original content; add real new-example/alternate/negative coverage.
+   Source-only seven-path repair is delegated; no public registration yet.
+   Private NFS151 final five native-event groups pass; its Clippy gate is running.
+   Root retains the sole heavy-work slot. Then validate the combined seven in an
+   isolated checkout, full suite before main integration and Fedora rebuild.
+   Three packaged NAT flows remain pending. Keep old candidates and failed logs.
 2. NFS Stage B is integrated in7deb208: typed engine/loader/progress, exact2MiB
    Attempt admission, source-aware separate practice, foreign-field guards and
    preserved old prepare bodies. No normal NFS registration or objective credit.
@@ -68,7 +74,7 @@ No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet
    defaults/0fail/14ignored and all14explicit plusClippy19.25s PASS. Same W now
    has frozen normal151/38 source/controller R2b59ee7f5 for4 canonical NFS tasks,
   45000..46000 stage. Sourcepeer64/665 ACK; missingResetreceipt guard closed.
-   New normal/runtime gates queued. No public NFS count or native acceptance yet.
+   Final R7 normal registration/content and five complete headless widget flows PASS. Actual Fedora flows and complete combined regression remain pending; no public NFS count yet.
    Other-family launch behavior stays unchanged.
 4. EtherChannel pure R1 passes22 focused groups/20 literal vectors and76 library
    checks, then the same98 defaults in Main; five retained library checks ignored
@@ -91,7 +97,9 @@ No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet
    SOURCE-ONLY private150/38 registration/controller is now authorized in that W,
    stages43000..43504. Original147/37/46 remain pinned; no public count/credit
    before Root gates and actual native acceptance. Normal150manifest e7d2e424
-   (64owned662protected) has peerACKc08c0b47; firstcatalog/contentgate active.
+   (64owned662protected) has peerACKc08c0b47; catalog/content17 and native-event9
+   groups PASS. Full regression subsequently fails11 tests/seven targets; closed
+   source repair is in progress, with all failure diagnostics retained.
 
 Root owns ALL heavy commands through MAIN tools/dev.py; source workers have NO
 build/test/native/reference grant. Reap every running session before the next
