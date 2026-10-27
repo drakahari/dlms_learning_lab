@@ -131,3 +131,6 @@ pub mod rpm_packages;
 pub mod rpm_packages_teaching;
 pub mod rpm_packages_terminal;
 pub mod rpm_packages_workspace;
+
+/// Bounded L2 LACP eligibility; no app/curriculum integration.
+pub mod etherchannel;

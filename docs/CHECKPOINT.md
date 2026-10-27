@@ -30,7 +30,11 @@ are overlapping source references, not completed objectives or percentages.
 Three normal NAT lessons already passed actual Fedora flows and80 screenshots,
 including separate practice, alternatives, invalidation, warm resume and scaling.
 The latest scoped installed-accepted Fedora candidate remains140 atddb886b4d418;
-prepare and test an updated147 candidate after committing this polish/evidence.
+new clean87121151e82e candidate has now built and passes installation lifecycle,
+   upgrade from140, catalog identity and exact synthetic old-progress retention.
+   Installed ELF2418f835… passes10 quiet native startups and72 alignment captures.
+   Representative actual light/dark100/150/200/wide/narrow renders inspected.
+   Full new-seven packaged lesson and two-process reopen checks remain queued.
 No new installed, cold-process, Windows/macOS, screen-reader or novice acceptance
 is implied by the current development tests.
 
@@ -49,17 +53,29 @@ is implied by the current development tests.
    attempts exposed a test field typo then invalid guide schema; both corrected
    without changing model outcomes. R4 all11 content groups PASS4.58s in isolated
    nfs-content-validation/a21522e. They remain unbundled and uncounted.
-3. independent_review owns SOURCE-ONLY native Stage C in nfs-native-147 on
-   a21522e, contractfb067cd9. Finish review/gates/native events before integrating
-   four normal NFS labs. The borrowed Session editor, bounded memo and NFS-only
-   visit digit-boundary preflight are approved; other-family launch logic stays.
-4. EtherChannel pure R1 is frozen in etherchannel-core-147 (5 paths,718 protected,
-   manifest1ef93d78).22 model groups/20 vectors are not yet run. teaching_audit
-   is independently reviewing source. ccna_discovery drafts the next adapter/
-   teaching contract only. No registered labs or objective credit yet.
-5. Bash-course-next/REVIEW.md privately maps all46 current scripts and five
-   distinct next batches. Read it before granting another content capability;
-   do not assume parser gaps or count variants as new assignments.
+3. Recovered nfs_native_resume owns SOURCE-ONLY native Stage C in nfs-native-147
+   on a21522e, contractfb067cd9. R1af4fceab compiles:4 library checks pass (one
+   retained-history ignored);16 bin checks pass,3 fail at genuine Undo, ShiftTab
+   and same-release positive Write. Do not relabel that failure log. Independent
+   review also finds transient read/notice leakage across practice/assignment
+   and missing real wrong-repair UI vectors. Narrow R2 fixes are authorized;
+   no weakened controls, forced focus or expected-state installation. Finish
+   source review/gates/native before integration. Other-family launch stays.
+4. EtherChannel pure R1 passes22 focused groups/20 literal vectors and76 library
+   checks, then the same98 defaults in Main; five retained library checks ignored
+   in this scoped run were previously covered explicitly on the combined source.
+   Private all-target Clippy40.95s and Main all-target Clippy21.61s pass.
+   Independent source review verifies5owned/718protected. No app/count/coverage.
+   Adapter contract548b7346 plus Root4d65d44f (whole2MiB Attempt and same-pair/source
+   VLAN anchors) has independent design ACK. Source-only adapter grant follows
+   final pure integration commit; no old VLAN/STP model composition.
+5. Bash-course-next/REVIEW.md privately maps46 scripts/five next batches.
+   Root6 command-head probes and6 utility groups (32 literal cases/63 pairs)
+   pass on exact current VM source. No new language feature/evaluator change.
+   bash_vectors_review owns source-only3 distinct construction/dispatch/validated
+   publication lessons in bash-command-vectors-147 under reviewed contract8a990cc3.
+   Four new pack/test/fixture/guide paths only; no registry/count/old46 changes.
+   Fixed controlled Bash reference extension remains a separate Root gate.
 
 Root owns ALL heavy commands through MAIN tools/dev.py; source workers have NO
 build/test/native/reference grant. Reap every running session before the next

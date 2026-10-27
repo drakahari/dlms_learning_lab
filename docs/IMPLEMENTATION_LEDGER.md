@@ -2801,3 +2801,43 @@ native activities. After exact canonical-source recheck all11 groups pass4.58s,
 including alternatives, partial/wrong outcomes, state invalidation, independent
 future trials, separate drafts, genuine history, backup/resume and selected reset.
 No NFS normal lab, native acceptance or objective status is claimed yet.
+
+
+### M137 Fedora147 candidate; M139 bounded L2 LACP core (2026-10-27)
+
+Clean87121151e82e Fedora44 candidate built with the guarded two-job workflow.
+ELF2418f83531f1332335931f3e5ecd3361cdb0130193fd9ed7c1b468a0e1c4aa09;
+archive1b38c5010f6d85d464b077b42e7061be935f1a7b4e15c095bd8656fbf1f49295.
+Private actual install/upgrade from140/uninstall/reinstall, desktop metadata,
+catalog147/37 and exact synthetic original-nine bytes pass. The installed ELF
+passes10/10 quiet normal-policy Wayland startup/readbacks and72 IPv4/VLAN
+alignment captures across100/150/200, measured1920x1080/946x929 and light/dark.
+Root inspected actual blank placeholders, populated numeric fields, table columns,
+focused controls and narrow stacked rows. No personal progress/settings changed.
+Full packaged new-seven lessons and actual two-process reopening remain pending.
+Candidate run minimum available memory21.28GiB, peak sampled some PSI avg100.18%,
+OOMdelta0; no parallel build/test or stress workload. No release or complete
+curriculum/platform claim.223 existing dependency notices/source gate preserved.
+
+Pure EtherChannel/L2 LACP foundation passes22 isolated model groups (including20
+literal independently reasoned vectors) and76 library defaults; five retained
+history checks ignored here already passed explicitly on prior combined source.
+All-target isolated Clippy passes40.95s. Independent full source review verifies
+five owned and718 protected paths. Exact pure source integrates into Main; same98
+defaults and Main all-target Clippy21.61s pass. Models one-link operational readiness separately
+from educational>=2 queries, both-end live eligibility before partner ambiguity,
+independent VLAN admission and current+four fault snapshots within160 cable visits
+plus40 query evaluations. Strict typed/wire admission, source context and atomic
+configuration changes are tested. No packets/timers/device CLI or L3/STP model
+composition. No normal lesson/count/objective credit from this foundation.
+Adapter design review added whole-Attempt2MiB pre-copy accounting and same-target/
+same-current-or-fault positive VLAN anchors; neither is an owner blocker.
+
+NFS native R1 compiler/event gate is4 library PASS/1ignored and16 bin PASS/3FAIL.
+Failures retain native Undo, ShiftTab and actual same-frame positive Write guards.
+Independent source review identifies cross-activity transient read/notice leakage
+and insufficient wrong-repair event vectors. Source-only R2 work is authorized,
+without weakening controls. Four authored NFS lessons remain unbundled;
+their11 separate content/model groups pass. Bash command-construction capability
+probes pass6 basic plus6 utility groups/32 cases/63 source pairs on unchanged VM;
+three distinct new assignments are authorized source-only, not counted yet.
