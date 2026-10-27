@@ -14,6 +14,8 @@ PROBE = ROOT / 'target/debug/examples/shell_probe'
 if not BASH:
     raise SystemExit('Bash unavailable: reference comparison NOT RUN')
 fixtures = json.loads((ROOT / 'tests/fixtures/bash-reference.json').read_text())
+# Additional fixed developer fixtures; original comparison cases remain byte-exact.
+fixtures += json.loads((ROOT / 'tests/fixtures/bash-command-vectors-reference.json').read_text())
 failures = []
 for fixture in fixtures:
     case = fixture['case']

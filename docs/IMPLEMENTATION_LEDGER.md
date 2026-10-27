@@ -2841,3 +2841,27 @@ without weakening controls. Four authored NFS lessons remain unbundled;
 their11 separate content/model groups pass. Bash command-construction capability
 probes pass6 basic plus6 utility groups/32 cases/63 source pairs on unchanged VM;
 three distinct new assignments are authorized source-only, not counted yet.
+
+
+### M138 existing command-construction semantics verified (2026-10-27)
+
+No shell/parser/evaluator change. Twelve in-process command-vector groups plus
+existing shell/array/text/case/substitution/expansion-limit/safe-automation targets
+pass93/0 across nine targets. Six basic groups cover whole argument boundaries,
+function return status and literal external-looking data; six utility groups
+cover32 literal cases/63 vector/direct/control pairs. Actual utility results,
+option-looking/spaced names, explicit single-minus guards, continued mixed jobs
+and rejected-plan preservation are compared. Equivalent direct branches pass;
+there is no source-spelling grading or array-use/mastery inference.
+
+Root reviewed the nine fixed source recipes, sample file/argument closure and
+allowlisted utility calls before extending the existing development-only Bash
+reference helper with a second checked-in fixture file. Original657 comparison
+cases remain byte-exact. All720 controlled Bash5.3.9 comparisons pass, including
+63 new fixed source/case pairs, against complete output/status/disposable-file
+state. External-head Unsupported tests stay in-process only and never go to Bash.
+No learner input or personal file is accepted by the fixed helper; the app has
+no host execution path. Main all-target Clippy0.16s, format and211 Python tooling
+checks7.815s pass. Independent authored three-task content remains source-only in
+its own worktree and uncounted; existing46 script Goals/drafts/evaluator10 and
+147/37 normal inventory remain unchanged. See SHELL_COMMAND_VECTORS.md.

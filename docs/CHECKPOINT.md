@@ -75,7 +75,8 @@ is implied by the current development tests.
    bash_vectors_review owns source-only3 distinct construction/dispatch/validated
    publication lessons in bash-command-vectors-147 under reviewed contract8a990cc3.
    Four new pack/test/fixture/guide paths only; no registry/count/old46 changes.
-   Fixed controlled Bash reference extension remains a separate Root gate.
+   Root fixed reference extension passes720 Bash5.3.9 comparisons (657 original
+   byte-exact+63new),93 scoped shell defaults, all-target Clippy and211Python.
 
 Root owns ALL heavy commands through MAIN tools/dev.py; source workers have NO
 build/test/native/reference grant. Reap every running session before the next
