@@ -151,6 +151,9 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
 /// No result survives a state/draft change or becomes a persisted credential.
 /// Reject context and pending draft first; do not run new-client probes for them.
 pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_rpm_workspace(a) {
+        return vec![(false, crate::rpm_packages_workspace::notice(&e))];
+    }
     if let Err(e) = validate_nat_workspace(a) {
         return vec![(false, crate::nat_workspace::notice(&e))];
     }
@@ -202,6 +205,9 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Current applied draft/context first; snapshot predicates are derived once per batch.
 pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_rpm_workspace(a) {
+        return vec![(false, crate::rpm_packages_workspace::notice(&e))];
+    }
     if let Err(e) = validate_nat_workspace(a) {
         return vec![(false, crate::nat_workspace::notice(&e))];
     }
@@ -254,8 +260,78 @@ pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     ));
     rows
 }
+/// Fresh RPM current outcomes. A transcript, raw command or checked flag never grants credit.
+pub fn current_rpm_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let fail = |e: &str| vec![(false, crate::rpm_packages_workspace::notice(e))];
+    if let Err(e) = validate_rpm_metadata(a) {
+        return fail(&e);
+    }
+    let (
+        State::RpmPackages { simulation },
+        State::RpmPackages {
+            simulation: authored,
+        },
+        crate::engine::Goal::RpmPackages { definition },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return fail("RPM assignment kind differs");
+    };
+    if authored != &definition.initial || !definition.same_assignment(simulation) {
+        return fail("RPM immutable catalog differs from authored assignment");
+    }
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.rpm_learning.as_ref())
+        .is_some_and(|l| {
+            s.rpm_packages_teaching.as_ref().is_none_or(|source| {
+                !source.separate_from_definition(definition) || !l.valid_for(source)
+            })
+        })
+    {
+        return fail("RPM practice differs from its authored lesson");
+    }
+    // Definition.checks owns the one runtime State validation/view for this batch.
+    definition.checks(simulation)
+}
+fn validate_rpm_metadata(a: &Attempt) -> Result<(), String> {
+    let w = a.workspace.as_ref();
+    let metadata = w.is_some_and(|w| w.rpm_session.is_some() || w.rpm_learning.is_some());
+    let State::RpmPackages { simulation } = &a.state else {
+        return if metadata {
+            Err("RPM console/practice on another activity".into())
+        } else {
+            Ok(())
+        };
+    };
+    if w.is_some_and(|w| {
+        crate::rpm_packages_workspace::foreign(w)
+            || !w.valid()
+            || w.rpm_session
+                .as_ref()
+                .is_some_and(|t| !t.valid_for(simulation))
+            || w.rpm_learning.as_ref().is_some_and(|l| {
+                !crate::rpm_packages_teaching::separate(&l.context.initial, simulation)
+            })
+    }) || !crate::rpm_packages_workspace::within(a, crate::rpm_packages_workspace::MAX_ATTEMPT)
+    {
+        return Err("RPM bounds or foreign metadata differ; previous work retained".into());
+    }
+    Ok(())
+}
+fn validate_rpm_workspace(a: &Attempt) -> Result<(), String> {
+    validate_rpm_metadata(a)?;
+    if let State::RpmPackages { simulation } = &a.state
+        && !crate::rpm_packages_workspace::admitted(simulation)
+    {
+        return Err("RPM State exceeds app admission".into());
+    }
+    Ok(())
+}
 /// Fresh package outcomes with context/session guards; display history is never credit.
 pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_rpm_workspace(a) {
+        return vec![(false, crate::rpm_packages_workspace::notice(&e))];
+    }
     if let Err(e) = validate_nat_workspace(a) {
         return vec![(false, crate::nat_workspace::notice(&e))];
     }
@@ -293,6 +369,9 @@ pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, S
     definition.checks(simulation)
 }
 pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = validate_rpm_workspace(a) {
+        return vec![(false, crate::rpm_packages_workspace::notice(&e))];
+    }
     if let Err(e) = validate_nat_workspace(a) {
         return vec![(false, crate::nat_workspace::notice(&e))];
     }
@@ -344,6 +423,7 @@ pub(crate) fn validate_nat_metadata(a: &Attempt) -> Result<(), String> {
     validate_nat_workspace(a)?;
     // Existing family validators are admission only; none calls a grader.
     for validate in [
+        validate_rpm_workspace,
         validate_apache_static_workspace,
         validate_debian_packages_workspace,
         validate_spanning_tree_workspace,
@@ -415,6 +495,12 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if matches!(a.state, State::RpmPackages { .. }) {
+        return current_rpm_checks(a, s).iter().all(|r| r.0);
+    }
+    if validate_rpm_workspace(a).is_err() {
+        return false;
+    }
     if validate_nat_workspace(a).is_err() {
         return false;
     }
@@ -737,6 +823,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        validate_rpm_workspace(a)?;
         validate_nat_workspace(a)?;
         validate_apache_static_workspace(a)?;
         validate_debian_packages_workspace(a)?;
@@ -766,6 +853,32 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if let State::RpmPackages { simulation } = &a.state {
+            let (
+                State::RpmPackages {
+                    simulation: authored,
+                },
+                crate::engine::Goal::RpmPackages { definition },
+            ) = (&s.initial, &s.goal)
+            else {
+                return Err("RPM state belongs to another activity".into());
+            };
+            if authored != &definition.initial
+                || !definition.same_assignment(simulation)
+                || a.workspace
+                    .as_ref()
+                    .and_then(|w| w.rpm_learning.as_ref())
+                    .is_some_and(|l| {
+                        s.rpm_packages_teaching.as_ref().is_none_or(|source| {
+                            !source.separate_from_definition(definition) || !l.valid_for(source)
+                        })
+                    })
+            {
+                return Err(
+                    "Saved RPM authored catalog/practice context differs; original retained".into(),
+                );
+            }
         }
         if let State::DebianPackages { simulation } = &a.state {
             let (
@@ -1747,6 +1860,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
+        validate_rpm_workspace(a)?;
         validate_nat_workspace(a)?;
         validate_apache_static_workspace(a)?;
         validate_debian_packages_workspace(a)?;

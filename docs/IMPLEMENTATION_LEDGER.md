@@ -2548,3 +2548,38 @@ five private checks PASS including actual9. Native contract R2 peer-ACK resolves
 public binary-inspector access and counts one exact activity entry containing both
 assignment/practice reports in the complete four-context bound. MAIN integration
 and renderer/content gates remain pending.
+
+M127 complete MAIN source73b93e4 regression:1698PASS/0FAIL/12ignored across128
+harnesses. Receipt reviews/nat-foundation/main-full-regression-r1/RESULT.json;
+log SHA d4a72e61dad49aa1ff180915e27939a9c84cc6bcc85695efe499534ad69d82fc.
+441 memory samples: min21.25GiB available, some/full PSI avg10 peak0, OOM delta0,
+swapin70pages/out0. Default ignored tests are not passed-test evidence; earlier
+private checks remain separately versioned. No stress test or memory guarantee.
+
+RPM merged-source17paths/669protected is root/peer-ACK (9f8e6985) in fresh
+rpm-native-140 based on73b93e4. Existing Nat typed Lesson/Learning, complete memo
+key and actual capture fix are preserved. Reciprocal individually valid foreign
+metadata is rejected before current credit, save/decode/prepare and Nat snapshot.
+Three new mixed-context groups and one warm-memo group are still pending execution;
+the first guarded cold-target model run is underway. No renderer/credit yet.
+
+Three distinct NAT tasks passed independent source/content review. Review caught
+an actual misconception: total dynamic policy capacity after static reservations
+is different from globals still unallocated after active maps exist. R2 prose
+fixes that distinction without changing goal semantics or expected outcomes.
+Unregistered content-test staging/native workflows remain future gates;140/35
+and coverage144Partial/1Supporting/1095Open remain unchanged.
+
+M128 merged source gates pass178default/0failed/7ignored,33 native-event/memo
+checks, allseven private checks explicitly and all-target Clippy37.77s. Private
+exact sourcefbac26e anchors renderer development. MAIN copied17 paths after exact
+73b93e4 preimages;667 other files remain exact plus two intentional status docs.
+MAIN repeats178+33+7 passing checks (UI7.19s). No new authored RPM count, renderer
+acceptance or package candidate. Main model memory min19.27GiB/some PSI peak0.9%,
+OOM0; no sustained threshold or safety refusal.
+
+First real unregistered NAT content gate compiles then all eight tests fail at
+one shared pack admission: handover has four optional guide entries but three
+step labels. Existing loader correctly rejects the mismatch. The author is
+aligning the authored labels; no bounds, validator, state or expected vector
+will be relaxed. The failed log is retained as m127-nat-content-first-r1.log.

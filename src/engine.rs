@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    RpmPackages {
+        simulation: crate::rpm_packages::State,
+    },
     BasicNat {
         simulation: crate::nat::State,
     },
@@ -142,6 +145,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    RpmPackages {
+        definition: Box<crate::rpm_packages_workspace::Definition>,
+    },
     BasicNat {
         definition: Box<crate::nat_workspace::Definition>,
     },
@@ -307,6 +313,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::RpmPackages { simulation }, Goal::RpmPackages { definition }) => {
+            definition.checks(simulation)
+        }
         (State::BasicNat { simulation }, Goal::BasicNat { definition }) => {
             definition.checks(simulation)
         }
@@ -627,6 +636,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::RpmPackages { .. } => crate::rpm_packages_workspace::HELP,
         State::BasicNat { .. } => crate::nat_workspace::HELP,
         State::ApacheStatic { .. } => crate::apache_static_workspace::HELP,
         State::DebianPackages { .. } => crate::debian_packages_terminal::HELP,
@@ -687,6 +697,17 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::RpmPackages { simulation } = s {
+        if input.len() > crate::rpm_packages_terminal::MAX_COMMAND {
+            return Err("RPM input exceeds2048 bytes before any trimming".into());
+        }
+        let Goal::RpmPackages { definition } = goal else {
+            return Err("RPM assignment requires its authored context".into());
+        };
+        return crate::rpm_packages_terminal::output_text(crate::rpm_packages_terminal::execute(
+            definition, simulation, input,
+        ));
+    }
     if let State::BasicNat { simulation } = s {
         if input.len() > crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON {
             return Err("Typed NAT input exceeds raw bound".into());
@@ -846,6 +867,11 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::RpmPackages { .. }) {
+        return Err(
+            "RPM commands require goal-aware supplied archive context; no host execution".into(),
+        );
+    }
     if matches!(s, State::BasicNat { .. }) {
         if input.len() > crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON {
             return Err("Typed NAT input exceeds raw bound".into());
@@ -1003,7 +1029,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::BasicNat { .. }
+        State::RpmPackages { .. }
+        | State::BasicNat { .. }
         | State::ApacheStatic { .. }
         | State::DebianPackages { .. }
         | State::SpanningTree { .. }
@@ -1449,6 +1476,11 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::RpmPackages { simulation } => format!(
+            "Restricted script-free RPM simulation: {} installed records, {} virtual files; no host RPM or full verification",
+            simulation.runtime().installed.len(),
+            simulation.runtime().files.len()
+        ),
         State::BasicNat { simulation } => format!(
             "Basic NAT address-only model: {} inside hosts, {} outside peers, {} static and {} current dynamic mappings. No sessions, routing, connectivity or security verdict",
             simulation.inventory().inside.len(),

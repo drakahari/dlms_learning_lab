@@ -17,6 +17,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub nat_learning: Option<crate::nat_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub rpm_session: Option<crate::rpm_packages_terminal::Session>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rpm_learning: Option<crate::rpm_packages_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nat_draft: Option<crate::nat_workspace::Draft>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub debian_packages_terminal: Option<crate::debian_packages_terminal::Session>,
@@ -132,6 +136,8 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.rpm_session.as_ref().is_none_or(|s| s.valid())
+            && self.rpm_learning.as_ref().is_none_or(|l| l.valid())
             && self.nat_draft.as_ref().is_none_or(|d| d.valid())
             && self.nat_learning.as_ref().is_none_or(|l| l.valid())
             && self.apache_static_draft.as_ref().is_none_or(|d| d.valid())
@@ -271,6 +277,9 @@ pub fn preserve_script_history(a: &mut Attempt) {
 pub fn prepare(a: &mut Attempt) {
     preserve_script_history(a);
     let w = a.workspace.get_or_insert_with(WorkspaceData::new);
+    if matches!(&a.state, State::RpmPackages { .. }) && w.rpm_session.is_none() {
+        w.rpm_session = Some(crate::rpm_packages_terminal::Session::default());
+    }
     if let State::BasicNat { simulation } = &a.state
         && w.nat_draft.is_none()
     {

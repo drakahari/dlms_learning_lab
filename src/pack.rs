@@ -7,6 +7,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nat_teaching: Option<crate::nat_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rpm_packages_teaching: Option<crate::rpm_packages_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub apache_static_teaching: Option<crate::apache_static_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub spanning_tree_teaching: Option<crate::spanning_tree_teaching::Lesson>,
@@ -172,7 +174,9 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || s.solution.iter().any(|v| {
                 v.trim().is_empty()
                     || v.len()
-                        > if matches!(s.initial, State::BasicNat { .. }) {
+                        > if matches!(s.initial, State::RpmPackages { .. }) {
+                            crate::rpm_packages_terminal::MAX_COMMAND
+                        } else if matches!(s.initial, State::BasicNat { .. }) {
                             crate::nat_workspace::PREFIX.len() + crate::nat::MAX_ACTION_JSON
                         } else if matches!(s.initial, State::ApacheStatic { .. }) {
                             crate::apache_static_workspace::PREFIX.len()
@@ -356,6 +360,38 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || matches!(s.goal, Goal::DebianPackages { .. })
         {
             return Err("Package teaching/objectives on another activity".into());
+        }
+        if let State::RpmPackages { simulation } = &s.initial {
+            let Goal::RpmPackages { definition } = &s.goal else {
+                return Err("RPM needs its matching authored goal".into());
+            };
+            if simulation != &definition.initial
+                || definition.validate().is_err()
+                || !crate::rpm_packages_workspace::within(
+                    s,
+                    crate::rpm_packages_workspace::MAX_SCENARIO,
+                )
+            {
+                return Err("RPM exact initial context or complete Scenario bound differs".into());
+            }
+            if s.guide.iter().any(|step| {
+                step.commands
+                    .iter()
+                    .any(|c| crate::rpm_packages_terminal::validate_guidance(&c.command).is_err())
+            }) {
+                return Err("RPM guide command is outside the closed real-command grammar".into());
+            }
+            if let Some(l) = &s.rpm_packages_teaching {
+                l.validate()?;
+                if !l.separate_from_definition(definition) {
+                    return Err(
+                        "RPM practice must have independent catalogs/packages/capabilities/paths"
+                            .into(),
+                    );
+                }
+            }
+        } else if s.rpm_packages_teaching.is_some() || matches!(s.goal, Goal::RpmPackages { .. }) {
+            return Err("RPM metadata on another activity".into());
         }
         if let State::DhcpV4 { simulation } = &s.initial {
             let Goal::DhcpV4 {
@@ -779,6 +815,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::RpmPackages { simulation } => crate::rpm_packages_workspace::admitted(simulation),
         State::BasicNat { simulation } => crate::nat_workspace::admitted(simulation),
         State::ApacheStatic { simulation } => crate::apache_static_workspace::admitted(simulation),
         State::DebianPackages { simulation } => {

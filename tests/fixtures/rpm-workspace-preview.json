@@ -1,0 +1,691 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "rpm-workspace-preview",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Restricted RPM package investigation",
+      "unit": "",
+      "title": "Repair a supplied RPM client",
+      "summary": "Unbundled developer fixture for current outcomes and separate RPM practice.",
+      "objective": "Provide the versioned desk API, restore the client payload, and preserve the neighbor and configuration.",
+      "retry_guidance": "Inspect installed and local metadata separately. Use the explicit compatible provider and the exact recorded client archive.",
+      "difficulty": "Intermediate",
+      "minutes": 12,
+      "steps": [
+        "Inspect current records and supplied archive metadata",
+        "Install a compatible explicit provider and repair the current payload",
+        "Check current outcomes and preservation"
+      ],
+      "guide": [],
+      "explanation": "The selected provider satisfies the versioned capability and the exact client archive restores its simulated payload.",
+      "hints": [
+        "An unversioned provide does not satisfy the required version."
+      ],
+      "sources": [
+        "https://rpm.org/docs/6.0.x/man/rpm.8",
+        "https://rpm.org/docs/6.0.x/manual/spec.html"
+      ],
+      "simplifications": "Declared noarch script-free metadata and virtual text only. No RPM archive parser, host commands, resolver, signatures, rpm -V, sidecars, parallel versions or real transaction rollback.",
+      "initial": {
+        "kind": "RpmPackages",
+        "simulation": {
+          "schema_version": 1,
+          "catalog": {
+            "fixture": "rpm-assignment",
+            "target": "x86_64",
+            "published": "stable",
+            "archives": {
+              "client-a": {
+                "identity": {
+                  "name": "desk-client",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [
+                  {
+                    "capability": "desk-api",
+                    "constraint": {
+                      "relation": "Ge",
+                      "evr": "1.0-1"
+                    }
+                  }
+                ],
+                "provides": {},
+                "files": {
+                  "/usr/share/desk/report": {
+                    "file": {
+                      "contents": "ready\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 100
+                    },
+                    "kind": "ordinary"
+                  },
+                  "/etc/desk.conf": {
+                    "file": {
+                      "contents": "mode=plain\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 100
+                    },
+                    "kind": "config"
+                  }
+                }
+              },
+              "provider-a": {
+                "identity": {
+                  "name": "ink-bridge",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {
+                  "desk-api": "1.0-1"
+                },
+                "files": {
+                  "/usr/share/ink/label": {
+                    "file": {
+                      "contents": "ink\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 100
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "provider-b": {
+                "identity": {
+                  "name": "vector-bridge",
+                  "arch": "noarch"
+                },
+                "evr": "1.1-1",
+                "requires": [],
+                "provides": {
+                  "desk-api": "1.1-1"
+                },
+                "files": {
+                  "/usr/share/vector/label": {
+                    "file": {
+                      "contents": "vector\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 100
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "decoy-a": {
+                "identity": {
+                  "name": "api-lookalike",
+                  "arch": "noarch"
+                },
+                "evr": "9.0-1",
+                "requires": [],
+                "provides": {
+                  "desk-api": null
+                },
+                "files": {
+                  "/usr/share/decoy/label": {
+                    "file": {
+                      "contents": "decoy\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 100
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              },
+              "neighbor-a": {
+                "identity": {
+                  "name": "quiet-neighbor",
+                  "arch": "noarch"
+                },
+                "evr": "1.0-1",
+                "requires": [],
+                "provides": {},
+                "files": {
+                  "/usr/share/neighbor/note": {
+                    "file": {
+                      "contents": "stay\n",
+                      "mode": 420,
+                      "owner": "root",
+                      "group": "root",
+                      "mtime": 100
+                    },
+                    "kind": "ordinary"
+                  }
+                }
+              }
+            },
+            "snapshots": {
+              "stable": {
+                "archives": [
+                  "client-a",
+                  "provider-a",
+                  "provider-b",
+                  "decoy-a",
+                  "neighbor-a"
+                ]
+              }
+            },
+            "allowed_paths": [
+              "/etc/desk.conf",
+              "/usr/share/decoy/label",
+              "/usr/share/desk/report",
+              "/usr/share/ink/label",
+              "/usr/share/neighbor/note",
+              "/usr/share/vector/label"
+            ]
+          },
+          "runtime": {
+            "installed": [
+              {
+                "identity": {
+                  "name": "desk-client",
+                  "arch": "noarch"
+                },
+                "archive": "client-a"
+              },
+              {
+                "identity": {
+                  "name": "quiet-neighbor",
+                  "arch": "noarch"
+                },
+                "archive": "neighbor-a"
+              }
+            ],
+            "available": [
+              "client-a",
+              "provider-a",
+              "provider-b",
+              "decoy-a",
+              "neighbor-a"
+            ],
+            "cached": null,
+            "files": {
+              "/usr/share/desk/report": {
+                "contents": "damaged\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 100
+              },
+              "/etc/desk.conf": {
+                "contents": "mode=plain\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 100
+              },
+              "/usr/share/neighbor/note": {
+                "contents": "stay\n",
+                "mode": 420,
+                "owner": "root",
+                "group": "root",
+                "mtime": 100
+              }
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "RpmPackages",
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "rpm-assignment",
+              "target": "x86_64",
+              "published": "stable",
+              "archives": {
+                "client-a": {
+                  "identity": {
+                    "name": "desk-client",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [
+                    {
+                      "capability": "desk-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/desk/report": {
+                      "file": {
+                        "contents": "ready\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    },
+                    "/etc/desk.conf": {
+                      "file": {
+                        "contents": "mode=plain\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "config"
+                    }
+                  }
+                },
+                "provider-a": {
+                  "identity": {
+                    "name": "ink-bridge",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {
+                    "desk-api": "1.0-1"
+                  },
+                  "files": {
+                    "/usr/share/ink/label": {
+                      "file": {
+                        "contents": "ink\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "provider-b": {
+                  "identity": {
+                    "name": "vector-bridge",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.1-1",
+                  "requires": [],
+                  "provides": {
+                    "desk-api": "1.1-1"
+                  },
+                  "files": {
+                    "/usr/share/vector/label": {
+                      "file": {
+                        "contents": "vector\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "decoy-a": {
+                  "identity": {
+                    "name": "api-lookalike",
+                    "arch": "noarch"
+                  },
+                  "evr": "9.0-1",
+                  "requires": [],
+                  "provides": {
+                    "desk-api": null
+                  },
+                  "files": {
+                    "/usr/share/decoy/label": {
+                      "file": {
+                        "contents": "decoy\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "neighbor-a": {
+                  "identity": {
+                    "name": "quiet-neighbor",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {},
+                  "files": {
+                    "/usr/share/neighbor/note": {
+                      "file": {
+                        "contents": "stay\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "stable": {
+                  "archives": [
+                    "client-a",
+                    "provider-a",
+                    "provider-b",
+                    "decoy-a",
+                    "neighbor-a"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/etc/desk.conf",
+                "/usr/share/decoy/label",
+                "/usr/share/desk/report",
+                "/usr/share/ink/label",
+                "/usr/share/neighbor/note",
+                "/usr/share/vector/label"
+              ]
+            },
+            "runtime": {
+              "installed": [
+                {
+                  "identity": {
+                    "name": "desk-client",
+                    "arch": "noarch"
+                  },
+                  "archive": "client-a"
+                },
+                {
+                  "identity": {
+                    "name": "quiet-neighbor",
+                    "arch": "noarch"
+                  },
+                  "archive": "neighbor-a"
+                }
+              ],
+              "available": [
+                "client-a",
+                "provider-a",
+                "provider-b",
+                "decoy-a",
+                "neighbor-a"
+              ],
+              "cached": null,
+              "files": {
+                "/usr/share/desk/report": {
+                  "contents": "damaged\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 100
+                },
+                "/etc/desk.conf": {
+                  "contents": "mode=plain\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 100
+                },
+                "/usr/share/neighbor/note": {
+                  "contents": "stay\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 100
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/pkgs/client-a.rpm": "client-a",
+            "/pkgs/provider-a.rpm": "provider-a",
+            "/pkgs/provider-b.rpm": "provider-b",
+            "/pkgs/decoy-a.rpm": "decoy-a",
+            "/pkgs/neighbor-a.rpm": "neighbor-a"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "desk-client",
+                "arch": "noarch"
+              },
+              "version": {
+                "relation": "Eq",
+                "evr": "1.0-1"
+              }
+            },
+            {
+              "kind": "SatisfiesCapability",
+              "requirement": {
+                "capability": "desk-api",
+                "constraint": {
+                  "relation": "Ge",
+                  "evr": "1.0-1"
+                }
+              }
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "desk-client",
+                "arch": "noarch"
+              },
+              "path": "/usr/share/desk/report"
+            },
+            {
+              "kind": "DependenciesHealthy"
+            },
+            {
+              "kind": "PreserveInitialPackage",
+              "package": {
+                "name": "quiet-neighbor",
+                "arch": "noarch"
+              }
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/etc/desk.conf"
+            }
+          ]
+        }
+      },
+      "solution": [
+        "rpm -i /pkgs/provider-a.rpm",
+        "rpm --reinstall /pkgs/client-a.rpm"
+      ],
+      "prerequisites": [],
+      "rpm_packages_teaching": {
+        "definition": {
+          "initial": {
+            "schema_version": 1,
+            "catalog": {
+              "fixture": "rpm-gallery",
+              "target": "x86_64",
+              "published": "stable",
+              "archives": {
+                "panel-a": {
+                  "identity": {
+                    "name": "museum-panel",
+                    "arch": "noarch"
+                  },
+                  "evr": "2.0-1",
+                  "requires": [
+                    {
+                      "capability": "museum-api",
+                      "constraint": {
+                        "relation": "Ge",
+                        "evr": "1.0-1"
+                      }
+                    }
+                  ],
+                  "provides": {},
+                  "files": {
+                    "/museum/report": {
+                      "file": {
+                        "contents": "blue\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                },
+                "supply-a": {
+                  "identity": {
+                    "name": "museum-supply",
+                    "arch": "noarch"
+                  },
+                  "evr": "1.0-1",
+                  "requires": [],
+                  "provides": {
+                    "museum-api": "1.0-1"
+                  },
+                  "files": {
+                    "/museum/supply": {
+                      "file": {
+                        "contents": "supply\n",
+                        "mode": 420,
+                        "owner": "root",
+                        "group": "root",
+                        "mtime": 100
+                      },
+                      "kind": "ordinary"
+                    }
+                  }
+                }
+              },
+              "snapshots": {
+                "stable": {
+                  "archives": [
+                    "panel-a",
+                    "supply-a"
+                  ]
+                }
+              },
+              "allowed_paths": [
+                "/museum/note",
+                "/museum/report",
+                "/museum/supply"
+              ]
+            },
+            "runtime": {
+              "installed": [],
+              "available": [
+                "panel-a",
+                "supply-a"
+              ],
+              "cached": null,
+              "files": {
+                "/museum/note": {
+                  "contents": "keep\n",
+                  "mode": 420,
+                  "owner": "root",
+                  "group": "root",
+                  "mtime": 100
+                }
+              }
+            }
+          },
+          "archive_paths": {
+            "/museum/rpms/panel-a.rpm": "panel-a",
+            "/museum/rpms/supply-a.rpm": "supply-a"
+          },
+          "requirements": [
+            {
+              "kind": "Installed",
+              "package": {
+                "name": "museum-panel",
+                "arch": "noarch"
+              },
+              "version": null
+            },
+            {
+              "kind": "SatisfiesCapability",
+              "requirement": {
+                "capability": "museum-api",
+                "constraint": {
+                  "relation": "Ge",
+                  "evr": "1.0-1"
+                }
+              }
+            },
+            {
+              "kind": "OwnedPayloadMatches",
+              "package": {
+                "name": "museum-panel",
+                "arch": "noarch"
+              },
+              "path": "/museum/report"
+            },
+            {
+              "kind": "PreserveInitialFile",
+              "path": "/museum/note"
+            }
+          ]
+        },
+        "prerequisite_note": "Use the supplied virtual archive paths. This separate gallery uses different packages and files from the assignment.",
+        "concepts": [
+          {
+            "title": "A package name and a capability differ",
+            "text": "Requires names a capability. Either an actual package name or an explicit versioned Provides can satisfy it. An unversioned provide cannot satisfy a versioned requirement."
+          },
+          {
+            "title": "A record does not prove intact files",
+            "text": "File lists come from stored metadata. The read-only inspector compares simulated current content with the recorded payload. This is not rpm -V or signature verification."
+          },
+          {
+            "title": "Only explicit local archives are installed",
+            "text": "These script-free noarch exercises have no downloads or resolver. Choose every needed archive. Unsupported operations leave the current state unchanged; a simulator explanation is not an RPM exit status."
+          }
+        ],
+        "example_description": "Install a museum panel and its separate supplier, preserve the museum note, then remove and restore the panel.",
+        "example_commands": [
+          {
+            "command": "rpm -qp --requires /museum/rpms/panel-a.rpm",
+            "explanation": "Inspect the declared requirements without installing."
+          },
+          {
+            "command": "rpm -i /museum/rpms/panel-a.rpm /museum/rpms/supply-a.rpm",
+            "explanation": "Install the explicit compatible set; no dependency is fetched."
+          }
+        ],
+        "try_change": {
+          "description": "Remove the museum panel and inspect its recorded absence while its supplier and the note remain.",
+          "commands": [
+            {
+              "command": "rpm -e museum-panel",
+              "explanation": "This removes only the selected package."
+            }
+          ],
+          "expected": [
+            false,
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "rpm -i /museum/rpms/panel-a.rpm",
+            "explanation": "The supplier is already installed; restore the panel from its exact local archive."
+          }
+        ]
+      }
+    }
+  ]
+}

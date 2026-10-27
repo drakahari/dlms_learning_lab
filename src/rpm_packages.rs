@@ -1006,6 +1006,8 @@ impl State {
         Ok(b)
     }
     pub fn validate(&self) -> Result<()> {
+        #[cfg(test)]
+        QUERY_VALIDATIONS.with(|n| n.set(n.get() + 1));
         if self.schema_version != 1 {
             return fail(Code::Malformed, "Future RPM State");
         }
@@ -1094,18 +1096,24 @@ impl State {
         }
         Ok(())
     }
-    pub fn installed(&self, identity: &Identity) -> Result<Option<&Archive>> {
+    fn identity_shape(identity: &Identity) -> Result<()> {
         limit(identity.name.len() <= 32)?;
         if !name(&identity.name) {
             return fail(Code::Malformed, "Invalid package identity");
         }
+        Ok(())
+    }
+    pub fn installed(&self, identity: &Identity) -> Result<Option<&Archive>> {
+        Self::identity_shape(identity)?;
         self.validate()?;
-        Ok(self
-            .runtime
+        Ok(self.installed_inner(identity))
+    }
+    fn installed_inner(&self, identity: &Identity) -> Option<&Archive> {
+        self.runtime
             .installed
             .iter()
             .find(|x| &x.identity == identity)
-            .map(|x| &self.catalog.archives[&x.archive]))
+            .map(|x| &self.catalog.archives[&x.archive])
     }
     pub fn local_archive(&self, id: &str) -> Result<&Archive> {
         limit(id.len() <= 32)?;
@@ -1127,13 +1135,15 @@ impl State {
     pub fn installed_providers(&self, q: &Requirement) -> Result<Vec<&Archive>> {
         Self::requirement_shape(q)?;
         self.validate()?;
-        Ok(self
-            .runtime
+        Ok(self.installed_providers_inner(q))
+    }
+    fn installed_providers_inner(&self, q: &Requirement) -> Vec<&Archive> {
+        self.runtime
             .installed
             .iter()
             .map(|x| &self.catalog.archives[&x.archive])
             .filter(|a| Self::provides(a, q))
-            .collect())
+            .collect()
     }
     pub fn available_providers(&self, q: &Requirement) -> Result<Vec<&Archive>> {
         Self::requirement_shape(q)?;
@@ -1192,6 +1202,9 @@ impl State {
         let Some(a) = self.installed(identity)? else {
             return fail(Code::NotInstalled, "Package is not installed");
         };
+        Ok(self.file_issues_inner(a))
+    }
+    fn file_issues_inner(&self, a: &Archive) -> Vec<FileIssue> {
         let mut out = Vec::new();
         for (p, expected) in &a.files {
             let mut differences = Vec::new();
@@ -1222,7 +1235,7 @@ impl State {
                 });
             }
         }
-        Ok(out)
+        out
     }
     fn config_manifest(a: &Archive) -> BTreeMap<&str, FileKind> {
         a.files
@@ -1464,5 +1477,189 @@ impl State {
         let (next, plan) = self.candidate(action)?;
         *self = next;
         Ok(plan)
+    }
+}
+
+// A checked borrow, never a serialized credential. Only this module constructs it.
+pub(crate) struct ValidatedQueries<'a> {
+    state: &'a State,
+}
+impl State {
+    pub(crate) fn validated_queries(&self) -> Result<ValidatedQueries<'_>> {
+        self.validate()?;
+        Ok(ValidatedQueries { state: self })
+    }
+}
+impl<'a> ValidatedQueries<'a> {
+    pub(crate) fn installed(&self, id: &Identity) -> Result<Option<&'a Archive>> {
+        State::identity_shape(id)?;
+        Ok(self.state.installed_inner(id))
+    }
+    pub(crate) fn installed_providers(&self, q: &Requirement) -> Result<Vec<&'a Archive>> {
+        State::requirement_shape(q)?;
+        Ok(self.state.installed_providers_inner(q))
+    }
+    pub(crate) fn dependency_issues(&self) -> Vec<DependencyIssue> {
+        self.state.dependency_issues_inner()
+    }
+    pub(crate) fn file_issues(&self, id: &Identity) -> Result<Vec<FileIssue>> {
+        let Some(a) = self.installed(id)? else {
+            return fail(Code::NotInstalled, "Package is not installed");
+        };
+        Ok(self.state.file_issues_inner(a))
+    }
+}
+#[cfg(test)]
+std::thread_local! { static QUERY_VALIDATIONS: std::cell::Cell<usize> = const { std::cell::Cell::new(0) }; }
+
+#[cfg(test)]
+mod validated_query_tests {
+    use super::*;
+    fn fixture() -> State {
+        let v: serde_json::Value =
+            serde_json::from_str(include_str!("../tests/fixtures/rpm-workspace-preview.json"))
+                .unwrap();
+        State::decode(&serde_json::to_vec(&v["scenarios"][0]["initial"]["simulation"]).unwrap())
+            .unwrap()
+    }
+    fn id(n: &str) -> Identity {
+        Identity {
+            name: n.into(),
+            arch: Architecture::Noarch,
+        }
+    }
+    #[test]
+    fn query_view_matches_complete_public_values_and_validates_once() {
+        let mut s = fixture();
+        s.apply(&Action::InstallSet {
+            archives: vec!["provider-a".into()],
+        })
+        .unwrap();
+        let expected_ids = ["desk-client", "quiet-neighbor", "ink-bridge", "missing"].map(|n| {
+            let i = id(n);
+            (
+                i.clone(),
+                s.installed(&i).unwrap().cloned(),
+                s.file_issues(&i),
+            )
+        });
+        let requirements = [
+            Requirement {
+                capability: "desk-api".into(),
+                constraint: None,
+            },
+            Requirement {
+                capability: "desk-api".into(),
+                constraint: Some(Constraint {
+                    relation: Relation::Ge,
+                    evr: Evr::parse("2.0-1").unwrap(),
+                }),
+            },
+            Requirement {
+                capability: "ink-bridge".into(),
+                constraint: None,
+            },
+        ];
+        let providers = requirements
+            .iter()
+            .map(|q| {
+                s.installed_providers(q)
+                    .unwrap()
+                    .into_iter()
+                    .cloned()
+                    .collect::<Vec<_>>()
+            })
+            .collect::<Vec<_>>();
+        let dep = s.dependency_issues().unwrap();
+        let before = s.clone();
+        QUERY_VALIDATIONS.with(|n| n.set(0));
+        let v = s.validated_queries().unwrap();
+        assert_eq!(QUERY_VALIDATIONS.with(|n| n.get()), 1);
+        assert!(std::ptr::eq(
+            v.installed(&id("desk-client")).unwrap().unwrap(),
+            &s.catalog.archives["client-a"]
+        ));
+        for _ in 0..4 {
+            for (i, archive, issues) in &expected_ids {
+                assert_eq!(v.installed(i).unwrap().cloned(), *archive);
+                match issues {
+                    Ok(e) => assert_eq!(v.file_issues(i).unwrap(), *e),
+                    Err(e) => {
+                        let got = v.file_issues(i).unwrap_err();
+                        assert_eq!(got.code, e.code);
+                        assert_eq!(got.message, e.message);
+                    }
+                }
+            }
+            for (q, expected) in requirements.iter().zip(&providers) {
+                assert_eq!(
+                    v.installed_providers(q)
+                        .unwrap()
+                        .into_iter()
+                        .cloned()
+                        .collect::<Vec<_>>(),
+                    *expected
+                );
+            }
+            assert_eq!(v.dependency_issues(), dep);
+        }
+        assert_eq!(QUERY_VALIDATIONS.with(|n| n.get()), 1);
+        assert!(s == before, "Queries must not mutate caller");
+    }
+    #[test]
+    fn shared_file_loop_preserves_every_difference_order_and_configuration_flag() {
+        let mut s = fixture();
+        let f = s.runtime.files.get_mut("/etc/desk.conf").unwrap();
+        f.contents = "changed".into();
+        f.mode = 0o600;
+        f.owner = "operator".into();
+        f.group = "team".into();
+        f.mtime += 1;
+        s.runtime.files.remove("/usr/share/desk/report");
+        let expected = s.file_issues(&id("desk-client")).unwrap();
+        let v = s.validated_queries().unwrap();
+        assert_eq!(v.file_issues(&id("desk-client")).unwrap(), expected);
+        assert_eq!(
+            expected[0].differences,
+            vec![
+                Difference::Contents,
+                Difference::Mode,
+                Difference::Owner,
+                Difference::Group,
+                Difference::Mtime
+            ]
+        );
+        assert!(expected[0].configuration);
+        assert_eq!(expected[1].differences, vec![Difference::Missing]);
+    }
+    #[test]
+    fn public_query_argument_errors_still_precede_invalid_state_and_no_unchecked_view() {
+        let mut s = fixture();
+        s.schema_version = 99;
+        let large = id(&"x".repeat(33));
+        assert_eq!(s.installed(&large).unwrap_err().code, Code::Limit);
+        assert_eq!(s.file_issues(&large).unwrap_err().code, Code::Limit);
+        assert_eq!(s.installed(&id("Upper")).unwrap_err().code, Code::Malformed);
+        assert_eq!(
+            s.installed(&id("Upper")).unwrap_err().message,
+            "Invalid package identity"
+        );
+        assert_eq!(
+            s.file_issues(&id("missing")).unwrap_err().message,
+            "Future RPM State"
+        );
+        let q = Requirement {
+            capability: "Upper".into(),
+            constraint: None,
+        };
+        assert_eq!(
+            s.installed_providers(&q).unwrap_err().code,
+            Code::UnsupportedSubset
+        );
+        assert_eq!(
+            s.file_issues(&id("missing")).unwrap_err().code,
+            Code::Malformed
+        );
+        assert!(s.validated_queries().is_err());
     }
 }

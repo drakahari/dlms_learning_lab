@@ -124,3 +124,7 @@ pub(crate) mod actual9_test_evidence;
 
 /// Restricted RPM EVR/provider observations; no CLI or curriculum.
 pub mod rpm_packages;
+
+pub mod rpm_packages_teaching;
+pub mod rpm_packages_terminal;
+pub mod rpm_packages_workspace;

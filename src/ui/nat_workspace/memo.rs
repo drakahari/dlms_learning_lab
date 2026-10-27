@@ -236,6 +236,8 @@ impl Memo {
 // All typed foreign-family payloads are rejected by NAT admission. Never copy them.
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        rpm_session,
+        rpm_learning,
         nat_draft: _,
         nat_learning: _,
         version: _,
@@ -298,6 +300,8 @@ fn foreign(w: &model::WorkspaceData) -> bool {
     } = w;
     macro_rules! any { ($($v:ident),* $(,)?) => { false $(|| $v.is_some())* }; }
     any!(
+        rpm_session,
+        rpm_learning,
         debian_packages_terminal,
         apache_static_draft,
         apache_static_learning,
@@ -799,6 +803,63 @@ mod tests {
         dlms_learning_lab::nat_teaching::prepare(&mut a, s.nat_teaching.as_ref().unwrap(), true)
             .unwrap();
         (s, a)
+    }
+    #[test]
+    fn rpm_foreign_metadata_and_state_cannot_reuse_warm_nat_success_or_snapshot() {
+        let (s, mut a) = teaching_fixture();
+        solve(&s, &mut a);
+        let good = a.clone();
+        let rpm = pack::load(include_str!(
+            "../../../tests/fixtures/rpm-workspace-preview.json"
+        ))
+        .unwrap()
+        .remove(0);
+        let learning = dlms_learning_lab::rpm_packages_teaching::Learning::new(
+            rpm.rpm_packages_teaching.as_ref().unwrap(),
+        )
+        .unwrap();
+        assert!(learning.valid());
+        for (session, practice) in [(true, false), (false, true), (true, true)] {
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            let w = a.workspace.as_mut().unwrap();
+            if session {
+                w.rpm_session = Some(dlms_learning_lab::rpm_packages_terminal::Session::default());
+            }
+            if practice {
+                w.rpm_learning = Some(learning.clone());
+            }
+            assert!(w.valid());
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.evaluations, before.evaluations + 1);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert!(m.entries.is_empty());
+            assert_eq!(
+                m.rows(&s.id).unwrap().iter().all(|r| r.0),
+                progress::current_nat_checks(&a, &s).iter().all(|r| r.0)
+            );
+            assert!(serde_json::to_value(&a).unwrap() == caller);
+            a = good.clone();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            assert_eq!(m.counters.snapshots, before.snapshots + 1);
+            let before = m.counters;
+            a.state = rpm.initial.clone();
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert!(m.entries.is_empty());
+            assert_eq!(m.counters.evaluations, before.evaluations);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert!(serde_json::to_value(&a).unwrap() == caller);
+        }
     }
     #[test]
     fn exact_learning_and_lesson_key_hits_do_not_run_admission_checks_or_copy_inputs() {
