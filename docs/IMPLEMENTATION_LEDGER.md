@@ -2673,3 +2673,26 @@ clarified; all original140 source packs remain byte-exact. Current CCNA v1.1
 Basic NAT model, no IOS/PAT/ports/routing/connectivity or full exam coverage.
 No new packaged, cold-process, other-OS, physical-device, screen-reader or novice
 acceptance is claimed. Failed diagnostics and all screenshots remain private.
+
+### M129 isolated NFS goal and teaching foundation (2026-10-26)
+
+Stage A adds bounded outcome Definitions, display/request Sessions and separate
+Lesson/Learning data around the unchanged NFS core. Current mounts/access/file
+text, saved/applied agreement and independent new-mount trials are explicit;
+faults never satisfy expected denial. Rule ordering is not prescribed. Existing
+inode metadata stays immutable; repairs use supplied profiles or supported
+anonymous-group mapping, not fabricated chmod/create operations.
+
+Independent source review caught Session copying before proposed-size checks and
+stale client-dependent selections. R2 uses borrowed Session/Learning preflight,
+counts exact editor substitution before State copy, and clears only invalid view
+selections. Paired refusal/positive controls and actual fill copy counters pass.
+R3 changes only an equivalent let-chain after a lint finding.97 default checks
+pass privately and on exact seven-path MAIN integration (75 library,10 teaching,
+12 workspace);4 unrelated historical checks retain their explicit earlier gates.
+Private all-target Clippy passes21.64s;696 protected source paths and core exact.
+
+The four-shape technical fixture is not bundled curriculum. Engine/progress/pack/
+native integration, complete Attempt admission and authored NFS lessons remain
+future Stage B work. No NFS objective credit, learner-facing workspace, normal
+registration, source count increase or packaged acceptance is claimed.

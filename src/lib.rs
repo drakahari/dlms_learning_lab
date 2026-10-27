@@ -12,6 +12,8 @@ pub mod debian_packages_workspace;
 pub mod engine;
 pub mod filesystem;
 pub mod nfs;
+pub mod nfs_teaching;
+pub mod nfs_workspace;
 pub mod pack;
 pub mod progress;
 

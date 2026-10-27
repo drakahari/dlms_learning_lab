@@ -29,8 +29,8 @@ Current work, in order:
    original visibility tolerance,20wheel/60idle/300queue limits and pacing.
    Eleven reviewed paths merged into MAIN with all before hashes checked and
    clean three-way merges preserving newer RPM state handling. MAIN45 NAT UI
-   checks pass, plus142 default model/content/library/interop checks (4 ignored
-   historical checks retain prior explicit receipts); Main Clippy12.17s and
+   checks pass, plus142 default model/content/library/interop checks plus all6 scoped ignored
+   historical checks explicitly run and passed; Main Clippy12.17s and
    development build5.36s pass. CCNA v1.1 4.1 is now narrowly Partial practice; no IOS/PAT/ports/
    real-packet or full-objective claim. No new packaged/cold-process acceptance.
 3. RPM backend is pushed at8f5e5fa. Private renderer R7 in rpm-native-140 passes
@@ -51,8 +51,11 @@ Current work, in order:
    decoding and documents/tests mode-denial ordering. Root R3 gates pass95 default plus4 explicit private; Clippy13.74s.
    Exact four-path MAIN integration passes the same95 default checks.
    Main all-target Clippy19.37s also passes. Source pushed asf7d1210.
-   Stage A adapter/separate-teaching source work is authorized only in isolated
-   nfs-app-143 atf7d1210, contract9486b5c7. No normal scenarios/credit yet.
+   Stage A adapter/separate-teaching R3 is merged into MAIN after peer review
+   and97 default checks privately and in Main; private Clippy21.64s passes.
+   Relevant saved/current/fresh outcomes, preserved layers, separate practice
+   and pre-copy limits are covered. No engine/progress/UI hooks or NFS scenario
+   registration yet; Stage B must use finalized147 base for reciprocal guards.
    No host NFS/mount commands or dependency; all16 objective rows remain Open.
 
 Root alone owns heavy commands through MAIN tools/dev.py. Source workers have no
