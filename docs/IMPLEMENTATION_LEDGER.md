@@ -3416,3 +3416,67 @@ worktree, but are not yet integrated MAIN or a full-inclusive claim. All new
 observations/artifacts remain ignored; only static recipes and tooling are public.
 Shared runner2jobs/2threads/disk artifacts remains mandatory. No new catalog or
 objective credit; no release, personal profile or host learner execution.
+
+### M171 controlled shell reference detects a real parser defect (2026-10-28)
+
+Closed developer-only collector pins35 original parameter recipes,6 colon and13
+cat inputs, Bash5.3.9/original manual plus sort/cat retained descriptors. It accepts
+no learner source, binary/profile/output paths or arbitrary command. Preparation
+is metadata-only; an exact independently reviewed same-head/source approval is
+required before the fixed disposable-fixture run. PATH/startup imports stay closed;
+only reviewed utility wrappers run. Eight new guard groups pass in231Python tests.
+No VM/progress is produced by the Bash reference collector.
+
+Actual54 observations completed, but only53 matched their proposed expected
+results: Bash rejects the malformed arithmetic fallback in case032 rather than
+printing8. This is a discovered simulator/parser and NEW expected-fixture defect,
+not a passing54-case conformance report. Exact raw observations remain under
+ignored reviews/bash-parameter-defaults/bash-captures/parameters54-r1, manifest
+`86b789a47debdccbbbcab130fe40cacd16ac44ca049d593b9bf8bf6a6de8bbad`.
+The invalid observation SHA256 is
+`a88b399953a9bb660a1492cd565c8e34e009ebe85de3486379dea775833169ab`.
+Original35+6+13 inputs, original actual10 records and failed expected value remain
+immutable. Structural borrowed-span arithmetic/parameter correction and explicit
+amendment tests are source-frozen in the isolated worktree, not yet accepted MAIN.
+Five separately pinned balanced controls await reviewed reference execution.
+No blanket test weakening, source-specific success branch or coverage promotion.
+
+### M172 bounded virtual backup/restore foundation (2026-10-28)
+
+Independent typed archive/tree/snapshot model supplies owned full payloads,
+logical modification/change clocks, incremental selection/directory inventories,
+overlay versus deletion-aware restore and snapshot branching. Wrong/missing/order
+choices honestly produce old/missing/extra files; no command-to-success/chain flag.
+Relative-path, duplicate-key, scalar/count/text/raw-size guards precede copying;
+failed edits/extraction retain the previous target. No host I/O, learner subprocess,
+network, real tar binary format, compression, links/devices or physical timestamp
+conformance. FILE_BACKUP_SUBSET.md records the precise original reference/limits.
+
+Independent source review found three issues before acceptance: extraction must
+advance change-time so a later incremental notices restored old data; an omitted
+unchanged file must not accept a target directory masquerading as that file; and
+metadata/count fields need early bounded admission. All corrected with explicit
+regressions. Thirteen focused tests pass. One NEW combined decoder test initially
+left an invalid directory fixture active before testing text; reset to the valid
+fixture fixed the test without changing either assertion/model. Scoped Clippy
+initially rejected nested impl placement/one collapsible if; scope/style corrected,
+13 tests and Clippy pass again. No allowances or existing tests weakened.
+
+Fixed compile-identified probe and no-shell GNU tar1.35 collector compare eight
+actual disposable restore chains: full, sequential, overlay, delta alone, reverse,
+second sequential level, differential and missing-middle. All8 match actual names,
+text, directory types and modes. Physical ctime/ownership/format not compared.
+Final original manifest `202da09ac3f90fd09dc6dcf7dc5e94a886e26424bb07386ce1aae789efd092fa`;
+private source/log/measurement receipt reviews/file-backup/foundation-r2/RESULT.json
+SHA256 `9e495a8e174cfa35f75dafe3610b2484bfcd96f848e527914ed5ba3875a52a0a`.
+Six new collector guards plus earlier shell guards yield237Python PASS. Coverage
+checker PASS; all statuses/credited IDs/source fingerprints unchanged. Observed
+minimum available21.32GiB/maxsome-fullPSI0.18/0.18/OOMdelta0; one shared runner,
+2jobs/2threads/disk fixtures, all wrappers reaped. Not a memory guarantee.
+
+This is a tested foundation, NOT an integrated backup lab. LPIC-2 206.2 and its13
+references remain Open; gap wording now acknowledges the foundation honestly.
+Terminal adapter, teaching, full assignments, independent grading, persistence
+and native flows remain to implement. Existing catalog154/39 and28themes/progress
+remain unchanged. No release/platform/curriculum-completion claim. Cron integration
+and LACP native fixes plus corrected shell evaluation continue, not stop here.

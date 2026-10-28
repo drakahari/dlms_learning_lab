@@ -33,13 +33,26 @@ observations may be regenerated or relabeled under11. Historical producer is
 nondefault-feature gated; ordinary all-target checks do not rebuild it. See M170.
 Python223 and the closed immutable verifier pass. MAIN still evaluator10/catalog154.
 
-Current sole HEAVY GRANT is Bash R5: real bounded `cat --` behavior, all five
-actual10 migration groups and scoped Clippy. ROOT must wait for DONE/reaped before
-any other heavy invocation. LACP QA overlay and Cron integration remain source-only;
-no registration, new count or objective credit yet. Cron foundation17/workspace6
-and scoped Clippy pass; LACP initial adapter/content/UI gates pass but native QA
-is pending. Next: finish capability/reference/native gates, integrate substantive
-units, then continue the remaining reconciliation queue; do not end at this note.
+M171 actual Bash54 comparison found a genuine malformed-arithmetic false positive:
+53 expected matches,1 rejected case032. Original recipe/output/evaluator10 bytes
+stay immutable. Structural R7 correction and5 balanced controls are SOURCE ONLY;
+next scoped VM/private-history/reference gates precede MAIN11 integration. Do not
+claim54/54 or silently change old evidence. See M171 and private correction receipt.
+
+M172 pure backup/tree/snapshot foundation passes13 tests, scoped Clippy and8/8
+controlled GNU tar restore comparisons;237Python and coverage pass. Independent
+review found/fixed restore ctime, omitted-file type conflict and early bounds.
+No backup lab/credit yet: 206.2 remains Open, now accurately naming the foundation.
+
+Current sole HEAVY GRANT is Cron integrationR2: library/core/workspace/attempts,
+three warm metadata regressions and scoped Clippy. ROOT must wait for DONE/reaped
+before any other heavy invocation. LACP is source-only fixing115% optional-form
+clipping plus idle admission-serialization bypasses discovered by real controller
+checks; its preserved assertions stay. No registration/new count/objective credit.
+Cron foundation17/workspace6 earlier passed; integration/policy equivalence awaits
+this new gate. ROOT wrappers all reaped; memoryminimum21.32GiB/PSI0.18/OOMdelta0.
+Next: finish capability/reference/native gates, integrate substantive units, then
+continue remaining reconciliation queue; do not end at this note.
 
 Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
 three substantive tasks); bash-parameter-defaults-154 (faithful parameter fallback/

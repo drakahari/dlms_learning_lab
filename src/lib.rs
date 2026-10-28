@@ -134,3 +134,6 @@ pub mod rpm_packages_workspace;
 
 /// Bounded L2 LACP eligibility; no app/curriculum integration.
 pub mod etherchannel;
+
+/// Bounded virtual archive/restore foundation; not yet bundled curriculum.
+pub mod file_backup;

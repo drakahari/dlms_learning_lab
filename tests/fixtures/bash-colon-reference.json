@@ -1,0 +1,123 @@
+[
+  {
+    "name": "colon ignores literal arguments and returns success",
+    "source": "false; : first '' -n -- 'literal ; $(false)'; printf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "colon ignores literal arguments and returns success",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "colon keeps expanded values as data",
+    "source": ": \"${value:-fallback}\"; printf '<%s>\\n' \"$value\"\n",
+    "case": {
+      "name": "colon keeps expanded values as data",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": "two words ; $(false) % *"
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<two words ; $(false) % *>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "colon ordinary truncate and append",
+    "source": ": old > output.txt; : more >> output.txt; printf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "colon ordinary truncate and append",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n",
+        "/work/output.txt": ""
+      }
+    }
+  },
+  {
+    "name": "colon input redirect restores caller input",
+    "source": ": < input.txt; read -r line; printf '<%s>\\n' \"$line\"\n",
+    "case": {
+      "name": "colon input redirect restores caller input",
+      "args": [],
+      "stdin": "caller input\n",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n",
+        "/work/input.txt": "virtual input\n"
+      },
+      "stdout": "<caller input>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n",
+        "/work/input.txt": "virtual input\n"
+      }
+    }
+  },
+  {
+    "name": "colon capture effects occur but its status is zero",
+    "source": ": \"$(printf inside > captured.txt; false)\" > output.txt; printf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "colon capture effects occur but its status is zero",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n",
+        "/work/captured.txt": "inside",
+        "/work/output.txt": ""
+      }
+    }
+  },
+  {
+    "name": "quoted and expanded colon heads use ordinary dispatch",
+    "source": "head=:; ':' one ''; \"$head\" two; printf '%s\\n' \"$?\"\n",
+    "case": {
+      "name": "quoted and expanded colon heads use ordinary dispatch",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "0\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  }
+]

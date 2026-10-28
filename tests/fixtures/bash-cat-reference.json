@@ -1,0 +1,260 @@
+[
+  {
+    "name": "cat bare consumes finite stdin",
+    "source": "cat\n",
+    "case": {
+      "name": "cat bare consumes finite stdin",
+      "args": [],
+      "stdin": "first\n  second  \nlast",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "first\n  second  \nlast",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "cat delimiter without file consumes finite stdin",
+    "source": "cat --\n",
+    "case": {
+      "name": "cat delimiter without file consumes finite stdin",
+      "args": [],
+      "stdin": "alpha\nbeta\n",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "alpha\nbeta\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "cat dash means stdin even when a virtual dash file exists",
+    "source": "cat -\n",
+    "case": {
+      "name": "cat dash means stdin even when a virtual dash file exists",
+      "args": [],
+      "stdin": "stream\n",
+      "env": {},
+      "files": {
+        "/work/-": "file must not be read\n",
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "stream\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/-": "file must not be read\n",
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "cat delimiter dash means stdin",
+    "source": "cat -- -\n",
+    "case": {
+      "name": "cat delimiter dash means stdin",
+      "args": [],
+      "stdin": "line without newline",
+      "env": {},
+      "files": {
+        "/work/-": "not stream\n"
+      },
+      "stdout": "line without newline",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/-": "not stream\n"
+      }
+    }
+  },
+  {
+    "name": "cat file leaves finite stdin untouched",
+    "source": "cat notes.txt; read -r line; printf '<%s>\\n' \"$line\"\n",
+    "case": {
+      "name": "cat file leaves finite stdin untouched",
+      "args": [],
+      "stdin": "caller\n",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "file\n",
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "file\n<caller>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "file\n",
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "cat delimiter permits option-looking filename",
+    "source": "cat -- -notes\n",
+    "case": {
+      "name": "cat delimiter permits option-looking filename",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/-notes": "option-looking file\n"
+      },
+      "stdout": "option-looking file\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/-notes": "option-looking file\n"
+      }
+    }
+  },
+  {
+    "name": "only the first cat delimiter is special",
+    "source": "cat -- --\n",
+    "case": {
+      "name": "only the first cat delimiter is special",
+      "args": [],
+      "stdin": "not this\n",
+      "env": {},
+      "files": {
+        "/work/--": "literal delimiter file\n"
+      },
+      "stdout": "literal delimiter file\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/--": "literal delimiter file\n"
+      }
+    }
+  },
+  {
+    "name": "quoted expanded cat operand stays one filename",
+    "source": "cat -- \"$FILE\"\n",
+    "case": {
+      "name": "quoted expanded cat operand stays one filename",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "FILE": "- shift notes.txt"
+      },
+      "files": {
+        "/work/- shift notes.txt": "literal * and $(printf no)\n"
+      },
+      "stdout": "literal * and $(printf no)\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/- shift notes.txt": "literal * and $(printf no)\n"
+      }
+    }
+  },
+  {
+    "name": "cat redirect binds and restores caller input",
+    "source": "cat -- < notes.txt; read -r line; printf '<%s>\\n' \"$line\"\n",
+    "case": {
+      "name": "cat redirect binds and restores caller input",
+      "args": [],
+      "stdin": "caller\n",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "file stream\n"
+      },
+      "stdout": "file stream\n<caller>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "file stream\n"
+      }
+    }
+  },
+  {
+    "name": "cat capture retains ordinary trailing newline removal",
+    "source": "text=$(cat -- notes.txt); printf '<%s>\\n' \"$text\"\n",
+    "case": {
+      "name": "cat capture retains ordinary trailing newline removal",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/notes.txt": "one\ntwo\n\n"
+      },
+      "stdout": "<one\ntwo>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/notes.txt": "one\ntwo\n\n"
+      }
+    }
+  },
+  {
+    "name": "cat pipeline does not consume unrelated caller stdin",
+    "source": "printf 'pipe\\n' | cat --; cat --\n",
+    "case": {
+      "name": "cat pipeline does not consume unrelated caller stdin",
+      "args": [],
+      "stdin": "caller\n",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "pipe\ncaller\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "cat copies exact text into a quoted output operand",
+    "source": "cat -- -notes > \"- saved.txt\"\n",
+    "case": {
+      "name": "cat copies exact text into a quoted output operand",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/-notes": "a\n\n  b  \\c\nfinal",
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/-notes": "a\n\n  b  \\c\nfinal",
+        "/work/keep.txt": "retained\n",
+        "/work/- saved.txt": "a\n\n  b  \\c\nfinal"
+      }
+    }
+  },
+  {
+    "name": "quoted and expanded cat delimiter has ordinary option semantics",
+    "source": "stop=--; cat \"$stop\" \"$1\"\n",
+    "case": {
+      "name": "quoted and expanded cat delimiter has ordinary option semantics",
+      "args": [
+        "--"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/--": "argument data\n"
+      },
+      "stdout": "argument data\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/--": "argument data\n"
+      }
+    }
+  }
+]
