@@ -1,28 +1,41 @@
 # Verification evidence and current limits
 
-Current source has154 authored assignments/39 units (45CCNA/32LPIC-1/28LPIC-2/
-49Bash). The final inclusive Rust suite passes1974/0/0 on the reviewed integration
-source, including all14 retained-history checks; all-target Clippy passes. Main's
-Rust app, catalog, Rust tests and assets are byte-identical to that gated tree.
-A workflow test additionally verifies the current39 units against exact old37 and
-new2 objects; all215 Python checks pass separately on the integrated source.
-Final real-native installed flows pass for all seven new tasks (178 captures),
-plus three NAT tasks80 captures, shared alignment72, ten quiet/one traced Wayland
-starts, actual script/DHCP cold reopening and installer lifecycle/legacy-byte
-retention. Exact candidate00d69d3/ELF/archive identity is in INSTALLATION.md.
-Two nonblocking UI follow-ups remain: selected-pass script comparison under overall
-failure, and an NFS scrollbar-related Save-row offset. New-seven resume is full
-warm readback; expanded optional inventory/novice/physical-reader acceptance is
-not inferred. Root and independent peers reviewed representative native frames.
-Exact identities, failed and successful logs and scope are in CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
-INSTALLATION.md. Shell behavior is evaluator10 and the current SHELL_SUBSET.md;
-older capability lists below are historical. MIT for original code/curriculum is
-approved; all third-party notices remain, with macOS dispatch redistribution open.
+Current source remains154 authored assignments/39 units (45CCNA/32LPIC-1/28LPIC-2/
+49Bash). This UI-only milestone changes no simulation or grading behavior,
+authored data, evaluator revision, progress format or dependencies. The final
+inclusive all-target Rust run passes **1981/0/0 across150 harnesses**, including
+all14 retained-history checks. All-target Clippy (warnings denied),215 Python
+checks, coverage, formatting and all28 palette/source-notice checks pass.
 
-Native CI builds on Windows/macOS exist at earlier milestones; actual desktop
-runtime acceptance on those systems, screen-reader/physical-device accessibility
-and novice comprehension remain pending. Automated input and screenshots are
-technical checks, not a learner study. Full curriculum remains incomplete.
+Seven new regression groups cover actual Run/case selection, Tab/Enter, exact
+unchanged progress, wrong simulated files despite correct output, syntax versus
+unsupported errors, edit invalidation, stable native editor geometry and actual
+capture-controller paths. Normal and forced horizontal/vertical/both scrollbar
+transitions are tested at all five picker sizes100/115/125/150/200%, wide/narrow,
+light/dark. Existing full Expected/Actual paint clipping and meaningful nonzero
+status assertions pass unchanged. Earlier failed diagnostics remain retained.
+
+Installed Fedora **9a90f275e133** passes lifecycle upgrade from00d69d3/uninstall/
+reinstall/desktop/content/legacy-byte preservation and all ten final native stages.
+These include four NFS, three command-construction and three reliable-text flows,
+40 five-size NFS alignment captures,7 feedback captures and72 original IPv4/VLAN
+alignment captures:369 PNGs indexed, with representative Root review and independent
+feedback/all40 NFS sweep review. Actual NFS sweep geometry is1920×1080 and946×929;
+requests alone are not measured acceptance. Pointer/focus/editing/keyboard event
+checks are automated application events, not physical-device testing.
+
+Ten quiet and one traced Wayland launches pass; actual two-process cold reopening
+covers original script/DHCP cases. Full NFS/script lesson resume is warm raw/
+portable/receipt readback, not a cold test of every assignment. Exact checksums,
+startup times, memory observations, before/after scope and a partial tool-preview
+delivery caveat are in INSTALLATION.md. Final ignored receipt:
+reviews/ui-polish154-final/RESULT.json SHA-256 `2f8522a536641f25f449f03d5433b21065aa23d55ebb4967c9dd0183b6368430`.
+
+Coverage is unchanged154Partial/1Supporting/1085Open of1240 overlapping references,
+not completion percentages. Full curriculum, Windows/macOS desktop runtime,
+screen-reader/physical-device accessibility and novice comprehension remain open.
+No all28-theme native render claim follows from light/dark sampling. MIT originals
+are approved; macOS dispatch original-notice/signing gates remain. No release.
 
 ## Historical prototype verification
 

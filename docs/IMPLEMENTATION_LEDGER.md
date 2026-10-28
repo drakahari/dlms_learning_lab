@@ -3298,3 +3298,42 @@ PASS612.80s;215Python PASS8.06s; coverage/palettes/fmt/diff PASS. All14 retained
 checks run, original3 clipping tests remain exact. Final candidate build/actual
 five-size/affected-flow installation verification is NEXT, not yet accepted.
 Shared-lock2jobs/2threads/disk workflow stays mandatory. No public release.
+
+
+### M165–M166 final installed UI milestone (2026-10-28)
+
+Product3562e84 plus final five-size QA9a90f27 built clean Fedora candidate
+g9a90f275e133; release2m44s,223Linux dependency notices/exact source closure PASS.
+ELF `96c3cf50503d1228342999887e0168d466389de79c7079e7dd6336b714f6333f`;
+archive `0d757e92fdfc268931976178ca5ddf2f1c342661dedffcdbd24fc58f34f4f9fa`.
+Actual private regular installed ELF passes upgrade from00d69d3, uninstall/
+reinstall, desktop/outside-checkout identity/content and exact synthetic old-nine
+progress-byte retention. No personal progress was accessed.
+
+All10 final serialized native stages PASS: NFS all-five-size sweep40, focused
+case/run feedback7, fullNFS4/106, command-construction3/72, reliable-text3/72,
+original sharedIPv4/VLAN72, quiet10+traced1starts, original script/DHCP actual
+cold reopening. Total369 captured/indexed PNGs; actual NFS sweep1920×1080 and
+946×929 at100/115/125/150/200%, light/dark. Requested sizes alone are not proof.
+Independent review viewed all40 sweep frames plus before; Root/peer inspected
+representative fullflows and feedback. One tool-preview delivery path sometimes
+shows partial images despite populated exactPNG bytes; image hashes/pixel-region
+counts and the caveat remain retained, not mislabeled as an app defect. No PNG
+was altered or substituted. Final quiet starts0.865–0.916s; no universal startup cure.
+
+Final source gates remain1981/0/0 inclusive across150harnesses/all14 retained,
+215Python/Clippy/coverage/28palettes/fmt/diff PASS. No source changed afterward
+except this delivery documentation. Old3 failing assertions stay unchanged and
+pass. All154/39/data/core/evaluator10/progress/dependencies stay exact. Before/
+after5 pairs and all source/build/lifecycle/native/memory hashes are in ignored
+reviews/ui-polish154-final/RESULT.json SHA256 `2f8522a536641f25f449f03d5433b21065aa23d55ebb4967c9dd0183b6368430`.
+All final source/build/install/native commands use MAINsharedlock2jobs/2threads,
+disk artifacts; minimum available21.20GiB/maxsome-fullPSI0/0/OOMdelta0.
+This is observation, not memory reservation/stress acceptance. All wrappers reaped.
+
+No fullcurriculum/platform/novice/reader/physical-device acceptance. NewNFS/script
+resume remains warm fullreadback; cold cases named above are not all154. Expanded
+optional inventory not newly visually reviewed. NAT80 stays on00d; RPM/olderunit
+acceptance remains bound to originalELFs. All28 palettes retained; native themes
+sampled light/dark. macOS dispatchnotice and actualWindows/macOS acceptance stay
+open. No release. Exact runnable artifact and owner-install steps: INSTALLATION.md.

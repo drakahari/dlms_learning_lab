@@ -214,9 +214,11 @@ and a two-share capstone preserving unrelated vault state. Each uses a native
 configuration workspace and independent practice rather than host NFS execution.
 Current and independent new-mount checks distinguish actual files/mounts from saved
 policy, recognize correct alternatives, reject wrong/partial repairs and invalidate
-broken-again success. Installed154 candidate00d69d3 passes all four final NFS
-flows (106 captures), alongside lifecycle/legacy-byte retention checks; technical
-gates and exact build identity are in IMPLEMENTATION_LEDGER.md/INSTALLATION.md.
+broken-again success. Installed154 candidate9a90f275e133 passes all four NFS
+flows (106 captures), plus40 all-five-size editor/Save alignment captures and
+lifecycle/legacy-byte retention. This UI-only fix promotes no objective or utility
+credit; all1240 rows/fingerprints and154Partial/1Supporting/1085Open remain exact.
+Technical gates and identity are in IMPLEMENTATION_LEDGER.md/INSTALLATION.md.
 New-NFS resume is full warm readback, not four cold-process checks. Expanded
 optional inventory/novice/screen-reader/other-platform acceptance is not inferred.
 This paragraph alone is not acceptance evidence or broader objective credit.

@@ -6,13 +6,16 @@ evidence ledger, not complete exam preparation. Main has **154 authored assignme
 /39 units:45CCNA,32LPIC-1,28LPIC-2,49Bash/Shell**. The latest two units contain
 three distinct safe-command scripting tasks and four NFS configuration tasks.
 Generated numerical practice and developer-only synthetic entries are excluded.
-Complete inclusive regression passes1974/0/0. Installed Fedora candidate00d69d3
-passes scoped new-seven/NAT/alignment/lifecycle/startup/reopen verification; exact
-identity and two nonblocking UI follow-ups are in INSTALLATION.md.
+The UI-only9a90f275e133 milestone adds no curriculum or objective credit. Complete
+inclusive regression passes1981/0/0. Its installed Fedora candidate passes four
+NFS, three command-construction and three reliable-text flows, all-five-size NFS
+alignment, feedback, shared alignment, lifecycle/startup/original cold reopening.
+The two prior UI follow-ups are corrected; exact scope is in INSTALLATION.md.
 
-Three Basic NAT lessons now have complete installed154 Fedora flows80 captures;
-the four NFS106 and three command-construction scripting72 flows pass on that
-same ELF. New-seven resume is full warm readback, not seven cold-process tests.
+Three Basic NAT lessons retain installed154 Fedora flows80 captures on00d69d3;
+NAT was not rerun on the UI-only9a90f275e133 ELF. Four NFS106 and three command-
+construction scripting72 flows pass on that latest ELF, alongside reliable-text72.
+New-seven resume is full warm readback, not seven cold-process tests.
 Four RPM lessons separately passed development AND installed147 native flows,
 including separate practice, alternatives, wrong/partial work, invalidation,
 reset/resume and scaling; those flows were not repeated on154. Earlier147

@@ -116,11 +116,15 @@ the replacement client after handover. Native acceptance and artifact identities
 are recorded in [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md) and
 [INSTALLATION.md](INSTALLATION.md); test descriptions alone are not acceptance.
 
-**Installed Fedora candidate00d69d3 passes all four final NFS flows**,106 captures,
-including visible supplied IPv4 rows, default-open required Write editors and the
-shorter optional inventory caption. Lifecycle and exact synthetic legacy-byte
-retention also pass; see INSTALLATION.md for identities. New-task resume is full
-warm readback, not four cold-process tests. Optional expanded inventory was not
-visually reviewed; a horizontal editor scrollbar can offset adjacent Save rows.
-Windows/macOS runtime, screen-reader and novice acceptance remain pending.
+**Installed Fedora candidate9a90f275e133 passes all four NFS flows**,106 captures,
+and the40-frame editor/Save sweep at all five text sizes100/115/125/150/200%,
+wide/narrow, light/dark. The shared viewport reserves font/style-derived space
+before Save rows; horizontal/vertical scrollbar changes no longer shift them.
+All40 sweep PNGs and representative full-flow screens were visually reviewed.
+Visible supplied IPv4 rows, required Write editors, editing/focus/Undo and existing
+Save/Apply behavior are preserved. Lifecycle and exact synthetic legacy-byte
+retention pass; see INSTALLATION.md for identities. New-task resume remains full
+warm readback, not four cold-process tests. Optional expanded inventory is not
+newly visually reviewed. Windows/macOS runtime, screen-reader/physical-device and
+novice acceptance remain pending. Previous00d scrollbar evidence is historical.
 No public release is published.

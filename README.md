@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **154 authored assignments in development:**45 CCNA,32 LPIC-1,28 LPIC-2 and49 Bash/Shell in39 source units. The latest source batch adds four [NFS assignments](docs/NFS_LESSONS.md) and three [command-construction scripting assignments](docs/SHELL_COMMAND_VECTOR_LESSONS.md), retaining full tasks, separate practice and optional guidance. Source, native and packaged acceptance are tracked separately in [the implementation ledger](docs/IMPLEMENTATION_LEDGER.md) and [installation evidence](docs/INSTALLATION.md); the154-lab Fedora candidate passes scoped installed verification, with two documented UI follow-ups. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **154 authored assignments in39 units:**45 CCNA,32 LPIC-1,28 LPIC-2 and49 Bash/Shell. The latest update clarifies individual script cases versus the overall run and stabilizes NFS editor Save rows. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. Source and installed acceptance are recorded separately in [the implementation ledger](docs/IMPLEMENTATION_LEDGER.md) and [installation evidence](docs/INSTALLATION.md). This is scoped Fedora milestone evidence, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g9a90f275e133-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -41,19 +41,20 @@ The checked-in Cargo.lock pins dependencies. First-time builds need crates.io ac
 
 ## This milestone
 
-The latest seven source assignments teach restricted NFS exports, publication
-permissions, client replacement and a two-share handover, plus safe argument
-construction, approved transformation dispatch and review-before-publication.
-Networking tasks keep editors and explicit virtual operations; scripting tasks
-keep editable scripts and bounded execution against multiple sample inputs.
-Alternative valid solutions, useful wrong/partial feedback and resumed drafts
-remain part of the work. Installed Fedora verification passes all seven new flows,
-three NAT flows,72 alignment captures,11 Wayland starts and script/DHCP cold
-reopening. This is scoped milestone evidence; full curriculum, Windows/macOS
-runtime, novice and assistive-device acceptance remain open. A selected passing
-script case can show equal expected/actual under overall failure; select a failing
-case to compare it. NFS scrollbars can offset adjacent Save rows. Grading remains
-state/behavior based; these UI follow-ups remain recorded in the checkpoint.
+Script results explicitly separate the selected numbered case's Pass/Fail from
+the whole run. Named failing cases explain the difference; pointer or keyboard
+selection changes inspection without changing grading. NFS document viewports
+reserve consistent space so scrollbar transitions cannot move adjacent Save rows.
+The existing four NFS and three command-construction assignments keep their full
+tasks, editors, investigation, independent examples and alternate solutions.
+
+The installed Fedora candidate passes four NFS flows, three command-construction
+flows, three reliable-text flows,72 original IPv4/VLAN alignment captures and the
+focused feedback/alignment sweeps. All five supported text sizes (100/115/125/150/
+200%) are checked on actual wide/narrow light/dark NFS screens. Installer lifecycle,
+11 Wayland starts and original script/DHCP cold reopening pass separately.
+Full curriculum, Windows/macOS runtime, novice comprehension and physical-device/
+screen-reader acceptance remain open. No release is published.
 
 The source now includes four [static-web configuration assignments](docs/STATIC_WEB_LESSONS.md)
 and three [reliable-text scripting assignments](docs/SHELL_SAFE_AUTOMATION_LESSONS.md).

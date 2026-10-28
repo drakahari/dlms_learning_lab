@@ -116,11 +116,15 @@ Acceptance evidence includes independent source/content review, behavior and
 persistence regressions, fixed controlled Bash/Coreutils comparisons in disposable
 development fixtures, and actual native introduction/example/assignment/error/
 repair/reset/resume/Challenge flows at100/150/200 text with light/dark themes.
-Installed Fedora candidate00d69d3 passes all three final flows,72 captures, with
+Installed Fedora candidate9a90f275e133 passes all three flows,72 captures, with
 separate example/assignment drafts, real Run/Stop and warm full progress readback.
-One feedback-selection issue remains: a selected passing case can show equal
-expected/actual beneath overall failure; the case list and grading correctly
-reject failing inputs. Select a failing case to inspect its difference.
+Seven dedicated feedback captures distinguish selected Case N/total Pass/Fail
+from the whole Run status. Named numbered results support pointer or Tab/Enter
+inspection. A passing selected case stays correct while other cases fail; the
+overall result names the failure count and the individual rows explain why.
+Wrong-file, nonzero-status and complete Expected/Actual comparisons remain intact.
+The earlier00d presentation ambiguity is corrected without changing grading,
+shell syntax, evaluator revision, cases or progress formats.
 Read INSTALLATION.md for exact build identities and limits. Windows/macOS runtime, physical screen-reader
 and novice comprehension remain separate pending acceptance. Do not count source
 or automated tests as those observations.

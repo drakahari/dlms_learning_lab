@@ -4,53 +4,62 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current scoped Fedora candidate: **00d69d3c09ea**,154 authored labs/39 units
+Current scoped Fedora candidate: **9a90f275e133**,154 authored labs/39 units
 (45CCNA,32LPIC-1,28LPIC-2,49Bash). Source commit
-`00d69d3c09ea3ae050148ac421e2ec9556ae3716` is pushed; the following
-delivery-documentation commit does not change this executable. Open from any
-terminal directory, including your home directory:
+`9a90f275e133655f981cd79dd49d93f5246d7377` contains the reviewed UI fixes and
+five-size verification. The later documentation-only commit does not change this
+executable. Curriculum, grading, evaluator10, progress formats and all28 themes
+remain unchanged. Open from any terminal directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g9a90f275e133-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-The actual installed regular executable passes upgrade from87121151e82e, clean
-uninstall/reinstall, desktop validation, outside-checkout identity/content checks
-and exact synthetic original-nine progress-byte retention. The same ELF passes
-all four new NFS lesson flows106 captures, all three new scripting flows72, all
-three NAT flows80, and shared alignment72 captures. Wrong/partial/reference/two
-alternative solutions, current-success invalidation, isolated examples, warm full
-raw/portable/receipt readback, reset and Challenge are exercised. Actual light/dark
-100/150/200% screens were reviewed. NFS/NAT/alignment measured1920x1080 and946x929;
-scripting measured946x929 even where wider sizes were requested. Requested window
-sizes are not acceptance evidence. Independent render reviews viewed25NFS/21Bash
-frames; Root also inspected representative networking/alignment screens. All330
-flow/alignment captures are indexed, not claimed all individually viewed.
+The actual installed regular ELF passes upgrade from00d69d3, clean uninstall/
+reinstall, desktop validation, outside-checkout identity/content checks and exact
+synthetic original-nine progress-byte retention. On this same final ELF, all ten
+serialized native stages pass: NFS editor/Save alignment40 captures, script case/
+run feedback7, four complete NFS flows106, three command-construction flows72,
+three reliable-text flows72, original IPv4/VLAN alignment72, quiet/traced startup
+and original script/DHCP two-process reopening. All369 flow/alignment PNGs are
+indexed; this is not a claim that every image was individually viewed.
 
-Ten quiet Wayland launches/readbacks pass0.865–0.916s; one separately traced
-Wayland launch passes. Eleven successes do not prove intermittent failure
-impossible. Actual two-process original script/DHCP reopening also passes.
-New-seven resume is warm readback, not seven cold-process tests. Expanded optional
-NFS inventory was source/event tested but not visually reviewed in this pass.
-These are synthetic technical checks, not novice, physical-device, screen-reader
-or Windows/macOS runtime acceptance. No desktop/backend override or personal
-progress inspection. All28 palettes remain; installed visual sampling is light/dark.
+The NFS alignment sweep observes1920×1080 wide and946×929 narrow windows at all
+five supported sizes100/115/125/150/200%, with both light/dark themes. Root reviews
+representative final frames; an independent reviewer inspected all40 sweep frames
+and the retained before image. Full lesson flows also retain wrong/partial work,
+alternatives, invalidation, isolated drafts, reset, Challenge and warm full progress
+readback. Named Case Pass/Fail is now distinct from whole-run failure; NFS Save
+rows remain aligned through scrollbar changes. The unchanged comparison/clipping
+and nonzero-status teaching regressions pass. Narrow200% documents require editor
+scrolling; Save controls remain visible. No text is shrunk to fit.
 
-Two nonblocking UI follow-ups remain: script output comparison can show the
-selected passing case while other cases fail (the per-case list and grading are
-correct; select a failing input to compare it), and an NFS editor scrollbar can
-offset adjacent Save rows. This is not full curriculum or perfect UX acceptance.
+Ten quiet Wayland launches/readbacks pass 0.865–0.916s; one separately traced
+Wayland launch passes. Eleven successes do not prove an intermittent failure
+impossible. Cold-process reopening covers the original script/DHCP cases, not
+every NFS or newly authored scenario. This is injected-event technical acceptance,
+not novice, physical-device, screen-reader or Windows/macOS desktop acceptance.
+All28 theme checks pass; actual installed theme sampling is light/dark, not every
+palette. Expanded optional NFS inventory is not newly visually reviewed.
 
-ELF SHA-256: `8b6861790f8371da789b6b6187a9484a00e14fe13cda13fa176ac4bce2f18fbb`.
-Archive SHA-256: `be6480590bd0dfa94092f8f50f883c34e4e4bcb478323b4e9161147d9749b540`.
-Archive: `dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz`.
-Private receipt: reviews/catalog154/installed-00d-acceptance-r1/RESULT.json,
-SHA-256 `eab3b0c281d070e0bce5e63cd05807650daf686815c925b1d69e176ba4590ca6`.
-Linux223 dependency notices and exact source archives pass the candidate gate.
-All work used the shared two-job/two-thread runner and disk-backed artifacts.
-Build minimum21.76GiB available; installed checks minimum23.79GiB, PSI0/OOM0.
-Those observations are not a memory reservation or stress-test guarantee.
-No release or new cross-platform runtime acceptance. Older candidates remain intact.
+ELF SHA-256: `96c3cf50503d1228342999887e0168d466389de79c7079e7dd6336b714f6333f`.
+Archive SHA-256: `0d757e92fdfc268931976178ca5ddf2f1c342661dedffcdbd24fc58f34f4f9fa`.
+Archive: `dist/dlms-learning-lab-0.1.0-g9a90f275e133-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz`.
+Private receipt: reviews/ui-polish154-final/RESULT.json,
+SHA-256 `2f8522a536641f25f449f03d5433b21065aa23d55ebb4967c9dd0183b6368430`. Before/after originals and all frame/log hashes stay
+in ignored project-disk evidence, not the public repository. A tool sometimes
+delivered partial previews despite populated, unchanged PNG bytes; read-only pixel/
+hash comparisons and peer reviews retain that delivery caveat rather than calling
+the stored capture blank or claiming every preview was uncaveated.
+
+The Linux223 dependency notices and exact source archives pass the candidate gate.
+All checks use the shared two-job/two-thread runner and disk-backed artifacts.
+Across final source/build/install/native checks, minimum available memory was
+21.20GiB; maximum some/full PSI avg10 was 0/0, OOM counter delta0.
+These observations are not a memory reservation or stress-test guarantee.
+No public release or new cross-platform runtime acceptance. Older candidates and
+diagnostics remain intact. NAT80 acceptance remains on the previous00d candidate;
+it was not rerun as part of this UI-only final pass.
 
 Extract the candidate archive. Open a terminal in its extracted folder and run:
 
@@ -837,3 +846,56 @@ The retained d781 candidate failed the scripting Stop capture; it is not relabel
 accepted. Its replacement changes only exact capture Run-acknowledgement pacing,
 with an actual-frame regression; normal execution and budgets are unchanged.
 Historical acceptance entries below retain their own identities.
+
+## Historical154 candidate before the UI fixes — 00d69d3
+
+The following describes the earlier executable only. Its two UI follow-ups are
+corrected in the current9a90f275e133 candidate above.
+
+Current scoped Fedora candidate: **00d69d3c09ea**,154 authored labs/39 units
+(45CCNA,32LPIC-1,28LPIC-2,49Bash). Source commit
+`00d69d3c09ea3ae050148ac421e2ec9556ae3716` is pushed; the following
+delivery-documentation commit does not change this executable. Open from any
+terminal directory, including your home directory:
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+The actual installed regular executable passes upgrade from87121151e82e, clean
+uninstall/reinstall, desktop validation, outside-checkout identity/content checks
+and exact synthetic original-nine progress-byte retention. The same ELF passes
+all four new NFS lesson flows106 captures, all three new scripting flows72, all
+three NAT flows80, and shared alignment72 captures. Wrong/partial/reference/two
+alternative solutions, current-success invalidation, isolated examples, warm full
+raw/portable/receipt readback, reset and Challenge are exercised. Actual light/dark
+100/150/200% screens were reviewed. NFS/NAT/alignment measured1920x1080 and946x929;
+scripting measured946x929 even where wider sizes were requested. Requested window
+sizes are not acceptance evidence. Independent render reviews viewed25NFS/21Bash
+frames; Root also inspected representative networking/alignment screens. All330
+flow/alignment captures are indexed, not claimed all individually viewed.
+
+Ten quiet Wayland launches/readbacks pass0.865–0.916s; one separately traced
+Wayland launch passes. Eleven successes do not prove intermittent failure
+impossible. Actual two-process original script/DHCP reopening also passes.
+New-seven resume is warm readback, not seven cold-process tests. Expanded optional
+NFS inventory was source/event tested but not visually reviewed in this pass.
+These are synthetic technical checks, not novice, physical-device, screen-reader
+or Windows/macOS runtime acceptance. No desktop/backend override or personal
+progress inspection. All28 palettes remain; installed visual sampling is light/dark.
+
+Two nonblocking UI follow-ups remain: script output comparison can show the
+selected passing case while other cases fail (the per-case list and grading are
+correct; select a failing input to compare it), and an NFS editor scrollbar can
+offset adjacent Save rows. This is not full curriculum or perfect UX acceptance.
+
+ELF SHA-256: `8b6861790f8371da789b6b6187a9484a00e14fe13cda13fa176ac4bce2f18fbb`.
+Archive SHA-256: `be6480590bd0dfa94092f8f50f883c34e4e4bcb478323b4e9161147d9749b540`.
+Archive: `dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz`.
+Private receipt: reviews/catalog154/installed-00d-acceptance-r1/RESULT.json,
+SHA-256 `eab3b0c281d070e0bce5e63cd05807650daf686815c925b1d69e176ba4590ca6`.
+Linux223 dependency notices and exact source archives pass the candidate gate.
+All work used the shared two-job/two-thread runner and disk-backed artifacts.
+Build minimum21.76GiB available; installed checks minimum23.79GiB, PSI0/OOM0.
+Those observations are not a memory reservation or stress-test guarantee.
+No release or new cross-platform runtime acceptance. Older candidates remain intact.
