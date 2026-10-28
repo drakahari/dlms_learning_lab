@@ -42,17 +42,34 @@ No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet
 ### Immediate continuation
 
 1. Packaged147 RPM native command is REAPED/PASS. Main1909 default+14explicit
-   renderer checks and Clippy also PASS. Private Bash150 full regression is now
-   REAPED/FAIL: 11 tests in seven targets, not a clean integration. The failures
-   are five unbounded RPM-tail assertions, accounts count, preserved-unit comparison,
-   RPM content tail, oversized synthetic DHCP aggregate pack, and missing new-three
-   generic teaching/content inventories. Preserve the existing assertions, pack
-   limits and original content; add real new-example/alternate/negative coverage.
-   Source-only seven-path repair is delegated; no public registration yet.
-   Private NFS151 final five native-event groups pass; its Clippy gate is running.
-   Root retains the sole heavy-work slot. Then validate the combined seven in an
-   isolated checkout, full suite before main integration and Fedora rebuild.
-   Three packaged NAT flows remain pending. Keep old candidates and failed logs.
+   renderer checks and Clippy PASS. Private Bash150 full regression originally
+   failed11 tests/seven targets; repaired exact seven paths now PASS all444 tests
+   across those seven targets, with all-target Clippy42.16s PASS. Independent
+   source ACK7f429bd3 preserves all old assertions,2MiB cap and49 actual script
+   example/alternate/wrong/hardcode checks. SourceR2d92c5dc6 remains frozen.
+   Actual private150 native three-lesson flow90189 is REAPED/PASS,72 captures;
+   log m147-private150-native-r2.log, native-runs/run-rr6zhjr1.
+   Combined154/39 is frozen at private61f343d in nfs-native-147 worktree,
+   baseline22c996d (NFS151R7+Mainbe4c66f). Exact BashR2 patch d4f1a988 and
+   closed composition manifest1bce867b preserve canonical source and old data.
+   COMPLETE all-target regression14272 is REAPED/FAIL:1953PASS/3FAIL/14ignored.
+   Explicit retained20357 is REAPED/FAIL:8PASS/6FAIL. Logs m148-private154-*.
+   Nine failures expose five consumer/test gaps: current DHCP unit count, real
+   goal-aware NFS broken-state mutation, explicit absent new-ID sets for actual8
+   and actual9 profiles, and a current NFS count in the retained consumer.
+   Closed5-path repairs are frozen/committed privately at3cb1e70; source receipt
+   f6fe6e5a. Both count fixes are current test consumers; migration sets explicitly
+   add new IDs without changing actual8/9 records. Real goal-aware Unmount now
+   covers NFS broken saves. Source peer review is finishing; no tests yet on R2.
+   Sole active heavy25837 is ACTUAL NFS native from an immutable copied61f343d
+   ELF508084b4 (validated154/39), runner MAIN, log m149-private154-nfs-native-r1.
+   The edited worktree is not the executing artifact. Reap before next heavy.
+   After native25837, reap and run five affected default+retained targets, then
+   complete all-target default +all14explicit +Clippy/Python. Only a clean full
+   suite may permit Main integration. Source/candidate acceptance stays pending.
+   Ordered147 old +3Bash +4NFS, units37old+Bash+NFS. Main stays147 until full
+   combined suite passes, then native/package gates. NFS151 ClippyR7 PASS12.93s.
+   Keep all old candidates and failed logs; no release.
 2. NFS Stage B is integrated in7deb208: typed engine/loader/progress, exact2MiB
    Attempt admission, source-aware separate practice, foreign-field guards and
    preserved old prepare bodies. No normal NFS registration or objective credit.

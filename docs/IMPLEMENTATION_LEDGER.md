@@ -2960,3 +2960,88 @@ original check dates, not a claimed fresh full-objective extraction. Current
 versions remain CCNA1.1, LPIC-1 5.0, LPIC-2 4.5; future CCNA2.0 stays separate.
 All commands use the shared two-job/two-runtime-thread disk-backed runner.
 No release, Windows/macOS runtime, screen-reader or novice acceptance claim.
+
+
+### M147 exact regression repair gate (2026-10-27)
+
+The11 observed failures are repaired in exactly seven private Bash150 paths.
+Independent review7f429bd3 verifies67 owned/659 protected and all10 closed hunks
+reverse to R1; old tests are not skipped. Both generic49-script loops execute
+actual new examples, alternate/wrong/overfit cases; declared experiment outputs
+and repairs are separately exercised. The synthetic DHCP scenario is validated
+as its own prerequisite-free unique pack, original150 prefix remains exact, and
+explicit oversized-pack rejection still enforces2MiB.
+
+Root reruns all seven formerly failing targets:444PASS/0FAIL (375 native-bin,
+17 accounts,25 DHCP,8 legacy access,10 RPM content,4 script teaching,5 script
+content). All-target Clippy PASS42.16s. Root receipt root-repair-gate-r2;184 memory
+samples, minimum16.51GiB available, max somePSIavg10 0.39%, OOM delta0. This is
+not a complete-regression pass. Actual private150 three-lesson native flow is
+active; no native result is inferred from headless checks.
+
+Private NFS151R7 all-target Clippy passes12.93s. Its64-path source is preserved
+atf183d01 and merged with current Mainbe4c66f as22c996d, with seven exact conflict
+resolutions independently reviewed. Main renderer protections and original147/37
+remain intact. Root begins private combined154 composition using exact BashR2
+tracked patchd4f1a988 and seven new files. Only source resolution/closed current
+metadata changes are delegated; Root owns every heavy gate. No new public lab
+count or objective credit until full combined regression and actual native gates.
+
+
+### M148 combined154 full gate begins; private scripting native PASS (2026-10-27)
+
+Private Bash150 normal native acceptance passes all three assignments and72
+actual captures. Real editor/Run/Stop, examples and changed examples/repair,
+wrong/partial/reference/two alternatives, syntax/unsupported/resource diagnostics,
+100/150/200 light-dark focus/editing, warm full portable/raw/receipt comparisons
+without installing loaded Progress, selected Reset cancel/confirm and library
+return all pass. Actual physical window1268x632;150/200 zoom changes logical
+content, not a claim that compositor honored requested physical sizes. Root
+reviewed representative full assignment, introduction and focused200% renders.
+Receipt reviews/bash-command-vectors/actual-native150-r2/RESULT.json;255 samples,
+minimum23.77GiB available, PSI0/OOM delta0. Not packaged or cold-process proof.
+
+Combined source61f343d is private, on Mainbe4c66f plus reviewed NFS151R7 and
+Bash150R2. Closed composition1bce867b preserves74 scoped/674 protected inputs.
+Original147 typed specifications/order and raw37 unit bytes remain exact; a tiny
+test-only helper reverses exact NFS append to the independently pinned Bash38
+bytes and then exact Bash append to old37, checking typed39 field/order data too.
+No immutable recipe/source fixture was rewritten. New intervals147..150 Bash,
+150..154 NFS; current154/39 and45/32/28/49, private appended scenarios155.
+All49 actual generic script checks and original2MiB boundaries remain intact.
+Full all-target/no-fail-fast regression now running under the shared runner;
+Main remains147 until it passes. Complete regression, all14 explicit retained
+checks, native NFS, candidate rebuild and packaged acceptance remain pending.
+
+
+### M148 complete integration results and M149 native verification (2026-10-27)
+
+Complete private154 R1 regression finishes1953PASS/3FAIL/14ignored across150
+harnesses, including399UI checks PASS. Failures: a second DHCP unit-count literal
+still38, missing NFS goal-aware mutation in the whole-catalog broken-save test,
+and an exact actual8 absent-ID set omitting four new NFS IDs. Explicit retained
+gate then finishes8PASS/6FAIL: one current147 count in the NFS consumer and five
+actual9 tests sharing an absent-ID set missing the new seven. All failed logs
+remain. These are not counted as acceptance; no assertion/old producer/record
+will be removed. Exact five-path repair is delegated, including real successful
+required-mount Unmount and full save/reload-unsolved checks for all four NFS tasks.
+
+Root copies immutable compiled61f343d ELF to ignored reviews/combined154/native-61f343d,
+SHA508084b419d25a80eb3c294b135e4f4f9798b9faa6874649ac1bd3912075d395.
+Its bounded content check confirms154/39. A first identity attempt used an invalid
+flag and exited2 without GUI/state change; corrected --validate-content passes.
+Actual Fedora NFS native stage now runs from MAIN on that immutable copy with
+private data while the source worker edits only test consumers. No compiler or
+mutable-worktree executable is running concurrently. It is not the public main
+or packaged candidate; neither native nor full-suite acceptance is presumed.
+
+Private3cb1e70 pins the five-path corrective source, manifestf6fe6e5a and closed
+patch6e867268;743 other files remain byte-exact. Two single-literal count changes
+are test-consumer-only; neither producer nor historic payload changes. Prototype
+now selects a real required current Read mount, verifies solved/held state, uses
+goal-aware Unmount, verifies output/map removal and retains all154 broken-state
+save/reload checks. Exact explicit absent-ID sets add four NFS IDs to actual8
+and seven new IDs to actual9; original116/133 attempts,40 definitions/246 cases,
+histories/receipts and raw evidence remain unchanged. Independent repair review
+and guarded runtime gates remain pending. Actual NFS stage continues on immutable
+61f343d copy; no concurrent compile. Main remains147/37.
