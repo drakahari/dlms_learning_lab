@@ -76,12 +76,32 @@ fn unsupported_grep_options_and_integer_tests_fail_honestly() {
         "printf '%s\\n' '-bb' | grep -F '-b'",
         "[ bad -eq 2 ]; printf 'after\\n'",
         "cat -n",
-        "cat -",
         "grep -F ERR -v",
         "grep -F ERR -",
     ] {
         let r = shell::run(source, c);
         assert!(r.error.as_ref().unwrap().contains("Unsupported"));
+    }
+}
+#[test]
+fn supported_cat_stdin_forms_preserve_exact_input_and_never_read_a_dash_named_file() {
+    let labs = pack::bundled().unwrap();
+    let mut case = labs[9].teaching.as_ref().unwrap().fixture.clone();
+    case.stdin = "first\n  second  \nlast without a newline".into();
+    case.files.insert(
+        "/work/-".into(),
+        "This is a file, not standard input.\n".into(),
+    );
+    assert!(case.valid());
+    // These forms were added with the explicit evaluator11 cat subset. Retain
+    // the option/integer/grep exclusions above; do not call valid stdin a flag.
+    for source in ["cat", "cat --", "cat -", "cat -- -"] {
+        let outcome = shell::run(source, &case);
+        assert!(outcome.error.is_none(), "{source}: {outcome:?}");
+        assert_eq!(outcome.status, 0);
+        assert_eq!(outcome.stdout, case.stdin);
+        assert!(outcome.stderr.is_empty());
+        assert_eq!(outcome.files, case.files);
     }
 }
 #[test]

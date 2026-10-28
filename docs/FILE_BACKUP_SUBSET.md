@@ -57,3 +57,65 @@ file I/O in the module. Mutations validate capacity first; extraction builds a
 private bounded result and publishes only after complete validation. Failures
 leave the target unchanged. General file-copy permissions and GNU tar's
 partial-write/error-continuation behavior are not yet modeled by this foundation.
+
+## Terminal adapter — tested, not catalog-integrated
+
+The tested unregistered adapter uses one literal command at a time. Its typed
+surface is `tar -c/-x/-t -f ARCHIVE [-C DIRECTORY] [-g SNAPSHOT | -G]`
+(with optional -v for creation/extraction only),
+including clustered short options and the corresponding long forms. Creation
+selects one complete supplied tree by `-C PARENT NAME`; extraction selects a
+supplied destination parent and restores the archive's named tree. Literal stored file members can be restored/listed independently; their parent
+folders must already exist. Partial restore neither selects directory dumps nor
+changes unrelated contents or parent metadata. Selective directory recursion,
+legacy option syntax without dashes, repeated context options,
+compression and old `-G` creation are explicitly unsupported. Extraction with
+`-g /dev/null` is a virtual flag convention; it never opens that host device or
+reads a snapshot during extraction. Listing shows actually stored member names.
+
+`pwd`, `cd`, `ls [-a]`, `cat`, `mkdir`, `touch`, numeric `chmod` and regular-file
+`rm` inspect/change only the supplied virtual trees. The `cp` subset copies opaque
+archive/snapshot artifacts inside the supplied backup folder, including snapshot
+branches; it is not a general file-copy lesson. Directory removal, touching
+directories, shell expansion, operators, pipelines and subprocesses are excluded.
+Literal quoting is parsed by the existing in-process terminal lexer. A snapshot
+copy retains its source-tree identity; using it against a different source is
+explicitly unsupported because inode-based relocation is not modeled. The supplied operator is explicitly the simulated backup administrator, root,
+with no host privileges. Extraction preserves virtual owners/modes as privileged
+GNU tar does by default; -p/--same-permissions is also accepted. Ordinary-user
+umask/ownership restrictions are not silently approximated. Partial-error
+continuation, inode relocation and actual privilege changes remain excluded.
+
+The adapter has at most6 disjoint trees,64 entries/32KiB text per tree/archive,
+8 archives,8 snapshots,32 command words/4096 input bytes,32KiB output and2MiB
+encoded workspace data. Artifact/root maps reject excess or duplicate keys before
+decoding values. Creation uses fixed0644/0755 virtual defaults for newly created
+files/directories owned by simulated root; SGID parents supply their group and
+propagate SGID to new directories. No host creation mask or identity is read. Whole commands publish a bounded
+candidate on success. Focused runtime16 core/11 terminal groups and final all-target Clippy pass. The
+full2045-test inclusive run passes on the source before the last numeric-chmod/
+listing correction; the corrected source passes all27 focused groups. Ten controlled GNU tar comparisons include
+partial restores that preserve unrelated changes. Teaching, grading integration
+and native validation still precede registration; no extra authored assignment
+or objective credit follows from this section.
+
+
+The interactive backup terminal has no stdin/archive byte stream: `cat -` and
+`cat -- -`, and a tar archive operand `-`, fail honestly instead of reading a
+same-named virtual file. Bare `HOST:FILE` tar archive syntax is refused as remote.
+An explicit absolute `/backups/-` or `/backups/host:archive` can name an ordinary
+local virtual archive. These are parser distinctions, never host operations.
+File additions/removals update the immediate virtual parent directory's logical
+mtime/ctime; writing an existing file does not change its parent's entry clock.
+The GNU comparison remains a projection of names/text/types/modes, not a claim
+of physical timestamp or archive byte-format equivalence.
+
+Numeric directory chmod follows GNU's set-ID preservation rule: one to four
+octal digits preserve unmentioned directory setuid/setgid bits; a five-digit
+form such as00755 clears them explicitly. Regular files take the exact requested
+mode. Symbolic/operator modes and longer numeric forms are outside this adapter.
+The corrected set-ID rules and verbose/duplicate-listing refusal pass the final
+27-group focused gate and Clippy. Eight fixed numeric-mode comparisons against
+GNU chmod match; the full2045 run precedes this last peer-review correction.
+Verbose tar metadata listings and repeated literal selectors fail explicitly;
+name-only listing is not silently presented as GNU tar -tv output.

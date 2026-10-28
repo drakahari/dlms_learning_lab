@@ -181,3 +181,28 @@ explicitly runs work or accepts a disclosed backup recheck. This is technical
 synthetic-profile evidence, not personal-profile, novice or other-OS acceptance.
 The installed38a Fedora candidate remains evaluator9 until a newer candidate is
 built and accepted; do not use an older candidate to interpret newer results.
+
+
+## Current evaluator11 transition — 2026-10-28
+
+Evaluator11 adds read-only default/alternate parameter values, normal colon
+argument handling and the bounded finite-input/single-file cat subset. Earlier
+runs keep their actual revision and completion history; a current Run verifies
+new behavior. Opening a lesson preserves assignment and separate example drafts.
+New labs are not marked completed merely because an earlier unit was finished.
+
+Before the first11 write, the exact existing file is protected in the unused
+`before-shell-v11.json` slot. Actual10 receipts7/8/9/10 become7/8/9/10/11;
+a direct actual9→11 write becomes7/8/9/11 and direct7→11 becomes7/11.
+The app never invents an intermediate10 receipt. Existing before8/9/10 snapshots,
+unrelated attempts, earlier records, favorites and drafts stay intact. A different
+occupied before11 slot blocks the write; no existing backup is replaced. Failed
+copy/persistence and postcommit durability warnings retain their prior rules.
+
+All19 explicit retained-history checks, including five genuine actual10 groups,
+pass in the full2045-test Fedora source suite. The actual10 producer/source and
+original profiles were captured and hash-pinned before11; no old result is
+regenerated under11. See SHELL_PARAMETER_DEFAULTS.md and ledgerM170–M176.
+This is synthetic technical evidence. Installed9a90f275e133 still uses evaluator10;
+new source is not yet a newly accepted installed candidate. Personal-profile,
+novice, screen-reader and Windows/macOS runtime acceptance are not implied.

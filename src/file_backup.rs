@@ -366,6 +366,12 @@ impl Tree {
             return Err("Choose an existing entry beneath the selected root".into());
         }
         self.entries.retain(|p, _| !within(p, target));
+        let parent = self
+            .entries
+            .get_mut(parent(target))
+            .expect("Validated parent is outside the removed subtree");
+        parent.modified = clock;
+        parent.changed = clock;
         self.clock = clock;
         Ok(())
     }
@@ -404,6 +410,12 @@ impl Tree {
             return Err("Invalid virtual file type, contents or metadata".into());
         }
         self.entries.insert(target.into(), entry);
+        let parent = self
+            .entries
+            .get_mut(parent(target))
+            .expect("Validated parent remains present");
+        parent.modified = clock;
+        parent.changed = clock;
         self.clock = clock;
         Ok(())
     }
@@ -513,6 +525,63 @@ impl Archive {
             return Err("Invalid virtual archive, directory inventory, path or size".into());
         }
         Ok(value)
+    }
+
+    /// Restore literal stored file members without selecting directory dumps.
+    /// Parent folders must already exist; automatic intermediate directory policy
+    /// and selective directory recursion are deliberately not approximated.
+    pub fn extract_files(&self, target: &mut Tree, files: &[&str]) -> Result<(), String> {
+        if !self.valid() || !target.valid() || files.is_empty() || files.len() > MAX_ENTRIES {
+            return Err("Choose bounded literal file members from a valid virtual archive".into());
+        }
+        let mut selected = BTreeSet::new();
+        for path in files {
+            if path.is_empty() || path.len() > 1024 {
+                return Err("Use a bounded relative file member".into());
+            }
+            if !selected.insert(*path) {
+                return Err("A selected file member is repeated".into());
+            }
+            let entry = self.entries.get(*path).ok_or("File member is not stored in this archive; inspect tar -t and the earlier backup levels")?;
+            if entry.node.directory {
+                return Err(
+                    "Selective directory recursion is unsupported; choose a literal stored file"
+                        .into(),
+                );
+            }
+            if !target
+                .entries
+                .get(parent(path))
+                .is_some_and(|e| e.node.directory)
+            {
+                return Err("Selective restore requires an existing virtual parent folder; automatic intermediate directory policy is unsupported".into());
+            }
+            if target.entries.get(*path).is_some_and(|e| e.node.directory) {
+                return Err(
+                    "File/directory replacement during selective restore is unsupported".into(),
+                );
+            }
+        }
+        let clock = target
+            .clock
+            .max(self.clock)
+            .checked_add(1)
+            .filter(|clock| *clock <= MAX_CLOCK)
+            .ok_or("Virtual change counter exhausted")?;
+        let mut result = target.clone();
+        for path in selected {
+            let mut entry = self.entries[path].clone();
+            entry.changed = clock;
+            result.entries.insert(path.into(), entry);
+        }
+        result.clock = clock;
+        if !result.valid() {
+            return Err(
+                "Selective restore exceeds virtual capacity; previous files retained".into(),
+            );
+        }
+        *target = result;
+        Ok(())
     }
 
     /// Extract into a selected virtual root. Incremental deletion is explicitly

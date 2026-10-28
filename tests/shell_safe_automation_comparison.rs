@@ -1,4 +1,4 @@
-//! Opt-in fixed public9→current10 comparison, not a producer or saved recording.
+//! Opt-in fixed public9→current11 comparison, not a producer or saved recording.
 //! No Bash, process, learner source/path options, or old evidence writes.
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
@@ -280,9 +280,9 @@ fn verify_identity(baseline: &proof::Baseline, row: &Value, authored: &Value) {
 }
 
 #[test]
-#[ignore = "Requires exact accepted private public9 COMPLETE; explicit MAIN-guarded current10 comparison only"]
+#[ignore = "Requires exact accepted private public9 COMPLETE; explicit MAIN-guarded current11 comparison only"]
 fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabeling() {
-    assert_eq!(shell::EVALUATOR_REVISION, 10);
+    assert_eq!(shell::EVALUATOR_REVISION, 11);
     let baseline = proof::Baseline::open();
     for (name, raw) in [
         (
@@ -424,7 +424,7 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
                             "Expected changed fixed Outcome {id}"
                         );
                         different.insert(id.to_string());
-                        delta_hashes.insert(id.to_string(),json!({"before9_sha256":proof::sha(&serde_json::to_vec(&row["actual"]).unwrap()),"actual10_sha256":proof::sha(&serde_json::to_vec(&actual_value).unwrap()),"policy":"exact actual Bash5.3.9 Outcome"}));
+                        delta_hashes.insert(id.to_string(),json!({"before9_sha256":proof::sha(&serde_json::to_vec(&row["actual"]).unwrap()),"actual_current_sha256":proof::sha(&serde_json::to_vec(&actual_value).unwrap()),"policy":"exact actual Bash5.3.9 Outcome"}));
                     }
                 }
                 if !intentional {
@@ -487,7 +487,7 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
                 proof::exact(
                     row,
                     &profile_metadata(),
-                    "historical9 profile metadata is NOT a current10 profile claim",
+                    "historical9 profile metadata is NOT a current11 profile claim",
                 );
                 let raw = baseline.read("vm-profile/writer9-original.json");
                 assert_eq!(
@@ -528,7 +528,7 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
         ])
     );
     baseline.unchanged();
-    let summary = json!({"kind":"actual10-comparison-test-summary","actual_evaluator_revision":10,"accepted_before9_manifest_sha256":proof::MANIFEST_SHA,"baseline_rows":1570,"named_outcome_rows":1520,"input_vectors":380,"unchanged_vectors":357,"intentionally_changed_fixed_vectors":23,"supported_fixed_cases":26,"excluded_fixed_cases":2,"stop_ticks":SLICES.map(|slice|stop_ticks[&slice]),"delta_hashes":delta_hashes,"compiled_shell_source_sha256":proof::sha(include_bytes!("../src/shell.rs")),"compiled_execution_source_sha256":proof::sha(include_bytes!("../src/shell/execution.rs")),"compiled_capture_source_sha256":proof::sha(include_bytes!("../src/shell/capture.rs")),"claims":"In-process opt-in comparison only; historical9 rows not relabeled; no new saved Records/profile/native/Bash capture or COMPLETE is produced"});
+    let summary = json!({"kind":"actual11-comparison-test-summary","actual_evaluator_revision":shell::EVALUATOR_REVISION,"accepted_before9_manifest_sha256":proof::MANIFEST_SHA,"baseline_rows":1570,"named_outcome_rows":1520,"input_vectors":380,"unchanged_vectors":357,"intentionally_changed_fixed_vectors":23,"supported_fixed_cases":26,"excluded_fixed_cases":2,"stop_ticks":SLICES.map(|slice|stop_ticks[&slice]),"delta_hashes":delta_hashes,"compiled_shell_source_sha256":proof::sha(include_bytes!("../src/shell.rs")),"compiled_execution_source_sha256":proof::sha(include_bytes!("../src/shell/execution.rs")),"compiled_capture_source_sha256":proof::sha(include_bytes!("../src/shell/capture.rs")),"claims":"In-process opt-in comparison only; historical9 rows not relabeled; no new saved Records/profile/native/Bash capture or COMPLETE is produced"});
     let text = serde_json::to_string(&summary).unwrap();
     assert!(text.len() <= 16 * 1024);
     eprintln!("{text}");

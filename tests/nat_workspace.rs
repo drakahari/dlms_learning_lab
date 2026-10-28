@@ -767,7 +767,11 @@ fn actual9_private_profile_nat_addition_preserves_full_old_histories_target_byte
     std::fs::write(path.with_extension("before-shell-v8.json"), old7).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         raw
     );
     assert_eq!(
@@ -781,8 +785,8 @@ fn actual9_private_profile_nat_addition_preserves_full_old_histories_target_byte
     evidence::exact(&loaded.attempts[&s.id], &selected);
     let mut expected = original["migration_receipts"].clone();
     let versions = expected["shell"].as_array_mut().unwrap();
-    if versions.last() != Some(&serde_json::json!(10)) {
-        versions.push(serde_json::json!(10));
+    if versions.last() != Some(&serde_json::json!(11)) {
+        versions.push(serde_json::json!(11));
     }
     evidence::exact(&loaded.migration_receipts.as_ref().unwrap(), &expected);
     assert_eq!(loaded.attempts.len(), 134);

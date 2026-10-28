@@ -137,3 +137,5 @@ pub mod etherchannel;
 
 /// Bounded virtual archive/restore foundation; not yet bundled curriculum.
 pub mod file_backup;
+
+pub mod file_backup_terminal;

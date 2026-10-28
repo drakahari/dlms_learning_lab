@@ -1053,7 +1053,11 @@ fn nfs_actual_backup_review_cancel_restore_and_reopen_keep_full_selected_and_gen
     let selected = serde_json::to_value(&loaded.attempts[&id]).unwrap();
     let raw_saved = std::fs::read(&a.path).unwrap();
     assert_eq!(
-        std::fs::read(a.path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(a.path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         raw
     );
     let export = a.path.parent().unwrap().join("dlms-learning-backup.json");

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fixed GNU tar comparisons in private fixtures, never learner paths or commands.
 
-No source/path/binary options. All eight restore chains and fixture bytes are
+No source/path/binary options. All ten restore cases and fixture bytes are
 defined below and in the compiled fixed probe. No Bash or shell=True is used.
 """
 import argparse
@@ -18,10 +18,15 @@ from automation_before10_oracle import pinned_executable
 
 ROOT = Path(__file__).resolve().parents[1]
 TAR = Path('/usr/bin/tar')
+CHMOD = Path('/usr/bin/chmod')
+COREUTILS = Path('/usr/share/info/coreutils.info.gz')
+COREUTILS_SHA = '6e28a10ae4e4acad5c0147348ffe0a0a0cea4f93ed7cd794d434d953059e4716'
+NUMERIC_MODES = [('directory','755'),('directory','0755'),('directory','2755'),('directory','4755'),
+                 ('directory','00755'),('directory','000'),('file','755'),('file','4755')]
 MANUAL = Path('/usr/share/info/tar.info-1.gz')
 MANUAL_SHA = 'e2a5577834435166482dee180f55f8192ed21081a7ac5f7f25aeab532ee56365'
 PROBE = 'target/debug/examples/file_backup_probe'
-SOURCES = ['src/file_backup.rs', 'src/engine.rs', 'src/lib.rs', 'examples/file_backup_probe.rs',
+SOURCES = ['src/file_backup.rs', 'src/file_backup_terminal.rs', 'src/engine.rs', 'src/lib.rs', 'examples/file_backup_probe.rs',
            'examples/support/automation_digest.rs', 'tools/file_backup_reference.py',
            'tools/case_bash_oracle.py', 'tools/automation_before10_oracle.py',
            'tools/build_safety.py', 'tools/dev.py', 'Cargo.toml', 'Cargo.lock']
@@ -34,6 +39,8 @@ CHAINS = {
     'sequential_day2': [('base.tar', True), ('day1.tar', True), ('day2.tar', True)],
     'differential': [('base.tar', True), ('differential.tar', True)],
     'missing_middle': [('base.tar', True), ('day2.tar', True)],
+    'partial_overwrite': [('base.tar', True)],
+    'partial_only': [],
 }
 
 
@@ -55,6 +62,8 @@ def source_pins(root):
     pins += [safe.pin(root / PROBE, 256 * 1024 * 1024),
              safe.pin(TAR, 4 * 1024 * 1024), safe.pin(MANUAL, 2 * 1024 * 1024)]
     safe.require(pins[-1]['sha256'] == MANUAL_SHA, 'Original primary manual changed')
+    pins += [safe.pin(CHMOD,4*1024*1024),safe.pin(COREUTILS,2*1024*1024)]
+    safe.require(pins[-1]['sha256']==COREUTILS_SHA,'Original GNU numeric-mode manual changed')
     return pins
 
 
@@ -91,11 +100,18 @@ def create_argv(executable, archive, snapshot):
             '--listed-incremental=' + snapshot, '--directory=source', 'data']
 
 
-def extract_argv(executable, archive, destination, incremental):
+def extract_argv(executable, archive, destination, incremental, member=None):
     safe.require(archive in {'base.tar', 'day1.tar', 'day2.tar', 'differential.tar'}, 'Fixed archive only')
     safe.require(destination in CHAINS, 'Fixed restore directory only')
+    safe.require(member is None or member == 'data/.settings', 'Only the fixed partial file member')
     return [executable, '--extract', '--file=' + archive,
-            '--directory=' + destination, *(['--incremental'] if incremental else [])]
+            '--directory=' + destination, *(['--incremental'] if incremental else []),
+            *(['--', member] if member is not None else [])]
+
+
+def chmod_argv(executable,kind,mode):
+    safe.require((kind,mode) in NUMERIC_MODES,'Only fixed reviewed numeric modes')
+    return [executable,mode,'mode-'+kind]
 
 
 def main(argv=None):
@@ -113,9 +129,11 @@ def main(argv=None):
     started = time.monotonic()
     tar_pin = next(p for p in before if p['path'] == str(TAR))
     probe_pin = next(p for p in before if p['path'] == str(root / PROBE))
+    chmod_pin=next(p for p in before if p['path']==str(CHMOD))
     with pinned_executable(TAR, tar_pin, 4 * 1024 * 1024) as (tar, tar_fd), \
-         pinned_executable(root / PROBE, probe_pin, 256 * 1024 * 1024) as (probe, probe_fd):
-        descriptors = (*inherited, tar_fd, probe_fd)
+         pinned_executable(root / PROBE, probe_pin, 256 * 1024 * 1024) as (probe, probe_fd), \
+         pinned_executable(CHMOD,chmod_pin,4*1024*1024) as (chmod,chmod_fd):
+        descriptors = (*inherited, tar_fd, probe_fd,chmod_fd)
         serial = 0
 
         def command(command):
@@ -135,7 +153,7 @@ def main(argv=None):
         model = json.loads(command([probe]))
         safe.require(model['kind'] == 'fixed-backup-model-comparison' and model['revision'] == 1
                      and model['compiled_manifest_dir'] == str(root), 'Current fixed probe identity required')
-        for key, path in [('model_sha256', 'src/file_backup.rs'), ('probe_sha256', 'examples/file_backup_probe.rs'),
+        for key, path in [('model_sha256', 'src/file_backup.rs'),('terminal_sha256','src/file_backup_terminal.rs'), ('probe_sha256', 'examples/file_backup_probe.rs'),
                           ('digest_sha256', 'examples/support/automation_digest.rs')]:
             safe.require(model[key] == next(p for p in before if p['path'] == str(root / path))['sha256'],
                          'Stale compiled model/probe refused')
@@ -166,19 +184,40 @@ def main(argv=None):
             safe.private_dir(work, name)
             for archive, incremental in chain:
                 command(extract_argv(tar, archive, name, incremental))
+            if name == 'partial_overwrite':
+                target = work / name / 'data'
+                (target / 'notes/change.txt').write_text('independent local change\n')
+                (target / 'notes').chmod(0o700)
+                (target / '.settings').write_text('damaged\n')
+                command(extract_argv(tar, 'base.tar', name, False, 'data/.settings'))
+            elif name == 'partial_only':
+                safe.private_dir(work / name, 'data').chmod(0o750)
+                command(extract_argv(tar, 'base.tar', name, False, 'data/.settings'))
             actual[name] = observation(work / name / 'data')
         safe.require(set(model['observations']) == set(CHAINS), 'Every fixed comparison required')
+        safe.private_dir(work,'mode-directory')
+        safe.write_new(work/'mode-file',b'fixture only\n',budget,4096)
+        numeric_modes={}
+        for kind,mode in NUMERIC_MODES:
+            target=work/('mode-'+kind)
+            target.chmod(0o6750)  # Newly owned fixture, never a host/user path.
+            command(chmod_argv(chmod,kind,mode))
+            numeric_modes[kind+'-'+mode]=stat.S_IMODE(target.lstat().st_mode)
+        safe.require(set(model['numeric_modes'])==set(numeric_modes),'Every fixed numeric-mode comparison required')
         report = {'actual_tar_version': version.splitlines()[0], 'source_head': head,
-                  'compared': 8, 'matches': sum(actual[n] == model['observations'][n] for n in CHAINS),
+                  'compared': 10, 'matches': sum(actual[n] == model['observations'][n] for n in CHAINS),
                   'gnu': actual, 'model': model['observations'],
+                  'numeric_modes_compared':8,'numeric_modes_matches':sum(numeric_modes[n]==model['numeric_modes'][n] for n in numeric_modes),
+                  'gnu_numeric_modes':numeric_modes,'model_numeric_modes':model['numeric_modes'],
                   'scope': 'Names, text, directory types and modes only; no binary-format/ctime/ownership conformance'}
         outputs.append(safe.json_new(out / 'COMPARISON.json', report, budget, 2 * 1024 * 1024))
     safe.require(source_pins(root) == before and safe.source_identity(root) == head, 'Source identity changed during reference')
     for output in outputs:
         safe.require(safe.pin(Path(output['path']), 2 * 1024 * 1024) == output, 'Observation changed')
-    safe.publish(out, {'pins': before, 'outputs': outputs, 'comparison': report['matches'], 'fixed_cases': 8}, budget)
-    print(json.dumps({'path': str(out), 'matches': report['matches'], 'compared': 8}))
-    return 0 if report['matches'] == 8 else 1
+    safe.publish(out, {'pins': before, 'outputs': outputs, 'comparison': report['matches'], 'fixed_cases': 10,
+                      'numeric_mode_matches':report['numeric_modes_matches'],'numeric_mode_cases':8}, budget)
+    print(json.dumps({'path': str(out), 'matches': report['matches'], 'compared': 10,'numeric_modes_matches':report['numeric_modes_matches']}))
+    return 0 if report['matches'] == 10 and report['numeric_modes_matches']==8 else 1
 
 
 if __name__ == '__main__':

@@ -1,4 +1,4 @@
-//! Prospective evaluator10 tests. Bash expectations are exact controlled actual
+//! Current evaluator11 replay of accepted evaluator10 semantics. Bash expectations are exact controlled actual
 //! observations; no historical public9 Record/outcome is relabeled as current.
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
@@ -66,7 +66,7 @@ struct Oracle {
 
 #[test]
 fn actual28_bash_observations_have_exact_supported_and_excluded_classification() {
-    assert_eq!(shell::EVALUATOR_REVISION, 10);
+    assert_eq!(shell::EVALUATOR_REVISION, 11);
     let oracle: Oracle = serde_json::from_str(include_str!(
         "fixtures/automation-bash539-observations.json"
     ))

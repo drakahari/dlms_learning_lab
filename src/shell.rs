@@ -5,6 +5,7 @@ mod case;
 mod execution;
 mod getopts;
 mod globbing;
+mod parameters;
 mod preparation;
 mod substitution;
 mod text_tools;
@@ -20,7 +21,7 @@ use std::{
 use values::{ArrayRef, Value};
 // Increment when previously saved outcomes can change under corrected evaluator semantics.
 pub const MAX_CASES: usize = 12;
-pub const EVALUATOR_REVISION: u32 = 10;
+pub const EVALUATOR_REVISION: u32 = 11;
 pub(crate) fn legacy_revision(revision: &u32) -> bool {
     *revision == 0
 }
@@ -1643,6 +1644,21 @@ impl Vm {
             }
             let _key_memory = self.scratch(cs[start..end].iter().map(|c| c.len_utf8()).sum())?;
             let key = cs[start..end].iter().collect::<String>();
+            if let Some(expression) = parameters::parse(&key)? {
+                let current = match expression.target {
+                    parameters::Target::Named(name) => match self.env.get(name) {
+                        Some(Value::Scalar(value)) => Some(value.as_str()),
+                        Some(Value::Indexed(_)) => return Err("Unsupported default/alternate operator on an indexed array; use an ordinary scalar or positional argument".into()),
+                        None => None,
+                    },
+                    parameters::Target::Positional(index) => self.args.get(index).map(String::as_str),
+                };
+                let value = expression.select(current);
+                bounded_expansion_bytes(0, value.len())?;
+                self.charge_expansion(value.len())?;
+                self.append_expansion(&mut result, &mut memory, value)?;
+                continue;
+            }
             let value = self.variable_view(&key)?;
             let _value_memory = self.scratch(if matches!(value, Cow::Owned(_)) {
                 value.len()
@@ -2316,7 +2332,10 @@ impl Vm {
                 Ok((empty.clone(), empty, 0))
             }
             "local" => Err("Unsupported declaration command name: use literal unquoted local inside a function".into()),
-            ":" | "true" | "false" if args.is_empty() => {
+            // Arguments have already passed ordinary expansion and redirects.
+            // Colon ignores their resulting values, not their evaluation effects.
+            ":" => Ok((empty.clone(), empty, 0)),
+            "true" | "false" if args.is_empty() => {
                 Ok((empty.clone(), empty, i32::from(cmd == "false")))
             }
             "printf" => {
@@ -2336,18 +2355,36 @@ impl Vm {
                 output.push('\n');
                 Ok(ok(output))
             }
-            "cat" if args.len() == 1 => {
-                if args[0].starts_with('-') {
-                    return usage();
+            "cat" => {
+                // Only the first -- ends options; a second -- is a filename.
+                // There is one optional operand, never host utility lookup.
+                let operands = if args.first().is_some_and(|s| s == "--") {
+                    &args[1..]
+                } else {
+                    args
+                };
+                let file = match operands {
+                    [] => None,
+                    [file] if file == "-" => None,
+                    [file] if args.first().is_some_and(|s| s == "--") || !file.starts_with('-') => Some(file),
+                    _ => return usage(),
+                };
+                if let Some(file) = file {
+                    let p = self.virtual_path(file)?;
+                    Ok(match self.outcome.files.get(&p.text) {
+                        Some(s) => { self.reserve_memory(s.len())?; ok(s.clone()) },
+                        None => {
+                            self.reserve_memory(file.len() + "cat: : No such file or directory\n".len())?;
+                            (empty, format!("cat: {file}: No such file or directory\n"), 1)
+                        },
+                    })
+                } else {
+                    let text = &self.input[self.input_pos..];
+                    self.reserve_memory(text.len())?;
+                    let output = text.to_owned();
+                    self.input_pos = self.input.len();
+                    Ok(ok(output))
                 }
-                let p = self.virtual_path(&args[0])?;
-                Ok(match self.outcome.files.get(&p.text) {
-                    Some(s) => { self.reserve_memory(s.len())?; ok(s.clone()) },
-                    None => {
-                        self.reserve_memory(args[0].len() + "cat: : No such file or directory\n".len())?;
-                        (empty, format!("cat: {}: No such file or directory\n", args[0]), 1)
-                    },
-                })
             }
             "grep" if (args.len() == 2 || args.len() == 3) && args[0] == "-F" => {
                 if args[1].starts_with('-') {

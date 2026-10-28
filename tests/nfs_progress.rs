@@ -225,7 +225,11 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
     std::fs::write(&path, raw).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         raw
     );
     let saved = std::fs::read(&path).unwrap();

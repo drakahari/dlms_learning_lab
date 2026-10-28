@@ -3480,3 +3480,75 @@ Terminal adapter, teaching, full assignments, independent grading, persistence
 and native flows remain to implement. Existing catalog154/39 and28themes/progress
 remain unchanged. No release/platform/curriculum-completion claim. Cron integration
 and LACP native fixes plus corrected shell evaluation continue, not stop here.
+
+### M173–M174 reviewed evaluator11 and immutable reference correction (2026-10-28)
+
+Integrated the19 hash-reviewed shell capability paths: scalar/positional unset/
+empty fallback and alternate forms with literal words, ordinary colon expansion
+semantics, and finite simulated-stdin cat with an optional delimiter. Unsupported
+word syntax fails honestly even in an unselected arm; structural arithmetic spans
+retain old ordinary diagnostics. Existing instruction/output/memory/Stop bounds
+apply. No learner-host execution or new dependency. SHELL_PARAMETER_DEFAULTS.md
+and SHELL_SUBSET.md define the precise subset and exclusions.
+
+The original malformed arithmetic case032 remains an immutable failed proposal:
+Bash rejects it with status1, the simulator diagnoses the invalid supported-input
+boundary before execution with status2. A separately pinned exact amendment and
+five balanced positive controls replace no original input or output. Actual
+OracleR4 observes58 supported matches plus one exact known-invalid observation,
+zero unexpected differences. All original54 recipes, failed output and genuine
+actual10 producer/profile/compiled-source bytes remain retained. Reference59
+manifest `64af7aea653ca60e97e641febb27d8be0552538b327197a2b2446017d9706ed6`.
+
+Current consumers now name the actual destination revision11; actual9 transitions
+record7/8/9/11, actual10 transitions7/8/9/10/11, direct7 transitions7/11. No invented
+10 receipt or rewrite of old380 vectors/history. Closed reviewed12-path patch and
+three additional NAT receipt literals account for every current-consumer update.
+Immutable actual10 verifier passes after11. Five new actual10 migration groups
+join all14 older retained-history checks; inclusive execution is required.
+
+### M175–M177 backup terminal, complete regression and peer corrections (2026-10-28)
+
+Extended the typed backup foundation with atomic literal-file partial restores,
+immediate parent entry clocks and a bounded command adapter. Supplied virtual
+root/operator identity and relative containment are explicit. Archive/tree/
+snapshot maps reject excessive/duplicate data early; unsupported host streams,
+remote archives, shell operators, type replacement and verbose metadata output
+fail honestly. No tar binary-format or host privilege claim. FILE_BACKUP_SUBSET.md
+records the exact finite utility subset. No backup scenario is registered yet.
+
+Two independent reviews found special cat/tar operand ambiguity and GNU numeric
+directory chmod preservation. Fixed literal dash/delimiter/remote handling,
+set-ID preservation/explicit five-digit clearing, duplicate listing selectors and
+honest refusal of unsupported verbose metadata. New regressions cover unchanged
+state on rejection, root-owned new nodes, SGID inheritance and eight mode cases.
+All16 core plus11 terminal groups pass after the final corrections. Controlled
+GNU tar1.35 comparisons match10 restore projections, including two partial
+restores preserving unrelated data; GNU chmod matches all8 fixed numeric modes.
+Only disposable development fixtures are used, never the learner engine.
+Final GNU manifest `9dfea61a16568b16ec86847d44378d2dae84c2f2885a4d69aa7021256618d0af`.
+
+MAIN full inclusive R3:2045PASS/0FAIL/0ignored across159 harnesses, including all19
+retained-history checks. R1 caught an obsolete cat-dash negative because finite
+stdin is now supported; it was replaced with four positive forms preserving
+exact bytes and unchanged virtual files. The other old negatives remain. R2
+caught two stale NAT current-revision literals; only those three literal values
+were corrected. Original failed runs remain retained. No historical expected
+outcome or grading assertion was relaxed. The2045 full run precedes the final
+small numeric-chmod/listing peer correction; final27 focused,246Python and
+all-target Clippy pass on corrected source. Coverage,28-theme provenance and
+immutable10 verification pass. No new pack/unit or objective promotion.
+
+Private source/log/memory receipt: reviews/main11-backup-m177/RESULT.json, SHA256
+`e9160c7d55f81f4b5974bafe571bec676b30fbfd71967d071e6ebfbe6551177e`.
+Observed minimum available21.00GiB, max some/full PSI avg10 both0.18, OOMdelta0.
+All root wrappers reaped before granting the next worktree lease;2jobs/2threads
+and shared disk-backed runner remain mandatory, not a safety guarantee.
+
+Catalog remains154/39:45CCNA/32LPIC-1/28LPIC-2/49Bash; 206.2 and the broader
+reconciliation gaps remain Open. LACP's isolated2031-pass/83-native-capture run
+revealed a dense21-row feedback presentation on visual review; compact display
+with optional full details is being corrected before integration. Cron StageC
+and three new shell assignments remain unregistered. The old installed9a90 ELF
+is unchanged and does not inherit these source results. Continue implementation;
+no release, complete-curriculum, cross-platform or novice acceptance claim.

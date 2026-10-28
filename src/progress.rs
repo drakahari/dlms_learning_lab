@@ -2593,7 +2593,7 @@ mod actual9_before10_writer_acceptance {
     #[test]
     #[ignore = "Requires fixed private actual9 COMPLETE; explicit guarded replay only"]
     fn actual9_copy_races_do_not_overwrite_and_compare_exact_raw_bytes() {
-        assert_eq!(crate::shell::EVALUATOR_REVISION, 10);
+        assert_eq!(crate::shell::EVALUATOR_REVISION, 11);
         let raw = evidence::original9();
         for same in [false, true] {
             let dir = tempfile::tempdir().unwrap();
@@ -2637,7 +2637,11 @@ mod actual9_before10_writer_acceptance {
             assert!(result.is_err());
             assert_eq!(std::fs::read(&path).unwrap(), raw);
             assert_eq!(
-                std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+                std::fs::read(path.with_extension(format!(
+                    "before-shell-v{}.json",
+                    crate::shell::EVALUATOR_REVISION
+                )))
+                .unwrap(),
                 raw
             );
             evidence::exact(&candidate, &before);
@@ -2646,7 +2650,7 @@ mod actual9_before10_writer_acceptance {
     }
     #[test]
     #[ignore = "Requires fixed private actual9 COMPLETE; explicit guarded replay only"]
-    fn actual9_postcommit_sync_warning_records_only_real9_to10_transition() {
+    fn actual9_postcommit_sync_warning_records_only_the_real_transition_to_current() {
         let raw = evidence::original9();
         let dir = tempfile::tempdir().unwrap();
         let path = dir.path().join("progress.json");
@@ -2666,11 +2670,18 @@ mod actual9_before10_writer_acceptance {
         .unwrap();
         assert!(saved.durability_warning.is_some());
         assert_eq!(
-            std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+            std::fs::read(path.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
             raw
         );
         let disk: Progress = serde_json::from_slice(&std::fs::read(path).unwrap()).unwrap();
-        assert_eq!(disk.migration_receipts.unwrap().shell, vec![7, 8, 9, 10]);
+        assert_eq!(
+            disk.migration_receipts.unwrap().shell,
+            vec![7, 8, 9, crate::shell::EVALUATOR_REVISION]
+        );
         assert!(candidate.migration_receipts.is_none());
     }
 }

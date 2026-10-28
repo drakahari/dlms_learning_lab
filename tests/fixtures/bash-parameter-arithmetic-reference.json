@@ -1,0 +1,97 @@
+[
+  {
+    "name": "balanced unselected arithmetic fallback is not evaluated",
+    "source": "number=7; printf '%s\\n' \"$(( ${number:-(1/0)} + 1 ))\"\n",
+    "case": {
+      "name": "balanced unselected arithmetic fallback is not evaluated",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "8\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "balanced selected arithmetic fallback supplies grouping",
+    "source": "printf '%s\\n' \"$(( ${number:-2*(3+1)} + 1 ))\"\n",
+    "case": {
+      "name": "balanced selected arithmetic fallback supplies grouping",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "9\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "ordinary nonarithmetic fallback keeps closing parentheses literal",
+    "source": "printf '%s\\n' \"${missing:-))))}\"\n",
+    "case": {
+      "name": "ordinary nonarithmetic fallback keeps closing parentheses literal",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "))))\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "nested balanced arithmetic respects each parameter boundary",
+    "source": "number=7; printf '%s\\n' \"$(( $(( ${number:-(1/0)} + 1 )) + 1 ))\"\n",
+    "case": {
+      "name": "nested balanced arithmetic respects each parameter boundary",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "9\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "balanced deep unselected literal remains a valid arithmetic span",
+    "source": "number=7; printf '%s\\n' \"$(( ${number:-(3+(2))} + 1 ))\"\n",
+    "case": {
+      "name": "balanced deep unselected literal remains a valid arithmetic span",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "8\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  }
+]

@@ -1745,7 +1745,11 @@ mod attempt_projection_tests {
         std::fs::write(&path, &raw).unwrap();
         progress::save(&path, &p).unwrap();
         assert_eq!(
-            std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+            std::fs::read(path.with_extension(format!(
+                "before-shell-v{}.json",
+                crate::shell::EVALUATOR_REVISION
+            )))
+            .unwrap(),
             raw
         );
         let loaded = progress::load(&path, &all).unwrap();

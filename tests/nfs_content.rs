@@ -702,7 +702,11 @@ fn two_full_raw_drafts_histories_genuine_old_records_backup_resume_and_selected_
     std::fs::write(&path, original).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         original
     );
     let raw = std::fs::read(&path).unwrap();

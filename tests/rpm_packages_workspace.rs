@@ -337,7 +337,11 @@ fn real6_7_8_histories_two_sessions_full_restore_and_selected_reset_are_preserve
     std::fs::write(path.with_extension("before-shell-v8.json"), slot).unwrap();
     progress::save(&path, &old).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         raw
     );
     assert_eq!(
@@ -431,7 +435,11 @@ fn actual9_full_selected_sessions_and_old_records_and_backup_bytes_remain_exact(
     std::fs::write(&path, &raw).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         raw
     );
     let loaded = progress::load(&path, &all).unwrap();

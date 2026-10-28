@@ -1,4 +1,4 @@
-//! Current10 boundaries use actual9 evidence ONLY in explicit private replay.
+//! Current11 boundaries use actual9 evidence ONLY in explicit private replay.
 //! The default tests never fabricate historical9 outcomes or implied revisions.
 use dlms_learning_lab::{
     backup,
@@ -21,7 +21,7 @@ fn empty() -> Progress {
     }
 }
 fn slot(path: &Path) -> std::path::PathBuf {
-    path.with_extension("before-shell-v10.json")
+    path.with_extension(format!("before-shell-v{}.json", shell::EVALUATOR_REVISION))
 }
 fn history(profile: &Progress, include_main: bool) -> BTreeMap<String, Vec<shell::Record>> {
     profile
@@ -50,7 +50,7 @@ fn history(profile: &Progress, include_main: bool) -> BTreeMap<String, Vec<shell
         .collect()
 }
 fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
-    assert_eq!(shell::EVALUATOR_REVISION, 10);
+    assert_eq!(shell::EVALUATOR_REVISION, 11);
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
@@ -165,7 +165,7 @@ fn unchanged_except_execution_and_history(now: &Progress, old: &Progress) {
 }
 #[test]
 fn empty_legacy9_record_shape_is_explicitly_ungraded_not_a_fabricated_execution() {
-    assert_eq!(shell::EVALUATOR_REVISION, 10);
+    assert_eq!(shell::EVALUATOR_REVISION, 11);
     let labs = pack::bundled().unwrap();
     let lab = labs.iter().find(|s| s.id == "shell-arguments").unwrap();
     let mut attempt = Attempt::new(lab, 1);
@@ -192,7 +192,7 @@ fn empty_legacy9_record_shape_is_explicitly_ungraded_not_a_fabricated_execution(
     assert!(retained.results.is_empty());
 }
 #[test]
-fn direct7_to10_retains_exact_source7_and_before8_without_inventing8_or9_receipts() {
+fn direct7_to_current_retains_exact_source7_and_before8_without_inventing_intermediate_receipts() {
     let raw = include_bytes!("fixtures/shell-v7-synthetic-writer-progress.json");
     let labs = pack::bundled().unwrap();
     let directory = tempfile::tempdir().unwrap();
@@ -209,7 +209,7 @@ fn direct7_to10_retains_exact_source7_and_before8_without_inventing8_or9_receipt
             .migration_receipts
             .unwrap()
             .shell,
-        vec![7, 10]
+        vec![7, shell::EVALUATOR_REVISION]
     );
 }
 #[test]
@@ -271,7 +271,7 @@ fn actual9_target_before10_exact_bytes_old_slots_and_receipts_are_preserved() {
     let disk = progress::load(&path, &labs).unwrap();
     assert_eq!(
         disk.migration_receipts.as_ref().unwrap().shell,
-        vec![7, 8, 9, 10]
+        vec![7, 8, 9, shell::EVALUATOR_REVISION]
     );
     evidence::exact(&history(&disk, false), &history(&original, true));
     progress::save(&path, &disk).unwrap();
@@ -313,7 +313,7 @@ fn actual9_reset_first_practice_only_and_conflicting_valid_slot_never_skip_raw_t
                 .migration_receipts
                 .unwrap()
                 .shell,
-            vec![7, 8, 9, 10]
+            vec![7, 8, 9, shell::EVALUATOR_REVISION]
         );
     }
 }
@@ -350,7 +350,7 @@ fn actual9_export_preview_cancel_confirm_restore_runs_current_only_explicitly_an
             run: Some(run),
         } = &a.state
         {
-            assert_eq!(run.engine_revision, 10);
+            assert_eq!(run.engine_revision, shell::EVALUATOR_REVISION);
             assert_eq!(&run.source, source);
             let lab = labs.iter().find(|s| &s.id == id).unwrap();
             let Goal::Script { cases } = &lab.goal else {
@@ -371,7 +371,10 @@ fn actual9_export_preview_cancel_confirm_restore_runs_current_only_explicitly_an
     let disk = progress::load(&target, &labs).unwrap();
     let expected_full = expected_after_actual9_target_save(&candidate.progress, &original);
     evidence::exact(&full(&disk), &expected_full);
-    assert_eq!(disk.migration_receipts.unwrap().shell, vec![7, 8, 9, 10]);
+    assert_eq!(
+        disk.migration_receipts.unwrap().shell,
+        vec![7, 8, 9, shell::EVALUATOR_REVISION]
+    );
 }
 #[test]
 #[ignore = "Requires exact retained private actual9 COMPLETE; explicit guarded replay only"]

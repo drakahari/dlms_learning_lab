@@ -411,3 +411,79 @@ fn metadata_scalar_bounds_reject_before_unrelated_later_fields_are_decoded() {
         );
     }
 }
+
+#[test]
+fn selective_file_restore_preserves_unselected_changes_and_directory_metadata() {
+    let original = sample();
+    let (archive, _) = file_backup::create(&original, "project", None, true).unwrap();
+    let mut target = original.clone();
+    target.write(".settings", "damaged\n").unwrap();
+    target
+        .write("notes/change.txt", "independent local update\n")
+        .unwrap();
+    target.chmod("notes", 0o700).unwrap();
+    let before = target.clone();
+    archive.extract_files(&mut target, &[".settings"]).unwrap();
+    assert_eq!(
+        target.entries[".settings"].text,
+        original.entries[".settings"].text
+    );
+    assert!(target.entries[".settings"].changed > before.clock);
+    assert_eq!(
+        target.entries["notes/change.txt"],
+        before.entries["notes/change.txt"]
+    );
+    assert_eq!(target.entries["notes"], before.entries["notes"]);
+}
+
+#[test]
+fn selective_missing_members_parents_and_directories_fail_without_partial_effects() {
+    let original = sample();
+    let (archive, snapshot) = file_backup::create(&original, "project", None, true).unwrap();
+    let (delta, _) = file_backup::create(&original, "project", Some(&snapshot), true).unwrap();
+    for files in [
+        vec![".settings", "missing"],
+        vec!["notes"],
+        vec![".settings", ".settings"],
+        vec!["../outside"],
+        vec![],
+    ] {
+        let mut target = original.clone();
+        target.write(".settings", "retain on error").unwrap();
+        let before = target.clone();
+        assert!(archive.extract_files(&mut target, &files).is_err());
+        assert_eq!(target, before);
+    }
+    let mut target = empty();
+    let before = target.clone();
+    assert!(
+        archive
+            .extract_files(&mut target, &["notes/keep.txt"])
+            .is_err()
+    );
+    assert_eq!(target, before);
+    assert!(delta.extract_files(&mut target, &[".settings"]).is_err());
+    assert_eq!(target, before);
+}
+
+#[test]
+fn directory_entry_changes_update_only_the_immediate_parent_clock() {
+    let mut tree = empty();
+    tree.add("notes", node(true), None).unwrap();
+    assert_eq!(tree.entries[""].modified, tree.clock);
+    let root = tree.entries[""].clone();
+    tree.add("notes/file", node(false), Some("first")).unwrap();
+    assert_eq!(tree.entries["notes"].modified, tree.clock);
+    assert_eq!(tree.entries["notes"].changed, tree.clock);
+    assert_eq!(tree.entries[""], root);
+    let folder = tree.entries["notes"].clone();
+    tree.write("notes/file", "second").unwrap();
+    assert_eq!(tree.entries["notes"], folder);
+    assert_eq!(tree.entries[""], root);
+    tree.remove("notes/file").unwrap();
+    assert_eq!(tree.entries["notes"].modified, tree.clock);
+    assert_eq!(tree.entries[""], root);
+    tree.remove("notes").unwrap();
+    assert_eq!(tree.entries[""].modified, tree.clock);
+    assert_eq!(tree.entries[""].changed, tree.clock);
+}

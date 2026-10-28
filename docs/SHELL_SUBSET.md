@@ -11,12 +11,12 @@ Defined before the introductory unit (checked 2026-10-21). This is an in-process
 - `|`, `&&`, `||`; pipeline status is the last stage by default. Explicit `set -o pipefail` selects the rightmost nonzero stage status, or0 if all stages succeed; `set +o pipefail` restores the default. Pipeline variable/option changes are isolated; virtual file writes and first-stage stdin consumption persist. A first-stage redirected or explicit file input leaves the caller’s finite stdin untouched. No other `set` forms or `set -e`.
 - `if …; then …; [else …;] fi`, `for name in words; do …; done`, `while …; do …; done`, nesting within the limits below.
 - Text redirects `<`, `>`, `>>`, `2>`, `2>>`, `>&2`, `1>&2`, `2>&1`, evaluated left to right. Redirected paths must expand to exactly one word. Only a single trailing input redirect on while loops is supported, as specified below; other compound-command redirects remain unsupported.
-- Commands (shell builtins and simulated text utilities): `printf` with literal `%s`, `%%`, `\n`, `\t`, `\\` formats (format repeats for excess arguments); `echo` without flags or backslashes; `cat PATH`; `grep -F LITERAL [PATH]` (literal lines, status 0/1/2); `read -r NAME` (one variable, default whitespace trimming, EOF status) and the narrowly scoped literal `IFS= read -r NAME` described below; `test`/`[` with `-n`, `-z`, `-f`, `=`, `!=`, `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`, or one-string truth; `true`, `false`, `:`, `exit [0…255]`; function `return [0…255]`, `shift [N]`, and the Bash-specific local-variable extension as specified below.
+- Commands (shell builtins and simulated text utilities): `printf` with literal `%s`, `%%`, `\n`, `\t`, `\\` formats (format repeats for excess arguments); `echo` without flags or backslashes; `cat [--] [PATH]` (one optional file; absent or `-` reads finite input); `grep -F LITERAL [PATH]` (literal lines, status 0/1/2); `read -r NAME` (one variable, default whitespace trimming, EOF status) and the narrowly scoped literal `IFS= read -r NAME` described below; `test`/`[` with `-n`, `-z`, `-f`, `=`, `!=`, `-eq`, `-ne`, `-lt`, `-le`, `-gt`, `-ge`, or one-string truth; `true` and `false` without arguments, `:` (discards successfully prepared arguments), `exit [0…255]`; function `return [0…255]`, `shift [N]`, and the Bash-specific local-variable extension as specified below.
 - The first `#!/bin/bash` or `#!/bin/sh` line is a comment, not a process launcher. No startup files or inherited host environment. Each test starts with its declared environment, arguments, stdin and virtual files. Each Run starts fresh; editor work remains saved.
 
 ## Honest exclusions
 
-Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
+Reject unsupported operators/syntax: backticks, bracket/recursive/directory globbing, tilde/brace expansion, parameter operators beyond the read-only extension below, unsupported array forms, subshells, groups, background jobs, here-documents/strings, `until`, `select`, `break`, `continue`, `export`, other `set` forms, `eval`, `exec`, `source`/`.`. No host commands, filesystem metadata/links/devices, executable files, non-C utility locale behavior or binary/NUL data. Filename matching is limited to the documented * and ? subset; unsupported patterns fail explicitly. `[[ ]]` and Bash-only syntax are not taught in unit 1. Foundation/composition/reusable/text units use portable shell syntax; the scope unit explicitly teaches Bash local. The reference oracle is Bash in its default mode with controlled inputs.
 
 Diagnostic clarification (2026-10-25): `elif` clauses remain unsupported. Use
 nested `if`/`else` blocks. A bare unquoted `elif` command head, including a pipeline
@@ -243,3 +243,50 @@ new requirements or learner answers are invented. The full application regressio
 passes before a test-only shared-helper cleanup, followed by affected library/
 migration checks and all-target Clippy. New practical assignments and native
 acceptance are separate gates; the installed133 candidate38a still uses evaluator9.
+
+
+## Read-only fallback/alternate values — evaluator11
+
+Integrated and gated on MAIN2026-10-28. `${name-WORD}`, `${name:-WORD}`, `${name+WORD}` and `${name:+WORD}`
+distinguish unset from empty scalars/positional arguments without assignment.
+WORD is literal-only; complete-expansion quoting and existing split/glob/resource
+rules apply. Nested expansion, inner quotes/escapes, array targets and other
+parameter operators fail honestly. See [the exact contract](SHELL_PARAMETER_DEFAULTS.md).
+The genuine actual10 capture precedes integration; source/results/history/drafts
+and target-derived receipts are preserved by explicit replay. No new authored
+labs or learner credit are implied. Subsequent unit/native gates stay separate.
+
+
+### Single-file cat operand correction — evaluator11
+
+Evaluator11 extends the former one-literal-path form to bounded
+`cat [--] [FILE]`. With no operand, or a sole `-`, copy the remaining finite
+simulated standard input exactly and consume it. Reading a virtual file leaves
+that input untouched. The first leading `--` ends options; a later `--` is a
+literal filename. `cat -- -notes` reads that virtual file, whereas `cat -- -`
+still reads input. Names containing spaces remain one operand when quoted.
+Use the normal /work resolver; no host path or utility lookup occurs.
+
+Other flags, multiple file operands and full GNU cat behavior remain unsupported.
+Arguments expand and redirections apply normally before the builtin; failed
+expansion is not success, missing files return normal status1, and an earlier
+truncate is not rolled back by a later file error. Output, memory, instruction,
+file and cooperative Stop bounds are unchanged. Ordinary helper calls and the existing builtin-name/function-in-pipeline
+restrictions remain unchanged.
+
+Thirteen fixed source recipes and six boundary/equivalence groups pass runtime
+and controlled reference gates. The comparison includes an independent
+read/printf loop and existing virtual /work prefix alternatives; host reference
+recipes use relative disposable names only. Original350 authored outcomes and
+the original35 parameter/six colon recipes remain protected. See
+[SHELL_PARAMETER_DEFAULTS.md](SHELL_PARAMETER_DEFAULTS.md).
+
+
+Arithmetic-boundary correction for the read-only parameter candidate: lazy
+selection cannot make malformed source valid. Parentheses retain ordinary
+arithmetic lexical matching; parameter braces and nested arithmetic must close
+inside their own span. The original35 proposals remain immutable:34 supported
+cases plus one explicitly amended Syntax failure confirmed by actual Bash,
+with five separate balanced controls passing controlled comparison. Whole-script compile
+preflight/status2 is an intentional simulator difference from Bash runtime error
+timing/status1. See the detailed contract/amendment above.

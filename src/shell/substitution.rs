@@ -22,21 +22,39 @@ pub(super) fn body_start(chars: &[char], dollar: usize) -> Option<usize> {
 /// An arithmetic span remains atomic to the shell lexer. Command substitution
 /// inside arithmetic is deliberately excluded; nested arithmetic is unchanged.
 pub(super) fn arithmetic_end(chars: &[char], start: usize) -> Result<usize, String> {
+    // Parentheses in source still participate in arithmetic lexical matching,
+    // even in an unselected parameter fallback. Never make a braced WORD opaque.
     let end = arithmetic::end(chars, start)?;
-    for i in start + 3..end {
-        if body_start(chars, i).is_some() {
+    let expression_end = end - 2;
+    let expression = &chars[..expression_end];
+    let mut i = start + 3;
+    while i < expression_end {
+        if expression[i..].starts_with(&['$', '(', '(']) {
+            i = arithmetic_end(expression, i)?;
+            continue;
+        }
+        if expression[i..].starts_with(&['$', '{']) {
+            // A brace after this arithmetic close belongs to a different span.
+            // Reject it while compiling, before any previous command can run.
+            i = parameter_end(expression, i)?;
+            continue;
+        }
+        if body_start(expression, i).is_some() {
             return Err("Unsupported command substitution inside arithmetic expansion".into());
         }
+        i += 1;
     }
     Ok(end)
 }
 
-/// Skip the existing simple parameter span without admitting a new parameter
-/// operator or computed-index execution context by accident.
+/// Skip a parameter span. The read-only default/alternate extension validates
+/// its literal WORD while compiling, before any commands or redirects run.
 pub(super) fn parameter_end(chars: &[char], start: usize) -> Result<usize, String> {
     let mut i = start + 2;
     while i < chars.len() {
         if chars[i] == '}' {
+            let key = chars[start + 2..i].iter().collect::<String>();
+            super::parameters::parse(&key)?;
             return Ok(i + 1);
         }
         if body_start(chars, i).is_some() {

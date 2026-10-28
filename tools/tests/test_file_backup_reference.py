@@ -13,6 +13,14 @@ import file_backup_reference as reference
 
 @unittest.skipUnless(sys.platform.startswith('linux'), 'fixed Fedora reference')
 class BackupReferenceSafety(unittest.TestCase):
+    def test_chmod_reference_accepts_only_eight_fixed_modes_and_owned_targets(self):
+        self.assertEqual(len(reference.NUMERIC_MODES),8)
+        for kind,mode in reference.NUMERIC_MODES:
+            self.assertEqual(reference.chmod_argv('/proc/self/fd/99',kind,mode),
+                             ['/proc/self/fd/99',mode,'mode-'+kind])
+        for kind,mode in [('directory','77777'),('file','--reference=/private'),('../outside','755'),('directory','u+s')]:
+            with self.assertRaises(reference.safe.OracleError):
+                reference.chmod_argv('/proc/self/fd/99',kind,mode)
     def test_no_cli_source_profile_path_binary_or_abbreviations(self):
         with patch.object(reference, 'root_guard') as guard:
             for flags in [['--capture-id', 'x', '--source', 'tar bad'], ['--binary', '/bin/tar'],
@@ -32,8 +40,8 @@ class BackupReferenceSafety(unittest.TestCase):
             with self.assertRaises(reference.safe.OracleError):
                 reference.create_argv('/proc/self/fd/99', archive, snapshot)
 
-    def test_extraction_only_targets_eight_owned_roots_no_unlink_or_exec_flags(self):
-        self.assertEqual(len(reference.CHAINS), 8)
+    def test_extraction_only_targets_ten_owned_roots_no_unlink_or_exec_flags(self):
+        self.assertEqual(len(reference.CHAINS), 10)
         for name, chain in reference.CHAINS.items():
             for archive, incremental in chain:
                 command = reference.extract_argv('retained-tar', archive, name, incremental)
@@ -42,6 +50,10 @@ class BackupReferenceSafety(unittest.TestCase):
         for destination in ['..', '/private', 'source', '--to-command=sh']:
             with self.assertRaises(reference.safe.OracleError):
                 reference.extract_argv('retained-tar', 'base.tar', destination, True)
+        self.assertEqual(reference.extract_argv('retained-tar','base.tar','partial_only',False,'data/.settings')[-2:], ['--','data/.settings'])
+        for member in ['../private','/etc/passwd','data/../../private','--to-command=sh']:
+            with self.assertRaises(reference.safe.OracleError):
+                reference.extract_argv('retained-tar','base.tar','partial_only',False,member)
 
     def test_missing_shared_guard_or_foreign_target_stops_before_pins_or_children(self):
         with tempfile.TemporaryDirectory() as temporary:

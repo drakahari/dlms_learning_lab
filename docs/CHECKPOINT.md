@@ -31,12 +31,13 @@ and independent unfinished assignment/example drafts. Immutable manifest:
 The exact producer and243 compiled source inputs are retained privately; no
 observations may be regenerated or relabeled under11. Historical producer is
 nondefault-feature gated; ordinary all-target checks do not rebuild it. See M170.
-Python223 and the closed immutable verifier pass. MAIN still evaluator10/catalog154.
+Python223 and the closed immutable verifier pass. At that capture MAIN was
+evaluator10/catalog154; the later reviewed integration is recorded below.
 
 M171 actual Bash54 comparison found a genuine malformed-arithmetic false positive:
 53 expected matches,1 rejected case032. Original recipe/output/evaluator10 bytes
-stay immutable. Structural R7 correction and5 balanced controls are SOURCE ONLY;
-next scoped VM/private-history/reference gates precede MAIN11 integration. Do not
+stay immutable. R7 structural correction and5 balanced controls were initially
+source-only; the R8/reference integration below supersedes that stage. Do not
 claim54/54 or silently change old evidence. See M171 and private correction receipt.
 
 M172 pure backup/tree/snapshot foundation passes13 tests, scoped Clippy and8/8
@@ -44,22 +45,60 @@ controlled GNU tar restore comparisons;237Python and coverage pass. Independent
 review found/fixed restore ctime, omitted-file type conflict and early bounds.
 No backup lab/credit yet: 206.2 remains Open, now accurately naming the foundation.
 
-Current sole HEAVY GRANT is Cron integrationR2: library/core/workspace/attempts,
-three warm metadata regressions and scoped Clippy. ROOT must wait for DONE/reaped
-before any other heavy invocation. LACP is source-only fixing115% optional-form
-clipping plus idle admission-serialization bypasses discovered by real controller
-checks; its preserved assertions stay. No registration/new count/objective credit.
-Cron foundation17/workspace6 earlier passed; integration/policy equivalence awaits
-this new gate. ROOT wrappers all reaped; memoryminimum21.32GiB/PSI0.18/OOMdelta0.
-Next: finish capability/reference/native gates, integrate substantive units, then
-continue remaining reconciliation queue; do not end at this note.
+M173–M177 reviewed shell capability is now integrated in MAIN evaluator11. All19
+source paths and the exact12-path current-consumer transition were independently
+pinned. Genuine before10/380-vector/historical data stay unchanged. The full
+inclusive R3 suite passes2045/0FAIL/0ignored across159 harnesses, including all19
+retained-history checks. Earlier R1 obsolete cat-stdin negative and R2 two stale
+NAT receipt literals were corrected explicitly, with all original failed logs
+retained; no expected observation was rewritten. Current-vs-historical filenames
+and receipts now reflect the transition actually performed, never fabricate10.
+The immutable actual10 verifier still passes after11.
+
+Real Bash OracleR4 accepts58 supported positive observations and one exact
+confirmed invalid case,0 unexpected. Original54 inputs/failed032 output and all
+old evaluator10 records are immutable. Reference59 manifest:
+`64af7aea653ca60e97e641febb27d8be0552538b327197a2b2446017d9706ed6`.
+All-target Clippy,246Python, coverage and28-theme provenance checks pass. Final
+backup peer corrections pass27 focused runtime tests plus final all-target Clippy,
+Python and GNU comparisons; the2045 inclusive run precedes these last small
+numeric-chmod/listing guards. Ten GNU restore and eight GNU numeric-mode cases
+match. Exact private receipt and source-bound limitations are in ledger M173–M177.
+No new assignment or objective credit: catalog154/39 remains exact.
+
+LACP R10 isolated full inclusive2031/0/0, all-target Clippy and actual native83
+captures pass. Root then viewed a genuine usability problem: the capstone's
+21-row verbose result hid the task/editor. R11 SOURCE ONLY is compacting the
+same21 canonical checks with one visible specific failure and optional full
+Details; no grading change. Actual after-render and normal integration remain.
+All native processes/wrappers exited; an initial sandbox NoCompositor refusal
+before any window is retained separately from the successful authorized run.
+
+Bash three substantive optional-input assignments/34 cases are frozen but
+unregistered. Their13 content groups and scoped Clippy are the current sole
+heavy lease in bash-parameter-defaults-154; after success, the independently
+frozen actual native overlay gets9 paired event/controller checks before native.
+Cron StageC49 owned files/722 protected are frozen, not yet compiled; the next
+exclusive queue is lib/core/workspace/content,17 bin cron groups and Clippy.
+No worker may start heavy work without Root's explicit serialized lease.
+
+Backup now has bounded full/partial restore, parent/change clocks and an actual
+literal terminal adapter; it is NOT wired to the normal catalog yet. Independent
+review corrected special cat/tar operands, remote syntax and GNU directory set-ID
+preservation, with explicit regressions and controlled disposable references.
+Abstract archive format, virtual administrator identity, unsupported streams/
+verbose metadata/type replacement and all limits are disclosed. Goal/teaching/
+native/persistence integration remains;206.2 stays Open. Continue these units and
+the complete reconciliation queue without treating capability tests as curriculum.
+Latest pushed source before this milestone is dcaceec; the verified installed
+9a90 candidate remains evaluator10, not the current source/new capabilities.
 
 Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
 three substantive tasks); bash-parameter-defaults-154 (faithful parameter fallback/
-alternate forms, evaluator11 isolated ONLY); linux-scheduling-154 (bounded Cronie
+alternate forms reviewed into MAIN11, new content still isolated); linux-scheduling-154 (bounded Cronie
 calendar/access/execution foundation, then scheduling tasks). All use MAINrunner,
-exclusive worktree targets and shared lock; no concurrent heavy run. Root captured genuine actual10 authored/example/legacy bytes; preserve them
-unchanged while integrating11.
+exclusive worktree targets and shared lock; no concurrent heavy run. Root captured genuine actual10 authored/example/legacy
+bytes; preserve them unchanged after integrating11.
 No unintegrated source/fixture receives catalog or coverage credit. Continue the
 remaining curriculum tables after these ordinary batches; platform/novice/reader
 acceptance stays distinct. No release or unrelated-project/desktop changes.
@@ -70,7 +109,7 @@ acceptance stays distinct. No release or unrelated-project/desktop changes.
 Fedora candidate. No release is published. Full application/curriculum completion
 remains open; this checkpoint does not turn the candidate into that claim.
 
-## Current source and runnable artifact
+## Historical verified source and runnable artifact
 
 Product fixes:3562e844e028a713ddcdd222780e85202a53ad68.
 Final five-size QA/source:9a90f275e133655f981cd79dd49d93f5246d7377.

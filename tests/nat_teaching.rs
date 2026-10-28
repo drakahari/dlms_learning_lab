@@ -429,7 +429,11 @@ fn actual9_profile_plus_practice_retains_every_old_attempt_raw_target_and_receip
     std::fs::write(path.with_extension("before-shell-v8.json"), old7).unwrap();
     progress::save(&path, &p).unwrap();
     assert_eq!(
-        std::fs::read(path.with_extension("before-shell-v10.json")).unwrap(),
+        std::fs::read(path.with_extension(format!(
+            "before-shell-v{}.json",
+            dlms_learning_lab::shell::EVALUATOR_REVISION
+        )))
+        .unwrap(),
         raw
     );
     assert_eq!(
@@ -443,6 +447,6 @@ fn actual9_profile_plus_practice_retains_every_old_attempt_raw_target_and_receip
     evidence::exact(&loaded.attempts[&s.id], &selected);
     assert_eq!(loaded.attempts.len(), 134);
     let receipts = serde_json::to_value(loaded.migration_receipts).unwrap();
-    assert_eq!(receipts["shell"], serde_json::json!([7, 8, 9, 10]));
+    assert_eq!(receipts["shell"], serde_json::json!([7, 8, 9, 11]));
     assert_eq!(evidence::original9(), raw);
 }
