@@ -21,6 +21,7 @@ mod ospf;
 mod safe_automation_lessons;
 mod seed_learning;
 mod spanning_tree;
+mod ui_consistency;
 #[test]
 fn opening_terminal_assignment_keeps_task_visible_and_scrolling_does_not_grow_output() {
     for scale in [1., 1.5, 2.] {

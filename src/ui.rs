@@ -251,6 +251,8 @@ struct Metrics {
     script_diagnostic: Option<egui::Rect>,
     script_completion: Option<egui::Rect>,
     script_feedback: Option<egui::Rect>,
+    script_case_rows: Vec<(usize, egui::Rect)>,
+    script_case_status: Option<(usize, bool, egui::Rect)>,
     reopen_scale: Option<egui::Rect>,
     reopen_scale_items: Vec<(f32, egui::Rect)>,
     reopen_theme: Option<egui::Rect>,
@@ -471,6 +473,11 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if let Some(stage) = Self::script_feedback_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if let Some(stage) =
                 Self::nfs_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {

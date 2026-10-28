@@ -496,3 +496,22 @@ pub fn topology_chain(ui: &mut egui::Ui, cards: &[[&str; 3]], caption: &str) -> 
     );
     response
 }
+
+/// Reserve one stable outer viewport before laying out scrollable editor content.
+/// Scrollbar animation or content overflow must not move adjacent action rows.
+/// Child widgets retain their native cursor, selection, focus and hit geometry.
+pub fn fixed_viewport<R>(
+    ui: &mut egui::Ui,
+    size: egui::Vec2,
+    contents: impl FnOnce(&mut egui::Ui) -> R,
+) -> (egui::Rect, R) {
+    let (id, rect) = ui.allocate_space(size);
+    let mut child = ui.new_child(
+        egui::UiBuilder::new()
+            .id_salt(id)
+            .max_rect(rect)
+            .layout(egui::Layout::top_down(egui::Align::Min)),
+    );
+    child.set_clip_rect(rect.intersect(ui.clip_rect()));
+    (rect, contents(&mut child))
+}

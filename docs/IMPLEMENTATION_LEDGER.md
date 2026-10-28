@@ -3189,3 +3189,83 @@ recorded PSI avg10 of0.18%, without sustained pressure/OOM; no global zero-press
 claim or memory guarantee. No other app/desktop/GPU/swap/service/model changes,
 new dependency, discarded diagnostics, CI dispatch or public release. Full
 curriculum154Partial/1Supporting/1085Open of1240 remains incomplete.
+
+
+### M157 scoped UI consistency repair — source verification (2026-10-28)
+
+From00d69d3/ed7e333, all154/39 scenarios/units, source packs, engine/shell/grading,
+progress formats and dependencies remain unchanged. Script output names the
+selected case and explicit Pass/Fail, distinguishes a passing selection from
+other failing cases, and gives whole-run failure counts. Native result-row
+selection changes presentation only. Same-error, syntax, unsupported behavior,
+per-case reasons and current-success invalidation retain original core grading.
+Closer read of the old escaped output shows a repeated-line difference; its
+selected case identity was unclear. New tests also deliberately select a truly
+passing case while the overall run fails; they do not reinterpret old outcomes.
+
+A style-derived shared fixed_viewport reserves NFS editor geometry before
+scrollbars render, with native clipping/cursor/selection/focus inside. No text
+shrinking, manual per-screen offsets, scrollbar hiding or progress mutation.
+First inner-minimum adjustment still failed actual150% Save-row geometry; the
+fixed outer allocation resolves it. Normal config text wraps inside the viewport;
+a separate forced-overflow regression exercises real horizontal/vertical/both
+scrollbar transitions, retaining strict0.1-point action-position invariance.
+
+Six appended UI tests PASS2.74s (m157-focusedR8). Earlier failed runs retained:
+R1 required a float Option annotation; R2 identified font initialization and an
+advice line below the scroll viewport; R3 fixture exceeded the unchanged512-byte
+line cap; R4/R5 exposed real150% outer sizing; R6 proved geometry stable but no
+natural horizontal overflow in wrapped documents. R7 adds a real forced-overflow
+component test rather than waiving the scrollbar requirement. R8 also exercises
+an actual-event isolated capture driver: Run selects first failure, a real result
+click selects a passing case,12 literal outcomes and full Progress remain exact,
+and7 dark100/light150/dark200 screenshot requests are acknowledged. These are
+headless route checks; actual installed screenshots remain pending. Existing NFS
+native stages additionally assert real two-column Save alignment each frame.
+Independent source ACKs41bee3db/89bbf8a1. All old tests/fixtures/cases unchanged.
+
+Source frozen for m158 full inclusive/Python/Clippy/coverage gates. No native or
+candidate acceptance inferred before it runs; before artifacts from actual00d
+are privately hash-pinned, no screenshot alteration/public commit. All heavy
+work uses MAIN shared lock,2 Cargo jobs/2 test threads and project disk TMP.
+
+
+### M159 script visibility regressions repaired before final gate (2026-10-28)
+
+First COMPLETE inclusive run m158:1977PASS/3FAIL/0ignored,150 harnesses. Failures
+are unchanged full Expected/Actual paint-clip assertions in two native capture
+consumers and the meaningful nonzero-status explanation. All other tests,
+including NFS editing/Undo/focus/progress gates, pass. No old test was modified.
+Measurements show the selected header/status consumed bounded output space; a
+later measurement has the diff extending8points below its actual clip. Moving
+status out restores the prior internal content ordering; compact clickable labels
+instead of full-size selectable buttons retain the original result-row wrapping
+and page geometry. Case and whole-run status share the existing one-line heading,
+with separately colored spans plus explicit words. Numbered result rows retain
+full names/reasons. The original Behavior differs/advice/diff bodies are exact.
+
+Focused original two full-pair assertions PASS m159-pairsR7; meaningful nonzero
+status PASS m159-statusR1. Six new groups PASS m159-focusedR10, adding real Tab/
+Enter after a real result click, exact full Progress equality and unchanged12case
+outcomes. A clicked result explicitly requests native focus; new heading metadata
+is read-only. Temporary diagnosis prints were removed. Original consumer tests,
+core checks, bounds, history fixtures, catalog/units and progress format are exact.
+Source frozen for Clippy-first full rerun m160; no candidate pass presumed.
+
+
+### M160 final source gates PASS for two UI fixes (2026-10-28)
+
+Clippy first flags two unnecessary format-string borrows, corrected without
+behavior change. Then all-target ClippyPASS6.05s; complete inclusive1980PASS/
+0FAIL/0ignored across150harnesses PASS614.30s, including all14 retained checks;
+Python215 PASS8.05s; coverage and all28 palette/source-notice checks PASS. Fmt/diff
+PASS. All original3 failed UI assertions pass unchanged. Six new groups include
+real Tab/Enter and a genuine passing selection under overall failure. Main is
+still154/39 (45/32/28/49); every scenario/unit, engine/shell/progress/tool source,
+existing test/fixture and dependency remains exact. Source peer038cafcd ACK.
+No masks, weakened assertions, skips, cap changes or invented progress. First
+failed full1977/3 and focused diagnostic runs remain privately retained.
+
+Local code commit and clean Fedora candidate are next; actual native capture and
+installed verification of this source have not happened yet. Do not substitute
+headless7 screenshot requests for real Fedora captures. No public release.

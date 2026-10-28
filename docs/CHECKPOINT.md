@@ -1,8 +1,36 @@
 # Implementation continuation checkpoint
 
-2026-10-27. **ACTIVE: the full application build remains authorized.**
+2026-10-28. **ACTIVE: the full application build remains authorized.**
 Do not stop at a status report or treat a Fedora package as curriculum completion.
 No public release. All ordinary milestones may continue without routine approval.
+
+## Current scoped UI fix — active verification (2026-10-28)
+
+From implementation00d69d3 and verificationed7e333. No curriculum expansion:
+all154 labs/39 units, all28 palettes, evaluator10 and progress formats unchanged.
+Script feedback now names the selected case and its Pass/Fail separately from the
+whole-run failure count. Result rows select the case through native widgets.
+NFS editors use a shared fixed outer viewport with a font/style-derived scrollbar
+budget, keeping Save rows stable rather than compensating with screen offsets.
+Six appended regressions PASS (m159 focusedR10, including Tab/Enter), including real Run/case-click,
+equal-output/wrong-files, syntax/unsupported/success invalidation, normal NFS
+reflow and separately forced horizontal/vertical scrollbar transitions. Existing
+tests remain intact. Source reviews41bee3db and89bbf8a1 ACK no grading/progress/
+isolation change. Before PNGs are hash-pinned in reviews/ui-polish154-r1/BEFORE.json.
+
+Final m160 gates PASS:1980/0/0 inclusive Rust across150 harnesses (all14 retained
+checks run),215 Python, Clippy6.05s, coverage/palettes/fmt/diff. Wrapper22885 and
+all child sessions reaped; NO active heavy command. Original3 UI clipping tests
+pass unchanged after compact external case/run status and compact selectable
+result labels; real Tab/Enter works and grade/progress snapshots stay exact.
+Source review038cafcd ACK. All old scenarios/units/engine/shell/progress/tools/
+fixtures/dependencies remain byte-exact. Next locally commit this scoped tested
+source for clean candidate identity, build Fedora candidate, install/upgrade from
+00d69d3, then real script-feedback7, NFS4, scripting3+safe-text3, alignment,11
+starts and script/DHCP cold reopening. Native/installed acceptance of the FIXES
+is still pending; old00d69d3 remains the verified baseline. Do not publish/push
+a false package claim; push reviewed fixes/delivery evidence after acceptance.
+Before PNGs remain private and pinned, with after pairs REQUIRED. No release.
 
 ## Verified application and next actions
 

@@ -27,6 +27,7 @@ mod ospf_lessons;
 pub(super) mod reopen;
 pub(in crate::ui) mod rpm_lessons;
 mod safe_automation_lessons;
+mod script_feedback;
 mod seed_teaching;
 pub(super) mod spanning_tree;
 mod spanning_tree_lessons;
@@ -386,6 +387,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 47000..=47014 => {
+                let (advance, capture) = self.script_feedback_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 28000..=28999 => {
                 let (advance, capture) = self.legacy_terminal_native(ctx, n);
                 if !advance {

@@ -1302,6 +1302,29 @@ impl LabApp {
         ctx: &egui::Context,
         stage: usize,
     ) -> (bool, Option<String>) {
+        if self.metrics.nfs.columns && self.metrics.nfs.documents.len() == 2 {
+            let exports = self
+                .metrics
+                .nfs
+                .controls
+                .iter()
+                .find(|r| r.0 == "save-exports")
+                .unwrap()
+                .1;
+            let fstab = self
+                .metrics
+                .nfs
+                .controls
+                .iter()
+                .find(|r| r.0 == "save-fstab")
+                .unwrap()
+                .1;
+            assert!(
+                (exports.top() - fstab.top()).abs() <= 1. / ctx.pixels_per_point(),
+                "Actual native NFS Save rows must align, including scrollbar transitions: {exports:?}/{fstab:?}"
+            );
+        }
+
         self.nf_scope();
         let p = plan(&self.scenarios);
         assert!((FIRST..FIRST + p.len()).contains(&stage));

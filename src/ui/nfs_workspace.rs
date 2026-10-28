@@ -8,6 +8,7 @@ pub(super) struct NfsMetrics {
     pub read_output: Option<(egui::Rect, egui::Rect)>,
     pub row_clips: Vec<(usize, egui::Rect)>,
     pub fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
+    pub documents: Vec<(String, egui::Rect, egui::Rect, egui::Vec2)>,
     pub controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
     pub choices: Vec<(String, egui::Rect)>,
     pub selections: Vec<(String, String)>,
@@ -427,21 +428,36 @@ fn document(
         rejected: false,
         received: false,
     };
-    let scrolled = egui::ScrollArea::both()
-        .id_salt(id.with("scroll"))
-        .max_height(height)
-        .min_scrolled_height(height)
-        .auto_shrink([false, false])
-        .show(ui, |ui| {
-            ui.add(
-                egui::TextEdit::multiline(&mut b)
-                    .id(id)
-                    .font(egui::TextStyle::Monospace)
-                    .margin(egui::Margin::symmetric(controls::PAD_X, controls::PAD_Y))
-                    .desired_width(editor_width)
-                    .desired_rows(3),
-            )
-        });
+    // The outer viewport includes a style-derived scrollbar gutter. Reserve it
+    // before rendering either editor: egui scrollbar transitions may change the
+    // inner size, but must never change the following Save row's position.
+    let outer_size = egui::vec2(
+        ui.available_width(),
+        height + ui.spacing().scroll.allocated_width(),
+    );
+    let (outer, scrolled) = controls::fixed_viewport(ui, outer_size, |ui| {
+        egui::ScrollArea::both()
+            .id_salt(id.with("scroll"))
+            .max_height(outer_size.y)
+            .min_scrolled_height(height)
+            .auto_shrink([false, false])
+            .show(ui, |ui| {
+                ui.add(
+                    egui::TextEdit::multiline(&mut b)
+                        .id(id)
+                        .font(egui::TextStyle::Monospace)
+                        .margin(egui::Margin::symmetric(controls::PAD_X, controls::PAD_Y))
+                        .desired_width(editor_width)
+                        .desired_rows(3),
+                )
+            })
+    });
+    m.documents.push((
+        key.into(),
+        outer,
+        scrolled.inner_rect,
+        scrolled.content_size,
+    ));
     let r = scrolled.inner;
     r.widget_info(|| egui::WidgetInfo::labeled(egui::WidgetType::TextEdit, r.enabled(), key));
     if *focus == Some(id) && r.enabled() {

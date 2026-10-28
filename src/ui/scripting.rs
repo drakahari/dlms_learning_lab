@@ -242,11 +242,12 @@ impl LabApp {
             let checks = shell::checks(source, run, cases);
             let complete = checks.iter().all(|c| c.0);
             self.metrics.completion = complete;
+            let failed = checks.iter().filter(|c| !c.0).count();
             let summary = ui.label(
                 RichText::new(if complete {
-                    "Correct solution · All input sets pass."
+                    "Overall result · Correct solution · All input sets pass.".to_owned()
                 } else {
-                    "Needs another edit · Inspect the failing inputs, then retry."
+                    format!("Overall result · Needs another edit · {failed} of {} input sets need attention. Select a failing case below to inspect it.", checks.len())
                 })
                 .color(if complete {
                     palette(ui).success
@@ -271,15 +272,40 @@ impl LabApp {
                     cases.len()
                 ));
             } else {
-                for (pass, message) in checks {
-                    ui.add(
-                        egui::Label::new(RichText::new(message).small().color(if pass {
-                            palette(ui).success
+                for (n, (pass, message)) in checks.into_iter().enumerate() {
+                    let message = format!(
+                        "Case {} · {}",
+                        n + 1,
+                        if pass {
+                            message
                         } else {
-                            palette(ui).error
-                        }))
-                        .wrap(),
+                            format!("Fail · {message}")
+                        }
                     );
+                    let response = ui
+                        .add(
+                            egui::Label::new(RichText::new(message).small().color(if pass {
+                                palette(ui).success
+                            } else {
+                                palette(ui).error
+                            }))
+                            .wrap()
+                            .sense(egui::Sense::click()),
+                        )
+                        .on_hover_cursor(egui::CursorIcon::PointingHand);
+                    response.widget_info(|| {
+                        egui::WidgetInfo::labeled(
+                            egui::WidgetType::Button,
+                            response.enabled(),
+                            format!("Inspect result for {}", cases[n].name),
+                        )
+                    });
+                    self.metrics.script_case_rows.push((n, response.rect));
+                    name_control(&response, format!("Inspect result for {}", cases[n].name));
+                    if response.clicked() {
+                        response.request_focus();
+                        self.script_case = n;
+                    }
                 }
             }
             if complete {
@@ -385,7 +411,6 @@ impl LabApp {
         (run, stop)
     }
     fn script_output(&mut self, ui: &mut egui::Ui, i: usize, case: usize) {
-        ui.label("Run output · selected inputs");
         let engine::State::Script { run, .. } =
             &self.progress.attempts[&self.scenarios[i].id].state
         else {
@@ -442,6 +467,79 @@ impl LabApp {
             self.metrics.script_history = Some(history_panel.header_response.rect);
         }
         let r = displayed.and_then(|r| r.results.get(case));
+        // Keep selected-case and whole-run status on the existing heading row.
+        // The details below retain their full scrolling comparison space.
+        if r.is_some() {
+            let engine::Goal::Script { cases } = &self.scenarios[i].goal else {
+                return;
+            };
+            let engine::State::Script { source, run } =
+                &self.progress.attempts[&self.scenarios[i].id].state
+            else {
+                return;
+            };
+            if !earlier {
+                let checks = shell::checks(source, run, cases);
+                let pass = checks[case].0;
+                let failed = checks.iter().filter(|c| !c.0).count();
+                let overall = if failed == 0 {
+                    "all pass".into()
+                } else {
+                    format!("{failed} fail")
+                };
+                let font = egui::TextStyle::Body.resolve(ui.style());
+                let mut caption = egui::text::LayoutJob::default();
+                caption.append(
+                    &format!(
+                        "Case {}/{} · {}",
+                        case + 1,
+                        cases.len(),
+                        if pass { "Pass" } else { "Fail" }
+                    ),
+                    0.,
+                    egui::TextFormat {
+                        font_id: font.clone(),
+                        color: if pass {
+                            palette(ui).success
+                        } else {
+                            palette(ui).error
+                        },
+                        ..Default::default()
+                    },
+                );
+                caption.append(
+                    &format!(" · Run: {overall}"),
+                    0.,
+                    egui::TextFormat {
+                        font_id: font,
+                        color: if failed == 0 {
+                            palette(ui).success
+                        } else {
+                            palette(ui).error
+                        },
+                        ..Default::default()
+                    },
+                );
+                let status = ui.add(egui::Label::new(caption).wrap());
+                name_control(
+                    &status,
+                    format!(
+                        "Selected inputs: {}. {}. Whole run: {overall}.",
+                        cases[case].name,
+                        if pass { "Pass" } else { "Fail" }
+                    ),
+                );
+                self.metrics.script_case_status = Some((case, pass, status.rect));
+            } else {
+                ui.label(format!(
+                    "Case {}/{} · Earlier saved output",
+                    case + 1,
+                    cases.len()
+                ));
+            }
+        } else {
+            ui.label("Run output · selected inputs");
+        }
         let output = egui::Frame::new().fill(palette(ui).input).stroke(egui::Stroke::new(1_f32,palette(ui).border)).inner_margin(10.).show(ui, |ui| {
             egui::ScrollArea::both().id_salt(("script-output",i,case)).max_height(330.).min_scrolled_height(if r.is_some() { 160. } else { 40. }).auto_shrink([false,r.is_none()]).show(ui, |ui| {
                 if let Some(r) = r {
