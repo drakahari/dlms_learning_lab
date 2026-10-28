@@ -3552,3 +3552,49 @@ with optional full details is being corrected before integration. Cron StageC
 and three new shell assignments remain unregistered. The old installed9a90 ELF
 is unchanged and does not inherit these source results. Continue implementation;
 no release, complete-curriculum, cross-platform or novice acceptance claim.
+
+### M178 bounded backup outcomes and isolated teaching (2026-10-28)
+
+Added substantive outcome-grading and separate teaching foundations for the
+remaining backup unit. Requirements inspect actual restored trees, literal
+payloads/root/type, current snapshots, unchanged supplied recovery history and
+multiple independent restore tests. Missing/reversed levels, a plausible full
+archive substituted for an increment, wrong roots, changed contents/permissions
+and overwritten history fail. Fresh sample inputs cannot reuse a previously
+restored learner target as proof. Each test restores its own simulated files.
+
+CheckRun owns only admitted bounded inputs, yields after each archive, and cannot
+publish success before completion. Dropping cancels without learner-file writes.
+Complete-input identity and a combined8MiB cache/transient reservation remain
+mandatory before native integration. Independent review first identified the
+abstract-root ambiguity; explicit Recovery.root now checks it. PreserveArtifacts
+was independently reviewed after addition. The52 focused groups (16core,
+14terminal,15workspace,7teaching) all pass, including alternatives, partial/wrong
+work, no answer dumps, reset/retry, cancellation, post-success invalidation,
+early excess-row rejection and raw/path/context limits. No prior assertion changed.
+
+The lesson foundation validates explained runnable example→adverse experiment→
+repair, distinct paths and independent persisted draft/transcript/navigation.
+No Attempt/Progress handle exists in practice execution. Peer teaching review
+found no current material issue; outer bounded progress loading/valid_for and
+practice-only checked presentation are explicit pending integration obligations.
+Added narrow real-format stat for inspecting actual virtual permissions/ownership,
+including special bits; unsupported formats/metadata fail honestly. Not canned
+output and not a host utility. Controlled disposable GNU reference now matches
+10restore cases,8numeric modes and8stat mode-format observations. GNU manifest
+`4e6e602cfe59611295a693d7a5483e65e5b3b14b40924a86b2c8bb8111a6b00d`.
+
+Scoped Clippy and247Python pass. Full inclusive2045 remains the preceding M176
+source evidence; it does not include these22 new workspace/teaching groups or
+three new stat groups. Re-run inclusive after the integrated curriculum batch.
+Private receipt reviews/file-backup/goals-teaching-m178/RESULT.json SHA256
+`3a1bc990c291f0f7ffef90101235bbacee9a020dd3cf5ba32feb6348e2d9922a`.
+Minimum observed available21.13GiB, maxsome/fullPSIavg10=0/0, OOMdelta0; all root
+wrappers reaped before LACP received its exclusive test/native lease.
+
+No new assignment is registered and no coverage row promoted:154labs/39units,
+45CCNA/32LPIC-1/28LPIC-2/49Bash, all28themes and old progress unchanged. Actual
+backup scenario/native/persistence integration remains, as do all broader scope
+gaps. Cron scoped backend/editor gates pass but actual native is pending; LACP
+compact-feedback native review and three shell tasks remain in the serialized
+queue. Continue the agreed implementation; no release or completion claim.

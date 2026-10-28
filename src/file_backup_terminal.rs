@@ -14,7 +14,7 @@ pub enum Operator {
 }
 pub const OPERATOR: Operator = Operator::Root;
 
-pub const HELP: &str = "Simulated backup administrator: root (no host privileges). Virtual backup terminal: pwd; cd PATH; ls [-a] [PATH]; cat [--] FILE; cp [--] ARCHIVE_OR_SNAPSHOT DESTINATION; rm [--] FILE; mkdir [--] PATH; touch [--] FILE; chmod OCTAL PATH; tar -c/-x/-t -f ARCHIVE (-v for create/extract only) [-C DIRECTORY] [-g SNAPSHOT | -G] [SOURCE]. Long create/extract/list/verbose/file/directory/listed-incremental/incremental options are supported. One selected source directory; extract/list support literal stored file members; selective directory recursion is unsupported. No compression, links, devices, shell operators or host execution. See optional reference for exact limits.";
+pub const HELP: &str = "Simulated backup administrator: root (no host privileges). Virtual backup terminal: pwd; cd PATH; ls [-a] [PATH]; stat -c FORMAT [--] FILE (only %a, %A, %U, %G, %n and %%); cat [--] FILE; cp [--] ARCHIVE_OR_SNAPSHOT DESTINATION; rm [--] FILE; mkdir [--] PATH; touch [--] FILE; chmod OCTAL PATH; tar -c/-x/-t -f ARCHIVE (-v for create/extract only) [-C DIRECTORY] [-g SNAPSHOT | -G] [SOURCE]. Long create/extract/list/verbose/file/directory/listed-incremental/incremental options are supported. One selected source directory; extract/list support literal stored file members; selective directory recursion is unsupported. No compression, links, devices, shell operators or host execution. See optional reference for exact limits.";
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(deny_unknown_fields)]
@@ -144,6 +144,23 @@ fn join(directory: &str, name: &str) -> Result<String, String> {
         return Err("Use a literal virtual path without empty, dot or parent components".into());
     }
     Ok(result)
+}
+fn permission_text(node: &crate::engine::Node) -> String {
+    let mut chars = crate::engine::mode_string(node).chars().collect::<Vec<_>>();
+    for (bit, index, executed, plain, capital) in [
+        (0o4000, 3, 0o100, 's', 'S'),
+        (0o2000, 6, 0o010, 's', 'S'),
+        (0o1000, 9, 0o001, 't', 'T'),
+    ] {
+        if node.mode & bit != 0 {
+            chars[index] = if node.mode & executed != 0 {
+                plain
+            } else {
+                capital
+            };
+        }
+    }
+    chars.into_iter().collect()
 }
 struct Count(usize);
 impl std::io::Write for Count {
@@ -305,6 +322,43 @@ impl Store {
                     self.cwd.clone()
                 };
                 self.list(&p, all)
+            }
+            "stat" => {
+                if !(args.len() == 3 || (args.len() == 4 && args[2] == "--"))
+                    || args[0] != "-c"
+                    || args[1].len() > 256
+                {
+                    return Err("Supported stat subset: stat -c FORMAT [--] FILE; format supports %a, %A, %U, %G, %n and %% only".into());
+                }
+                let operand = args.last().unwrap();
+                if operand.starts_with('-') && args.len() != 4 {
+                    return Err("Use -- before a literal filename beginning with -".into());
+                }
+                let path = self.path(operand)?;
+                let (root,relative)=self.locate(&path).ok_or("Metadata is available for supplied virtual tree entries only; archive/snapshot bytes and ancestor metadata are not modeled")?;
+                let entry = self.trees[root]
+                    .entries
+                    .get(relative)
+                    .ok_or("No such virtual tree entry")?;
+                let mut output = String::new();
+                let mut chars = args[1].chars();
+                while let Some(c) = chars.next() {
+                    if c != '%' {
+                        output.push(c);
+                        continue;
+                    }
+                    match chars.next() {
+                        Some('%')=>output.push('%'),
+                        Some('a')=>output.push_str(&format!("{:o}",entry.node.mode)),
+                        Some('A')=>output.push_str(&permission_text(&entry.node)),
+                        Some('U')=>output.push_str(&entry.node.owner),
+                        Some('G')=>output.push_str(&entry.node.group),
+                        Some('n')=>output.push_str(operand),
+                        _=>return Err("Unsupported stat format: use %a, %A, %U, %G, %n or %% without width/escape modifiers".into()),
+                    }
+                }
+                output.push('\n');
+                Ok(output)
             }
             "cat" | "cp" | "rm" | "mkdir" | "touch" => {
                 let ended = args.first().is_some_and(|a| a == "--");

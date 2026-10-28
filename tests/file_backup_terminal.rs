@@ -438,3 +438,85 @@ fn gnu_numeric_directory_modes_preserve_setid_until_explicit_five_digit_clear() 
     assert!(s.execute("chmod 77777 /srv/data").is_err());
     assert_eq!(s, before);
 }
+#[test]
+fn stat_formats_read_actual_metadata_and_never_invent_archive_or_ancestor_metadata() {
+    let mut state = initial();
+    assert_eq!(
+        state
+            .execute("stat -c '%a %U %G' /srv/data/keep.txt")
+            .unwrap(),
+        "640 alex staff\n"
+    );
+    state.execute("chmod 751 /srv/data/keep.txt").unwrap();
+    assert_eq!(
+        state
+            .execute("stat -c '%a %A %n %%' /srv/data/keep.txt")
+            .unwrap(),
+        "751 -rwxr-x--x /srv/data/keep.txt %\n"
+    );
+    let original = state.clone();
+    for command in [
+        "stat /srv/data",
+        "stat -c %s /srv/data",
+        "stat -c %06a /srv/data",
+        "stat -c %a /backups",
+        "stat -c %a /srv",
+        "stat -c %a /srv/data/missing",
+        "stat -c % /srv/data",
+    ] {
+        assert!(state.execute(command).is_err(), "{command}");
+        assert_eq!(state, original);
+    }
+}
+#[test]
+fn stat_symbolic_modes_include_setuid_setgid_and_sticky_execute_distinctions() {
+    let mut state = initial();
+    for (mode, expected) in [
+        ("4755", "-rwsr-xr-x"),
+        ("4644", "-rwSr--r--"),
+        ("2755", "-rwxr-sr-x"),
+        ("2644", "-rw-r-Sr--"),
+        ("1755", "-rwxr-xr-t"),
+        ("1644", "-rw-r--r-T"),
+        ("7777", "-rwsrwsrwt"),
+        ("0000", "----------"),
+    ] {
+        state
+            .execute(&format!("chmod {mode} /srv/data/keep.txt"))
+            .unwrap();
+        assert_eq!(
+            state.execute("stat -c %A /srv/data/keep.txt").unwrap(),
+            format!("{expected}\n")
+        );
+    }
+    state.execute("chmod 2770 /srv/data").unwrap();
+    assert_eq!(
+        state.execute("stat -c %A /srv/data").unwrap(),
+        "drwxrws---\n"
+    );
+}
+#[test]
+fn stat_preserves_literal_relative_names_and_quoted_spaces() {
+    let mut state = initial();
+    state.execute("touch '/srv/data/new note'").unwrap();
+    state.execute("cd /srv/data").unwrap();
+    assert_eq!(
+        state.execute("stat -c '%n:%a:%U:%G' 'new note'").unwrap(),
+        "new note:644:root:root\n"
+    );
+    state.execute("touch -- -entry").unwrap();
+    assert_eq!(
+        state.execute("stat -c '%n %a' -- -entry").unwrap(),
+        "-entry 644\n"
+    );
+    assert!(state.execute("stat -c %a -entry").is_err());
+    let name = "x".repeat(255);
+    state.execute(&format!("touch {name}")).unwrap();
+    let before = state.clone();
+    assert!(
+        state
+            .execute(&format!("stat -c '{}' /srv/data/{name}", "%n".repeat(128)))
+            .is_err()
+    );
+    assert_eq!(state, before);
+}

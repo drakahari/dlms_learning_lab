@@ -19,6 +19,7 @@ from automation_before10_oracle import pinned_executable
 ROOT = Path(__file__).resolve().parents[1]
 TAR = Path('/usr/bin/tar')
 CHMOD = Path('/usr/bin/chmod')
+STAT = Path('/usr/bin/stat')
 COREUTILS = Path('/usr/share/info/coreutils.info.gz')
 COREUTILS_SHA = '6e28a10ae4e4acad5c0147348ffe0a0a0cea4f93ed7cd794d434d953059e4716'
 NUMERIC_MODES = [('directory','755'),('directory','0755'),('directory','2755'),('directory','4755'),
@@ -64,6 +65,7 @@ def source_pins(root):
     safe.require(pins[-1]['sha256'] == MANUAL_SHA, 'Original primary manual changed')
     pins += [safe.pin(CHMOD,4*1024*1024),safe.pin(COREUTILS,2*1024*1024)]
     safe.require(pins[-1]['sha256']==COREUTILS_SHA,'Original GNU numeric-mode manual changed')
+    pins.append(safe.pin(STAT,4*1024*1024))
     return pins
 
 
@@ -114,6 +116,11 @@ def chmod_argv(executable,kind,mode):
     return [executable,mode,'mode-'+kind]
 
 
+def stat_argv(executable,kind):
+    safe.require(kind in {'directory','file'},'Only fixed reviewed metadata targets')
+    return [executable,'-c','%a %A','--','mode-'+kind]
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--capture-id', required=True, type=identity)
@@ -130,10 +137,12 @@ def main(argv=None):
     tar_pin = next(p for p in before if p['path'] == str(TAR))
     probe_pin = next(p for p in before if p['path'] == str(root / PROBE))
     chmod_pin=next(p for p in before if p['path']==str(CHMOD))
+    stat_pin=next(p for p in before if p['path']==str(STAT))
     with pinned_executable(TAR, tar_pin, 4 * 1024 * 1024) as (tar, tar_fd), \
          pinned_executable(root / PROBE, probe_pin, 256 * 1024 * 1024) as (probe, probe_fd), \
-         pinned_executable(CHMOD,chmod_pin,4*1024*1024) as (chmod,chmod_fd):
-        descriptors = (*inherited, tar_fd, probe_fd,chmod_fd)
+         pinned_executable(CHMOD,chmod_pin,4*1024*1024) as (chmod,chmod_fd), \
+         pinned_executable(STAT,stat_pin,4*1024*1024) as (stat_tool,stat_fd):
+        descriptors = (*inherited, tar_fd, probe_fd,chmod_fd,stat_fd)
         serial = 0
 
         def command(command):
@@ -198,26 +207,32 @@ def main(argv=None):
         safe.private_dir(work,'mode-directory')
         safe.write_new(work/'mode-file',b'fixture only\n',budget,4096)
         numeric_modes={}
+        numeric_metadata={}
         for kind,mode in NUMERIC_MODES:
             target=work/('mode-'+kind)
             target.chmod(0o6750)  # Newly owned fixture, never a host/user path.
             command(chmod_argv(chmod,kind,mode))
             numeric_modes[kind+'-'+mode]=stat.S_IMODE(target.lstat().st_mode)
+            numeric_metadata[kind+'-'+mode]=command(stat_argv(stat_tool,kind))
         safe.require(set(model['numeric_modes'])==set(numeric_modes),'Every fixed numeric-mode comparison required')
+        safe.require(set(model['numeric_metadata'])==set(numeric_metadata),'Every fixed metadata comparison required')
         report = {'actual_tar_version': version.splitlines()[0], 'source_head': head,
                   'compared': 10, 'matches': sum(actual[n] == model['observations'][n] for n in CHAINS),
                   'gnu': actual, 'model': model['observations'],
                   'numeric_modes_compared':8,'numeric_modes_matches':sum(numeric_modes[n]==model['numeric_modes'][n] for n in numeric_modes),
                   'gnu_numeric_modes':numeric_modes,'model_numeric_modes':model['numeric_modes'],
+                  'numeric_metadata_matches':sum(numeric_metadata[n]==model['numeric_metadata'][n] for n in numeric_metadata),
+                  'gnu_numeric_metadata':numeric_metadata,'model_numeric_metadata':model['numeric_metadata'],
                   'scope': 'Names, text, directory types and modes only; no binary-format/ctime/ownership conformance'}
         outputs.append(safe.json_new(out / 'COMPARISON.json', report, budget, 2 * 1024 * 1024))
     safe.require(source_pins(root) == before and safe.source_identity(root) == head, 'Source identity changed during reference')
     for output in outputs:
         safe.require(safe.pin(Path(output['path']), 2 * 1024 * 1024) == output, 'Observation changed')
     safe.publish(out, {'pins': before, 'outputs': outputs, 'comparison': report['matches'], 'fixed_cases': 10,
-                      'numeric_mode_matches':report['numeric_modes_matches'],'numeric_mode_cases':8}, budget)
-    print(json.dumps({'path': str(out), 'matches': report['matches'], 'compared': 10,'numeric_modes_matches':report['numeric_modes_matches']}))
-    return 0 if report['matches'] == 10 and report['numeric_modes_matches']==8 else 1
+                      'numeric_mode_matches':report['numeric_modes_matches'],'numeric_mode_cases':8,
+                      'numeric_metadata_matches':report['numeric_metadata_matches'],'numeric_metadata_cases':8}, budget)
+    print(json.dumps({'path': str(out), 'matches': report['matches'], 'compared': 10,'numeric_modes_matches':report['numeric_modes_matches'],'numeric_metadata_matches':report['numeric_metadata_matches']}))
+    return 0 if report['matches'] == 10 and report['numeric_modes_matches']==8 and report['numeric_metadata_matches']==8 else 1
 
 
 if __name__ == '__main__':

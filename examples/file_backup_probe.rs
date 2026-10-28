@@ -100,6 +100,7 @@ fn main() {
     base.extract(&mut missing, true).unwrap();
     day2.extract(&mut missing, true).unwrap();
     let mut numeric_modes = BTreeMap::new();
+    let mut numeric_metadata = BTreeMap::new();
     for (directory, mode) in [
         (true, "755"),
         (true, "0755"),
@@ -129,6 +130,10 @@ fn main() {
             cwd: "/fixture/data".into(),
         };
         store.execute(&format!("chmod {mode} target")).unwrap();
+        numeric_metadata.insert(
+            format!("{}-{mode}", if directory { "directory" } else { "file" }),
+            store.execute("stat -c '%a %A' target").unwrap(),
+        );
         numeric_modes.insert(
             format!("{}-{mode}", if directory { "directory" } else { "file" }),
             store.trees["/fixture/data"].entries["target"].node.mode,
@@ -143,7 +148,7 @@ fn main() {
             "terminal_sha256":digest::hash(include_bytes!("../src/file_backup_terminal.rs")),
             "probe_sha256":digest::hash(include_bytes!("file_backup_probe.rs")),
             "digest_sha256":digest::hash(include_bytes!("support/automation_digest.rs")),
-            "numeric_modes":numeric_modes,"observations":{
+            "numeric_modes":numeric_modes,"numeric_metadata":numeric_metadata,"observations":{
                 "base":base_view,"sequential":sequential,"overlay":view(&overlay),
                 "delta_alone":view(&alone),"reverse":view(&reversed),
                 "sequential_day2":view(&restored),"differential":view(&differential),"missing_middle":view(&missing),

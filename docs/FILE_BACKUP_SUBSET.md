@@ -119,3 +119,47 @@ The corrected set-ID rules and verbose/duplicate-listing refusal pass the final
 GNU chmod match; the full2045 run precedes this last peer-review correction.
 Verbose tar metadata listings and repeated literal selectors fail explicitly;
 name-only listing is not silently presented as GNU tar -tv output.
+
+## Outcome grading and separate teaching foundation
+
+The unregistered workspace definition can require restored names/text/metadata,
+independent recovery from declared archive levels, exact stored payload/type/root,
+a current source-bound snapshot, and preservation of named supplied archives and
+snapshots. An archive filename or a clean-looking existing restore folder is not
+recovery proof. Each recovery test starts with its own sample files, including a
+destination with obsolete data where declared. Only its private test destination
+changes; learner files are retained. Wrong roots, missing levels, stale contents,
+wrong metadata and overwritten history fail with specific counts or causes.
+Logical clocks are not falsely graded as physical restoration timestamps.
+
+Definitions have bounded early label/path/sequence admission and a2MiB aggregate
+limit; test trees have at most64 entries/32KiB text. CheckRun validates borrowed
+inputs before owning fixed definition/state snapshots. Each tick handles at most
+one archive application or one result row; dropping it cancels without publishing
+success. At most54 result rows exist. Before native integration the UI must
+reserve the combined snapshots, recovery target/transients and result storage
+(conservative8MiB per admitted entry), key results by the COMPLETE input, and
+publish success only when done and still current. These are integration duties,
+not a claim that an unused source module already proves a native workflow.
+
+The separate lesson supplies concise concepts, runnable explained example
+commands, an adverse change and a repair. Loading verifies all three against the
+same bounded simulator. Practice paths and the archive folder must be disjoint
+from the assignment. Persisted practice has independent command text, transcript
+and view; its commands never receive an Attempt or award assignment credit.
+Transcript retention is16 entries/64KiB total, with32KiB command output; draft
+4096bytes and raw lesson2MiB. Outer progress byte bounds and valid_for validation
+must precede display/use of restored practice. No complete backup lab is counted
+until scenario, progress and native interaction acceptance is finished.
+
+`stat -c FORMAT [--] FILE` now reads actual virtual tree metadata. Supported
+format substitutions are `%a`, `%A`, `%U`, `%G`, `%n` and `%%`, without modifiers;
+other formats fail explicitly. Symbolic permission text includes set-ID/sticky
+execute distinctions. No ancestor/archive metadata, UID lookup, real date, file
+size or link count is invented. Literal name/quote/delimiter behavior and output
+bounds are tested. The original GNU coreutils9.10 manual, sections14.3 and27.5,
+was inspected2026-10-28; its pinned local SHA256 is
+`6e28a10ae4e4acad5c0147348ffe0a0a0cea4f93ed7cd794d434d953059e4716`.
+The fixed disposable collector matches eight `%a %A` outputs as well as all eight
+numeric modes and ten restore projections. No reference utility is part of the
+learner execution engine. See M178 for source-bound evidence and remaining gates.

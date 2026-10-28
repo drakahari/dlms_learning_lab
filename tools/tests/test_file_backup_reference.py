@@ -21,6 +21,14 @@ class BackupReferenceSafety(unittest.TestCase):
         for kind,mode in [('directory','77777'),('file','--reference=/private'),('../outside','755'),('directory','u+s')]:
             with self.assertRaises(reference.safe.OracleError):
                 reference.chmod_argv('/proc/self/fd/99',kind,mode)
+    def test_stat_reference_reads_only_fixed_owned_metadata_without_custom_formats(self):
+        for kind in ['directory','file']:
+            self.assertEqual(reference.stat_argv('/proc/self/fd/99',kind),
+                             ['/proc/self/fd/99','-c','%a %A','--','mode-'+kind])
+        for kind in ['../private','/private','--format=%n','source','']:
+            with self.assertRaises(reference.safe.OracleError):
+                reference.stat_argv('/proc/self/fd/99',kind)
+
     def test_no_cli_source_profile_path_binary_or_abbreviations(self):
         with patch.object(reference, 'root_guard') as guard:
             for flags in [['--capture-id', 'x', '--source', 'tar bad'], ['--binary', '/bin/tar'],

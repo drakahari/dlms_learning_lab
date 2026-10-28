@@ -75,11 +75,17 @@ All native processes/wrappers exited; an initial sandbox NoCompositor refusal
 before any window is retained separately from the successful authorized run.
 
 Bash three substantive optional-input assignments/34 cases are frozen but
-unregistered. Their13 content groups and scoped Clippy are the current sole
-heavy lease in bash-parameter-defaults-154; after success, the independently
-frozen actual native overlay gets9 paired event/controller checks before native.
-Cron StageC49 owned files/722 protected are frozen, not yet compiled; the next
-exclusive queue is lib/core/workspace/content,17 bin cron groups and Clippy.
+unregistered. Their13 content groups and9 paired native event/controller groups now pass,
+with scoped Clippy. A separate8-frame capstone goal-slice source amendment is
+not yet tested; actual-window acceptance and private157-catalog full checks
+precede normal integration. Cron StageC now passes83 library,17 core,2 attempts,
+5 content,10 workspace and17 bin groups after preserving/fixing genuine new
+compile/event-fixture and modal-disable findings. Scoped Clippy and final7 widget tests pass; final Cron source is frozen R6
+(50owned/722protected),76 headless capture phases, not native PNGs. Actual native
+windows remain pending. Current sole heavy lease is LACP R11a26→Clippy→build→
+native106; its first new display shadowing compile error was retained and fixed
+without grader/data changes. ROOT M178 backup52/scopedClippy/247Python and GNU
+10restore/8modes/8stat pass and all wrappers are reaped.
 No worker may start heavy work without Root's explicit serialized lease.
 
 Backup now has bounded full/partial restore, parent/change clocks and an actual
@@ -87,10 +93,10 @@ literal terminal adapter; it is NOT wired to the normal catalog yet. Independent
 review corrected special cat/tar operands, remote syntax and GNU directory set-ID
 preservation, with explicit regressions and controlled disposable references.
 Abstract archive format, virtual administrator identity, unsupported streams/
-verbose metadata/type replacement and all limits are disclosed. Goal/teaching/
-native/persistence integration remains;206.2 stays Open. Continue these units and
+verbose metadata/type replacement and all limits are disclosed. Outcome grading and independent runnable teaching now pass M178 focused gates;
+scenario/native/persistence integration remains and206.2 stays Open. Continue these units and
 the complete reconciliation queue without treating capability tests as curriculum.
-Latest pushed source before this milestone is dcaceec; the verified installed
+Latest pushed source milestone is8568198 (shell11/backup terminal); the verified installed
 9a90 candidate remains evaluator10, not the current source/new capabilities.
 
 Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
