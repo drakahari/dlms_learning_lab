@@ -21,6 +21,7 @@ mod mac_learning;
 mod mac_lessons;
 pub(in crate::ui) mod nat;
 pub(in crate::ui) mod nat_lessons;
+mod nfs_alignment;
 pub(in crate::ui) mod nfs_lessons;
 mod ospf;
 mod ospf_lessons;
@@ -387,6 +388,14 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 48000..=48060 => {
+                let (advance, capture) = self.nfs_alignment_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+
             n @ 47000..=47014 => {
                 let (advance, capture) = self.script_feedback_native(ctx, n);
                 if !advance {

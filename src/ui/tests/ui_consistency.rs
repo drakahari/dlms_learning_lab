@@ -258,7 +258,7 @@ fn nfs_save_rows_and_outer_editor_height_are_stable_across_content_and_reflow() 
     let mut saw_columns = false;
     let mut saw_stacking = false;
     for theme_id in ["dlms-dark", "dlms-light"] {
-        for scale in [1., 1.5, 2.] {
+        for scale in [1., 1.15, 1.25, 1.5, 2.] {
             for width in [1920., 946.] {
                 let (ctx, mut a) = app();
                 a.scale = scale;
@@ -401,7 +401,7 @@ fn fixed_viewport_contains_real_horizontal_vertical_and_combined_scrollbar_trans
     let mut horizontal = false;
     let mut vertical = false;
     for theme_id in ["dlms-dark", "dlms-light"] {
-        for scale in [1., 1.5, 2.] {
+        for scale in [1., 1.15, 1.25, 1.5, 2.] {
             for width in [1920., 946.] {
                 let ctx = egui::Context::default();
                 theme::apply(&ctx, theme_id);
@@ -590,6 +590,105 @@ fn script_feedback_capture_driver_uses_actual_run_case_selection_and_seven_bound
     }
     assert_eq!(a.script_case, 0);
     let i = a.selected.unwrap();
+    assert!(!progress::current_solved(
+        &a.progress.attempts[&a.scenarios[i].id],
+        &a.scenarios[i]
+    ));
+}
+
+#[test]
+fn nfs_alignment_driver_captures_both_editors_at_every_supported_size_without_model_changes() {
+    assert_eq!(
+        LabApp::nfs_alignment_stage(false, Some("nfs-alignment")),
+        None
+    );
+    assert_eq!(
+        LabApp::nfs_alignment_stage(true, Some("nfs-alignment-extra")),
+        None
+    );
+    assert_eq!(
+        LabApp::nfs_alignment_stage(true, Some("nfs-alignment")),
+        Some(48000)
+    );
+    let (ctx, mut a) = app();
+    a.smoke = true;
+    a.smoke_stage = 48000;
+    let mut captures = std::collections::BTreeSet::new();
+    let mut closed = false;
+    for n in 0..10_000 {
+        let events = std::mem::take(&mut a.pending_events);
+        let case = a.smoke_stage.saturating_sub(48000) / 3;
+        let width = if case >= 10 { 946. } else { 1920. };
+        let mut input = egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(width / (a.scale * 1.15), 1080. / (a.scale * 1.15)),
+            )),
+            events,
+            time: Some(n as f64 / 20.),
+            ..Default::default()
+        };
+        input
+            .viewports
+            .get_mut(&egui::ViewportId::ROOT)
+            .unwrap()
+            .native_pixels_per_point = Some(1.15);
+        input
+            .viewports
+            .get_mut(&egui::ViewportId::ROOT)
+            .unwrap()
+            .fullscreen = Some(case < 10);
+        let out = ctx.run(input, |ctx| {
+            a.render(ctx);
+            a.save();
+            a.started = Instant::now() - std::time::Duration::from_secs(1);
+            a.smoke_tick(ctx);
+        });
+        for viewport in out.viewport_output.values() {
+            for command in &viewport.commands {
+                match command {
+                    egui::ViewportCommand::Screenshot(data) => {
+                        let name = data
+                            .data
+                            .as_ref()
+                            .unwrap()
+                            .downcast_ref::<String>()
+                            .unwrap()
+                            .clone();
+                        assert!(
+                            captures.insert(name),
+                            "Every geometry capture must be distinct"
+                        );
+                        a.capture_pending = false;
+                    }
+                    egui::ViewportCommand::Close => closed = true,
+                    _ => {}
+                }
+            }
+        }
+        if closed {
+            break;
+        }
+    }
+    assert!(closed, "Bounded actual capture controller must finish");
+    assert_eq!(captures.len(), 40);
+    for width in ["wide", "narrow"] {
+        for theme in ["light", "dark"] {
+            for size in [100, 115, 125, 150, 200] {
+                for editor in ["exports", "fstab"] {
+                    assert!(
+                        captures
+                            .contains(&format!("nfs-alignment-{width}-{theme}-{size}-{editor}"))
+                    );
+                }
+            }
+        }
+    }
+    let i = a.selected.unwrap();
+    assert_eq!(
+        a.progress.attempts[&a.scenarios[i].id].state,
+        a.scenarios[i].initial
+    );
     assert!(!progress::current_solved(
         &a.progress.attempts[&a.scenarios[i].id],
         &a.scenarios[i]

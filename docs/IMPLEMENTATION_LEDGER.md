@@ -3269,3 +3269,32 @@ failed full1977/3 and focused diagnostic runs remain privately retained.
 Local code commit and clean Fedora candidate are next; actual native capture and
 installed verification of this source have not happened yet. Do not substitute
 headless7 screenshot requests for real Fedora captures. No public release.
+
+
+### M163–M164 complete supported-size verification source (2026-10-28)
+
+Intermediate local3562 candidate passes installed lifecycle upgrade from00d,
+all9 serialized native stages: focused feedback7, NFS4/106, command scripting3/72,
+safe-text3/72, alignment72,10quiet+1traced starts, script/DHCP actual cold reopening.
+All329 captures retained. Native NFS4 aligns Save rows each two-column frame;
+Root/independent image comparison confirms beforeleft560/righ575 →both575.
+One image preview appeared blank; current PNG bytes are identical to a populated
+frame with2833 colors/SHA5736a61d. This is retained as a delivery-confidence caveat,
+not falsely described as a blank stored application capture. No artifact altered.
+
+Picker inspection identifies supported115/125 beyond the initially sampled100/
+150/200. Both geometry tests now cover all5, and a read-only native normal-NFS
+alignment sweep requests40 editor/Save bands across20 size/theme/width cases.
+A seventh real capture-driver regression covers all40 distinct names, unchanged
+initial model/portable Progress, no model action/grade installation, and bounded
+completion. Guard waits for observed fullscreen/zoom/physical width, not filenames;
+logs exact content/PPP geometry. Headless viewport metadata is explicitly synthetic.
+All7 focused tests PASS3.18s. Source peer645d634e/e8eaf2fa ACK; product UI controls,
+script renderer, NFS renderer, engine, shell, progress, all catalog bytes, existing
+fixtures/tests/tools/dependencies remain exact3562. No extra authored count/credit.
+
+Final m164 ClippyPASS3.05s; full inclusive1981PASS/0FAIL/0ignored across150harnesses
+PASS612.80s;215Python PASS8.06s; coverage/palettes/fmt/diff PASS. All14 retained
+checks run, original3 clipping tests remain exact. Final candidate build/actual
+five-size/affected-flow installation verification is NEXT, not yet accepted.
+Shared-lock2jobs/2threads/disk workflow stays mandatory. No public release.

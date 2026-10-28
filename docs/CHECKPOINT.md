@@ -4,6 +4,33 @@
 Do not stop at a status report or treat a Fedora package as curriculum completion.
 No public release. All ordinary milestones may continue without routine approval.
 
+## Active continuation override — final five-size source (2026-10-28)
+
+NO heavy command active; wrappers63564 (intermediate3562 installed) and13481
+(final five-size source gates) reaped, every child exit0. Intermediate3562 all9
+native stages PASS329 captures, NFS4/scripting3/safe-text3, alignment,11starts and
+script/DHCP cold reopening. It remains a verified BEFORE-final-QA baseline, not
+final-five-size acceptance. All product controls/scripting/NFSrenderer/model/pack
+and progress functions remain byte-exact3562; only QA routes/constructor and
+regression coverage were extended for the actual picker100/115/125/150/200.
+
+Final source gates m164 PASS:1981/0/0 inclusive across150harnesses/all14 retained;
+Clippy3.05s, Python215, coverage/palettes/fmt/diff. Seven new groups pass, including
+actual capture controller40 requests across20 width/theme/size combinations.
+Native geometry guards use observed zoom/fullscreen/pixel width with bounded
+retry; headless requests alone are NOT native acceptance. Source peer e8eaf2fa ACK.
+All154/39,28themes, authored bytes, grader/evaluator and progress formats unchanged.
+
+Next locally commit the final QA source for clean identity, build new Fedora
+candidate, private install/upgrade from3562; execute actual nfs-alignment40 FIRST,
+then focusedfeedback7/NFS4/scripting3/safe3/alignment/starts/cold flows on FINAL ELF.
+Only MAIN runner2jobs/2threads/sharedlock/disk TMP. Reap each command before next.
+Then pin after/before/identity/memory evidence, inspect PNGs, update delivery docs,
+commit/push scoped work. Do not stop at intermediate3562. No release. Existing
+source/old failed diagnostics/private artifacts preserved; no cleanup grant.
+Full curriculum, Windows/macOS, screen-reader/physical-device and novice acceptance
+remain explicitly open. Source badges/capture counts are not full acceptance.
+
 ## Current scoped UI fix — active verification (2026-10-28)
 
 From implementation00d69d3 and verificationed7e333. No curriculum expansion:
@@ -19,18 +46,29 @@ tests remain intact. Source reviews41bee3db and89bbf8a1 ACK no grading/progress/
 isolation change. Before PNGs are hash-pinned in reviews/ui-polish154-r1/BEFORE.json.
 
 Final m160 gates PASS:1980/0/0 inclusive Rust across150 harnesses (all14 retained
-checks run),215 Python, Clippy6.05s, coverage/palettes/fmt/diff. Wrapper22885 and
-all child sessions reaped; NO active heavy command. Original3 UI clipping tests
-pass unchanged after compact external case/run status and compact selectable
-result labels; real Tab/Enter works and grade/progress snapshots stay exact.
-Source review038cafcd ACK. All old scenarios/units/engine/shell/progress/tools/
-fixtures/dependencies remain byte-exact. Next locally commit this scoped tested
-source for clean candidate identity, build Fedora candidate, install/upgrade from
-00d69d3, then real script-feedback7, NFS4, scripting3+safe-text3, alignment,11
-starts and script/DHCP cold reopening. Native/installed acceptance of the FIXES
-is still pending; old00d69d3 remains the verified baseline. Do not publish/push
-a false package claim; push reviewed fixes/delivery evidence after acceptance.
-Before PNGs remain private and pinned, with after pairs REQUIRED. No release.
+checks run),215 Python, Clippy6.05s, coverage/palettes/fmt/diff. Local code commit
+**3562e844e028a713ddcdd222780e85202a53ad68** is CLEAN and not yet pushed,
+awaiting actual installed verification. Clean Fedora build2m45s/Linux223 notices
+PASS; installed lifecycle upgrade from00d69d3/uninstall/reinstall/desktop/content/
+legacy-byte preservation PASS. Candidate exactname g3562e844e028. ELF SHA
+2934f580ccfbfbafaeb69a7da9b84703b6258997b12208390b948b2bbc855faa; archive
+3db5fa389175048a29ee070e733480c1397b390ceb815691429cc71bda577d9f.
+
+Root owns SINGLE active native wrapper exec63564. Read ignored
+reviews/ui-polish154-r1/NATIVE-ACTIVE.json/NATIVE-RUNS.json; all commands use
+MAIN runner2jobs/2threads/sharedlock/disk TMP. Exact installed REGULAR executable:
+.build-artifacts/installations/verified-3562e844e028-2yw3rdck/application/dlms-learning-lab.
+Focused script-feedback flow PASS7 actual captures at observed1920x1080 dark100
+and946x929 light150/dark200. Passing Case1 and failing Run11/12 are explicit,
+with exact portable Progress snapshot equality. A preview appeared blank, but
+PNG SHA/pixel check shows populated identical bytes; retain delivery observation
+without falsely labeling the stored image blank. Native NFS4 is ACTIVE; before/
+after first assignment already visibly aligns both Save rows. Scripting3 plus
+safe-text3, alignment,11starts and script/DHCP cold checks follow automatically.
+Do not start another heavy invocation; do not infer all9 stages accepted yet.
+After real screenshots/flows finish: pin before/after/identity/memory evidence,
+update delivery docs, commit/push reviewed scope. No release. Full curriculum,
+Windows/macOS/reader/novice acceptance remain open.
 
 ## Verified application and next actions
 
