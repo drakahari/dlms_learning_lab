@@ -94,6 +94,19 @@ gates for current development; do not bypass either refusal to relabel historica
 observations. New comparison and private
 migration tests run current in-process simulation against hash-pinned old evidence.
 
+The genuine evaluator11 before12 producer similarly has its own nondefault
+`historical-evaluator11-capture` feature. Explicit compilation requires actual
+revision11; it never selects an older engine. Its fixed synthetic fixture uses
+only the reviewed52 authored scripts/384 cases/52 separate examples and the
+pinned genuine10 private profiles, adding only3 actually executed script contexts.
+No Ether/Cron answers or personal progress are fabricated. The new fixed tool
+`tools/dev.py tool scripting_before12_verify.py --mode prepare` launches nothing;
+`--mode capture` requires independent approval of exact source/producer pins and
+refuses an existing destination. Only a genuinely observed and separately sealed
+manifest/attestation authorizes `--mode verify` after a future evaluator advance.
+Keep original9/10/11 producers, compiled source, executables and observations
+immutable. A source proposal or unsealed capture is not migration acceptance.
+
 ## Disk location and toolchain
 
 The dedicated ignored directory is `.build-artifacts` under the main checkout.

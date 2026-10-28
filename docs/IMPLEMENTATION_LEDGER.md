@@ -3705,3 +3705,35 @@ registration, physical-uplink and reviewed numeric-validation capabilities after
 authentic evaluator11 capture; do not stop at this checkpoint. Windows/macOS
 runtime, screen reader/physical devices and novice acceptance stay unverified.
 No release or installer publication.
+
+
+## M194 — genuine evaluator11 boundary before numeric-pattern capability
+
+2026-10-28. Added a fixed development-only producer/verifier behind the explicit
+historical-evaluator11-capture feature. The runner refuses building it under a
+later evaluator; current learner semantics and catalog164/42 remain unchanged.
+Original9/10 producers, sources and observations remain immutable. Captured and
+independently verified actual11 before any12 implementation:52reference records,
+384cases,52examples. Both profiles retain139 authentic prior contexts plus only
+3actually executed new scripts (142);22missing non-script contexts stay absent.
+The ordinary profile has52current records, the draft profile50 plus2entire
+unchanged authentic unfinished assignment/example Attempts. All90non-script
+Attempts per profile and every old record remain exact. Stored raw10 backups,
+favorites, metadata and genuine7/8/9/10→11 receipts were checked separately.
+
+Observed manifest e303bdecb9f57a89debd77c8300d27b523c94630446bc918e4c5e4c171373168;
+attestation254d696e4ca90ec508b6034f015ae5710bf2184a30e068d9839a9f93d6523e48.
+Retained actual11 producer0d3e3bf4033cec16ac5cc9580732f23145272904729fd80160f7ddc65e78e608
+and283 compiled-source files remain private. Root independently checked every
+case/example, both full profiles/record histories and all output/source hashes,
+then populated the two observed seals; fixed sealed verificationPASS. No learner
+mastery or answer is invented by these explicitly synthetic development fixtures.
+
+Python283PASS after sealing. Explicit-feature all-targetClippy -DwarningsPASS
+and producer buildPASS. Initial Clippy caught duplicate digest module loading;
+new producer reuses the unchanged actual10 helper's public hash function rather
+than suppressing the lint. The prematurely prepared pre-fix control remains;
+new exact r2 control was independently reviewed before the first actual capture.
+No old capture/destination was overwritten. This adds no scenarios or issuer
+coverage; continue the reviewed numeric-validation capability and backup/physical
+work, not a release or curriculum-completion claim.

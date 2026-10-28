@@ -47,8 +47,10 @@ def historical_capture_preflight(arguments, cwd):
     """
     feature = 'historical-evaluator9-capture'
     feature10 = 'historical-evaluator10-capture'
+    feature11 = 'historical-evaluator11-capture'
     enabled, explicit, all_features = False, False, False
     enabled10, explicit10 = False, False
+    enabled11, explicit11 = False, False
     index = 0
     while index < len(arguments) and arguments[index] != '--':
         value = arguments[index]
@@ -62,6 +64,8 @@ def historical_capture_preflight(arguments, cwd):
                            for name in re.split(r'[,\s]+', arguments[index]))
             enabled10 |= any(name.rsplit('/', 1)[-1] == feature10
                              for name in re.split(r'[,\s]+', arguments[index]))
+            enabled11 |= any(name.rsplit('/', 1)[-1] == feature11
+                             for name in re.split(r'[,\s]+', arguments[index]))
         elif value.startswith('--features=') or value.startswith('-F'):
             names = value.split('=', 1)[1] if value.startswith('--features=') else value[2:]
             if value.startswith('-F='):
@@ -70,20 +74,26 @@ def historical_capture_preflight(arguments, cwd):
                            for name in re.split(r'[,\s]+', names))
             enabled10 |= any(name.rsplit('/', 1)[-1] == feature10
                              for name in re.split(r'[,\s]+', names))
+            enabled11 |= any(name.rsplit('/', 1)[-1] == feature11
+                             for name in re.split(r'[,\s]+', names))
         elif value == '--example':
             index += 1
             if index >= len(arguments):
                 raise RuntimeError('Cargo example requires an explicit name')
             explicit |= arguments[index] == 'automation_before10_capture'
             explicit10 |= arguments[index] == 'parameters_before11_capture'
+            explicit11 |= arguments[index] == 'scripting_before12_capture'
         elif value == '--example=automation_before10_capture':
             explicit = True
         elif value == '--example=parameters_before11_capture':
             explicit10 = True
+        elif value == '--example=scripting_before12_capture':
+            explicit11 = True
         index += 1
     requested9 = enabled or explicit or all_features
     requested10 = enabled10 or explicit10
-    if not (requested9 or requested10):
+    requested11 = enabled11 or explicit11
+    if not (requested9 or requested10 or requested11):
         return
     source = Path(cwd) / 'src/shell.rs'
     with source.open('rb') as stream:
@@ -99,6 +109,10 @@ def historical_capture_preflight(arguments, cwd):
         raise RuntimeError('Frozen parameters_before11_capture requires actual public evaluator10; current evaluator cannot relabel historical observations')
     if explicit10 and not (enabled10 or all_features):
         raise RuntimeError('Explicit public10 capture requires --features historical-evaluator10-capture')
+    if requested11 and revisions != [b'11']:
+        raise RuntimeError('Frozen scripting_before12_capture requires actual public evaluator11; current evaluator cannot relabel historical observations')
+    if explicit11 and not (enabled11 or all_features):
+        raise RuntimeError('Explicit public11 capture requires --features historical-evaluator11-capture')
 
 
 def tool_outputs(arguments, cwd, root):
@@ -161,7 +175,7 @@ def main():
         elif args.action == 'python-tests':
             session.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/tests', '-v'], cwd=args.cwd)
         elif args.action == 'tool':
-            allowed = {'optional_inputs_bash_oracle.py', 'file_backup_reference.py', 'parameter_bash_oracle.py', 'parameters_before11_verify.py', 'rpm_version_oracle.py', 'automation_before10_oracle.py', 'getopts_scope_oracle.py', 'getopts_before9_oracle.py', 'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
+            allowed = {'scripting_before12_verify.py', 'optional_inputs_bash_oracle.py', 'file_backup_reference.py', 'parameter_bash_oracle.py', 'parameters_before11_verify.py', 'rpm_version_oracle.py', 'automation_before10_oracle.py', 'getopts_scope_oracle.py', 'getopts_before9_oracle.py', 'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
             if args.cwd.resolve() != root or args.target_dir:
                 raise RuntimeError('Fixed reference tools currently require the main checkout/default target to preserve probe provenance')
             if not args.args or args.args[0] not in allowed:

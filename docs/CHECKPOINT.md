@@ -16,29 +16,40 @@ heavy work, RAM /tmp artifacts, cleanup or interruption of other applications.
 
 ### Current Main, lease and exact next action
 
-HEAD is pusheda6aca2c (following8568198/32ed454). Main has uncommitted reviewed
-working source164 assignments/42units:48CCNA/36LPIC-1/28LPIC-2/52Bash. Ten normal
+HEAD73199d5 is pushed (followinga6aca2c/8568198/32ed454). Main has reviewed
+registered164 assignments/42units:48CCNA/36LPIC-1/28LPIC-2/52Bash. Ten normal
 new tasks are Ether3, optional-input Script3 and Cron4. All original37 packs/
 154 complete objects/39 raw unit objects remain independently pinned. The latest
 accepted installed baseline is still154/39 at9a90f275e133 below; do not relabel it.
 The four backup tasks remain unregistered and outside all catalog/coverage counts.
 
-No current heavy lease after M193 Python/coverage. Main164 inclusive2249PASS,
-ClippyPASS,269PythonPASS and coveragePASS. Actual Cron R2 wrapper34356 REAPED
-exit0,77PNG/40matrix, receipt5500fa55; ELF c8810bae unchanged. Actual review
-caught narrow200 Remove-button/form overflow and square pass glyphs. Fixed with
-direct parent Button placement and explicit Pass/Needs-work words. New real-egui
-capture geometry test FAILS before (right412.8 > clip379.3), all20Cron UI groups
-PASS after. Corrected native screenshots and combined installed acceptance remain
-pending, not passed by assumption. No worker may start heavy without Root lease.
+CURRENT SOLE HEAVY LEASE: etherchannel_review_resume owns physical adapterR2
+worktree validation (35prospective groups then all-targetClippy), MAINrunner,
+DEBUG0/2jobs/2threads/exclusive worktree target. Root may source-edit Main but
+must launch no heavy work until the worker explicitly releases/reaps. Do not
+interrupt other applications or bypass the lock.
 
-Next: commit/push verified164source/docs, then reviewed before12 seven-file
-capture-only proposal925cd2d8 (actual evaluator11,52/384/52) BEFORE any12 semantics
-or new registry changes. Build/capture/seal real11 source, preserving139authentic
-old contexts and adding only3actually executed new scripts. Then apply reviewed
-backup native9file overlay/11actual-event tests plus5presentation/2UTF8 groups,
-compile/fix, register4onlyaftergates (prospective168/43). NFS worker prepares
-closed registration/source-only; physical R2 source35groups remains queued.
+Main164 inclusive2249PASS/ClippyPASS/269PythonPASS/coveragePASS. Ordinary Cron
+R2 actual77PNG/40matrix receipt5500fa55 is control-flow PASS but retains narrow200
+overflow and glyph failures. Both fixed; all20Cron UI groups pass expanded
+failing-before/passing-after x-bounds/paint regressions. Corrected native and
+combined installed acceptance still pending. Old154candidate remains separate.
+
+Actual evaluator11-before12 capture is now SEALED and fixed verifyPASS:
+private public11-164-384-r1, manifeste303bdec, attestation254d696e, retained
+producer0d3e3bf4 and283sourcefiles.52records/384cases/52examples; both142contexts
+preserve139actual old plus only3executed new scripts. Drafts50current+2whole
+unchanged unfinished Attempts;90non-script exact each;22absent not invented.
+Python283PASS; explicit11feature build/ClippyPASS. Do not rerun/overwrite the
+producer or relabel it12. New sealed verifier is safe after later capability
+changes; old9/10 producers/evidence remain exact. VM12 source work can proceed
+only in an isolated reviewed worktree with exact case-feature amendments.
+
+NEXT after current capture-tool commit: create numeric-case isolated worktree
+from actual current11; apply closed9file backup native proposal7baf181b to Main
+(unregistered4), compile5presentation+11actual-event+2UTF8 and fix findings.
+NFS worker prepares closed168/43registration, only integrate after native/code
+gates. Full curriculum and candidate/NFS cold acceptance stay open.
 First Main160 full25347 reaped2162PASS/13fixtureFAIL/0ignored across169 harnesses.
 Repairs preserve every scenario/assertion/cap: exact new unit-tail assertions,
 bounded pack fixtures, valid positives plus intended negative diagnostics, and
