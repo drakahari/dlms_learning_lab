@@ -1,0 +1,707 @@
+[
+  {
+    "name": "named unset",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-Default}\" \"${value:-Default}\" \"${value+Marker}\" \"${value:+Marker}\"\n",
+    "case": {
+      "name": "named unset",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<Default>|<Default>|<>|<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "named empty",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-Default}\" \"${value:-Default}\" \"${value+Marker}\" \"${value:+Marker}\"\n",
+    "case": {
+      "name": "named empty",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": ""
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<>|<Default>|<Marker>|<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "named set",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-Default}\" \"${value:-Default}\" \"${value+Marker}\" \"${value:+Marker}\"\n",
+    "case": {
+      "name": "named set",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": "kept"
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<kept>|<kept>|<Marker>|<Marker>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "positional unset",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${1-Default}\" \"${1:-Default}\" \"${1+Marker}\" \"${1:+Marker}\"\n",
+    "case": {
+      "name": "positional unset",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<Default>|<Default>|<>|<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "positional empty",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${1-Default}\" \"${1:-Default}\" \"${1+Marker}\" \"${1:+Marker}\"\n",
+    "case": {
+      "name": "positional empty",
+      "args": [
+        ""
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<>|<Default>|<Marker>|<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "positional set",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${1-Default}\" \"${1:-Default}\" \"${1+Marker}\" \"${1:+Marker}\"\n",
+    "case": {
+      "name": "positional set",
+      "args": [
+        "kept"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<kept>|<kept>|<Marker>|<Marker>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "existing data spaced",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-Default}\" \"${value:-Default}\" \"${value+Marker}\" \"${value:+Marker}\"\n",
+    "case": {
+      "name": "existing data spaced",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": "two words"
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<two words>|<two words>|<Marker>|<Marker>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "existing data literal code",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-Default}\" \"${value:-Default}\" \"${value+Marker}\" \"${value:+Marker}\"\n",
+    "case": {
+      "name": "existing data literal code",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": "$(printf surprise > keep.txt); * ? %"
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<$(printf surprise > keep.txt); * ? %>|<$(printf surprise > keep.txt); * ? %>|<Marker>|<Marker>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "existing data unicode",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-Default}\" \"${value:-Default}\" \"${value+Marker}\" \"${value:+Marker}\"\n",
+    "case": {
+      "name": "existing data unicode",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": "éclair 旗"
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<éclair 旗>|<éclair 旗>|<Marker>|<Marker>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "quoted versus split fallback",
+    "source": "words() { printf 'count:%s\\n' \"$#\"; for word in \"$@\"; do printf '[%s]\\n' \"$word\"; done; };\nwords ${missing:-two words}; words \"${missing:-two words}\"\n",
+    "case": {
+      "name": "quoted versus split fallback",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "count:2\n[two]\n[words]\ncount:1\n[two words]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "quoted versus disappearing empty",
+    "source": "words() { printf 'count:%s\\n' \"$#\"; for word in \"$@\"; do printf '[%s]\\n' \"$word\"; done; };\nwords ${missing+marker}; words \"${missing+marker}\"; value=; words ${value:+marker}; words \"${value:+marker}\"\n",
+    "case": {
+      "name": "quoted versus disappearing empty",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "count:0\ncount:1\n[]\ncount:0\ncount:1\n[]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "empty literal WORD",
+    "source": "printf '<%s>|<%s>|<%s>|<%s>\\n' \"${value-}\" \"${value:-}\" \"${value+}\" \"${value:+}\"\n",
+    "case": {
+      "name": "empty literal WORD",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "value": "x"
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<x>|<x>|<>|<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "prefix and suffix quoted fallback",
+    "source": "words() { printf 'count:%s\\n' \"$#\"; for word in \"$@\"; do printf '[%s]\\n' \"$word\"; done; };\nwords pre\"${missing:-two words}\"post\n",
+    "case": {
+      "name": "prefix and suffix quoted fallback",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "count:1\n[pretwo wordspost]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "literal no reparsing",
+    "source": "printf '%s\\n' '${value:-literal}' \"\\${value:-literal}\"\n",
+    "case": {
+      "name": "literal no reparsing",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "${value:-literal}\n${value:-literal}\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "literal fallback metacharacters",
+    "source": "printf '%s\\n' \"${missing:-first; second | third > keep.txt}\"\n",
+    "case": {
+      "name": "literal fallback metacharacters",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "first; second | third > keep.txt\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "fallback Unicode and literal newline",
+    "source": "printf '<%s>\\n' \"${missing:-éclair\n旗}\"\n",
+    "case": {
+      "name": "fallback Unicode and literal newline",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<éclair\n旗>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "bare versus quoted default glob",
+    "source": "words() { printf 'count:%s\\n' \"$#\"; for word in \"$@\"; do printf '[%s]\\n' \"$word\"; done; };\nwords ${missing:-*.txt}; words \"${missing:-*.txt}\"\n",
+    "case": {
+      "name": "bare versus quoted default glob",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "a\n",
+        "/work/b.txt": "b\n",
+        "/work/.hidden.txt": "hidden\n",
+        "/work/keep.bin": "unchanged"
+      },
+      "stdout": "count:2\n[a.txt]\n[b.txt]\ncount:1\n[*.txt]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "a\n",
+        "/work/b.txt": "b\n",
+        "/work/.hidden.txt": "hidden\n",
+        "/work/keep.bin": "unchanged"
+      }
+    }
+  },
+  {
+    "name": "alternative glob selects only appropriate branch",
+    "source": "words() { printf 'count:%s\\n' \"$#\"; for word in \"$@\"; do printf '[%s]\\n' \"$word\"; done; };\nvalue=; words ${value:+*.txt}; words ${value+*.txt}; words \"${value+*.txt}\"\n",
+    "case": {
+      "name": "alternative glob selects only appropriate branch",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "a\n",
+        "/work/b.txt": "b\n",
+        "/work/.hidden.txt": "hidden\n",
+        "/work/keep.bin": "unchanged"
+      },
+      "stdout": "count:0\ncount:2\n[a.txt]\n[b.txt]\ncount:1\n[*.txt]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "a\n",
+        "/work/b.txt": "b\n",
+        "/work/.hidden.txt": "hidden\n",
+        "/work/keep.bin": "unchanged"
+      }
+    }
+  },
+  {
+    "name": "unmatched pattern and hidden names",
+    "source": "words() { printf 'count:%s\\n' \"$#\"; for word in \"$@\"; do printf '[%s]\\n' \"$word\"; done; };\nwords ${missing:-*.absent}; words ${missing:-.*.txt}\n",
+    "case": {
+      "name": "unmatched pattern and hidden names",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/a.txt": "a\n",
+        "/work/b.txt": "b\n",
+        "/work/.hidden.txt": "hidden\n",
+        "/work/keep.bin": "unchanged"
+      },
+      "stdout": "count:1\n[*.absent]\ncount:1\n[.hidden.txt]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/a.txt": "a\n",
+        "/work/b.txt": "b\n",
+        "/work/.hidden.txt": "hidden\n",
+        "/work/keep.bin": "unchanged"
+      }
+    }
+  },
+  {
+    "name": "fallback does not assign",
+    "source": "printf '<%s>\\n' \"${value:-chosen}\" \"$value\" \"${value+set}\"; value=; printf '<%s>\\n' \"${value:-chosen}\" \"$value\" \"${value+set}\"\n",
+    "case": {
+      "name": "fallback does not assign",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<chosen>\n<>\n<>\n<chosen>\n<>\n<set>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "local unset empty set and caller restoration",
+    "source": "value=outer; show() { local value; printf '%s:%s\\n' \"${value-no local}\" \"${value:-no local}\"; value=; printf '%s:%s\\n' \"${value-no local}\" \"${value:-no local}\"; value=inner; printf '%s:%s\\n' \"${value-no local}\" \"${value:-no local}\"; }; show; printf '%s\\n' \"${value-no caller}\"\n",
+    "case": {
+      "name": "local unset empty set and caller restoration",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "no local:no local\n:no local\ninner:inner\nouter\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "restored call arguments",
+    "source": "show() { printf '<%s>\\n' \"${1-no argument}\" \"${1:-no text}\"; }; show; show ''; show inner; printf '<%s>\\n' \"${1-no caller}\"\n",
+    "case": {
+      "name": "restored call arguments",
+      "args": [
+        "caller"
+      ],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<no argument>\n<no text>\n<>\n<no text>\n<inner>\n<inner>\n<caller>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "local declaration keeps intact literal words",
+    "source": "show() { local title=${missing:-two words}; printf '<%s>\\n' \"$title\"; }; show\n",
+    "case": {
+      "name": "local declaration keeps intact literal words",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<two words>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "last status is unchanged by read only operators",
+    "source": "false; printf '%s:%s\\n' \"${missing:-fallback}\" \"$?\"\n",
+    "case": {
+      "name": "last status is unchanged by read only operators",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "fallback:1\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "default in ordinary command capture",
+    "source": "result=$(printf '%s\\n' \"${missing:-first line}\"); printf '<%s>\\n' \"$result\"\n",
+    "case": {
+      "name": "default in ordinary command capture",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<first line>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "default command head only uses existing dispatcher",
+    "source": "${missing:-printf} '%s\\n' 'kept; $(false)'\n",
+    "case": {
+      "name": "default command head only uses existing dispatcher",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "kept; $(false)\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "default in for word list",
+    "source": "for item in ${missing:-first second}; do printf '[%s]\\n' \"$item\"; done\n",
+    "case": {
+      "name": "default in for word list",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "[first]\n[second]\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "pipeline and caller input remain existing semantics",
+    "source": "printf '%s\\n' \"${missing:-b}\" \"${missing:-a}\" | sort; read -r line; printf '<%s>\\n' \"$line\"\n",
+    "case": {
+      "name": "pipeline and caller input remain existing semantics",
+      "args": [],
+      "stdin": "caller input\n",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "a\nb\n<caller input>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "redirection fallback and read only destination",
+    "source": "printf '%s\\n' \"${value:-report}\" > \"${destination-output.txt}\"; printf '<%s>\\n' \"$destination\"\n",
+    "case": {
+      "name": "redirection fallback and read only destination",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n",
+        "/work/output.txt": "report\n"
+      }
+    }
+  },
+  {
+    "name": "empty destination uses colon fallback",
+    "source": "printf '%s\\n' \"${value:-report}\" > \"${destination:-output.txt}\"\n",
+    "case": {
+      "name": "empty destination uses colon fallback",
+      "args": [],
+      "stdin": "",
+      "env": {
+        "destination": ""
+      },
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n",
+        "/work/output.txt": "report\n"
+      }
+    }
+  },
+  {
+    "name": "arithmetic selected literal grouping",
+    "source": "printf '%s\\n' \"$(( ${number:-2*(3+1)} + 1 ))\"\n",
+    "case": {
+      "name": "arithmetic selected literal grouping",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "9\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "arithmetic ignores unselected literal operation",
+    "source": "number=7; printf '%s\\n' \"$(( ${number:-1/0} + 1 ))\"\n",
+    "case": {
+      "name": "arithmetic ignores unselected literal operation",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "8\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "arithmetic ignores parentheses in unselected literal",
+    "source": "number=7; printf '%s\\n' \"$(( ${number:-))))} + 1 ))\"\n",
+    "case": {
+      "name": "arithmetic ignores parentheses in unselected literal",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "8\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "existing empty arithmetic parameter is not defaulted",
+    "source": "number=; printf '%s\\n' \"$(( ${number-1/0} + 1 ))\"\n",
+    "case": {
+      "name": "existing empty arithmetic parameter is not defaulted",
+      "args": [],
+      "stdin": "",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "1\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  },
+  {
+    "name": "read empty line is set not absent",
+    "source": "read -r value; printf '<%s>|<%s>\\n' \"${value-unset}\" \"${value:-empty}\"\n",
+    "case": {
+      "name": "read empty line is set not absent",
+      "args": [],
+      "stdin": "\n",
+      "env": {},
+      "files": {
+        "/work/keep.txt": "retained\n"
+      },
+      "stdout": "<>|<empty>\n",
+      "stderr": "",
+      "status": 0,
+      "after": {
+        "/work/keep.txt": "retained\n"
+      }
+    }
+  }
+]

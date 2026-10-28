@@ -84,8 +84,14 @@ checks exclude that one old producer; its accepted original source, executable
 and evidence remain preserved privately. Explicit selection of that target,
 feature or `--all-features` is refused before compilation unless the selected
 checkout really declares evaluator9. A feature never switches current evaluator
-semantics. Use ordinary default-feature gates for current development; do not
-bypass this refusal to relabel historical observations. New comparison and private
+semantics. The evaluator10 producer similarly requires the nondefault
+`historical-evaluator10-capture` feature and actual revision10. Its fixed original
+capture, source bundle and producer are retained privately before revision11;
+`tools/dev.py tool parameters_before11_verify.py verify` checks historical bytes
+without requiring current semantics to remain10. Do not rerun/overwrite the
+original capture or attest it against changed source. Use ordinary default-feature
+gates for current development; do not bypass either refusal to relabel historical
+observations. New comparison and private
 migration tests run current in-process simulation against hash-pinned old evidence.
 
 ## Disk location and toolchain

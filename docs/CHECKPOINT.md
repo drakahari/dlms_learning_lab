@@ -24,19 +24,29 @@ grade is injected. Exact evidence: .build-artifacts/tmp/native-reopen-nfs-m168-r
 All root wrappers reaped. The older9a90f275e133 installed candidate remains unchanged;
 this development-native proof is not yet acceptance on a new installed candidate.
 
-Cron foundation15/scoped Clippy pass and its grant is released. Current sole
-HEAVY GRANT belongs to ccna-lacp-154 worker for initial library/adapter/content/bin
-gates (first new content fixture rejected schema0; fix is explicit schema1, no
-relaxed decoder). Root must NOT launch another heavy invocation until that worker
-reports DONE and reaped sessions. Root can commit/push M168 and prepare actual10
-capture source while waiting; then KEEP IMPLEMENTING rather than ending here.
+The actual evaluator10 baseline is now captured before any MAIN11 integration:
+49 script references/350 cases/49 separate examples,139 authentic profile contexts,
+and independent unfinished assignment/example drafts. Immutable manifest:
+`220cebac329a62adcc59e8338df80b94a07a383807d5832dd6905bbf332776a1`.
+The exact producer and243 compiled source inputs are retained privately; no
+observations may be regenerated or relabeled under11. Historical producer is
+nondefault-feature gated; ordinary all-target checks do not rebuild it. See M170.
+Python223 and the closed immutable verifier pass. MAIN still evaluator10/catalog154.
+
+Current sole HEAVY GRANT is Bash R5: real bounded `cat --` behavior, all five
+actual10 migration groups and scoped Clippy. ROOT must wait for DONE/reaped before
+any other heavy invocation. LACP QA overlay and Cron integration remain source-only;
+no registration, new count or objective credit yet. Cron foundation17/workspace6
+and scoped Clippy pass; LACP initial adapter/content/UI gates pass but native QA
+is pending. Next: finish capability/reference/native gates, integrate substantive
+units, then continue the remaining reconciliation queue; do not end at this note.
 
 Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
 three substantive tasks); bash-parameter-defaults-154 (faithful parameter fallback/
 alternate forms, evaluator11 isolated ONLY); linux-scheduling-154 (bounded Cronie
 calendar/access/execution foundation, then scheduling tasks). All use MAINrunner,
-exclusive worktree targets and shared lock; no concurrent heavy run. Root must
-capture genuine actual10 authored/example/legacy bytes BEFORE integrating11.
+exclusive worktree targets and shared lock; no concurrent heavy run. Root captured genuine actual10 authored/example/legacy bytes; preserve them
+unchanged while integrating11.
 No unintegrated source/fixture receives catalog or coverage credit. Continue the
 remaining curriculum tables after these ordinary batches; platform/novice/reader
 acceptance stays distinct. No release or unrelated-project/desktop changes.

@@ -3381,3 +3381,38 @@ LACP native/content, scheduling and shell parameters proceed in isolated worktre
 only the explicitly granted worker may hold the shared heavy-work lock. Capture
 genuine evaluator10 evidence before integrating evaluator11; do not invent old
 answers or relabel evaluator11 outcomes as10.
+
+### M170 actual evaluator10 migration baseline before11 (2026-10-28)
+
+Captured current MAIN evaluator10 before integration of the reviewed parameter
+capability. The nondefault developer producer executes all49 existing references,
+350 behavioral cases and49 separate teaching examples in the in-process VM; it
+never executes learner/fixture source on a host shell. Authentic old133 contexts
+and6/7/8/9 receipts remain; only six exercised script attempts are added, yielding
+139 contexts, not fabricated154 solved attempts. A second profile retains two
+independent unfinished assignment/example drafts with no current result. All
+350 results pass current10;35 proposal observations retain actual old diagnostics.
+
+Immutable private capture manifest SHA256
+`220cebac329a62adcc59e8338df80b94a07a383807d5832dd6905bbf332776a1`;
+original profile `bce977c138f5afc1aee4095d5c0e01d290a8cb50a129a7099e09770c720bfd06`;
+draft profile `254c9267091462fef82b10b27c9ab1d76ec176af368871c9a18ef03a25cccd7c`.
+Exact80,058,784-byte producer SHA256
+`d13109ecb1d9f0b845cf11dd60219877443f1ac6ade080ce786b66a0c89edf40`
+and243 source inputs/9,114,661 bytes retained in the ignored capture directory.
+No observations regenerated. Closed attest/verify tool validates manifest,
+contained identities, size/hash bounds and same-FD ordinary files; exclusive
+attestation prevents overwrite. Five new guard tests and two historical-feature
+selection guards pass in223Python tests. One initial NEW test failed because its
+fixture was created inside a mocked file-open scope; fixture construction was
+corrected before installing the mock. No existing assertion or captured byte changed.
+
+Historical producer selection requires actual10 plus explicit nondefault feature;
+ordinary all-target checks exclude it. Immutable verification passes after source
+advances. Root R2 producer compilation/capture and attestation succeeded; actual
+Bash parameter comparison, MAIN11 integration, new tasks and installed verification
+remain pending. Five private current11 migration groups pass in the isolated
+worktree, but are not yet integrated MAIN or a full-inclusive claim. All new
+observations/artifacts remain ignored; only static recipes and tooling are public.
+Shared runner2jobs/2threads/disk artifacts remains mandatory. No new catalog or
+objective credit; no release, personal profile or host learner execution.

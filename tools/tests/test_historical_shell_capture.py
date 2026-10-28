@@ -15,6 +15,23 @@ spec.loader.exec_module(dev)
 
 
 class HistoricalCaptureGuards(unittest.TestCase):
+    def test_actual10_capture_accepts_only_its_source_revision_and_explicit_feature(self):
+        for flags in [['--features', 'historical-evaluator10-capture'],
+                      ['--features=historical-evaluator10-capture'],
+                      ['-Fhistorical-evaluator10-capture'], ['-F=historical-evaluator10-capture'],
+                      ['-F', 'historical-evaluator10-capture'],
+                      ['--features', 'other,dlms-learning-lab/historical-evaluator10-capture']]:
+            with self.subTest(flags=flags):
+                dev.historical_capture_preflight(['--example', 'parameters_before11_capture', *flags], self.fixture(10))
+                with self.assertRaisesRegex(RuntimeError, 'actual public evaluator10'):
+                    dev.historical_capture_preflight(flags, self.fixture(11))
+        with self.assertRaisesRegex(RuntimeError, 'requires --features'):
+            dev.historical_capture_preflight(['--example=parameters_before11_capture'], self.fixture(10))
+
+    def test_new_historical_name_as_test_filter_does_not_select_its_producer(self):
+        root = self.fixture(11)
+        with patch.object(Path, 'open', side_effect=AssertionError('No historical source read')):
+            dev.historical_capture_preflight(['--all-targets', '--', 'historical-evaluator10-capture'], root)
     def fixture(self, revision=9, extra=''):
         directory = tempfile.TemporaryDirectory()
         self.addCleanup(directory.cleanup)
