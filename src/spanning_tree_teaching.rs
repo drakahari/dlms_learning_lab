@@ -436,6 +436,7 @@ impl Learning {
 /// Initialize only this activity's optional metadata after all context checks.
 /// Wrong kind/foreign existing practice never publishes partial new fields.
 pub fn prepare(a: &mut crate::progress::Attempt, lesson: &Lesson) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     let crate::engine::State::SpanningTree { simulation } = &a.state else {
         return Err("Spanning-tree practice requires its own assignment kind".into());

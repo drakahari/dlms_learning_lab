@@ -151,6 +151,16 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
 /// No result survives a state/draft change or becomes a persisted credential.
 /// Reject context and pending draft first; do not run new-client probes for them.
 pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
+    if s.cron_teaching.is_some() {
+        return vec![(
+            false,
+            "Scheduling teaching belongs to its scheduling activity".into(),
+        )];
+    }
+
     if let Err(e) = validate_nfs_workspace(a) {
         return vec![(false, crate::nfs_workspace::notice(e))];
     }
@@ -208,6 +218,16 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Current applied draft/context first; snapshot predicates are derived once per batch.
 pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
+    if s.cron_teaching.is_some() {
+        return vec![(
+            false,
+            "Scheduling teaching belongs to its scheduling activity".into(),
+        )];
+    }
+
     if let Err(e) = validate_nfs_workspace(a) {
         return vec![(false, crate::nfs_workspace::notice(e))];
     }
@@ -297,9 +317,69 @@ pub fn current_file_backup_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Strin
         Err(e) => vec![(false, e)],
     }
 }
+/// Current LACP outcomes use applied typed configuration and bounded independent fault snapshots.
+pub fn current_etherchannel_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let d = match crate::etherchannel_workspace::context(a, s) {
+        Ok(d) => d,
+        Err(e) => return vec![(false, crate::etherchannel_workspace::notice(e))],
+    };
+    let State::EtherChannel { simulation } = &a.state else {
+        return vec![(false, "LACP assignment kind differs".into())];
+    };
+    let mut rows = d.checks(simulation);
+    if a.workspace
+        .as_ref()
+        .and_then(|w| w.etherchannel_draft.as_ref())
+        .is_some_and(|draft| !draft.matches(simulation))
+    {
+        rows[0] = (
+            false,
+            "Configuration changes are pending; Apply the current draft before checking".into(),
+        );
+    }
+    rows
+}
+/// Scheduling metadata admission only; no grading, parser execution or inferred credit.
+pub(crate) fn validate_cron_metadata(a: &Attempt) -> Result<(), String> {
+    let present = crate::workspace::has_cron_metadata(a);
+    let State::Cron { simulation } = &a.state else {
+        return if present {
+            Err("Scheduling drafts/practice on another activity; previous work retained".into())
+        } else {
+            Ok(())
+        };
+    };
+    simulation.validate().map_err(|e| e.to_string())?;
+    if a.ipv4.is_some()
+        || a.workspace
+            .as_ref()
+            .is_some_and(|w| crate::cron_workspace::foreign(w) || !w.valid())
+        || !crate::cron_workspace::within(a, crate::cron_workspace::MAX_ATTEMPT)
+    {
+        return Err(
+            "Scheduling metadata or whole Attempt bound differs; previous work retained".into(),
+        );
+    }
+    Ok(())
+}
+pub fn current_cron_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let d = match crate::cron_workspace::context(a, s) {
+        Ok(d) => d,
+        Err(e) => return vec![(false, e)],
+    };
+    let State::Cron { simulation } = &a.state else {
+        return vec![(false, "Scheduling assignment kind differs".into())];
+    };
+    if let Some(t) = a.workspace.as_ref().and_then(|w| w.cron_session.as_ref()) {
+        crate::cron_workspace::checks_with_session(d, simulation, t)
+    } else {
+        d.checks(simulation)
+    }
+}
 /// NFS metadata admission only: no grader recursion and no inferred completion.
 pub(crate) fn validate_nfs_metadata(a: &Attempt) -> Result<(), String> {
     validate_file_backup_workspace(a)?;
+    crate::etherchannel_workspace::metadata(a)?;
     let present = crate::workspace::has_nfs_metadata(a);
     let State::Nfs { simulation } = &a.state else {
         return if present {
@@ -326,6 +406,7 @@ pub(crate) fn validate_nfs_metadata(a: &Attempt) -> Result<(), String> {
     Ok(())
 }
 pub(crate) fn validate_nfs_workspace(a: &Attempt) -> Result<(), String> {
+    validate_cron_metadata(a)?;
     validate_nfs_metadata(a)?;
     if let State::Nfs { simulation } = &a.state {
         simulation
@@ -336,6 +417,9 @@ pub(crate) fn validate_nfs_workspace(a: &Attempt) -> Result<(), String> {
 }
 /// Snapshot grading uses actual current files/mounts plus independent next-mount trials.
 pub fn current_nfs_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
     let d = match crate::nfs_workspace::context(a, s) {
         Ok(d) => d,
         Err(e) => return vec![(false, crate::nfs_workspace::notice(e))],
@@ -347,6 +431,16 @@ pub fn current_nfs_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Fresh RPM current outcomes. A transcript, raw command or checked flag never grants credit.
 pub fn current_rpm_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
+    if s.cron_teaching.is_some() {
+        return vec![(
+            false,
+            "Scheduling teaching belongs to its scheduling activity".into(),
+        )];
+    }
+
     if let Err(e) = validate_nfs_workspace(a) {
         return vec![(false, crate::nfs_workspace::notice(e))];
     }
@@ -417,6 +511,16 @@ fn validate_rpm_workspace(a: &Attempt) -> Result<(), String> {
 }
 /// Fresh package outcomes with context/session guards; display history is never credit.
 pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
+    if s.cron_teaching.is_some() {
+        return vec![(
+            false,
+            "Scheduling teaching belongs to its scheduling activity".into(),
+        )];
+    }
+
     if let Err(e) = validate_nfs_workspace(a) {
         return vec![(false, crate::nfs_workspace::notice(e))];
     }
@@ -460,6 +564,16 @@ pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, S
     definition.checks(simulation)
 }
 pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
+    if s.cron_teaching.is_some() {
+        return vec![(
+            false,
+            "Scheduling teaching belongs to its scheduling activity".into(),
+        )];
+    }
+
     if let Err(e) = validate_nfs_workspace(a) {
         return vec![(false, crate::nfs_workspace::notice(e))];
     }
@@ -544,6 +658,16 @@ pub(crate) fn validate_nat_metadata(a: &Attempt) -> Result<(), String> {
     Ok(())
 }
 pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
+        return vec![(false, crate::etherchannel_workspace::notice(e))];
+    }
+    if s.cron_teaching.is_some() {
+        return vec![(
+            false,
+            "Scheduling teaching belongs to its scheduling activity".into(),
+        )];
+    }
+
     let fail = |m: &str| vec![(false, crate::nat_workspace::notice(m))];
     if let Err(e) = validate_nat_metadata(a) {
         return fail(&e);
@@ -590,12 +714,29 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if crate::etherchannel_workspace::reject_foreign_source(s).is_err()
+        || crate::etherchannel_workspace::metadata(a).is_err()
+    {
+        return false;
+    }
+    if matches!(a.state, State::EtherChannel { .. }) {
+        let rows = current_etherchannel_checks(a, s);
+        return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
+
     if validate_file_backup_workspace(a).is_err() {
         return false;
     }
     if matches!(a.state, State::FileBackup { .. }) {
         let rows = current_file_backup_checks(a, s);
         return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
+    if matches!(a.state, State::Cron { .. }) {
+        let rows = current_cron_checks(a, s);
+        return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
+    if validate_cron_metadata(a).is_err() || s.cron_teaching.is_some() {
+        return false;
     }
     if matches!(a.state, State::Nfs { .. }) {
         let rows = current_nfs_checks(a, s);
@@ -967,6 +1108,12 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         }
         if matches!(a.state, State::FileBackup { .. }) {
             crate::file_backup_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::EtherChannel { .. }) {
+            crate::etherchannel_workspace::context(a, s)?;
+        }
+        if matches!(a.state, State::Cron { .. }) {
+            crate::cron_workspace::context(a, s)?;
         }
         if matches!(a.state, State::Nfs { .. }) {
             crate::nfs_workspace::context(a, s)?;

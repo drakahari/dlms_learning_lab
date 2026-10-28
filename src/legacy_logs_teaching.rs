@@ -329,6 +329,7 @@ impl Learning {
     }
 }
 pub fn prepare(a: &mut Attempt, l: &Lesson, new_attempt: bool) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     if !matches!(a.state, State::Logs { .. }) {
         return Err("Log teaching belongs to the original log task".into());

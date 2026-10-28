@@ -347,7 +347,27 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::Nfs { simulation } = &a.state {
+        if let State::EtherChannel { simulation } = &a.state {
+            // A genuine admitted bad configuration, preserving the source and
+            // topology: disable every member after the taught solution passed.
+            let mut configuration = simulation.configuration().clone();
+            for device in configuration.devices.values_mut() {
+                for port in device.ports.values_mut() {
+                    port.up = false;
+                }
+            }
+            let action = dlms_learning_lab::etherchannel::Action::Configure { configuration };
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    dlms_learning_lab::etherchannel_workspace::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
+        } else if let State::Nfs { simulation } = &a.state {
             use dlms_learning_lab::{nfs, nfs_workspace};
             let engine::Goal::Nfs { definition } = &s.goal else {
                 panic!("NFS goal context");
@@ -404,6 +424,37 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                 a.workspace.is_none(),
                 "Typed state-only adapter does not fabricate editor/practice metadata"
             );
+        } else if matches!(a.state, State::Cron { .. }) {
+            use dlms_learning_lab::cron_workspace::{self as cron_work, Document, ReferenceAction};
+            let engine::Goal::Cron { definition } = &s.goal else {
+                panic!("Cron context");
+            };
+            let target = definition
+                .editable
+                .iter()
+                .find(|target| matches!(target, Document::User { .. } | Document::System))
+                .expect("Authored Cron task requires an editable running schedule")
+                .clone();
+            let text = if target == Document::System {
+                "* * * * * root echo wrong\n"
+            } else {
+                "* * * * * echo wrong\n"
+            };
+            let action = ReferenceAction::Install {
+                actor: "root".into(),
+                target,
+                text: text.into(),
+            };
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    cron_work::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
         } else if let State::BasicNat { simulation } = &a.state {
             use dlms_learning_lab::{nat, nat_workspace};
             let engine::Goal::BasicNat { definition } = &s.goal else {

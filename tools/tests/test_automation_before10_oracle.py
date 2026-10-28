@@ -222,7 +222,7 @@ class FixedAutomationSafety(unittest.TestCase):
         units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())
         self.assertEqual(units['version'],1)
         frozen=json.loads((ROOT/'tests/fixtures/catalog133-original-index.json').read_bytes())
-        self.assertEqual(len(units['units']),39)
+        self.assertEqual(len(units['units']),42)
         # Current consumer only: the original capture inputs and observations above
         # remain frozen. Verify all37 prior unit objects and both exact new units.
         old_index_raw=(ROOT/'tests/fixtures/nfs-original147-source-index.json').read_bytes()
@@ -235,6 +235,19 @@ class FixedAutomationSafety(unittest.TestCase):
                          'fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e82ee5f58a8f9c0eb')
         self.assertEqual(units['units'][37],json.loads(bash_raw)['unit_proposal'])
         self.assertEqual(units['units'][38],old_index['appended_unit'])
+        lacp_raw=(ROOT/'tests/fixtures/catalog157-original154-boundary.json').read_bytes()
+        self.assertEqual(hashlib.sha256(lacp_raw).hexdigest(),'0d2035c4da961607c6b40066a944040f2ee133a1270dceefe5c69598768f9969')
+        lacp=json.loads(lacp_raw)
+        self.assertEqual(units['units'][:39],json.loads(lacp['original_units_utf8'])['units'])
+        self.assertEqual(units['units'][39],lacp['append']['new_unit'])
+        optional_raw=(ROOT/'tests/fixtures/shell-optional-inputs-registration.json').read_bytes()
+        self.assertEqual(hashlib.sha256(optional_raw).hexdigest(),'3e74d47dc4af1344b93404db1de5464f211f24fe0a559b86495d044917b04450')
+        self.assertEqual(units['units'][40],json.loads(optional_raw)['unit'])
+        cron_raw=(ROOT/'tests/fixtures/catalog164-registration.json').read_bytes()
+        self.assertEqual(hashlib.sha256(cron_raw).hexdigest(),'980ac05b935f9cbcc76bf3f1dff351de2e11dbad326ccf349f195f70c4f13072')
+        cron=json.loads(cron_raw)
+        self.assertEqual(units['units'][:41],cron['before_units41']['units'])
+        self.assertEqual(units['units'][41],cron['cron_unit'])
         original35=units['units'][:35]
         self.assertEqual(len(original35),35)
         self.assertEqual(original35[:33],frozen['units']['units'])

@@ -2,7 +2,13 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are154 narrowly evidenced Partial practice rows, one Supporting explanation row and1085 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package9a90f275e133 contains154 authored assignments/39 units; current source reconciliation is in [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md). Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are161 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1078 Open rows; no full-objective completion is asserted. Main source
+contains164 authored assignments/42 units. The retained Fedora candidate
+9a90f275e133 contains154; it is not acceptance evidence for the ten new source
+assignments. [CATALOG164_MILESTONE.md](CATALOG164_MILESTONE.md) separates source,
+behavior, pending Main native and candidate receipts. Current reconciliation is
+in [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -258,3 +264,21 @@ dynamic, commented/quoted, duplicate and draft-only source cases. Current normal
 catalog154/39 and154Partial/1Supporting/1085Open are unchanged. A registry entry
 alone still does not prove behavior or teaching quality; the runtime/content and
 native evidence gates remain mandatory.
+
+
+## Narrow L2 LACP and recurring-job additions — 2026-10-28
+
+Seven rows move from Open to Partial practice: current CCNA2.4, and LPIC-1
+107.2 parent/K1/K2/T4/T5/T6. The latter term positions mean /etc/crontab,
+/etc/cron.allow and /etc/cron.deny in the retained source inventory. Native
+configuration and independent behavioral cases earn only those named slices.
+No IOS/crontab CLI credit is inferred from editor buttons. The crontab term T8,
+at/access/queue tools, cron directories/spool and systemd timers remain Open.
+The optional-input Bash unit adds meaningful applied course work without a new
+issuer-row promotion. All136 parents remain incomplete (98Open/38Partial).
+
+Narrow issuer-content checks on2026-10-28 used the official current CCNAv1.1
+PDF2.4 and LPIC-1v5.0 section107.2; the complete normalized source fingerprints
+retain their actual2026-10-22 snapshot. Future CCNAv2.0 receives no inherited
+credit. Native/candidate results are separately pending in CATALOG164_MILESTONE.md
+until their real runs and source/binary identities are recorded.

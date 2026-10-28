@@ -5,6 +5,9 @@ pub mod apache_static_teaching;
 pub mod apache_static_workspace;
 pub mod catalog;
 pub mod client_teaching;
+pub mod cron;
+pub mod cron_teaching;
+pub mod cron_workspace;
 pub mod debian_packages;
 pub mod debian_packages_teaching;
 pub mod debian_packages_terminal;
@@ -138,6 +141,8 @@ pub mod etherchannel;
 /// Bounded virtual archive/restore foundation; not yet bundled curriculum.
 pub mod file_backup;
 
+pub mod etherchannel_teaching;
+pub mod etherchannel_workspace;
 pub mod file_backup_teaching;
 pub mod file_backup_terminal;
 pub mod file_backup_workspace;

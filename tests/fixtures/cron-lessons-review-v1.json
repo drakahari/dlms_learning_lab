@@ -1,0 +1,895 @@
+[
+  {
+    "id": "lpic1-cron-weekday-report",
+    "reference": [
+      {
+        "kind": "Install",
+        "actor": "alex",
+        "target": {
+          "kind": "User",
+          "owner": "alex"
+        },
+        "text": "10 9 * * 1-5 cat /work/source > /work/report\n"
+      },
+      {
+        "kind": "Run",
+        "end": {
+          "year": 2026,
+          "month": 10,
+          "day": 28,
+          "hour": 9,
+          "minute": 10
+        }
+      }
+    ],
+    "alternatives": [
+      [
+        {
+          "kind": "Install",
+          "actor": "alex",
+          "target": {
+            "kind": "User",
+            "owner": "alex"
+          },
+          "text": "10 9 * * MON-FRI cat /work/source > /work/report\n"
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 10
+          }
+        }
+      ],
+      [
+        {
+          "kind": "Install",
+          "actor": "alex",
+          "target": {
+            "kind": "User",
+            "owner": "alex"
+          },
+          "text": "10 9 * * 1,2,3,4,5 'cat' '/work/source' > /work/report\n"
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 10
+          }
+        }
+      ]
+    ],
+    "wrong": [
+      {
+        "name": "Every day mistaken for weekdays",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "alex",
+            "target": {
+              "kind": "User",
+              "owner": "alex"
+            },
+            "text": "10 9 * * * cat /work/source > /work/report\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "Full numeric day-of-month mistaken for wildcard",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "alex",
+            "target": {
+              "kind": "User",
+              "owner": "alex"
+            },
+            "text": "10 9 1-31 * 1-5 cat /work/source > /work/report\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hardcoded one input",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "alex",
+            "target": {
+              "kind": "User",
+              "owner": "alex"
+            },
+            "text": "10 9 * * 1-5 printf 'cobalt\\n' > /work/report\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 10
+            }
+          }
+        ]
+      }
+    ],
+    "try_action": [
+      {
+        "kind": "Install",
+        "actor": "alex",
+        "target": {
+          "kind": "User",
+          "owner": "alex"
+        },
+        "text": "10 9 * * * cat /work/source > /work/report\n"
+      }
+    ],
+    "try_cases": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      true
+    ],
+    "repair": [
+      {
+        "kind": "Install",
+        "actor": "alex",
+        "target": {
+          "kind": "User",
+          "owner": "alex"
+        },
+        "text": "10 9 * * 1-5 cat /work/source > /work/report\n"
+      }
+    ]
+  },
+  {
+    "id": "lpic1-cron-environment-output",
+    "reference": [
+      {
+        "kind": "Install",
+        "actor": "alex",
+        "target": {
+          "kind": "User",
+          "owner": "alex"
+        },
+        "text": "LABEL='Morning report'\n15 9 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * 1-5 cat /work/source >> /work/report\n"
+      },
+      {
+        "kind": "Run",
+        "end": {
+          "year": 2026,
+          "month": 10,
+          "day": 28,
+          "hour": 9,
+          "minute": 15
+        }
+      }
+    ],
+    "alternatives": [
+      [
+        {
+          "kind": "Install",
+          "actor": "alex",
+          "target": {
+            "kind": "User",
+            "owner": "alex"
+          },
+          "text": "LABEL='Morning report'\n15 9 * * 1-5 echo \"$LABEL $LOGNAME\" >> /work/report\n15 9 * * 1-5 cat /work/source >> /work/report\n"
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 15
+          }
+        }
+      ],
+      [
+        {
+          "kind": "Install",
+          "actor": "alex",
+          "target": {
+            "kind": "User",
+            "owner": "alex"
+          },
+          "text": "LABEL='Morning report'\n15 9 * * MON-FRI printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * MON-FRI cat /work/source >> /work/report\n"
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 15
+          }
+        }
+      ]
+    ],
+    "wrong": [
+      {
+        "name": "Replace loses retained report",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "alex",
+            "target": {
+              "kind": "User",
+              "owner": "alex"
+            },
+            "text": "LABEL='Morning report'\n15 9 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * 1-5 cat /work/source > /work/report\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 15
+            }
+          }
+        ]
+      },
+      {
+        "name": "Environment declared after consumer",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "alex",
+            "target": {
+              "kind": "User",
+              "owner": "alex"
+            },
+            "text": "15 9 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * 1-5 cat /work/source >> /work/report\nLABEL='Morning report'\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 15
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hardcoded sample input",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "alex",
+            "target": {
+              "kind": "User",
+              "owner": "alex"
+            },
+            "text": "LABEL='Morning report'\n15 9 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * 1-5 printf 'cobalt\\n' >> /work/report\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 15
+            }
+          }
+        ]
+      }
+    ],
+    "try_action": [
+      {
+        "kind": "Install",
+        "actor": "alex",
+        "target": {
+          "kind": "User",
+          "owner": "alex"
+        },
+        "text": "LABEL='Morning report'\n15 9 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * 1-5 cat /work/source > /work/report\n"
+      }
+    ],
+    "try_cases": [
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ],
+    "repair": [
+      {
+        "kind": "Install",
+        "actor": "alex",
+        "target": {
+          "kind": "User",
+          "owner": "alex"
+        },
+        "text": "LABEL='Morning report'\n15 9 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/report\n15 9 * * 1-5 cat /work/source >> /work/report\n"
+      }
+    ]
+  },
+  {
+    "id": "lpic1-cron-access-retirement",
+    "reference": [
+      {
+        "kind": "Install",
+        "actor": "root",
+        "target": {
+          "kind": "Allow"
+        },
+        "text": "alex\npat\n"
+      },
+      {
+        "kind": "Remove",
+        "actor": "root",
+        "target": {
+          "kind": "User",
+          "owner": "sam"
+        }
+      },
+      {
+        "kind": "Run",
+        "end": {
+          "year": 2026,
+          "month": 10,
+          "day": 28,
+          "hour": 9,
+          "minute": 10
+        }
+      }
+    ],
+    "alternatives": [
+      [
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "Deny"
+          },
+          "text": "sam\n"
+        },
+        {
+          "kind": "Remove",
+          "actor": "root",
+          "target": {
+            "kind": "Allow"
+          }
+        },
+        {
+          "kind": "Remove",
+          "actor": "root",
+          "target": {
+            "kind": "User",
+            "owner": "sam"
+          }
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 10
+          }
+        }
+      ],
+      [
+        {
+          "kind": "Remove",
+          "actor": "root",
+          "target": {
+            "kind": "User",
+            "owner": "sam"
+          }
+        },
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "Allow"
+          },
+          "text": "alex\npat\n"
+        },
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "Deny"
+          },
+          "text": "sam\n"
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 10
+          }
+        }
+      ]
+    ],
+    "wrong": [
+      {
+        "name": "Deny file cannot override existing allow file",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Deny"
+            },
+            "text": "sam\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "Management denied but installed job retained",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Allow"
+            },
+            "text": "alex\npat\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 10
+            }
+          }
+        ]
+      },
+      {
+        "name": "Empty table stops jobs but leaves the explicitly unwanted installed user crontab",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Allow"
+            },
+            "text": "alex\npat\n"
+          },
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "User",
+              "owner": "sam"
+            },
+            "text": ""
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 10
+            }
+          }
+        ]
+      }
+    ],
+    "try_action": [
+      {
+        "kind": "Install",
+        "actor": "root",
+        "target": {
+          "kind": "Deny"
+        },
+        "text": "alex\n"
+      }
+    ],
+    "try_cases": [
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ],
+    "repair": [
+      {
+        "kind": "Remove",
+        "actor": "root",
+        "target": {
+          "kind": "Deny"
+        }
+      }
+    ]
+  },
+  {
+    "id": "lpic1-cron-calendar-handover",
+    "reference": [
+      {
+        "kind": "Install",
+        "actor": "root",
+        "target": {
+          "kind": "System"
+        },
+        "text": "0 6 1 * MON reporter cat /work/source > /work/report\n"
+      },
+      {
+        "kind": "Remove",
+        "actor": "root",
+        "target": {
+          "kind": "User",
+          "owner": "reporter"
+        }
+      },
+      {
+        "kind": "Install",
+        "actor": "root",
+        "target": {
+          "kind": "Allow"
+        },
+        "text": "reporter\npat\n"
+      },
+      {
+        "kind": "Run",
+        "end": {
+          "year": 2026,
+          "month": 10,
+          "day": 1,
+          "hour": 6,
+          "minute": 0
+        }
+      }
+    ],
+    "alternatives": [
+      [
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "System"
+          },
+          "text": "0 6 1 * 1 reporter cat /work/source > /work/report\n"
+        },
+        {
+          "kind": "Remove",
+          "actor": "root",
+          "target": {
+            "kind": "User",
+            "owner": "reporter"
+          }
+        },
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "Deny"
+          },
+          "text": ""
+        },
+        {
+          "kind": "Remove",
+          "actor": "root",
+          "target": {
+            "kind": "Allow"
+          }
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 1,
+            "hour": 6,
+            "minute": 0
+          }
+        }
+      ],
+      [
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "System"
+          },
+          "text": "0 6 1 * MON reporter 'cat' '/work/source' > /work/report\n"
+        },
+        {
+          "kind": "Remove",
+          "actor": "root",
+          "target": {
+            "kind": "User",
+            "owner": "reporter"
+          }
+        },
+        {
+          "kind": "Install",
+          "actor": "root",
+          "target": {
+            "kind": "Allow"
+          },
+          "text": "reporter\npat\n"
+        },
+        {
+          "kind": "Run",
+          "end": {
+            "year": 2026,
+            "month": 10,
+            "day": 1,
+            "hour": 6,
+            "minute": 0
+          }
+        }
+      ]
+    ],
+    "wrong": [
+      {
+        "name": "First day only loses other Mondays",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "System"
+            },
+            "text": "0 6 1 * * reporter cat /work/source > /work/report\n"
+          },
+          {
+            "kind": "Remove",
+            "actor": "root",
+            "target": {
+              "kind": "User",
+              "owner": "reporter"
+            }
+          },
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Allow"
+            },
+            "text": "reporter\npat\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 1,
+              "hour": 6,
+              "minute": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "Duplicate user table still dispatches",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "System"
+            },
+            "text": "0 6 1 * MON reporter cat /work/source > /work/report\n"
+          },
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Allow"
+            },
+            "text": "reporter\npat\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 1,
+              "hour": 6,
+              "minute": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "Wrong system identity",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "System"
+            },
+            "text": "0 6 1 * MON root cat /work/source > /work/report\n"
+          },
+          {
+            "kind": "Remove",
+            "actor": "root",
+            "target": {
+              "kind": "User",
+              "owner": "reporter"
+            }
+          },
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Allow"
+            },
+            "text": "reporter\npat\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 1,
+              "hour": 6,
+              "minute": 0
+            }
+          }
+        ]
+      },
+      {
+        "name": "Hardcoded one report sample",
+        "actions": [
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "System"
+            },
+            "text": "0 6 1 * MON reporter printf 'cobalt\\n' > /work/report\n"
+          },
+          {
+            "kind": "Remove",
+            "actor": "root",
+            "target": {
+              "kind": "User",
+              "owner": "reporter"
+            }
+          },
+          {
+            "kind": "Install",
+            "actor": "root",
+            "target": {
+              "kind": "Allow"
+            },
+            "text": "reporter\npat\n"
+          },
+          {
+            "kind": "Run",
+            "end": {
+              "year": 2026,
+              "month": 10,
+              "day": 1,
+              "hour": 6,
+              "minute": 0
+            }
+          }
+        ]
+      }
+    ],
+    "try_action": [
+      {
+        "kind": "Install",
+        "actor": "root",
+        "target": {
+          "kind": "System"
+        },
+        "text": "0 6 1 * * reporter cat /work/source > /work/report\n"
+      }
+    ],
+    "try_cases": [
+      true,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ],
+    "repair": [
+      {
+        "kind": "Install",
+        "actor": "root",
+        "target": {
+          "kind": "System"
+        },
+        "text": "0 6 1 * MON reporter cat /work/source > /work/report\n"
+      }
+    ]
+  }
+]

@@ -4,9 +4,13 @@ mod apache_static;
 mod apache_static_lessons;
 mod client_learning;
 mod command_vectors;
+mod cron_lessons_native;
+pub(in crate::ui) mod cron_workspace;
 mod debian_packages;
 mod dhcpv4;
 mod dhcpv4_lessons;
+mod etherchannel_native;
+pub(in crate::ui) mod etherchannel_workspace;
 mod getopts_history;
 mod getopts_lessons;
 mod mac_learning;
@@ -17,6 +21,7 @@ mod nat_native;
 mod nat_teaching;
 mod nfs_lessons_native;
 pub(in crate::ui) mod nfs_workspace;
+mod optional_inputs;
 mod ospf;
 mod safe_automation_lessons;
 mod seed_learning;
@@ -900,7 +905,17 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 )
                 .unwrap();
             }
+            State::EtherChannel { simulation } => {
+                let mut configuration = simulation.configuration().clone();
+                for device in configuration.devices.values_mut() {
+                    for group in device.groups.values_mut() {
+                        group.up = false;
+                    }
+                }
+                simulation.reconfigure(configuration).unwrap();
+            }
             State::FileBackup { .. }
+            | State::Cron { .. }
             | State::Nfs { .. }
             | State::RpmPackages { .. }
             | State::BasicNat { .. }

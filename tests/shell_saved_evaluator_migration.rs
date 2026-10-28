@@ -139,7 +139,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 154);
+    assert_eq!(all.len(), 164);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -150,7 +150,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
-        49
+        52
     );
     let mut case_count = 0;
     for old in originals {
@@ -186,6 +186,9 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "ccna-lacp-initiation",
+            "ccna-lacp-member-service",
+            "ccna-lacp-resilient-handover",
             "ccna-nat-static",
             "ccna-nat-pool",
             "ccna-nat-handover",
@@ -197,9 +200,16 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-nfs-publication",
             "lpic2-nfs-handover",
             "lpic2-nfs-capstone",
+            "lpic1-cron-weekday-report",
+            "lpic1-cron-environment-output",
+            "lpic1-cron-access-retirement",
+            "lpic1-cron-calendar-handover",
             "shell-command-options",
             "shell-command-dispatch",
             "shell-command-plan",
+            "shell-optional-policy",
+            "shell-optional-report",
+            "shell-optional-handover",
             "lpic2-dns-reverse-investigation",
             "lpic2-dns-reverse-ipv6",
             "lpic2-dns-reverse-handover",
@@ -225,7 +235,35 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All38 later tasks remain absent and ungraded; no invented contexts.
+    ); // All48 later tasks remain absent and ungraded; no invented contexts.
+    for id in [
+        "shell-optional-policy",
+        "shell-optional-report",
+        "shell-optional-handover",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Script { .. })
+                && matches!(source.goal, Goal::Script { .. })
+        );
+        assert!(
+            !p.attempts.contains_key(id) && !p.favorites.contains(id),
+            "Actual8 migration must not invent optional-input drafts, answers or mastery"
+        );
+    }
+    for id in [
+        "lpic1-cron-weekday-report",
+        "lpic1-cron-environment-output",
+        "lpic1-cron-access-retirement",
+        "lpic1-cron-calendar-handover",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Cron { .. })
+                && matches!(source.goal, Goal::Cron { .. })
+        );
+        assert!(!p.attempts.contains_key(id) && !p.favorites.contains(id));
+    }
     for id in [
         "lpic2-nfs-reference",
         "lpic2-nfs-publication",

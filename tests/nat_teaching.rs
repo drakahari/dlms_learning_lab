@@ -307,7 +307,7 @@ fn foreign_practice_rejects_current_save_decode_and_good_file_is_unchanged() {
 #[test]
 fn old_140_wire_and_views_are_unchanged_and_technical_fixture_unregistered() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 154);
+    assert_eq!(all.len(), 164);
     assert!(all[..140].iter().all(|s| s.nat_teaching.is_none()));
     assert_eq!(
         all[140..143]

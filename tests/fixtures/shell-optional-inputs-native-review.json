@@ -1,0 +1,176 @@
+{
+  "content_review_sha256": "62ef4778223586cc9879f904c610a024f65f8c84fd4e8c683d277e40bb827aee",
+  "plans": [
+    {
+      "id": "shell-optional-policy",
+      "alternates": [
+        "if test -n \"$TEAM\"; then team=$TEAM; else team=Operations; fi\nif test -n \"${SUBTITLE+present}\"; then subtitle=$SUBTITLE; else subtitle='Shift handover'; fi\nif test -n \"${NOTICE+present}\"; then supplied=yes; else supplied=no; fi\nif test -n \"$NOTICE\"; then text=yes; else text=no; fi\nprintf 'Team: %s\\nSubtitle: %s\\nNotice supplied: %s\\nNotice has text: %s\\nNotice: %s\\n' \"$team\" \"$subtitle\" \"$supplied\" \"$text\" \"$NOTICE\"\n",
+        "printf 'Team: %s\\nSubtitle: %s\\n' \"${TEAM:-Operations}\" \"${SUBTITLE-Shift handover}\"\nif test -n \"${NOTICE+present}\"; then printf 'Notice supplied: yes\\n'; else printf 'Notice supplied: no\\n'; fi\nif test -n \"$NOTICE\"; then printf 'Notice has text: yes\\n'; else printf 'Notice has text: no\\n'; fi\nprintf 'Notice: %s\\n' \"$NOTICE\"\n"
+      ],
+      "partial": "team=${TEAM:-Operations}\nsubtitle=${SUBTITLE:-Shift handover}\nsupplied=${NOTICE+yes}\nsupplied=${supplied:-no}\ntext=${NOTICE:+yes}\ntext=${text:-no}\nprintf 'Team: %s\\nSubtitle: %s\\nNotice supplied: %s\\nNotice has text: %s\\nNotice: %s\\n' \"$team\" \"$subtitle\" \"$supplied\" \"$text\" \"$NOTICE\"\n",
+      "partial_expected": [
+        true,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "wrong": "printf '%s' 'Team: Operations\nSubtitle: Shift handover\nNotice supplied: no\nNotice has text: no\nNotice: \n'\n",
+      "wrong_expected": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true
+      ],
+      "experiment": {
+        "source": "LABEL=\nroom=${ROOM:-Exhibit hall}\ncredit=${CREDIT-Museum staff}\nlabel=${LABEL-Guest label}\nprovided=${CREDIT+yes}\nprovided=${provided:-no}\nvisible=${CREDIT:+yes}\nvisible=${visible:-no}\nprintf 'Room: <%s>\\nCredit: <%s>\\nCredit supplied: %s\\nCredit has text: %s\\nLabel: <%s>\\n' \"$room\" \"$credit\" \"$provided\" \"$visible\" \"$label\"\n",
+        "expected": {
+          "name": "Exhibit sign example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "ROOM": "Reading gallery",
+            "CREDIT": ""
+          },
+          "files": {
+            "/work/exhibit-notes.txt": "Example notes stay untouched.\n"
+          },
+          "stdout": "Room: <Reading gallery>\nCredit: <>\nCredit supplied: yes\nCredit has text: no\nLabel: <>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/exhibit-notes.txt": "Example notes stay untouched.\n"
+          }
+        }
+      },
+      "repair": "room=${ROOM:-Exhibit hall}\ncredit=${CREDIT-Museum staff}\nlabel=${LABEL-Guest label}\nprovided=${CREDIT+yes}\nprovided=${provided:-no}\nvisible=${CREDIT:+yes}\nvisible=${visible:-no}\nprintf 'Room: <%s>\\nCredit: <%s>\\nCredit supplied: %s\\nCredit has text: %s\\nLabel: <%s>\\n' \"$room\" \"$credit\" \"$provided\" \"$visible\" \"$label\"\n"
+    },
+    {
+      "id": "shell-optional-report",
+      "alternates": [
+        "if test \"$#\" -gt 2; then printf 'Cannot create report: too many arguments\\n' >&2; exit 2; fi\nsource=data.txt\ndestination=report.txt\nif test \"$#\" -ge 1; then source=$1; fi\nif test \"$#\" -ge 2; then destination=$2; fi\nerror=\nif test -z \"$source\"; then error='source is empty'; else\n if test -z \"$destination\"; then error='destination is empty'; else\n  case \"$source\" in -|.|..|*/*) error='use a simple source filename' ;; esac\n  if test -z \"$error\"; then case \"$destination\" in -|.|..|*/*) error='use a simple destination filename' ;; esac; fi\n  if test -z \"$error\"; then\n   if test \"$source\" = \"$destination\"; then error='source and report must differ'; else\n    if test -f \"$source\"; then :; else error='source is missing'; fi\n   fi\n  fi\n fi\nfi\nif test -n \"$error\"; then printf 'Cannot create report: %s\\n' \"$error\" >&2; exit 2; fi\nprintf 'Report from %s\\n' \"$source\" > \"$destination\"\ncat -- \"$source\" >> \"$destination\"\nprintf 'Created: %s\\n' \"$destination\"\n",
+        "fail() { printf 'Cannot create report: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 2; then fail 'too many arguments'; fi\nsource=${1-data.txt}\ndestination=${2-report.txt}\nif test -n \"$source\"; then :; else fail 'source is empty'; fi\nif test -n \"$destination\"; then :; else fail 'destination is empty'; fi\ncase \"$source\" in -|.|..|*/*) fail 'use a simple source filename' ;; esac\ncase \"$destination\" in -|.|..|*/*) fail 'use a simple destination filename' ;; esac\nif test \"$source\" != \"$destination\"; then :; else fail 'source and report must differ'; fi\nif test -f \"$source\"; then :; else fail 'source is missing'; fi\nprintf 'Report from %s\\n' \"$source\" > \"$destination\"\nwhile IFS= read -r line; do printf '%s\\n' \"$line\" >> \"$destination\"; done < \"$source\"\nprintf '%s' \"$line\" >> \"$destination\"\nprintf 'Created: %s\\n' \"$destination\"\n"
+      ],
+      "partial": ": > report.txt\nreject() { printf 'Cannot create report: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 2; then reject 'too many arguments'; fi\nsource=${1-data.txt}\ndestination=${2-report.txt}\nif test -z \"$source\"; then reject 'source is empty'; fi\nif test -z \"$destination\"; then reject 'destination is empty'; fi\ncase \"$source\" in -|.|..|*/*) reject 'use a simple source filename' ;; esac\ncase \"$destination\" in -|.|..|*/*) reject 'use a simple destination filename' ;; esac\nif test \"$source\" = \"$destination\"; then reject 'source and report must differ'; fi\nif test -f \"$source\"; then :; else reject 'source is missing'; fi\nprintf 'Report from %s\\n' \"$source\" > \"$destination\"\ncat -- \"$source\" >> \"$destination\"\nprintf 'Created: %s\\n' \"$destination\"\n",
+      "partial_expected": [
+        true,
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "wrong": "printf '%s' 'Created: report.txt\n'\n",
+      "wrong_expected": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "experiment": {
+        "source": "show() {\n chosen=${1-flyer.txt}\n if test -z \"$chosen\"; then printf 'Choose a flyer\\n' >&2; return 2; fi\n case \"$chosen\" in -|.|..|*/*) printf 'Use a simple flyer filename\\n' >&2; return 2 ;; esac\n if test -f \"$chosen\"; then :; else printf 'Flyer missing\\n' >&2; return 2; fi\n printf 'Preview: %s\\n' \"$chosen\"\n cat -- \"$chosen\"\n}\nshow ''\n",
+        "expected": {
+          "name": "Flyer preview example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/flyer.txt": "Gallery opens at ten.\n",
+            "/work/spare-flyer.txt": "Evening event.\n"
+          },
+          "stdout": "",
+          "stderr": "Choose a flyer\n",
+          "status": 2,
+          "after": {
+            "/work/flyer.txt": "Gallery opens at ten.\n",
+            "/work/spare-flyer.txt": "Evening event.\n"
+          }
+        }
+      },
+      "repair": "show() {\n chosen=${1-flyer.txt}\n if test -z \"$chosen\"; then printf 'Choose a flyer\\n' >&2; return 2; fi\n case \"$chosen\" in -|.|..|*/*) printf 'Use a simple flyer filename\\n' >&2; return 2 ;; esac\n if test -f \"$chosen\"; then :; else printf 'Flyer missing\\n' >&2; return 2; fi\n printf 'Preview: %s\\n' \"$chosen\"\n cat -- \"$chosen\"\n}\nshow\n"
+    },
+    {
+      "id": "shell-optional-handover",
+      "alternates": [
+        "fail() { printf 'Cannot hand over: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 1; then fail 'too many arguments'; fi\nmode=${1-preview}\ncase \"$mode\" in preview|publish) : ;; *) fail 'choose preview or publish' ;; esac\nbase_team=${BASE_TEAM:-Operations}\nbase_note=${BASE_NOTE-Ready}\nteam_one=$base_team\nteam_two=$base_team\nnote_one=$base_note\nnote_two=$base_note\nif test -n \"${TEAM1+set}\"; then team_one=$TEAM1; fi\nif test -n \"${TEAM2+set}\"; then team_two=$TEAM2; fi\nif test -n \"${NOTE1+set}\"; then note_one=$NOTE1; fi\nif test -n \"${NOTE2+set}\"; then note_two=$NOTE2; fi\nif test -z \"$NAME1\"; then fail 'first job name is empty'; fi\nif test -z \"$NAME2\"; then fail 'second job name is empty'; fi\nif test -z \"$team_one\"; then fail 'first job team is empty'; fi\nif test -z \"$team_two\"; then fail 'second job team is empty'; fi\ncase \"$mode\" in\n preview) printf 'Preview\\n'; printf 'Job: %s\\nTeam: %s\\nNote: %s\\n\\nJob: %s\\nTeam: %s\\nNote: %s\\nCommon input team: <%s>\\nCommon input note: <%s>\\n' \"$NAME1\" \"$team_one\" \"$note_one\" \"$NAME2\" \"$team_two\" \"$note_two\" \"${BASE_TEAM-not supplied}\" \"${BASE_NOTE-not supplied}\" ;;\n publish) printf 'Job: %s\\nTeam: %s\\nNote: %s\\n\\nJob: %s\\nTeam: %s\\nNote: %s\\nCommon input team: <%s>\\nCommon input note: <%s>\\n' \"$NAME1\" \"$team_one\" \"$note_one\" \"$NAME2\" \"$team_two\" \"$note_two\" \"${BASE_TEAM-not supplied}\" \"${BASE_NOTE-not supplied}\" > handover.txt; printf 'Published: handover.txt\\n' ;;\nesac\n",
+        "fail() { printf 'Cannot hand over: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 1; then fail 'too many arguments'; fi\nmode=${1-preview}\ncase \"$mode\" in preview|publish) : ;; *) fail 'choose preview or publish' ;; esac\nif test -z \"$NAME1\"; then fail 'first job name is empty'; fi\nif test -z \"$NAME2\"; then fail 'second job name is empty'; fi\nbase_team=${BASE_TEAM:-Operations}\nbase_note=${BASE_NOTE-Ready}\nresolve() {\n local label=$1 team_given=$2 own_team=$3 note_given=$4 own_note=$5 position=$6\n local team=$base_team note=$base_note\n if test -n \"$team_given\"; then team=$own_team; fi\n if test -n \"$note_given\"; then note=$own_note; fi\n if test -z \"$team\"; then printf 'Cannot hand over: %s job team is empty\\n' \"$position\" >&2; return 2; fi\n printf 'Job: %s\\nTeam: %s\\nNote: %s\\n' \"$label\" \"$team\" \"$note\"\n}\nif first=$(resolve \"$NAME1\" \"${TEAM1+set}\" \"$TEAM1\" \"${NOTE1+set}\" \"$NOTE1\" first); then :; else exit 2; fi\nif second=$(resolve \"$NAME2\" \"${TEAM2+set}\" \"$TEAM2\" \"${NOTE2+set}\" \"$NOTE2\" second); then :; else exit 2; fi\nreport=\"$first\n\n$second\nCommon input team: <${BASE_TEAM-not supplied}>\nCommon input note: <${BASE_NOTE-not supplied}>\"\ncase \"$mode\" in\n preview) printf 'Preview\\n%s\\n' \"$report\" ;;\n publish) printf '%s\\n' \"$report\" > handover.txt; printf 'Published: handover.txt\\n' ;;\nesac\n"
+      ],
+      "partial": "fail() { printf 'Cannot hand over: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 1; then fail 'too many arguments'; fi\nmode=${1-preview}\ncase \"$mode\" in preview|publish) : ;; *) fail 'choose preview or publish' ;; esac\nbase_team=${BASE_TEAM:-Operations}\nbase_note=${BASE_NOTE-Ready}\nteam_one=$base_team\nteam_two=$base_team\nnote_one=$base_note\nnote_two=$base_note\nif test -n \"${TEAM1+set}\"; then team_one=$TEAM1; fi\nif test -n \"${TEAM1+set}\"; then team_two=$TEAM1; fi\nif test -n \"${NOTE1+set}\"; then note_one=$NOTE1; fi\nif test -n \"${NOTE1+set}\"; then note_two=$NOTE1; fi\nif test -z \"$NAME1\"; then fail 'first job name is empty'; fi\nif test -z \"$NAME2\"; then fail 'second job name is empty'; fi\nif test -z \"$team_one\"; then fail 'first job team is empty'; fi\nif test -z \"$team_two\"; then fail 'second job team is empty'; fi\nreport=$(printf 'Job: %s\\nTeam: %s\\nNote: %s\\n\\nJob: %s\\nTeam: %s\\nNote: %s\\nCommon input team: <%s>\\nCommon input note: <%s>\\n' \"$NAME1\" \"$team_one\" \"$note_one\" \"$NAME2\" \"$team_two\" \"$note_two\" \"${BASE_TEAM-not supplied}\" \"${BASE_NOTE-not supplied}\")\ncase \"$mode\" in\n preview) printf 'Preview\\n%s\\n' \"$report\" ;;\n publish) printf '%s\\n' \"$report\" > handover.txt; printf 'Published: handover.txt\\n' ;;\nesac\n",
+      "partial_expected": [
+        true,
+        false,
+        false,
+        true,
+        false,
+        true,
+        true,
+        true,
+        false,
+        true,
+        true,
+        true
+      ],
+      "wrong": "printf '%s' 'Preview\nJob: Intake\nTeam: Operations\nNote: Ready\n\nJob: Dispatch\nTeam: Operations\nNote: Ready\nCommon input team: <not supplied>\nCommon input note: <not supplied>\n'\n",
+      "wrong_expected": [
+        true,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "experiment": {
+        "source": "DISPLAY=Courtyard\nhouse='Reading room'\ncaption=$house\nif test -n \"${DISPLAY+set}\"; then caption=$DISPLAY; fi\nprintf 'Display: <%s>\\nCredit: <%s>\\n' \"$caption\" \"${CREDIT-Local team}\"\n",
+        "expected": {
+          "name": "Exhibit override example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "CREDIT": ""
+          },
+          "files": {
+            "/work/exhibit-card.txt": "Example card stays unchanged.\n"
+          },
+          "stdout": "Display: <Courtyard>\nCredit: <>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/exhibit-card.txt": "Example card stays unchanged.\n"
+          }
+        }
+      },
+      "repair": "house='Reading room'\ncaption=$house\nif test -n \"${DISPLAY+set}\"; then caption=$DISPLAY; fi\nprintf 'Display: <%s>\\nCredit: <%s>\\n' \"$caption\" \"${CREDIT-Local team}\"\n"
+    }
+  ]
+}

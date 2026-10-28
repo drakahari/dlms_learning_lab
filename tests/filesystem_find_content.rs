@@ -63,23 +63,25 @@ fn reviews() -> Vec<Review> {
 fn originals() -> Vec<Original> {
     serde_json::from_str(include_str!("fixtures/linux-find-original-catalog.json")).unwrap()
 }
+fn base_packs() -> Vec<String> {
+    let mut existing = pack::bundled().unwrap();
+    existing.retain(|s| !IDS.contains(&s.id.as_str()));
+    let packs = existing
+        .chunks(16)
+        .map(|rows| serde_json::json!({"schema_version":1,"scenarios":rows}).to_string())
+        .collect::<Vec<_>>();
+    assert!(packs.iter().all(|text| text.len() <= pack::MAX_PACK_BYTES));
+    packs
+}
 fn catalog() -> &'static Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
-        let mut existing = pack::bundled().unwrap();
-        existing.retain(|s| !IDS.contains(&s.id.as_str()));
-        let normal = serde_json::to_string(&pack::Pack {
-            schema_version: 1,
-            scenarios: existing,
-        })
-        .unwrap();
-        // Resolve actual prerequisites against the real complete catalog. Do not
-        // remove the substantive old-lab prerequisite to load this private pack.
-        pack::load_catalog(&[
-            normal.as_str(),
-            include_str!("../scenarios/linux-find-v1.json"),
-        ])
-        .unwrap()
+        let normal = base_packs();
+        let mut texts = normal.iter().map(String::as_str).collect::<Vec<_>>();
+        // Resolve every actual prerequisite across the full real catalog;
+        // no prerequisite, definition or pack cap is removed.
+        texts.push(include_str!("../scenarios/linux-find-v1.json"));
+        pack::load_catalog(&texts).unwrap()
     })
 }
 fn lab(id: &str) -> &'static Scenario {
@@ -415,17 +417,19 @@ fn malformed_commands_are_atomic_even_after_success_and_invalid_pack_names_are_r
         serde_json::from_str(include_str!("../scenarios/linux-find-v1.json")).unwrap();
     content["scenarios"][0]["goal"]["requirements"][0]["names"] =
         serde_json::json!(["duplicate", "duplicate"]);
+    let base = base_packs();
+    let mut texts = base.iter().map(String::as_str).collect::<Vec<_>>();
+    texts.push(include_str!("../scenarios/linux-find-v1.json"));
     assert!(
-        pack::load_catalog(&[
-            serde_json::to_string(&pack::Pack {
-                schema_version: 1,
-                scenarios: pack::bundled().unwrap()
-            })
-            .unwrap()
-            .as_str(),
-            content.to_string().as_str()
-        ])
-        .is_err()
+        pack::load_catalog(&texts).is_ok(),
+        "Same complete unique bounded source context validates before the intended malformed objective"
+    );
+    let invalid = content.to_string();
+    *texts.last_mut().unwrap() = &invalid;
+    let error = pack::load_catalog(&texts).unwrap_err();
+    assert!(
+        error.contains("Duplicate directory entry name"),
+        "Must reject actual duplicate directory names, not pack size, duplicate lab IDs or missing prerequisites: {error}"
     );
 }
 

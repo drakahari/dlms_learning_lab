@@ -1298,7 +1298,9 @@ pub(super) fn solved_with_memos(
 }
 impl LabApp {
     pub(super) fn nfs_visible_solved(&self, a: &Attempt, s: &Scenario) -> bool {
-        solved_with_memos(
+        cron_workspace::solved_with_memos(
+            &self.cron_presentation.memo,
+            &self.ether_presentation.memo,
             &self.nfs_presentation.memo,
             &self.rpm_presentation.memo,
             &self.nat_presentation.memo,

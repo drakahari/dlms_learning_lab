@@ -642,7 +642,7 @@ impl LabApp {
     fn nl_fixed_context(&self, lesson: usize) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (154, 39));
+        assert_eq!((self.scenarios.len(), self.units.len()), (164, 42));
         assert_eq!(
             self.scenarios[140..143]
                 .iter()

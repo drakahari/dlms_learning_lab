@@ -54,7 +54,7 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 154);
+    assert_eq!(labs.len(), 164);
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -63,6 +63,9 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "ccna-lacp-initiation",
+            "ccna-lacp-member-service",
+            "ccna-lacp-resilient-handover",
             "shell-preserve-lines",
             "shell-pipeline-status",
             "shell-safe-handover",
@@ -80,10 +83,17 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             "shell-command-options",
             "shell-command-dispatch",
             "shell-command-plan",
+            "shell-optional-policy",
+            "shell-optional-report",
+            "shell-optional-handover",
             "lpic2-nfs-reference",
             "lpic2-nfs-publication",
             "lpic2-nfs-handover",
             "lpic2-nfs-capstone",
+            "lpic1-cron-weekday-report",
+            "lpic1-cron-environment-output",
+            "lpic1-cron-access-retirement",
+            "lpic1-cron-calendar-handover",
         ])
     );
     assert_eq!(original.attempts.len(), 133);
@@ -91,6 +101,9 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
         ("shell-command-options", true),
         ("shell-command-dispatch", true),
         ("shell-command-plan", true),
+        ("shell-optional-policy", true),
+        ("shell-optional-report", true),
+        ("shell-optional-handover", true),
         ("lpic2-nfs-reference", false),
         ("lpic2-nfs-publication", false),
         ("lpic2-nfs-handover", false),
@@ -108,6 +121,19 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             !original.attempts.contains_key(id) && !original.favorites.contains(id),
             "Original actual9 must retain absent later attempts and credit"
         );
+    }
+    for id in [
+        "lpic1-cron-weekday-report",
+        "lpic1-cron-environment-output",
+        "lpic1-cron-access-retirement",
+        "lpic1-cron-calendar-handover",
+    ] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(
+            matches!(source.initial, State::Cron { .. })
+                && matches!(source.goal, Goal::Cron { .. })
+        );
+        assert!(!original.attempts.contains_key(id) && !original.favorites.contains(id));
     }
     (raw, original, labs)
 }

@@ -3,6 +3,8 @@ use dlms_learning_lab::{course, engine, nfs, nfs_teaching, nfs_workspace, pack, 
 use serde_json::Value;
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
+#[path = "support/cron_registration.rs"]
+mod cron_registration;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
 const INDEX_SHA: &str = "d1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef";
@@ -47,7 +49,7 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     assert_eq!(texts.len(), 35);
     let old = pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (147, 154));
+    assert_eq!((old.len(), all.len()), (147, 164));
     exact(&all[..147].to_vec(), &old);
     exact(
         &old.iter()
@@ -68,9 +70,14 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [45, 32, 28, 49]
+        [48, 36, 28, 52]
     );
-    let raw = include_str!("../scenarios/units-v1.json");
+    let current_raw = include_str!("../scenarios/units-v1.json");
+    let raw39 = cron_registration::previous_units(
+        &cron_registration::private_cron_units(current_raw.as_bytes()).unwrap(),
+    )
+    .unwrap();
+    let raw = std::str::from_utf8(&raw39).unwrap();
     let reconstructed = original_units(raw).unwrap();
     exact(
         &serde_json::from_str::<Value>(&reconstructed).unwrap(),
@@ -78,7 +85,7 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     );
     let original = course::load(&reconstructed, &old).unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!((original.len(), units.len()), (37, 39));
+    assert_eq!((original.len(), units.len()), (37, 42));
     exact(&units[..37].to_vec(), &original);
     exact(&units[38], &i["appended_unit"]);
     assert_eq!(
@@ -88,13 +95,20 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
 }
 #[test]
 fn raw_unit_reconstruction_accepts_only_the_closed_append_and_unchanged_prefix() {
-    let raw = include_str!("../scenarios/units-v1.json");
+    let current_raw = include_str!("../scenarios/units-v1.json");
+    let raw39 = cron_registration::previous_units(
+        &cron_registration::private_cron_units(current_raw.as_bytes()).unwrap(),
+    )
+    .unwrap();
+    let raw = std::str::from_utf8(&raw39).unwrap();
     let original = original_units(raw).unwrap();
     assert!(original_units(&original).is_none());
     assert!(original_units(&(raw.to_owned() + " ")).is_none());
     assert!(original_units(&raw.replacen("Shared files:", "Changed files:", 1)).is_none());
     assert!(original_units(&raw.replacen("IPv4", "IPvX", 1)).is_none());
     let i = index();
+    // raw is already the exact original39 projection above. Apply the
+    // original missing-NFS mutation to those bytes, not a second current inverse.
     let bash_only = format!(
         "{}{}",
         raw.strip_suffix(i["unit_new_suffix"].as_str().unwrap())

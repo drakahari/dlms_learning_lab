@@ -468,6 +468,9 @@ fn populate_prior98(all: &[Scenario]) -> Progress {
             assert!(progress::current_solved(&a, s));
         }
         workspace::prepare(&mut a);
+        if matches!(a.state, State::Cron { .. }) {
+            dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
+        }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(&mut a, lesson, true);
         }

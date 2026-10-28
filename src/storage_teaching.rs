@@ -143,7 +143,12 @@ pub fn save_action(text: String) -> String {
 }
 
 pub fn prepare(attempt: &mut crate::progress::Attempt, lesson: &Lesson, new_attempt: bool) {
-    if crate::workspace::has_nfs_metadata(attempt) {
+    if crate::workspace::is_etherchannel_workspace(attempt)
+        || crate::workspace::is_cron_workspace(attempt)
+    {
+        return;
+    }
+    if crate::workspace::has_nfs_metadata(attempt) || crate::workspace::has_cron_metadata(attempt) {
         return;
     }
     let w = attempt.workspace.as_mut().expect("workspace prepared");

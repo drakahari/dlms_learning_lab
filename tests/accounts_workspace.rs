@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 154);
+    assert_eq!(all.len(), 164);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -434,6 +434,55 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
             "lpic2-nfs-capstone",
         ]
     );
+    let ether = all
+        .iter()
+        .filter(|s| matches!(s.initial, State::EtherChannel { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        ether.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        [
+            "ccna-lacp-initiation",
+            "ccna-lacp-member-service",
+            "ccna-lacp-resilient-handover"
+        ]
+    );
+    for source in ether {
+        assert!(matches!(source.goal, engine::Goal::EtherChannel { .. }));
+        let mut raw = source.initial.clone();
+        let before = raw.clone();
+        assert!(engine::execute(&mut raw, &source.solution[0]).is_err());
+        assert_eq!(
+            raw, before,
+            "Goal-less Ether action must retain all supplied state"
+        );
+        let mut contextual = source.initial.clone();
+        for command in &source.solution {
+            engine::execute_for_goal(&mut contextual, &source.goal, command).unwrap();
+        }
+        assert!(
+            engine::checks(&contextual, &source.goal)
+                .iter()
+                .all(|r| r.0)
+        );
+    }
+    assert_eq!(
+        all[160..164]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "lpic1-cron-weekday-report",
+            "lpic1-cron-environment-output",
+            "lpic1-cron-access-retirement",
+            "lpic1-cron-calendar-handover",
+        ]
+    );
+    assert!(
+        all[160..164]
+            .iter()
+            .all(|s| matches!(s.initial, State::Cron { .. })
+                && matches!(s.goal, engine::Goal::Cron { .. }))
+    );
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -452,12 +501,14 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::ApacheStatic { .. }
                     | State::BasicNat { .. }
                     | State::Nfs { .. }
+                    | State::EtherChannel { .. }
+                    | State::Cron { .. }
             )
         })
         .collect::<Vec<_>>();
     assert_eq!(
         old.len(),
-        116,
+        119,
         "all current context-free assignment kinds remain exercised"
     );
     assert_eq!(
@@ -474,6 +525,23 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
     assert!(old[113..116].iter().all(|s| {
         matches!(&s.initial, State::Script { .. }) && matches!(&s.goal, engine::Goal::Script { .. })
     }));
+    assert_eq!(
+        old[116..119]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "shell-optional-policy",
+            "shell-optional-report",
+            "shell-optional-handover"
+        ]
+    );
+    assert!(
+        old[116..119]
+            .iter()
+            .all(|s| matches!(s.initial, State::Script { .. })
+                && matches!(s.goal, engine::Goal::Script { .. }))
+    );
     for s in old {
         let mut raw = s.initial.clone();
         let mut contextual = s.initial.clone();

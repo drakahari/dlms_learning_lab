@@ -620,6 +620,7 @@ impl Learning {
     }
 }
 pub fn prepare(a: &mut Attempt, l: &Lesson, new_attempt: bool) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     if !matches!(a.state, State::Dns { .. }) || l.validate().is_err() {
         return Err("Seed DNS teaching needs the original DNS activity".into());

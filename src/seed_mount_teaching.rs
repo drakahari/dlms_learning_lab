@@ -439,6 +439,7 @@ impl Learning {
     }
 }
 pub fn prepare(a: &mut Attempt, l: &Lesson, new_attempt: bool) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     if !matches!(a.state, State::Mount { .. }) || l.validate().is_err() {
         return Err("Seed mount teaching needs the original mount activity".into());

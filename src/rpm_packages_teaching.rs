@@ -320,6 +320,7 @@ pub fn prepare(
     l: &Lesson,
     new: bool,
 ) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     let crate::engine::State::RpmPackages { simulation } = &a.state else {
         return Err("RPM practice attached to another activity".into());

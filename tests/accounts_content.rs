@@ -597,6 +597,9 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
             });
         }
         workspace::prepare(&mut a);
+        if matches!(a.state, State::Cron { .. }) {
+            dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
+        }
         a.workspace.as_mut().unwrap().command = format!("Retained draft for {}", s.id);
         a.transcript
             .push("Retained synthetic investigation transcript".into());

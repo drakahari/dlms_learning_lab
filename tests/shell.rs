@@ -22,9 +22,9 @@ fn fixture() -> Case {
 #[test]
 fn all_authored_scripts_grade_behavior_and_break_after_edit() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 154);
+    assert_eq!(labs.len(), 164);
     let scripts: Vec<_> = labs.iter().filter(|s| s.track == "Bash/Shell").collect();
-    assert_eq!(scripts.len(), 49);
+    assert_eq!(scripts.len(), 52);
     for s in scripts {
         let Goal::Script { cases } = &s.goal else {
             panic!()

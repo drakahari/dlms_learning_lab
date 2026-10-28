@@ -25,7 +25,7 @@ fn lessons() -> Vec<Scenario> {
 }
 fn opened(id: &str) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (154, 39));
+    assert_eq!((a.scenarios.len(), a.units.len()), (164, 42));
     for source in lessons() {
         let current = a.scenarios.iter().find(|s| s.id == source.id).unwrap();
         assert!(serde_json::to_value(current).unwrap() == serde_json::to_value(source).unwrap());

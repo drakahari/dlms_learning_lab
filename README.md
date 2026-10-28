@@ -1,10 +1,10 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **154 authored assignments in39 units:**45 CCNA,32 LPIC-1,28 LPIC-2 and49 Bash/Shell. The latest update clarifies individual script cases versus the overall run and stabilizes NFS editor Save rows. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. Source and installed acceptance are recorded separately in [the implementation ledger](docs/IMPLEMENTATION_LEDGER.md) and [installation evidence](docs/INSTALLATION.md). This is scoped Fedora milestone evidence, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop learning application for networking, Linux administration and scripting. **164 authored assignments in42 units:**48 CCNA,36 LPIC-1,28 LPIC-2 and52 Bash/Shell. The latest source units add L2 LACP configuration/troubleshooting, optional shell inputs with intentional empty values, and recurring cron reports/access/handover. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. This is **not full exam coverage**. Main native and candidate acceptance for these ten additions must be recorded separately in [the catalog164 milestone](docs/CATALOG164_MILESTONE.md); the earlier154-lab installation evidence remains historical. Independent of DLMS_next and the old dlms_lab.
 
-## Open the verified Fedora candidate
+## Open the verified154-lab Fedora candidate
 
-From this checkout, no build tools are needed to open the prepared candidate.
+This retained candidate contains the earlier154-lab milestone; it does not include the latest ten source additions. A new164-lab candidate is pending build and installation acceptance. From this checkout, no build tools are needed to open the retained candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh

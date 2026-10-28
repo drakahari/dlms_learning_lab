@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Baseline: `4bc390a`, reconciled2026-10-28. This is an implementation queue, not
+Current Main164 source, reconciled2026-10-28; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -10,12 +10,12 @@ grading, persistence and available native acceptance. There is no lab-count targ
 
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| CCNA | 45 | 11 | 70 | 41 | 0 |
-| LPIC-1 | 32 | 8 | 512 | 85 | 1 |
+| CCNA | 48 | 12 | 69 | 42 | 0 |
+| LPIC-1 | 36 | 9 | 506 | 91 | 1 |
 | LPIC-2 | 28 | 7 | 503 | 28 | 0 |
-| Bash/Shell | 49 | 13 | Separate path below | — | — |
+| Bash/Shell | 52 | 14 | Separate path below | — | — |
 
-All136 current parent objectives remain incomplete (100 Open,36 Partial).
+All136 current parent objectives remain incomplete (98 Open,38 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -62,7 +62,7 @@ configuration or troubleshooting.
 | 2.1 | Partial practice · ccna-vlan-access;ccna-vlan-trunk;ccna-vlan-native;ccna-vlan-handover | Reconnect a host in the correct VLAN | No voice/default-VLAN-specific progression, inter-VLAN routing, STP/PVST/PVID blocking, actual IOS or equipment conformance. Single educational tagged-native ingress policy; full objective remains incomplete. Source learning/aging is taught separately in MAC_LESSONS.md. |
 | 2.2 | Partial practice · ccna-vlan-access;ccna-vlan-trunk;ccna-vlan-native;ccna-vlan-handover | Repair mismatched trunk settings | No voice/default-VLAN-specific progression, inter-VLAN routing, STP/PVST/PVID blocking, actual IOS or equipment conformance. Single educational tagged-native ingress policy; full objective remains incomplete. Source learning/aging is taught separately in MAC_LESSONS.md. |
 | 2.3 | Partial practice · ccna-lldp-receive;ccna-lldp-inventory;ccna-lldp-transmit-policy;ccna-lldp-handover | Correct a misleading topology record | No CDP, IOS command syntax, real frames/NICs, automatic timers/reinitialization/fast-start, LLDP-MED or wider TLVs, multiple scopes, physical-device acceptance or full IEEE802.1AB conformance. Current diagnostics use simulator knowledge; manual actions differ from equipment scheduling. |
-| 2.4 | Open | Repair an inconsistent uplink bundle | A tested bounded L2 LACP eligibility-snapshot core exists; native workspace and authored lessons are not integrated. L3 bundles and protocol negotiation/packets/timers remain unmodeled. |
+| 2.4 | Partial practice · ccna-lacp-initiation;ccna-lacp-member-service;ccna-lacp-resilient-handover | Repair an inconsistent uplink bundle | Layer3 bundles, actual IOS CLI/output, LACP packet exchange/negotiation/timers/convergence, hashing/throughput and physical-device verification remain absent. Finite L2 eligibility/service snapshots do not complete objective2.4 or the future blueprint. |
 | 2.5 | Partial practice · ccna-stp-root;ccna-stp-local-cost;ccna-stp-parallel;ccna-stp-handover | Prevent a loop without isolating users | Rapid PVST+/per-VLAN instances, BPDUs, protocol transitions/timers/convergence, primary/secondary failover, Backup/shared-media roles, PortFast/guards, real IOS/output and physical traffic remain absent. |
 | 2.6 | Open | Choose an AP deployment mode | wireless architecture model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 2.7 | Open | Wire a controller-based access point | physical/logical WLAN topology. Required model not implemented; cannot claim faithful command or state behavior. |
@@ -133,7 +133,7 @@ configuration or troubleshooting.
 | 106.2 | Open | Choose a remote desktop arrangement | session/desktop architecture model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 106.3 | Open | Choose accessible workstation settings | accessibility decision model. Evidence/configuration reasoning can be simulated; physical, kernel, cryptographic or assistive-device operation cannot be validated here. |
 | 107.1 | Partial practice · lpic1-account-onboarding;lpic1-account-membership;lpic1-account-retirement;lpic1-account-team-handover;lpic1-traversal | Onboard a user with correct group access | Bounded fixed local records only; no passwords, chage, authentication/PAM/login, live sessions, full NSS/defaults or complete utility option surface. Supplied templates only; no template maintenance/links/ACL/xattrs. Expiry is metadata only. |
-| 107.2 | Open | Schedule a report without overlapping runs | cron/timer/lock clock model. Required model not implemented; cannot claim faithful command or state behavior. |
+| 107.2 | Partial practice · lpic1-cron-weekday-report;lpic1-cron-environment-output;lpic1-cron-access-retirement;lpic1-cron-calendar-handover | Schedule a report without overlapping runs | No at/anacron, systemd timer units, overlap/duration/locking, timezone/DST, mail/PAM/SELinux, spool-file administration or learner-facing cron CLI. Bounded UTC recurring-job/access practice does not complete107.2. |
 | 107.3 | Open | Repair a locale-sensitive report | locale/timezone/encoding model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 108.1 | Open | Diagnose clock drift and time sources | clock/NTP model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 108.2 | Partial practice · lpic2-service | Route and rotate useful logs | No date/priority filters, journal persistence/rotation/rescue, rsyslog or syslog-ng configuration. |
@@ -195,7 +195,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These39 units, and only their154 registered authored scenarios, count as
+These42 units, and only their164 registered authored scenarios, count as
 implemented inventory. The presence of a unit does not mean its entire related
 objective or wider course stage is complete. Exact per-lab prerequisites remain
 in the versioned scenario packs; unit prerequisites are in units-v1.json.
@@ -242,10 +242,15 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 | Bash/Shell | Build and dispatch safe command requests (`shell-command-construction`) | `shell-command-options`, `shell-command-dispatch`, `shell-command-plan` |
 | LPIC-2 | Shared files: export policy, clients and safe handover (`nfs-network-file-sharing`) | `lpic2-nfs-reference`, `lpic2-nfs-publication`, `lpic2-nfs-handover`, `lpic2-nfs-capstone` |
 
+| CCNA | LACP: form, diagnose and safely migrate a bundle (`ccna-lacp`) | `ccna-lacp-initiation`, `ccna-lacp-member-service`, `ccna-lacp-resilient-handover` |
+| Bash/Shell | Optional inputs and intentional empty values (`shell-optional-inputs`) | `shell-optional-policy`, `shell-optional-report`, `shell-optional-handover` |
+| LPIC-1 | Recurring jobs: reports, access and safe handover (`linux-cron-foundations`) | `lpic1-cron-weekday-report`, `lpic1-cron-environment-output`, `lpic1-cron-access-retirement`, `lpic1-cron-calendar-handover` |
+
 ## Bash/Shell remaining path
 
-The49 delivered scripts span13 units. They already cover bounded indexed arrays,
+The52 delivered scripts span14 units. They already cover bounded indexed arrays,
 command-output capture, getopts, case dispatch, command-list construction,
+read-only literal fallback/alternate expansion and optional-input projects,
 C-locale cut/sort/uniq work and explicit pipefail. Older Stage4 wording calling
 command construction planned is stale; those three authored tasks are delivered.
 The original agreed scope still requires the following distinct capabilities
@@ -253,7 +258,7 @@ and projects, with prerequisite teaching before assessment:
 
 | Required area | Remaining implementation / authored work |
 | --- | --- |
-| Quoting and expansion | Parameter fallback/alternate handling and practical validation/configuration projects; any additional operator needed by those tasks requires faithful expansion tests. Preserve literal-vs-expanded provenance and disclose unsupported forms. |
+| Quoting and expansion | Read-only literal fallback/alternate forms and three optional-input policy/report/handover projects are implemented. Broader nested, assignment/error, substring/length/pattern operators remain unsupported; add only capabilities required by a reviewed substantive task with faithful expansion tests. |
 | Arguments and interfaces | Robust long-option/input validation projects beyond the bounded getopts subset; streamed row validation and meaningful handling of malformed inputs. |
 | Functions and scope | Applied state/return/error handling across the remaining projects; broader function-call redirection/pipeline forms remain explicit subset limits unless a task needs them. Existing scope lessons are implemented. |
 | Conditions and loop recovery | Meaningful recovery using conditional branches, break/continue and bounded retries where needed; teach every newly required control form before assessing it. |
@@ -275,17 +280,21 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Extend NFS acceptance to two fully exited/relaunched normal native processes,
-   retaining independent drafts, actual mounted state, files and fresh grading.
-2. Integrate the reviewed LACP capability with a native workspace and substantive
-   teaching/practice/assignments; it currently has no authored catalog credit.
-3. Implement scheduling state/calendar/permission semantics before dependent
-   LPIC-1 tasks; at/systemd timers/locking stay separate requirements.
-4. Implement the next needed shell expansion capability and honest historical
-   result handling, then author distinct applied validation/configuration tasks.
-5. Continue through the remaining tables and shell projects; update evidence and
-   this inventory after each integrated, reviewed batch. Do not stop for ordinary
-   batch approval or treat a package/test count as curriculum completion.
+1. Complete and pin Main164 actual LACP/optional-input/Cron native flows and the
+   new packaged Fedora lifecycle/cold-reopen evidence. Earlier154 evidence stays
+   tied to its actual ELF. Source/test counts are not rendered-screen acceptance.
+2. Finish the independent backup/restore capability, authored unit and native
+   verification. Existing unregistered source drafts do not count as curriculum.
+3. Continue physical-uplink capability/content and remaining CCNA frontiers; the
+   unregistered pure physical backend grants no current objective credit. L3
+   EtherChannel and packet/timer behavior remain separate from delivered L2 work.
+4. Extend the shell course beyond delivered optional inputs to faithful bounded
+   malformed-input recovery, debugging and safe file-automation projects; the
+   remaining table is not replaced by a larger authored count.
+5. Continue LPIC scheduling with one-off jobs, timers and overlap/locking, plus
+   all remaining Linux/storage/network/security/service gaps. Keep coarse and
+   granular evidence aligned after each reviewed batch without routine approval
+   gates. Every current parent remains incomplete.
 
 Full curriculum acceptance is separate from Windows/macOS desktop, physical-device,
 screen-reader and novice comprehension acceptance. Fedora native/install evidence

@@ -2,15 +2,22 @@
 
 Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
 retain their separately documented2026-10-22 source snapshot. This is a plan and
-evidence ledger, not complete exam preparation. Main has **154 authored assignments
-/39 units:45CCNA,32LPIC-1,28LPIC-2,49Bash/Shell**. The latest two units contain
-three distinct safe-command scripting tasks and four NFS configuration tasks.
-Generated numerical practice and developer-only synthetic entries are excluded.
-The UI-only9a90f275e133 milestone adds no curriculum or objective credit. Complete
-inclusive regression passes1981/0/0. Its installed Fedora candidate passes four
-NFS, three command-construction and three reliable-text flows, all-five-size NFS
-alignment, feedback, shared alignment, lifecycle/startup/original cold reopening.
-The two prior UI follow-ups are corrected; exact scope is in INSTALLATION.md.
+evidence ledger, not complete exam preparation. Main has **164 authored assignments
+/42 units:48CCNA,36LPIC-1,28LPIC-2,52Bash/Shell**. Three new units contain
+L2 LACP initiation/member/service/resilient handover, deliberate optional shell
+inputs and bounded recurring cron reports/access/system-table handover. Generated
+numerical practice and developer-only synthetic entries are excluded. All136
+current parent objectives remain incomplete (98 Open,38 Partial).
+
+Source/content, behavior, real native and packaged results for these ten additions
+are distinguished in [CATALOG164_MILESTONE.md](CATALOG164_MILESTONE.md). Main native
+receipts and a new candidate are pending final pinning; source existence does not
+establish rendered-screen, novice or platform acceptance. The retained
+UI-only9a90f275e133 milestone added no curriculum: its154-lab inclusive regression
+passed1981/0/0 and its installed Fedora candidate passed scoped NFS, command-
+construction, reliable-text, alignment, lifecycle/startup/original reopen checks.
+Those earlier observations are preserved below and in INSTALLATION.md; they do
+not prove acceptance of the ten new assignments.
 
 Three Basic NAT lessons retain installed154 Fedora flows80 captures on00d69d3;
 NAT was not rerun on the UI-only9a90f275e133 ELF. Four NFS106 and three command-
@@ -27,7 +34,7 @@ See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION
 
 The2026-10-28 [complete reconciliation](CURRICULUM_RECONCILIATION.md) enumerates
 every current parent assignment still incomplete, links every granular gap and
-inventories the39 integrated units. No arbitrary final lab count replaces the
+inventories the42 integrated units. No arbitrary final lab count replaces the
 agreed skills. Source-only foundations and private content remain excluded.
 
 ## Primary sources and version boundaries
@@ -73,9 +80,9 @@ Each row records credited scenario IDs (or None), a distinct proposed assignment
 
 ## Learning order and capability gates
 
-CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. DHCP client/relay practice now has three accepted assignments. The bounded single-instance steady-state spanning-tree model, app adapter, teaching and four authored assignments pass scoped installed acceptance; real BPDUs, convergence and per-VLAN protocol behavior remain absent. Integrated dual-stack diagnosis, LACP, FHRP and broader protocol behavior still require models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
+CCNA progresses through physical/device evidence → addressing and switching → routing → services → access/security → operational automation. Existing IPv4 work is an entry point, not completion of the fundamentals domain. Bounded IPv4 and IPv6 static-forwarding models each support six reviewed assignments. Four bounded OSPFv2 configuration/route-reasoning assignments are implemented; neighbor FSM, LSA exchange, convergence and broadcast DR/BDR are not. DHCP client/relay practice now has three accepted assignments. The bounded single-instance steady-state spanning-tree model, app adapter, teaching and four authored assignments pass scoped installed acceptance; real BPDUs, convergence and per-VLAN protocol behavior remain absent. Three native L2 LACP configuration/verification assignments now use finite member/VLAN eligibility and supplied cable-loss snapshots. L3 EtherChannel, packet negotiation/timers/convergence, integrated dual-stack diagnosis, FHRP and broader protocol behavior still require models and substantive content. Wireless RF, cable faults and virtualization can use offline evidence and conceptual models; those cannot establish physical or production acceptance. No VMs are required or launched.
 
-LPIC-1 progresses through terminal/files → permissions/accounts → packages/processes → storage/boot → shell/scheduling → networking/services/security. Hardware probing, bootloaders, real package transactions, locale behavior, accessibility and cryptography require new evidence/state models; existing tests do not establish those capabilities. A visual configuration exercise must identify what it models and what it cannot execute.
+LPIC-1 progresses through terminal/files → permissions/accounts → packages/processes → storage/boot → shell/scheduling → networking/services/security. Four recurring-job assignments now add user/system cron syntax, explicit UTC samples, report output and management-versus-installed-job policy; one-off jobs, anacron, timers, duration/overlap and locking remain unimplemented. Hardware probing, bootloaders, real package transactions, locale behavior, accessibility and cryptography require new evidence/state models; existing tests do not establish those capabilities. A visual configuration exercise must identify what it models and what it cannot execute.
 
 LPIC-2 assumes LPIC-1 foundations. Sequence capacity and boot recovery → advanced storage/networking → DNS/web/file/identity/mail services → security and backup projects. The service/DNS/mount labs are small seeds. Kernel compilation, genuine recovery, TLS/VPN handshakes and hardware timing are not faithfully demonstrated now; proposed offline models must disclose this and may teach evidence interpretation rather than pretend to perform the operation. Never add a canned command-success response to fill a coverage cell.
 
@@ -87,7 +94,7 @@ The first fifteen shell labs and four text-processing labs use **portable shell 
 | --- | --- | --- | --- |
 | 1. Foundations | **Implemented:** reliable handover; supplied-file labels; input without losing backslashes; missing-destination guard; incident report; multi-file handover; safe-report capstone | Listed preceding lab in the unit, advisory rather than a lock | Scalars, quoting, positional arguments, read, printf, status, test/if, redirects, for, literal grep/cat. Portable subset; 3–5 deterministic cases per assignment |
 | 2. Composition and debugging | **Implemented:** route normal/error/file output; compose two-stage literal filtering; repair final unterminated input; audit a batch while retaining earlier failures | Unit 1 | Existing bounded pipeline/while evaluator; 3–6 deterministic cases, independent examples, alternate and plausible incorrect solutions. Bounded retry and tracing remain planned. `set -x` remains unsupported; explicit pipefail is now taught in the later reliable-text unit; Bash local is taught in the following scope unit |
-| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Implemented with installed native acceptance:** short-option report, independent job parsers and validated batch publication. **Planned:** streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. Bounded command-output capture now has its own taught unit (SHELL_CAPTURE_LESSONS.md). The bounded getopts extension and its three source-gated projects are documented in SHELL_GETOPTS_LESSONS.md; compound/function-call redirects remain unsupported; evaluator11 implements reviewed literal fallback/alternate forms, with three authored assignments pending normal integration |
+| 3. Reusable interfaces | **Implemented:** reusable label printer; per-item rejection without terminating the batch; consume leading prefix; validate-before-writing bundle capstone. **Implemented scope continuation:** caller-title isolation, nested filter visibility and input-preserving review repair. **Implemented with installed native acceptance:** short-option report, independent job parsers and validated batch publication. **Planned:** streamed row validator | Stages 1–2 | Portable brace-body functions, return and shift implemented with explicit restrictions. Bounded command-output capture now has its own taught unit (SHELL_CAPTURE_LESSONS.md). The bounded getopts extension and its three source-gated projects are documented in SHELL_GETOPTS_LESSONS.md; compound/function-call redirects remain unsupported; evaluator11 implements reviewed literal fallback/alternate forms, taught in three integrated optional-input policy/report/handover assignments |
 | 4. Structured Bash | **Implemented:** exact dispatch lists, whole-list mutation repair, grouped package inventory, preview/save handover and three safe command-construction/dispatch/publication tasks. **Planned:** associative lookup and regex validation | Reusable functions, scope and filename selection | Bounded Bash-specific dense indexed arrays/counts/quoted @ implemented and taught. No associative/sparse arrays, computed indices/index writes, `[[ ]]`, `=~` or full Bash arrays. Portable arithmetic remains a separate counters unit. |
 | 5. Text and data | **Implemented:** inventory field extraction, unique manifests, grouped location counts and a duplicate-ID audit. **Planned:** regex audit, snapshot comparison and broader malformed-row recovery | Streams, conditions and functions | Bounded C-locale sort/uniq/cut models and four reviewed assignments implemented; broader sed/awk/regex/locale behavior still needed. Distinguish shell language from external utility semantics |
 | 6. Safe automation projects | **Implemented narrow precursor:** preserve exact input lines, distinguish no matches from a missing pipeline input, and validate-before-writing report handover. **Planned:** dry-run cleanup planner; verified backup/restore; idempotent configuration rollout; resumable batch processor | Stages 1–5 | Virtual tree, safe path traversal, temporary-file/rename semantics, traps/cleanup, deterministic clocks and locking. No host actions. Teach validation before mutation, quoting, exit propagation and recovery |
@@ -96,7 +103,7 @@ Each planned stage includes a guided repair, independent construction and capsto
 
 ## Next capability batch
 
-The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Three [Bash scope/debugging assignments](SHELL_SCOPE.md) now follow the reusable unit, using the tested function-local subset. Bounded filename matching and three reviewed batch-selection/publication assignments now follow; see SHELL_FILE_BATCHES.md. Reviewed dense indexed lists and bounded cooperative command-output capture are now implemented; associative data, broader option parsing and robust recovery remain planned. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
+The four composition assignments are implemented and independently reviewed; see [SHELL_COMPOSITION.md](SHELL_COMPOSITION.md). The reusable-interface capability and four reviewed assignments are implemented; see [SHELL_REUSABLE.md](SHELL_REUSABLE.md). Three [Bash scope/debugging assignments](SHELL_SCOPE.md) now follow the reusable unit, using the tested function-local subset. Bounded filename matching and three reviewed batch-selection/publication assignments now follow; see SHELL_FILE_BATCHES.md. Reviewed dense indexed lists, bounded cooperative command-output capture and read-only literal fallback/alternate expansion with three applied optional-input assignments are now implemented; associative data, broader option parsing and robust recovery remain planned. IPv6 native addressing/static-route foundations are implemented; retain the separate current/upcoming Cisco blueprints. Full certification and advanced shell coverage remain open.
 
 Linux file-management capability and six reviewed assignments: [LINUX_FILES.md](LINUX_FILES.md). This delivers narrow practical slices of LPIC-1 103.1, 103.3 and 104.5; the full objectives remain partial.
 
@@ -187,11 +194,11 @@ rows strengthen narrowly; counts remain134Partial/1Supporting/1105Open. Original
 three terminal teaching source is verified; its actual native acceptance is next.
 
 
-## Current parent-slice reconciliation — 2026-10-25
+## Historical parent-slice reconciliation — 2026-10-25
 
-This appendix mirrors only the **136 current parent rows** in
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv). The 28 rows below already have Partial
-practice evidence; the other 108 current parents stay Open/Planned. No parent or
+This retained2026-10-25 appendix described the then-current partial slices in
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv). At that checkpoint the28 rows below had Partial
+practice evidence; the other108 parents stayed Open/Planned. No parent or
 child status is promoted by this reconciliation, and no full proposed assignment
 is declared complete. The CSV's remaining-gap field mirrors the corresponding
 parent evidence row; this appendix separates that gap from the verified slice.
@@ -315,3 +322,17 @@ lpic2-mount-policy and lpic1-traversal, followed by sequential NFS prerequisites
 Related objective slices are Partial only. The model's explicit native editing,
 Save/Apply and Mount/Read/Write actions are not Linux commands. Full NFS
 administration, TCP Wrappers, NFSv4 and security stack remain unimplemented.
+
+
+## Current narrow additions — 2026-10-28
+
+The current crosswalk contains136 incomplete parents:98 Open and38 Partial.
+Current CCNA v1.1 2.4 receives only the L2 LACP member/VLAN/failure-snapshot slice
+from three authored tasks; L3, IOS and protocol timing/packets remain absent.
+LPIC-1 107.2 receives only recurring cron configuration/access slices: parent,
+K1/K2, /etc/crontab, /etc/cron.allow and /etc/cron.deny. All at/timer/directory/
+spool and crontab-command rows remain Open. The original planned non-overlapping
+report assignment still requires duration/locking and is not marked finished.
+The optional-input Bash unit strengthens the course without promoting another
+certification row. See CATALOG164_MILESTONE.md for exact IDs, boundaries and
+separate pending native/candidate receipts. No future CCNA row gains credit.

@@ -84,7 +84,10 @@ impl Learning {
     }
 }
 pub fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
-    if crate::workspace::has_nfs_metadata(a) {
+    if crate::workspace::is_etherchannel_workspace(a) || crate::workspace::is_cron_workspace(a) {
+        return;
+    }
+    if crate::workspace::has_nfs_metadata(a) || crate::workspace::has_cron_metadata(a) {
         return;
     }
     let w = a.workspace.as_mut().expect("workspace prepared");

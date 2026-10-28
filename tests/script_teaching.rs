@@ -66,6 +66,9 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         ("-r); fi", "-r -u); fi"),
         ("titles)", "cards)"),
         ("mode=$1", "mode=save"),
+        ("", "LABEL=\n"),
+        ("show\n", "show ''\n"),
+        ("", "DISPLAY=Courtyard\n"),
     ];
     assert_eq!(
         edits.len(),
@@ -110,7 +113,7 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
             "shell-command-plan"
         ]
     );
-    for (row, (from, to)) in rows.iter().zip(edits[46..].iter().copied()) {
+    for (row, (from, to)) in rows.iter().zip(edits[46..49].iter().copied()) {
         let s = labs
             .iter()
             .find(|s| Some(s.id.as_str()) == row["id"].as_str())
@@ -131,6 +134,45 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
         assert!(
             l.fixture.accepts(&shell::run(repair, &l.fixture)),
             "{} repair",
+            s.id
+        );
+    }
+    let optional: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/shell-optional-inputs-review.json")).unwrap();
+    let rows = optional["labs"].as_array().unwrap();
+    assert_eq!(
+        rows.iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        [
+            "shell-optional-policy",
+            "shell-optional-report",
+            "shell-optional-handover"
+        ]
+    );
+    assert_eq!(edits[49..52].len(), rows.len());
+    for (row, (from, to)) in rows.iter().zip(edits[49..52].iter().copied()) {
+        let s = labs
+            .iter()
+            .find(|s| Some(s.id.as_str()) == row["id"].as_str())
+            .unwrap();
+        let lesson = s.teaching.as_ref().unwrap();
+        let practice = &row["practice"];
+        assert_eq!(practice["reference"], lesson.example);
+        let changed = lesson.example.replacen(from, to, 1);
+        assert_eq!(changed, practice["experiment"].as_str().unwrap());
+        let expected: shell::Case =
+            serde_json::from_value(practice["experiment_case"].clone()).unwrap();
+        assert!(
+            expected.accepts(&shell::run(&changed, &lesson.fixture)),
+            "{} declared independent experiment",
+            s.id
+        );
+        let repair = practice["repair"].as_str().unwrap();
+        assert_eq!(repair, lesson.example);
+        assert!(
+            lesson.fixture.accepts(&shell::run(repair, &lesson.fixture)),
+            "{} repaired example",
             s.id
         );
     }

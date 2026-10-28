@@ -29,6 +29,12 @@ pub enum State {
     FileBackup {
         simulation: crate::file_backup_terminal::Store,
     },
+    EtherChannel {
+        simulation: crate::etherchannel::State,
+    },
+    Cron {
+        simulation: crate::cron::State,
+    },
     Nfs {
         simulation: crate::nfs::State,
     },
@@ -153,6 +159,12 @@ pub enum State {
 pub enum Goal {
     FileBackup {
         definition: Box<crate::file_backup_workspace::Definition>,
+    },
+    EtherChannel {
+        definition: Box<crate::etherchannel_workspace::Definition>,
+    },
+    Cron {
+        definition: Box<crate::cron_workspace::Definition>,
     },
     Nfs {
         definition: Box<crate::nfs_workspace::Definition>,
@@ -328,6 +340,10 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
         (State::FileBackup { simulation }, Goal::FileBackup { definition }) => {
             definition.checks(simulation)
         }
+        (State::EtherChannel { simulation }, Goal::EtherChannel { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::Cron { simulation }, Goal::Cron { definition }) => definition.checks(simulation),
         (State::Nfs { simulation }, Goal::Nfs { definition }) => definition.checks(simulation),
         (State::RpmPackages { simulation }, Goal::RpmPackages { definition }) => {
             definition.checks(simulation)
@@ -653,6 +669,8 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 pub fn help(s: &State) -> &'static str {
     match s {
         State::FileBackup { .. } => crate::file_backup_terminal::HELP,
+        State::EtherChannel { .. } => crate::etherchannel_workspace::HELP,
+        State::Cron { .. } => crate::cron_workspace::HELP,
         State::Nfs { .. } => crate::nfs_workspace::HELP,
         State::RpmPackages { .. } => crate::rpm_packages_workspace::HELP,
         State::BasicNat { .. } => crate::nat_workspace::HELP,
@@ -731,6 +749,19 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
             );
         }
         return simulation.execute(input);
+    }
+    if let State::EtherChannel { simulation } = s {
+        let Goal::EtherChannel { definition } = goal else {
+            return Err("LACP internal action needs authored Goal context".into());
+        };
+        return crate::etherchannel_workspace::execute(definition, simulation, input);
+    }
+
+    if let State::Cron { simulation } = s {
+        let Goal::Cron { definition } = goal else {
+            return Err("Scheduling needs its authored context".into());
+        };
+        return crate::cron_workspace::execute(definition, simulation, input);
     }
     if let State::Nfs { simulation } = s {
         if input.len() > crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION {
@@ -923,6 +954,34 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
             ),
         };
     }
+    if matches!(s, State::EtherChannel { .. }) {
+        if input.len()
+            > crate::etherchannel_workspace::PREFIX.len() + crate::etherchannel::MAX_ACTION_BYTES
+        {
+            return Err("LACP raw input bound before trimming".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::etherchannel_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "LACP mutation needs authored context; use native editors, not host/IOS commands"
+                    .into(),
+            ),
+        };
+    }
+
+    if matches!(s, State::Cron { .. }) {
+        if input.len() > crate::cron_workspace::PREFIX.len() + crate::cron_workspace::MAX_ACTION {
+            return Err("Scheduling input exceeds raw bound".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::cron_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Scheduling changes require authored virtual context; no host command runs".into(),
+            ),
+        };
+    }
     if matches!(s, State::Nfs { .. }) {
         if input.len() > crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION {
             return Err("NFS typed input exceeds raw bound before trimming".into());
@@ -1098,6 +1157,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     }
     match s {
         State::FileBackup { .. }
+        | State::EtherChannel { .. }
+        | State::Cron { .. }
         | State::Nfs { .. }
         | State::RpmPackages { .. }
         | State::BasicNat { .. }
@@ -1552,6 +1613,18 @@ pub fn describe(s: &State) -> String {
             simulation.archives.len(),
             simulation.snapshots.len(),
             simulation.cwd
+        ),
+        State::EtherChannel { simulation } => format!(
+            "Virtual L2 LACP: {} supplied devices, {} physical pairs. No packets, timers, routed channel or host command",
+            simulation.topology().devices.len(),
+            simulation.topology().cables.len()
+        ),
+        State::Cron { simulation } => format!(
+            "Virtual UTC {} · {} supplied accounts · {} installed user tables · {} virtual files. Only the explicit clock advances; no host scheduler runs",
+            simulation.clock.text(),
+            simulation.users.len(),
+            simulation.tables.len(),
+            simulation.files.len()
         ),
         State::Nfs { simulation } => format!(
             "Supplied virtual NFS inventory: {} servers, {} clients, {} current mounts and {} existing text files. No host mount, RPC or trusted identity",

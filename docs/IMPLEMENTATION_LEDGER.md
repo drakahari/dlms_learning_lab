@@ -3658,3 +3658,50 @@ progress. Backup UI/course/candidate acceptance remains. LACP106 native and its
 dual-width rerun being prepared. Cron private4-unit composition/native still
 pending. None of these isolated sources is counted as normal curriculum yet.
 Continue the reconciliation queue; this is not completion or a stopping point.
+
+
+## M181–M193 — ten integrated assignments; explicit candidate/visual limits
+
+2026-10-28. Main now bundles164 authored assignments/42units:48CCNA,36LPIC-1,
+28LPIC-2,52Bash. Added3L2LACP,3optional-input scripting and4recurring-job
+assignments with full independent tasks, separate runnable practice, meaningful
+alternate/negative/current-state grading and preserved original154 definitions.
+New state/source fields are rejected by foreign-family warm caches before copies.
+Exact raw/typed original-pack/unit controls and retained historical groups remain.
+See CATALOG164_MILESTONE.md and the authoritative coverage matrix:161Partial,
+1Supporting,1078Open overlapping references; all136 parents remain incomplete.
+
+Main inclusive suite:2249PASS/0FAIL/0ignored,177harnesses, all19 retained history
+groups (receipt7f7a7e1d; log83fc3bc8). Earlier13+3fixture failures are retained;
+repairs recover exact old bytes and split artificial oversized test packs without
+weakening loader caps, negative diagnostics or existing assertions. All-target
+Clippy -Dwarnings PASS; Python269PASS; registered-only coverage PASS.
+
+Actual ordinary Main Cron ELF c8810bae completed77native captures/40matrix views
+at actual1920x1080 and946x929, allfive supported text sizes, Light/Dark. Receipt
+5500fa55 records control-flow success and actual visual failures: fallback square
+checkmarks and clipped Remove-button/subsequent form at narrow200. Fixed status
+words and direct wrapping-parent button placement; new real capture-phase
+regression fails before (right412.8 versus clip379.3) and passes after. All20Cron
+UI groups pass after correction, including all-field/control bounds and painted
+Pass/Needs-work states. Corrected native render remains pending. Private LACP and
+optional-input native acceptance is recorded separately, never relabeled Main.
+
+Closed fixed lesson references:114 actual GNU Bash5.3.9/evaluator11/authored
+comparisons from15 programs, all stdout/stderr/status/files exact;0mismatches.
+Private manifesta1d643683a85 retains633 output pins and240 source/tool/ELF pins.
+The3 absolute-path guards remain simulation-only, not117host comparisons. No
+learner source reaches Bash. Old59 comparison and genuine9/10 history remain.
+
+Memory: all heavy work serialized by MAIN runner,2Cargo jobs/2test threads,
+NVMe-backed artifacts. Cron run observed855 samples/min23.11GiBavailable/PSI0/
+OOMdelta0. Later regular gates retained observations. No stress or desktop changes.
+
+This is a tested source milestone, not an accepted164installer/full curriculum.
+Rebuilt installed Fedora flows, corrected native screenshots, NFS-specific actual
+two-process cold reopening and lifecycle remain pending. Prior154candidate keeps
+its original identity/evidence. Backup4 remains unregistered. Continue backup UI/
+registration, physical-uplink and reviewed numeric-validation capabilities after
+authentic evaluator11 capture; do not stop at this checkpoint. Windows/macOS
+runtime, screen reader/physical devices and novice acceptance stay unverified.
+No release or installer publication.

@@ -748,7 +748,7 @@ fn original125_source_metadata_unit_order_and_omitted_optional_wire_are_exact() 
         serde_json::from_str(include_str!("fixtures/spanning-tree-original125.json")).unwrap();
     let expected: Vec<Scenario> = serde_json::from_value(v["scenarios"].clone()).unwrap();
     let all = catalog();
-    assert_eq!(all.len(), 154);
+    assert_eq!(all.len(), 164);
     assert_eq!(
         all[..125].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         expected.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
@@ -836,7 +836,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     let original = all.clone();
     let s = scenario();
     let mut p = retained_profile(&all);
-    assert_eq!(p.attempts.len(), 154);
+    assert_eq!(p.attempts.len(), 164);
     let histories = p
         .attempts
         .values()
@@ -851,9 +851,110 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         .collect::<BTreeSet<_>>();
     assert!(histories.is_superset(&BTreeSet::from([6, 7, 8])));
     let current=p.attempts.values().filter(|a|matches!(&a.state,State::Script{run:Some(r),..}if r.engine_revision==shell::EVALUATOR_REVISION)).count();
+    // Closed literal IDs from the accepted public49-script catalog, independent
+    // of the newly extended current catalog. Its original48 current executions
+    // and one deliberately unfinished assignment must still be preserved.
+    let original_script_ids = BTreeSet::from([
+        "shell-handover",
+        "shell-arguments",
+        "shell-input",
+        "shell-validation",
+        "shell-report",
+        "shell-loop",
+        "shell-capstone",
+        "shell-streams",
+        "shell-pipelines",
+        "shell-eof",
+        "shell-batch-audit",
+        "shell-functions",
+        "shell-return",
+        "shell-shift",
+        "shell-bundle",
+        "shell-local-heading",
+        "shell-scope-review",
+        "shell-scope-capstone",
+        "shell-cut-inventory",
+        "shell-sort-manifest",
+        "shell-uniq-counts",
+        "shell-text-capstone",
+        "shell-number-records",
+        "shell-order-total",
+        "shell-pack-items",
+        "shell-count-capstone",
+        "shell-file-manifest",
+        "shell-collect-errors",
+        "shell-file-batch-capstone",
+        "shell-array-intake",
+        "shell-array-priority",
+        "shell-array-package",
+        "shell-array-handover",
+        "shell-capture-preview",
+        "shell-capture-evidence",
+        "shell-capture-decision",
+        "shell-capture-handover",
+        "shell-case-interface",
+        "shell-case-routing",
+        "shell-case-publication",
+        "shell-options-report",
+        "shell-options-jobs",
+        "shell-options-publication",
+        "shell-preserve-lines",
+        "shell-pipeline-status",
+        "shell-safe-handover",
+        "shell-command-options",
+        "shell-command-dispatch",
+        "shell-command-plan",
+    ]);
+    assert_eq!(original_script_ids.len(), 49);
+    let original_current = p.attempts.iter().filter(|(id, _)| original_script_ids.contains(id.as_str()))
+        .filter(|(_, a)| matches!(&a.state, State::Script { run: Some(record), .. } if record.engine_revision == shell::EVALUATOR_REVISION)).count();
     assert_eq!(
-        current, 48,
-        "49 current scripts with one retained unfinished assignment"
+        original_current, 48,
+        "Original49 scripts retain48 genuine current runs and the original unfinished draft"
+    );
+    let new_ids = [
+        "shell-optional-policy",
+        "shell-optional-report",
+        "shell-optional-handover",
+    ];
+    let expected_scripts = original_script_ids
+        .iter()
+        .copied()
+        .chain(new_ids)
+        .collect::<BTreeSet<_>>();
+    assert_eq!(
+        all.iter()
+            .filter(|s| matches!(s.goal, Goal::Script { .. }))
+            .map(|s| s.id.as_str())
+            .collect::<BTreeSet<_>>(),
+        expected_scripts
+    );
+    for id in new_ids {
+        let s = all.iter().find(|s| s.id == id).unwrap();
+        let a = &p.attempts[id];
+        let (
+            State::Script {
+                source,
+                run: Some(record),
+            },
+            Goal::Script { cases },
+        ) = (&a.state, &s.goal)
+        else {
+            panic!("Expected explicitly executed new script {id}")
+        };
+        assert_eq!(source, s.solution.last().unwrap());
+        assert_eq!(record.engine_revision, shell::EVALUATOR_REVISION);
+        assert_eq!(&record.source, source);
+        assert_eq!(record.results.len(), cases.len());
+        assert!(
+            record.results.iter().zip(cases).all(|(r, c)| c.accepts(r)),
+            "Every genuinely run new case passes its whole outcome"
+        );
+        assert!(progress::current_solved(a, s));
+    }
+    assert_eq!(
+        current, 51,
+        "52 current scripts with the same one retained unfinished assignment"
     );
     let prior = prior(&p, &original);
     let mut a = prepared(&s);

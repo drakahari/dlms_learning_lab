@@ -13,11 +13,13 @@ mod address_learning;
 mod apache_static_workspace;
 mod client_learning;
 mod controls;
+mod cron_workspace;
 mod data;
 mod debian_packages_workspace;
 mod dhcpv4_workspace;
 mod discovery_workspace;
 mod dns_workspace;
+mod etherchannel_workspace;
 mod legacy_learning;
 mod nat_workspace;
 mod nfs_workspace;
@@ -44,7 +46,9 @@ mod tests;
 mod workspace;
 #[derive(Default)]
 struct Metrics {
+    cron: cron_workspace::CronMetrics,
     nfs: nfs_workspace::NfsMetrics,
+    ether: etherchannel_workspace::EtherMetrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -117,6 +121,12 @@ struct Metrics {
     data_confirm: Option<egui::Rect>,
     data_cancel: Option<egui::Rect>,
     course_start: Option<egui::Rect>,
+    unit_picker: Option<egui::Rect>,
+    unit_choices: Vec<(String, egui::Rect)>,
+    unit_popup: Option<egui::Rect>,
+    next_unit: Option<egui::Rect>,
+    unit_back: Option<egui::Rect>,
+    unit_complete: Option<egui::Rect>,
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
     pagination: bool,
@@ -318,6 +328,8 @@ pub struct LabApp {
     nat_presentation: nat_workspace::Presentation,
     rpm_presentation: rpm_packages::Presentation,
     nfs_presentation: nfs_workspace::Presentation,
+    ether_presentation: etherchannel_workspace::Presentation,
+    cron_presentation: cron_workspace::Presentation,
     help_open: bool,
     extra_filters: bool,
     host_activity: bool,
@@ -461,6 +473,8 @@ impl LabApp {
             nat_presentation: nat_workspace::Presentation::default(),
             rpm_presentation: rpm_packages::Presentation::default(),
             nfs_presentation: nfs_workspace::Presentation::default(),
+            ether_presentation: etherchannel_workspace::Presentation::default(),
+            cron_presentation: cron_workspace::Presentation::default(),
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -473,6 +487,14 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if let Some(stage) =
+                Self::etherchannel_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
+                Self::cron_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
             } else if let Some(stage) =
                 Self::nfs_alignment_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
@@ -579,6 +601,11 @@ impl LabApp {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
+            } else if let Some(stage) = Self::optional_inputs_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if let Some(stage) = Self::command_vectors_stage(
                 smoke,
                 std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
@@ -722,6 +749,8 @@ impl LabApp {
         self.nat_presentation.clear();
         self.rpm_presentation.clear();
         self.nfs_presentation.clear();
+        self.ether_presentation.clear();
+        self.cron_presentation.clear();
         self.script_job = None;
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
@@ -737,6 +766,8 @@ impl LabApp {
         Self::prepare_apache_static(a, s, new_attempt);
         Self::prepare_rpm(a, s, new_attempt);
         Self::prepare_nfs(a, s, new_attempt);
+        Self::prepare_ether(a, s, new_attempt);
+        Self::prepare_cron(a, s);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated ACL lesson");
@@ -858,7 +889,15 @@ impl LabApp {
                 .unwrap()
                 .selected_device = device;
         }
-        let nfs_recency_notice = if matches!(a.state, engine::State::Nfs { .. }) {
+        let nfs_recency_notice = if matches!(a.state, engine::State::EtherChannel { .. }) {
+            self.input.clear();
+            self.checked = false;
+            dlms_learning_lab::etherchannel_workspace::record_visit(a, s, clock).err()
+        } else if matches!(a.state, engine::State::Cron { .. }) {
+            self.input.clear();
+            self.checked = false;
+            dlms_learning_lab::cron_workspace::budget::record_visit(a, s, clock).err()
+        } else if matches!(a.state, engine::State::Nfs { .. }) {
             self.input.clear();
             self.checked = false;
             dlms_learning_lab::nfs_workspace::record_visit(a, s, clock).err()
@@ -911,6 +950,8 @@ impl LabApp {
         self.nat_presentation.clear();
         self.rpm_presentation.clear();
         self.nfs_presentation.clear();
+        self.ether_presentation.clear();
+        self.cron_presentation.clear();
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
@@ -922,6 +963,8 @@ impl LabApp {
         Self::prepare_apache_static(a, s, true);
         Self::prepare_rpm(a, s, true);
         Self::prepare_nfs(a, s, true);
+        Self::prepare_ether(a, s, true);
+        Self::prepare_cron(a, s);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
                 .expect("validated ACL lesson");
@@ -1287,18 +1330,38 @@ impl LabApp {
         let Some(unit) = self.units.iter().find(|u| u.id == self.scenarios[i].unit) else {
             return;
         };
-        if let Some(next) =
+        let next = if matches!(self.scenarios[i].initial, engine::State::Cron { .. }) {
+            let position = unit
+                .labs
+                .iter()
+                .position(|id| id == &self.scenarios[i].id)
+                .unwrap();
+            unit.labs
+                .iter()
+                .skip(position + 1)
+                .chain(unit.labs.iter().take(position))
+                .filter_map(|id| self.scenarios.iter().position(|s| &s.id == id))
+                .find(|at| {
+                    self.progress
+                        .attempts
+                        .get(&self.scenarios[*at].id)
+                        .is_none_or(|a| !self.nfs_visible_solved(a, &self.scenarios[*at]))
+                })
+        } else {
             course::next(unit, &self.scenarios[i].id, &self.scenarios, &self.progress)
-        {
-            if ui
-                .link(format!("Next in unit: {}", self.scenarios[next].title))
-                .clicked()
-            {
+        };
+        if let Some(next) = next {
+            let r = ui.link(format!("Next in unit: {}", self.scenarios[next].title));
+            self.metrics.next_unit = Some(r.rect);
+            if r.clicked() {
                 self.launch(next);
             }
         } else {
-            ui.label("Unit complete · All its current assignments pass.");
-            if ui.link("Back to this unit").clicked() {
+            let r = ui.label("Unit complete · All its current assignments pass.");
+            self.metrics.unit_complete = Some(r.rect);
+            let r = ui.link("Back to this unit");
+            self.metrics.unit_back = Some(r.rect);
+            if r.clicked() {
                 self.filter.track = unit.track.clone();
                 self.filter.unit = unit.id.clone();
                 self.filter.topic.clear();
@@ -1308,6 +1371,8 @@ impl LabApp {
                 self.nat_presentation.clear();
                 self.rpm_presentation.clear();
                 self.nfs_presentation.clear();
+                self.ether_presentation.clear();
+                self.cron_presentation.clear();
             }
         }
     }
@@ -1386,16 +1451,19 @@ impl LabApp {
                                 for u in self.units.iter().filter(|u| {
                                     self.filter.track.is_empty() || u.track == self.filter.track
                                 }) {
-                                    ui.selectable_value(
+                                    let r = ui.selectable_value(
                                         &mut self.filter.unit,
                                         u.id.clone(),
                                         &u.title,
                                     );
+                                    self.metrics.unit_choices.push((u.id.clone(), r.rect));
                                 }
+                                self.metrics.unit_popup = Some(controls::popup_content_clip(ui));
                             })
                     },
                 )
                 .inner;
+            self.metrics.unit_picker = Some(r.response.rect);
             name_control(&r.response, "Course unit filter");
             self.metrics.filters.push(r.response.rect);
             if previous != self.filter.unit {
@@ -1582,7 +1650,9 @@ impl LabApp {
                         );
                         let a = self.progress.attempts.get(&s.id);
                         let complete = a.is_some_and(|a| {
-                            nfs_workspace::solved_with_memos(
+                            cron_workspace::solved_with_memos(
+                                &self.cron_presentation.memo,
+                                &self.ether_presentation.memo,
                                 &self.nfs_presentation.memo,
                                 &self.rpm_presentation.memo,
                                 &self.nat_presentation.memo,
@@ -1803,6 +1873,8 @@ impl LabApp {
         self.nat_presentation.memo.begin_frame();
         self.rpm_presentation.memo.begin_frame();
         self.nfs_presentation.memo.begin_frame();
+        self.ether_presentation.memo.begin_frame();
+        self.cron_presentation.memo.begin_frame();
         ctx.set_zoom_factor(self.scale);
         controls::configure(ctx);
         self.advance_scripts(ctx);
@@ -1813,10 +1885,15 @@ impl LabApp {
         self.data_dialog(ctx);
         if nfs_selected_before_restore.is_some() && self.selected.is_none() {
             self.nfs_presentation.clear();
+            self.ether_presentation.clear();
+            self.cron_presentation.clear();
         }
         self.sync_appearance(ctx, previous);
         self.rpm_prepass();
         self.nfs_prepass();
+        self.ether_prepass();
+        self.advance_cron(ctx);
+        self.cron_prepass(ctx);
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(palette(ui).error, error);

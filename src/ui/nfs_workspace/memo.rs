@@ -291,6 +291,8 @@ fn compact_size<T: Serialize + ?Sized>(v: &T, cap: usize) -> Option<usize> {
 fn source_shape(s: &Scenario) -> bool {
     let Scenario {
         file_backup_teaching,
+        etherchannel_teaching,
+        cron_teaching,
         nfs_teaching,
         nat_teaching,
         rpm_packages_teaching,
@@ -343,6 +345,8 @@ fn source_shape(s: &Scenario) -> bool {
     } = s;
     let _ = nfs_teaching;
     file_backup_teaching.is_none()
+        && etherchannel_teaching.is_none()
+        && cron_teaching.is_none()
         && nat_teaching.is_none()
         && rpm_packages_teaching.is_none()
         && apache_static_teaching.is_none()
@@ -418,6 +422,10 @@ fn same_source(a: &Scenario, b: &Scenario) -> bool {
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
         file_backup_learning,
+        etherchannel_draft,
+        etherchannel_learning,
+        cron_session,
+        cron_learning,
         nfs_session: _,
         nfs_learning: _,
         rpm_session,
@@ -484,6 +492,10 @@ fn foreign(w: &model::WorkspaceData) -> bool {
     } = w;
     false
         || file_backup_learning.is_some()
+        || etherchannel_draft.is_some()
+        || etherchannel_learning.is_some()
+        || cron_session.is_some()
+        || cron_learning.is_some()
         || rpm_session.is_some()
         || rpm_learning.is_some()
         || nat_draft.is_some()
@@ -1073,5 +1085,108 @@ mod tests {
         assert!(m.bytes <= TOTAL_BYTES - EDITOR_RESERVE - FRAME_RESERVE);
         m.retain(|_| false);
         assert_eq!(m.bytes, 0);
+    }
+    #[test]
+    fn admitted_etherchannel_payloads_cannot_reuse_nfs_warm_success_or_copy() {
+        let s = sources().remove(0);
+        let mut a = prepared(&s);
+        solve(&mut a, &s);
+        let good = a.clone();
+        let raw: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/etherchannel-workbench-v1.json"
+        ))
+        .unwrap();
+        let lesson: dlms_learning_lab::etherchannel_teaching::Lesson =
+            serde_json::from_value(raw["cases"][0]["lesson"].clone()).unwrap();
+        let learning =
+            dlms_learning_lab::etherchannel_teaching::Learning::new(&lesson, true).unwrap();
+        assert!(learning.valid());
+        for (draft, practice) in [(true, false), (false, true), (true, true)] {
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            let w = a.workspace.as_mut().unwrap();
+            if draft {
+                w.etherchannel_draft = Some(
+                    dlms_learning_lab::etherchannel_workspace::Draft::from_state(
+                        &lesson.definition.initial,
+                    )
+                    .unwrap(),
+                );
+            }
+            if practice {
+                w.etherchannel_learning = Some(learning.clone());
+            }
+            assert!(w.valid());
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.evaluations, before.evaluations);
+            assert!(m.entries.iter().all(|e| e.source.id != s.id));
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            assert!(!progress::current_solved(&a, &s));
+            m.evaluate(&good, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+        }
+    }
+    #[test]
+    fn cron_metadata_and_teaching_cannot_reuse_a_warm_success_or_copy_foreign_input() {
+        let cron_source = pack::load(include_str!(
+            "../../../tests/fixtures/cron-workbench-v1.json"
+        ))
+        .unwrap()
+        .remove(0);
+        let engine::Goal::Cron { definition } = &cron_source.goal else {
+            unreachable!()
+        };
+        let session = dlms_learning_lab::cron_workspace::Session::new(definition).unwrap();
+        let lesson = cron_source.cron_teaching.as_ref().unwrap();
+        let learning = dlms_learning_lab::cron_teaching::Learning::new(lesson).unwrap();
+        let source = sources().remove(0);
+        let mut good = prepared(&source);
+        solve(&mut good, &source);
+        assert!(progress::current_solved(&good, &source));
+        for payload in 0..4 {
+            let mut source = source.clone();
+            let mut a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            let cold = m.counters;
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.counters.hits, cold.hits + 1);
+            assert_eq!(m.counters.meters, cold.meters);
+            assert_eq!(m.counters.snapshots, cold.snapshots);
+            let before = m.counters;
+            match payload {
+                0 => a.workspace.as_mut().unwrap().cron_session = Some(session.clone()),
+                1 => a.workspace.as_mut().unwrap().cron_learning = Some(learning.clone()),
+                2 => {
+                    let w = a.workspace.as_mut().unwrap();
+                    w.cron_session = Some(session.clone());
+                    w.cron_learning = Some(learning.clone());
+                }
+                3 => source.cron_teaching = Some(lesson.clone()),
+                _ => unreachable!(),
+            }
+            assert!(a.workspace.as_ref().unwrap().valid());
+            let caller = serde_json::to_vec(&a).unwrap();
+            let authored = serde_json::to_vec(&source).unwrap();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(false), "payload {payload}");
+            assert_eq!(m.counters.hits, before.hits);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert!(!progress::current_solved(&a, &source));
+            assert_eq!(serde_json::to_vec(&a).unwrap(), caller);
+            assert_eq!(serde_json::to_vec(&source).unwrap(), authored);
+            source.cron_teaching = None;
+            m.evaluate(&good, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+        }
     }
 }

@@ -136,7 +136,9 @@ impl Memo {
         };
         let definition = definition.as_ref();
         self.tick = self.tick.saturating_add(1);
-        let shape = storage_shape(a, definition)
+        let shape = s.etherchannel_teaching.is_none()
+            && s.cron_teaching.is_none()
+            && storage_shape(a, definition)
             && s.id.len() <= 80
             && s.nat_teaching
                 .as_ref()
@@ -247,6 +249,10 @@ impl Memo {
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
         file_backup_learning,
+        etherchannel_draft,
+        etherchannel_learning,
+        cron_session,
+        cron_learning,
         nfs_session,
         nfs_learning,
         rpm_session,
@@ -314,6 +320,10 @@ fn foreign(w: &model::WorkspaceData) -> bool {
     macro_rules! any { ($($v:ident),* $(,)?) => { false $(|| $v.is_some())* }; }
     any!(
         file_backup_learning,
+        etherchannel_draft,
+        etherchannel_learning,
+        cron_session,
+        cron_learning,
         nfs_session,
         nfs_learning,
         rpm_session,
@@ -1444,6 +1454,123 @@ mod tests {
             m.evaluate(&a, &s, false);
             assert_eq!(m.prepared(&s.id), Some(true));
             assert_eq!(m.counters.snapshots, before.snapshots + 1);
+        }
+    }
+    #[test]
+    fn admitted_etherchannel_metadata_cannot_hit_warm_success_or_copy_a_foreign_snapshot() {
+        let (s, mut a) = teaching_fixture();
+        solve(&s, &mut a);
+        let good = a.clone();
+        let raw: serde_json::Value = serde_json::from_str(include_str!(
+            "../../../tests/fixtures/etherchannel-workbench-v1.json"
+        ))
+        .unwrap();
+        let lesson: dlms_learning_lab::etherchannel_teaching::Lesson =
+            serde_json::from_value(raw["cases"][0]["lesson"].clone()).unwrap();
+        let learning =
+            dlms_learning_lab::etherchannel_teaching::Learning::new(&lesson, true).unwrap();
+        assert!(learning.valid());
+        for (session, practice) in [(true, false), (false, true), (true, true)] {
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            let w = a.workspace.as_mut().unwrap();
+            if session {
+                w.etherchannel_draft = Some(
+                    dlms_learning_lab::etherchannel_workspace::Draft::from_state(
+                        &lesson.definition.initial,
+                    )
+                    .unwrap(),
+                );
+            }
+            if practice {
+                w.etherchannel_learning = Some(learning.clone());
+            }
+            assert!(w.valid());
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.evaluations, before.evaluations + 1);
+            assert!(m.entries.is_empty());
+            assert!(
+                serde_json::to_value(&a).unwrap() == caller,
+                "complete caller unchanged"
+            );
+            assert!(!progress::current_solved(&a, &s));
+            a = good.clone();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            assert_eq!(m.counters.snapshots, before.snapshots + 1);
+        }
+    }
+    #[test]
+    fn cron_metadata_and_teaching_cannot_reuse_a_warm_success_or_copy_foreign_input() {
+        let cron_source = pack::load(include_str!(
+            "../../../tests/fixtures/cron-workbench-v1.json"
+        ))
+        .unwrap()
+        .remove(0);
+        let engine::Goal::Cron { definition } = &cron_source.goal else {
+            unreachable!()
+        };
+        let session = dlms_learning_lab::cron_workspace::Session::new(definition).unwrap();
+        let lesson = cron_source.cron_teaching.as_ref().unwrap();
+        let learning = dlms_learning_lab::cron_teaching::Learning::new(lesson).unwrap();
+        assert!(session.valid_for(definition));
+        assert!(learning.valid_for(lesson));
+        let (source, mut good) = fixture();
+        solve(&source, &mut good);
+        assert!(progress::current_solved(&good, &source));
+        let good_attempt = serde_json::to_vec(&good).unwrap();
+        let good_source = serde_json::to_vec(&source).unwrap();
+        for payload in 0..4 {
+            let mut source = source.clone();
+            let mut a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            let cold = m.counters;
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.counters.hits, cold.hits + 1);
+            assert_eq!(m.counters.meters, cold.meters);
+            assert_eq!(m.counters.snapshots, cold.snapshots);
+            let before = m.counters;
+            match payload {
+                0 => a.workspace.as_mut().unwrap().cron_session = Some(session.clone()),
+                1 => a.workspace.as_mut().unwrap().cron_learning = Some(learning.clone()),
+                2 => {
+                    let w = a.workspace.as_mut().unwrap();
+                    w.cron_session = Some(session.clone());
+                    w.cron_learning = Some(learning.clone());
+                }
+                3 => source.cron_teaching = Some(lesson.clone()),
+                _ => unreachable!(),
+            }
+            assert!(a.workspace.as_ref().unwrap().valid());
+            let caller = serde_json::to_vec(&a).unwrap();
+            let authored = serde_json::to_vec(&source).unwrap();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(false), "payload {payload}");
+            assert_eq!(m.counters.hits, before.hits);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            // NAT retains one bounded diagnostic evaluation on foreign input.
+            assert_eq!(m.counters.evaluations, before.evaluations + 1);
+            assert!(m.entries.is_empty());
+            assert!(!progress::current_solved(&a, &source));
+            assert_eq!(serde_json::to_vec(&a).unwrap(), caller);
+            assert_eq!(serde_json::to_vec(&source).unwrap(), authored);
+            source.cron_teaching = None;
+            m.evaluate(&good, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            assert_eq!(m.counters.snapshots, before.snapshots + 1);
+            assert_eq!(m.counters.meters, before.meters + 1);
+            assert_eq!(serde_json::to_vec(&good).unwrap(), good_attempt);
+            assert_eq!(serde_json::to_vec(&source).unwrap(), good_source);
         }
     }
 }

@@ -44,6 +44,27 @@ fn reviews() -> Vec<Review> {
         incorrect: r["wrong"][0]["source"].as_str().unwrap().into(),
         misconception: r["wrong"][0]["misconception"].as_str().unwrap().into(),
     }));
+    let optional: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/shell-optional-inputs-review.json")).unwrap();
+    let additions = optional["labs"].as_array().unwrap();
+    assert_eq!(
+        additions
+            .iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        [
+            "shell-optional-policy",
+            "shell-optional-report",
+            "shell-optional-handover"
+        ]
+    );
+    for ((row, wrong), misconception) in additions.iter().zip(["treat_empty_subtitle_as_missing", "premature_truncate", "stale_second_job"]).zip([
+        "A supplied empty subtitle intentionally clears its text; only an omitted value inherits the default.",
+        "Validate the source and destination before opening output; a rejected request must preserve the existing files.",
+        "Each job inherits from the common defaults independently; a missing second value must not reuse the first job's setting."
+    ]) {
+        rows.push(Review { id: row["id"].as_str().unwrap().into(), alternate: row["alternatives"][0].as_str().unwrap().into(), incorrect: row["common_wrong"][wrong].as_str().unwrap().into(), misconception: misconception.into() });
+    }
     rows
 }
 fn quoted(value: &str) -> String {

@@ -12,7 +12,7 @@ fn native_app() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
     a.smoke = true;
     a.smoke_stage = BASE;
-    assert_eq!((a.scenarios.len(), a.units.len()), (154, 39));
+    assert_eq!((a.scenarios.len(), a.units.len()), (164, 42));
     assert!(a._smoke_profile.is_some());
     (ctx, a)
 }

@@ -2,118 +2,150 @@
 
 ## Active full-curriculum continuation — 2026-10-28
 
-Owner renewed the complete implementation task after4bc390a. Do not stop at a
-small batch/report or count a Fedora candidate as curriculum completion. Reconcile
-all recorded requirements; no arbitrary final lab count. Current inventory is
-still154/39 (45CCNA/32LPIC-1/28LPIC-2/49Bash). See
-[CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md): all136 current parent
-objectives and every1240 granular reference remain explicit; future29 CCNA rows
-stay separate. No objective promotion or source fingerprint change.
+The owner authorized completing the whole agreed curriculum through verified,
+committed/pushed milestones. Do not stop at a small batch/status or count a Fedora
+candidate as curriculum completion. Work only here; preserve native Rust/egui,
+offline bounded simulation, accepted workspaces, all28 themes and user progress.
+MIT was explicitly approved. No release/installer publication or unrelated
+project/desktop/GPU/swap/service/model changes.
 
-MAIN M168 implements a closed NFS two-process case in the existing guarded native
-reopen tool. Relevant17 Rust reopen and7 shared-UI regressions,216Python, all-target
-Clippy and development build pass. Final actual nativeR3 passes two distinct fully
-exited processes (writer75.764s/read32.098s),12PNGs revealing restored fields/results.
-Every portable in-memory field and the cold reader's full loaded provenance match
-saved data; negative clock/receipt mutations reject. Writer provenance remains a
-disk durability fact: Save intentionally does not stamp caller data. Both mounted
-state/files and separate unfinished drafts survive, and real editor repairs pass
-both goals. An occupied-mount refusal correctly caught a redundant repair fixture;
-repair changes only unfinished drafts and rereads the retained mount. No State or
-grade is injected. Exact evidence: .build-artifacts/tmp/native-reopen-nfs-m168-r3.
-All root wrappers reaped. The older9a90f275e133 installed candidate remains unchanged;
-this development-native proof is not yet acceptance on a new installed candidate.
+Read BUILD_WORKFLOW.md before any heavy run. MAIN python3 tools/dev.py owns the
+single shared lock across worktrees; Cargo2 jobs AND Rust2 test threads, explicit
+DEV/TEST_DEBUG=0. Each worktree uses its own runner-selected target. No parallel
+heavy work, RAM /tmp artifacts, cleanup or interruption of other applications.
 
-The actual evaluator10 baseline is now captured before any MAIN11 integration:
-49 script references/350 cases/49 separate examples,139 authentic profile contexts,
-and independent unfinished assignment/example drafts. Immutable manifest:
-`220cebac329a62adcc59e8338df80b94a07a383807d5832dd6905bbf332776a1`.
-The exact producer and243 compiled source inputs are retained privately; no
-observations may be regenerated or relabeled under11. Historical producer is
-nondefault-feature gated; ordinary all-target checks do not rebuild it. See M170.
-Python223 and the closed immutable verifier pass. At that capture MAIN was
-evaluator10/catalog154; the later reviewed integration is recorded below.
+### Current Main, lease and exact next action
 
-M171 actual Bash54 comparison found a genuine malformed-arithmetic false positive:
-53 expected matches,1 rejected case032. Original recipe/output/evaluator10 bytes
-stay immutable. R7 structural correction and5 balanced controls were initially
-source-only; the R8/reference integration below supersedes that stage. Do not
-claim54/54 or silently change old evidence. See M171 and private correction receipt.
+HEAD is pusheda6aca2c (following8568198/32ed454). Main has uncommitted reviewed
+working source164 assignments/42units:48CCNA/36LPIC-1/28LPIC-2/52Bash. Ten normal
+new tasks are Ether3, optional-input Script3 and Cron4. All original37 packs/
+154 complete objects/39 raw unit objects remain independently pinned. The latest
+accepted installed baseline is still154/39 at9a90f275e133 below; do not relabel it.
+The four backup tasks remain unregistered and outside all catalog/coverage counts.
 
-M172 pure backup/tree/snapshot foundation passes13 tests, scoped Clippy and8/8
-controlled GNU tar restore comparisons;237Python and coverage pass. Independent
-review found/fixed restore ctime, omitted-file type conflict and early bounds.
-No backup lab/credit yet: 206.2 remains Open, now accurately naming the foundation.
+No current heavy lease after M193 Python/coverage. Main164 inclusive2249PASS,
+ClippyPASS,269PythonPASS and coveragePASS. Actual Cron R2 wrapper34356 REAPED
+exit0,77PNG/40matrix, receipt5500fa55; ELF c8810bae unchanged. Actual review
+caught narrow200 Remove-button/form overflow and square pass glyphs. Fixed with
+direct parent Button placement and explicit Pass/Needs-work words. New real-egui
+capture geometry test FAILS before (right412.8 > clip379.3), all20Cron UI groups
+PASS after. Corrected native screenshots and combined installed acceptance remain
+pending, not passed by assumption. No worker may start heavy without Root lease.
 
-M173–M178 source milestones are committed/pushed8568198 and32ed454: reviewed
-shell evaluator11, bounded archive terminal/stat, outcome grading and isolated
-teaching foundation. Full MAIN inclusive M176 passes2045/0/0 (159 harnesses/all19
-retained checks) on its earlier exact source; later peer fixes and M178 pass their
-focused gates, not a relabeled full run. Original actual10/380-vector records,
-failed Bash032 observation and historical producers remain immutable. Reference
-59 still means58 supported positives plus1 exact confirmed invalid,0 unexpected.
-The genuine actual10 verifier passed after11. No new normal labs yet.
+Next: commit/push verified164source/docs, then reviewed before12 seven-file
+capture-only proposal925cd2d8 (actual evaluator11,52/384/52) BEFORE any12 semantics
+or new registry changes. Build/capture/seal real11 source, preserving139authentic
+old contexts and adding only3actually executed new scripts. Then apply reviewed
+backup native9file overlay/11actual-event tests plus5presentation/2UTF8 groups,
+compile/fix, register4onlyaftergates (prospective168/43). NFS worker prepares
+closed registration/source-only; physical R2 source35groups remains queued.
+First Main160 full25347 reaped2162PASS/13fixtureFAIL/0ignored across169 harnesses.
+Repairs preserve every scenario/assertion/cap: exact new unit-tail assertions,
+bounded pack fixtures, valid positives plus intended negative diagnostics, and
+original37 raw/hash/typed equality. Focused repairs passed; Main160 Clippy and
+254Python/coverage passed. Main164 first full71706 reaped2246PASS/3fixtureFAIL/
+0ignored across177 harnesses/all19 retained. Two exact repairs then pass scoped
+catalog151+etherchannel_workspace: remove a double raw-unit inverse (the negative
+already receives original39 bytes), and prepare all four Cron positive fixtures
+through their real Goal-aware budget API instead of unwrapping absent metadata.
+No scenario, grading behavior, original assertion or simulation cap was weakened.
 
-M179 now authors four distinct backup tasks with working typed engine/pack,
-complete-origin practice, transactional whole-attempt actions and save/readback.
-68focused Rust plus3 actual native-memo refusal regressions, all-target Clippy,
-254Python and coverage pass. First compiler errors deliberately forced four
-metadata/source projection decisions and the original-nine impossible-kind arm;
-actual foreign refusals were added without ignoring new fields or weakening old
-assertions. Tests retain synthetic original154 data/no invented new contexts;
-actual history is separate. These four are NOT registered/native-accepted.
-FILE_BACKUP_LESSONS.md and ledgerM179 record source/evidence and remaining gates.
-A final checker replay after the gap-wording-only CSV edit also passes; the
-test-name clarification changes no body. Root has no active heavy wrapper.
+Main164 inclusive94728 REAPED:2249PASS/0FAIL/0ignored across177harnesses, all19
+retained historical groups. Log83fc3bc8; receipt7f7a7e1d. Subsequent four
+test-only lint fixes retain assertions; all20affected Cron/warm-cache groups
+rerunPASS. All-target ClippyR2 PASS; PythonR3 269PASS (two retained earlier
+fixture failures), coveragePASS. Regular Main164 build/versionPASS. After34356
+reaps: correct status glyphs, recheck affected UI, normal Ether/optional/Cron
+flows and installed NFS cold reopening/lifecycle on the final rebuilt candidate. Do not use an old worktree
+ELF as Main proof. Commit/push a verified coherent milestone and continue backup,
+physical-uplink and the complete reconciliation queue; do not stop for approval.
 
-The coverage checker now derives exact registered bundle includes, not every
-scenario JSON. Unregistered draft IDs are separate and cannot become practical
-coverage or inflate authored totals. All13 LPIC-2 206.2 rows remain Open with
-specific remaining directory/media/software/automation/dd/tape/mt/rsync gaps.
-Current154/39/45CCNA/32LPIC-1/28LPIC-2/49Bash and1240 reference statuses unchanged.
+### Applied source and actual feature evidence
 
-LACP actual R11d106 native frames pass, and Root viewed the before/after capstone:
-all21 checks remain with a visible first failure and compact status cells. R12
-removes an empty retired row and fixes singular wording;26 scoped/all-target
-Clippy/build and8 actual100/200 light-dark wide/narrow follow-up frames pass,
-all wrappers reaped. R12 source3972bab2, ELF9bac87bf; private result
-072130bba3d8ead4143af500be078463c49af00b933f18ae1cf0f5b3c969edac.
-Normal3pack/unit/current-consumer composition and Main regression remain.
+- Ether normal3 proposal f1123d42 plus current-consumer9995d415: exact59+68 path
+  before/after hashes verified. Main157 focused162/ten harnesses plus28 actual
+  egui widget groups pass (five private history cases deferred to full). Receipt
+  58fbd1bd. New valid cross-family and normal real card/Apply/Check/Next controls.
+  Private R11d106 and R12eight actual native frames remain separate source proof;
+  Root reviewed compact21-check feedback and equal-card layout. No old Source/
+  schema/progress rewritten.
+- Optional-input normal3 Main160 proposal6dc9f4a, manifeste92ad3e8, all89 path
+  hashes verified.52scripts/384cases,34 new deterministic cases/two alternatives
+  each and separate runnable examples. Original49/350 remain exact. Private
+  full2042/all19 retained and actual132 final-row frames pass. ELF1f08e28a,
+  receipt1237073f. Root viewed light/dark200 narrow final-row images: unobscured.
+  Actual sizes include1920x1080 and946x929/allfive scales. Earlier128single-width
+  and132occluded observations remain immutable, not relabeled as accepted.
+- Cron normal4 Main164 R3 proposal58e095ee, manifest84fe5b39,132 changed path
+  hashes verified. Root review caught/fixed a real proposed Ether warm-cache
+  foreign-field omission before apply; valid singleton/paired/source warm tests
+  pass. NAT's existing macro already guarded the fields. Main11 shell body is
+  byte-exact after removing only additive pub mod cron. Independent source ACK
+  48eaee0d. Main164 focused145/ten harnesses plus20 actual egui widget groups
+  pass. Private W158/40 source126/651 and its2040/4fixture-failure run remain
+  separately frozen; final W full/native77 never ran. Normal Main native77 is
+  still pending; command/source plan6e105e2b is prepared in
+  .build-artifacts/reviews/cron-main164-native-plan-r1/.
+- Main includes the closed five-file114 reference collector/probe proposal
+  3e795b49 (manifestcccb39b0). Static original117 recipe unchanged; exactly three
+  absolute-destination guards remain simulation-only, not silently remapped.
+  All15 program identities, flat114 fixtures, stripped startup env, retained-FD
+  Bash/cat, child/stream/time/resource guards and independent source approval
+  were reviewed. Actual114 fixed Bash/VM/authored comparisons PASS on all four outcome fields,
+ 0mismatches; private manifesta1d643683a85/633outputs. Exactly3absolute-path
+ guards remain simulation-only. New15Python guards pass; original117 unchanged.
 
-Bash private157/40 now passes61 scoped,22 explicit historical,9 event and full
-inclusive2042/0/0 across158 harnesses/all19 retained groups. An original49→48
-current-run proof remains independently intact; new3 real records yield51 of52,
-with the deliberate unfinished draft retained. Clippy and9 affected tests pass.
-Its original128 actual native frames pass functional flows but ALL are946×929;
-that is NOT wide-window acceptance. A capture-only fullscreen-wide/windowed-narrow
-fix adds strict observed geometry and stronger essential-row coverage. It is the
-CURRENT SOLE HEAVY LEASE: paired checks/Clippy/build then full132 captures
-(ceiling136, phase<=64676), no product/data changes. First strict goal-row tests
-correctly caught missing middle rows; extra actual middle slices strengthen the
-union assertion. Preserve all earlier failures/128frames/source/ELF; no relabeling.
+### Retained history, NFS and unfinished next batches
 
-Cron R6 scoped source50owned/722protected passes83library(+5retainedignored),17core,
-10workspace,2attempts,5lessons,17bin plus final7widget/Clippy.76 headless capture
-phases are NOT native PNGs. It is SOURCE ONLY closing its private4pack/40thunit,
-current-consumer and normal unit/Next navigation seams before full/native gates.
-No normal or objective credit yet. Main composition must preserve shell11/NFS
-cold and FileBackup, with reciprocal Cron/LACP/backup metadata/cache guards.
+Actual evaluator10 baseline was captured before11:49refs/350cases/49examples,
+139 authentic contexts and independent drafts. Immutable manifest220cebac,
+original profilebce977c1/draft254c9267, retained producerd13109ec and243 compiled
+sources. Do not rebuild/relabel it under11. Historical9/10 producers are
+nondefault feature gated; inclusive current tests retain all19 historical groups.
+Current evaluator11 read-only parameter/cat semantics passed earlier full2045;
+controlled59 comparisons mean58 supported positives plus1 exact invalid Bash
+case032, not59 supported/54of54. Original failed observation stays immutable.
 
-Continue the complete reconciliation queue, including native backup UI/course
-integration after its reviewed backend. Installed9a90 remains evaluator10; new
-source proofs do not update that artifact. Repeat NFS actual two-process cold
-and final installed lifecycle/new-flow acceptance on the rebuilt regular ELF.
-All platform/reader/physical-device/novice acceptance limits remain distinct.
+NFS actual two-process development cold run M168 passes: writer75.764s and
+reader32.098s, distinct fully exited PIDs/12PNGs, actual repairs, all portable
+fields/raw drafts/durable provenance preserved. Receipt628b8fe0. Repeat using
+--case nfs and the exact NEW ordinary installed ELF after final candidate build;
+old9a90 does not contain this new route. Native plan above records exact caps.
 
-Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
-three substantive tasks); bash-parameter-defaults-154 (faithful parameter fallback/
-alternate forms reviewed into MAIN11, new content still isolated); linux-scheduling-154 (bounded Cronie
-calendar/access/execution foundation, then scheduling tasks). All use MAINrunner,
-exclusive worktree targets and shared lock; no concurrent heavy run. Root captured genuine actual10 authored/example/legacy
-bytes; preserve them unchanged after integrating11.
-No unintegrated source/fixture receives catalog or coverage credit. Continue the
-remaining curriculum tables after these ordinary batches; platform/novice/reader
-acceptance stays distinct. No release or unrelated-project/desktop changes.
+Backup backend is committeda6: four distinct authored draft tasks, typed virtual
+archives/stat/commands, actual independent recovery grading, isolated teaching,
+whole-attempt transactional actions, reset/save/load. M17968focused+3memo checks,
+Clippy/254Python/coverage passed. FileBackup4 is NOT registered/covered yet.
+Concrete new native overlay under
+.build-artifacts/reviews/file-backup/native-main164-r1/proposed is UNCOMPILED/
+UNAPPLIED: combined UI, exact shrinking-field backend, strict source guard,
+App/header/library/Next/prepass/visit/mode/reset hooks and prospective backend/
+real-egui tests. Prior source ACKs/prototype receipts are retained. Peer found
+binary crate::workspace namespace and Root fixed it to model. Output is now
+virtualized in bounded UTF8 chunks without dropping older text. More event tests,
+actual compilation/near-cap Undo/modal/Stop/cold/native/course gates remain before
+normal registration; do not import it during34356.
+
+Physical-uplink pure source R1 privately passes12/Clippy (f251ab5e; min20.466GiB,
+transientPSI0.18/noOOM). R2 span/raw-ObservedCounters refinements sourcee3d4aba
+remain UNRUN/frozen in ccna-physical-uplink-160. Later isolated adapter source
+32d1baa6 in ccna-physical-adapter-160 has atomic cable swaps, typed Definition,
+protected-neighbor/fresh-probe grading and isolated Learning;28 prospective
+groups are UNRUN. No State/Goal/progress/native/registered lab/coverage credit.
+Bash worker is preparing NEW genuine11-before12 capture sources, not changing
+old producers or VM:52/384/52 examples, preserve139 actual old contexts and add
+only3 actually executed new Script fixture contexts (142),22 absent non-Script
+contexts remain absent. No capture/build or revision12 edits yet. Next reviewed
+capability gap is case bracket-pattern numeric-text validation, not a guessed
+missing basic feature; implement only after actual11 baseline and fidelity review.
+
+CURRICULUM_RECONCILIATION.md and the1240-reference matrix still enumerate every
+remaining current requirement; all136 parent objectives remain incomplete. Source
+version boundaries rechecked28; original22 source fingerprints unchanged; future
+29 CCNA rows stay separate. No arbitrary catalog quota or inherited coverage.
+Windows/macOS runtime, novice study, physical-device/screen-reader acceptance and
+macOS distribution notice/signing decisions remain explicitly pending. Those do
+not stop independent curriculum/code work. No public release is authorized.
 
 ## Previous verified UI milestone — historical baseline
 
@@ -209,3 +241,12 @@ release or production deployment is authorized.
 Older checkpoint states remain in Git history; chronological implementation,
 failed diagnostics, peer reviews and acceptance receipts stay in the ledger and
 ignored evidence. No original artifact, profile or pending evidence was deleted.
+
+## Private native backup implementation scratch
+
+Root has uncompiled/unwired exact-key, cancellable memo and terminal component
+proposals under ignored reviews/file-backup/native-prototype. These are not
+implemented UI or curriculum credit. Pending-job library fairness and actual
+editor replacement/Undo/budget tests remain before wiring. Bash source-review
+help was requested while its final-row capture fix remains frozen. No Main code
+change accompanies those prototypes.

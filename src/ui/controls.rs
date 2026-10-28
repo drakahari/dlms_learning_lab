@@ -54,6 +54,23 @@ pub fn dropdown(ui: &egui::Ui, id: impl std::hash::Hash, maximum: f32) -> egui::
         .width(ui.available_size_before_wrap().x.min(maximum).max(0.))
         .wrap_mode(egui::TextWrapMode::Truncate)
 }
+/// Preserve native disclosure behavior while allowing long titles to wrap.
+/// egui's stock header forces Extend and expands its indented body to the
+/// title width. Prelayout the full title at the actual visible width so a long
+/// optional-help title cannot widen otherwise responsive form controls.
+pub fn collapsing_header(ui: &egui::Ui, title: &str) -> egui::CollapsingHeader {
+    let available = ui
+        .available_width()
+        .min((ui.clip_rect().right() - ui.next_widget_position().x).max(0.));
+    let text_width = (available - ui.spacing().indent - ui.spacing().button_padding.x).max(1.);
+    let text = egui::WidgetText::from(title).into_galley(
+        ui,
+        Some(egui::TextWrapMode::Wrap),
+        text_width,
+        egui::TextStyle::Button,
+    );
+    egui::CollapsingHeader::new(text)
+}
 /// Bound popup rows to the current visible width, including after zoom/resize.
 /// egui remembers an Area's previous size; a ComboBox's default width alone
 /// cannot shrink that remembered popup when the viewport becomes narrower.

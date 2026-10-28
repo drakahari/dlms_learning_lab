@@ -20,6 +20,8 @@ impl LabApp {
                 self.nat_presentation.clear();
                 self.rpm_presentation.clear();
                 self.nfs_presentation.clear();
+                self.ether_presentation.clear();
+                self.cron_presentation.clear();
             }
             ui.label(
                 RichText::new(format!("{} / {}", track, topic))
@@ -44,7 +46,18 @@ impl LabApp {
                 self.metrics.manager_challenge = Some(independent.rect);
             }
             if before != challenge {
-                self.progress.attempts.get_mut(&id).unwrap().challenge = challenge;
+                if matches!(self.scenarios[i].initial, State::EtherChannel { .. }) {
+                    if let Err(error) = dlms_learning_lab::etherchannel_workspace::record_mode(
+                        self.progress.attempts.get_mut(&id).unwrap(),
+                        &self.scenarios[i],
+                        challenge,
+                    ) {
+                        self.notice = Some(error);
+                        challenge = before;
+                    }
+                } else {
+                    self.progress.attempts.get_mut(&id).unwrap().challenge = challenge;
+                }
                 self.help_open = false;
                 self.script_job = None;
                 if let Some(view) = &mut self.ipv4_view {
@@ -55,6 +68,8 @@ impl LabApp {
                 self.nat_presentation.clear();
                 self.rpm_presentation.clear();
                 self.nfs_presentation.clear();
+                self.ether_presentation.clear();
+                self.cron_presentation.clear();
             }
             let r = ui.add(button("Reset"));
             self.metrics.reset = Some(r.rect);
@@ -92,6 +107,15 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::EtherChannel { .. }) {
+            self.ether_page(ui, i);
+            return;
+        }
+        if matches!(self.scenarios[i].initial, State::Cron { .. }) {
+            self.cron_page(ui, i);
+            Self::workspace_footer(ui);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::Nfs { .. }) {
             self.nfs_page(ui, i);
             Self::workspace_footer(ui);

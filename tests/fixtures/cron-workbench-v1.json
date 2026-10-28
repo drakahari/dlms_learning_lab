@@ -1,0 +1,333 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "cron-technical-admission",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Virtual scheduling adapter",
+      "unit": "",
+      "title": "Technical scheduling adapter fixture",
+      "summary": "Unregistered admission and persistence fixture.",
+      "objective": "Copy the supplied virtual input by installing and running a schedule.",
+      "retry_guidance": "Inspect the installed table, pending draft and virtual output.",
+      "difficulty": "Beginner",
+      "minutes": 10,
+      "steps": [
+        "Inspect the supplied virtual input",
+        "Install and run the table"
+      ],
+      "guide": [],
+      "explanation": "The same in-process scheduler handles real draft actions and fresh deterministic inputs.",
+      "hints": [
+        "Install differs from editing; Run advances only the explicit virtual clock."
+      ],
+      "sources": [
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.5"
+      ],
+      "simplifications": "Unregistered technical fixture, not curriculum credit. Flat supplied virtual files and the closed portable command subset only; no daemon, host clock, at, timers or locking.",
+      "initial": {
+        "kind": "Cron",
+        "simulation": {
+          "clock": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 8,
+            "minute": 59
+          },
+          "users": [
+            "root",
+            "alex"
+          ],
+          "tables": {},
+          "system_table": "",
+          "allow": [
+            "alex"
+          ],
+          "deny": null,
+          "files": {
+            "/work/source": "amber\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "Cron",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 8,
+              "minute": 59
+            },
+            "users": [
+              "root",
+              "alex"
+            ],
+            "tables": {},
+            "system_table": "",
+            "allow": [
+              "alex"
+            ],
+            "deny": null,
+            "files": {
+              "/work/source": "amber\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "User",
+              "owner": "alex"
+            }
+          ],
+          "outputs": [
+            "/work/report"
+          ],
+          "requirements": [
+            {
+              "kind": "CurrentFile",
+              "path": "/work/report",
+              "text": "amber\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Independent file sample 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 8,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "fresh input 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "fresh input 0\n",
+                "/work/report": "fresh input 0\n"
+              }
+            },
+            {
+              "name": "Independent file sample 2",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 10,
+                "minute": 39
+              },
+              "files": {
+                "/work/source": "fresh input 1\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "fresh input 1\n",
+                "/work/report": "fresh input 1\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "schedule {\"kind\":\"Install\",\"actor\":\"alex\",\"target\":{\"kind\":\"User\",\"owner\":\"alex\"},\"text\":\"* * * * * cat /work/source > /work/report\\n\"}",
+        "schedule {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":28,\"hour\":9,\"minute\":0}}"
+      ],
+      "prerequisites": [],
+      "cron_teaching": {
+        "prerequisite_note": "You have practiced cat and output redirection. This technical example introduces separate editing, installation and explicit virtual time.",
+        "concepts": [
+          {
+            "title": "An installed schedule",
+            "text": "Five calendar fields choose when a command starts. A draft is not installed until you use Install. The simulator never edits a host scheduler."
+          }
+        ],
+        "example_description": "This ungraded example copies different supplied files as Mira. The assignment remains separate.",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 8,
+              "minute": 59
+            },
+            "users": [
+              "root",
+              "mira"
+            ],
+            "tables": {},
+            "system_table": "",
+            "allow": [
+              "mira"
+            ],
+            "deny": null,
+            "files": {
+              "/work/example-input": "amber\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "User",
+              "owner": "mira"
+            }
+          ],
+          "outputs": [
+            "/work/example-report"
+          ],
+          "requirements": [
+            {
+              "kind": "CurrentFile",
+              "path": "/work/example-report",
+              "text": "amber\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Independent file sample 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 8,
+                "minute": 59
+              },
+              "files": {
+                "/work/example-input": "fresh input 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-input": "fresh input 0\n",
+                "/work/example-report": "fresh input 0\n"
+              }
+            },
+            {
+              "name": "Independent file sample 2",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 10,
+                "minute": 39
+              },
+              "files": {
+                "/work/example-input": "fresh input 1\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-input": "fresh input 1\n",
+                "/work/example-report": "fresh input 1\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the example owner",
+            "explanation": "This supplied user may install its own table.",
+            "action": {
+              "kind": "Actor",
+              "actor": "mira"
+            }
+          },
+          {
+            "title": "Fill the example table",
+            "explanation": "Each star leaves its calendar field unrestricted. This example intentionally runs every minute.",
+            "action": {
+              "kind": "Edit",
+              "target": {
+                "kind": "User",
+                "owner": "mira"
+              },
+              "text": "* * * * * cat /work/example-input > /work/example-report\n"
+            }
+          },
+          {
+            "title": "Install the example table",
+            "explanation": "Editing a draft does not change the installed schedule. Use the actual Install action.",
+            "action": {
+              "kind": "Install",
+              "target": {
+                "kind": "User",
+                "owner": "mira"
+              }
+            }
+          },
+          {
+            "title": "Run one simulated minute",
+            "explanation": "Run advances only this explicit virtual UTC clock, copies sample data inside the simulator and shows the result.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 0
+              }
+            }
+          }
+        ],
+        "try_change": "Leave an unsaved wrong draft. The installed table keeps working, but the pending edit must be identified before completion.",
+        "try_actions": [
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            },
+            "text": "* * * * * echo wrong\n"
+          }
+        ],
+        "try_rows": [
+          false,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            },
+            "text": "* * * * * cat /work/example-input > /work/example-report\n"
+          }
+        ]
+      }
+    }
+  ]
+}

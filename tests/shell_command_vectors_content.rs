@@ -15,6 +15,8 @@ use std::sync::{
 };
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
+#[path = "support/cron_registration.rs"]
+mod cron_registration;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
 
@@ -101,7 +103,7 @@ fn catalog() -> Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 154);
+        assert_eq!(all.len(), 164);
         for new in authored() {
             let actual = all.iter().find(|s| s.id == new.id).unwrap();
             assert_eq!(
@@ -180,8 +182,12 @@ fn three_distinct_registered_tasks_preserve_original147_and_exact37_unit_prefix(
         r.original_ids.iter().collect::<Vec<_>>()
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 39);
-    let old_raw = original_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    assert_eq!(units.len(), 42);
+    let private40 =
+        cron_registration::private_cron_units(include_bytes!("../scenarios/units-v1.json"))
+            .unwrap();
+    let raw39 = cron_registration::previous_units(&private40).unwrap();
+    let old_raw = original_units(&raw39).unwrap();
     let original = course::load(std::str::from_utf8(&old_raw).unwrap(), existing).unwrap();
     assert_eq!(original.len(), 37);
     assert_eq!(
@@ -219,11 +225,10 @@ fn three_distinct_registered_tasks_preserve_original147_and_exact37_unit_prefix(
         assert!(!lesson.prerequisite_note.is_empty());
         lesson.validate().unwrap();
     }
-    let mut changed = include_bytes!("../scenarios/units-v1.json").to_vec();
+    let mut changed = raw39.clone();
     changed.push(b' ');
     assert!(original_units(&changed).is_err());
-    let mut changed: serde_json::Value =
-        serde_json::from_slice(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let mut changed: serde_json::Value = serde_json::from_slice(&raw39).unwrap();
     changed["units"][0]["title"] = "Unreviewed change".into();
     assert!(original_units(&serde_json::to_vec(&changed).unwrap()).is_err());
 }
@@ -576,7 +581,13 @@ fn current_old_pack_bytes_and_real_legacy_records_are_not_reauthored_or_relabell
         let bytes =
             std::fs::read(std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join(path)).unwrap();
         let original = if pin.path == "scenarios/units-v1.json" {
-            original_units(&bytes).unwrap()
+            original_units(
+                &cron_registration::previous_units(
+                    &cron_registration::private_cron_units(&bytes).unwrap(),
+                )
+                .unwrap(),
+            )
+            .unwrap()
         } else {
             bytes
         };

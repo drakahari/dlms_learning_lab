@@ -1,0 +1,1087 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-optional-policy",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Optional inputs and configuration",
+      "title": "Honor a deliberately empty setting",
+      "summary": "Create a readable delivery summary without replacing an intentional blank.",
+      "objective": "The lab may supply TEAM, SUBTITLE and NOTICE. Print five lines: Team: (TEAM, or Operations when missing/empty); Subtitle: (SUBTITLE, or Shift handover only when missing); Notice supplied: yes/no; Notice has text: yes/no; Notice: (the exact NOTICE value, empty when missing). Use one space after each colon and a newline after each line. Preserve every virtual file.",
+      "difficulty": "Intermediate",
+      "minutes": 15,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test. The supplied variables and arguments may be missing or deliberately empty.",
+          "action": "Read the required behavior, then inspect the sample inputs and expected results.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Choose defaults according to the task, quote data and finish validation before changing an output file.",
+          "action": "Edit the complete script and Run. Retry after comparing a failing case’s expected and actual results.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "One successful input does not prove that missing values, empty values or bad requests are handled correctly.",
+          "action": "Compare the cases and explain your choices. Optional hints and a worked solution remain available in Learn mode.",
+          "commands": []
+        }
+      ],
+      "explanation": "Missing and empty inputs can express different intentions. The colon in a fallback/alternate operator includes empty values in the test. Operators select text without assigning it. Quote the complete expansion.\n\nOne supported solution:\nteam=${TEAM:-Operations}\nsubtitle=${SUBTITLE-Shift handover}\nsupplied=${NOTICE+yes}\nsupplied=${supplied:-no}\ntext=${NOTICE:+yes}\ntext=${text:-no}\nprintf 'Team: %s\\nSubtitle: %s\\nNotice supplied: %s\\nNotice has text: %s\\nNotice: %s\\n' \"$team\" \"$subtitle\" \"$supplied\" \"$text\" \"$NOTICE\"\n",
+      "hints": [
+        "Use a colon in the team fallback; omit it from the subtitle fallback. An explicitly empty subtitle is intentional.",
+        "A plus form can report presence without copying the supplied value. Presence and nonempty text are different tests.",
+        "Keep the format fixed and pass each result as its own quoted %s argument."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Bounded offline shell simulation. Only virtual UTF-8 files in flat /work exist. The four fallback/alternate forms accept literal fallback/alternate text only; nested expansion and other parameter operators remain unsupported. No host command, file, network or environment is used. These tasks add optional-input practice, not full Bash or exam coverage.",
+      "initial": {
+        "kind": "Script",
+        "source": "# TEAM, SUBTITLE and NOTICE are optional lab-supplied settings.\n# Create the five-line summary; do not change virtual files.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "No optional settings",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Operations\nSubtitle: Shift handover\nNotice supplied: no\nNotice has text: no\nNotice: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Deliberately empty settings",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": "",
+              "SUBTITLE": "",
+              "NOTICE": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Operations\nSubtitle: \nNotice supplied: yes\nNotice has text: no\nNotice: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "All settings supplied",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": "Dispatch",
+              "SUBTITLE": "Early shift",
+              "NOTICE": "Call desk"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Dispatch\nSubtitle: Early shift\nNotice supplied: yes\nNotice has text: yes\nNotice: Call desk\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Empty subtitle suppresses its default",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": "Field team",
+              "SUBTITLE": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Field team\nSubtitle: \nNotice supplied: no\nNotice has text: no\nNotice: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "An empty notice is still supplied",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "NOTICE": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Operations\nSubtitle: Shift handover\nNotice supplied: yes\nNotice has text: no\nNotice: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Nonempty notice without other settings",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "NOTICE": "Use channel 3"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Operations\nSubtitle: Shift handover\nNotice supplied: yes\nNotice has text: yes\nNotice: Use channel 3\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Spaces and percent signs",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": "West office",
+              "SUBTITLE": "95% ready",
+              "NOTICE": "Check 80% threshold"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: West office\nSubtitle: 95% ready\nNotice supplied: yes\nNotice has text: yes\nNotice: Check 80% threshold\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Literal shell-looking data",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": "$(printf unexpected)",
+              "SUBTITLE": "*; two words",
+              "NOTICE": "${missing:-other}"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: $(printf unexpected)\nSubtitle: *; two words\nNotice supplied: yes\nNotice has text: yes\nNotice: ${missing:-other}\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Unicode values",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": "Équipe",
+              "SUBTITLE": "旗",
+              "NOTICE": "Café"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Équipe\nSubtitle: 旗\nNotice supplied: yes\nNotice has text: yes\nNotice: Café\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          },
+          {
+            "name": "Only an empty team was supplied",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "TEAM": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            },
+            "stdout": "Team: Operations\nSubtitle: Shift handover\nNotice supplied: no\nNotice has text: no\nNotice: \n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "team=${TEAM:-Operations}\nsubtitle=${SUBTITLE-Shift handover}\nsupplied=${NOTICE+yes}\nsupplied=${supplied:-no}\ntext=${NOTICE:+yes}\ntext=${text:-no}\nprintf 'Team: %s\\nSubtitle: %s\\nNotice supplied: %s\\nNotice has text: %s\\nNotice: %s\\n' \"$team\" \"$subtitle\" \"$supplied\" \"$text\" \"$NOTICE\"\n"
+      ],
+      "prerequisites": [
+        "shell-validation"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use variables, quotes, printf and if/test from the foundations. This lesson introduces missing versus empty settings.",
+        "concepts": [
+          {
+            "title": "Missing and empty are different",
+            "text": "A supplied variable may contain no text. That can mean “clear this setting.” If the variable was not supplied at all, a default may be appropriate. The lab supplies uppercase names; you create the lowercase working values."
+          },
+          {
+            "title": "Choose the right fallback",
+            "text": "${ROOM-Exhibit hall} uses its literal default only when ROOM is missing. ${ROOM:-Exhibit hall} also uses the default when ROOM is empty. Neither form assigns ROOM."
+          },
+          {
+            "title": "Ask whether a setting exists",
+            "text": "${CREDIT+yes} produces yes when CREDIT was supplied, even if empty. ${CREDIT:+yes} produces yes only when it contains text. When either produces empty text, a separate fallback can turn that into a readable no."
+          },
+          {
+            "title": "Keep data intact",
+            "text": "Quote the whole expansion, for example \"${ROOM:-Exhibit hall}\". Spaces, stars, percent signs and shell-looking text inside a supplied value remain data. printf uses a fixed format and separate %s values."
+          },
+          {
+            "title": "This subset uses literal default words",
+            "text": "Write literal text after - or +. Nested forms such as ${ROOM:-$OTHER} are not implemented here. Use separate assignments or an ordinary if/else when choosing another variable’s value."
+          }
+        ],
+        "example": "room=${ROOM:-Exhibit hall}\ncredit=${CREDIT-Museum staff}\nlabel=${LABEL-Guest label}\nprovided=${CREDIT+yes}\nprovided=${provided:-no}\nvisible=${CREDIT:+yes}\nvisible=${visible:-no}\nprintf 'Room: <%s>\\nCredit: <%s>\\nCredit supplied: %s\\nCredit has text: %s\\nLabel: <%s>\\n' \"$room\" \"$credit\" \"$provided\" \"$visible\" \"$label\"\n",
+        "inputs": "ROOM is supplied as Reading gallery. CREDIT is deliberately empty. LABEL is absent. The example creates lowercase working values and has one unrelated virtual note file.",
+        "try_change": "Add LABEL= at the very top and Run example. The label should become blank, while the other rows stay the same. Remove that added assignment to restore the missing-label default.",
+        "fixture": {
+          "name": "Exhibit sign example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "ROOM": "Reading gallery",
+            "CREDIT": ""
+          },
+          "files": {
+            "/work/exhibit-notes.txt": "Example notes stay untouched.\n"
+          },
+          "stdout": "Room: <Reading gallery>\nCredit: <>\nCredit supplied: yes\nCredit has text: no\nLabel: <Guest label>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/exhibit-notes.txt": "Example notes stay untouched.\n"
+          }
+        }
+      },
+      "unit": "shell-optional-inputs",
+      "retry_guidance": "Compare missing and empty inputs first. An empty subtitle is intentional; a notice can be supplied without containing text. Keep each output value quoted."
+    },
+    {
+      "id": "shell-optional-report",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Optional inputs and configuration",
+      "title": "Choose a report destination safely",
+      "summary": "Apply optional arguments without hiding bad requests or destroying an input.",
+      "objective": "Accept zero, one or two arguments: SOURCE defaults to data.txt only when omitted; DESTINATION defaults to report.txt only when omitted. Reject empty names, too many arguments, source -, names containing / or equal to . or .., destination -, source=destination and a missing source. On error print Cannot create report: REASON to stderr, exit 2 and preserve all files. Reasons are too many arguments; source is empty; destination is empty; use a simple source filename; use a simple destination filename; source and report must differ; source is missing, in that checking order. On success replace DESTINATION with Report from SOURCE plus a newline and the exact source text; print Created: DESTINATION plus a newline, exit 0. Preserve other files.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test. The supplied variables and arguments may be missing or deliberately empty.",
+          "action": "Read the required behavior, then inspect the sample inputs and expected results.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Choose defaults according to the task, quote data and finish validation before changing an output file.",
+          "action": "Edit the complete script and Run. Retry after comparing a failing case’s expected and actual results.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "One successful input does not prove that missing values, empty values or bad requests are handled correctly.",
+          "action": "Compare the cases and explain your choices. Optional hints and a worked solution remain available in Learn mode.",
+          "commands": []
+        }
+      ],
+      "explanation": "Missing and empty inputs can express different intentions. The colon in a fallback/alternate operator includes empty values in the test. Operators select text without assigning it. Quote the complete expansion.\n\nOne supported solution:\nreject() { printf 'Cannot create report: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 2; then reject 'too many arguments'; fi\nsource=${1-data.txt}\ndestination=${2-report.txt}\nif test -z \"$source\"; then reject 'source is empty'; fi\nif test -z \"$destination\"; then reject 'destination is empty'; fi\ncase \"$source\" in -|.|..|*/*) reject 'use a simple source filename' ;; esac\ncase \"$destination\" in -|.|..|*/*) reject 'use a simple destination filename' ;; esac\nif test \"$source\" = \"$destination\"; then reject 'source and report must differ'; fi\nif test -f \"$source\"; then :; else reject 'source is missing'; fi\nprintf 'Report from %s\\n' \"$source\" > \"$destination\"\ncat -- \"$source\" >> \"$destination\"\nprintf 'Created: %s\\n' \"$destination\"\n",
+      "hints": [
+        "An omitted argument uses the default. An explicitly empty argument must remain invalid, so omit the colon from both argument fallbacks.",
+        "Finish every guard before the first >. Use test -f for the virtual source, then keep the two filenames different.",
+        "Print the header once and append the exact cat output. Do not capture file content into a variable if you need to retain trailing newlines."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Bounded offline shell simulation. Only virtual UTF-8 files in flat /work exist. The four fallback/alternate forms accept literal fallback/alternate text only; nested expansion and other parameter operators remain unsupported. No host command, file, network or environment is used. These tasks add optional-input practice, not full Bash or exam coverage.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Write a validated optional-argument report tool.\n# Arguments are SOURCE and DESTINATION; omitted values have documented defaults.\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Both arguments omitted",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "Created: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Report from data.txt\nnorth\nsouth\n"
+            }
+          },
+          {
+            "name": "Only source supplied",
+            "args": [
+              "intake.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n",
+              "/work/intake.txt": "one item\n"
+            },
+            "stdout": "Created: report.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Report from intake.txt\none item\n",
+              "/work/intake.txt": "one item\n"
+            }
+          },
+          {
+            "name": "Spaced source and destination",
+            "args": [
+              "shift notes.txt",
+              "daily summary.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n",
+              "/work/shift notes.txt": "Check 95%\nLiteral * text\n"
+            },
+            "stdout": "Created: daily summary.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n",
+              "/work/shift notes.txt": "Check 95%\nLiteral * text\n",
+              "/work/daily summary.txt": "Report from shift notes.txt\nCheck 95%\nLiteral * text\n"
+            }
+          },
+          {
+            "name": "Option-looking source and output preserve literal data",
+            "args": [
+              "- input.txt",
+              "-report"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n",
+              "/work/- input.txt": "$(printf no)\n${NAME}\nlast line"
+            },
+            "stdout": "Created: -report\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n",
+              "/work/-report": "Report from - input.txt\n$(printf no)\n${NAME}\nlast line",
+              "/work/- input.txt": "$(printf no)\n${NAME}\nlast line"
+            }
+          },
+          {
+            "name": "Explicit empty source",
+            "args": [
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: source is empty\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Explicit empty destination",
+            "args": [
+              "data.txt",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: destination is empty\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Missing virtual source",
+            "args": [
+              "missing.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: source is missing\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Cannot overwrite the input",
+            "args": [
+              "data.txt",
+              "data.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: source and report must differ\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Standard-input spelling is not a source",
+            "args": [
+              "-"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: use a simple source filename\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Standard-input spelling is not a destination",
+            "args": [
+              "data.txt",
+              "-"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: use a simple destination filename\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Too many arguments",
+            "args": [
+              "data.txt",
+              "new.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: too many arguments\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          },
+          {
+            "name": "Path aliases are outside this interface",
+            "args": [
+              "./data.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot create report: use a simple source filename\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/data.txt": "north\nsouth\n",
+              "/work/report.txt": "Previous report.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "reject() { printf 'Cannot create report: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 2; then reject 'too many arguments'; fi\nsource=${1-data.txt}\ndestination=${2-report.txt}\nif test -z \"$source\"; then reject 'source is empty'; fi\nif test -z \"$destination\"; then reject 'destination is empty'; fi\ncase \"$source\" in -|.|..|*/*) reject 'use a simple source filename' ;; esac\ncase \"$destination\" in -|.|..|*/*) reject 'use a simple destination filename' ;; esac\nif test \"$source\" = \"$destination\"; then reject 'source and report must differ'; fi\nif test -f \"$source\"; then :; else reject 'source is missing'; fi\nprintf 'Report from %s\\n' \"$source\" > \"$destination\"\ncat -- \"$source\" >> \"$destination\"\nprintf 'Created: %s\\n' \"$destination\"\n"
+      ],
+      "prerequisites": [
+        "shell-optional-policy",
+        "shell-report",
+        "shell-case-interface"
+      ],
+      "teaching": {
+        "prerequisite_note": "Complete the previous optional-setting lab and the existing reusable-function, report and case lessons.",
+        "concepts": [
+          {
+            "title": "An omitted argument is not an empty argument",
+            "text": "${1-flyer.txt} chooses a file only when argument 1 is missing. Calling show with an explicit empty string leaves it empty so the script can reject it. Using :- would hide that invalid request."
+          },
+          {
+            "title": "Validate the complete request first",
+            "text": "Check argument count, nonempty names, the supported filename form, different source/destination and source existence before opening an output. A failed later check cannot undo a file already truncated with >."
+          },
+          {
+            "title": "Use the interface’s filename rules",
+            "text": "Use a simple flat filename: no slash, dot-only names or the single -. Quote a source after --, as in cat -- \"$chosen\". -- ends options; it lets -flyer be a literal filename. A lone - still means standard input even after --, so this report interface rejects it. A redirection target is a filename, not a utility option."
+          },
+          {
+            "title": "Keep file content exact",
+            "text": "cat prints the virtual file as it is, including a final line without a newline. Print a fixed header with > and append cat output with >> only after validation. Quoting a path keeps its spaces together."
+          },
+          {
+            "title": "Errors are part of the behavior",
+            "text": "The assignment lists the required plain-language error reasons. Print them to stderr and exit 2 without changing any virtual file. Success prints Created: followed by the destination and returns 0."
+          }
+        ],
+        "example": "show() {\n chosen=${1-flyer.txt}\n if test -z \"$chosen\"; then printf 'Choose a flyer\\n' >&2; return 2; fi\n case \"$chosen\" in -|.|..|*/*) printf 'Use a simple flyer filename\\n' >&2; return 2 ;; esac\n if test -f \"$chosen\"; then :; else printf 'Flyer missing\\n' >&2; return 2; fi\n printf 'Preview: %s\\n' \"$chosen\"\n cat -- \"$chosen\"\n}\nshow\n",
+        "inputs": "The separate example has flyer.txt and spare-flyer.txt, no arguments or environment variables, and writes no file.",
+        "try_change": "Change the final line from show to show ''. Run example: an explicit empty argument is rejected, while the omitted argument used the default. Restore the final line to show.",
+        "fixture": {
+          "name": "Flyer preview example",
+          "args": [],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/flyer.txt": "Gallery opens at ten.\n",
+            "/work/spare-flyer.txt": "Evening event.\n"
+          },
+          "stdout": "Preview: flyer.txt\nGallery opens at ten.\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/flyer.txt": "Gallery opens at ten.\n",
+            "/work/spare-flyer.txt": "Evening event.\n"
+          }
+        }
+      },
+      "unit": "shell-optional-inputs",
+      "retry_guidance": "Check the failing input and the first required error reason. Invalid requests must preserve every file; a successful report must keep the source text exactly, including its final newline behavior."
+    },
+    {
+      "id": "shell-optional-handover",
+      "version": 1,
+      "track": "Bash/Shell",
+      "topic": "Optional inputs and configuration",
+      "title": "Repair a configuration handover",
+      "summary": "Resolve independent overrides, preview safely and publish only a complete two-job report.",
+      "objective": "Optional argument: preview (also the default when omitted) or publish; reject an empty/unknown action or excess arguments. NAME1/NAME2 are required nonempty names. BASE_TEAM defaults to Operations when missing/empty; BASE_NOTE defaults to Ready only when missing. TEAM1/TEAM2 and NOTE1/NOTE2 inherit their common value only when absent; empty notes clear, empty resolved teams are invalid. Print both Job/Team/Note groups separated by one blank line, then Common input team/note rows in angle brackets (use not supplied for absent inputs). Preview prints Preview then the report and changes no file. Publish writes only handover.txt and prints Published: handover.txt. Errors print Cannot hand over: REASON to stderr and exit 2 without changes: too many arguments; choose preview or publish; first/second job name is empty; first/second job team is empty, in that order. End every report row with a newline; success exits 0.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Build and test the behavior",
+        "Review the edge cases"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test. The supplied variables and arguments may be missing or deliberately empty.",
+          "action": "Read the required behavior, then inspect the sample inputs and expected results.",
+          "commands": []
+        },
+        {
+          "title": "Build and test the behavior",
+          "why": "Choose defaults according to the task, quote data and finish validation before changing an output file.",
+          "action": "Edit the complete script and Run. Retry after comparing a failing case’s expected and actual results.",
+          "commands": []
+        },
+        {
+          "title": "Review the edge cases",
+          "why": "One successful input does not prove that missing values, empty values or bad requests are handled correctly.",
+          "action": "Compare the cases and explain your choices. Optional hints and a worked solution remain available in Learn mode.",
+          "commands": []
+        }
+      ],
+      "explanation": "An absent override and an intentionally empty override are different decisions. Resolve each job from common values, preserve caller inputs and validate the complete plan before publication. Ordinary if/else can select another variable’s value without unsupported nested defaults.\n\nOne supported solution:\nfail() { printf 'Cannot hand over: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 1; then fail 'too many arguments'; fi\nmode=${1-preview}\ncase \"$mode\" in preview|publish) : ;; *) fail 'choose preview or publish' ;; esac\nbase_team=${BASE_TEAM:-Operations}\nbase_note=${BASE_NOTE-Ready}\nteam_one=$base_team\nteam_two=$base_team\nnote_one=$base_note\nnote_two=$base_note\nif test -n \"${TEAM1+set}\"; then team_one=$TEAM1; fi\nif test -n \"${TEAM2+set}\"; then team_two=$TEAM2; fi\nif test -n \"${NOTE1+set}\"; then note_one=$NOTE1; fi\nif test -n \"${NOTE2+set}\"; then note_two=$NOTE2; fi\nif test -z \"$NAME1\"; then fail 'first job name is empty'; fi\nif test -z \"$NAME2\"; then fail 'second job name is empty'; fi\nif test -z \"$team_one\"; then fail 'first job team is empty'; fi\nif test -z \"$team_two\"; then fail 'second job team is empty'; fi\nreport=$(printf 'Job: %s\\nTeam: %s\\nNote: %s\\n\\nJob: %s\\nTeam: %s\\nNote: %s\\nCommon input team: <%s>\\nCommon input note: <%s>\\n' \"$NAME1\" \"$team_one\" \"$note_one\" \"$NAME2\" \"$team_two\" \"$note_two\" \"${BASE_TEAM-not supplied}\" \"${BASE_NOTE-not supplied}\")\ncase \"$mode\" in\n preview) printf 'Preview\\n%s\\n' \"$report\" ;;\n publish) printf '%s\\n' \"$report\" > handover.txt; printf 'Published: handover.txt\\n' ;;\nesac\n",
+      "hints": [
+        "Check both names and both resolved teams before the first >. Keep preview read-only.",
+        "Use the presence marker ${TEAM1+set}, not the nonempty marker ${TEAM1:+set}, when a deliberately empty override must be detected.",
+        "Choose the common value first, then replace it only when that job’s override was supplied. Start each job independently."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Shell-Parameter-Expansion.html",
+        "https://pubs.opengroup.org/onlinepubs/9799919799/utilities/V3_chap02.html"
+      ],
+      "simplifications": "Bounded offline shell simulation. Only virtual UTF-8 files in flat /work exist. The four fallback/alternate forms accept literal fallback/alternate text only; nested expansion and other parameter operators remain unsupported. No host command, file, network or environment is used. These tasks add optional-input practice, not full Bash or exam coverage.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Repair this incomplete handover. All effects stay in the simulator.\n: > handover.txt\nteam=${TEAM1:-Operations}\nnote=${NOTE1:-Ready}\nprintf 'Job: %s\\nTeam: %s\\nNote: %s\\n' \"$NAME1\" \"$team\" \"$note\" > handover.txt\n# The second job currently inherits the first job's chosen values.\nprintf 'Job: %s\\nTeam: %s\\nNote: %s\\n' \"$NAME2\" \"$team\" \"$note\" >> handover.txt\n"
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Omitted mode and inherited defaults",
+            "args": [],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "Preview\nJob: Intake\nTeam: Operations\nNote: Ready\n\nJob: Dispatch\nTeam: Operations\nNote: Ready\nCommon input team: <not supplied>\nCommon input note: <not supplied>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Only the first optional note is deliberately cleared",
+            "args": [
+              "preview"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch",
+              "NOTE1": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "Preview\nJob: Intake\nTeam: Operations\nNote: \n\nJob: Dispatch\nTeam: Operations\nNote: Ready\nCommon input team: <not supplied>\nCommon input note: <not supplied>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Common settings and independent overrides",
+            "args": [
+              "publish"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch",
+              "BASE_TEAM": "Field support",
+              "BASE_NOTE": "Wait for review",
+              "TEAM1": "Dispatch team",
+              "NOTE2": "Priority",
+              "TEAM2": "Field responders"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "Published: handover.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Job: Intake\nTeam: Dispatch team\nNote: Wait for review\n\nJob: Dispatch\nTeam: Field responders\nNote: Priority\nCommon input team: <Field support>\nCommon input note: <Wait for review>\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Empty common team defaults but empty common note remains empty",
+            "args": [
+              "publish"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch",
+              "BASE_TEAM": "",
+              "BASE_NOTE": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "Published: handover.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Job: Intake\nTeam: Operations\nNote: \n\nJob: Dispatch\nTeam: Operations\nNote: \nCommon input team: <>\nCommon input note: <>\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Space and percent values remain literal",
+            "args": [
+              "preview"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "East office",
+              "NAME2": "$(printf no)",
+              "BASE_TEAM": "Check 90%",
+              "NOTE1": "Keep * literal",
+              "NOTE2": "",
+              "TEAM1": "Night crew"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "Preview\nJob: East office\nTeam: Night crew\nNote: Keep * literal\n\nJob: $(printf no)\nTeam: Check 90%\nNote: \nCommon input team: <Check 90%>\nCommon input note: <not supplied>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "An empty first name cannot start publication",
+            "args": [
+              "publish"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "",
+              "NAME2": "Dispatch"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: first job name is empty\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "A late invalid name cannot truncate the report",
+            "args": [
+              "publish"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: second job name is empty\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "An explicit empty first team is invalid",
+            "args": [
+              "publish"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch",
+              "TEAM1": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: first job team is empty\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "An explicit empty second team is invalid",
+            "args": [
+              "publish"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch",
+              "TEAM1": "Valid",
+              "TEAM2": ""
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: second job team is empty\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Unknown action keeps previous publication",
+            "args": [
+              "launch"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: choose preview or publish\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Empty action is not the omitted default",
+            "args": [
+              ""
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: choose preview or publish\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          },
+          {
+            "name": "Excess arguments cannot start a publication",
+            "args": [
+              "publish",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {
+              "NAME1": "Intake",
+              "NAME2": "Dispatch"
+            },
+            "files": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            },
+            "stdout": "",
+            "stderr": "Cannot hand over: too many arguments\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Retain this unrelated file.\n",
+              "/work/handover.txt": "Previously approved report.\n",
+              "/work/team-notes.txt": "These notes are separate.\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "fail() { printf 'Cannot hand over: %s\\n' \"$1\" >&2; exit 2; }\nif test \"$#\" -gt 1; then fail 'too many arguments'; fi\nmode=${1-preview}\ncase \"$mode\" in preview|publish) : ;; *) fail 'choose preview or publish' ;; esac\nbase_team=${BASE_TEAM:-Operations}\nbase_note=${BASE_NOTE-Ready}\nteam_one=$base_team\nteam_two=$base_team\nnote_one=$base_note\nnote_two=$base_note\nif test -n \"${TEAM1+set}\"; then team_one=$TEAM1; fi\nif test -n \"${TEAM2+set}\"; then team_two=$TEAM2; fi\nif test -n \"${NOTE1+set}\"; then note_one=$NOTE1; fi\nif test -n \"${NOTE2+set}\"; then note_two=$NOTE2; fi\nif test -z \"$NAME1\"; then fail 'first job name is empty'; fi\nif test -z \"$NAME2\"; then fail 'second job name is empty'; fi\nif test -z \"$team_one\"; then fail 'first job team is empty'; fi\nif test -z \"$team_two\"; then fail 'second job team is empty'; fi\nreport=$(printf 'Job: %s\\nTeam: %s\\nNote: %s\\n\\nJob: %s\\nTeam: %s\\nNote: %s\\nCommon input team: <%s>\\nCommon input note: <%s>\\n' \"$NAME1\" \"$team_one\" \"$note_one\" \"$NAME2\" \"$team_two\" \"$note_two\" \"${BASE_TEAM-not supplied}\" \"${BASE_NOTE-not supplied}\")\ncase \"$mode\" in\n preview) printf 'Preview\\n%s\\n' \"$report\" ;;\n publish) printf '%s\\n' \"$report\" > handover.txt; printf 'Published: handover.txt\\n' ;;\nesac\n"
+      ],
+      "prerequisites": [
+        "shell-optional-report",
+        "shell-scope-capstone",
+        "shell-capture-handover"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use the prior optional-input labs, function/scope lessons, case dispatch and command-capture practice. This is their configuration handover capstone.",
+        "concepts": [
+          {
+            "title": "Missing inherits; empty can be intentional",
+            "text": "The lab supplies two job names, common settings and optional per-job overrides. A missing override inherits its common value. An explicitly empty note clears it; an explicitly empty required team is an error."
+          },
+          {
+            "title": "Use a presence test for dynamic inheritance",
+            "text": "Fallback text is literal in this simulator; it cannot expand another variable. First copy the common value, then use if test -n \"${DISPLAY+set}\" to ask whether an override was supplied. If supplied, copy its exact value, even if empty."
+          },
+          {
+            "title": "Resolve each job independently",
+            "text": "Start the second job from the common defaults again. Reusing the first job’s chosen values can leak an override into the next job. Separate variables, explicit helper arguments or Bash local values are valid approaches."
+          },
+          {
+            "title": "Validate before opening the report",
+            "text": "Check the action, both required names and both resolved teams before the first output-file redirection. A bad second job must not leave an incomplete report. This is preflight, not crash-atomic filesystem replacement."
+          },
+          {
+            "title": "Preview and publication have different effects",
+            "text": "Preview prints the complete plan and preserves every file. Publish replaces only handover.txt after validation. A captured report or direct printf publication is valid. Command capture removes trailing newlines; add the specified final newline explicitly."
+          },
+          {
+            "title": "Portable choices and Bash local",
+            "text": "The four fallback/alternate forms and ordinary if/case choices are portable shell syntax in this subset. local is a separate Bash-specific feature from the scope unit; it is optional here. Quoted values remain data, never commands."
+          }
+        ],
+        "example": "house='Reading room'\ncaption=$house\nif test -n \"${DISPLAY+set}\"; then caption=$DISPLAY; fi\nprintf 'Display: <%s>\\nCredit: <%s>\\n' \"$caption\" \"${CREDIT-Local team}\"\n",
+        "inputs": "CREDIT is supplied as an empty string. DISPLAY is absent. The example creates house and caption and writes no file. Its exhibit-card file is unrelated to the assignment.",
+        "try_change": "Add DISPLAY=Courtyard at the top and Run example. Then change that to DISPLAY= to deliberately clear the display text. Remove the assignment to restore inheritance.",
+        "fixture": {
+          "name": "Exhibit override example",
+          "args": [],
+          "stdin": "",
+          "env": {
+            "CREDIT": ""
+          },
+          "files": {
+            "/work/exhibit-card.txt": "Example card stays unchanged.\n"
+          },
+          "stdout": "Display: <Reading room>\nCredit: <>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/exhibit-card.txt": "Example card stays unchanged.\n"
+          }
+        }
+      },
+      "unit": "shell-optional-inputs",
+      "retry_guidance": "Compare the two resolved jobs independently. Check missing versus empty overrides, preview file preservation and a bad second job before opening handover.txt."
+    }
+  ]
+}

@@ -922,6 +922,10 @@ pub fn perform(
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
         file_backup_learning,
+        etherchannel_draft,
+        etherchannel_learning,
+        cron_session,
+        cron_learning,
         nfs_session: _,
         nfs_learning: _,
         rpm_session,
@@ -988,6 +992,10 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     } = w;
     false
         || file_backup_learning.is_some()
+        || etherchannel_draft.is_some()
+        || etherchannel_learning.is_some()
+        || cron_session.is_some()
+        || cron_learning.is_some()
         || rpm_session.is_some()
         || rpm_learning.is_some()
         || nat_draft.is_some()
@@ -1079,6 +1087,9 @@ pub(crate) fn context<'a>(
     a: &crate::progress::Attempt,
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
+    if s.cron_teaching.is_some() {
+        return Err("Scheduling teaching belongs to its scheduling activity".into());
+    }
     if a.scenario_version != s.version || !within(s, MAX_SCENARIO) {
         return Err("NFS source version or complete Scenario bound differs".into());
     }
@@ -1734,7 +1745,7 @@ mod attempt_projection_tests {
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
         let mut all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 154);
+        assert_eq!(all.len(), 164);
         let s = scenario();
         all.push(s.clone());
         let mut p = progress::decode(&raw, &all).unwrap();

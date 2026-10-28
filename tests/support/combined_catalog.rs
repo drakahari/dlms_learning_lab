@@ -1,9 +1,190 @@
-//! Test-only closed composition of two reviewed unit appends. No runtime loader change.
+//! Test-only closed composition of reviewed Bash/NFS/LACP unit appends. No runtime loader change.
 use super::digest;
 use serde_json::Value;
 const NFS_INDEX_SHA: &str = "d1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef";
 const BASH_REVIEW_SHA: &str = "fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e82ee5f58a8f9c0eb";
+/// Exact new42→reviewed41 inverse; no historical producer or old recipe changes.
+pub fn before_cron_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let bytes = include_bytes!("../fixtures/catalog164-registration.json");
+    if digest::hash(bytes) != "980ac05b935f9cbcc76bf3f1dff351de2e11dbad326ccf349f195f70c4f13072" {
+        return Err("Immutable Cron combined append recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    if digest::hash(raw)
+        != recipe["after_units42_sha256"]
+            .as_str()
+            .ok_or("New42 pin missing")?
+        || raw.len() as u64
+            != recipe["after_units42_bytes"]
+                .as_u64()
+                .ok_or("New42 length missing")?
+    {
+        return Err("Exact combined42 raw units differ".into());
+    }
+    let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
+    let prefix = text
+        .strip_suffix(
+            recipe["append_suffix_utf8"]
+                .as_str()
+                .ok_or("Exact Cron suffix missing")?,
+        )
+        .ok_or("Exact final Cron append differs")?;
+    let before = format!(
+        "{prefix}{}",
+        recipe["old_tail_utf8"]
+            .as_str()
+            .ok_or("Prior tail missing")?
+    )
+    .into_bytes();
+    if digest::hash(&before)
+        != recipe["before_units41_sha256"]
+            .as_str()
+            .ok_or("Reviewed41 pin missing")?
+        || before.len() as u64
+            != recipe["before_units41_bytes"]
+                .as_u64()
+                .ok_or("Reviewed41 length missing")?
+    {
+        return Err("Full reviewed41 raw bytes differ".into());
+    }
+    let mut expected: Value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
+    if expected != recipe["before_units41"] {
+        return Err("Full reviewed41 typed objects differ".into());
+    }
+    let units = expected["units"]
+        .as_array_mut()
+        .ok_or("Reviewed41 unit array absent")?;
+    if units.len() != 41 {
+        return Err("Reviewed41 count differs".into());
+    }
+    units.push(recipe["cron_unit"].clone());
+    if serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? != expected {
+        return Err("Change outside ordered Cron append".into());
+    }
+    before_optional_units(&before)?;
+    Ok(before)
+}
+pub fn before_optional_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let recipe_raw = include_bytes!("../fixtures/catalog160-registration.json");
+    if digest::hash(recipe_raw)
+        != "e431d3f3e8102fac06272879b91baf20ae00144e410cc3278886f70a37b4e312"
+    {
+        return Err("Immutable combined160 unit recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_slice(recipe_raw).map_err(|e| e.to_string())?;
+    if digest::hash(raw)
+        != recipe["combined41_sha256"]
+            .as_str()
+            .ok_or("Combined41 pin missing")?
+    {
+        return Err("Exact combined41 raw unit bytes differ".into());
+    }
+    let pos = usize::try_from(
+        recipe["optional_insert_byte_offset"]
+            .as_u64()
+            .ok_or("Optional position missing")?,
+    )
+    .map_err(|e| e.to_string())?;
+    let insert = recipe["optional_insert_utf8"]
+        .as_str()
+        .ok_or("Optional insertion missing")?
+        .as_bytes();
+    let end = pos
+        .checked_add(insert.len())
+        .ok_or("Optional position overflow")?;
+    if raw.get(pos..end) != Some(insert) {
+        return Err("Exact optional unit append differs".into());
+    }
+    let mut recovered = raw[..pos].to_vec();
+    recovered.extend_from_slice(&raw[end..]);
+    if digest::hash(&recovered)
+        != recipe["ether40_sha256"]
+            .as_str()
+            .ok_or("Ether40 pin missing")?
+    {
+        return Err("Exact reviewed Ether40 raw unit bytes differ".into());
+    }
+    // Reuse the exact peer-reviewed inverse; it independently recovers and
+    // validates all original39 bytes and the full authored LACP unit.
+    before_lacp_units(&recovered)?;
+    let mut expected: Value = serde_json::from_slice(&recovered).map_err(|e| e.to_string())?;
+    let units = expected["units"]
+        .as_array_mut()
+        .ok_or("Ether40 units missing")?;
+    if units.len() != 40 {
+        return Err("Reviewed Ether40 count differs".into());
+    }
+    units.push(recipe["optional_unit"].clone());
+    if serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? != expected {
+        return Err("Change outside exact Ether40 plus optional unit append".into());
+    }
+    Ok(recovered)
+}
+pub fn before_lacp_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let recipe_raw = include_str!("../fixtures/catalog157-original154-boundary.json");
+    if digest::hash(recipe_raw.as_bytes())
+        != "0d2035c4da961607c6b40066a944040f2ee133a1270dceefe5c69598768f9969"
+    {
+        return Err("Immutable LACP append recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_str(recipe_raw).map_err(|e| e.to_string())?;
+    let original = recipe["original_units_utf8"]
+        .as_str()
+        .ok_or("Original39 units missing")?
+        .as_bytes();
+    if digest::hash(original)
+        != recipe["original_units_sha256"]
+            .as_str()
+            .ok_or("Original39 pin missing")?
+    {
+        return Err("Original39 raw bytes differ".into());
+    }
+    let pos = usize::try_from(
+        recipe["append"]["insertion_offset"]
+            .as_u64()
+            .ok_or("LACP offset missing")?,
+    )
+    .map_err(|e| e.to_string())?;
+    let insert = recipe["append"]["insert_utf8"]
+        .as_str()
+        .ok_or("LACP insertion missing")?
+        .as_bytes();
+    if pos > original.len() {
+        return Err("LACP insertion outside original39".into());
+    }
+    let mut expected = original[..pos].to_vec();
+    expected.extend_from_slice(insert);
+    expected.extend_from_slice(&original[pos..]);
+    if digest::hash(&expected)
+        != recipe["append"]["new_units_sha256"]
+            .as_str()
+            .ok_or("Current40 pin missing")?
+        || raw != expected
+    {
+        return Err("Change outside exact original39 plus LACP append".into());
+    }
+    let original_value: Value = serde_json::from_slice(original).map_err(|e| e.to_string())?;
+    let mut expected_value = original_value;
+    let units = expected_value["units"]
+        .as_array_mut()
+        .ok_or("Original39 array missing")?;
+    if units.len() != 39 {
+        return Err("Original39 count differs".into());
+    }
+    units.push(recipe["append"]["new_unit"].clone());
+    let actual: Value = serde_json::from_slice(raw).map_err(|e| e.to_string())?;
+    if actual != expected_value {
+        return Err("Exact typed original39 and new LACP unit differ".into());
+    }
+    Ok(original.to_vec())
+}
 pub fn old_unit_bytes(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let before_cron = before_cron_units(raw).ok();
+    let raw = before_cron.as_deref().unwrap_or(raw);
+    let before_optional = before_optional_units(raw).ok();
+    let raw = before_optional.as_deref().unwrap_or(raw);
+    let projected = before_lacp_units(raw).ok();
+    let raw = projected.as_deref().unwrap_or(raw);
     let bash_raw = include_str!("../fixtures/shell-command-vectors-review.json");
     let nfs_raw = include_str!("../fixtures/nfs-original147-source-index.json");
     if digest::hash(bash_raw.as_bytes()) != BASH_REVIEW_SHA

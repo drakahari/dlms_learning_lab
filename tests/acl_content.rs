@@ -153,7 +153,21 @@ fn catalog() -> Vec<Scenario> {
         .filter(|s| !IDS.contains(&s.id.as_str()))
         .collect();
     all.extend(labs());
-    pack::load(&serde_json::json!({"schema_version":1,"scenarios":all}).to_string()).unwrap()
+    // The catalog is several independently bounded packs; growing content
+    // must not turn this fixture into one oversized artificial pack.
+    let before = serde_json::to_value(&all).unwrap();
+    let packs = all
+        .chunks(16)
+        .map(|rows| serde_json::json!({"schema_version":1,"scenarios":rows}).to_string())
+        .collect::<Vec<_>>();
+    assert!(packs.iter().all(|text| text.len() <= pack::MAX_PACK_BYTES));
+    let loaded = pack::load_catalog(&packs.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
+    assert_eq!(
+        serde_json::to_value(&loaded).unwrap(),
+        before,
+        "Chunking retains every typed definition and original fixture order"
+    );
+    loaded
 }
 fn network(s: &State) -> &routing::Network {
     let State::Ipv4Acl { network } = s else {

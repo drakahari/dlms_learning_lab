@@ -7,6 +7,10 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_backup_teaching: Option<crate::file_backup_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub etherchannel_teaching: Option<crate::etherchannel_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub cron_teaching: Option<crate::cron_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nfs_teaching: Option<crate::nfs_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nat_teaching: Option<crate::nat_teaching::Lesson>,
@@ -178,7 +182,10 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || s.solution.iter().any(|v| {
                 v.trim().is_empty()
                     || v.len()
-                        > if matches!(s.initial, State::Nfs { .. }) {
+                        > if matches!(s.initial, State::EtherChannel { .. }) {
+                            crate::etherchannel_workspace::PREFIX.len()
+                                + crate::etherchannel::MAX_ACTION_BYTES
+                        } else if matches!(s.initial, State::Nfs { .. }) {
                             crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION
                         } else if matches!(s.initial, State::RpmPackages { .. }) {
                             crate::rpm_packages_terminal::MAX_COMMAND
@@ -391,6 +398,57 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             }
         } else if s.file_backup_teaching.is_some() || matches!(s.goal, Goal::FileBackup { .. }) {
             return Err("Backup teaching/objectives on another activity".into());
+        }
+        if let State::EtherChannel { simulation } = &s.initial {
+            let Goal::EtherChannel { definition } = &s.goal else {
+                return Err("LACP State needs its matching authored Goal".into());
+            };
+            if simulation != &definition.initial
+                || definition.validate().is_err()
+                || !crate::etherchannel_workspace::within(
+                    s,
+                    crate::etherchannel_workspace::MAX_SCENARIO,
+                )
+            {
+                return Err("LACP exact initial/source aggregate differs".into());
+            }
+            if s.guide.iter().any(|g| !g.commands.is_empty()) {
+                return Err("LACP uses native editors; internal JSON is not taught as IOS".into());
+            }
+            if let Some(l) = &s.etherchannel_teaching {
+                l.validate()?;
+                if !l.separate_from(simulation) {
+                    return Err("LACP practice needs disjoint supplied identities".into());
+                }
+            }
+        } else if s.etherchannel_teaching.is_some() || matches!(s.goal, Goal::EtherChannel { .. }) {
+            return Err("LACP Goal/teaching belongs to another activity".into());
+        }
+        if let State::Cron { simulation } = &s.initial {
+            let Goal::Cron { definition } = &s.goal else {
+                return Err("Scheduling state needs its matching authored goal".into());
+            };
+            if simulation != &definition.initial
+                || definition.validate().is_err()
+                || !crate::cron_workspace::within(s, crate::cron_workspace::MAX_CONTEXT)
+            {
+                return Err("Scheduling initial context or complete Scenario bound differs".into());
+            }
+            if s.guide.iter().any(|g| !g.commands.is_empty()) {
+                return Err(
+                    "Scheduling uses native editors and Run, not learner JSON commands".into(),
+                );
+            }
+            if let Some(l) = &s.cron_teaching {
+                l.validate()?;
+                if !l.separate_from(definition) {
+                    return Err(
+                        "Scheduling practice must use separate supplied users and files".into(),
+                    );
+                }
+            }
+        } else if s.cron_teaching.is_some() || matches!(s.goal, Goal::Cron { .. }) {
+            return Err("Scheduling goal or teaching on another activity".into());
         }
         if let State::Nfs { simulation } = &s.initial {
             let Goal::Nfs { definition } = &s.goal else {
@@ -871,6 +929,8 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
         State::FileBackup { simulation } => simulation.valid(),
+        State::EtherChannel { simulation } => simulation.validate().is_ok(),
+        State::Cron { simulation } => simulation.validate().is_ok(),
         State::Nfs { simulation } => simulation.validate().is_ok(),
         State::RpmPackages { simulation } => crate::rpm_packages_workspace::admitted(simulation),
         State::BasicNat { simulation } => crate::nat_workspace::admitted(simulation),
@@ -1074,5 +1134,8 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/rpm-packages-v1.json"),
         include_str!("../scenarios/shell-command-vectors-v1.json"),
         include_str!("../scenarios/nfs-v1.json"),
+        include_str!("../scenarios/etherchannel-v1.json"),
+        include_str!("../scenarios/shell-optional-inputs-v1.json"),
+        include_str!("../scenarios/linux-cron-v1.json"),
     ])
 }

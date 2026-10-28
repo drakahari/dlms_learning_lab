@@ -447,6 +447,10 @@ pub fn apply(d: &Definition, s: &mut State, a: &core::Action) -> Result<core::Pl
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
         file_backup_learning,
+        etherchannel_draft,
+        etherchannel_learning,
+        cron_session,
+        cron_learning,
         nfs_session,
         nfs_learning,
         rpm_session: _,
@@ -513,6 +517,10 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     } = w;
     false
         || file_backup_learning.is_some()
+        || etherchannel_draft.is_some()
+        || etherchannel_learning.is_some()
+        || cron_session.is_some()
+        || cron_learning.is_some()
         || nfs_session.is_some()
         || nfs_learning.is_some()
         || nat_draft.is_some()

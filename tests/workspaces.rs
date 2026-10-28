@@ -152,6 +152,9 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     for (n, s) in labs.iter().enumerate() {
         let mut a = Attempt::new(s, n as u64);
         workspace::prepare(&mut a);
+        if matches!(a.state, State::Cron { .. }) {
+            dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
+        }
         let w = a.workspace.as_mut().unwrap();
         w.command = "unfinished |".into();
         w.service_port = Some("unfinished".into());

@@ -1039,7 +1039,7 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
     scenario.dhcpv4_teaching = Some(lesson);
     // The catalog is a collection of bounded packs, not one growing artificial pack.
     let mut catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 154);
+    assert_eq!(catalog.len(), 164);
     let normal = serde_json::to_value(&catalog).unwrap();
     assert!(scenario.prerequisites.is_empty());
     assert!(catalog.iter().all(|s| s.id != scenario.id));
@@ -1052,8 +1052,8 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
         serde_json::to_value(&scenario).unwrap()
     );
     catalog.extend(validated);
-    assert_eq!(catalog.len(), 155);
-    assert_eq!(serde_json::to_value(&catalog[..154]).unwrap(), normal);
+    assert_eq!(catalog.len(), 165);
+    assert_eq!(serde_json::to_value(&catalog[..164]).unwrap(), normal);
     let oversized = format!("{}{}", fixture_pack, " ".repeat(2 * 1024 * 1024));
     assert!(
         pack::load(&oversized)

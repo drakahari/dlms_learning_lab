@@ -17,6 +17,14 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub file_backup_learning: Option<crate::file_backup_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub etherchannel_draft: Option<crate::etherchannel_workspace::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub etherchannel_learning: Option<crate::etherchannel_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cron_session: Option<crate::cron_workspace::Session>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub cron_learning: Option<crate::cron_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nfs_session: Option<crate::nfs_workspace::Session>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub nfs_learning: Option<crate::nfs_teaching::Learning>,
@@ -143,6 +151,13 @@ impl WorkspaceData {
     pub fn valid(&self) -> bool {
         self.version == 1
             && self.file_backup_learning.as_ref().is_none_or(|l| l.valid())
+            && self.etherchannel_draft.as_ref().is_none_or(|d| d.valid())
+            && self
+                .etherchannel_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
+            && self.cron_session.as_ref().is_none_or(|s| s.valid())
+            && self.cron_learning.as_ref().is_none_or(|l| l.valid())
             && self.nfs_session.as_ref().is_none_or(|s| s.valid())
             && self.nfs_learning.as_ref().is_none_or(|l| l.valid())
             && self.rpm_session.as_ref().is_none_or(|s| s.valid())
@@ -283,6 +298,40 @@ pub fn preserve_script_history(a: &mut Attempt) {
         w.checked = false;
     }
 }
+/// Presence only, without serialization or completion authority.
+pub fn has_etherchannel_metadata(a: &Attempt) -> bool {
+    a.workspace
+        .as_ref()
+        .is_some_and(|w| w.etherchannel_draft.is_some() || w.etherchannel_learning.is_some())
+}
+/// Old-family prepare must also reject a new-kind Attempt before optional metadata exists.
+pub fn is_etherchannel_workspace(a: &Attempt) -> bool {
+    matches!(a.state, State::EtherChannel { .. }) || has_etherchannel_metadata(a)
+}
+pub(crate) fn reject_etherchannel_metadata(a: &Attempt) -> Result<(), String> {
+    reject_cron_metadata(a)?;
+    if is_etherchannel_workspace(a) {
+        Err("LACP workspace belongs to its LACP activity; previous work retained".into())
+    } else {
+        Ok(())
+    }
+}
+/// Presence only; no serialization, grading or cached validation credential.
+pub fn has_cron_metadata(a: &Attempt) -> bool {
+    a.workspace
+        .as_ref()
+        .is_some_and(|w| w.cron_session.is_some() || w.cron_learning.is_some())
+}
+pub fn is_cron_workspace(a: &Attempt) -> bool {
+    matches!(a.state, State::Cron { .. }) || has_cron_metadata(a)
+}
+pub(crate) fn reject_cron_metadata(a: &Attempt) -> Result<(), String> {
+    if is_cron_workspace(a) {
+        Err("Scheduling workspace metadata belongs to its scheduling activity; previous work retained".into())
+    } else {
+        Ok(())
+    }
+}
 /// Presence only: no grading, serialization, mutation or validation credential.
 pub fn has_nfs_metadata(a: &Attempt) -> bool {
     a.workspace
@@ -290,6 +339,8 @@ pub fn has_nfs_metadata(a: &Attempt) -> bool {
         .is_some_and(|w| w.nfs_session.is_some() || w.nfs_learning.is_some())
 }
 pub(crate) fn reject_nfs_metadata(a: &Attempt) -> Result<(), String> {
+    reject_cron_metadata(a)?;
+    reject_etherchannel_metadata(a)?;
     if has_nfs_metadata(a) {
         Err("NFS workspace metadata belongs to its NFS activity; previous work retained".into())
     } else {
@@ -302,6 +353,16 @@ pub fn prepare(a: &mut Attempt) {
         return;
     }
 
+    if matches!(a.state, State::EtherChannel { .. }) {
+        let _ = crate::etherchannel_workspace::prepare_draft(a);
+        return;
+    }
+    if has_etherchannel_metadata(a) {
+        return;
+    }
+    if matches!(a.state, State::Cron { .. }) || has_cron_metadata(a) {
+        return;
+    }
     if matches!(a.state, State::Nfs { .. }) {
         let _ = crate::nfs_workspace::prepare_session(a);
         return;

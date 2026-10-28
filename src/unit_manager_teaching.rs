@@ -364,6 +364,7 @@ pub fn prepare(
     lesson: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(attempt)?;
     crate::workspace::reject_nfs_metadata(attempt)?;
     let crate::engine::State::UnitManager { simulation } = &attempt.state else {
         return Err("Virtual unit practice belongs only to its own workspace".into());

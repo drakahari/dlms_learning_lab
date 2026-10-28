@@ -9,6 +9,8 @@ use dlms_learning_lab::{
 use serde_json::Value;
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
+#[path = "support/cron_registration.rs"]
+mod cron_registration;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
 const IDS: [&str; 3] = [
@@ -43,7 +45,7 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     let old = existing();
     assert_eq!(old.len(), 147);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 154);
+    assert_eq!(all.len(), 164);
     assert_eq!(
         serde_json::to_value(&all[..147]).unwrap(),
         serde_json::to_value(&old).unwrap()
@@ -64,7 +66,7 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [45, 32, 28, 49]
+        [48, 36, 28, 52]
     );
     let scripts = all
         .iter()
@@ -76,18 +78,23 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
             }
         })
         .collect::<Vec<_>>();
-    assert_eq!(scripts.len(), 49);
-    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 350);
+    assert_eq!(scripts.len(), 52);
+    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 384);
 }
 #[test]
 fn exact_closed_unit_append_reconstructs_the_complete_original37_unit_bytes() {
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let current_raw = include_bytes!("../scenarios/units-v1.json");
+    let raw39 = cron_registration::previous_units(
+        &cron_registration::private_cron_units(current_raw).unwrap(),
+    )
+    .unwrap();
+    let raw = raw39.as_slice();
     let old = old_units(raw).unwrap();
     let original = course::load(std::str::from_utf8(&old).unwrap(), &existing()).unwrap();
     assert_eq!(original.len(), 37);
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 39);
+    assert_eq!(units.len(), 42);
     assert_eq!(
         serde_json::to_value(&units[..37]).unwrap(),
         serde_json::to_value(original).unwrap()

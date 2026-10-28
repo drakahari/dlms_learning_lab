@@ -206,7 +206,7 @@ fn normal_catalog_context_prerequisite_chain_and_source_shape() {
     let all = labs();
     assert_eq!(all.len(), 3);
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 154);
+    assert_eq!(normal.len(), 164);
     assert!(
         all.iter()
             .all(|s| normal.iter().any(|current| current.id == s.id))

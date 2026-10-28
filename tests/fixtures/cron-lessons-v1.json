@@ -1,0 +1,4660 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-cron-weekday-report",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-cron-foundations",
+      "title": "Publish a weekday report on schedule",
+      "summary": "At 09:10 Monday–Friday, copy /work/source to /work/report as Alex.",
+      "objective": "At 09:10 Monday–Friday, copy /work/source to /work/report as Alex. Do not start on weekends or neighbouring minutes. Install Alex’s user table, run a virtual interval through 2026-10-28 09:10, and retain Pat’s installed table and the peer note.",
+      "retry_guidance": "Inspect the installed document and virtual output. Editing a draft does not install it. Check feedback names the failing calendar/input case; retry without resetting your draft.",
+      "difficulty": "Beginner",
+      "minutes": 15,
+      "steps": [
+        "Inspect the supplied task and installed documents",
+        "Edit and install the needed scheduling documents",
+        "Run the requested virtual interval and inspect output",
+        "Check the full current and fresh-input outcomes"
+      ],
+      "guide": [],
+      "explanation": "The minute and hour select 09:10; the weekday field selects Monday through Friday. Leaving day of month and month unrestricted avoids adding a second restricted day rule. cat reads the current supplied source, and > replaces the report. Quiet dates and varied sample contents distinguish a correct recurring schedule from a daily job or one hardcoded report.",
+      "hints": [
+        "The five fields are minute, hour, day of month, month and weekday. Choose Alex’s user table; its owner is already implicit.",
+        "Keep day-of-month and month unrestricted. Select weekdays instead of every day, and preserve the supplied peer table.",
+        "Install before Run, advance through the requested minute and inspect /work/report. Fresh weekend cases catch schedules that accidentally run every day."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.5",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.1"
+      ],
+      "simplifications": "Offline bounded UTC scheduling, supplied accounts and flat virtual /work files only. Supported commands: one simple printf, echo or cat with documented quoting/redirection. No host cron, shell, files, processes or clock. No at, systemd timers, locking, concurrency, DST/timezones, mail, PAM, SELinux or spool permissions. Unescaped cron percent/stdin is rejected; use escaped percent for printf formatting.",
+      "initial": {
+        "kind": "Cron",
+        "simulation": {
+          "clock": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 9
+          },
+          "users": [
+            "alex",
+            "pat",
+            "root"
+          ],
+          "tables": {
+            "pat": "40 11 * * * echo peer-status\n"
+          },
+          "system_table": "",
+          "allow": [
+            "alex",
+            "pat"
+          ],
+          "deny": null,
+          "files": {
+            "/work/source": "cobalt\n",
+            "/work/peer-notes": "Keep this handover note.\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "Cron",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 9
+            },
+            "users": [
+              "alex",
+              "pat",
+              "root"
+            ],
+            "tables": {
+              "pat": "40 11 * * * echo peer-status\n"
+            },
+            "system_table": "",
+            "allow": [
+              "alex",
+              "pat"
+            ],
+            "deny": null,
+            "files": {
+              "/work/source": "cobalt\n",
+              "/work/peer-notes": "Keep this handover note.\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "User",
+              "owner": "alex"
+            }
+          ],
+          "outputs": [
+            "/work/report"
+          ],
+          "requirements": [
+            {
+              "kind": "CurrentFile",
+              "path": "/work/report",
+              "text": "cobalt\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Weekday and minute boundary 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 26,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 0: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 0: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 0\n",
+                "/work/report": "input 0: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 27,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 1: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 1\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 1: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 1\n",
+                "/work/report": "input 1: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 3",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 2: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 2\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 2: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 2\n",
+                "/work/report": "input 2: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 3: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 3\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 3: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 3\n",
+                "/work/report": "input 3: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 30,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 4: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 4\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 4: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 4\n",
+                "/work/report": "input 4: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 31,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 5: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 5: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 5\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 7",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 1,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 6: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 6: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 6\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 8",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 8
+              },
+              "files": {
+                "/work/source": "input 7: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 7\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 7: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 7\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 9",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 10
+              },
+              "files": {
+                "/work/source": "input 8: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 8\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 8: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 8\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 10",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 8,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 9: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 9\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 9: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 9\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 11",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 10,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 10: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 10\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 10: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 10\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 12",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 2,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 11: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 11: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 11\n",
+                "/work/report": "input 11: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 13",
+              "start": {
+                "year": 2027,
+                "month": 2,
+                "day": 28,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 12: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 12\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "input 12: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 12\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 14",
+              "start": {
+                "year": 2027,
+                "month": 3,
+                "day": 1,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 13: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 13: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 13\n",
+                "/work/report": "input 13: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 15",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 14: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 14: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 14\n",
+                "/work/report": "input 14: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 16",
+              "start": {
+                "year": 2026,
+                "month": 12,
+                "day": 31,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "input 15: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 15\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "input 15: amber and silver\n",
+                "/work/peer-notes": "peer sentinel 15\n",
+                "/work/report": "input 15: amber and silver\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "schedule {\"kind\":\"Install\",\"actor\":\"alex\",\"target\":{\"kind\":\"User\",\"owner\":\"alex\"},\"text\":\"10 9 * * 1-5 cat /work/source > /work/report\\n\"}",
+        "schedule {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":28,\"hour\":9,\"minute\":10}}"
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "shell-handover"
+      ],
+      "cron_teaching": {
+        "prerequisite_note": "Start here if scheduling is new. The linked prerequisite labs teach file commands, redirection and account ownership before this assignment. You may skip or reopen this introduction.",
+        "concepts": [
+          {
+            "title": "What is scheduled?",
+            "text": "A scheduled job starts a command when its calendar fields match. The supplied virtual UTC clock moves only when you choose Run; it never changes your computer’s clock."
+          },
+          {
+            "title": "Read the five calendar fields",
+            "text": "Read minute, hour, day of month, month and day of week from left to right, followed by the command. Minutes run from 0–59 and hours from 0–23. A star means any value in that field. For weekdays, 1 is Monday through 6 for Saturday; 0 or 7 is Sunday. MON-FRI or 1-5 selects Monday–Friday."
+          },
+          {
+            "title": "Draft, installed table and output",
+            "text": "Type into the table editor, use Install, then choose the end of the virtual interval and Run. A user table runs as its owner and has no username column. The output viewer shows supplied simulated files, not host files."
+          }
+        ],
+        "example_description": "Mira copies /work/example-source to /work/example-report at 14:20 Monday–Friday. Keep Nora’s installed table and the example peer note. The virtual clock begins at 2026-10-28 14:19; run through 14:20. The actions below provide worked values: Fill only prepares fields, while Install and Run remain your explicit actions. This practice never completes the assignment.",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 14,
+              "minute": 19
+            },
+            "users": [
+              "mira",
+              "nora",
+              "root"
+            ],
+            "tables": {
+              "nora": "50 16 * * * echo peer-status\n"
+            },
+            "system_table": "",
+            "allow": [
+              "mira",
+              "nora"
+            ],
+            "deny": null,
+            "files": {
+              "/work/example-source": "copper\n",
+              "/work/example-peer-notes": "Keep this handover note.\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "User",
+              "owner": "mira"
+            }
+          ],
+          "outputs": [
+            "/work/example-report"
+          ],
+          "requirements": [
+            {
+              "kind": "CurrentFile",
+              "path": "/work/example-report",
+              "text": "copper\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Weekday and minute boundary 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 26,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 0: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 0: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 0\n",
+                "/work/example-report": "input 0: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 27,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 1: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 1\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 1: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 1\n",
+                "/work/example-report": "input 1: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 3",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 2: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 2\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 2: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 2\n",
+                "/work/example-report": "input 2: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 3: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 3\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 3: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 3\n",
+                "/work/example-report": "input 3: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 30,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 4: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 4\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 4: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 4\n",
+                "/work/example-report": "input 4: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 31,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 5: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 5: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 5\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 7",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 1,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 6: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 6: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 6\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 8",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 18
+              },
+              "files": {
+                "/work/example-source": "input 7: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 7\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 7: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 7\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 9",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 20
+              },
+              "files": {
+                "/work/example-source": "input 8: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 8\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 8: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 8\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 10",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 13,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 9: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 9\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 9: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 9\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 11",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 15,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 10: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 10\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 10: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 10\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 12",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 2,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 11: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 11: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 11\n",
+                "/work/example-report": "input 11: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 13",
+              "start": {
+                "year": 2027,
+                "month": 2,
+                "day": 28,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 12: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 12\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "input 12: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 12\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 14",
+              "start": {
+                "year": 2027,
+                "month": 3,
+                "day": 1,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 13: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 13: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 13\n",
+                "/work/example-report": "input 13: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 15",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 14: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 14: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 14\n",
+                "/work/example-report": "input 14: amber and silver\n"
+              }
+            },
+            {
+              "name": "Weekday and minute boundary 16",
+              "start": {
+                "year": 2026,
+                "month": 12,
+                "day": 31,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "input 15: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 15\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "input 15: amber and silver\n",
+                "/work/example-peer-notes": "peer sentinel 15\n",
+                "/work/example-report": "input 15: amber and silver\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the supplied practice account",
+            "explanation": "This changes only the simulated acting account; it does not execute anything.",
+            "action": {
+              "kind": "Actor",
+              "actor": "mira"
+            }
+          },
+          {
+            "title": "Fill this separate example document",
+            "explanation": "20 14 * * 1-5 means minute 20 of hour 14 on Monday–Friday, with any day of month and month. cat copies the supplied example source; > replaces its example report. Fill places this worked text in the practice draft only; Install and Run remain separate actions.",
+            "action": {
+              "kind": "Edit",
+              "target": {
+                "kind": "User",
+                "owner": "mira"
+              },
+              "text": "20 14 * * 1-5 cat /work/example-source > /work/example-report\n"
+            }
+          },
+          {
+            "title": "Install the practice document",
+            "explanation": "Use the actual Install document button below. Fill only selects this document; it does not install it. Installation validates and stores the draft inside this separate simulation.",
+            "action": {
+              "kind": "Install",
+              "target": {
+                "kind": "User",
+                "owner": "mira"
+              }
+            }
+          },
+          {
+            "title": "Run the example virtual interval",
+            "explanation": "Fill sets the example end time only. Choose Run yourself, then inspect the actual owner, output and exit status (0 means success). Stop discards unfinished simulated changes.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 20
+              }
+            }
+          }
+        ],
+        "try_change": "In Mira’s practice table, replace only the weekday field 1-5 with *. Install the change and choose Check work: the Wednesday output can still look right, but the fresh weekend cases should expose the extra job starts. Restore 1-5 (or MON-FRI), install and check again. Your assignment stays untouched.",
+        "try_actions": [
+          {
+            "kind": "Actor",
+            "actor": "mira"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            },
+            "text": "20 14 * * * cat /work/example-source > /work/example-report\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            }
+          }
+        ],
+        "try_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Actor",
+            "actor": "mira"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            },
+            "text": "20 14 * * 1-5 cat /work/example-source > /work/example-report\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-cron-environment-output",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-cron-foundations",
+      "title": "Repair a noninteractive report and its output",
+      "summary": "At 09:15 on weekdays, append “Morning report alex”, a newline and the current /work/source data to /work/report as Alex.",
+      "objective": "At 09:15 on weekdays, append “Morning report alex”, a newline and the current /work/source data to /work/report as Alex. Keep its existing report text and peer note. Repair the supplied table, then run an interval through 2026-10-28 09:15.",
+      "retry_guidance": "Inspect the installed document and virtual output. Editing a draft does not install it. Check feedback names the failing calendar/input case; retry without resetting your draft.",
+      "difficulty": "Beginner",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied task and installed documents",
+        "Edit and install the needed scheduling documents",
+        "Run the requested virtual interval and inspect output",
+        "Check the full current and fresh-input outcomes"
+      ],
+      "guide": [],
+      "explanation": "A declaration before the entries gives LABEL a value in both jobs. LOGNAME comes from the actual job owner. Cron removes the backslash before each escaped percent, then printf uses %s for text and backslash-n for the newline. Appending both the label and current input preserves the existing report. Replacing it, declaring the value too late, or hardcoding one input produces different files in fresh cases.",
+      "hints": [
+        "Inspect the supplied LABEL declaration and the two output destinations. LABEL is created in the table; LOGNAME comes from the owner.",
+        "Cron processes percent even inside quotes. Escape a printf percent in the table; keep the double quotes around expanded variables.",
+        "Both jobs should append to the same report. A later > can erase a correct-looking header, and fixed sample text fails changed-input cases."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.5",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.1"
+      ],
+      "simplifications": "Offline bounded UTC scheduling, supplied accounts and flat virtual /work files only. Supported commands: one simple printf, echo or cat with documented quoting/redirection. No host cron, shell, files, processes or clock. No at, systemd timers, locking, concurrency, DST/timezones, mail, PAM, SELinux or spool permissions. Unescaped cron percent/stdin is rejected; use escaped percent for printf formatting.",
+      "initial": {
+        "kind": "Cron",
+        "simulation": {
+          "clock": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 9,
+            "minute": 14
+          },
+          "users": [
+            "alex",
+            "pat",
+            "root"
+          ],
+          "tables": {
+            "alex": "15 9 * * * printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" > /work/report\nLABEL='Morning report'\n15 9 * * * cat /work/source > /work/report\n",
+            "pat": "40 11 * * * echo peer-status\n"
+          },
+          "system_table": "",
+          "allow": [
+            "alex",
+            "pat"
+          ],
+          "deny": null,
+          "files": {
+            "/work/source": "cobalt\n",
+            "/work/report": "Previously published\n",
+            "/work/peer-notes": "Keep peer\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "Cron",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 9,
+              "minute": 14
+            },
+            "users": [
+              "alex",
+              "pat",
+              "root"
+            ],
+            "tables": {
+              "alex": "15 9 * * * printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" > /work/report\nLABEL='Morning report'\n15 9 * * * cat /work/source > /work/report\n",
+              "pat": "40 11 * * * echo peer-status\n"
+            },
+            "system_table": "",
+            "allow": [
+              "alex",
+              "pat"
+            ],
+            "deny": null,
+            "files": {
+              "/work/source": "cobalt\n",
+              "/work/report": "Previously published\n",
+              "/work/peer-notes": "Keep peer\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "User",
+              "owner": "alex"
+            }
+          ],
+          "outputs": [
+            "/work/report"
+          ],
+          "requirements": [
+            {
+              "kind": "CurrentFile",
+              "path": "/work/report",
+              "text": "Previously published\nMorning report alex\ncobalt\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Noninteractive output case 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "plain\n0",
+                "/work/report": "Retained 0\n",
+                "/work/peer-notes": "peer 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "plain\n0",
+                "/work/report": "Retained 0\nMorning report alex\nplain\n0",
+                "/work/peer-notes": "peer 0\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 13
+              },
+              "files": {
+                "/work/source": "two words\n1",
+                "/work/report": "Retained 1\n",
+                "/work/peer-notes": "peer 1\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "two words\n1",
+                "/work/report": "Retained 1\n",
+                "/work/peer-notes": "peer 1\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 3",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 15
+              },
+              "files": {
+                "/work/source": "2",
+                "/work/report": "Retained 2\n",
+                "/work/peer-notes": "peer 2\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "2",
+                "/work/report": "Retained 2\n",
+                "/work/peer-notes": "peer 2\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 8,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "last line without LF3",
+                "/work/report": "Retained 3\n",
+                "/work/peer-notes": "peer 3\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "last line without LF3",
+                "/work/report": "Retained 3\n",
+                "/work/peer-notes": "peer 3\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 30,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "dollar $HOME and percent % remain data\n4",
+                "/work/report": "Retained 4\n",
+                "/work/peer-notes": "peer 4\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "dollar $HOME and percent % remain data\n4",
+                "/work/report": "Retained 4\nMorning report alex\ndollar $HOME and percent % remain data\n4",
+                "/work/peer-notes": "peer 4\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 31,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "row one\nrow two\n5",
+                "/work/report": "Retained 5\n",
+                "/work/peer-notes": "peer 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "row one\nrow two\n5",
+                "/work/report": "Retained 5\n",
+                "/work/peer-notes": "peer 5\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 7",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 1,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "plain\n6",
+                "/work/report": "Retained 6\n",
+                "/work/peer-notes": "peer 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "plain\n6",
+                "/work/report": "Retained 6\n",
+                "/work/peer-notes": "peer 6\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 8",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 2,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "two words\n7",
+                "/work/report": "Retained 7\n",
+                "/work/peer-notes": "peer 7\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "two words\n7",
+                "/work/report": "Retained 7\nMorning report alex\ntwo words\n7",
+                "/work/peer-notes": "peer 7\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 9",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 30,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "8",
+                "/work/report": "Retained 8\n",
+                "/work/peer-notes": "peer 8\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "8",
+                "/work/report": "Retained 8\nMorning report alex\n8",
+                "/work/peer-notes": "peer 8\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 10",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "last line without LF9",
+                "/work/report": "Retained 9\n",
+                "/work/peer-notes": "peer 9\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "last line without LF9",
+                "/work/report": "Retained 9\nMorning report alex\nlast line without LF9",
+                "/work/peer-notes": "peer 9\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 11",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/report": "Retained 10\n",
+                "/work/peer-notes": "peer 10\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/report": "Retained 10\nMorning report alex\nplain\n",
+                "/work/peer-notes": "peer 10\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 12",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/report": "Retained 11\n",
+                "/work/peer-notes": "peer 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/report": "Retained 11\nMorning report alex\ntwo words\n",
+                "/work/peer-notes": "peer 11\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 13",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "",
+                "/work/report": "Retained 12\n",
+                "/work/peer-notes": "peer 12\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/report": "Retained 12\nMorning report alex\n",
+                "/work/peer-notes": "peer 12\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 14",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/report": "Retained 13\n",
+                "/work/peer-notes": "peer 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/report": "Retained 13\nMorning report alex\nlast line without LF",
+                "/work/peer-notes": "peer 13\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 15",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/report": "Retained 14\n",
+                "/work/peer-notes": "peer 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/report": "Retained 14\nMorning report alex\ndollar $HOME and percent % remain data\n",
+                "/work/peer-notes": "peer 14\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 16",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 14
+              },
+              "files": {
+                "/work/source": "row one\nrow two\n",
+                "/work/report": "Retained 15\n",
+                "/work/peer-notes": "peer 15\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "row one\nrow two\n",
+                "/work/report": "Retained 15\nMorning report alex\nrow one\nrow two\n",
+                "/work/peer-notes": "peer 15\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "schedule {\"kind\":\"Install\",\"actor\":\"alex\",\"target\":{\"kind\":\"User\",\"owner\":\"alex\"},\"text\":\"LABEL='Morning report'\\n15 9 * * 1-5 printf '\\\\%s \\\\%s\\\\n' \\\"$LABEL\\\" \\\"$LOGNAME\\\" >> /work/report\\n15 9 * * 1-5 cat /work/source >> /work/report\\n\"}",
+        "schedule {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":28,\"hour\":9,\"minute\":15}}"
+      ],
+      "prerequisites": [
+        "lpic1-cron-weekday-report",
+        "shell-report"
+      ],
+      "cron_teaching": {
+        "prerequisite_note": "Start here if scheduling is new. The linked prerequisite labs teach file commands, redirection and account ownership before this assignment. You may skip or reopen this introduction.",
+        "concepts": [
+          {
+            "title": "A scheduled environment",
+            "text": "A scheduled job does not inherit variables from an interactive terminal. Put ordinary values explicitly in the table before the entries that use them. Declarations are literal and affect following entries."
+          },
+          {
+            "title": "Supplied and created variables",
+            "text": "LOGNAME and USER are supplied from the job’s actual virtual owner; HOME=/work and SHELL=/bin/sh are fixed in this subset. LABEL is a value the learner controls in this table. Double quotes keep each expanded value together."
+          },
+          {
+            "title": "Two kinds of formatting",
+            "text": "printf uses %s for each text argument and backslash-n for a newline. Cron processes percent first, even inside shell quotes: escape each percent as backslash-percent in a table. Unescaped percent input is unsupported and clearly rejected here."
+          },
+          {
+            "title": "Append preserves earlier output",
+            "text": "A single > replaces a file. >> appends to it. Separate jobs at the same minute run in listed order in this simulator; real cron concurrency is not modeled."
+          }
+        ],
+        "example_description": "Mira appends Practice report mira, a newline and the current /work/example-source to the existing /work/example-report at 14:25 on weekdays. Retain the report’s earlier text and the example peer note. The clock begins at 2026-10-28 14:24; run through 14:25. Fill prepares this separate worked example; Install and Run are explicit and ungraded.",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 14,
+              "minute": 24
+            },
+            "users": [
+              "mira",
+              "nora",
+              "root"
+            ],
+            "tables": {
+              "mira": "25 14 * * * printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" > /work/example-report\nLABEL='Practice report'\n25 14 * * * cat /work/example-source > /work/example-report\n",
+              "nora": "50 16 * * * echo peer-status\n"
+            },
+            "system_table": "",
+            "allow": [
+              "mira",
+              "nora"
+            ],
+            "deny": null,
+            "files": {
+              "/work/example-source": "copper\n",
+              "/work/example-report": "Previously published\n",
+              "/work/example-peer-notes": "Keep peer\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "User",
+              "owner": "mira"
+            }
+          ],
+          "outputs": [
+            "/work/example-report"
+          ],
+          "requirements": [
+            {
+              "kind": "CurrentFile",
+              "path": "/work/example-report",
+              "text": "Previously published\nPractice report mira\ncopper\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Noninteractive output case 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "plain\n0",
+                "/work/example-report": "Retained 0\n",
+                "/work/example-peer-notes": "peer 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "plain\n0",
+                "/work/example-report": "Retained 0\nPractice report mira\nplain\n0",
+                "/work/example-peer-notes": "peer 0\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 23
+              },
+              "files": {
+                "/work/example-source": "two words\n1",
+                "/work/example-report": "Retained 1\n",
+                "/work/example-peer-notes": "peer 1\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "two words\n1",
+                "/work/example-report": "Retained 1\n",
+                "/work/example-peer-notes": "peer 1\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 3",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 25
+              },
+              "files": {
+                "/work/example-source": "2",
+                "/work/example-report": "Retained 2\n",
+                "/work/example-peer-notes": "peer 2\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "2",
+                "/work/example-report": "Retained 2\n",
+                "/work/example-peer-notes": "peer 2\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 13,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "last line without LF3",
+                "/work/example-report": "Retained 3\n",
+                "/work/example-peer-notes": "peer 3\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "last line without LF3",
+                "/work/example-report": "Retained 3\n",
+                "/work/example-peer-notes": "peer 3\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 30,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n4",
+                "/work/example-report": "Retained 4\n",
+                "/work/example-peer-notes": "peer 4\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n4",
+                "/work/example-report": "Retained 4\nPractice report mira\ndollar $HOME and percent % remain data\n4",
+                "/work/example-peer-notes": "peer 4\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 31,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "row one\nrow two\n5",
+                "/work/example-report": "Retained 5\n",
+                "/work/example-peer-notes": "peer 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "row one\nrow two\n5",
+                "/work/example-report": "Retained 5\n",
+                "/work/example-peer-notes": "peer 5\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 7",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 1,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "plain\n6",
+                "/work/example-report": "Retained 6\n",
+                "/work/example-peer-notes": "peer 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "plain\n6",
+                "/work/example-report": "Retained 6\n",
+                "/work/example-peer-notes": "peer 6\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 8",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 2,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "two words\n7",
+                "/work/example-report": "Retained 7\n",
+                "/work/example-peer-notes": "peer 7\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "two words\n7",
+                "/work/example-report": "Retained 7\nPractice report mira\ntwo words\n7",
+                "/work/example-peer-notes": "peer 7\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 9",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 30,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "8",
+                "/work/example-report": "Retained 8\n",
+                "/work/example-peer-notes": "peer 8\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "8",
+                "/work/example-report": "Retained 8\nPractice report mira\n8",
+                "/work/example-peer-notes": "peer 8\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 10",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "last line without LF9",
+                "/work/example-report": "Retained 9\n",
+                "/work/example-peer-notes": "peer 9\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "last line without LF9",
+                "/work/example-report": "Retained 9\nPractice report mira\nlast line without LF9",
+                "/work/example-peer-notes": "peer 9\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 11",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-report": "Retained 10\n",
+                "/work/example-peer-notes": "peer 10\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-report": "Retained 10\nPractice report mira\nplain\n",
+                "/work/example-peer-notes": "peer 10\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 12",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-report": "Retained 11\n",
+                "/work/example-peer-notes": "peer 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-report": "Retained 11\nPractice report mira\ntwo words\n",
+                "/work/example-peer-notes": "peer 11\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 13",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-report": "Retained 12\n",
+                "/work/example-peer-notes": "peer 12\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-report": "Retained 12\nPractice report mira\n",
+                "/work/example-peer-notes": "peer 12\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 14",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-report": "Retained 13\n",
+                "/work/example-peer-notes": "peer 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-report": "Retained 13\nPractice report mira\nlast line without LF",
+                "/work/example-peer-notes": "peer 13\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 15",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-report": "Retained 14\n",
+                "/work/example-peer-notes": "peer 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-report": "Retained 14\nPractice report mira\ndollar $HOME and percent % remain data\n",
+                "/work/example-peer-notes": "peer 14\n"
+              }
+            },
+            {
+              "name": "Noninteractive output case 16",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 24
+              },
+              "files": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-report": "Retained 15\n",
+                "/work/example-peer-notes": "peer 15\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                },
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-report": "Retained 15\nPractice report mira\nrow one\nrow two\n",
+                "/work/example-peer-notes": "peer 15\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the supplied practice account",
+            "explanation": "This changes only the simulated acting account; it does not execute anything.",
+            "action": {
+              "kind": "Actor",
+              "actor": "mira"
+            }
+          },
+          {
+            "title": "Fill this separate example document",
+            "explanation": "LABEL is created here; LOGNAME comes from the actual job owner. Each escaped percent reaches printf as a format marker: %s prints one text argument and backslash-n starts a new line. Both >> operators preserve existing report text. Fill edits only the separate practice draft.",
+            "action": {
+              "kind": "Edit",
+              "target": {
+                "kind": "User",
+                "owner": "mira"
+              },
+              "text": "LABEL='Practice report'\n25 14 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/example-report\n25 14 * * 1-5 cat /work/example-source >> /work/example-report\n"
+            }
+          },
+          {
+            "title": "Install the practice document",
+            "explanation": "Use the actual Install document button below. Fill only selects this document; it does not install it. Installation validates and stores the draft inside this separate simulation.",
+            "action": {
+              "kind": "Install",
+              "target": {
+                "kind": "User",
+                "owner": "mira"
+              }
+            }
+          },
+          {
+            "title": "Run the example virtual interval",
+            "explanation": "Fill sets the example end time only. Choose Run yourself, then inspect the actual owner, output and exit status (0 means success). Stop discards unfinished simulated changes.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 25
+              }
+            }
+          }
+        ],
+        "try_change": "In the separate practice table, change only the cat line’s >> to >, then Install and Check work. The fresh cases explain how replacing the report loses the earlier header and supplied text. Restore >> and install again; you need not run the same past interval again to check fresh samples.",
+        "try_actions": [
+          {
+            "kind": "Actor",
+            "actor": "mira"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            },
+            "text": "LABEL='Practice report'\n25 14 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/example-report\n25 14 * * 1-5 cat /work/example-source > /work/example-report\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            }
+          }
+        ],
+        "try_rows": [
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false,
+          false
+        ],
+        "repair": [
+          {
+            "kind": "Actor",
+            "actor": "mira"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            },
+            "text": "LABEL='Practice report'\n25 14 * * 1-5 printf '\\%s \\%s\\n' \"$LABEL\" \"$LOGNAME\" >> /work/example-report\n25 14 * * 1-5 cat /work/example-source >> /work/example-report\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "User",
+              "owner": "mira"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-cron-access-retirement",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-cron-foundations",
+      "title": "Delegate scheduling and retire an installed job",
+      "summary": "Let Alex and Pat manage their own user tables and prevent Sam from future table management.",
+      "objective": "Let Alex and Pat manage their own user tables and prevent Sam from future table management. Separately remove Sam’s entire installed user crontab, rather than leaving an empty installed table; denying edits does not stop an installed job. Preserve Alex’s and Pat’s installed tables and the peer note. Run an interval through 2026-10-28 09:10 and inspect both report files.",
+      "retry_guidance": "Inspect the installed document and virtual output. Editing a draft does not install it. Check feedback names the failing calendar/input case; retry without resetting your draft.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied task and installed documents",
+        "Edit and install the needed scheduling documents",
+        "Run the requested virtual interval and inspect output",
+        "Check the full current and fresh-input outcomes"
+      ],
+      "guide": [],
+      "explanation": "The allow file takes precedence when present. Listing Alex and Pat permits their own table management and excludes Sam. Alternatively, remove the allow file and use a deny file naming Sam. That policy alone does not stop Sam’s installed job: the task explicitly requires removing Sam’s entire installed user crontab. Active and peer jobs must still run, with their actual virtual owners and fresh file data.",
+      "hints": [
+        "A policy file controls future table management; it does not stop jobs in an already installed table.",
+        "Check which access file takes precedence. Preserve Alex and Pat’s access while excluding Sam. Use the supplied administrator for policy and retirement changes.",
+        "Remove Sam’s installed user table explicitly. Denying edits or installing an empty table does not meet this retirement task."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.5",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.1"
+      ],
+      "simplifications": "Offline bounded UTC scheduling, supplied accounts and flat virtual /work files only. Supported commands: one simple printf, echo or cat with documented quoting/redirection. No host cron, shell, files, processes or clock. No at, systemd timers, locking, concurrency, DST/timezones, mail, PAM, SELinux or spool permissions. Unescaped cron percent/stdin is rejected; use escaped percent for printf formatting.",
+      "initial": {
+        "kind": "Cron",
+        "simulation": {
+          "clock": {
+            "year": 2026,
+            "month": 10,
+            "day": 28,
+            "hour": 8,
+            "minute": 59
+          },
+          "users": [
+            "alex",
+            "pat",
+            "root",
+            "sam"
+          ],
+          "tables": {
+            "alex": "10 9 * * 1-5 cat /work/source > /work/report\n",
+            "sam": "5 9 * * * echo retired-job\n",
+            "pat": "0 9 * * * printf 'peer\\n' >> /work/peer-status\n"
+          },
+          "system_table": "",
+          "allow": [
+            "sam",
+            "pat"
+          ],
+          "deny": null,
+          "files": {
+            "/work/source": "cobalt\n",
+            "/work/peer-status": "Earlier peer\n",
+            "/work/peer-notes": "Keep peer\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "Cron",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 8,
+              "minute": 59
+            },
+            "users": [
+              "alex",
+              "pat",
+              "root",
+              "sam"
+            ],
+            "tables": {
+              "alex": "10 9 * * 1-5 cat /work/source > /work/report\n",
+              "sam": "5 9 * * * echo retired-job\n",
+              "pat": "0 9 * * * printf 'peer\\n' >> /work/peer-status\n"
+            },
+            "system_table": "",
+            "allow": [
+              "sam",
+              "pat"
+            ],
+            "deny": null,
+            "files": {
+              "/work/source": "cobalt\n",
+              "/work/peer-status": "Earlier peer\n",
+              "/work/peer-notes": "Keep peer\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "Allow"
+            },
+            {
+              "kind": "Deny"
+            },
+            {
+              "kind": "User",
+              "owner": "sam"
+            }
+          ],
+          "outputs": [
+            "/work/report",
+            "/work/peer-status"
+          ],
+          "requirements": [
+            {
+              "kind": "TableAbsent",
+              "owner": "sam"
+            },
+            {
+              "kind": "CanManage",
+              "actor": "alex",
+              "owner": "alex",
+              "allowed": true
+            },
+            {
+              "kind": "CanManage",
+              "actor": "sam",
+              "owner": "sam",
+              "allowed": false
+            },
+            {
+              "kind": "CanManage",
+              "actor": "pat",
+              "owner": "pat",
+              "allowed": true
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/report",
+              "text": "cobalt\n"
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/peer-status",
+              "text": "Earlier peer\npeer\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Management versus installed execution 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 8,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/peer-status": "Peer retained 0\n",
+                "/work/peer-notes": "Keep 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "pat",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/peer-status": "Peer retained 0\npeer\n",
+                "/work/peer-notes": "Keep 0\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 4
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/peer-status": "Peer retained 1\n",
+                "/work/peer-notes": "Keep 1\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/peer-status": "Peer retained 1\n",
+                "/work/peer-notes": "Keep 1\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 3",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "",
+                "/work/peer-status": "Peer retained 2\n",
+                "/work/peer-notes": "Keep 2\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/peer-status": "Peer retained 2\n",
+                "/work/peer-notes": "Keep 2\n",
+                "/work/report": ""
+              }
+            },
+            {
+              "name": "Management versus installed execution 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 3
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/peer-status": "Peer retained 3\n",
+                "/work/peer-notes": "Keep 3\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/peer-status": "Peer retained 3\n",
+                "/work/peer-notes": "Keep 3\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 5
+              },
+              "files": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-status": "Peer retained 4\n",
+                "/work/peer-notes": "Keep 4\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-status": "Peer retained 4\n",
+                "/work/peer-notes": "Keep 4\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 9,
+                "minute": 10
+              },
+              "files": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-status": "Peer retained 5\n",
+                "/work/peer-notes": "Keep 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-status": "Peer retained 5\n",
+                "/work/peer-notes": "Keep 5\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 7",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 31,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/peer-status": "Peer retained 6\n",
+                "/work/peer-notes": "Keep 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/peer-status": "Peer retained 6\n",
+                "/work/peer-notes": "Keep 6\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 8",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 2,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/peer-status": "Peer retained 7\n",
+                "/work/peer-notes": "Keep 7\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/peer-status": "Peer retained 7\n",
+                "/work/peer-notes": "Keep 7\n",
+                "/work/report": "two words\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 9",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "",
+                "/work/peer-status": "Peer retained 8\n",
+                "/work/peer-notes": "Keep 8\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/peer-status": "Peer retained 8\n",
+                "/work/peer-notes": "Keep 8\n",
+                "/work/report": ""
+              }
+            },
+            {
+              "name": "Management versus installed execution 10",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 1,
+                "hour": 8,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/peer-status": "Peer retained 9\n",
+                "/work/peer-notes": "Keep 9\n"
+              },
+              "expected": [
+                {
+                  "owner": "pat",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/peer-status": "Peer retained 9\npeer\n",
+                "/work/peer-notes": "Keep 9\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 11",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-status": "Peer retained 10\n",
+                "/work/peer-notes": "Keep 10\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-status": "Peer retained 10\n",
+                "/work/peer-notes": "Keep 10\n",
+                "/work/report": "dollar $HOME and percent % remain data\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 12",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-status": "Peer retained 11\n",
+                "/work/peer-notes": "Keep 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-status": "Peer retained 11\n",
+                "/work/peer-notes": "Keep 11\n",
+                "/work/report": "row one\nrow two\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 13",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/peer-status": "Peer retained 12\n",
+                "/work/peer-notes": "Keep 12\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/peer-status": "Peer retained 12\n",
+                "/work/peer-notes": "Keep 12\n",
+                "/work/report": "plain\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 14",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/peer-status": "Peer retained 13\n",
+                "/work/peer-notes": "Keep 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/peer-status": "Peer retained 13\n",
+                "/work/peer-notes": "Keep 13\n",
+                "/work/report": "two words\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 15",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 9
+              },
+              "files": {
+                "/work/source": "",
+                "/work/peer-status": "Peer retained 14\n",
+                "/work/peer-notes": "Keep 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "alex",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/peer-status": "Peer retained 14\n",
+                "/work/peer-notes": "Keep 14\n",
+                "/work/report": ""
+              }
+            },
+            {
+              "name": "Management versus installed execution 16",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 9,
+                "minute": 4
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/peer-status": "Peer retained 15\n",
+                "/work/peer-notes": "Keep 15\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/peer-status": "Peer retained 15\n",
+                "/work/peer-notes": "Keep 15\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "schedule {\"kind\":\"Install\",\"actor\":\"root\",\"target\":{\"kind\":\"Allow\"},\"text\":\"alex\\npat\\n\"}",
+        "schedule {\"kind\":\"Remove\",\"actor\":\"root\",\"target\":{\"kind\":\"User\",\"owner\":\"sam\"}}",
+        "schedule {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":28,\"hour\":9,\"minute\":10}}"
+      ],
+      "prerequisites": [
+        "lpic1-cron-environment-output",
+        "lpic1-account-onboarding"
+      ],
+      "cron_teaching": {
+        "prerequisite_note": "Start here if scheduling is new. The linked prerequisite labs teach file commands, redirection and account ownership before this assignment. You may skip or reopen this introduction.",
+        "concepts": [
+          {
+            "title": "Managing a table is different from running it",
+            "text": "An access file controls who may install, list or remove user tables. It does not disable a table already installed. Explicitly removing the retired table is a separate task."
+          },
+          {
+            "title": "Allow file takes precedence",
+            "text": "If cron.allow exists, only its listed ordinary users may manage their own tables. cron.deny is considered only when the allow file is absent. An empty allow file allows no ordinary users; a missing allow file is different."
+          },
+          {
+            "title": "Supplied administrator and owners",
+            "text": "The simulated root account can manage supplied tables and access files. A regular account may manage only its own table when policy allows. These are virtual accounts, not credentials or permissions on your computer."
+          },
+          {
+            "title": "Prove the handover",
+            "text": "Run the requested window, inspect the actual owners and output, and check fresh cases. Retain the active owner and peer jobs instead of disabling scheduling for everyone."
+          }
+        ],
+        "example_description": "Let Mira and Nora manage their own user tables, and prevent Tess from future management. Remove Tess’s entire installed user crontab, while preserving Mira’s and Nora’s jobs and notes. Run the separate clock from 2026-10-28 14:09 through 14:20, then inspect the example report and peer-status file. Access denial alone does not stop Tess’s installed job. Practice is ungraded.",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 28,
+              "hour": 14,
+              "minute": 9
+            },
+            "users": [
+              "mira",
+              "nora",
+              "root",
+              "tess"
+            ],
+            "tables": {
+              "mira": "20 14 * * 1-5 cat /work/example-source > /work/example-report\n",
+              "tess": "15 14 * * * echo retired-job\n",
+              "nora": "10 14 * * * printf 'peer\\n' >> /work/example-peer-status\n"
+            },
+            "system_table": "",
+            "allow": [
+              "tess",
+              "nora"
+            ],
+            "deny": null,
+            "files": {
+              "/work/example-source": "copper\n",
+              "/work/example-peer-status": "Earlier peer\n",
+              "/work/example-peer-notes": "Keep peer\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "Allow"
+            },
+            {
+              "kind": "Deny"
+            },
+            {
+              "kind": "User",
+              "owner": "tess"
+            }
+          ],
+          "outputs": [
+            "/work/example-report",
+            "/work/example-peer-status"
+          ],
+          "requirements": [
+            {
+              "kind": "TableAbsent",
+              "owner": "tess"
+            },
+            {
+              "kind": "CanManage",
+              "actor": "mira",
+              "owner": "mira",
+              "allowed": true
+            },
+            {
+              "kind": "CanManage",
+              "actor": "tess",
+              "owner": "tess",
+              "allowed": false
+            },
+            {
+              "kind": "CanManage",
+              "actor": "nora",
+              "owner": "nora",
+              "allowed": true
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/example-report",
+              "text": "copper\n"
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/example-peer-status",
+              "text": "Earlier peer\npeer\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "Management versus installed execution 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-status": "Peer retained 0\n",
+                "/work/example-peer-notes": "Keep 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "nora",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-status": "Peer retained 0\npeer\n",
+                "/work/example-peer-notes": "Keep 0\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 14
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-status": "Peer retained 1\n",
+                "/work/example-peer-notes": "Keep 1\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-status": "Peer retained 1\n",
+                "/work/example-peer-notes": "Keep 1\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 3",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-peer-status": "Peer retained 2\n",
+                "/work/example-peer-notes": "Keep 2\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-peer-status": "Peer retained 2\n",
+                "/work/example-peer-notes": "Keep 2\n",
+                "/work/example-report": ""
+              }
+            },
+            {
+              "name": "Management versus installed execution 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 13
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-status": "Peer retained 3\n",
+                "/work/example-peer-notes": "Keep 3\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-status": "Peer retained 3\n",
+                "/work/example-peer-notes": "Keep 3\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 15
+              },
+              "files": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-status": "Peer retained 4\n",
+                "/work/example-peer-notes": "Keep 4\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-status": "Peer retained 4\n",
+                "/work/example-peer-notes": "Keep 4\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 20
+              },
+              "files": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-status": "Peer retained 5\n",
+                "/work/example-peer-notes": "Keep 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-status": "Peer retained 5\n",
+                "/work/example-peer-notes": "Keep 5\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 7",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 31,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-status": "Peer retained 6\n",
+                "/work/example-peer-notes": "Keep 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-status": "Peer retained 6\n",
+                "/work/example-peer-notes": "Keep 6\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 8",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 2,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-status": "Peer retained 7\n",
+                "/work/example-peer-notes": "Keep 7\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-status": "Peer retained 7\n",
+                "/work/example-peer-notes": "Keep 7\n",
+                "/work/example-report": "two words\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 9",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-peer-status": "Peer retained 8\n",
+                "/work/example-peer-notes": "Keep 8\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-peer-status": "Peer retained 8\n",
+                "/work/example-peer-notes": "Keep 8\n",
+                "/work/example-report": ""
+              }
+            },
+            {
+              "name": "Management versus installed execution 10",
+              "start": {
+                "year": 2026,
+                "month": 11,
+                "day": 1,
+                "hour": 14,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-status": "Peer retained 9\n",
+                "/work/example-peer-notes": "Keep 9\n"
+              },
+              "expected": [
+                {
+                  "owner": "nora",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-status": "Peer retained 9\npeer\n",
+                "/work/example-peer-notes": "Keep 9\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 11",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-status": "Peer retained 10\n",
+                "/work/example-peer-notes": "Keep 10\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-status": "Peer retained 10\n",
+                "/work/example-peer-notes": "Keep 10\n",
+                "/work/example-report": "dollar $HOME and percent % remain data\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 12",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-status": "Peer retained 11\n",
+                "/work/example-peer-notes": "Keep 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-status": "Peer retained 11\n",
+                "/work/example-peer-notes": "Keep 11\n",
+                "/work/example-report": "row one\nrow two\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 13",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-status": "Peer retained 12\n",
+                "/work/example-peer-notes": "Keep 12\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-status": "Peer retained 12\n",
+                "/work/example-peer-notes": "Keep 12\n",
+                "/work/example-report": "plain\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 14",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-status": "Peer retained 13\n",
+                "/work/example-peer-notes": "Keep 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-status": "Peer retained 13\n",
+                "/work/example-peer-notes": "Keep 13\n",
+                "/work/example-report": "two words\n"
+              }
+            },
+            {
+              "name": "Management versus installed execution 15",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 19
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-peer-status": "Peer retained 14\n",
+                "/work/example-peer-notes": "Keep 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "mira",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-peer-status": "Peer retained 14\n",
+                "/work/example-peer-notes": "Keep 14\n",
+                "/work/example-report": ""
+              }
+            },
+            {
+              "name": "Management versus installed execution 16",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 14,
+                "minute": 14
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-status": "Peer retained 15\n",
+                "/work/example-peer-notes": "Keep 15\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-status": "Peer retained 15\n",
+                "/work/example-peer-notes": "Keep 15\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the supplied practice account",
+            "explanation": "This changes only the simulated acting account; it does not execute anything.",
+            "action": {
+              "kind": "Actor",
+              "actor": "root"
+            }
+          },
+          {
+            "title": "Fill this separate example document",
+            "explanation": "One supplied username per line allows these ordinary users to manage their own user tables. root remains the administrator. Fill changes only this practice document; Install applies the policy, and a separate Remove action retires an already installed table.",
+            "action": {
+              "kind": "Edit",
+              "target": {
+                "kind": "Allow"
+              },
+              "text": "mira\nnora\n"
+            }
+          },
+          {
+            "title": "Install the practice document",
+            "explanation": "Use the actual Install document button below. Fill only selects this document; it does not install it. Installation validates and stores the draft inside this separate simulation.",
+            "action": {
+              "kind": "Install",
+              "target": {
+                "kind": "Allow"
+              }
+            }
+          },
+          {
+            "title": "Remove the installed example document",
+            "explanation": "Use Remove installed document below. Fill only selects the document; it does not remove it. Denying future table management does not stop an already installed job.",
+            "action": {
+              "kind": "Remove",
+              "target": {
+                "kind": "User",
+                "owner": "tess"
+              }
+            }
+          },
+          {
+            "title": "Run the example virtual interval",
+            "explanation": "Fill sets the example end time only. Choose Run yourself, then inspect the actual owner, output and exit status (0 means success). Stop discards unfinished simulated changes.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 28,
+                "hour": 14,
+                "minute": 20
+              }
+            }
+          }
+        ],
+        "try_change": "As root in this practice, put mira on one line in cron.deny and Install it. Predict whether this prevents Mira managing her table, then Check work: the supplied cron.allow still takes precedence, so the checks should remain correct. Remove that unnecessary deny document afterward. This never stops an installed job by itself.",
+        "try_actions": [
+          {
+            "kind": "Actor",
+            "actor": "root"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "Deny"
+            },
+            "text": "mira\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "Deny"
+            }
+          }
+        ],
+        "try_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Actor",
+            "actor": "root"
+          },
+          {
+            "kind": "Remove",
+            "target": {
+              "kind": "Deny"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-cron-calendar-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-cron-foundations",
+      "title": "Hand over a system report without losing peer jobs",
+      "summary": "Publish /work/source to /work/report as reporter at 06:00 on the first day of a month OR on Mondays.",
+      "objective": "Publish /work/source to /work/report as reporter at 06:00 on the first day of a month OR on Mondays. Use one system-table entry, remove reporter’s obsolete duplicate user table, and let reporter manage a future user table. Preserve Pat’s table and the peer note. Run an interval through 2026-10-01 06:00.",
+      "retry_guidance": "Inspect the installed document and virtual output. Editing a draft does not install it. Check feedback names the failing calendar/input case; retry without resetting your draft.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Inspect the supplied task and installed documents",
+        "Edit and install the needed scheduling documents",
+        "Run the requested virtual interval and inspect output",
+        "Check the full current and fresh-input outcomes"
+      ],
+      "guide": [],
+      "explanation": "The system table adds reporter as the job owner after its five calendar fields. Restricting both day of month to 1 and weekday to Monday starts on either kind of day; a date matching both still starts one entry once. Removing the obsolete user table prevents a duplicate dispatch. Access policy separately permits future management, while fresh quiet-date, runtime-owner and file-input cases verify the full handover.",
+      "hints": [
+        "Use the system format: five calendar fields, supplied runtime username, then command. A user table does not have that extra username field.",
+        "The two restricted day fields use OR; a leading star changes that rule. Test first-of-month, Monday and quiet dates.",
+        "Retire the obsolete user table as a separate action, preserve Pat, and allow reporter future management. One successful report alone does not detect duplicates."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.5",
+        "https://github.com/cronie-crond/cronie/blob/cronie-1.7.2/man/crontab.1"
+      ],
+      "simplifications": "Offline bounded UTC scheduling, supplied accounts and flat virtual /work files only. Supported commands: one simple printf, echo or cat with documented quoting/redirection. No host cron, shell, files, processes or clock. No at, systemd timers, locking, concurrency, DST/timezones, mail, PAM, SELinux or spool permissions. Unescaped cron percent/stdin is rejected; use escaped percent for printf formatting.",
+      "initial": {
+        "kind": "Cron",
+        "simulation": {
+          "clock": {
+            "year": 2026,
+            "month": 10,
+            "day": 1,
+            "hour": 5,
+            "minute": 59
+          },
+          "users": [
+            "pat",
+            "reporter",
+            "root"
+          ],
+          "tables": {
+            "reporter": "0 6 * * * cat /work/source > /work/report\n",
+            "pat": "40 11 * * * echo peer-status\n"
+          },
+          "system_table": "0 6 * * * root cat /work/source > /work/report\n",
+          "allow": null,
+          "deny": null,
+          "files": {
+            "/work/source": "cobalt\n",
+            "/work/peer-notes": "Keep peer\n"
+          }
+        }
+      },
+      "goal": {
+        "kind": "Cron",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 1,
+              "hour": 5,
+              "minute": 59
+            },
+            "users": [
+              "pat",
+              "reporter",
+              "root"
+            ],
+            "tables": {
+              "reporter": "0 6 * * * cat /work/source > /work/report\n",
+              "pat": "40 11 * * * echo peer-status\n"
+            },
+            "system_table": "0 6 * * * root cat /work/source > /work/report\n",
+            "allow": null,
+            "deny": null,
+            "files": {
+              "/work/source": "cobalt\n",
+              "/work/peer-notes": "Keep peer\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "System"
+            },
+            {
+              "kind": "User",
+              "owner": "reporter"
+            },
+            {
+              "kind": "Allow"
+            },
+            {
+              "kind": "Deny"
+            }
+          ],
+          "outputs": [
+            "/work/report"
+          ],
+          "requirements": [
+            {
+              "kind": "TableAbsent",
+              "owner": "reporter"
+            },
+            {
+              "kind": "CanManage",
+              "actor": "reporter",
+              "owner": "reporter",
+              "allowed": true
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/report",
+              "text": "cobalt\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "System identity and OR-day boundary 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/peer-notes": "Preserve 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/peer-notes": "Preserve 0\n",
+                "/work/report": "plain\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 5,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/peer-notes": "Preserve 1\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/peer-notes": "Preserve 1\n",
+                "/work/report": "two words\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 3",
+              "start": {
+                "year": 2026,
+                "month": 6,
+                "day": 1,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "",
+                "/work/peer-notes": "Preserve 2\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/peer-notes": "Preserve 2\n",
+                "/work/report": ""
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 6,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/peer-notes": "Preserve 3\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/peer-notes": "Preserve 3\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 5,
+                "minute": 58
+              },
+              "files": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-notes": "Preserve 4\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-notes": "Preserve 4\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 6,
+                "minute": 0
+              },
+              "files": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-notes": "Preserve 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-notes": "Preserve 5\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 7",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 6,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/peer-notes": "Preserve 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/peer-notes": "Preserve 6\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 8",
+              "start": {
+                "year": 2026,
+                "month": 9,
+                "day": 30,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/peer-notes": "Preserve 7\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/peer-notes": "Preserve 7\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 9",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "",
+                "/work/peer-notes": "Preserve 8\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/peer-notes": "Preserve 8\n",
+                "/work/report": ""
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 10",
+              "start": {
+                "year": 2028,
+                "month": 2,
+                "day": 1,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/peer-notes": "Preserve 9\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/peer-notes": "Preserve 9\n",
+                "/work/report": "last line without LF"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 11",
+              "start": {
+                "year": 2027,
+                "month": 2,
+                "day": 28,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-notes": "Preserve 10\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/source": "dollar $HOME and percent % remain data\n",
+                "/work/peer-notes": "Preserve 10\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 12",
+              "start": {
+                "year": 2027,
+                "month": 3,
+                "day": 1,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-notes": "Preserve 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "row one\nrow two\n",
+                "/work/peer-notes": "Preserve 11\n",
+                "/work/report": "row one\nrow two\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 13",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "plain\n",
+                "/work/peer-notes": "Preserve 12\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "plain\n",
+                "/work/peer-notes": "Preserve 12\n",
+                "/work/report": "plain\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 14",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "two words\n",
+                "/work/peer-notes": "Preserve 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "two words\n",
+                "/work/peer-notes": "Preserve 13\n",
+                "/work/report": "two words\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 15",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "",
+                "/work/peer-notes": "Preserve 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "",
+                "/work/peer-notes": "Preserve 14\n",
+                "/work/report": ""
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 16",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 5,
+                "minute": 59
+              },
+              "files": {
+                "/work/source": "last line without LF",
+                "/work/peer-notes": "Preserve 15\n"
+              },
+              "expected": [
+                {
+                  "owner": "reporter",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/source": "last line without LF",
+                "/work/peer-notes": "Preserve 15\n",
+                "/work/report": "last line without LF"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "schedule {\"kind\":\"Install\",\"actor\":\"root\",\"target\":{\"kind\":\"System\"},\"text\":\"0 6 1 * MON reporter cat /work/source > /work/report\\n\"}",
+        "schedule {\"kind\":\"Remove\",\"actor\":\"root\",\"target\":{\"kind\":\"User\",\"owner\":\"reporter\"}}",
+        "schedule {\"kind\":\"Install\",\"actor\":\"root\",\"target\":{\"kind\":\"Allow\"},\"text\":\"reporter\\npat\\n\"}",
+        "schedule {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":1,\"hour\":6,\"minute\":0}}"
+      ],
+      "prerequisites": [
+        "lpic1-cron-weekday-report",
+        "lpic1-cron-environment-output",
+        "lpic1-cron-access-retirement"
+      ],
+      "cron_teaching": {
+        "prerequisite_note": "Start here if scheduling is new. The linked prerequisite labs teach file commands, redirection and account ownership before this assignment. You may skip or reopen this introduction.",
+        "concepts": [
+          {
+            "title": "User and system table formats",
+            "text": "A user table has five calendar fields and its command; the owner is implicit. A system table adds an explicit supplied username between the fields and command. That account is the job’s runtime identity."
+          },
+          {
+            "title": "Read the two day fields carefully",
+            "text": "When both day-of-month and day-of-week are restricted, Cronie starts on either matching day. A first-of-month that is also Monday still starts the one entry once. If either day field begins with a star, both day tests must match."
+          },
+          {
+            "title": "Do not replace a star with a numeric list casually",
+            "text": "The original leading star matters to Cronie’s day rule. A full day-number range can select the same numbers as a star but produce a different OR/AND rule when paired with a restricted weekday."
+          },
+          {
+            "title": "Retire duplicates and verify the complete result",
+            "text": "A system entry and a user entry are separate jobs even when their commands are identical. Remove the obsolete user table, retain peer work and check positive and quiet dates with varied supplied inputs."
+          }
+        ],
+        "example_description": "Publish /work/example-source to /work/example-report as Rowan at 11:10 on the first day of a month OR on Mondays. Use the system table, remove Rowan’s obsolete duplicate user table, allow Rowan future table management and preserve Nora’s work. The clock begins at 2026-10-01 11:09; run through 11:10. Fill prepares worked values without installing or running them; practice remains separate and ungraded.",
+        "definition": {
+          "initial": {
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 1,
+              "hour": 11,
+              "minute": 9
+            },
+            "users": [
+              "nora",
+              "rowan",
+              "root"
+            ],
+            "tables": {
+              "rowan": "10 11 * * * cat /work/example-source > /work/example-report\n",
+              "nora": "50 16 * * * echo peer-status\n"
+            },
+            "system_table": "10 11 * * * root cat /work/example-source > /work/example-report\n",
+            "allow": null,
+            "deny": null,
+            "files": {
+              "/work/example-source": "copper\n",
+              "/work/example-peer-notes": "Keep peer\n"
+            }
+          },
+          "editable": [
+            {
+              "kind": "System"
+            },
+            {
+              "kind": "User",
+              "owner": "rowan"
+            },
+            {
+              "kind": "Allow"
+            },
+            {
+              "kind": "Deny"
+            }
+          ],
+          "outputs": [
+            "/work/example-report"
+          ],
+          "requirements": [
+            {
+              "kind": "TableAbsent",
+              "owner": "rowan"
+            },
+            {
+              "kind": "CanManage",
+              "actor": "rowan",
+              "owner": "rowan",
+              "allowed": true
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/example-report",
+              "text": "copper\n"
+            }
+          ],
+          "probes": [
+            {
+              "name": "System identity and OR-day boundary 1",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-notes": "Preserve 0\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-notes": "Preserve 0\n",
+                "/work/example-report": "plain\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 2",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 5,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-notes": "Preserve 1\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-notes": "Preserve 1\n",
+                "/work/example-report": "two words\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 3",
+              "start": {
+                "year": 2026,
+                "month": 6,
+                "day": 1,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-peer-notes": "Preserve 2\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-peer-notes": "Preserve 2\n",
+                "/work/example-report": ""
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 4",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 6,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-notes": "Preserve 3\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-notes": "Preserve 3\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 5",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 11,
+                "minute": 8
+              },
+              "files": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-notes": "Preserve 4\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-notes": "Preserve 4\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 6",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 11,
+                "minute": 10
+              },
+              "files": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-notes": "Preserve 5\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-notes": "Preserve 5\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 7",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 12,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-notes": "Preserve 6\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-notes": "Preserve 6\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 8",
+              "start": {
+                "year": 2026,
+                "month": 9,
+                "day": 30,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-notes": "Preserve 7\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-notes": "Preserve 7\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 9",
+              "start": {
+                "year": 2027,
+                "month": 1,
+                "day": 1,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-peer-notes": "Preserve 8\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-peer-notes": "Preserve 8\n",
+                "/work/example-report": ""
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 10",
+              "start": {
+                "year": 2028,
+                "month": 2,
+                "day": 1,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-notes": "Preserve 9\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-notes": "Preserve 9\n",
+                "/work/example-report": "last line without LF"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 11",
+              "start": {
+                "year": 2027,
+                "month": 2,
+                "day": 28,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-notes": "Preserve 10\n"
+              },
+              "expected": [],
+              "after": {
+                "/work/example-source": "dollar $HOME and percent % remain data\n",
+                "/work/example-peer-notes": "Preserve 10\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 12",
+              "start": {
+                "year": 2027,
+                "month": 3,
+                "day": 1,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-notes": "Preserve 11\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "row one\nrow two\n",
+                "/work/example-peer-notes": "Preserve 11\n",
+                "/work/example-report": "row one\nrow two\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 13",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-notes": "Preserve 12\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "plain\n",
+                "/work/example-peer-notes": "Preserve 12\n",
+                "/work/example-report": "plain\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 14",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-notes": "Preserve 13\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "two words\n",
+                "/work/example-peer-notes": "Preserve 13\n",
+                "/work/example-report": "two words\n"
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 15",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "",
+                "/work/example-peer-notes": "Preserve 14\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "",
+                "/work/example-peer-notes": "Preserve 14\n",
+                "/work/example-report": ""
+              }
+            },
+            {
+              "name": "System identity and OR-day boundary 16",
+              "start": {
+                "year": 2026,
+                "month": 10,
+                "day": 12,
+                "hour": 11,
+                "minute": 9
+              },
+              "files": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-notes": "Preserve 15\n"
+              },
+              "expected": [
+                {
+                  "owner": "rowan",
+                  "stdout": "",
+                  "stderr": "",
+                  "status": 0
+                }
+              ],
+              "after": {
+                "/work/example-source": "last line without LF",
+                "/work/example-peer-notes": "Preserve 15\n",
+                "/work/example-report": "last line without LF"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the supplied practice account",
+            "explanation": "This changes only the simulated acting account; it does not execute anything.",
+            "action": {
+              "kind": "Actor",
+              "actor": "root"
+            }
+          },
+          {
+            "title": "Fill this separate example document",
+            "explanation": "10 11 selects 11:10. The restricted day fields 1 and MON mean first-of-month OR Monday. rowan is the explicit runtime account between the five fields and command. Fill prepares only this separate practice draft; use Install yourself.",
+            "action": {
+              "kind": "Edit",
+              "target": {
+                "kind": "System"
+              },
+              "text": "10 11 1 * MON rowan cat /work/example-source > /work/example-report\n"
+            }
+          },
+          {
+            "title": "Install the practice document",
+            "explanation": "Use the actual Install document button below. Fill only selects this document; it does not install it. Installation validates and stores the draft inside this separate simulation.",
+            "action": {
+              "kind": "Install",
+              "target": {
+                "kind": "System"
+              }
+            }
+          },
+          {
+            "title": "Remove the installed example document",
+            "explanation": "Use Remove installed document below. Fill only selects the document; it does not remove it. Denying future table management does not stop an already installed job.",
+            "action": {
+              "kind": "Remove",
+              "target": {
+                "kind": "User",
+                "owner": "rowan"
+              }
+            }
+          },
+          {
+            "title": "Fill this separate example document",
+            "explanation": "One supplied username per line allows these ordinary users to manage their own user tables. root remains the administrator. Fill changes only this practice document; Install applies the policy, and a separate Remove action retires an already installed table.",
+            "action": {
+              "kind": "Edit",
+              "target": {
+                "kind": "Allow"
+              },
+              "text": "rowan\nnora\n"
+            }
+          },
+          {
+            "title": "Install the practice document",
+            "explanation": "Use the actual Install document button below. Fill only selects this document; it does not install it. Installation validates and stores the draft inside this separate simulation.",
+            "action": {
+              "kind": "Install",
+              "target": {
+                "kind": "Allow"
+              }
+            }
+          },
+          {
+            "title": "Run the example virtual interval",
+            "explanation": "Fill sets the example end time only. Choose Run yourself, then inspect the actual owner, output and exit status (0 means success). Stop discards unfinished simulated changes.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 1,
+                "hour": 11,
+                "minute": 10
+              }
+            }
+          }
+        ],
+        "try_change": "In the system example, replace only MON with * and Install. Predict whether a Monday that is not the first of a month still starts the job, then Check work. Because a day field now begins with a star, both day tests must match, so fresh Monday cases fail. Restore MON and install again.",
+        "try_actions": [
+          {
+            "kind": "Actor",
+            "actor": "root"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "System"
+            },
+            "text": "10 11 1 * * rowan cat /work/example-source > /work/example-report\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "System"
+            }
+          }
+        ],
+        "try_rows": [
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          false,
+          false,
+          false,
+          false
+        ],
+        "repair": [
+          {
+            "kind": "Actor",
+            "actor": "root"
+          },
+          {
+            "kind": "Edit",
+            "target": {
+              "kind": "System"
+            },
+            "text": "10 11 1 * MON rowan cat /work/example-source > /work/example-report\n"
+          },
+          {
+            "kind": "Install",
+            "target": {
+              "kind": "System"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}

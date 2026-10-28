@@ -6,7 +6,14 @@ use dlms_learning_lab::{
 };
 
 pub(super) fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
-    if dlms_learning_lab::workspace::has_nfs_metadata(a) {
+    if dlms_learning_lab::workspace::is_etherchannel_workspace(a)
+        || dlms_learning_lab::workspace::is_cron_workspace(a)
+    {
+        return;
+    }
+    if dlms_learning_lab::workspace::has_nfs_metadata(a)
+        || dlms_learning_lab::workspace::has_cron_metadata(a)
+    {
         return;
     }
     let w = a.workspace.as_mut().expect("workspace prepared");

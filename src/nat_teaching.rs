@@ -434,6 +434,7 @@ pub fn prepare(
     l: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     let crate::engine::State::BasicNat { simulation } = &a.state else {
         return Err("NAT practice on another activity".into());

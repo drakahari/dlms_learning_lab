@@ -586,7 +586,11 @@ pub fn within<T: Serialize>(value: &T, cap: usize) -> bool {
 // No ..: every added metadata field needs an explicit admission decision.
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
+        etherchannel_draft,
+        etherchannel_learning,
         file_backup_learning: _,
+        cron_session,
+        cron_learning,
         nfs_session,
         nfs_learning,
         nat_learning,
@@ -651,7 +655,11 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         legacy_practice_reviewed,
         migrated_practice_host,
     } = w;
-    nfs_session.is_some()
+    cron_session.is_some()
+        || cron_learning.is_some()
+        || etherchannel_draft.is_some()
+        || etherchannel_learning.is_some()
+        || nfs_session.is_some()
         || nfs_learning.is_some()
         || nat_learning.is_some()
         || rpm_session.is_some()
@@ -724,7 +732,9 @@ pub fn context<'a>(
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
     crate::progress::validate_file_backup_workspace(a)?;
-    if a.scenario_version != s.version
+    if s.cron_teaching.is_some()
+        || s.etherchannel_teaching.is_some()
+        || a.scenario_version != s.version
         || a.step >= s.steps.len()
         || a.hints > s.hints.len()
         || !within(s, MAX_SCENARIO)

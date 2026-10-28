@@ -227,13 +227,13 @@ impl LabApp {
             .iter()
             .position(|s| s.id == id)
             .expect("Normal safe-automation lab");
-        assert_eq!((self.scenarios.len(), self.units.len()), (154, 39));
+        assert_eq!((self.scenarios.len(), self.units.len()), (164, 42));
         assert_eq!(
             self.scenarios
                 .iter()
                 .filter(|s| s.track == "Bash/Shell")
                 .count(),
-            49
+            52
         );
         assert!(
             self.units

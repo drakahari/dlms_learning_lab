@@ -108,8 +108,8 @@ fn full_source_version_kind_initial_and_lesson_pins_reject_before_mutation() {
 #[test]
 fn old147_wire_none_fields_and_existing_solved_nfs_without_metadata_remain_truthful() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 154);
-    assert_eq!(dlms_learning_lab::course::bundled(&all).unwrap().len(), 39);
+    assert_eq!(all.len(), 164);
+    assert_eq!(dlms_learning_lab::course::bundled(&all).unwrap().len(), 42);
     for s in &all[..147] {
         assert!(s.nfs_teaching.is_none());
         assert!(
@@ -204,7 +204,7 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 154);
+    assert_eq!(p.attempts.len(), 164);
     let old = serde_json::to_value(&p.attempts).unwrap();
     let mut a = solved(&s);
     let source = s.nfs_teaching.as_ref().unwrap();

@@ -2,6 +2,7 @@
 mod arithmetic;
 mod capture;
 mod case;
+pub mod cron;
 mod execution;
 mod getopts;
 mod globbing;
