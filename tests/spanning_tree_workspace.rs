@@ -748,7 +748,7 @@ fn original125_source_metadata_unit_order_and_omitted_optional_wire_are_exact() 
         serde_json::from_str(include_str!("fixtures/spanning-tree-original125.json")).unwrap();
     let expected: Vec<Scenario> = serde_json::from_value(v["scenarios"].clone()).unwrap();
     let all = catalog();
-    assert_eq!(all.len(), 147);
+    assert_eq!(all.len(), 154);
     assert_eq!(
         all[..125].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         expected.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
@@ -836,7 +836,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     let original = all.clone();
     let s = scenario();
     let mut p = retained_profile(&all);
-    assert_eq!(p.attempts.len(), 147);
+    assert_eq!(p.attempts.len(), 154);
     let histories = p
         .attempts
         .values()
@@ -852,8 +852,8 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     assert!(histories.is_superset(&BTreeSet::from([6, 7, 8])));
     let current=p.attempts.values().filter(|a|matches!(&a.state,State::Script{run:Some(r),..}if r.engine_revision==shell::EVALUATOR_REVISION)).count();
     assert_eq!(
-        current, 45,
-        "46 current scripts with one retained unfinished assignment"
+        current, 48,
+        "49 current scripts with one retained unfinished assignment"
     );
     let prior = prior(&p, &original);
     let mut a = prepared(&s);

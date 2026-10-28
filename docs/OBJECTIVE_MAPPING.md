@@ -2,7 +2,7 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are150 narrowly evidenced Partial practice rows, one Supporting explanation row and1089 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package ddb886b contains140 authored assignments/35 units. Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are154 narrowly evidenced Partial practice rows, one Supporting explanation row and1085 Open rows; no full-objective completion is asserted. The scoped verified native Fedora package ddb886b contains140 authored assignments/35 units. Three DHCP client/relay tasks add only the two explicitly scoped parent slices below; no child/tool or future-version credit is inherited.
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 
@@ -176,8 +176,9 @@ inside-source static/pool model. It does not implement IOS CLI/interface setup,
 PAT, ports, sessions, routing, connectivity or real packets. All issuer source
 fingerprints remain unchanged; the separate future-blueprint plan receives no
 credit. The accepted NAT run used 143 assignments in 36 units; current source has
-147 assignments in 37 units after the four RPM additions. Current coverage totals
-are 150 Partial, 1 Supporting and 1089 Open overlapping references, not percentages
+147 assignments in37 units after the four RPM additions. Current source now has
+154 assignments/39 units after the NFS and scripting additions. Current coverage totals
+are 154 Partial, 1 Supporting and 1085 Open overlapping references, not percentages
 or completed certification objectives.
 
 
@@ -200,3 +201,35 @@ credit. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency solvin
 signatures, binary archives and real transactions remain unmodeled. The model
 executes no package scripts or host transactions. Issuer fingerprints are unchanged;
 backend existence alone does not count as implemented practical coverage.
+
+
+### Bounded NFS configuration and access practice — 2026-10-27
+
+Four distinct NFS assignments provide a narrowly scoped part of current LPIC-2
+v4.5 objective209.2: restricted reference publication, diagnosis of separate
+server/client write gates and numeric permission classes, retired-client handover,
+and a two-share capstone preserving unrelated vault state. Each uses a native
+configuration workspace and independent practice rather than host NFS execution.
+Current and independent new-mount checks distinguish actual files/mounts from saved
+policy, recognize correct alternatives, reject wrong/partial repairs and invalidate
+broken-again success. Technical gates are recorded in IMPLEMENTATION_LEDGER.md; final polished154
+packaged acceptance and its build identity remain pending in INSTALLATION.md.
+This paragraph alone is not acceptance evidence.
+
+Only209.2,209.2.K1,209.2.K3 and209.2.K4 receive Partial practice for those bounded
+config-file-grammar, supplied-client restriction and mount-option slices. K3 credits
+only reference/handover/capstone; publication alone does not assess narrowing host
+selectors. Four promotions change the overlapping ledger to154Partial/1Supporting/
+1085Open, still1240 references. These are not completed objectives or lab counts.
+The current authoritative objective page/version was rechecked2026-10-27; the original
+2026-10-22 source fingerprints/positions are unchanged.
+
+No utility/service term receives practical credit: explicit native actions do not
+teach a Linux command by analogy. The abstract Exports document and Client mount
+document practice related grammars but do not explicitly teach canonical filename
+association, so T1 and T6 remain Open. T5 is not covered by a live-mount state card.
+TCP Wrappers and NFSv4 remain Open; mentioning an excluded feature is not substantive
+supporting instruction. Real RPC/discovery, daemons, trusted authentication,
+Kerberos, locking, client caches and durability/boot behavior remain absent. Numeric
+UID/group/root-squash practice is an ACCESS-style supplied-inventory model; it does
+not implement actual credential validation or a complete Linux open path.

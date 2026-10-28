@@ -219,7 +219,7 @@ fn original143_typed_fields_and36units_have_only_the_closed_nat_intro_exception(
         pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
     assert_eq!(original.len(), 143);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 147);
+    assert_eq!(all.len(), 154);
     let nat_raw = ORIGINAL_PACKS.last().unwrap().1;
     if digest::hash(nat_raw.as_bytes())
         == index["nat_teaching_amendment"]["new_pack_sha256"]
@@ -244,16 +244,19 @@ fn original143_typed_fields_and36units_have_only_the_closed_nat_intro_exception(
         .collect::<Vec<_>>();
     exact(&ids, &index["catalog"]);
     assert_eq!(
-        all[143..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        all[143..147]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
         IDS
     );
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [45, 32, 24, 46]
+        [45, 32, 28, 49]
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 37);
+    assert_eq!(units.len(), 39);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(index["units"]["units"].clone()).unwrap();
     assert_eq!(old_units.len(), 36);
@@ -284,7 +287,7 @@ fn normal_rpm_prerequisites_references_and_truth_are_real_registered_scenarios()
         schema_version: 1,
         ..Default::default()
     };
-    for (i, s) in all[143..].iter().enumerate() {
+    for (i, s) in all[143..147].iter().enumerate() {
         assert_eq!(s.id, IDS[i]);
         assert_eq!(s.track, "LPIC-1");
         assert_eq!(s.unit, "rpm-package-investigation");

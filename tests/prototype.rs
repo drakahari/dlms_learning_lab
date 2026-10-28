@@ -347,7 +347,64 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::BasicNat { simulation } = &a.state {
+        if let State::Nfs { simulation } = &a.state {
+            use dlms_learning_lab::{nfs, nfs_workspace};
+            let engine::Goal::Nfs { definition } = &s.goal else {
+                panic!("NFS goal context");
+            };
+            let (client, mountpoint) = definition
+                .requirements
+                .iter()
+                .find_map(|r| match r {
+                    nfs_workspace::Requirement::CurrentAccess {
+                        request:
+                            nfs::Request::Read {
+                                client, mountpoint, ..
+                            },
+                        expected: nfs::Expected::Read { .. },
+                    } => Some((client.clone(), mountpoint.clone())),
+                    _ => None,
+                })
+                .expect("Authored NFS task requires an actual positive current read");
+            assert!(engine::solved(&a.state, &s.goal));
+            assert!(
+                simulation
+                    .runtime()
+                    .mounts
+                    .iter()
+                    .any(|m| m.client == client && m.specification.mountpoint == mountpoint),
+                "The required positive read has a real held mount before breaking it"
+            );
+            let action = nfs::Action::Unmount {
+                client: client.clone(),
+                mountpoint: mountpoint.clone(),
+            };
+            let output = engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    nfs_workspace::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
+            assert_eq!(output, "Virtual mount removed");
+            let State::Nfs { simulation } = &a.state else {
+                unreachable!()
+            };
+            assert!(
+                !simulation
+                    .runtime()
+                    .mounts
+                    .iter()
+                    .any(|m| m.client == client && m.specification.mountpoint == mountpoint)
+            );
+            assert!(
+                a.workspace.is_none(),
+                "Typed state-only adapter does not fabricate editor/practice metadata"
+            );
+        } else if let State::BasicNat { simulation } = &a.state {
             use dlms_learning_lab::{nat, nat_workspace};
             let engine::Goal::BasicNat { definition } = &s.goal else {
                 panic!("NAT goal context");

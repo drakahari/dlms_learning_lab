@@ -9,6 +9,7 @@ pub(in crate::ui) mod apache_static_lessons;
 mod capture_lessons;
 mod case_history;
 mod client_learning;
+pub(in crate::ui) mod command_vectors;
 mod debian_packages_lessons;
 mod dhcpv4;
 mod dhcpv4_lessons;
@@ -20,6 +21,7 @@ mod mac_learning;
 mod mac_lessons;
 pub(in crate::ui) mod nat;
 pub(in crate::ui) mod nat_lessons;
+pub(in crate::ui) mod nfs_lessons;
 mod ospf;
 mod ospf_lessons;
 pub(super) mod reopen;
@@ -350,6 +352,7 @@ impl LabApp {
                 // exhaust its bounded job during the normal 350ms capture wait.
                 37066 | 37067 | 37068 | 37266 | 37267 | 37268 | 37466 | 37467 | 37468
             );
+        let immediate_stop = immediate_stop || command_vectors::immediate_stop(self.smoke_stage);
         if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;
         }
@@ -565,6 +568,13 @@ impl LabApp {
                 }
                 shot = capture;
             }
+            n if self.nfs_lessons_contains_stage(n) => {
+                let (advance, capture) = self.nfs_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n if self.rpm_lessons_contains_stage(n) => {
                 let (advance, capture) = self.rpm_lessons_native(ctx, n);
                 if !advance {
@@ -581,6 +591,13 @@ impl LabApp {
             }
             n @ nat::FIRST..=nat::LAST => {
                 let (advance, capture) = self.nat_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 43000..=43504 => {
+                let (advance, capture) = self.command_vectors_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

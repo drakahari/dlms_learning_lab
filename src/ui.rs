@@ -472,6 +472,10 @@ impl LabApp {
             smoke_stage: if is_reopen {
                 17000
             } else if let Some(stage) =
+                Self::nfs_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
+            {
+                stage
+            } else if let Some(stage) =
                 Self::rpm_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
                 stage
@@ -564,6 +568,11 @@ impl LabApp {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
+            } else if let Some(stage) = Self::command_vectors_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if let Some(stage) = Self::safe_automation_stage(
                 smoke,
                 std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),

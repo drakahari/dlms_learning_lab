@@ -341,7 +341,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 37);
+    assert_eq!(units.len(), 39);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -367,6 +367,12 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     ] {
         assert_eq!(units.iter().filter(|u| u["id"] == id).count(), 1);
     }
+    let review: Value =
+        serde_json::from_str(include_str!("fixtures/shell-command-vectors-review.json")).unwrap();
+    let nfs: Value =
+        serde_json::from_str(include_str!("fixtures/nfs-original147-source-index.json")).unwrap();
+    assert_eq!(units.pop().unwrap(), nfs["appended_unit"]);
+    assert_eq!(units.pop().unwrap(), review["unit_proposal"]);
     units.retain(|u| {
         u["id"] != "dns-reverse"
             && u["id"] != "shell-option-interfaces"

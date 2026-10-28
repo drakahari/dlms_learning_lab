@@ -2,10 +2,11 @@
 
 Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
 retain their separately documented2026-10-22 source snapshot. This is a plan and
-evidence ledger, not complete exam preparation. Main has **147 authored assignments
-/37 units:45CCNA,32LPIC-1,24LPIC-2,46Bash/Shell**. The scripting path has twelve units.
-Generated numerical practice and the developer-only large catalog are not authored
-labs. Three new scripting and four NFS lessons remain private/unaccepted additions.
+evidence ledger, not complete exam preparation. Main has **154 authored assignments
+/39 units:45CCNA,32LPIC-1,28LPIC-2,49Bash/Shell**. The latest two units contain
+three distinct safe-command scripting tasks and four NFS configuration tasks.
+Generated numerical practice and developer-only synthetic entries are excluded.
+Complete inclusive regression passes1974/0/0; packaged154 acceptance is pending.
 
 Three Basic NAT lessons have complete development-native Fedora flows; their
 packaged acceptance remains pending. Four RPM lessons have complete development
@@ -270,36 +271,35 @@ percentages; scoped accepted installed catalog is now140/35 at ddb886b after fin
 candidate acceptance. All1240 original source fingerprints/positions are retained.
 
 
-### Basic NAT backend foundation — 2026-10-26
+### Basic NAT and RPM practical subsets — 2026-10-27
 
-The independently reviewed [pure model](NAT_SUBSET.md) and
-[typed workspace backend](NAT_WORKSPACE_SUBSET.md) pass their compiler, outcome,
-alternate-policy, bound, invalidation and progress-retention gates. They model
-inside-source static and pool address mappings. The [native workbench](NAT_NATIVE.md)
-now passes MAIN UI/model gates and a scoped actual Fedora technical flow. It remains
-bundled in the development source while three authored tasks complete native gates; current CCNA4.1 stays **Open**, and all1240 issuer fingerprints/status totals remain unchanged. The source143/36
-unit separates
-static mapping, dynamic eligibility/capacity diagnosis and preservation handover.
-It does not promise PAT, transport sessions, IOS or actual packet delivery. The
-old plan's generic NAT/PAT-session label was not the issuer objective wording;
-current4.1 explicitly concerns inside-source static mappings and pools. This
-clarifies the implementation boundary without granting practice credit or altering
-the separate future-blueprint plan.
+Three [Basic NAT tasks](NAT_LESSONS.md) have reviewed models, separate practice,
+alternatives and complete development-native Fedora flows. Current CCNA4.1 is
+narrowly Partial for inside-source static/pool mappings; PAT, sessions, IOS CLI,
+routing/connectivity and real packets remain absent. Packaged NAT acceptance
+remains pending; the earlier technical foundation alone did not earn credit.
 
+Four [RPM tasks](RPM_NATIVE.md) have complete development and installed147 native
+flows. They cover versioned providers, epoch-aware updates, recorded payload repair
+and provider handover in script-free logical transactions. LPIC-1 102.5 parent and
+K1/K2/K3/T1 have narrowly Partial evidence, with general YUM/Zypper, signatures,
+archives, dependency solving and actual transactions still unmodeled. See the
+[granular ledger](OBJECTIVE_MAPPING.md) for exact slices; no wider objective inherits
+credit from a command name or backend. Historical stage results remain in the
+implementation ledger rather than being restated as current Open statuses.
 
-### RPM foundation — no practical credit yet
+### Supplied NFS clients, publication and handover — 2026-10-27
 
-The [pure RPM foundation](RPM_PACKAGE_SUBSET.md) passes23 independent behavior/
-negative/bound groups and library integration checks. It distinguishes RPM EVR,
-capability providers and installed/local/repository sources, with atomic logical
-script-free sets. The [command and separate-practice backend](RPM_PACKAGES_WORKSPACE.md)
-now passes guarded query, update/removal, alternate-outcome, isolation and saved-
-progress gates. Four RPM investigations and their separate practice are now
-registered in source with one unit: versioned providers, epoch-aware updates,
-recorded ownership/payload repair and provider handover. Prior scoped four-task
-content and real-egui checks passed on the accepted donor; normal147/37 integration
-and rendered RPM acceptance remain unverified. All LPIC-1 v5.0 102.5 references
-remain **Open**. Configuration sidecars, general RPM/YUM/Zypper syntax, dependency
-solving, signatures, binary archives and real transactions remain unmodeled.
-Issuer fingerprints/status totals are unchanged; source registration is not
-completed learner coverage or complete package administration.
+The NFS unit contains four authored tasks with existing prerequisites
+lpic2-mount-policy and lpic1-traversal, followed by sequential NFS prerequisites:
+
+| Authored scenario | Meaningful practice | Explicit boundary |
+| --- | --- | --- |
+| lpic2-nfs-reference | Narrow supplied-client admission, Save/Apply export policy, mount/read and prove independent server ro | Finite supplied clients, not universal IPv4 security |
+| lpic2-nfs-publication | Diagnose export/client write gates and numeric owner/group mapping, then explicitly publish file bytes | Existing immutable-metadata text files; no chmod/chown/create or real credentials |
+| lpic2-nfs-handover | Remove held retired mount, save separate replacement/retired documents and prove fresh old-client denial | Incompatible Apply requires unmount as a simulator planner restriction, not Linux revocation semantics |
+| lpic2-nfs-capstone | Coordinate two publication shares and preserve independent vault state | Bounded NFSv3-style decisions; no services/RPC/general utilities |
+
+Related objective slices are Partial only. The model's explicit native editing,
+Save/Apply and Mount/Read/Write actions are not Linux commands. Full NFS
+administration, TCP Wrappers, NFSv4 and security stack remain unimplemented.

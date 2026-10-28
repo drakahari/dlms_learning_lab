@@ -196,13 +196,29 @@ fn actual_prerequisites_guides_and_introduction_precede_the_separate_tasks() {
         }
     }
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 147);
+    assert_eq!(normal.len(), 154);
     assert!(
         normal[..143]
             .iter()
             .all(|s| !IDS.contains(&s.id.as_str()) && s.rpm_packages_teaching.is_none())
     );
-    exact(&&normal[143..], &all);
+    exact(&&normal[143..147], &all);
+    let new: pack::Pack =
+        serde_json::from_str(include_str!("../scenarios/shell-command-vectors-v1.json")).unwrap();
+    assert_eq!(
+        normal[147..150]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "shell-command-options",
+            "shell-command-dispatch",
+            "shell-command-plan"
+        ]
+    );
+    exact(&&normal[147..150], &new.scenarios);
+    let nfs: pack::Pack = serde_json::from_str(include_str!("../scenarios/nfs-v1.json")).unwrap();
+    exact(&&normal[150..154], &nfs.scenarios);
 }
 
 #[test]
@@ -506,7 +522,7 @@ fn foreign_learning_or_catalog_cannot_pass_and_prepare_refusal_is_atomic() {
 fn both_raw_drafts_full_histories_backup_resume_and_selected_reset_keep_other_work_exact() {
     let all = labs();
     let catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 147);
+    assert_eq!(catalog.len(), 154);
     for reviewed in &all {
         let registered = catalog.iter().find(|s| s.id == reviewed.id).unwrap();
         exact(registered, reviewed);

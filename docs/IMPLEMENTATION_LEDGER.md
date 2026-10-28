@@ -3045,3 +3045,102 @@ and seven new IDs to actual9; original116/133 attempts,40 definitions/246 cases,
 histories/receipts and raw evidence remain unchanged. Independent repair review
 and guarded runtime gates remain pending. Actual NFS stage continues on immutable
 61f343d copy; no concurrent compile. Main remains147/37.
+
+Independent final repair reviewa9cecac6 ACKs all five precise changes, unchanged
+743 files and all old assertions/actual evidence. Actual first NFS lesson has
+passed wrong/partial/reference, success invalidation, two alternatives, light150/
+dark200 fields/read output, warm readback/reset and Challenge; remaining three
+still running. Root reviewed actual first-practice and200% read renders. The
+200%946x929/PPP2.3 screenshot exposes one overlong optional inventory caption.
+Root changes exactly one display literal to Inventory and identities · Optional
+in private8e51026; no ID/control/layout-rule/state/grading/progress change.
+Independent single-literal ACK24cbc0f2 and before screenshot/source receipt are
+retained. Explicit copied rustfmt --check exits0. Final candidate must render the
+shorter label; the immutable current native61f copy intentionally retains the
+before image. Complete full regression/14 retained/Clippy/Python remain queued
+after the sole active native command. Main stays147/37; no release.
+
+
+### M150 native NFS accepted baseline; repaired consumers pass (2026-10-27)
+
+Actual immutable61f NFS normal stage completes4/4 lessons and106 native captures.
+Reference and both alternatives, wrong/partial and invalidation/repair, separate
+examples/experiments, actual Read/Write/configure/mount actions, full warm portable/
+raw/receipt readback, selected Reset and Challenge all pass. Root reviewed first
+practice,200% read and capstone editor renders. Actual1920x1080/PPP1.15 fullscreen
+and946x929 Light150/Dark200 with logical scaling were logged. Memory1768 samples,
+minimum24.08GiB available, PSI0/OOM0. Evidence actual-native154-r1. It is private
+development proof; no cold new-NFS/novice/reader/other-OS or packaged claim.
+
+Actual capstone rendering found required file writing hidden as Optional. Private
+ea73b9c extracts the exact old editor body into a six-argument helper, derives
+required status from the active assignment/example CurrentFileText requirement,
+opens publication/capstone editors by default and removes their Optional suffix.
+Readonly reference/handover stay optional. No control/ID/action/draft/bound or
+progress shape changes; both modes retain the full task. Two real-event tests
+cover four normal tasks/both modes/practice, painted labels/enabled fields, actual
+typing and draft isolation without Write or credit. All old tests remain exact
+prefix. Independent review96a26dc6 validates2 scoped/746 unchanged inputs.
+Root new UI tests PASS2/0; actual final candidate must recheck this and short label.
+
+All five repaired consumer targets now pass133/0 INCLUDING their10 retained
+checks:82 library,13 DHCP content,22 prototype,8 actual9 migration and8 actual8
+migration. Exact historical evidence and current invalidation/save/reload checks
+remain strong. No failing case skipped. Full all-target/no-fail-fast rerun now
+active in the sole shared slot on frozenea73b9c. Main still147/37; no release.
+
+
+### M151 complete repaired suite PASS; final missing givens correction (2026-10-27)
+
+Complete all-target/no-fail-fast rerun on ea73b9c finishes1958PASS/0FAIL/14ignored
+across150 harnesses, including401UI checks. All original11 regression failures
+and later combined consumer failures are repaired without weakening assertions.
+Ten retained checks also passed in the133-targeted run; final inclusive gate will
+execute all14 together. No public registration until final source verification.
+
+Actual capstone render review found another essential missing given: exports
+need supplied client addresses, but selectors show IDs and old optional inventory
+shows profiles/roots without client/server IPs. Learners must not guess data from
+backend fixtures. Source owner now has a narrow2-path followup: aligned readonly
+selected server/client IPv4 rows beside existing selections, and complete server/
+client address and profile-ID mapping in the existing optional inventory. These
+are supplied inputs, not solved policies. No panel/control/model/grade/data/draft
+or persistence change is authorized. Added real normal-mode/practice/selection
+and no-write tests plus source peer review/final inclusive suite must pass before
+integration. Plan95104f88; ea73 before source hashes retained. No heavy command
+active at this entry; source edits alone are permitted in the owned2 paths.
+
+
+### M153–M154 final inclusive gate and seven-task integration (2026-10-27)
+
+Final private bc39dba passes all-target --include-ignored:1974PASS/0FAIL/0ignored
+across150 harnesses, and all-target Clippy21.99s. All14 retained-history checks
+run together. The repaired original11 failures and later combined consumers
+remain exercised; no weakened assertion, invented answer or rewritten old capture.
+The missing supplied server/client IPv4 and profile mappings are now visible in
+the existing aligned workspace. Two new real-event tests cover selections/modes/
+practice without writes; bounded actual selector reveal corrects a test-only
+above-viewport scan, retaining strict visibility/font/scroll limits and receipts.
+All18 NFS UI checks pass. Independent final route review3e3cb6df ACK.
+
+After that complete gate, MAIN squash-integrates the seven assignments: three
+command construction/dispatch/plan scripts and four restricted NFS publication/
+handover tasks. Catalog154/39 =45CCNA/32LPIC-1/28LPIC-2/49Bash. All prior147
+specifications/order and37 units remain exact; no new saved mastery is invented.
+MAIN Rust app/catalog/Rust tests/assets/build inputs equal privatebc39dba; its
+fresh exclusive target passes115 core/catalog/content checks including retained
+checks. One Python current-unit consumer37→39 is strengthened with SHA-pinned
+full old37/new2 object equality; unchanged original43 scripts/282 cases/capture
+inputs remain asserted. All215 Python checks pass after that repair. Independent
+reviewe2960ee7 ACK; its three current-doc findings are corrected.
+
+Coverage validation passes154Partial/1Supporting/1085Open of1240 references.
+Only narrow209.2/K1/K3/K4 NFS references gain practical Partial coverage; utilities,
+TCPWrappers, NFSv4 and unimplemented behavior stay Open. All28 palette checks pass.
+Baseline actual private3Bash72 captures and4NFS106 captures pass; those NFS frames
+precede the final small UI corrections. Packaged154 acceptance, native final
+render review and lifecycle/startup/reopen checks are NEXT, not already passed.
+Logs m153-private154-full-inclusive-r3, m153-private154-clippy-r1 and
+m154-main154-core-catalog-content/python-r2/coverage/palettes remain privately
+retained alongside every failed run. Full curriculum, Windows/macOS runtime,
+physical-reader and novice acceptance remain open. No public release.

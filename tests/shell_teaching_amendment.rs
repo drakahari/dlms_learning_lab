@@ -87,7 +87,7 @@ fn exact_closed_manifest_raw_bytes_and_typed_lessons_reject_unlisted_changes() {
 }
 
 #[test]
-fn all46_fresh_examples_and_two_original_sources_match_the_same_declared_fixtures() {
+fn all_current_fresh_examples_and_two_original_sources_match_the_same_declared_fixtures() {
     let all = pack::bundled().unwrap();
     let mut count = 0;
     let mut changed_defaults = Vec::new();
@@ -118,7 +118,7 @@ fn all46_fresh_examples_and_two_original_sources_match_the_same_declared_fixture
         }
         count += 1;
     }
-    assert_eq!(count, 46);
+    assert_eq!(count, 49);
     assert_eq!(changed_defaults, ["shell-bundle", "shell-text-capstone"]);
 }
 

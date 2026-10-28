@@ -25,7 +25,7 @@ pub(in crate::ui) fn sources() -> Vec<Scenario> {
 }
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (147, 37));
+    assert_eq!((a.scenarios.len(), a.units.len()), (154, 39));
     let at = a.scenarios.len();
     a.scenarios.extend(sources());
     a.launch(at + n);
@@ -203,7 +203,14 @@ fn choose(ctx: &egui::Context, a: &mut LabApp, key: &str, value: &str) {
                     .nfs
                     .selections
                     .iter()
-                    .any(|r| r.0 == key && r.1 == value)
+                    .any(|r| r.0 == key && r.1 == value),
+                "Actual popup choice failed: scenario={} challenge={} view={:?} key={key} requested={value} target={r:?} popup_clip={clip:?} root={:?} offset={:?} presented={:?}",
+                a.scenarios[a.selected.unwrap()].id,
+                chosen(a).challenge,
+                learning(a).view,
+                a.metrics.main_viewport,
+                a.metrics.main_scroll_offset,
+                a.nfs_presentation.observed_request_selection()
             );
             return;
         }
@@ -1447,6 +1454,588 @@ fn nfs_four_plausible_wrong_configs_and_meaningful_partial_repairs_have_literal_
                     && rows[4].0
             ),
             _ => unreachable!(),
+        }
+    }
+}
+
+fn normal_nfs_opened(id: &str) -> (egui::Context, LabApp, usize) {
+    let (ctx, mut a) = app();
+    assert_eq!((a.scenarios.len(), a.units.len()), (154, 39));
+    let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
+    a.launch(i);
+    draw(&ctx, &mut a);
+    assert_eq!(
+        a.scenarios.len(),
+        154,
+        "Use the normal authored catalog only"
+    );
+    assert_eq!(chosen(&a).state, a.scenarios[i].initial);
+    (ctx, a, i)
+}
+fn painted_nfs_text(shape: &egui::epaint::Shape, text: &str) -> bool {
+    match shape {
+        egui::epaint::Shape::Text(t) => t.galley.job.text == text,
+        egui::epaint::Shape::Vec(v) => v.iter().any(|s| painted_nfs_text(s, text)),
+        _ => false,
+    }
+}
+fn assert_normal_write_presentation(ctx: &egui::Context, a: &mut LabApp, required: bool) {
+    assert_eq!(
+        a.metrics.nfs.fields.iter().any(|r| r.0 == "write-text"),
+        required,
+        "A required editor opens by default; optional exploration stays collapsed"
+    );
+    assert_eq!(
+        a.metrics.nfs.controls.iter().any(|r| r.0 == "write"),
+        required
+    );
+    let _ = reveal(ctx, a, "write-toggle", false);
+    let out = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1200., 850.),
+            )),
+            ..Default::default()
+        },
+        |ctx| a.render(ctx),
+    );
+    let label = if required {
+        "Replace existing file text"
+    } else {
+        "Replace existing file text · Optional"
+    };
+    let other = if required {
+        "Replace existing file text · Optional"
+    } else {
+        "Replace existing file text"
+    };
+    assert!(
+        out.shapes.iter().any(|s| painted_nfs_text(&s.shape, label)),
+        "Actual visible header has the correct task-specific label"
+    );
+    assert!(!out.shapes.iter().any(|s| painted_nfs_text(&s.shape, other)));
+    if required {
+        assert!(
+            a.metrics
+                .nfs
+                .fields
+                .iter()
+                .find(|r| r.0 == "write-text")
+                .unwrap()
+                .3
+        );
+        assert!(
+            a.metrics
+                .nfs
+                .controls
+                .iter()
+                .find(|r| r.0 == "write")
+                .unwrap()
+                .2
+        );
+    }
+}
+const NORMAL_WRITE_TASKS: [(&str, bool); 4] = [
+    ("lpic2-nfs-reference", false),
+    ("lpic2-nfs-publication", true),
+    ("lpic2-nfs-handover", false),
+    ("lpic2-nfs-capstone", true),
+];
+#[test]
+fn normal_nfs_required_write_editor_is_open_and_honestly_labeled_in_learn_and_challenge() {
+    for (id, required) in NORMAL_WRITE_TASKS {
+        for challenge in [false, true] {
+            let (ctx, mut a, i) = normal_nfs_opened(id);
+            if challenge {
+                let r = a.metrics.mode_challenge.unwrap();
+                assert!(a.metrics.main_viewport.unwrap().contains_rect(r));
+                tap(&ctx, &mut a, r);
+                assert!(chosen(&a).challenge);
+                assert!(a.metrics.nfs.tabs.is_empty());
+                assert!(!a.metrics.nfs.controls.iter().any(|r| r.0 == "fill"));
+            } else {
+                tab(&ctx, &mut a, View::Assignment);
+            }
+            let before = serde_json::to_value(&a.progress).unwrap();
+            assert_normal_write_presentation(&ctx, &mut a, required);
+            assert_eq!(
+                serde_json::to_value(&a.progress).unwrap(),
+                before,
+                "Editor presentation adds no stored flag, action or completion"
+            );
+            assert!(!progress::current_solved(chosen(&a), &a.scenarios[i]));
+        }
+    }
+}
+#[test]
+fn normal_nfs_assignment_and_practice_write_drafts_are_separate_without_running_write() {
+    for (id, required) in NORMAL_WRITE_TASKS {
+        let (ctx, mut a, i) = normal_nfs_opened(id);
+        tab(&ctx, &mut a, View::Assignment);
+        assert_normal_write_presentation(&ctx, &mut a, required);
+        expanded(&ctx, &mut a, "write-toggle", "write-text");
+        let mut assignment_before = serde_json::to_value(&a.progress).unwrap();
+        text(
+            &ctx,
+            &mut a,
+            "write-text",
+            "Assignment draft stays separate\n",
+        );
+        let session = chosen(&a)
+            .workspace
+            .as_ref()
+            .unwrap()
+            .nfs_session
+            .as_ref()
+            .unwrap();
+        assert_eq!(session.write_text, "Assignment draft stays separate\n");
+        assert!(session.entries.is_empty(), "Typing never executes Write");
+        assignment_before["attempts"][id]["workspace"]["nfs_session"] =
+            serde_json::to_value(session).unwrap();
+        assert_eq!(
+            serde_json::to_value(&a.progress).unwrap(),
+            assignment_before,
+            "Assignment typing changes only its saved request draft"
+        );
+        tab(&ctx, &mut a, View::Example);
+        assert_normal_write_presentation(&ctx, &mut a, required);
+        expanded(&ctx, &mut a, "write-toggle", "write-text");
+        let mut practice_before = serde_json::to_value(&a.progress).unwrap();
+        text(
+            &ctx,
+            &mut a,
+            "write-text",
+            "Different ungraded practice draft\n",
+        );
+        assert_eq!(
+            learning(&a).session.write_text,
+            "Different ungraded practice draft\n"
+        );
+        assert!(
+            learning(&a).session.entries.is_empty(),
+            "Practice typing never executes Write"
+        );
+        practice_before["attempts"][id]["workspace"]["nfs_learning"]["session"] =
+            serde_json::to_value(&learning(&a).session).unwrap();
+        assert_eq!(
+            serde_json::to_value(&a.progress).unwrap(),
+            practice_before,
+            "Practice typing changes only its separate draft, never assignment State or credit"
+        );
+        assert_eq!(
+            a.nfs_presentation.observed_write_request().0,
+            "Different ungraded practice draft\n"
+        );
+        tab(&ctx, &mut a, View::Assignment);
+        draw(&ctx, &mut a);
+        assert_eq!(
+            a.nfs_presentation.observed_write_request().0,
+            "Assignment draft stays separate\n"
+        );
+        assert_eq!(
+            chosen(&a)
+                .workspace
+                .as_ref()
+                .unwrap()
+                .nfs_session
+                .as_ref()
+                .unwrap()
+                .write_text,
+            "Assignment draft stays separate\n"
+        );
+        assert_eq!(
+            learning(&a).session.write_text,
+            "Different ungraded practice draft\n"
+        );
+        assert!(!progress::current_solved(chosen(&a), &a.scenarios[i]));
+    }
+}
+
+fn complete_nfs_progress(a: &LabApp) -> serde_json::Value {
+    let mut value = serde_json::to_value(&a.progress).unwrap();
+    value["migration_receipts"] = serde_json::to_value(&a.progress.migration_receipts).unwrap();
+    value
+}
+fn normal_nfs_given_mode(id: &str, mode: usize) -> (egui::Context, LabApp, usize) {
+    let (ctx, mut a, i) = normal_nfs_opened(id);
+    match mode {
+        0 => tab(&ctx, &mut a, View::Assignment),
+        1 => {
+            let r = a.metrics.mode_challenge.unwrap();
+            assert!(a.metrics.main_viewport.unwrap().contains_rect(r));
+            tap(&ctx, &mut a, r);
+            assert!(chosen(&a).challenge && a.metrics.nfs.tabs.is_empty());
+        }
+        2 => tab(&ctx, &mut a, View::Example),
+        _ => unreachable!(),
+    }
+    (ctx, a, i)
+}
+fn given_capture(ctx: &egui::Context, a: &mut LabApp) -> egui::FullOutput {
+    let before = complete_nfs_progress(a);
+    let goal = serde_json::to_value(&a.scenarios[a.selected.unwrap()].goal).unwrap();
+    let out = ctx.run(
+        egui::RawInput {
+            screen_rect: Some(egui::Rect::from_min_size(
+                egui::Pos2::ZERO,
+                egui::vec2(1200. / a.scale, 850. / a.scale),
+            )),
+            ..Default::default()
+        },
+        |ctx| a.render(ctx),
+    );
+    assert_eq!(
+        complete_nfs_progress(a),
+        before,
+        "Reading givens must retain every progress field and exact receipts"
+    );
+    assert_eq!(
+        serde_json::to_value(&a.scenarios[a.selected.unwrap()].goal).unwrap(),
+        goal
+    );
+    out
+}
+fn given_text_geometry(
+    shape: &egui::epaint::Shape,
+    text: &str,
+) -> Option<(egui::Rect, egui::FontId)> {
+    match shape {
+        egui::epaint::Shape::Text(t) if painted_nfs_text(shape, text) => Some((
+            egui::Rect::from_min_size(t.pos, t.galley.size()),
+            t.galley.job.sections[0].format.font_id.clone(),
+        )),
+        egui::epaint::Shape::Vec(v) => v.iter().find_map(|s| given_text_geometry(s, text)),
+        _ => None,
+    }
+}
+fn visible_given_text(
+    out: &egui::FullOutput,
+    ctx: &egui::Context,
+    a: &LabApp,
+    text: &str,
+) -> Option<egui::Rect> {
+    let root = a
+        .metrics
+        .main_viewport
+        .unwrap()
+        .intersect(ctx.content_rect());
+    out.shapes.iter().find_map(|s| {
+        let (r, font) = given_text_geometry(&s.shape, text)?;
+        let clip = s.clip_rect.intersect(root);
+        if clip.contains(r.center()) && clip.expand(1. / ctx.pixels_per_point()).contains_rect(r) {
+            assert_eq!(
+                font,
+                egui::TextStyle::Body.resolve(&ctx.style()),
+                "Givens stay in normal readable body text"
+            );
+            Some(r)
+        } else {
+            None
+        }
+    })
+}
+fn relevant_given_paint(
+    shape: &egui::epaint::Shape,
+    target: &str,
+    found: &mut Vec<(String, egui::Rect, egui::FontId)>,
+) {
+    if found.len() >= 16 {
+        return;
+    }
+    match shape {
+        egui::epaint::Shape::Text(t) => {
+            let text = &t.galley.job.text;
+            if (text == target
+                || text.contains("IPv4")
+                || text.parse::<std::net::Ipv4Addr>().is_ok())
+                && let Some((r, font)) = given_text_geometry(shape, text)
+            {
+                found.push((text.chars().take(256).collect(), r, font));
+            }
+        }
+        egui::epaint::Shape::Vec(v) => {
+            for child in v {
+                relevant_given_paint(child, target, found);
+            }
+        }
+        _ => {}
+    }
+}
+fn seek_given_text(
+    ctx: &egui::Context,
+    a: &mut LabApp,
+    text: &str,
+) -> (egui::FullOutput, egui::Rect) {
+    let mut last = std::collections::VecDeque::new();
+    for tick in 0..20 {
+        let out = given_capture(ctx, a);
+        if let Some(r) = visible_given_text(&out, ctx, a, text) {
+            return (out, r);
+        }
+        let root = a
+            .metrics
+            .main_viewport
+            .unwrap()
+            .intersect(ctx.content_rect());
+        let mut paint = Vec::new();
+        for clipped in &out.shapes {
+            let mut rows = Vec::new();
+            relevant_given_paint(&clipped.shape, text, &mut rows);
+            for row in rows {
+                if paint.len() < 16 {
+                    paint.push((row, clipped.clip_rect));
+                }
+            }
+        }
+        if last.len() == 3 {
+            last.pop_front();
+        }
+        let session = if learning(a).view == View::Example && !chosen(a).challenge {
+            &learning(a).session
+        } else {
+            chosen(a)
+                .workspace
+                .as_ref()
+                .unwrap()
+                .nfs_session
+                .as_ref()
+                .unwrap()
+        };
+        let raw_request = (
+            &session.server,
+            &session.client,
+            &session.mountpoint,
+            &session.profile,
+            session.relative.len(),
+            session.write_text.len(),
+            session.entries.len(),
+        );
+        last.push_back(format!("tick={tick} scenario={} challenge={} view={:?} scale={} root={root:?} content={:?} offset={:?} size={:?} presented={:?} selections={:?} popup={:?} session={:?} paint={paint:?}", a.scenarios[a.selected.unwrap()].id, chosen(a).challenge, learning(a).view, a.scale, ctx.content_rect(), a.metrics.main_scroll_offset, a.metrics.main_content_size, a.nfs_presentation.observed_request_selection(), a.metrics.nfs.selections, a.metrics.nfs.popup, raw_request));
+        frame(
+            ctx,
+            a,
+            1200.,
+            850.,
+            vec![
+                egui::Event::PointerMoved(egui::pos2(root.left() + 1., root.center().y)),
+                egui::Event::MouseWheel {
+                    unit: egui::MouseWheelUnit::Point,
+                    delta: egui::vec2(0., -240.),
+                    modifiers: Default::default(),
+                },
+            ],
+        );
+        for _ in 0..12 {
+            draw(ctx, a);
+        }
+    }
+    panic!(
+        "Actual supplied label did not become fully visible within20 scrolls: {text}; last3actual observations={last:?}"
+    );
+}
+fn choose_given(ctx: &egui::Context, a: &mut LabApp, key: &str, id: &str, practice: bool) {
+    let selected = a.scenarios[a.selected.unwrap()].id.clone();
+    let mut before = complete_nfs_progress(a);
+    let (server, client, mountpoint, profile) = a.nfs_presentation.observed_request_selection();
+    let mut proposed = [
+        server.to_owned(),
+        client.to_owned(),
+        mountpoint.to_owned(),
+        profile.to_owned(),
+    ];
+    let field = match key {
+        "server" => 0,
+        "client" => 1,
+        _ => unreachable!(),
+    };
+    let changed = proposed[field] != id;
+    if changed {
+        proposed[field] = id.into();
+        if key == "client" {
+            let client = live(a, practice)
+                .inventory()
+                .clients
+                .iter()
+                .find(|c| c.id == id)
+                .unwrap();
+            if !client.mountpoints.contains(&proposed[2]) {
+                proposed[2].clear();
+            }
+            if !client.profiles.contains(&proposed[3]) {
+                proposed[3].clear();
+            }
+        }
+    }
+    choose(ctx, a, key, id);
+    let presented = a.nfs_presentation.observed_request_selection();
+    assert_eq!(
+        if key == "server" {
+            presented.0
+        } else {
+            presented.1
+        },
+        id,
+        "Actual presented request after real choice must match requested {key}; scenario={selected} practice={practice} selected={presented:?} popup={:?} choices={:?}",
+        a.metrics.nfs.popup,
+        a.metrics.nfs.choices
+    );
+    let session = if practice {
+        &learning(a).session
+    } else {
+        chosen(a)
+            .workspace
+            .as_ref()
+            .unwrap()
+            .nfs_session
+            .as_ref()
+            .unwrap()
+    };
+    if changed {
+        assert_eq!(
+            (
+                &session.server,
+                &session.client,
+                &session.mountpoint,
+                &session.profile
+            ),
+            (&proposed[0], &proposed[1], &proposed[2], &proposed[3]),
+            "Actual persisted selection/reconcile must match the requested choice and known givens"
+        );
+        let mut expected_session = if practice {
+            before["attempts"][&selected]["workspace"]["nfs_learning"]["session"].clone()
+        } else {
+            before["attempts"][&selected]["workspace"]["nfs_session"].clone()
+        };
+        for (name, value) in ["server", "client", "mountpoint", "profile"]
+            .into_iter()
+            .zip(proposed)
+        {
+            expected_session[name] = value.into();
+        }
+        if practice {
+            before["attempts"][&selected]["workspace"]["nfs_learning"]["session"] =
+                expected_session;
+        } else {
+            before["attempts"][&selected]["workspace"]["nfs_session"] = expected_session;
+        }
+    }
+    // Popup selection can scroll the containing workspace. Return to the real
+    // selector before seeking its immediately following read-only address row.
+    let _ = reveal(ctx, a, key, false);
+    let presented = a.nfs_presentation.observed_request_selection();
+    assert_eq!(
+        if key == "server" {
+            presented.0
+        } else {
+            presented.1
+        },
+        id
+    );
+    assert_eq!(
+        complete_nfs_progress(a),
+        before,
+        "Same-option clicks retain the entire Session; genuine selections and actual selector reveal change only independently predicted selection/reconcile fields, never relative/write text, histories, model, documents or receipts"
+    );
+}
+
+#[test]
+fn normal_nfs_given_addresses_follow_actual_selection_in_both_modes_and_separate_practice() {
+    for (id, _) in NORMAL_WRITE_TASKS {
+        for mode in 0..3 {
+            let (ctx, mut a, i) = normal_nfs_given_mode(id, mode);
+            let practice = mode == 2;
+            let prefix = if practice { "198.51.100" } else { "192.0.2" };
+            let servers = live(&a, practice)
+                .inventory()
+                .servers
+                .iter()
+                .map(|s| (s.id.clone(), s.address.to_string()))
+                .collect::<Vec<_>>();
+            let clients = live(&a, practice)
+                .inventory()
+                .clients
+                .iter()
+                .map(|s| (s.id.clone(), s.address.to_string()))
+                .collect::<Vec<_>>();
+            for (n, (server, address)) in servers.iter().enumerate() {
+                assert_eq!(*address, format!("{prefix}.{}", 10 + n));
+                choose_given(&ctx, &mut a, "server", server, practice);
+                let (out, value) = seek_given_text(&ctx, &mut a, address);
+                let label = visible_given_text(&out, &ctx, &a, "Server IPv4").unwrap();
+                assert!(
+                    (label.center().y - value.center().y).abs() < 1.,
+                    "Shared label/value row centers match"
+                );
+            }
+            for (client, address) in clients {
+                let octet = if client.ends_with("-reader") {
+                    21
+                } else if client.ends_with("-vault") {
+                    40
+                } else if client.ends_with("-outside") {
+                    90
+                } else {
+                    20
+                };
+                assert_eq!(address, format!("{prefix}.{octet}"));
+                choose_given(&ctx, &mut a, "client", &client, practice);
+                let (out, value) = seek_given_text(&ctx, &mut a, &address);
+                let label = visible_given_text(&out, &ctx, &a, "Client IPv4").unwrap();
+                assert!((label.center().y - value.center().y).abs() < 1.);
+                if a.metrics.nfs.columns {
+                    let server = visible_given_text(&out, &ctx, &a, "Server IPv4").unwrap();
+                    assert!(
+                        (server.center().y - label.center().y).abs() < 1.,
+                        "Both Docs columns reserve the same given row"
+                    );
+                }
+            }
+            assert!(!progress::current_solved(chosen(&a), &a.scenarios[i]));
+        }
+    }
+}
+#[test]
+fn normal_nfs_optional_inventory_reveals_every_supplied_address_and_numeric_profile_id() {
+    for (id, _) in NORMAL_WRITE_TASKS {
+        for mode in 0..3 {
+            let (ctx, mut a, i) = normal_nfs_given_mode(id, mode);
+            let practice = mode == 2;
+            a.scale = [1., 1.5, 2.][mode];
+            for _ in 0..3 {
+                given_capture(&ctx, &mut a);
+            }
+            let mut expected = Vec::new();
+            let inventory = live(&a, practice).inventory();
+            for s in &inventory.servers {
+                expected.push(format!("Server {} · IPv4 {}", s.id, s.address));
+            }
+            for c in &inventory.clients {
+                expected.push(format!("Client {} · IPv4 {}", c.id, c.address));
+                expected.push(format!(
+                    "Mountpoints: {}; numeric profiles: {}",
+                    c.mountpoints.join(", "),
+                    c.profiles.join(", ")
+                ));
+            }
+            for p in &inventory.profiles {
+                expected.push(format!(
+                    "{} ({}) · UID {}, GID {}, additional groups {:?}",
+                    p.id, p.label, p.uid, p.gid, p.groups
+                ));
+            }
+            let before = complete_nfs_progress(&a);
+            let (_, header) = seek_given_text(&ctx, &mut a, "Inventory and identities · Optional");
+            tap(&ctx, &mut a, header);
+            for text in expected {
+                let _ = seek_given_text(&ctx, &mut a, &text);
+            }
+            assert_eq!(
+                complete_nfs_progress(&a),
+                before,
+                "Opening and reading optional inventory does not edit anything"
+            );
+            assert!(!progress::current_solved(chosen(&a), &a.scenarios[i]));
         }
     }
 }

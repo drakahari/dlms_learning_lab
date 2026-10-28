@@ -1044,5 +1044,7 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/apache-static-v1.json"),
         include_str!("../scenarios/nat-basic-v1.json"),
         include_str!("../scenarios/rpm-packages-v1.json"),
+        include_str!("../scenarios/shell-command-vectors-v1.json"),
+        include_str!("../scenarios/nfs-v1.json"),
     ])
 }

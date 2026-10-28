@@ -1,6 +1,6 @@
 # Architecture and content authoring
 
-One native Rust package; no browser runtime, plugin platform, shell lab execution, server, VM, container, or required DLMS integration.
+One native Rust package; no browser runtime, plugin platform, host-shell execution of learner input, server, VM, container, or required DLMS integration.
 
 | Module | Responsibility |
 | --- | --- |
@@ -17,6 +17,8 @@ One native Rust package; no browser runtime, plugin platform, shell lab executio
 | `workspace.rs` | Versioned draft/check metadata, compatibility preparation, pure editor operations and state-specific diagnostic feedback |
 | `pack.rs` | Versioned declarative JSON validation and reference-solution reachability |
 | `catalog.rs` | Search/filter predicates and a marked synthetic metadata fixture |
+| `nfs.rs`, `nfs_workspace.rs`, `nfs_teaching.rs`, `ui/nfs_workspace.rs` | Typed supplied-client file/mount outcomes, bounded goals, separate saved practice, native document editing and readonly givens |
+| `shell.rs`, `script_teaching.rs`, `ui/scripting.rs` | Bounded in-process scripting, independent example/assignment drafts and behavior-based multi-case grading |
 | `progress.rs` | Local-only loading, compatibility backup, atomic synced saves and invalid-file preservation |
 | `ui.rs`, `ui/workspace.rs`, `ui/ipv4_workspace.rs` | Normal native library, tool-specific workspaces, approved IPv4 form, optional assistance and separate host-bit activity |
 | `ui/smoke.rs`, `ui/tests.rs`, `tests/` | Native rendering/input captures, UI and model/storage regression tests |
@@ -54,7 +56,16 @@ All single-line controls use `ui/controls.rs` for font-derived sizing and native
 
 Shared controls receive contextual names through the already enabled AccessKit integration without changing widget roles, values, IDs or keyboard actions. Real emitted-tree regressions cover the library, appearance samples, backup filename, terminals, configuration/script editors and allocation rows. See [ACCESSIBILITY.md](ACCESSIBILITY.md) for scope and the remaining specialized-network, platform-bridge and screen-reader acceptance work.
 
-`./target/debug/dlms-learning-lab --ui-smoke` runs the **normal** app with fresh isolated progress under `/tmp/dlms-workspaces-smoke`, injects egui input and captures application framebuffers to ignored `screenshots/workspaces/`. It captures all nine Learn/Challenge screens, actual IPv4 field/check/host invalidation, service-file save and modeled verification, terminal Enter/query invalidation, real resizing, 150% text, optional filters and a synthetic large catalog. Screenshot acknowledgements keep captures synchronized. This is native renderer/event testing, not physical-device or screen-reader acceptance.
+Use `python3 tools/dev.py native ./target/debug/dlms-learning-lab --ui-smoke`
+through the main checkout's shared workflow. The runner supplies private disk-backed
+temporary/profile paths and a fresh `.build-artifacts/native-runs/run-*` working
+directory; application framebuffers go to its ignored `screenshots/workspaces/`.
+Do not launch directly with the machine's RAM-backed default temporary directory.
+Closed smoke stages exercise ordinary application controls with synthetic profiles,
+actual egui input and screenshot acknowledgements. Record actual window sizes,
+text scale, theme, build identity and the exact checks performed. This is native
+renderer/event evidence, not physical-device, screen-reader or novice acceptance.
+
 
 `--developer` exposes the collapsed 900-item synthetic metadata fixture. It never adds playable curriculum. Preview-only UI and the former `--ipv4-smoke` flow have been removed; normal launch needs no special flag.
 
@@ -187,15 +198,13 @@ with positive required answers and Published plus both serving-copy negatives.
 See DNS_NO_ANSWER_SUBSET.md. This capability introduces no new State or curriculum.
 
 
-## Current authoring boundary — M116 in progress
+## Current authoring boundary — 2026-10-27
 
-Current source has133 authored assignments/33 units, including four Debian
-package and four ideal STP tasks. The scoped installed Fedora candidate38a8098 also has133; all eight new package/
-STP lesson flows pass on that exact ELF. Evidence is tracked in CHECKPOINT.md and
-INSTALLATION.md, not implied by source registration alone. Bash evaluator9 supports the documented functions, arrays,
-substitution, expansion and option interfaces; historical subset/count statements
-above describe their dated milestone, not current capability. SHELL_SUBSET.md is
-the current language contract. No new evaluator10 behavior is active.
+Current source has154 authored assignments/39 units across four tracks, including
+49 Bash/Shell tasks. Shell evaluator10 is the current in-process language contract;
+see SHELL_SUBSET.md. Historical counts and capability statements above describe
+those earlier milestones. Exact source, packaged and actual-native acceptance
+are recorded separately in CHECKPOINT.md, INSTALLATION.md and the ledger.
 
 For packages use the typed script-free model, guarded closed terminal and separate
 bounded assignment/example Sessions. Optional authored command annotations must
@@ -213,10 +222,36 @@ popup content, with actual font-derived heights/label columns. See
 SPANNING_TREE_LESSONS.md and SPANNING_TREE_WORKSPACE.md. Neither model proves
 real package transactions or protocol/device behavior.
 
-The pure Apache static-server module remains a foundation with no normal authored
-unit or native renderer. Reviewed adapter proposals and other private future
-capabilities are not registered content or objective coverage. Reuse the ordinary
-versioned pack loader, validate identifiers/state/objectives/hints/reachability,
-retain exact original catalog prefixes and genuine history, then verify separate
-practice/experiments, alternatives/negatives and actual native full assignments
-before promoting evidence. No executable scenario scripts or plugin platform.
+Four static-web assignments and four NFS assignments now use native configuration
+editors with independent practice. NFS grades saved/applied/live policy, current
+file access/publication, independent fresh-client trials and preservation of
+unrelated work. Readonly supplied IPs and identity maps are givens, not solved
+policies. Required writing tools start open for publication tasks; optional
+exploration stays collapsed for read-only work. See NFS_LESSONS.md,
+NFS_WORKSPACE.md, STATIC_WEB_LESSONS.md and APACHE_STATIC_SUBSET.md for exact limits.
+Neither model operates a real host service or network connection.
+
+The safe-command scripting unit adds three behavior-graded tasks to the existing
+46: option/filename boundaries, allowlisted dispatch and preflighted mixed-plan
+publication. Reuse the bounded interpreter and separate example/assignment drafts.
+Validate status, both output streams and complete virtual file outcomes against
+several deterministic cases, including legitimate alternatives, plausible mistakes,
+partial work, early writes and first-case hardcodes. See
+SHELL_COMMAND_VECTOR_LESSONS.md and its independently authored review fixture.
+
+Before authoring, make necessary givens visible in the actual workspace; never
+require learners to inspect backend fixtures for client addresses or identities.
+Keep the full practical task and appropriate tools in both modes. Teach new
+concepts with separate runnable examples before testing, keep help optional,
+and avoid labeling required editing as optional exploration. Inspect rendered
+screens and actual actions; passing tests alone do not establish novice usability.
+
+Reuse the ordinary versioned pack loader and validate identifiers, state, goals,
+hints, prerequisites and bounded solution reachability. Keep old specifications,
+raw unit prefixes and genuine historical evidence exact. Add new objectives without
+inventing answers or current mastery. Packs are declarative data; Bash examples
+and solutions are learner-language data evaluated only by the bounded simulator,
+never host initialization scripts or dynamically executable plugins. Future
+unregistered foundations and proposals earn no curriculum credit. All development
+build/test/reference/native gates follow BUILD_WORKFLOW.md and its shared lock,
+two Cargo jobs, two runtime threads and verified disk-backed artifacts.

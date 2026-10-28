@@ -54,7 +54,7 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 147);
+    assert_eq!(labs.len(), 154);
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -76,10 +76,39 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
             "lpic1-rpm-provider",
             "lpic1-rpm-epoch",
             "lpic1-rpm-payload",
-            "lpic1-rpm-handover"
+            "lpic1-rpm-handover",
+            "shell-command-options",
+            "shell-command-dispatch",
+            "shell-command-plan",
+            "lpic2-nfs-reference",
+            "lpic2-nfs-publication",
+            "lpic2-nfs-handover",
+            "lpic2-nfs-capstone",
         ])
     );
     assert_eq!(original.attempts.len(), 133);
+    for (id, scripting) in [
+        ("shell-command-options", true),
+        ("shell-command-dispatch", true),
+        ("shell-command-plan", true),
+        ("lpic2-nfs-reference", false),
+        ("lpic2-nfs-publication", false),
+        ("lpic2-nfs-handover", false),
+        ("lpic2-nfs-capstone", false),
+    ] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        if scripting {
+            assert!(matches!(source.initial, State::Script { .. }));
+            assert!(matches!(source.goal, Goal::Script { .. }));
+        } else {
+            assert!(matches!(source.initial, State::Nfs { .. }));
+            assert!(matches!(source.goal, Goal::Nfs { .. }));
+        }
+        assert!(
+            !original.attempts.contains_key(id) && !original.favorites.contains(id),
+            "Original actual9 must retain absent later attempts and credit"
+        );
+    }
     (raw, original, labs)
 }
 // Progress's portable Serialize intentionally omits main-only provenance.
@@ -189,7 +218,7 @@ fn actual9_open_prepare_preserves_all6_7_8_9_histories_drafts_and_unrelated_cont
     let (raw, original, labs) = private();
     let mut loaded = progress::decode(&raw, &labs).unwrap();
     evidence::exact(&history(&loaded, false), &history(&original, false));
-    // These are the exact loaded133 contexts. The new7 stay absent; opening
+    // These are the exact loaded133 contexts. All21 later tasks stay absent; opening
     // an older profile must not fabricate Attempts or historical answers.
     for lab in labs
         .iter()

@@ -1037,11 +1037,29 @@ fn maximum_admitted_assignment_and_practice_profile_roundtrip_with_actual_legacy
     lesson.validate().unwrap();
     assert!(lesson.separate_from(&assignment));
     scenario.dhcpv4_teaching = Some(lesson);
-    let mut current = pack::bundled().unwrap();
-    current.push(scenario.clone());
-    let catalog =
-        pack::load(&serde_json::json!({"schema_version":1,"scenarios":current}).to_string())
-            .unwrap();
+    // The catalog is a collection of bounded packs, not one growing artificial pack.
+    let mut catalog = pack::bundled().unwrap();
+    assert_eq!(catalog.len(), 154);
+    let normal = serde_json::to_value(&catalog).unwrap();
+    assert!(scenario.prerequisites.is_empty());
+    assert!(catalog.iter().all(|s| s.id != scenario.id));
+    let fixture_pack =
+        serde_json::json!({"schema_version":1,"scenarios":[scenario.clone()]}).to_string();
+    let validated = pack::load(&fixture_pack).unwrap();
+    assert_eq!(validated.len(), 1);
+    assert_eq!(
+        serde_json::to_value(&validated[0]).unwrap(),
+        serde_json::to_value(&scenario).unwrap()
+    );
+    catalog.extend(validated);
+    assert_eq!(catalog.len(), 155);
+    assert_eq!(serde_json::to_value(&catalog[..154]).unwrap(), normal);
+    let oversized = format!("{}{}", fixture_pack, " ".repeat(2 * 1024 * 1024));
+    assert!(
+        pack::load(&oversized)
+            .unwrap_err()
+            .contains("Pack exceeds 2 MB")
+    );
     let old_bytes = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let mut p = progress::decode(old_bytes, &catalog).unwrap();
     let old_attempts = serde_json::to_value(&p.attempts).unwrap();

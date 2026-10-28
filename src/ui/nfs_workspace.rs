@@ -4,6 +4,9 @@ use dlms_learning_lab::{nfs as core, nfs_teaching as learn, nfs_workspace as wor
 pub(super) mod memo;
 #[derive(Default)]
 pub(super) struct NfsMetrics {
+    pub heading: Option<egui::Rect>,
+    pub read_output: Option<(egui::Rect, egui::Rect)>,
+    pub row_clips: Vec<(usize, egui::Rect)>,
     pub fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     pub controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
     pub choices: Vec<(String, egui::Rect)>,
@@ -118,6 +121,15 @@ impl Presentation {
     #[cfg(test)]
     pub(in crate::ui) fn observed_write_request(&self) -> (&str, Option<&str>) {
         (&self.request.write_text, self.notice.as_deref())
+    }
+    #[cfg(test)]
+    pub(in crate::ui) fn observed_request_selection(&self) -> (&str, &str, &str, &str) {
+        (
+            &self.request.server,
+            &self.request.client,
+            &self.request.mountpoint,
+            &self.request.profile,
+        )
     }
     pub fn clear(&mut self) {
         self.epoch = self.epoch.wrapping_add(1);
@@ -517,6 +529,17 @@ fn selected(a: &Attempt, practice: bool) -> Option<(&core::State, &work::Session
         Some((simulation, a.workspace.as_ref()?.nfs_session.as_ref()?))
     }
 }
+fn given_address(ui: &mut egui::Ui, label: &str, address: std::net::Ipv4Addr) {
+    controls::form_row(ui, label, |ui, width| {
+        controls::cell(ui, width, |ui| {
+            ui.add(
+                egui::Label::new(address.to_string())
+                    .wrap()
+                    .selectable(true),
+            );
+        });
+    });
+}
 fn docs(
     ui: &mut egui::Ui,
     a: &Attempt,
@@ -554,6 +577,14 @@ fn docs(
                         &mut p.request.server,
                         s.inventory().servers.iter().map(|x| x.id.clone()),
                     );
+                    if let Some(server) = s
+                        .inventory()
+                        .servers
+                        .iter()
+                        .find(|x| x.id == p.request.server)
+                    {
+                        given_address(ui, "Server IPv4", server.address);
+                    }
                     if let Some(layer) = s
                         .runtime()
                         .servers
@@ -602,6 +633,14 @@ fn docs(
                         p.request.reconcile_client(s);
                         edits.profile = true;
                         edits.mountpoint = true;
+                    }
+                    if let Some(client) = s
+                        .inventory()
+                        .clients
+                        .iter()
+                        .find(|x| x.id == p.request.client)
+                    {
+                        given_address(ui, "Client IPv4", client.address);
                     }
                     if let Some(layer) = s
                         .runtime()
@@ -722,7 +761,16 @@ fn requests(
         button_action(ui, m, "read", "Read existing file", false),
         Submit::Read,
     );
-    let header = egui::CollapsingHeader::new("Replace existing file text · Optional").id_salt(scope.with("write")).show(ui,|ui|{let e=field(ui,m,FieldSpec{scope,key:"write-text",label:"Replacement text",cap:4096,multiline:true},&mut p.request.write_text,&mut p.focus);edits.observe(&e);edits.write_text|=e.before.is_some();edits.rejected|=e.rejected;queue(&mut edits.q,button_action(ui,m,"write","Write existing file",false),Submit::Write);ui.label(RichText::new("Typing does not write. Inode mode, owner and paths stay supplied and immutable.").small());});
+}
+fn write_editor(
+    ui: &mut egui::Ui,
+    p: &mut Presentation,
+    m: &mut NfsMetrics,
+    scope: egui::Id,
+    edits: &mut Edits,
+    required: bool,
+) {
+    let header = egui::CollapsingHeader::new(if required { "Replace existing file text" } else { "Replace existing file text · Optional" }).id_salt(scope.with("write")).default_open(required).show(ui,|ui|{let e=field(ui,m,FieldSpec{scope,key:"write-text",label:"Replacement text",cap:4096,multiline:true},&mut p.request.write_text,&mut p.focus);edits.observe(&e);edits.write_text|=e.before.is_some();edits.rejected|=e.rejected;queue(&mut edits.q,button_action(ui,m,"write","Write existing file",false),Submit::Write);ui.label(RichText::new("File permissions, owner and paths are supplied by the lab; editing this text does not change them.").small());});
     m.controls.push((
         "write-toggle".into(),
         header.header_response.rect,
@@ -847,7 +895,7 @@ fn apply_edits(
         p.notice=Some(if e.dropped {
             "The pending text or paste was not applied. Enter it again in the field before retrying the action; no action was run."
         } else {
-            "Edit not accepted; previous field retained and no same-frame action was submitted. Shorten the input or free saved capacity, then retry."
+            "Your previous text is still saved and nothing ran. Shorten the edit and try again."
         }.into());
     }
     dirty
@@ -963,7 +1011,7 @@ fn live(ui: &mut egui::Ui, a: &Attempt, practice: bool, p: &Presentation, m: &mu
  if let Some(client)=s.runtime().clients.iter().find(|x|x.client==p.request.client){let text=format!("{} · mount editor {} saved text",client.client,if client.draft==client.saved{"matches"}else{"differs from"});m.state_text.push(text.clone());ui.label(text);}
  for mount in &s.runtime().mounts{let text=format!("{}: {}:{} to {} · client {}, export {}",mount.client,mount.specification.server,mount.specification.root,mount.specification.mountpoint,access_label(mount.specification.access),access_label(mount.binding.access));m.state_text.push(text.clone());ui.label(text);}
  ui.label(RichText::new("Saved text equality is not proof of applied policy; Check evaluates actual current and independent new-mount outcomes.").small());
- egui::CollapsingHeader::new("Supplied inventory and numeric identities · Optional").id_salt("nfs-inventory").show(ui,|ui|{for profile in &s.inventory().profiles{ui.label(format!("{} · UID {}, GID {}, additional groups {:?}",profile.label,profile.uid,profile.gid,profile.groups));}for root in &s.inventory().roots{ui.label(format!("{}:{}",root.server,root.path));for inode in root.directories.iter().chain(&root.files){ui.label(format!("{} · {:o} · UID {} GID {}",inode.path,inode.mode,inode.uid,inode.gid));}}});});
+ egui::CollapsingHeader::new("Inventory and identities · Optional").id_salt("nfs-inventory").show(ui,|ui|{for server in &s.inventory().servers{ui.add(egui::Label::new(format!("Server {} · IPv4 {}",server.id,server.address)).wrap().selectable(true));}for client in &s.inventory().clients{ui.add(egui::Label::new(format!("Client {} · IPv4 {}",client.id,client.address)).wrap().selectable(true));ui.add(egui::Label::new(format!("Mountpoints: {}; numeric profiles: {}",client.mountpoints.join(", "),client.profiles.join(", "))).wrap().selectable(true));}for profile in &s.inventory().profiles{ui.add(egui::Label::new(format!("{} ({}) · UID {}, GID {}, additional groups {:?}",profile.id,profile.label,profile.uid,profile.gid,profile.groups)).wrap().selectable(true));}for root in &s.inventory().roots{ui.label(format!("{}:{}",root.server,root.path));for inode in root.directories.iter().chain(&root.files){ui.label(format!("{} · {:o} · UID {} GID {}",inode.path,inode.mode,inode.uid,inode.gid));}}});});
     m.current = Some(r.response.rect);
 }
 
@@ -1006,7 +1054,7 @@ fn page(
                     *id == owner.with("relative") || *id == owner.with("write-text")
                 }))
     });
-    ui.heading(&s.title);
+    m.nfs.heading = Some(ui.heading(&s.title).rect);
     ui.label(RichText::new(&s.objective).strong());
     ui.label(RichText::new("Supplied virtual NFS · Existing files and numeric identities only; nothing runs on the host").small());
     let old = view(a);
@@ -1117,9 +1165,20 @@ fn page(
     let shortcut = active
         && focused
         && ui.input_mut(|i| i.consume_key(egui::Modifiers::CTRL, egui::Key::Enter));
+    let required_write = if practice {
+        s.nfs_teaching.as_ref().is_some_and(|l| {
+            l.definition
+                .requirements
+                .iter()
+                .any(|r| matches!(r, work::Requirement::CurrentFileText { .. }))
+        })
+    } else {
+        matches!(&s.goal, engine::Goal::Nfs { definition } if definition.requirements.iter().any(|r| matches!(r, work::Requirement::CurrentFileText { .. })))
+    };
     ui.add_enabled_ui(active, |ui| {
         docs(ui, a, practice, p, &mut m.nfs, scope, &mut edits);
         requests(ui, a, practice, p, &mut m.nfs, scope, &mut edits);
+        write_editor(ui, p, &mut m.nfs, scope, &mut edits, required_write);
     });
     ui.add_enabled_ui(active, |ui| {
         queue(
@@ -1161,7 +1220,7 @@ fn page(
     if let Some(text) = &p.last_read {
         m.nfs.read_shown = true;
         ui.strong("Last successful read · Contents at that request");
-        egui::ScrollArea::both()
+        let scrolled = egui::ScrollArea::both()
             .id_salt(scope.with("read-result"))
             .max_height(controls::height(ui) * 3.)
             .show(ui, |ui| {
@@ -1169,8 +1228,12 @@ fn page(
                     egui::Label::new(RichText::new(text).monospace())
                         .extend()
                         .selectable(true),
-                );
+                )
             });
+        m.nfs.read_output = Some((
+            scrolled.inner.rect,
+            scrolled.inner_rect.intersect(ui.clip_rect()),
+        ));
     }
     if p.checked[usize::from(practice)]
         && let Some(rows) = p.memo.rows(&s.id, practice)
@@ -1187,6 +1250,7 @@ fn page(
                     text,
                 );
                 m.nfs.rows.push((n, *ok, r.rect));
+                m.nfs.row_clips.push((n, ui.clip_rect()));
             }
             let pass = !rows.is_empty() && rows.iter().all(|r| r.0);
             if pass {

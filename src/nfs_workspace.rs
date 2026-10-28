@@ -1732,7 +1732,7 @@ mod attempt_projection_tests {
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
         let mut all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 147);
+        assert_eq!(all.len(), 154);
         let s = scenario();
         all.push(s.clone());
         let mut p = progress::decode(&raw, &all).unwrap();

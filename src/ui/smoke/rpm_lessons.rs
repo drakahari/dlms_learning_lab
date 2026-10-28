@@ -654,14 +654,48 @@ impl LabApp {
     fn rpm_scope(&self) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (147, 37));
+        assert_eq!((self.scenarios.len(), self.units.len()), (154, 39));
         assert_eq!(
-            self.scenarios[143..]
+            self.scenarios[143..147]
                 .iter()
                 .map(|s| s.id.as_str())
                 .collect::<Vec<_>>(),
             IDS
         );
+        assert_eq!(
+            self.scenarios[147..150]
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "shell-command-options",
+                "shell-command-dispatch",
+                "shell-command-plan",
+            ]
+        );
+        assert!(self.scenarios[147..150].iter().all(|s| {
+            matches!(&s.initial, engine::State::Script { .. })
+                && matches!(&s.goal, engine::Goal::Script { .. })
+        }));
+        assert_eq!(
+            self.scenarios[150..154]
+                .iter()
+                .map(|s| s.id.as_str())
+                .collect::<Vec<_>>(),
+            [
+                "lpic2-nfs-reference",
+                "lpic2-nfs-publication",
+                "lpic2-nfs-handover",
+                "lpic2-nfs-capstone",
+            ]
+        );
+        assert!(self.scenarios[150..154].iter().all(|s| matches!(
+            &s.initial,
+            engine::State::Nfs { .. }
+        ) && matches!(
+            &s.goal,
+            engine::Goal::Nfs { .. }
+        )));
         assert!(
             self.progress.attempts.len() <= 4
                 && self

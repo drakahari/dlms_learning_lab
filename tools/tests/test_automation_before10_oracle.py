@@ -222,7 +222,19 @@ class FixedAutomationSafety(unittest.TestCase):
         units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())
         self.assertEqual(units['version'],1)
         frozen=json.loads((ROOT/'tests/fixtures/catalog133-original-index.json').read_bytes())
-        self.assertEqual(len(units['units']),37)
+        self.assertEqual(len(units['units']),39)
+        # Current consumer only: the original capture inputs and observations above
+        # remain frozen. Verify all37 prior unit objects and both exact new units.
+        old_index_raw=(ROOT/'tests/fixtures/nfs-original147-source-index.json').read_bytes()
+        self.assertEqual(hashlib.sha256(old_index_raw).hexdigest(),
+                         'd1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef')
+        old_index=json.loads(old_index_raw)
+        self.assertEqual(units['units'][:37],old_index['units']['units'])
+        bash_raw=(ROOT/'tests/fixtures/shell-command-vectors-review.json').read_bytes()
+        self.assertEqual(hashlib.sha256(bash_raw).hexdigest(),
+                         'fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e82ee5f58a8f9c0eb')
+        self.assertEqual(units['units'][37],json.loads(bash_raw)['unit_proposal'])
+        self.assertEqual(units['units'][38],old_index['appended_unit'])
         original35=units['units'][:35]
         self.assertEqual(len(original35),35)
         self.assertEqual(original35[:33],frozen['units']['units'])

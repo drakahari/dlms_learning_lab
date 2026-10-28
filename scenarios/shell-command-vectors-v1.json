@@ -1,0 +1,1254 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "shell-command-options",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-construction",
+      "topic": "Bash command construction",
+      "title": "Keep source names out of the option list",
+      "summary": "Build optional sort behavior while keeping option-looking source names literal.",
+      "objective": "Accept exactly ORDER POLICY SOURCE. ORDER is asc or desc; POLICY is all or unique. Print SOURCE's lines in C/POSIX byte order, reversed for desc and with repeated whole lines removed for unique. Keep repeated lines for all. Success returns 0, with no error output and no file changes.\n\nSOURCE must be a nonempty flat basename, not -, . or ..; it may start with a hyphen or contain spaces, quotes, stars or percent signs. Reject an invalid interface with only Usage: manifest asc|desc all|unique SOURCE and a newline on standard error, status 2. For a valid request with an absent source, print only Missing source: SOURCE and a newline on standard error, status 1. Use the supplied filenames exactly.",
+      "retry_guidance": "Compare the first differing test: output, error output, exit status and simulated files are separate results. Check the operation, argument boundaries and validation order before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 25,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your assignment draft stays saved.",
+          "action": "Accept exactly ORDER POLICY SOURCE. ORDER is asc or desc; POLICY is all or unique. Print SOURCE's lines in C/POSIX byte order, reversed for desc and with repeated whole lines removed for unique. Keep repeated lines for all. Success returns 0, with no error output and no file changes.\n\nSOURCE must be a nonempty flat basename, not -, . or ..; it may start with a hyphen or contain spaces, quotes, stars or percent signs. Reject an invalid interface with only Usage: manifest asc|desc all|unique SOURCE and a newline on standard error, status 2. For a valid request with an absent source, print only Missing source: SOURCE and a newline on standard error, status 1. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "The simulator's sort/uniq/cut use fixed C/POSIX byte ordering. LC_ALL=C selects its supported locale; it does not model environment export. Real Bash needs export or a command-prefix assignment to pass a new LC_ALL variable to external programs; neither workflow is implemented here.",
+          "action": "Open optional input details when needed; inspect arguments and files, then compare them with the latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "The complete practical task is graded by behavior, not a required command spelling.",
+          "action": "Write the script, Run all tests, investigate one differing result, and retry. Introduction, example and hints are optional to reopen.",
+          "commands": []
+        }
+      ],
+      "explanation": "Build flags from the two independent choices, place -- before the filename, and run the quoted list. Quoting preserves the filename as one value; -- tells the selected utility it is an operand. The single - remains a stdin marker and is rejected before running anything. Direct supported branches that produce the same behavior are equally valid.",
+      "hints": [
+        "Treat the order and duplicate policy as separate choices. Check the argument count and recognized values before invoking a tool.",
+        "Start with command=(sort), then add -r and/or -u only for the requested choices. Use -- before the source operand.",
+        "Run the whole list with \"${command[@]}\". Do not join it into one string or use the source as a printf format. Reject - before the utility can read stdin."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Search-and-Execution.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html"
+      ],
+      "simplifications": "Bash-specific dense arrays and the disclosed in-process shell subset; equivalent supported direct branches are accepted. No eval, sourcing, external/PATH command lookup or host execution. Only flat simulated /work text files and fixed C/POSIX byte-order sort/uniq/cut flags exist. -- separates these utilities' options; - still denotes stdin. No general CSV, filesystem alias detection, crash-safe rename, network, service or subprocess behavior is claimed. Twelve deterministic graded cases are finite evidence, not complete Bash/Coreutils conformance.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Build a configurable sort request without treating a filename as flags.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Ascending with every entry",
+            "args": [
+              "asc",
+              "all",
+              "orders.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            },
+            "stdout": "A\nb\nb\nz\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            }
+          },
+          {
+            "name": "Unique entries from an option-looking name",
+            "args": [
+              "asc",
+              "unique",
+              "-r"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-r": "b\nA\nb\nz\n"
+            },
+            "stdout": "A\nb\nz\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-r": "b\nA\nb\nz\n"
+            }
+          },
+          {
+            "name": "Descending while keeping repeated entries",
+            "args": [
+              "desc",
+              "all",
+              "night list.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/night list.txt": "pear\napple\npear\n"
+            },
+            "stdout": "pear\npear\napple\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/night list.txt": "pear\napple\npear\n"
+            }
+          },
+          {
+            "name": "Descending unique and a literal double-hyphen name",
+            "args": [
+              "desc",
+              "unique",
+              "--"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/--": "z\nb\nA\nb"
+            },
+            "stdout": "z\nb\nA\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/--": "z\nb\nA\nb"
+            }
+          },
+          {
+            "name": "Empty source",
+            "args": [
+              "asc",
+              "all",
+              "empty.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/empty.txt": ""
+            },
+            "stdout": "",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/empty.txt": ""
+            }
+          },
+          {
+            "name": "Literal spaces patterns percent and UTF8",
+            "args": [
+              "asc",
+              "unique",
+              "star*.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/star*.txt": "é\n100%\nA B\n100%\ncable\\label\n"
+            },
+            "stdout": "100%\nA B\ncable\\label\né\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/star*.txt": "é\n100%\nA B\n100%\ncable\\label\n"
+            }
+          },
+          {
+            "name": "Absent source",
+            "args": [
+              "asc",
+              "all",
+              "absent.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            },
+            "stdout": "",
+            "stderr": "Missing source: absent.txt\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            }
+          },
+          {
+            "name": "Unknown ordering",
+            "args": [
+              "sideways",
+              "all",
+              "orders.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: manifest asc|desc all|unique SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            }
+          },
+          {
+            "name": "Unknown duplicate policy",
+            "args": [
+              "asc",
+              "collapse",
+              "orders.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: manifest asc|desc all|unique SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            }
+          },
+          {
+            "name": "Extra argument",
+            "args": [
+              "asc",
+              "all",
+              "orders.txt",
+              "extra"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: manifest asc|desc all|unique SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            }
+          },
+          {
+            "name": "A single hyphen is not a source name",
+            "args": [
+              "asc",
+              "all",
+              "-"
+            ],
+            "stdin": "Do not sort input\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-": "Wrong source\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: manifest asc|desc all|unique SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-": "Wrong source\n"
+            }
+          },
+          {
+            "name": "Missing source argument",
+            "args": [
+              "asc",
+              "all"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: manifest asc|desc all|unique SOURCE\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/orders.txt": "b\nA\nb\nz\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "invalid() { printf 'Usage: manifest asc|desc all|unique SOURCE\\n' >&2; }\nif test \"$#\" -ne 3; then invalid; exit 2; fi\norder=$1\npolicy=$2\nsource=$3\ncase \"$order\" in asc|desc) : ;; *) invalid; exit 2 ;; esac\ncase \"$policy\" in all|unique) : ;; *) invalid; exit 2 ;; esac\ncase \"$source\" in ''|-|.|..|*/*) invalid; exit 2 ;; esac\nif test -f \"$source\"; then :; else printf 'Missing source: %s\\n' \"$source\" >&2; exit 1; fi\nLC_ALL=C\ncommand=(sort)\nif test \"$order\" = desc; then command=(\"${command[@]}\" -r); fi\nif test \"$policy\" = unique; then command=(\"${command[@]}\" -u); fi\ncommand=(\"${command[@]}\" -- \"$source\")\n\"${command[@]}\"\n"
+      ],
+      "prerequisites": [
+        "shell-array-priority",
+        "shell-sort-manifest",
+        "shell-case-interface",
+        "shell-safe-handover"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use quoted arrays and replacement from “Repair a queue that loses its tail”, C-locale sorting, case guards and basename checks from earlier units. This lesson adds executing a command list and separating options from filenames.",
+        "concepts": [
+          {
+            "title": "A command has separate words",
+            "text": "A command starts with the program name; later words are its arguments. command=(sort -r -- \"-shelf\") stores four separate words. Running \"${command[@]}\" uses that first word as the program name and passes the other entries separately. This array spelling is Bash-specific, not portable sh."
+          },
+          {
+            "title": "Build optional parts without flattening text",
+            "text": "command=(sort) starts a new command. command=(\"${command[@]}\" -r) copies its current entries, then adds one flag. The right-hand side uses the old list before replacement. Quoting the whole @ expansion preserves spaces, empty entries and literal wildcard characters."
+          },
+          {
+            "title": "A quoted name can still look like an option",
+            "text": "Quotes keep \"-shelf\" as one argument; they do not stop a utility from seeing an option. For the sort, uniq and cut commands used here, -- ends the options. Put the source filename after it. A single - still means standard input, even after --, so these assignments reject it as a source."
+          },
+          {
+            "title": "Choose behavior from a small known set",
+            "text": "Select program names and flags from your own case branches. Do not treat a supplied command string as a program. Text such as $(printf surprise) inside an argument stays data when expanded; it is not parsed again as script syntax. Quoted arrays do not choose safe operations for you."
+          },
+          {
+            "title": "Keep ordering and duplicate policy independent",
+            "text": "The simulator's tools use fixed C/POSIX byte ordering. sort prints ascending text; -r reverses it and -u removes repeated whole lines. Combine -r and -u when both are requested. LC_ALL=C selects this supported locale here; it does not model sending variables to separate programs. In real Bash, sending a newly created LC_ALL variable to an external program needs export or a command-prefix assignment. Those forms are outside this simulator. The lab supplies arguments and files; create command, order and policy yourself."
+          }
+        ],
+        "example": "command=(sort)\nif test \"$1\" = reverse; then command=(\"${command[@]}\" -r); fi\ncommand=(\"${command[@]}\" -- \"$2\")\nLC_ALL=C\n\"${command[@]}\"\n",
+        "inputs": "Arguments are reverse and -shelf. The separate museum shelf has Map, Atlas, Map; museum-preserve.txt is unchanged. This example uses different interface values and files from the assignment.",
+        "try_change": "Add -u beside -r in the reverse branch, then Run. The duplicate Map line disappears. Restore the branch without -u to repair the example.",
+        "fixture": {
+          "name": "Museum shelf example",
+          "args": [
+            "reverse",
+            "-shelf"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/-shelf": "Map\nAtlas\nMap\n",
+            "/work/museum-preserve.txt": "Do not change\n"
+          },
+          "stdout": "Map\nMap\nAtlas\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/-shelf": "Map\nAtlas\nMap\n",
+            "/work/museum-preserve.txt": "Do not change\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-command-dispatch",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-construction",
+      "topic": "Bash command construction",
+      "title": "Run approved transformations without losing jobs",
+      "summary": "Choose the right text tool per job and report failures without losing later work.",
+      "objective": "Accept one or more OP SOURCE pairs. With zero pairs or an unpaired final argument, print only Usage: transform OP SOURCE ... and a newline on standard error; return 2 and process no jobs.\n\nProcess pairs in order. ordered sorts all lines in C/POSIX byte order; neighbors collapses only adjacent identical lines; owners prints field 3 of colon-containing lines, skipping notes without a colon and keeping empty owner fields. For a valid job print Job N: OP and a newline, then the exact transformation output. Number every pair, starting at 1.\n\nUnknown OP prints Rejected job N: unknown operation. An empty SOURCE, a directory part, . , .. or - prints Rejected job N: invalid source. An absent valid source prints Missing source for job N: SOURCE. Send each diagnostic to standard error with a newline, with no heading for that failed job, then process later jobs. Return 1 if any job failed, otherwise 0. Change no files. Source names may begin with hyphens. Use the supplied filenames exactly.",
+      "retry_guidance": "Compare the first differing test: output, error output, exit status and simulated files are separate results. Check the operation, argument boundaries and validation order before retrying.",
+      "difficulty": "Intermediate",
+      "minutes": 30,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your assignment draft stays saved.",
+          "action": "Accept one or more OP SOURCE pairs. With zero pairs or an unpaired final argument, print only Usage: transform OP SOURCE ... and a newline on standard error; return 2 and process no jobs.\n\nProcess pairs in order. ordered sorts all lines in C/POSIX byte order; neighbors collapses only adjacent identical lines; owners prints field 3 of colon-containing lines, skipping notes without a colon and keeping empty owner fields. For a valid job print Job N: OP and a newline, then the exact transformation output. Number every pair, starting at 1.\n\nUnknown OP prints Rejected job N: unknown operation. An empty SOURCE, a directory part, . , .. or - prints Rejected job N: invalid source. An absent valid source prints Missing source for job N: SOURCE. Send each diagnostic to standard error with a newline, with no heading for that failed job, then process later jobs. Return 1 if any job failed, otherwise 0. Change no files. Source names may begin with hyphens. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Changing filenames, repeated values and rejected requests distinguish useful scripts from one hardcoded output.",
+          "action": "Open optional input details when needed; inspect arguments and files, then compare them with the latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "The complete practical task is graded by behavior, not a required command spelling.",
+          "action": "Write the script, Run all tests, investigate one differing result, and retry. Introduction, example and hints are optional to reopen.",
+          "commands": []
+        }
+      ],
+      "explanation": "An approved operation chooses a tool; it is not a program supplied by the request. Start a fresh command list per pair, validate before the heading, and remember errors while later pairs run. Neighbor deduplication must keep separated repeats. The final status describes the whole batch, not only the last job.",
+      "hints": [
+        "Map each recognized OP to a known tool. Unknown requests take an explicit error branch; do not run OP itself.",
+        "Print a heading only for a validated job. Keep a failed flag, and advance exactly two arguments for every pair.",
+        "Replace the old command list for each job. ordered, neighbors and owners need different arguments; use -- before the chosen filename."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Search-and-Execution.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html"
+      ],
+      "simplifications": "Bash-specific dense arrays and the disclosed in-process shell subset; equivalent supported direct branches are accepted. No eval, sourcing, external/PATH command lookup or host execution. Only flat simulated /work text files and fixed C/POSIX byte-order sort/uniq/cut flags exist. -- separates these utilities' options; - still denotes stdin. No general CSV, filesystem alias detection, crash-safe rename, network, service or subprocess behavior is claimed. Twelve deterministic graded cases are finite evidence, not complete Bash/Coreutils conformance.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Process each approved transformation and keep later jobs after a rejection.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Three different transformations",
+            "args": [
+              "ordered",
+              "order.txt",
+              "neighbors",
+              "-u",
+              "owners",
+              "-f"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "Job 1: ordered\na\na\nz\nJob 2: neighbors\nb\na\nb\nJob 3: owners\nAlex\n\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "One ordering job from a flag-looking source",
+            "args": [
+              "ordered",
+              "-r"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-r": "q\nb\n"
+            },
+            "stdout": "Job 1: ordered\nb\nq\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-r": "q\nb\n"
+            }
+          },
+          {
+            "name": "Owner fields keep literal text",
+            "args": [
+              "owners",
+              "roster map.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/roster map.txt": "a:r:Two words\nb:r:100%*\n"
+            },
+            "stdout": "Job 1: owners\nTwo words\n100%*\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/roster map.txt": "a:r:Two words\nb:r:100%*\n"
+            }
+          },
+          {
+            "name": "Empty source is a successful job",
+            "args": [
+              "neighbors",
+              "empty.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/empty.txt": ""
+            },
+            "stdout": "Job 1: neighbors\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/empty.txt": ""
+            }
+          },
+          {
+            "name": "Unknown middle job does not hide the last job",
+            "args": [
+              "ordered",
+              "order.txt",
+              "run",
+              "order.txt",
+              "neighbors",
+              "-u"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "Job 1: ordered\na\na\nz\nJob 3: neighbors\nb\na\nb\n",
+            "stderr": "Rejected job 2: unknown operation\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "Missing middle source then a valid job",
+            "args": [
+              "ordered",
+              "order.txt",
+              "neighbors",
+              "absent.txt",
+              "owners",
+              "-f"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "Job 1: ordered\na\na\nz\nJob 3: owners\nAlex\n\n",
+            "stderr": "Missing source for job 2: absent.txt\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "Single hyphen rejected without ending the batch",
+            "args": [
+              "neighbors",
+              "-",
+              "ordered",
+              "order.txt"
+            ],
+            "stdin": "not selected\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n",
+              "/work/-": "not input\n"
+            },
+            "stdout": "Job 2: ordered\na\na\nz\n",
+            "stderr": "Rejected job 1: invalid source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n",
+              "/work/-": "not input\n"
+            }
+          },
+          {
+            "name": "An unpaired final argument is rejected before work",
+            "args": [
+              "ordered",
+              "order.txt",
+              "owners"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: transform OP SOURCE ...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "No pairs supplied",
+            "args": [],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "",
+            "stderr": "Usage: transform OP SOURCE ...\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "Empty source argument",
+            "args": [
+              "ordered",
+              ""
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "",
+            "stderr": "Rejected job 1: invalid source\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "Text resembling shell code is not an operation",
+            "args": [
+              "$(printf injected)",
+              "order.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            },
+            "stdout": "",
+            "stderr": "Rejected job 1: unknown operation\n",
+            "status": 1,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/order.txt": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "notes\nx:r:Alex\ny:r:\n"
+            }
+          },
+          {
+            "name": "Repeated source with different meanings",
+            "args": [
+              "neighbors",
+              "repeat.txt",
+              "ordered",
+              "repeat.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/repeat.txt": "z\na\na\nz\n"
+            },
+            "stdout": "Job 1: neighbors\nz\na\nz\nJob 2: ordered\na\na\nz\nz\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/repeat.txt": "z\na\na\nz\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "count=$#\nif test \"$count\" -eq 0 || test \"$((count % 2))\" -ne 0; then\n printf 'Usage: transform OP SOURCE ...\\n' >&2; exit 2\nfi\nLC_ALL=C\nnumber=0\nfailed=0\nwhile test \"$#\" -gt 0; do\n number=$((number + 1))\n action=$1\n file=$2\n shift 2\n ready=yes\n command=()\n case \"$action\" in\n  ordered) command=(sort) ;;\n  neighbors) command=(uniq) ;;\n  owners) command=(cut -s -d ':' -f 3) ;;\n  *) printf 'Rejected job %s: unknown operation\\n' \"$number\" >&2; ready=no; failed=1 ;;\n esac\n if test \"$ready\" = yes; then\n  case \"$file\" in ''|-|.|..|*/*) printf 'Rejected job %s: invalid source\\n' \"$number\" >&2; ready=no; failed=1 ;; esac\n fi\n if test \"$ready\" = yes; then\n  if test -f \"$file\"; then :; else\n   printf 'Missing source for job %s: %s\\n' \"$number\" \"$file\" >&2; ready=no; failed=1\n  fi\n fi\n if test \"$ready\" = yes; then\n  command=(\"${command[@]}\" -- \"$file\")\n  printf 'Job %s: %s\\n' \"$number\" \"$action\"\n  \"${command[@]}\"\n fi\ndone\nexit \"$failed\"\n"
+      ],
+      "prerequisites": [
+        "shell-command-options",
+        "shell-uniq-counts",
+        "shell-cut-inventory",
+        "shell-return",
+        "shell-pack-items"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use the previous command-list lesson, adjacent repeat handling, cut fields, function return and small-count arithmetic. This lesson combines a closed tool allowlist with independent job processing.",
+        "concepts": [
+          {
+            "title": "Pick the tool before running it",
+            "text": "A case decision can build a different known command list for each operation. In the museum example, titles selects sort and shelves selects cut. The default branch rejects an unrecognized request. Never use the request itself as an unrestricted program name."
+          },
+          {
+            "title": "Start a new list for each job",
+            "text": "Each new job needs its own program and arguments. Replace the previous command list with command=(sort), command=(uniq), or the appropriate cut words. Appending a new program to the old list would pass it as an argument to the old program. Two jobs may name the same source and still need different work."
+          },
+          {
+            "title": "Neighboring repeats and sorted repeats differ",
+            "text": "uniq collapses only adjacent identical lines. The sequence A, A, B, A becomes A, B, A. Sorting first would change the meaning. sort keeps all entries unless -u is explicitly chosen. cut -s -d \":\" -f 3 keeps field 3 from colon-containing lines, including an empty field; it skips lines without a colon."
+          },
+          {
+            "title": "Reject one job while finishing the batch",
+            "text": "Check a job before printing its heading or running its tool. Use a variable such as failed=1 to remember a rejected job, then continue to the next pair. A function may return 1 for that job; exit would end the entire script. Read a command status before a later command replaces it."
+          },
+          {
+            "title": "Validate the pair interface before starting",
+            "text": "An operation and source form one pair. With count=$#, test \"$((count % 2))\" -ne 0 detects an odd count: % is the remainder after division. This uses the known small argument count, not arbitrary numeric text. shift 2 removes the pair just processed. Keep filename operands after -- and reject the single - source. The lab supplies argument pairs and files; action, file, command and failed are variables you create."
+          }
+        ],
+        "example": "LC_ALL=C\nfor action in \"$@\"; do\n case \"$action\" in\n  titles) command=(sort -- -catalogue) ;;\n  shelves) command=(cut -s -d ':' -f 2 -- museum-locations.txt) ;;\n  *) printf 'Unknown museum action\\n' >&2; exit 2 ;;\n esac\n \"${command[@]}\"\ndone\n",
+        "inputs": "Arguments are titles and shelves. The separate -catalogue and museum-locations.txt files supply title and room data. Neither file is an assignment source.",
+        "try_change": "Rename only the titles) pattern to cards), then Run. The supplied titles request now reaches the explicit rejection branch, and shelves is not run. Restore titles) to repair the example.",
+        "fixture": {
+          "name": "Museum action example",
+          "args": [
+            "titles",
+            "shelves"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/-catalogue": "Zine\nAtlas\nAtlas\n",
+            "/work/museum-locations.txt": "a:North\nb:South\n"
+          },
+          "stdout": "Atlas\nAtlas\nZine\nNorth\nSouth\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/-catalogue": "Zine\nAtlas\nAtlas\n",
+            "/work/museum-locations.txt": "a:North\nb:South\n"
+          }
+        }
+      }
+    },
+    {
+      "id": "shell-command-plan",
+      "version": 1,
+      "track": "Bash/Shell",
+      "unit": "shell-command-construction",
+      "topic": "Bash command construction",
+      "title": "Review or publish a mixed transformation plan",
+      "summary": "Combine validated transformations into an independent preview or saved plan.",
+      "objective": "Accept MODE DEST followed by one or more OP SOURCE pairs. MODE is preview or apply; operations are ordered, neighbors and owners from the previous lesson. DEST and SOURCE must be nonempty flat basenames, not -, . or ..; DEST must differ from every source and keep.txt. Validate every pair and source before output or file changes. Any invalid request prints only Invalid transformation plan and a newline on standard error; return 2 with every file unchanged.\n\nFor each job prepare Job N: OP and a newline, then Result: <VALUE> and a newline. VALUE is that transformation's output with ending newline bytes removed; internal newlines remain. An empty result gives Result: <>. Keep job order and duplicates.\n\nPreview prints Preview and a newline, then the complete plan, without changing files. Apply replaces only DEST with exactly the plan and prints Published N jobs to DEST and a newline. Success returns 0 with no errors; preserve all other files. Use the supplied filenames exactly.",
+      "retry_guidance": "Compare the first differing test: output, error output, exit status and simulated files are separate results. Check the operation, argument boundaries and validation order before retrying.",
+      "difficulty": "Advanced",
+      "minutes": 40,
+      "steps": [
+        "Understand the task",
+        "Inspect the sample inputs",
+        "Build, run and investigate"
+      ],
+      "guide": [
+        {
+          "title": "Understand the task",
+          "why": "Each test starts with its own sample inputs. Simulated files reset before each test; your assignment draft stays saved.",
+          "action": "Accept MODE DEST followed by one or more OP SOURCE pairs. MODE is preview or apply; operations are ordered, neighbors and owners from the previous lesson. DEST and SOURCE must be nonempty flat basenames, not -, . or ..; DEST must differ from every source and keep.txt. Validate every pair and source before output or file changes. Any invalid request prints only Invalid transformation plan and a newline on standard error; return 2 with every file unchanged.\n\nFor each job prepare Job N: OP and a newline, then Result: <VALUE> and a newline. VALUE is that transformation's output with ending newline bytes removed; internal newlines remain. An empty result gives Result: <>. Keep job order and duplicates.\n\nPreview prints Preview and a newline, then the complete plan, without changing files. Apply replaces only DEST with exactly the plan and prints Published N jobs to DEST and a newline. Success returns 0 with no errors; preserve all other files. Use the supplied filenames exactly.",
+          "commands": []
+        },
+        {
+          "title": "Inspect the sample inputs",
+          "why": "Changing filenames, repeated values and rejected requests distinguish useful scripts from one hardcoded output.",
+          "action": "Open optional input details when needed; inspect arguments and files, then compare them with the latest run.",
+          "commands": []
+        },
+        {
+          "title": "Build, run and investigate",
+          "why": "The complete practical task is graded by behavior, not a required command spelling.",
+          "action": "Write the script, Run all tests, investigate one differing result, and retry. Introduction, example and hints are optional to reopen.",
+          "commands": []
+        }
+      ],
+      "explanation": "A helper prepares results without changing files. Capture text and status separately; reject the complete plan when any job fails. Only after all preparation succeeds should preview print the plan or apply write the destination. This protects the supplied finite virtual inputs; it does not establish real filesystem atomicity.",
+      "hints": [
+        "Validate the top-level interface and destination first. A late bad job must prevent any preview or write.",
+        "Prepare each job through a closed tool choice. Capture its output and inspect the status before adding it to the complete plan.",
+        "Stage the entire plan, then branch on preview/apply. Restore the final newline once when writing the complete plan; preserve every source and keep.txt."
+      ],
+      "sources": [
+        "https://www.gnu.org/software/bash/manual/html_node/Arrays.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Simple-Command-Expansion.html",
+        "https://www.gnu.org/software/bash/manual/html_node/Command-Search-and-Execution.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/Common-options.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/sort-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/uniq-invocation.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/cut-invocation.html"
+      ],
+      "simplifications": "Bash-specific dense arrays and the disclosed in-process shell subset; equivalent supported direct branches are accepted. No eval, sourcing, external/PATH command lookup or host execution. Only flat simulated /work text files and fixed C/POSIX byte-order sort/uniq/cut flags exist. -- separates these utilities' options; - still denotes stdin. No general CSV, filesystem alias detection, crash-safe rename, network, service or subprocess behavior is claimed. Twelve deterministic graded cases are finite evidence, not complete Bash/Coreutils conformance.",
+      "initial": {
+        "kind": "Script",
+        "source": "# Prepare every job before previewing or publishing the complete plan.\n",
+        "run": null
+      },
+      "goal": {
+        "kind": "Script",
+        "cases": [
+          {
+            "name": "Preview leaves the previous plan intact",
+            "args": [
+              "preview",
+              "plan.txt",
+              "ordered",
+              "alpha.txt",
+              "neighbors",
+              "beta.txt",
+              "owners",
+              "roster.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "Preview\nJob 1: ordered\nResult: <a\na\nz>\nJob 2: neighbors\nResult: <q\np\nq>\nJob 3: owners\nResult: <Alex>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "Apply three tools with option-looking sources",
+            "args": [
+              "apply",
+              "result.txt",
+              "ordered",
+              "-r",
+              "neighbors",
+              "-u",
+              "owners",
+              "-f"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-r": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "a:r:North\nb:r:South\n",
+              "/work/result.txt": "Previous result\n"
+            },
+            "stdout": "Published 3 jobs to result.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/-r": "z\na\na\n",
+              "/work/-u": "b\nb\na\nb\n",
+              "/work/-f": "a:r:North\nb:r:South\n",
+              "/work/result.txt": "Job 1: ordered\nResult: <a\na\nz>\nJob 2: neighbors\nResult: <b\na\nb>\nJob 3: owners\nResult: <North\nSouth>\n"
+            }
+          },
+          {
+            "name": "Empty captured results create no preview file",
+            "args": [
+              "preview",
+              "new.txt",
+              "ordered",
+              "empty.txt",
+              "owners",
+              "notes.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/empty.txt": "",
+              "/work/notes.txt": "notes only\n"
+            },
+            "stdout": "Preview\nJob 1: ordered\nResult: <>\nJob 2: owners\nResult: <>\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/empty.txt": "",
+              "/work/notes.txt": "notes only\n"
+            }
+          },
+          {
+            "name": "Repeated source with Unicode and a spaced output",
+            "args": [
+              "apply",
+              "report 100%.txt",
+              "neighbors",
+              "repeats.txt",
+              "ordered",
+              "repeats.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/repeats.txt": "é\né\nA B\né\n",
+              "/work/report 100%.txt": "Previous\n"
+            },
+            "stdout": "Published 2 jobs to report 100%.txt\n",
+            "stderr": "",
+            "status": 0,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/repeats.txt": "é\né\nA B\né\n",
+              "/work/report 100%.txt": "Job 1: neighbors\nResult: <é\nA B\né>\nJob 2: ordered\nResult: <A B\né\né\né>\n"
+            }
+          },
+          {
+            "name": "Bad final operation cannot publish earlier work",
+            "args": [
+              "preview",
+              "plan.txt",
+              "ordered",
+              "alpha.txt",
+              "$(printf injected)",
+              "beta.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "Bad final source cannot truncate the destination",
+            "args": [
+              "apply",
+              "plan.txt",
+              "ordered",
+              "alpha.txt",
+              "neighbors",
+              "absent.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "Destination is an input",
+            "args": [
+              "apply",
+              "alpha.txt",
+              "ordered",
+              "alpha.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "Protected destination",
+            "args": [
+              "apply",
+              "keep.txt",
+              "ordered",
+              "alpha.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "Unknown publication mode",
+            "args": [
+              "overwrite",
+              "plan.txt",
+              "ordered",
+              "alpha.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "No transformation jobs",
+            "args": [
+              "preview",
+              "plan.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          },
+          {
+            "name": "Single hyphen cannot consume standard input",
+            "args": [
+              "apply",
+              "plan.txt",
+              "ordered",
+              "-"
+            ],
+            "stdin": "Do not consume\n",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n",
+              "/work/-": "Wrong input\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n",
+              "/work/-": "Wrong input\n"
+            }
+          },
+          {
+            "name": "Destination traversal is rejected",
+            "args": [
+              "apply",
+              "../escape",
+              "ordered",
+              "alpha.txt"
+            ],
+            "stdin": "",
+            "env": {},
+            "files": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            },
+            "stdout": "",
+            "stderr": "Invalid transformation plan\n",
+            "status": 2,
+            "after": {
+              "/work/keep.txt": "Leave this evidence unchanged.\n",
+              "/work/alpha.txt": "z\na\na\n",
+              "/work/beta.txt": "q\nq\np\nq\n",
+              "/work/roster.txt": "notes\nx:r:Alex\ny:r:\n",
+              "/work/plan.txt": "Previous plan\n"
+            }
+          }
+        ]
+      },
+      "solution": [
+        "invalid() { printf 'Invalid transformation plan\\n' >&2; }\nif test \"$#\" -lt 4; then invalid; exit 2; fi\nmode=$1\ndestination=$2\nshift 2\ncount=$#\nif test \"$((count % 2))\" -ne 0; then invalid; exit 2; fi\ncase \"$mode\" in preview|apply) : ;; *) invalid; exit 2 ;; esac\ncase \"$destination\" in ''|-|.|..|*/*|keep.txt) invalid; exit 2 ;; esac\nLC_ALL=C\nprepare() {\n local number=0\n local action\n local file\n local command\n local result\n while test \"$#\" -gt 0; do\n  number=$((number + 1))\n  action=$1\n  file=$2\n  shift 2\n  case \"$file\" in ''|-|.|..|*/*) return 2 ;; esac\n  if test \"$file\" = \"$destination\"; then return 2; fi\n  if test -f \"$file\"; then :; else return 2; fi\n  command=()\n  case \"$action\" in\n   ordered) command=(sort) ;;\n   neighbors) command=(uniq) ;;\n   owners) command=(cut -s -d ':' -f 3) ;;\n   *) return 2 ;;\n  esac\n  command=(\"${command[@]}\" -- \"$file\")\n  if result=$(\"${command[@]}\"); then :; else return 2; fi\n  printf 'Job %s: %s\\nResult: <%s>\\n' \"$number\" \"$action\" \"$result\"\n done\n}\nif plan=$(prepare \"$@\"); then :; else invalid; exit 2; fi\nif test \"$mode\" = preview; then\n printf 'Preview\\n%s\\n' \"$plan\"\nelse\n printf '%s\\n' \"$plan\" > \"$destination\"\n printf 'Published %s jobs to %s\\n' \"$((count / 2))\" \"$destination\"\nfi\n"
+      ],
+      "prerequisites": [
+        "shell-command-dispatch",
+        "shell-capture-decision",
+        "shell-case-publication",
+        "shell-pipeline-status"
+      ],
+      "teaching": {
+        "prerequisite_note": "Use the previous mixed-job lesson, command substitution, helper status and validated preview/publication. This capstone adds no new shell syntax; the work is combining those checks before any visible publication.",
+        "concepts": [
+          {
+            "title": "Prepare results before publishing them",
+            "text": "The assignment combines different transformations, not just filenames. Validate every operation and source before showing a plan or changing a destination. A bad final job must not leave a partially published report. Existing source and protected files must stay unchanged."
+          },
+          {
+            "title": "Capture text and check the status",
+            "text": "result=$(transform labels) captures the helper's standard output. Capture removes newline bytes at the end while keeping newlines inside the text. if result=$(transform labels); then ...; else ...; fi also checks the helper's status. A failed preparation is not a publishable result."
+          },
+          {
+            "title": "Separate a job result from the complete plan",
+            "text": "Each job contributes a numbered heading and a Result: <VALUE> line. VALUE may contain internal newlines; an empty result gives Result: <>. Build the complete plan first. When a final capture removes its ending newline, printf '%s\\n' \"$plan\" restores the one required final line break."
+          },
+          {
+            "title": "Preview and apply have different effects",
+            "text": "Preview prints the prepared plan and leaves all files alone. Apply replaces only the chosen destination and prints a short confirmation. Reject a destination equal to any source or keep.txt, and reject directory parts, empty names, . , .. and -. This is flat simulated-file replacement, not crash-safe filesystem publication."
+          },
+          {
+            "title": "Keep the request separate from the command",
+            "text": "The helper still uses closed case branches to select sort, uniq or cut, then a quoted argument list and --. The operation name is not arbitrary code. Supplied text, spaces and percent signs stay data with fixed printf formats. The example's gallery variables are created by the example; the lab supplies only the documented assignment arguments/files."
+          }
+        ],
+        "example": "transform() {\n case \"$1\" in\n  labels) command=(sort -u -- gallery-labels.txt) ;;\n  rooms) command=(cut -s -d ':' -f 2 -- gallery-rooms.txt) ;;\n  *) return 2 ;;\n esac\n \"${command[@]}\"\n}\nLC_ALL=C\nif labels=$(transform labels); then :; else printf 'Gallery unavailable\\n' >&2; exit 2; fi\nif rooms=$(transform rooms); then :; else printf 'Gallery unavailable\\n' >&2; exit 2; fi\nplan=\"Labels: <$labels>\nRooms: <$rooms>\"\nmode=$1\nif test \"$mode\" = review; then\n printf 'Gallery preview\\n%s\\n' \"$plan\"\nelse\n printf '%s\\n' \"$plan\" > gallery-result.txt\n printf 'Gallery saved\\n'\nfi\n",
+        "inputs": "The argument is review. Separate gallery files supply labels and rooms, and an old gallery-result.txt must stay unchanged during review. These are example files, not assignment files.",
+        "try_change": "Replace mode=$1 with mode=save, then Run. The example now writes only gallery-result.txt and prints Gallery saved. Restore mode=$1 to return to read-only review.",
+        "fixture": {
+          "name": "Gallery planning example",
+          "args": [
+            "review"
+          ],
+          "stdin": "",
+          "env": {},
+          "files": {
+            "/work/gallery-labels.txt": "Map\nAtlas\nMap\n",
+            "/work/gallery-rooms.txt": "west:Room A\neast:Room B\n",
+            "/work/gallery-result.txt": "Previous gallery result\n"
+          },
+          "stdout": "Gallery preview\nLabels: <Atlas\nMap>\nRooms: <Room A\nRoom B>\n",
+          "stderr": "",
+          "status": 0,
+          "after": {
+            "/work/gallery-labels.txt": "Map\nAtlas\nMap\n",
+            "/work/gallery-rooms.txt": "west:Room A\neast:Room B\n",
+            "/work/gallery-result.txt": "Previous gallery result\n"
+          }
+        }
+      }
+    }
+  ]
+}

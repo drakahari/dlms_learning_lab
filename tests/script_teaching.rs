@@ -63,6 +63,9 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
             r#"printf '%s\n' "$report" > "$destination""#,
             r#"printf '%s\n' "$report" > keep.txt"#,
         ),
+        ("-r); fi", "-r -u); fi"),
+        ("titles)", "cards)"),
+        ("mode=$1", "mode=save"),
     ];
     assert_eq!(
         edits.len(),
@@ -91,6 +94,43 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
                 changed.files
             ),
             "{}",
+            s.id
+        );
+    }
+    let review: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/shell-command-vectors-review.json")).unwrap();
+    let rows = review["reviews"].as_array().unwrap();
+    assert_eq!(
+        rows.iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        [
+            "shell-command-options",
+            "shell-command-dispatch",
+            "shell-command-plan"
+        ]
+    );
+    for (row, (from, to)) in rows.iter().zip(edits[46..].iter().copied()) {
+        let s = labs
+            .iter()
+            .find(|s| Some(s.id.as_str()) == row["id"].as_str())
+            .unwrap();
+        let l = s.teaching.as_ref().unwrap();
+        let changed = l.example.replacen(from, to, 1);
+        assert_eq!(changed, row["try_change"]["source"].as_str().unwrap());
+        let expected: shell::Case =
+            serde_json::from_value(row["try_change"]["expected"].clone()).unwrap();
+        let result = shell::run(&changed, &l.fixture);
+        assert!(
+            expected.accepts(&result),
+            "{} declared experiment: {result:?}",
+            s.id
+        );
+        let repair = row["try_change"]["repair"].as_str().unwrap();
+        assert_eq!(repair, l.example);
+        assert!(
+            l.fixture.accepts(&shell::run(repair, &l.fixture)),
+            "{} repair",
             s.id
         );
     }

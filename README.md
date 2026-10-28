@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **147 authored assignments in development:**45 CCNA,32 LPIC-1,24 LPIC-2 and46 Bash/Shell in37 source units. The three new [Basic NAT assignments](docs/NAT_LESSONS.md) pass model and native-widget checks; rendered lesson acceptance is pending. The four [RPM investigations](docs/RPM_NATIVE.md) have prior scoped content/widget gates and are now registered in source; this normal147 integration and rendered RPM acceptance remain unverified. The latest scoped accepted Fedora candidate, ddb886b, contains140 labs and passes installed lifecycle, eleven Wayland starts, script/DHCP reopening, shared alignment and seven static-web/reliable-text lesson flows. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **154 authored assignments in development:**45 CCNA,32 LPIC-1,28 LPIC-2 and49 Bash/Shell in39 source units. The latest source batch adds four [NFS assignments](docs/NFS_LESSONS.md) and three [command-construction scripting assignments](docs/SHELL_COMMAND_VECTOR_LESSONS.md), retaining full tasks, separate practice and optional guidance. Source, native and packaged acceptance are tracked separately in [the implementation ledger](docs/IMPLEMENTATION_LEDGER.md) and [installation evidence](docs/INSTALLATION.md); the154-lab Fedora candidate remains pending packaged verification. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -40,6 +40,15 @@ Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two te
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 
 ## This milestone
+
+The latest seven source assignments teach restricted NFS exports, publication
+permissions, client replacement and a two-share handover, plus safe argument
+construction, approved transformation dispatch and review-before-publication.
+Networking tasks keep editors and explicit virtual operations; scripting tasks
+keep editable scripts and bounded execution against multiple sample inputs.
+Alternative valid solutions, useful wrong/partial feedback and resumed drafts
+remain part of the work. Packaged Fedora verification for this batch is pending;
+no Windows/macOS runtime, novice or assistive-device acceptance is implied.
 
 The source now includes four [static-web configuration assignments](docs/STATIC_WEB_LESSONS.md)
 and three [reliable-text scripting assignments](docs/SHELL_SAFE_AUTOMATION_LESSONS.md).

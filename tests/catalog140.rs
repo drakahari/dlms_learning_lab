@@ -191,7 +191,7 @@ fn exact<A: serde::Serialize + ?Sized, B: serde::Serialize + ?Sized>(a: &A, b: &
 #[test]
 fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 147);
+    assert_eq!(all.len(), 154);
     let old = index();
     let pins = old["packs"].as_array().unwrap();
     assert_eq!(pins.len(), 31);
@@ -234,7 +234,7 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147(
         NEW
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 37);
+    assert_eq!(units.len(), 39);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(old["units"]["units"].clone()).unwrap();
     assert_eq!(old_units.len(), 33);
@@ -280,11 +280,11 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147(
             }
         })
         .collect::<Vec<_>>();
-    assert_eq!(scripts.len(), 46);
-    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 314);
+    assert_eq!(scripts.len(), 49);
+    assert_eq!(scripts.iter().map(|(_, c)| c.len()).sum::<usize>(), 350);
     assert_eq!(
         scripts.iter().filter(|(s, _)| s.teaching.is_some()).count(),
-        46
+        49
     );
 }
 #[test]
@@ -364,7 +364,7 @@ fn old_actual_profiles_keep_exact_contexts_and_do_not_receive_new_answers() {
                 .entry(s.id.clone())
                 .or_insert_with(|| Attempt::new(s, 1));
         }
-        assert_eq!(p.attempts.len(), 147);
+        assert_eq!(p.attempts.len(), 154);
         for (id, attempt) in old.as_object().unwrap() {
             exact(
                 &p.attempts[id],

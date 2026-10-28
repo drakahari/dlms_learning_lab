@@ -108,9 +108,9 @@ fn full_source_version_kind_initial_and_lesson_pins_reject_before_mutation() {
 #[test]
 fn old147_wire_none_fields_and_existing_solved_nfs_without_metadata_remain_truthful() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 147);
-    assert_eq!(dlms_learning_lab::course::bundled(&all).unwrap().len(), 37);
-    for s in &all {
+    assert_eq!(all.len(), 154);
+    assert_eq!(dlms_learning_lab::course::bundled(&all).unwrap().len(), 39);
+    for s in &all[..147] {
         assert!(s.nfs_teaching.is_none());
         assert!(
             !serde_json::to_string(s)
@@ -123,6 +123,52 @@ fn old147_wire_none_fields_and_existing_solved_nfs_without_metadata_remain_truth
                 .unwrap()
                 .contains("\"nfs_session\"")
         );
+    }
+    assert_eq!(
+        all[147..150]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "shell-command-options",
+            "shell-command-dispatch",
+            "shell-command-plan",
+        ]
+    );
+    for s in &all[147..150] {
+        assert!(matches!(s.initial, State::Script { .. }));
+        assert!(matches!(s.goal, engine::Goal::Script { .. }));
+        assert!(s.nfs_teaching.is_none());
+    }
+    const IDS: [&str; 4] = [
+        "lpic2-nfs-reference",
+        "lpic2-nfs-publication",
+        "lpic2-nfs-handover",
+        "lpic2-nfs-capstone",
+    ];
+    assert_eq!(
+        all[150..154]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        IDS
+    );
+    for s in &all[150..154] {
+        assert!(matches!(s.initial, State::Nfs { .. }));
+        assert!(matches!(s.goal, engine::Goal::Nfs { .. }));
+        assert!(s.nfs_teaching.is_some());
+        let mut fresh = Attempt::new(s, 1);
+        teach::prepare(&mut fresh, s, true).unwrap();
+        assert_eq!(fresh.state, s.initial);
+        let w = fresh.workspace.as_ref().unwrap();
+        assert_eq!(*w.nfs_session.as_ref().unwrap(), work::Session::default());
+        let l = w.nfs_learning.as_ref().unwrap();
+        assert_eq!(
+            l.view,
+            dlms_learning_lab::script_teaching::View::Introduction
+        );
+        assert_eq!(l.session, work::Session::default());
+        assert!(!progress::current_solved(&fresh, s));
     }
     let s = scenario(0);
     let mut a = solved(&s);
@@ -158,7 +204,7 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 147);
+    assert_eq!(p.attempts.len(), 154);
     let old = serde_json::to_value(&p.attempts).unwrap();
     let mut a = solved(&s);
     let source = s.nfs_teaching.as_ref().unwrap();

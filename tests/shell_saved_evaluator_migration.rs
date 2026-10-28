@@ -139,7 +139,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 147);
+    assert_eq!(all.len(), 154);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -150,7 +150,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
         all.iter()
             .filter(|s| matches!(s.goal, Goal::Script { .. }))
             .count(),
-        46
+        49
     );
     let mut case_count = 0;
     for old in originals {
@@ -193,6 +193,13 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic1-rpm-epoch",
             "lpic1-rpm-payload",
             "lpic1-rpm-handover",
+            "lpic2-nfs-reference",
+            "lpic2-nfs-publication",
+            "lpic2-nfs-handover",
+            "lpic2-nfs-capstone",
+            "shell-command-options",
+            "shell-command-dispatch",
+            "shell-command-plan",
             "lpic2-dns-reverse-investigation",
             "lpic2-dns-reverse-ipv6",
             "lpic2-dns-reverse-handover",
@@ -218,7 +225,21 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All31 later tasks remain absent and ungraded; no invented contexts.
+    ); // All38 later tasks remain absent and ungraded; no invented contexts.
+    for id in [
+        "lpic2-nfs-reference",
+        "lpic2-nfs-publication",
+        "lpic2-nfs-handover",
+        "lpic2-nfs-capstone",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::Nfs { .. }));
+        assert!(matches!(source.goal, Goal::Nfs { .. }));
+        assert!(
+            !p.attempts.contains_key(id) && !p.favorites.contains(id),
+            "Migration must not create NFS attempts, answers or completion"
+        );
+    }
     let original_histories = with_main_records(&p);
     for s in all
         .iter()

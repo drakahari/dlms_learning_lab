@@ -6,70 +6,62 @@ No public release. All ordinary milestones may continue without routine approval
 
 ## Verified application and next actions
 
-Main source has **147 authored labs /37 units: CCNA45, LPIC-1 32, LPIC-2 24,
-Bash46**. Pushed base7deb208 combines normal RPM lessons and NFS Stage B.
-The whole-project default regression passes1851/0/14ignored across142 harnesses;
-all14 retained private-history checks explicitly pass. Main all-target Clippy,
-format, development build and211 Python checks pass. Earlier failed logs remain;
-the new complete run does not relabel them.
+Main working source now has **154 authored labs /39 units: CCNA45, LPIC-1 32,
+LPIC-2 28, Bash49** after a gated squash integration, not yet committed at this
+entry. Private final sourcebc39dba passes COMPLETE all-target --include-ignored
+**1974PASS/0FAIL/0ignored across150 harnesses** and all-target Clippy21.99s.
+Main Rust app/catalog/Rust tests/assets/build inputs are byte-identical to that
+source; fresh exclusive MAIN target passes115 core/catalog/content checks including
+its retained checks. Main Python215, coverage154Partial/1Supporting/1085Open of1240
+and all28 palette checks PASS. One current-unit Python test was corrected37→39
+and strengthened with SHA-pinned full old37/new2 object equality; original43
+scripts/282cases and actual capture inputs remain immutable. No producer changed.
+Final integration documentation/privacy/source review is finishing. Next commit
+and push the scoped code, then build and VERIFY the real Fedora candidate.
+Do not treat source gates or the prior147 candidate as154 packaged acceptance.
 
-All four normal RPM lessons pass actual Fedora native Start/Introduction/separate
-practice/assignment flows, including wrong/partial/two alternatives, current
-success invalidation, warm full-progress readback, selected reset, Challenge and
-100/150/200 text scaling.126 PNGs are retained privately. Observed geometry was
-1920x1080 at100 and946x929 at150light/200dark. This is developer technical
-acceptance, not a novice study, cold-process or packaged acceptance. Source/ELF
-pins and memory observations are in the private actual-native-main-r2 receipt.
-Post-review polish replaces raw file-role booleans and an opaque unsupported
-transaction message. Its scoped model/content/teaching/terminal/workspace checks
-pass58/0/1ignored; the ignored retained-history check already passed explicitly
-on the combined source. All-target Clippy passes. Coverage integrity now reports
-**150 Partial practice /1 Supporting explanation /1089 Open references**. These
-are overlapping source references, not completed objectives or percentages.
+### Earlier147 candidate baseline (historical)
 
-Three normal NAT lessons already passed development-native Fedora flows and80
-screenshots, including separate practice, alternatives, invalidation and scaling.
-The latest fully scoped installed-accepted candidate remains140 atddb886b4d418.
-The new clean147 candidate87121151e82e now passes installation/upgrade/reinstall,
-exact synthetic old-progress retention,10quiet plus1traced Wayland startup,
-72alignment captures and actual two-process script AND DHCP reopening. Installed
-ELF2418f835…; no diagnostic override or personal profile. All observed startup,
-readback/update markers and script/network draft repairs pass. All four packaged
-RPM normal flows PASS,126 final captures hash-pinned. Three packaged NAT flows
-remain queued before full new-seven scoped acceptance.
-No full new-seven acceptance, Windows/macOS, physical reader or novice claim yet.
+Candidate87121151e82e contains147 labs/37 units. Its installed lifecycle, exact
+synthetic old-progress retention,10 quiet plus1 traced Wayland starts,72 alignment
+captures and real script/DHCP cold reopening PASS. All four packaged RPM flows
+PASS126 captures. Three NAT tasks passed complete development-native flows80
+captures, but packaged NAT acceptance there remained pending. The prior fully
+scoped140 candidate ddb886b stays preserved. Neither older artifact is evidence
+for the seven newly integrated154 tasks or their final native QA refinements.
+At the147 stage coverage was150Partial/1Supporting/1089Open; current154 source
+coverage is154Partial/1Supporting/1085Open. These are overlapping references,
+not percentages. Windows/macOS, physical reader and novice acceptance stay open.
 
 ### Immediate continuation
 
-1. Packaged147 RPM native command is REAPED/PASS. Main1909 default+14explicit
-   renderer checks and Clippy PASS. Private Bash150 full regression originally
-   failed11 tests/seven targets; repaired exact seven paths now PASS all444 tests
-   across those seven targets, with all-target Clippy42.16s PASS. Independent
-   source ACK7f429bd3 preserves all old assertions,2MiB cap and49 actual script
-   example/alternate/wrong/hardcode checks. SourceR2d92c5dc6 remains frozen.
-   Actual private150 native three-lesson flow90189 is REAPED/PASS,72 captures;
-   log m147-private150-native-r2.log, native-runs/run-rr6zhjr1.
-   Combined154/39 is frozen at private61f343d in nfs-native-147 worktree,
-   baseline22c996d (NFS151R7+Mainbe4c66f). Exact BashR2 patch d4f1a988 and
-   closed composition manifest1bce867b preserve canonical source and old data.
-   COMPLETE all-target regression14272 is REAPED/FAIL:1953PASS/3FAIL/14ignored.
-   Explicit retained20357 is REAPED/FAIL:8PASS/6FAIL. Logs m148-private154-*.
-   Nine failures expose five consumer/test gaps: current DHCP unit count, real
-   goal-aware NFS broken-state mutation, explicit absent new-ID sets for actual8
-   and actual9 profiles, and a current NFS count in the retained consumer.
-   Closed5-path repairs are frozen/committed privately at3cb1e70; source receipt
-   f6fe6e5a. Both count fixes are current test consumers; migration sets explicitly
-   add new IDs without changing actual8/9 records. Real goal-aware Unmount now
-   covers NFS broken saves. Source peer review is finishing; no tests yet on R2.
-   Sole active heavy25837 is ACTUAL NFS native from an immutable copied61f343d
-   ELF508084b4 (validated154/39), runner MAIN, log m149-private154-nfs-native-r1.
-   The edited worktree is not the executing artifact. Reap before next heavy.
-   After native25837, reap and run five affected default+retained targets, then
-   complete all-target default +all14explicit +Clippy/Python. Only a clean full
-   suite may permit Main integration. Source/candidate acceptance stays pending.
-   Ordered147 old +3Bash +4NFS, units37old+Bash+NFS. Main stays147 until full
-   combined suite passes, then native/package gates. NFS151 ClippyR7 PASS12.93s.
-   Keep all old candidates and failed logs; no release.
+1. NO active heavy command. Final privatebc39dba inclusive1974 and Clippy PASS;
+   all seven baseline native flows PASS (3Bash72 +4NFS106 captures). Current
+   polishing includes short inventory caption, task-required Write editors open
+   by default, and correct supplied IPv4/profile givens. Entire NFS UI18 PASS.
+   Strict given-selection test originally failed when its down-only scanner looked
+   above the viewport; actual selection was correct. Existing bounded real selector
+   reveal fixes the TEST route, without relaxing visibility/font/20-scroll checks;
+   stronger default-versus-persisted selection assertions and raw receipt equality
+   remain. Every failed diagnostic is retained, never reclassified as a pass.
+   Final whole-suite log m153-private154-full-inclusive-r3.log; Main focused
+   m154-main154-core-catalog-content115PASS, PythonR2 215PASS, palette/coverage PASS.
+   Squash is staged in MAIN, docs are being finalized; source code/data/Rust tests
+   remain EXACT privatebc39dba. Only tools/tests/test_automation_before10_oracle.py current-unit
+   consumer differs as documented above. Independent source reviews complete;
+   final docs/Python review is complete. Commit/push after scope/privacy review,
+   then tools/dev.py candidate. Rebuild from CLEAN MAIN only. Do not stop here.
+   Verify actual installed154 lifecycle/upgrade, full new7 native flows (including
+   final QA refinements), three NAT flows, alignment100/150/200 light/dark,
+   repeatedWayland launches and real script/DHCP cold reopening. Keep all older
+   artifacts; no public release. Windows/macOS/runtime/reader/novice remain open.
+
+### Superseded integration notes (historical, not active instructions)
+
+The notes below precede the final1974 inclusive gate and154 squash. Do not
+repeat their older registration/edit grants or treat their then-pending statements
+as current scope. Active next actions are in item1 above.
+
 2. NFS Stage B is integrated in7deb208: typed engine/loader/progress, exact2MiB
    Attempt admission, source-aware separate practice, foreign-field guards and
    preserved old prepare bodies. No normal NFS registration or objective credit.
@@ -124,8 +116,8 @@ heavy command. Current logs/evidence live under ignored .build-artifacts/.
 
 Development launch from any terminal directory:
 `"$HOME/Documents/dlms_learning_lab/target/debug/dlms-learning-lab"`
-Fully scoped installed-accepted140 remains in INSTALLATION.md until all147
-new-seven flows pass; the currently available147 launch is:
+Fully scoped installed-accepted140 remains in INSTALLATION.md until the final154
+packaged scope passes; the currently available147 launch is:
 `"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g87121151e82e-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"`
 Do not confuse source/catalog availability with packaged proof.
 

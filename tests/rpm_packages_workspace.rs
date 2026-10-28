@@ -249,7 +249,7 @@ fn bound_guards_precede_clone_and_max_escaped_state_has_a_closed_frontier() {
 #[test]
 fn original143_and_nil_old_wire_remain_exact_under_registered_rpm_and_raw_limits() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 147);
+    assert_eq!(all.len(), 154);
     assert!(all[..143].iter().all(|s| s.rpm_packages_teaching.is_none()
         && !matches!(s.initial, engine::State::RpmPackages { .. })));
     assert_eq!(

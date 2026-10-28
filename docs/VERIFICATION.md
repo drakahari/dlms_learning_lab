@@ -1,11 +1,17 @@
 # Verification evidence and current limits
 
-Current source133/33 has scoped installed Fedora acceptance at38a8098, including
-all8 new package/STP lesson flows; full curriculum/platform acceptance remains open. Use CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
-INSTALLATION.md for current exact source/binary/run identities and failures.
-Current shell contract is SHELL_SUBSET.md (evaluator9), not the original v1
-feature list below. MIT for original code/curriculum is approved; third-party
-notices stay intact and macOS redistribution has an unresolved dispatch notice.
+Current source has154 authored assignments/39 units (45CCNA/32LPIC-1/28LPIC-2/
+49Bash). The final inclusive Rust suite passes1974/0/0 on the reviewed integration
+source, including all14 retained-history checks; all-target Clippy passes. Main's
+Rust app, catalog, Rust tests and assets are byte-identical to that gated tree.
+A workflow test additionally verifies the current39 units against exact old37 and
+new2 objects; all215 Python checks pass separately on the integrated source.
+Baseline real-native flows pass for all seven new tasks. Final polished154 Fedora
+packaging and installed verification remain pending. Exact identities, failed and
+successful logs and scope are in CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
+INSTALLATION.md. Shell behavior is evaluator10 and the current SHELL_SUBSET.md;
+older capability lists below are historical. MIT for original code/curriculum is
+approved; all third-party notices remain, with macOS dispatch redistribution open.
 
 Native CI builds on Windows/macOS exist at earlier milestones; actual desktop
 runtime acceptance on those systems, screen-reader/physical-device accessibility

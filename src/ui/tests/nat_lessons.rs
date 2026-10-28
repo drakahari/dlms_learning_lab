@@ -207,7 +207,7 @@ fn tab(ctx: &egui::Context, a: &mut LabApp, index: usize) {
 }
 fn opened(id: &str) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (147, 37));
+    assert_eq!((a.scenarios.len(), a.units.len()), (154, 39));
     assert!(a.progress.attempts.is_empty());
     let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
     a.filter.search = a.scenarios[i].title.clone();
