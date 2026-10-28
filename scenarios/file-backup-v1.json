@@ -1,0 +1,4230 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic2-backup-selective-recovery",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Backup and recovery",
+      "unit": "backup-and-recovery",
+      "title": "Recover one file without losing newer work",
+      "summary": "Restore a damaged handover while retaining a newer working draft.",
+      "objective": "Recover /restore/project/handover.txt from project-full.tar. Keep the text, permission mode, owner and group of the newer /restore/project/work-in-progress.txt exactly as supplied. Preserve the names, bytes, modes and owners in /srv/project and the supplied archive. Inspect members before choosing a narrow restore; Check work evaluates actual results.",
+      "retry_guidance": "Read the first failing outcome, inspect that file or archive, and make one repair. Earlier success is not credit for a later broken state.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Inspect the supplied files and backups",
+        "Make the requested change without losing working data",
+        "Verify the saved result and retry any failing outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the supplied files and backups",
+          "why": "List the supplied archive with tar -tf and read both current destination files. The newer draft must remain unchanged.",
+          "action": "List the supplied archive with tar -tf and read both current destination files. The newer draft must remain unchanged.",
+          "commands": []
+        },
+        {
+          "title": "Make the requested change without losing working data",
+          "why": "-C names the parent of the stored project folder; select project/handover.txt, not the whole archive.",
+          "action": "-C names the parent of the stored project folder; select project/handover.txt, not the whole archive.",
+          "commands": []
+        },
+        {
+          "title": "Verify the saved result and retry any failing outcome",
+          "why": "Read the restored handover and inspect its mode with stat. A full restore may repair it while also losing the newer draft.",
+          "action": "Read the restored handover and inspect its mode with stat. A full restore may repair it while also losing the newer draft.",
+          "commands": []
+        }
+      ],
+      "explanation": "The archive stores both the approved handover and an older working draft. A whole-archive restore repairs the handover but overwrites the newer draft, so restore only project/handover.txt into the /restore parent. Read the recovered text and compare its permission mode, owner and group with the saved metadata. These checks deliberately do not treat logical modification/change counters as physical timestamp preservation.",
+      "hints": [
+        "List the supplied archive with tar -tf and read both current destination files. The newer draft must remain unchanged.",
+        "-C names the parent of the stored project folder; select project/handover.txt, not the whole archive.",
+        "Read the restored handover and inspect its mode with stat. A full restore may repair it while also losing the newer draft."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.gnu.org/software/tar/manual/html_node/Incremental-Dumps.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/stat-invocation.html"
+      ],
+      "simplifications": "Bounded UTF-8 virtual files and typed archives, not tar binary bytes. Supplied simulated root preserves stored modes/owners; no host privileges. Logical change counters replace filesystem times. No compression, links, type-changing extraction, tape, remote copies or host operations. Only the disclosed literal terminal subset runs.",
+      "initial": {
+        "kind": "FileBackup",
+        "simulation": {
+          "trees": {
+            "/srv/project": {
+              "clock": 2,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 2,
+                  "changed": 2
+                },
+                "handover.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "Approved release: maple\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "work-in-progress.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "Old draft\n",
+                  "modified": 2,
+                  "changed": 2
+                }
+              }
+            },
+            "/restore/project": {
+              "clock": 4,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 2,
+                  "changed": 2
+                },
+                "handover.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "Accidentally damaged\n",
+                  "modified": 3,
+                  "changed": 3
+                },
+                "work-in-progress.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "Unpublished work: retain exactly\n",
+                  "modified": 4,
+                  "changed": 4
+                }
+              }
+            }
+          },
+          "storage": "/backups",
+          "archives": {
+            "/backups/project-full.tar": {
+              "root": "project",
+              "clock": 2,
+              "incremental": false,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 2,
+                  "changed": 2
+                },
+                "handover.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "Approved release: maple\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "work-in-progress.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "Old draft\n",
+                  "modified": 2,
+                  "changed": 2
+                }
+              },
+              "directories": {
+                "": [
+                  "handover.txt",
+                  "work-in-progress.txt"
+                ]
+              }
+            }
+          },
+          "snapshots": {},
+          "cwd": "/srv"
+        }
+      },
+      "goal": {
+        "kind": "FileBackup",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/srv/project": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "handover.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Approved release: maple\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "work-in-progress.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Old draft\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/restore/project": {
+                "clock": 4,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "handover.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Accidentally damaged\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "work-in-progress.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Unpublished work: retain exactly\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                }
+              }
+            },
+            "storage": "/backups",
+            "archives": {
+              "/backups/project-full.tar": {
+                "root": "project",
+                "clock": 2,
+                "incremental": false,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "handover.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Approved release: maple\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "work-in-progress.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Old draft\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                },
+                "directories": {
+                  "": [
+                    "handover.txt",
+                    "work-in-progress.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {},
+            "cwd": "/srv"
+          },
+          "protected": [
+            "/srv/project"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/restore/project",
+              "expected": {
+                "clock": 4,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "handover.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Approved release: maple\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "work-in-progress.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Unpublished work: retain exactly\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                }
+              }
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/backups/project-full.tar"
+              ],
+              "snapshots": []
+            }
+          ]
+        }
+      },
+      "solution": [
+        "tar -xf /backups/project-full.tar -C /restore project/handover.txt"
+      ],
+      "prerequisites": [
+        "lpic1-file-handover"
+      ],
+      "file_backup_teaching": {
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/demo/policy": {
+                "clock": 2,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "guide.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Original reference: cedar\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "draft.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Archived rough draft\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                }
+              },
+              "/practice/policy": {
+                "clock": 4,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "guide.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Damaged example\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "draft.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "New example work to keep\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                }
+              }
+            },
+            "storage": "/example-backups",
+            "archives": {
+              "/example-backups/policy.tar": {
+                "root": "policy",
+                "clock": 2,
+                "incremental": false,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "guide.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Original reference: cedar\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "draft.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Archived rough draft\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                },
+                "directories": {
+                  "": [
+                    "draft.txt",
+                    "guide.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {},
+            "cwd": "/demo"
+          },
+          "protected": [
+            "/demo/policy"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/practice/policy",
+              "expected": {
+                "clock": 4,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "guide.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "Original reference: cedar\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "draft.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "New example work to keep\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                }
+              }
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/example-backups/policy.tar"
+              ],
+              "snapshots": []
+            }
+          ]
+        },
+        "prerequisite_note": "You should be able to read a file, name a path and recognize permission modes. The introduction explains the backup options used here. Type one command in the example terminal and choose Run command; these example paths never share assignment files.",
+        "concepts": [
+          {
+            "title": "A backup and the working folder are separate",
+            "text": "An archive holds saved file contents and permissions. Restoring the whole archive can overwrite newer work, so first decide which file actually needs recovery."
+          },
+          {
+            "title": "Name the member and its destination",
+            "text": "tar -t lists stored names. In tar -x -f ARCHIVE -C PARENT MEMBER, -x restores, -f names the archive, -C chooses a destination parent, and MEMBER is the exact stored name, including its top folder."
+          },
+          {
+            "title": "Inspect the result",
+            "text": "cat reads the restored text. stat -c '%a %U %G' PATH shows its simulated permissions, owner and group: %a chooses the octal permission number, %U the owner name and %G the group name. Quotes keep this format together as one argument. Check compares actual contents and metadata and also looks for unrelated changes."
+          }
+        ],
+        "example_description": "Restore only the damaged guide while keeping the newer example draft.",
+        "example_commands": [
+          {
+            "command": "tar -tf /example-backups/policy.tar",
+            "explanation": "List the archive members before selecting a file."
+          },
+          {
+            "command": "tar -xf /example-backups/policy.tar -C /practice policy/guide.txt",
+            "explanation": "Restore only policy/guide.txt into the separate practice folder."
+          },
+          {
+            "command": "cat /practice/policy/guide.txt",
+            "explanation": "Read the actual restored reference text."
+          },
+          {
+            "command": "stat -c '%a %U %G' /practice/policy/guide.txt",
+            "explanation": "Inspect the actual restored permission number, owner and group."
+          }
+        ],
+        "try_change": {
+          "description": "Make the restored guide world-writable, then check why correct text alone is insufficient.",
+          "commands": [
+            {
+              "command": "chmod 777 /practice/policy/guide.txt",
+              "explanation": "This changes only virtual permissions; the archive still holds the original mode."
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "tar -xf /example-backups/policy.tar -C /practice policy/guide.txt",
+            "explanation": "Restore that one member again to repair its stored metadata."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-backup-incremental-chain",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Backup and recovery",
+      "unit": "backup-and-recovery",
+      "title": "Recover the complete backup chain",
+      "summary": "Restore three dependent levels and remove obsolete destination files.",
+      "objective": "Recover the current team data in /recover/team using base.tar, day1.tar and day2.tar. Preserve the source, all supplied archives and current.snar. The newest level omits unchanged files; verify inventory.txt, new.txt and .settings, and ensure obsolete.txt is absent. Independent recovery tests must also pass.",
+      "retry_guidance": "Read the first failing outcome, inspect that file or archive, and make one repair. Earlier success is not credit for a later broken state.",
+      "difficulty": "Intermediate",
+      "minutes": 24,
+      "steps": [
+        "Inspect the supplied files and backups",
+        "Make the requested change without losing working data",
+        "Verify the saved result and retry any failing outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the supplied files and backups",
+          "why": "List each archive and compare which file payloads occur in the base and increments. Directory names alone are not full file payloads.",
+          "action": "List each archive and compare which file payloads occur in the base and increments. Directory names alone are not full file payloads.",
+          "commands": []
+        },
+        {
+          "title": "Make the requested change without losing working data",
+          "why": "Restore the base, then day1, then day2 into /recover, using incremental restoration so deleted members disappear.",
+          "action": "Restore the base, then day1, then day2 into /recover, using incremental restoration so deleted members disappear.",
+          "commands": []
+        },
+        {
+          "title": "Verify the saved result and retry any failing outcome",
+          "why": "Inspect the recovered files, including .settings; a missing middle level can leave old data even after day2 was applied.",
+          "action": "Inspect the recovered files, including .settings; a missing middle level can leave old data even after day2 was applied.",
+          "commands": []
+        }
+      ],
+      "explanation": "The base supplies unchanged stable.txt. Day1 changes inventory.txt, introduces new.txt and records the removal of obsolete.txt. Day2 changes only .settings; it cannot replace the omitted middle level. Restore base, day1 and day2 in order with incremental directory handling (-G or the documented -g /dev/null convention), then inspect the actual files. An ordinary overlay can leave obsolete names behind.",
+      "hints": [
+        "List each archive and compare which file payloads occur in the base and increments. Directory names alone are not full file payloads.",
+        "Restore the base, then day1, then day2 into /recover, using incremental restoration so deleted members disappear.",
+        "Inspect the recovered files, including .settings; a missing middle level can leave old data even after day2 was applied."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.gnu.org/software/tar/manual/html_node/Incremental-Dumps.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/stat-invocation.html"
+      ],
+      "simplifications": "Bounded UTF-8 virtual files and typed archives, not tar binary bytes. Supplied simulated root preserves stored modes/owners; no host privileges. Logical change counters replace filesystem times. No compression, links, type-changing extraction, tape, remote copies or host operations. Only the disclosed literal terminal subset runs.",
+      "initial": {
+        "kind": "FileBackup",
+        "simulation": {
+          "trees": {
+            "/srv/team": {
+              "clock": 8,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 7,
+                  "changed": 7
+                },
+                "inventory.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "version B\n",
+                  "modified": 5,
+                  "changed": 5
+                },
+                "stable.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "unchanged record\n",
+                  "modified": 2,
+                  "changed": 2
+                },
+                ".settings": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "mode=current\n",
+                  "modified": 8,
+                  "changed": 8
+                },
+                "new.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "introduced on day1\n",
+                  "modified": 7,
+                  "changed": 7
+                }
+              }
+            },
+            "/recover/team": {
+              "clock": 0,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                }
+              }
+            }
+          },
+          "storage": "/backups",
+          "archives": {
+            "/backups/base.tar": {
+              "root": "team",
+              "clock": 4,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 4,
+                  "changed": 4
+                },
+                "inventory.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "version A\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "stable.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "unchanged record\n",
+                  "modified": 2,
+                  "changed": 2
+                },
+                "obsolete.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "retired entry\n",
+                  "modified": 3,
+                  "changed": 3
+                },
+                ".settings": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "mode=old\n",
+                  "modified": 4,
+                  "changed": 4
+                }
+              },
+              "directories": {
+                "": [
+                  ".settings",
+                  "inventory.txt",
+                  "obsolete.txt",
+                  "stable.txt"
+                ]
+              }
+            },
+            "/backups/day1.tar": {
+              "root": "team",
+              "clock": 7,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 7,
+                  "changed": 7
+                },
+                "inventory.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "version B\n",
+                  "modified": 5,
+                  "changed": 5
+                },
+                "new.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "introduced on day1\n",
+                  "modified": 7,
+                  "changed": 7
+                }
+              },
+              "directories": {
+                "": [
+                  ".settings",
+                  "inventory.txt",
+                  "new.txt",
+                  "stable.txt"
+                ]
+              }
+            },
+            "/backups/day2.tar": {
+              "root": "team",
+              "clock": 8,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 7,
+                  "changed": 7
+                },
+                ".settings": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "mode=current\n",
+                  "modified": 8,
+                  "changed": 8
+                }
+              },
+              "directories": {
+                "": [
+                  ".settings",
+                  "inventory.txt",
+                  "new.txt",
+                  "stable.txt"
+                ]
+              }
+            }
+          },
+          "snapshots": {
+            "/backups/current.snar": {
+              "source": "/srv/team",
+              "snapshot": {
+                "root": "team",
+                "cutoff": 8,
+                "inventory": {
+                  "": true,
+                  "inventory.txt": false,
+                  "stable.txt": false,
+                  ".settings": false,
+                  "new.txt": false
+                }
+              }
+            }
+          },
+          "cwd": "/srv"
+        }
+      },
+      "goal": {
+        "kind": "FileBackup",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/srv/team": {
+                "clock": 8,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 7,
+                    "changed": 7
+                  },
+                  "inventory.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "version B\n",
+                    "modified": 5,
+                    "changed": 5
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unchanged record\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  ".settings": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "mode=current\n",
+                    "modified": 8,
+                    "changed": 8
+                  },
+                  "new.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "introduced on day1\n",
+                    "modified": 7,
+                    "changed": 7
+                  }
+                }
+              },
+              "/recover/team": {
+                "clock": 0,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  }
+                }
+              }
+            },
+            "storage": "/backups",
+            "archives": {
+              "/backups/base.tar": {
+                "root": "team",
+                "clock": 4,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "inventory.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "version A\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unchanged record\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "obsolete.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "retired entry\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  ".settings": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "mode=old\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                },
+                "directories": {
+                  "": [
+                    ".settings",
+                    "inventory.txt",
+                    "obsolete.txt",
+                    "stable.txt"
+                  ]
+                }
+              },
+              "/backups/day1.tar": {
+                "root": "team",
+                "clock": 7,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 7,
+                    "changed": 7
+                  },
+                  "inventory.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "version B\n",
+                    "modified": 5,
+                    "changed": 5
+                  },
+                  "new.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "introduced on day1\n",
+                    "modified": 7,
+                    "changed": 7
+                  }
+                },
+                "directories": {
+                  "": [
+                    ".settings",
+                    "inventory.txt",
+                    "new.txt",
+                    "stable.txt"
+                  ]
+                }
+              },
+              "/backups/day2.tar": {
+                "root": "team",
+                "clock": 8,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 7,
+                    "changed": 7
+                  },
+                  ".settings": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "mode=current\n",
+                    "modified": 8,
+                    "changed": 8
+                  }
+                },
+                "directories": {
+                  "": [
+                    ".settings",
+                    "inventory.txt",
+                    "new.txt",
+                    "stable.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {
+              "/backups/current.snar": {
+                "source": "/srv/team",
+                "snapshot": {
+                  "root": "team",
+                  "cutoff": 8,
+                  "inventory": {
+                    "": true,
+                    "inventory.txt": false,
+                    "stable.txt": false,
+                    ".settings": false,
+                    "new.txt": false
+                  }
+                }
+              }
+            },
+            "cwd": "/srv"
+          },
+          "protected": [
+            "/srv/team"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/recover/team",
+              "expected": {
+                "clock": 8,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 7,
+                    "changed": 7
+                  },
+                  "inventory.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "version B\n",
+                    "modified": 5,
+                    "changed": 5
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unchanged record\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  ".settings": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "mode=current\n",
+                    "modified": 8,
+                    "changed": 8
+                  },
+                  "new.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "introduced on day1\n",
+                    "modified": 7,
+                    "changed": 7
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Verify independent recovery",
+              "root": "team",
+              "archives": [
+                "/backups/base.tar",
+                "/backups/day1.tar",
+                "/backups/day2.tar"
+              ],
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 8,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 7,
+                        "changed": 7
+                      },
+                      "inventory.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "version B\n",
+                        "modified": 5,
+                        "changed": 5
+                      },
+                      "stable.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "unchanged record\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      ".settings": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "mode=current\n",
+                        "modified": 8,
+                        "changed": 8
+                      },
+                      "new.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "introduced on day1\n",
+                        "modified": 7,
+                        "changed": 7
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with obsolete data",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "obsolete-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "Old destination data\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 8,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 7,
+                        "changed": 7
+                      },
+                      "inventory.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "version B\n",
+                        "modified": 5,
+                        "changed": 5
+                      },
+                      "stable.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "unchanged record\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      ".settings": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "mode=current\n",
+                        "modified": 8,
+                        "changed": 8
+                      },
+                      "new.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "introduced on day1\n",
+                        "modified": 7,
+                        "changed": 7
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/backups/base.tar",
+                "/backups/day1.tar",
+                "/backups/day2.tar"
+              ],
+              "snapshots": [
+                "/backups/current.snar"
+              ]
+            }
+          ]
+        }
+      },
+      "solution": [
+        "tar -xGf /backups/base.tar -C /recover",
+        "tar -xGf /backups/day1.tar -C /recover",
+        "tar -xGf /backups/day2.tar -C /recover"
+      ],
+      "prerequisites": [
+        "lpic2-backup-selective-recovery"
+      ],
+      "file_backup_teaching": {
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/demo/books": {
+                "clock": 6,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "catalog.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new example\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "keep.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "steady example\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "added.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new example member\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                }
+              },
+              "/practice/books": {
+                "clock": 0,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  }
+                }
+              }
+            },
+            "storage": "/example-backups",
+            "archives": {
+              "/example-backups/start.tar": {
+                "root": "books",
+                "clock": 3,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "catalog.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "old example\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "keep.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "steady example\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "retired.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "remove example\n",
+                    "modified": 3,
+                    "changed": 3
+                  }
+                },
+                "directories": {
+                  "": [
+                    "catalog.txt",
+                    "keep.txt",
+                    "retired.txt"
+                  ]
+                }
+              },
+              "/example-backups/change.tar": {
+                "root": "books",
+                "clock": 6,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "catalog.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new example\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "added.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new example member\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                },
+                "directories": {
+                  "": [
+                    "added.txt",
+                    "catalog.txt",
+                    "keep.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {},
+            "cwd": "/demo"
+          },
+          "protected": [
+            "/demo/books"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/practice/books",
+              "expected": {
+                "clock": 6,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "catalog.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new example\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "keep.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "steady example\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "added.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new example member\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                }
+              }
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/example-backups/start.tar",
+                "/example-backups/change.tar"
+              ],
+              "snapshots": []
+            }
+          ]
+        },
+        "prerequisite_note": "You should be able to read a file, name a path and recognize permission modes. The introduction explains the backup options used here. Type one command in the example terminal and choose Run command; these example paths never share assignment files.",
+        "concepts": [
+          {
+            "title": "An increment is not a complete copy",
+            "text": "After the base, an incremental archive stores changed or new files and information about directory membership. It can omit unchanged files; the newest archive is not necessarily enough. These are GNU tar-style incremental backups: -g and -G are GNU extensions, not portable options for every tar implementation."
+          },
+          {
+            "title": "Restore from oldest to newest",
+            "text": "Start with the full base, then apply each needed increment in order. Reversing levels can put old text back. Skipping a middle level can lose a change that never appeared in a later archive."
+          },
+          {
+            "title": "Deletion needs directory information",
+            "text": "In this subset tar -xGf restores incremental directory inventories as well as file data. Without -G or -g /dev/null, extraction is an ordinary overlay and may retain names that were deleted at backup time."
+          }
+        ],
+        "example_description": "Recover an example catalog from two levels and remove the retired example file.",
+        "example_commands": [
+          {
+            "command": "tar -xGf /example-backups/start.tar -C /practice",
+            "explanation": "Restore the base first. -G uses the stored directory inventories when restoring this incremental archive."
+          },
+          {
+            "command": "tar -xGf /example-backups/change.tar -C /practice",
+            "explanation": "Apply the changed files and deletion information after the base."
+          }
+        ],
+        "try_change": {
+          "description": "Overlay the old base again. Inspect how old contents return and the retired file reappears.",
+          "commands": [
+            {
+              "command": "tar -xf /example-backups/start.tar -C /practice",
+              "explanation": "Ordinary overlay restores old stored files without applying deletion information."
+            }
+          ],
+          "expected": [
+            true,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "tar -xGf /example-backups/start.tar -C /practice",
+            "explanation": "Restore the base first. -G uses the stored directory inventories when restoring this incremental archive."
+          },
+          {
+            "command": "tar -xGf /example-backups/change.tar -C /practice",
+            "explanation": "Apply the changed files and deletion information after the base."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-backup-snapshot-branch",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Backup and recovery",
+      "unit": "backup-and-recovery",
+      "title": "Branch a backup without rewriting its history",
+      "summary": "Create and independently verify a differential branch from the right snapshot.",
+      "objective": "Deliver /backups/differential.tar and /backups/branch.snar based on base.snar, then recover base plus differential into /verify/finance. Preserve finance-base.tar, base.snar and sequential.snar exactly. The incremental branch must contain every current file changed since the base, omit unchanged steady.txt and keep its own current snapshot. Verify both the recovery folder and independent recovery tests.",
+      "retry_guidance": "Read the first failing outcome, inspect that file or archive, and make one repair. Earlier success is not credit for a later broken state.",
+      "difficulty": "Advanced",
+      "minutes": 28,
+      "steps": [
+        "Inspect the supplied files and backups",
+        "Make the requested change without losing working data",
+        "Verify the saved result and retry any failing outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the supplied files and backups",
+          "why": "base.snar and sequential.snar remember different starting points. Copy the base snapshot to the requested new branch name before creating anything.",
+          "action": "base.snar and sequential.snar remember different starting points. Copy the base snapshot to the requested new branch name before creating anything.",
+          "commands": []
+        },
+        {
+          "title": "Make the requested change without losing working data",
+          "why": "The branch must include monthly.txt even though its change preceded the latest sequential snapshot. A full archive is not the requested incremental branch.",
+          "action": "The branch must include monthly.txt even though its change preceded the latest sequential snapshot. A full archive is not the requested incremental branch.",
+          "commands": []
+        },
+        {
+          "title": "Verify the saved result and retry any failing outcome",
+          "why": "Recover the supplied base and your branch into /verify. Check also rebuilds the chain from separate empty and stale sample inputs.",
+          "action": "Recover the supplied base and your branch into /verify. Check also rebuilds the chain from separate empty and stale sample inputs.",
+          "commands": []
+        }
+      ],
+      "explanation": "monthly.txt changed after the base but before the latest sequential snapshot. A branch made from sequential.snar omits that change, so base plus branch would recover an old monthly report. Copy base.snar to branch.snar, create the differential with that copy, and keep both supplied snapshots unchanged. Restore base plus differential into /verify and check independent empty and stale sample destinations; an already-correct folder cannot hide a missing payload.",
+      "hints": [
+        "base.snar and sequential.snar remember different starting points. Copy the base snapshot to the requested new branch name before creating anything.",
+        "The branch must include monthly.txt even though its change preceded the latest sequential snapshot. A full archive is not the requested incremental branch.",
+        "Recover the supplied base and your branch into /verify. Check also rebuilds the chain from separate empty and stale sample inputs."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.gnu.org/software/tar/manual/html_node/Incremental-Dumps.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/stat-invocation.html"
+      ],
+      "simplifications": "Bounded UTF-8 virtual files and typed archives, not tar binary bytes. Supplied simulated root preserves stored modes/owners; no host privileges. Logical change counters replace filesystem times. No compression, links, type-changing extraction, tape, remote copies or host operations. Only the disclosed literal terminal subset runs.",
+      "initial": {
+        "kind": "FileBackup",
+        "simulation": {
+          "trees": {
+            "/srv/finance": {
+              "clock": 6,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 6,
+                  "changed": 6
+                },
+                "monthly.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "month1\n",
+                  "modified": 4,
+                  "changed": 4
+                },
+                "steady.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "keep this\n",
+                  "modified": 2,
+                  "changed": 2
+                },
+                "settings.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "v2\n",
+                  "modified": 5,
+                  "changed": 5
+                },
+                "new.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "new finance\n",
+                  "modified": 6,
+                  "changed": 6
+                }
+              }
+            },
+            "/verify/finance": {
+              "clock": 0,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                }
+              }
+            }
+          },
+          "storage": "/backups",
+          "archives": {
+            "/backups/finance-base.tar": {
+              "root": "finance",
+              "clock": 3,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 3,
+                  "changed": 3
+                },
+                "monthly.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "month0\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "steady.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "keep this\n",
+                  "modified": 2,
+                  "changed": 2
+                },
+                "settings.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "v0\n",
+                  "modified": 3,
+                  "changed": 3
+                }
+              },
+              "directories": {
+                "": [
+                  "monthly.txt",
+                  "settings.txt",
+                  "steady.txt"
+                ]
+              }
+            }
+          },
+          "snapshots": {
+            "/backups/base.snar": {
+              "source": "/srv/finance",
+              "snapshot": {
+                "root": "finance",
+                "cutoff": 3,
+                "inventory": {
+                  "": true,
+                  "monthly.txt": false,
+                  "steady.txt": false,
+                  "settings.txt": false
+                }
+              }
+            },
+            "/backups/sequential.snar": {
+              "source": "/srv/finance",
+              "snapshot": {
+                "root": "finance",
+                "cutoff": 4,
+                "inventory": {
+                  "": true,
+                  "monthly.txt": false,
+                  "steady.txt": false,
+                  "settings.txt": false
+                }
+              }
+            }
+          },
+          "cwd": "/srv"
+        }
+      },
+      "goal": {
+        "kind": "FileBackup",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/srv/finance": {
+                "clock": 6,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "monthly.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "month1\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "steady.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "keep this\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "settings.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "v2\n",
+                    "modified": 5,
+                    "changed": 5
+                  },
+                  "new.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new finance\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                }
+              },
+              "/verify/finance": {
+                "clock": 0,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  }
+                }
+              }
+            },
+            "storage": "/backups",
+            "archives": {
+              "/backups/finance-base.tar": {
+                "root": "finance",
+                "clock": 3,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "monthly.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "month0\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "steady.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "keep this\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "settings.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "v0\n",
+                    "modified": 3,
+                    "changed": 3
+                  }
+                },
+                "directories": {
+                  "": [
+                    "monthly.txt",
+                    "settings.txt",
+                    "steady.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {
+              "/backups/base.snar": {
+                "source": "/srv/finance",
+                "snapshot": {
+                  "root": "finance",
+                  "cutoff": 3,
+                  "inventory": {
+                    "": true,
+                    "monthly.txt": false,
+                    "steady.txt": false,
+                    "settings.txt": false
+                  }
+                }
+              },
+              "/backups/sequential.snar": {
+                "source": "/srv/finance",
+                "snapshot": {
+                  "root": "finance",
+                  "cutoff": 4,
+                  "inventory": {
+                    "": true,
+                    "monthly.txt": false,
+                    "steady.txt": false,
+                    "settings.txt": false
+                  }
+                }
+              }
+            },
+            "cwd": "/srv"
+          },
+          "protected": [
+            "/srv/finance"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/verify/finance",
+              "expected": {
+                "clock": 6,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "monthly.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "month1\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "steady.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "keep this\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "settings.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "v2\n",
+                    "modified": 5,
+                    "changed": 5
+                  },
+                  "new.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new finance\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Verify independent recovery",
+              "root": "finance",
+              "archives": [
+                "/backups/finance-base.tar",
+                "/backups/differential.tar"
+              ],
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 6,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 6,
+                        "changed": 6
+                      },
+                      "monthly.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "month1\n",
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "steady.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "keep this\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "settings.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "v2\n",
+                        "modified": 5,
+                        "changed": 5
+                      },
+                      "new.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "new finance\n",
+                        "modified": 6,
+                        "changed": 6
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with obsolete data",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "obsolete-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "Old destination data\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 6,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 6,
+                        "changed": 6
+                      },
+                      "monthly.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "month1\n",
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "steady.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "keep this\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "settings.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "v2\n",
+                        "modified": 5,
+                        "changed": 5
+                      },
+                      "new.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "new finance\n",
+                        "modified": 6,
+                        "changed": 6
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Payloads",
+              "name": "Inspect the delivered incremental payload",
+              "archive": "/backups/differential.tar",
+              "root": "finance",
+              "files": [
+                "monthly.txt",
+                "new.txt",
+                "settings.txt"
+              ],
+              "incremental": true
+            },
+            {
+              "kind": "Snapshot",
+              "name": "Keep a current branch snapshot",
+              "path": "/backups/branch.snar",
+              "source": "/srv/finance"
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/backups/finance-base.tar"
+              ],
+              "snapshots": [
+                "/backups/base.snar",
+                "/backups/sequential.snar"
+              ]
+            }
+          ]
+        }
+      },
+      "solution": [
+        "cp /backups/base.snar /backups/branch.snar",
+        "tar -cf /backups/differential.tar -g /backups/branch.snar -C /srv finance",
+        "tar -xGf /backups/finance-base.tar -C /verify",
+        "tar -xGf /backups/differential.tar -C /verify"
+      ],
+      "prerequisites": [
+        "lpic2-backup-incremental-chain"
+      ],
+      "file_backup_teaching": {
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/demo/docs": {
+                "clock": 5,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "summary.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "revision1\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "example steady\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "rules.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new rule\n",
+                    "modified": 5,
+                    "changed": 5
+                  }
+                }
+              },
+              "/practice/docs": {
+                "clock": 0,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  }
+                }
+              }
+            },
+            "storage": "/example-backups",
+            "archives": {
+              "/example-backups/base.tar": {
+                "root": "docs",
+                "clock": 3,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "summary.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "revision0\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "example steady\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "rules.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "old rule\n",
+                    "modified": 3,
+                    "changed": 3
+                  }
+                },
+                "directories": {
+                  "": [
+                    "rules.txt",
+                    "stable.txt",
+                    "summary.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {
+              "/example-backups/base.snar": {
+                "source": "/demo/docs",
+                "snapshot": {
+                  "root": "docs",
+                  "cutoff": 3,
+                  "inventory": {
+                    "": true,
+                    "summary.txt": false,
+                    "stable.txt": false,
+                    "rules.txt": false
+                  }
+                }
+              },
+              "/example-backups/latest.snar": {
+                "source": "/demo/docs",
+                "snapshot": {
+                  "root": "docs",
+                  "cutoff": 4,
+                  "inventory": {
+                    "": true,
+                    "summary.txt": false,
+                    "stable.txt": false,
+                    "rules.txt": false
+                  }
+                }
+              }
+            },
+            "cwd": "/demo"
+          },
+          "protected": [
+            "/demo/docs"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/practice/docs",
+              "expected": {
+                "clock": 5,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "summary.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "revision1\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "example steady\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "rules.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "new rule\n",
+                    "modified": 5,
+                    "changed": 5
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Verify independent recovery",
+              "root": "docs",
+              "archives": [
+                "/example-backups/base.tar",
+                "/example-backups/branch.tar"
+              ],
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 5,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 3,
+                        "changed": 3
+                      },
+                      "summary.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "revision1\n",
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "stable.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "example steady\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "rules.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "new rule\n",
+                        "modified": 5,
+                        "changed": 5
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with obsolete data",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "obsolete-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "Old destination data\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 5,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 3,
+                        "changed": 3
+                      },
+                      "summary.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "revision1\n",
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "stable.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "example steady\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "rules.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "new rule\n",
+                        "modified": 5,
+                        "changed": 5
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Payloads",
+              "name": "Inspect the delivered incremental payload",
+              "archive": "/example-backups/branch.tar",
+              "root": "docs",
+              "files": [
+                "rules.txt",
+                "summary.txt"
+              ],
+              "incremental": true
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/example-backups/base.tar"
+              ],
+              "snapshots": [
+                "/example-backups/base.snar",
+                "/example-backups/latest.snar"
+              ]
+            }
+          ]
+        },
+        "prerequisite_note": "You should be able to read a file, name a path and recognize permission modes. The introduction explains the backup options used here. Type one command in the example terminal and choose Run command; these example paths never share assignment files.",
+        "concepts": [
+          {
+            "title": "A snapshot remembers what was saved",
+            "text": "In tar -c -f ARCHIVE -g SNAPSHOT, -c creates an archive, -f names the output archive and -g names the tracking snapshot. That snapshot records which names and changes were seen; creating a backup updates it. It is tracking data, not the backup payload itself."
+          },
+          {
+            "title": "A branch needs a copy of the intended base",
+            "text": "Copy the older snapshot to a new name before making a branch. Starting from a later snapshot can omit earlier changes that a base-plus-branch recovery still needs."
+          },
+          {
+            "title": "Verify from the declared starting point",
+            "text": "A current working folder can hide missing payloads. The checks rebuild base plus branch on separate sample inputs as well as inspecting the verification folder."
+          }
+        ],
+        "example_description": "Build and verify an example branch from its older base.",
+        "example_commands": [
+          {
+            "command": "cp /example-backups/base.snar /example-backups/branch.snar",
+            "explanation": "Copy the base snapshot before creation updates the copy."
+          },
+          {
+            "command": "tar -cf /example-backups/branch.tar -g /example-backups/branch.snar -C /demo docs",
+            "explanation": "Save every example file changed since the base, not just since the most recent increment."
+          },
+          {
+            "command": "tar -xGf /example-backups/base.tar -C /practice",
+            "explanation": "Use a clean example recovery beginning at the base."
+          },
+          {
+            "command": "tar -xGf /example-backups/branch.tar -C /practice",
+            "explanation": "Apply the branch and inspect its recovered text."
+          }
+        ],
+        "try_change": {
+          "description": "Rebuild the branch from the later snapshot instead. The existing practice folder may still look correct, but independent recovery must reveal the omitted summary change.",
+          "commands": [
+            {
+              "command": "cp /example-backups/latest.snar /example-backups/branch.snar",
+              "explanation": "Select the wrong newer starting point deliberately."
+            },
+            {
+              "command": "tar -cf /example-backups/branch.tar -g /example-backups/branch.snar -C /demo docs",
+              "explanation": "This omits the summary changed before that later starting point."
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false,
+            false,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "cp /example-backups/base.snar /example-backups/branch.snar",
+            "explanation": "Copy the base snapshot before creation updates the copy."
+          },
+          {
+            "command": "tar -cf /example-backups/branch.tar -g /example-backups/branch.snar -C /demo docs",
+            "explanation": "Save every example file changed since the base, not just since the most recent increment."
+          },
+          {
+            "command": "tar -xGf /example-backups/base.tar -C /practice",
+            "explanation": "Use a clean example recovery beginning at the base."
+          },
+          {
+            "command": "tar -xGf /example-backups/branch.tar -C /practice",
+            "explanation": "Apply the branch and inspect its recovered text."
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic2-backup-recovery-handover",
+      "version": 1,
+      "track": "LPIC-2",
+      "topic": "Backup and recovery",
+      "unit": "backup-and-recovery",
+      "title": "Deliver a recovery that survives independent verification",
+      "summary": "Diagnose two plausible backup candidates and preserve the evidence.",
+      "objective": "Investigate candidate-a.tar and candidate-b.tar. Deliver the incremental level containing the updated portal files as /backups/recovery-level.tar, then recover portal-base.tar plus that level into /recovery/portal. Preserve the source, base and both candidates. The restored index and approved.txt must match the approved source, retired.txt must be absent, and the delivered increment must omit unchanged stable.txt. An earlier good-looking restore does not prove the delivered archive works.",
+      "retry_guidance": "Read the first failing outcome, inspect that file or archive, and make one repair. Earlier success is not credit for a later broken state.",
+      "difficulty": "Advanced",
+      "minutes": 30,
+      "steps": [
+        "Inspect the supplied files and backups",
+        "Make the requested change without losing working data",
+        "Verify the saved result and retry any failing outcome"
+      ],
+      "guide": [
+        {
+          "title": "Inspect the supplied files and backups",
+          "why": "List both candidates and compare their members. Restore a candidate and read index.txt if the names alone are insufficient.",
+          "action": "List both candidates and compare their members. Restore a candidate and read index.txt if the names alone are insufficient.",
+          "commands": []
+        },
+        {
+          "title": "Make the requested change without losing working data",
+          "why": "Copy the chosen level to recovery-level.tar instead of overwriting the original evidence. Reapply the base and selected level in order to remove stale members.",
+          "action": "Copy the chosen level to recovery-level.tar instead of overwriting the original evidence. Reapply the base and selected level in order to remove stale members.",
+          "commands": []
+        },
+        {
+          "title": "Verify the saved result and retry any failing outcome",
+          "why": "Check tests the delivered archive chain against separate sample inputs as well as the current folder. A wrong archive can fail while the folder still looks right.",
+          "action": "Check tests the delivered archive chain against separate sample inputs as well as the current folder. A wrong archive can fail while the folder still looks right.",
+          "commands": []
+        }
+      ],
+      "explanation": "Both candidates contain the same member names, but candidate-a contains preview text while candidate-b contains the approved portal contents. Member listing alone is insufficient: a trial restore and cat reveal the difference. Copy the correct incremental level to the delivery name, then restore the base and delivered level in order. Preserved candidates permit another investigation; independent recovery tests reject a wrong delivered archive even if the current folder still contains an earlier correct restore.",
+      "hints": [
+        "List both candidates and compare their members. Restore a candidate and read index.txt if the names alone are insufficient.",
+        "Copy the chosen level to recovery-level.tar instead of overwriting the original evidence. Reapply the base and selected level in order to remove stale members.",
+        "Check tests the delivered archive chain against separate sample inputs as well as the current folder. A wrong archive can fail while the folder still looks right."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-201-202-objectives/",
+        "https://www.gnu.org/software/tar/manual/html_node/Incremental-Dumps.html",
+        "https://www.gnu.org/software/coreutils/manual/html_node/stat-invocation.html"
+      ],
+      "simplifications": "Bounded UTF-8 virtual files and typed archives, not tar binary bytes. Supplied simulated root preserves stored modes/owners; no host privileges. Logical change counters replace filesystem times. No compression, links, type-changing extraction, tape, remote copies or host operations. Only the disclosed literal terminal subset runs.",
+      "initial": {
+        "kind": "FileBackup",
+        "simulation": {
+          "trees": {
+            "/srv/portal": {
+              "clock": 6,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 6,
+                  "changed": 6
+                },
+                "index.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "release2-approved\n",
+                  "modified": 4,
+                  "changed": 4
+                },
+                "stable.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "unchanged portal\n",
+                  "modified": 2,
+                  "changed": 2
+                },
+                "approved.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "approved rollout\n",
+                  "modified": 6,
+                  "changed": 6
+                }
+              }
+            },
+            "/recovery/portal": {
+              "clock": 0,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 0,
+                  "changed": 0
+                }
+              }
+            }
+          },
+          "storage": "/backups",
+          "archives": {
+            "/backups/portal-base.tar": {
+              "root": "portal",
+              "clock": 3,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 3,
+                  "changed": 3
+                },
+                "index.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "release0\n",
+                  "modified": 1,
+                  "changed": 1
+                },
+                "stable.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "unchanged portal\n",
+                  "modified": 2,
+                  "changed": 2
+                },
+                "retired.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "obsolete portal\n",
+                  "modified": 3,
+                  "changed": 3
+                }
+              },
+              "directories": {
+                "": [
+                  "index.txt",
+                  "retired.txt",
+                  "stable.txt"
+                ]
+              }
+            },
+            "/backups/candidate-a.tar": {
+              "root": "portal",
+              "clock": 6,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 6,
+                  "changed": 6
+                },
+                "index.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "release1-preview\n",
+                  "modified": 4,
+                  "changed": 4
+                },
+                "approved.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "unapproved preview\n",
+                  "modified": 6,
+                  "changed": 6
+                }
+              },
+              "directories": {
+                "": [
+                  "approved.txt",
+                  "index.txt",
+                  "stable.txt"
+                ]
+              }
+            },
+            "/backups/candidate-b.tar": {
+              "root": "portal",
+              "clock": 6,
+              "incremental": true,
+              "entries": {
+                "": {
+                  "node": {
+                    "mode": 488,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": true
+                  },
+                  "text": null,
+                  "modified": 6,
+                  "changed": 6
+                },
+                "index.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "release2-approved\n",
+                  "modified": 4,
+                  "changed": 4
+                },
+                "approved.txt": {
+                  "node": {
+                    "mode": 416,
+                    "owner": "alex",
+                    "group": "staff",
+                    "directory": false
+                  },
+                  "text": "approved rollout\n",
+                  "modified": 6,
+                  "changed": 6
+                }
+              },
+              "directories": {
+                "": [
+                  "approved.txt",
+                  "index.txt",
+                  "stable.txt"
+                ]
+              }
+            }
+          },
+          "snapshots": {},
+          "cwd": "/srv"
+        }
+      },
+      "goal": {
+        "kind": "FileBackup",
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/srv/portal": {
+                "clock": 6,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "index.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "release2-approved\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unchanged portal\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "approved.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "approved rollout\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                }
+              },
+              "/recovery/portal": {
+                "clock": 0,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  }
+                }
+              }
+            },
+            "storage": "/backups",
+            "archives": {
+              "/backups/portal-base.tar": {
+                "root": "portal",
+                "clock": 3,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "index.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "release0\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unchanged portal\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "retired.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "obsolete portal\n",
+                    "modified": 3,
+                    "changed": 3
+                  }
+                },
+                "directories": {
+                  "": [
+                    "index.txt",
+                    "retired.txt",
+                    "stable.txt"
+                  ]
+                }
+              },
+              "/backups/candidate-a.tar": {
+                "root": "portal",
+                "clock": 6,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "index.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "release1-preview\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "approved.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unapproved preview\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                },
+                "directories": {
+                  "": [
+                    "approved.txt",
+                    "index.txt",
+                    "stable.txt"
+                  ]
+                }
+              },
+              "/backups/candidate-b.tar": {
+                "root": "portal",
+                "clock": 6,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "index.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "release2-approved\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "approved.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "approved rollout\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                },
+                "directories": {
+                  "": [
+                    "approved.txt",
+                    "index.txt",
+                    "stable.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {},
+            "cwd": "/srv"
+          },
+          "protected": [
+            "/srv/portal"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/recovery/portal",
+              "expected": {
+                "clock": 6,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 6,
+                    "changed": 6
+                  },
+                  "index.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "release2-approved\n",
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "stable.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unchanged portal\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "approved.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "approved rollout\n",
+                    "modified": 6,
+                    "changed": 6
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Verify independent recovery",
+              "root": "portal",
+              "archives": [
+                "/backups/portal-base.tar",
+                "/backups/recovery-level.tar"
+              ],
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 6,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 6,
+                        "changed": 6
+                      },
+                      "index.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "release2-approved\n",
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "stable.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "unchanged portal\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "approved.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "approved rollout\n",
+                        "modified": 6,
+                        "changed": 6
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with obsolete data",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "obsolete-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "Old destination data\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 6,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 6,
+                        "changed": 6
+                      },
+                      "index.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "release2-approved\n",
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "stable.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "unchanged portal\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "approved.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "approved rollout\n",
+                        "modified": 6,
+                        "changed": 6
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Payloads",
+              "name": "Inspect the delivered incremental payload",
+              "archive": "/backups/recovery-level.tar",
+              "root": "portal",
+              "files": [
+                "approved.txt",
+                "index.txt"
+              ],
+              "incremental": true
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/backups/portal-base.tar",
+                "/backups/candidate-a.tar",
+                "/backups/candidate-b.tar"
+              ],
+              "snapshots": []
+            }
+          ]
+        }
+      },
+      "solution": [
+        "cp /backups/candidate-b.tar /backups/recovery-level.tar",
+        "tar -xGf /backups/portal-base.tar -C /recovery",
+        "tar -xGf /backups/recovery-level.tar -C /recovery"
+      ],
+      "prerequisites": [
+        "lpic2-backup-snapshot-branch"
+      ],
+      "file_backup_teaching": {
+        "definition": {
+          "version": 1,
+          "initial": {
+            "trees": {
+              "/demo/site": {
+                "clock": 4,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "page.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "reviewed example\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "steady.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "keep example\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "approval.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "reviewed\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                }
+              },
+              "/practice/site": {
+                "clock": 0,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 0,
+                    "changed": 0
+                  }
+                }
+              }
+            },
+            "storage": "/example-backups",
+            "archives": {
+              "/example-backups/base.tar": {
+                "root": "site",
+                "clock": 2,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "page.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "draft\n",
+                    "modified": 1,
+                    "changed": 1
+                  },
+                  "steady.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "keep example\n",
+                    "modified": 2,
+                    "changed": 2
+                  }
+                },
+                "directories": {
+                  "": [
+                    "page.txt",
+                    "steady.txt"
+                  ]
+                }
+              },
+              "/example-backups/older.tar": {
+                "root": "site",
+                "clock": 4,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "page.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "unapproved example\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "approval.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "not reviewed\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                },
+                "directories": {
+                  "": [
+                    "approval.txt",
+                    "page.txt",
+                    "steady.txt"
+                  ]
+                }
+              },
+              "/example-backups/reviewed.tar": {
+                "root": "site",
+                "clock": 4,
+                "incremental": true,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "page.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "reviewed example\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "approval.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "reviewed\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                },
+                "directories": {
+                  "": [
+                    "approval.txt",
+                    "page.txt",
+                    "steady.txt"
+                  ]
+                }
+              }
+            },
+            "snapshots": {},
+            "cwd": "/demo"
+          },
+          "protected": [
+            "/demo/site"
+          ],
+          "requirements": [
+            {
+              "kind": "Tree",
+              "name": "Restore the requested files",
+              "path": "/practice/site",
+              "expected": {
+                "clock": 4,
+                "entries": {
+                  "": {
+                    "node": {
+                      "mode": 488,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": true
+                    },
+                    "text": null,
+                    "modified": 4,
+                    "changed": 4
+                  },
+                  "page.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "reviewed example\n",
+                    "modified": 3,
+                    "changed": 3
+                  },
+                  "steady.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "keep example\n",
+                    "modified": 2,
+                    "changed": 2
+                  },
+                  "approval.txt": {
+                    "node": {
+                      "mode": 416,
+                      "owner": "alex",
+                      "group": "staff",
+                      "directory": false
+                    },
+                    "text": "reviewed\n",
+                    "modified": 4,
+                    "changed": 4
+                  }
+                }
+              }
+            },
+            {
+              "kind": "Recovery",
+              "name": "Verify independent recovery",
+              "root": "site",
+              "archives": [
+                "/example-backups/base.tar",
+                "/example-backups/handover.tar"
+              ],
+              "probes": [
+                {
+                  "name": "Empty sample destination",
+                  "initial": {
+                    "clock": 0,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 0,
+                        "changed": 0
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 4,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "page.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "reviewed example\n",
+                        "modified": 3,
+                        "changed": 3
+                      },
+                      "steady.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "keep example\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "approval.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "reviewed\n",
+                        "modified": 4,
+                        "changed": 4
+                      }
+                    }
+                  }
+                },
+                {
+                  "name": "Sample destination with obsolete data",
+                  "initial": {
+                    "clock": 1,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 1,
+                        "changed": 1
+                      },
+                      "obsolete-local.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "Old destination data\n",
+                        "modified": 1,
+                        "changed": 1
+                      }
+                    }
+                  },
+                  "expected": {
+                    "clock": 4,
+                    "entries": {
+                      "": {
+                        "node": {
+                          "mode": 488,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": true
+                        },
+                        "text": null,
+                        "modified": 4,
+                        "changed": 4
+                      },
+                      "page.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "reviewed example\n",
+                        "modified": 3,
+                        "changed": 3
+                      },
+                      "steady.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "keep example\n",
+                        "modified": 2,
+                        "changed": 2
+                      },
+                      "approval.txt": {
+                        "node": {
+                          "mode": 416,
+                          "owner": "alex",
+                          "group": "staff",
+                          "directory": false
+                        },
+                        "text": "reviewed\n",
+                        "modified": 4,
+                        "changed": 4
+                      }
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Payloads",
+              "name": "Inspect the delivered incremental payload",
+              "archive": "/example-backups/handover.tar",
+              "root": "site",
+              "files": [
+                "approval.txt",
+                "page.txt"
+              ],
+              "incremental": true
+            },
+            {
+              "kind": "PreserveArtifacts",
+              "name": "Preserve the supplied recovery history",
+              "archives": [
+                "/example-backups/base.tar",
+                "/example-backups/older.tar",
+                "/example-backups/reviewed.tar"
+              ],
+              "snapshots": []
+            }
+          ]
+        },
+        "prerequisite_note": "You should be able to read a file, name a path and recognize permission modes. The introduction explains the backup options used here. Type one command in the example terminal and choose Run command; these example paths never share assignment files.",
+        "concepts": [
+          {
+            "title": "A valid archive can contain the wrong information",
+            "text": "This exercise does not corrupt tar bytes. Both candidates are structurally valid; one contains older data. Listing members and reading a trial restore provide evidence that a filename alone cannot."
+          },
+          {
+            "title": "Preserve the supplied evidence",
+            "text": "Copy the selected archive to the handover name rather than overwriting a candidate. Keep the base and both original candidates so the choice can be checked or retried."
+          },
+          {
+            "title": "A good-looking folder is not enough",
+            "text": "Independent recovery tests begin again with their own sample files. They expose a wrong delivered level even if an earlier correct restore is still visible."
+          }
+        ],
+        "example_description": "Inspect two example candidates, deliver the reviewed one and verify its recovery.",
+        "example_commands": [
+          {
+            "command": "tar -tf /example-backups/reviewed.tar",
+            "explanation": "List the member names. Both candidates have an approval file, so names alone cannot prove its text is approved."
+          },
+          {
+            "command": "cp /example-backups/reviewed.tar /example-backups/handover.tar",
+            "explanation": "Deliver a separate copy, preserving both supplied candidate archives."
+          },
+          {
+            "command": "tar -xGf /example-backups/base.tar -C /practice",
+            "explanation": "Begin independent example restoration with the base."
+          },
+          {
+            "command": "tar -xGf /example-backups/handover.tar -C /practice",
+            "explanation": "Apply the selected level."
+          },
+          {
+            "command": "cat /practice/site/page.txt",
+            "explanation": "Read actual restored data before trusting a success message."
+          }
+        ],
+        "try_change": {
+          "description": "Replace only the delivered archive with the older candidate while leaving the correct-looking practice folder alone. Check why recovery now fails.",
+          "commands": [
+            {
+              "command": "cp /example-backups/older.tar /example-backups/handover.tar",
+              "explanation": "The handover archive is now wrong even though the previous recovered folder has not changed."
+            }
+          ],
+          "expected": [
+            true,
+            true,
+            false,
+            false,
+            true,
+            true
+          ]
+        },
+        "repair": [
+          {
+            "command": "tar -tf /example-backups/reviewed.tar",
+            "explanation": "List the member names. Both candidates have an approval file, so names alone cannot prove its text is approved."
+          },
+          {
+            "command": "cp /example-backups/reviewed.tar /example-backups/handover.tar",
+            "explanation": "Deliver a separate copy, preserving both supplied candidate archives."
+          },
+          {
+            "command": "tar -xGf /example-backups/base.tar -C /practice",
+            "explanation": "Begin independent example restoration with the base."
+          },
+          {
+            "command": "tar -xGf /example-backups/handover.tar -C /practice",
+            "explanation": "Apply the selected level."
+          },
+          {
+            "command": "cat /practice/site/page.txt",
+            "explanation": "Read actual restored data before trusting a success message."
+          }
+        ]
+      }
+    }
+  ]
+}

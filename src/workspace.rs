@@ -15,6 +15,8 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub file_backup_learning: Option<crate::file_backup_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub nfs_session: Option<crate::nfs_workspace::Session>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub nfs_learning: Option<crate::nfs_teaching::Learning>,
@@ -140,6 +142,7 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.file_backup_learning.as_ref().is_none_or(|l| l.valid())
             && self.nfs_session.as_ref().is_none_or(|s| s.valid())
             && self.nfs_learning.as_ref().is_none_or(|l| l.valid())
             && self.rpm_session.as_ref().is_none_or(|s| s.valid())
@@ -294,6 +297,11 @@ pub(crate) fn reject_nfs_metadata(a: &Attempt) -> Result<(), String> {
     }
 }
 pub fn prepare(a: &mut Attempt) {
+    if crate::file_backup_workspace::has_metadata(a) && !matches!(a.state, State::FileBackup { .. })
+    {
+        return;
+    }
+
     if matches!(a.state, State::Nfs { .. }) {
         let _ = crate::nfs_workspace::prepare_session(a);
         return;

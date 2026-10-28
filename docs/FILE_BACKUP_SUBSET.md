@@ -163,3 +163,23 @@ was inspected2026-10-28; its pinned local SHA256 is
 The fixed disposable collector matches eight `%a %A` outputs as well as all eight
 numeric modes and ten restore projections. No reference utility is part of the
 learner execution engine. See M178 for source-bound evidence and remaining gates.
+
+
+## M179 authored integration boundary
+
+Four unregistered assignments now have typed engine/pack validation and tested
+complete-attempt transactions. Native scenario admission is256KiB; each complete
+attempt, including both scopes and history, is2MiB. Before adding missing practice,
+borrowed size admission accounts for the stored initial Definition, example State
+and workspace overhead; refusal leaves every caller field unchanged. Actions
+validate context before cloning, reserve8MiB transient space in the native caller,
+and publish only after the proposed whole attempt remains within its bound.
+Native memo/presentation wiring remains pending. Assignment CLI history retains
+up to120 entries/256KiB; separate practice remains16 entries/64KiB.
+
+Practice now stores its complete immutable Definition origin. Matching path
+names alone cannot re-label a saved example after its source data changes.
+Existing original154 profile fields remain compatible; new attempts are never
+invented. Fresh file-load tests do not imply native process-cold acceptance.
+See FILE_BACKUP_LESSONS.md and ledgerM179; all13 objective206.2 references remain
+Open until appropriate native integration and broader required content exist.

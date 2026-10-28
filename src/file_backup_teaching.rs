@@ -172,6 +172,7 @@ impl Lesson {
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Learning {
+    pub context: work::Definition,
     pub version: u32,
     pub view: View,
     pub state: Store,
@@ -223,7 +224,32 @@ fn transcript<'de, D: serde::Deserializer<'de>>(d: D) -> Result<Vec<String>, D::
 impl Learning {
     pub fn new(lesson: &Lesson) -> Result<Self, String> {
         lesson.validate()?;
+        #[derive(Serialize)]
+        struct New<'a> {
+            context: &'a work::Definition,
+            version: u32,
+            view: View,
+            state: &'a Store,
+            command: &'static str,
+            transcript: Vec<String>,
+            example_command: usize,
+            checked: bool,
+        }
+        let proposed = New {
+            context: &lesson.definition,
+            version: 1,
+            view: View::Introduction,
+            state: &lesson.definition.initial,
+            command: "",
+            transcript: Vec::new(),
+            example_command: 0,
+            checked: false,
+        };
+        if !fits(&proposed, MAX_LEARNING) {
+            return Err("Backup example exceeds its saved size limit".into());
+        }
         Ok(Self {
+            context: lesson.definition.clone(),
             version: 1,
             view: View::Introduction,
             state: lesson.definition.initial.clone(),
@@ -235,6 +261,8 @@ impl Learning {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.context.validate().is_ok()
+            && self.context.bound_state(&self.state)
             && self.state.valid()
             && self.command.len() <= 4096
             && !self.command.contains('\0')
@@ -249,6 +277,7 @@ impl Learning {
     }
     pub fn valid_for(&self, lesson: &Lesson) -> bool {
         self.valid()
+            && self.context == lesson.definition
             && lesson.bounded()
             && self.example_command < lesson.example_commands.len()
             && lesson.definition.bound_state(&self.state)
@@ -274,4 +303,54 @@ impl Learning {
         }
         result
     }
+}
+
+/// Create only missing separate practice; never replace an existing learner draft.
+pub fn prepare(
+    attempt: &mut crate::progress::Attempt,
+    lesson: &Lesson,
+    new_attempt: bool,
+) -> Result<(), String> {
+    crate::progress::validate_file_backup_workspace(attempt)?;
+    let crate::engine::State::FileBackup { simulation } = &attempt.state else {
+        return Err("Backup example needs a backup assignment".into());
+    };
+    if !lesson.separate_from(simulation) {
+        return Err("Backup example paths overlap the assignment".into());
+    }
+    if let Some(learning) = attempt
+        .workspace
+        .as_ref()
+        .and_then(|w| w.file_backup_learning.as_ref())
+    {
+        return if learning.valid_for(lesson) {
+            Ok(())
+        } else {
+            Err("Saved backup example differs; previous work retained".into())
+        };
+    }
+    let mut learning = Learning::new(lesson)?;
+    if !new_attempt {
+        learning.view = View::Assignment;
+    }
+    // Conservative borrowed admission BEFORE any caller field is changed. This
+    // counts even the complete default workspace overhead when one already exists.
+    let admitted = work::size(attempt, work::MAX_ATTEMPT)
+        .and_then(|a| {
+            work::size(&learning, work::MAX_ATTEMPT).and_then(|b| {
+                work::size(&crate::workspace::WorkspaceData::new(), work::MAX_ATTEMPT)
+                    .and_then(|c| a.checked_add(b)?.checked_add(c)?.checked_add(64))
+            })
+        })
+        .is_some_and(|n| n <= work::MAX_ATTEMPT);
+    if !admitted {
+        return Err(
+            "Backup example exceeds the saved attempt size limit; previous work retained".into(),
+        );
+    }
+    attempt
+        .workspace
+        .get_or_insert_with(crate::workspace::WorkspaceData::new)
+        .file_backup_learning = Some(learning);
+    Ok(())
 }

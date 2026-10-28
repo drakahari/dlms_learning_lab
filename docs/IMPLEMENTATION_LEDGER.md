@@ -3598,3 +3598,63 @@ backup scenario/native/persistence integration remains, as do all broader scope
 gaps. Cron scoped backend/editor gates pass but actual native is pending; LACP
 compact-feedback native review and three shell tasks remain in the serialized
 queue. Continue the agreed implementation; no release or completion claim.
+
+### M179 four substantive backup drafts and honest registry evidence (2026-10-28)
+
+Authored selective-file preservation, three-level recovery/deletion, older-base
+snapshot branching and evidence-based recovery handover. Candidate handover
+archives have identical member names and different contents; listing alone
+cannot solve the task. All four include prerequisite teaching, different runnable
+practice, an adverse experiment/repair, full assignments, specific retry guidance,
+worked reasoning and legitimate long-option alternatives. They remain unregistered
+until native/course acceptance; FILE_BACKUP_LESSONS.md records the exact boundary.
+
+New typed FileBackup State/Goal and pack validation require matching bounded
+initials and separate teaching, verify actual solution reachability and retain
+all old authored bytes. Learning now preserves its complete Definition origin,
+not only matching path names. Native source cap256KiB and complete attempt2MiB
+admission precede copying. Actions are complete-attempt transactions: refusals
+retain both scopes, drafts, history and clock. CheckRun remains cancellable and
+yielding; native presentation/transient reservation still needs integration.
+
+68 focused checks pass across six targets, plus3 new NFS/RPM/NAT warm-memo
+refusals. Tests exercise all four references/alternatives, wrong/partial/hardcoded
+outcomes, current invalidation, explicit Step0 completion, examples with no credit,
+both drafts/views, selected reset, bounded atomic refusal and tempfile save/fresh
+load. Exact synthetic original154 attempts remain unchanged and no four new
+attempts are invented. This is not an actual historical capture or process-cold
+native run; all19 retained-history checks remain independently required.
+
+Independent source review corrected overly broad metadata wording and supplied
+four distinct worked explanations, explicit creation flags and actual cat/stat
+readback. The test loader retains bounded per-pack chunks and the complete
+prerequisite graph. First compile caught four intentional exhaustive metadata
+projection decisions: added actual foreign-payload refusals, not ignored fields.
+All-target Clippy then caught the original-nine test's exhaustive impossible-kind
+arm; adding the new kind there changes no original-nine behavior/assertion.
+Original failed logs are retained. One test name was clarified from cold_load to
+fresh_file_load after its unchanged body passed; no native cold claim.
+
+All-target Clippy and254Python pass. A genuine bookkeeping defect also closed:
+coverage previously counted every scenario-directory JSON, including unregistered
+drafts. It now admits the exact static bundle include list with contained/bounded
+sources and fail-closed syntax, reports drafts separately and rejects their use
+as practical evidence. Seven new Python guards pass. No CSV status/credited ID or
+source fingerprint changes; all13 206.2 remaining fields now state individual
+real gaps. The final gap-wording-only CSV edit then passes a serial checker replay:154
+registered labs and4 separately reported drafts; status/source counts unchanged.
+Final checker log SHA25644eab6582060c7a545611c7d7fdad339a251831b6aa78814b68dd7cad2548810.
+
+Private source/log/memory receipt reviews/file-backup/content-gated-m179/RESULT.json
+SHA256 `47edd1bb35d1d49ac263d2791e8d3b79db68438f4593e1bd1e5ae419f1e85b7c`.
+Observed minimum20.15GiB available, some/fullPSIavg10=0/0, OOMdelta0. Root reaped
+all wrappers before delegating LACP R12, then Bash's corrected geometry run.
+No public screenshot/profile/evidence, release or unrelated-project change.
+
+Normal catalog remains154/39 (45CCNA/32LPIC-1/28LPIC-2/49Bash),28themes and saved
+progress. Backup UI/course/candidate acceptance remains. LACP106 native and its
+8-frame spacing follow-up pass; Bash private157 inclusive2042 passes and its first
+128 native frames pass functional flows at one actual width only, with a stricter
+dual-width rerun being prepared. Cron private4-unit composition/native still
+pending. None of these isolated sources is counted as normal curriculum yet.
+Continue the reconciliation queue; this is not completion or a stopping point.

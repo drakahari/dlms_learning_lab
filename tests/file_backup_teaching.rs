@@ -247,3 +247,27 @@ fn altered_example_context_is_rejected_and_reset_is_selected_practice_only() {
             .contains_key("/example-backups/projects.tar")
     );
 }
+#[test]
+fn practice_retains_its_complete_origin_instead_of_relabeling_same_path_work() {
+    let lesson = sample();
+    let mut learning = Learning::new(&lesson).unwrap();
+    run_example(&mut learning, &lesson);
+    let before = learning.clone();
+    let mut different = lesson.clone();
+    different
+        .definition
+        .initial
+        .trees
+        .get_mut("/demo/projects")
+        .unwrap()
+        .write("guide.txt", "different supplied example\n")
+        .unwrap();
+    assert!(different.bounded());
+    assert!(!learning.valid_for(&different));
+    assert!(learning.execute(&different).is_err());
+    assert_eq!(learning, before);
+    let raw = serde_json::to_vec(&learning).unwrap();
+    let restored: Learning = serde_json::from_slice(&raw).unwrap();
+    assert_eq!(restored.context, lesson.definition);
+    assert!(restored.valid_for(&lesson));
+}

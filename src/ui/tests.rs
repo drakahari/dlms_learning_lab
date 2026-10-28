@@ -900,7 +900,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 )
                 .unwrap();
             }
-            State::Nfs { .. }
+            State::FileBackup { .. }
+            | State::Nfs { .. }
             | State::RpmPackages { .. }
             | State::BasicNat { .. }
             | State::DebianPackages { .. }

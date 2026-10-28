@@ -266,8 +266,40 @@ pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     ));
     rows
 }
+/// Backup metadata only: no grading recursion and no inferred result.
+pub(crate) fn validate_file_backup_workspace(a: &Attempt) -> Result<(), String> {
+    let State::FileBackup { simulation } = &a.state else {
+        return if crate::file_backup_workspace::has_metadata(a) {
+            Err("Backup practice belongs to another activity; previous work retained".into())
+        } else {
+            Ok(())
+        };
+    };
+    if a.ipv4.is_some()
+        || !simulation.valid()
+        || a.workspace
+            .as_ref()
+            .is_some_and(|w| crate::file_backup_workspace::foreign(w) || !w.valid())
+        || !crate::file_backup_workspace::within(a, crate::file_backup_workspace::MAX_ATTEMPT)
+    {
+        return Err("Saved backup work is too large or contains another activity's fields; previous work retained".into());
+    }
+    Ok(())
+}
+pub fn current_file_backup_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    match crate::file_backup_workspace::context(a, s) {
+        Ok(d) => {
+            let State::FileBackup { simulation } = &a.state else {
+                unreachable!()
+            };
+            d.checks(simulation)
+        }
+        Err(e) => vec![(false, e)],
+    }
+}
 /// NFS metadata admission only: no grader recursion and no inferred completion.
 pub(crate) fn validate_nfs_metadata(a: &Attempt) -> Result<(), String> {
+    validate_file_backup_workspace(a)?;
     let present = crate::workspace::has_nfs_metadata(a);
     let State::Nfs { simulation } = &a.state else {
         return if present {
@@ -558,6 +590,13 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if validate_file_backup_workspace(a).is_err() {
+        return false;
+    }
+    if matches!(a.state, State::FileBackup { .. }) {
+        let rows = current_file_backup_checks(a, s);
+        return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
     if matches!(a.state, State::Nfs { .. }) {
         let rows = current_nfs_checks(a, s);
         return !rows.is_empty() && rows.iter().all(|r| r.0);
@@ -925,6 +964,9 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if matches!(a.state, State::FileBackup { .. }) {
+            crate::file_backup_workspace::context(a, s)?;
         }
         if matches!(a.state, State::Nfs { .. }) {
             crate::nfs_workspace::context(a, s)?;

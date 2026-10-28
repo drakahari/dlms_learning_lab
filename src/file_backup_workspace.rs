@@ -548,3 +548,268 @@ pub(crate) fn list<'de, D: serde::Deserializer<'de>, V: Deserialize<'de>, const 
     }
     d.deserialize_seq(Items::<V, N>(std::marker::PhantomData))
 }
+
+/// Complete native-attempt admission remains2MiB, including both scopes/history.
+pub const MAX_ATTEMPT: usize = 2 * 1024 * 1024;
+pub fn has_metadata(a: &crate::progress::Attempt) -> bool {
+    a.workspace
+        .as_ref()
+        .is_some_and(|w| w.file_backup_learning.is_some())
+}
+pub const MAX_SCENARIO: usize = 256 * 1024;
+pub fn size<T: Serialize>(value: &T, cap: usize) -> Option<usize> {
+    struct Counter {
+        used: usize,
+        cap: usize,
+    }
+    impl std::io::Write for Counter {
+        fn write(&mut self, b: &[u8]) -> std::io::Result<usize> {
+            self.used = self
+                .used
+                .checked_add(b.len())
+                .filter(|n| *n <= self.cap)
+                .ok_or_else(|| std::io::Error::other("Backup attempt byte bound"))?;
+            Ok(b.len())
+        }
+        fn flush(&mut self) -> std::io::Result<()> {
+            Ok(())
+        }
+    }
+    let mut counter = Counter { used: 0, cap };
+    serde_json::to_writer(&mut counter, value).ok()?;
+    Some(counter.used)
+}
+pub fn within<T: Serialize>(value: &T, cap: usize) -> bool {
+    size(value, cap).is_some()
+}
+
+// No ..: every added metadata field needs an explicit admission decision.
+pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
+    let crate::workspace::WorkspaceData {
+        file_backup_learning: _,
+        nfs_session,
+        nfs_learning,
+        nat_learning,
+        rpm_session,
+        rpm_learning,
+        nat_draft,
+        debian_packages_terminal,
+        apache_static_draft,
+        apache_static_learning,
+        debian_packages_draft,
+        debian_packages_learning,
+        spanning_tree_draft,
+        spanning_tree_learning,
+        dhcpv4_draft,
+        dhcpv4_learning,
+        version: _,
+        unit_manager_draft,
+        unit_manager_learning,
+        unit_manager_terminal,
+        ospf_draft,
+        ospf_learning,
+        acl_draft,
+        acl_learning,
+        script_learning,
+        script_history,
+        script_history_more,
+        terminal_learning,
+        process_learning,
+        accounts_learning,
+        discovery_draft,
+        discovery_learning,
+        storage_draft,
+        storage_learning,
+        ipv6_draft,
+        ipv6_learning,
+        routing_v4_draft,
+        routing_v4_learning,
+        address_learning,
+        service_learning,
+        client_learning,
+        seed_dns_learning,
+        seed_mount_learning,
+        legacy_access_learning,
+        legacy_logs_learning,
+        client_draft,
+        dns_learning,
+        dns_draft,
+        switching_draft,
+        switching_learning,
+        mac_draft,
+        mac_learning,
+        command: _,
+        service_port,
+        dns_address,
+        dns_serial,
+        mount_device,
+        checked: _,
+        ipv4_check,
+        practice_check,
+        migrated_host,
+        legacy_host_reviewed,
+        legacy_practice_reviewed,
+        migrated_practice_host,
+    } = w;
+    nfs_session.is_some()
+        || nfs_learning.is_some()
+        || nat_learning.is_some()
+        || rpm_session.is_some()
+        || rpm_learning.is_some()
+        || nat_draft.is_some()
+        || debian_packages_terminal.is_some()
+        || apache_static_draft.is_some()
+        || apache_static_learning.is_some()
+        || debian_packages_draft.is_some()
+        || debian_packages_learning.is_some()
+        || spanning_tree_draft.is_some()
+        || spanning_tree_learning.is_some()
+        || dhcpv4_draft.is_some()
+        || dhcpv4_learning.is_some()
+        || unit_manager_draft.is_some()
+        || unit_manager_learning.is_some()
+        || unit_manager_terminal.is_some()
+        || ospf_draft.is_some()
+        || ospf_learning.is_some()
+        || acl_draft.is_some()
+        || acl_learning.is_some()
+        || script_learning.is_some()
+        || script_history.is_some()
+        || !script_history_more.is_empty()
+        || terminal_learning.is_some()
+        || process_learning.is_some()
+        || accounts_learning.is_some()
+        || discovery_draft.is_some()
+        || discovery_learning.is_some()
+        || storage_draft.is_some()
+        || storage_learning.is_some()
+        || ipv6_draft.is_some()
+        || ipv6_learning.is_some()
+        || routing_v4_draft.is_some()
+        || routing_v4_learning.is_some()
+        || address_learning.is_some()
+        || service_learning.is_some()
+        || client_learning.is_some()
+        || seed_dns_learning.is_some()
+        || seed_mount_learning.is_some()
+        || legacy_access_learning.is_some()
+        || legacy_logs_learning.is_some()
+        || client_draft.is_some()
+        || dns_learning.is_some()
+        || dns_draft.is_some()
+        || switching_draft.is_some()
+        || switching_learning.is_some()
+        || mac_draft.is_some()
+        || mac_learning.is_some()
+        || service_port.is_some()
+        || dns_address.is_some()
+        || dns_serial.is_some()
+        || mount_device.is_some()
+        || ipv4_check.is_some()
+        || practice_check.is_some()
+        || *migrated_host
+        || *legacy_host_reviewed
+        || *legacy_practice_reviewed
+        || *migrated_practice_host
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum Scope {
+    Assignment,
+    Practice,
+}
+/// Borrowed admission only; no grade computation or caller mutation.
+pub fn context<'a>(
+    a: &crate::progress::Attempt,
+    s: &'a crate::pack::Scenario,
+) -> Result<&'a Definition, String> {
+    crate::progress::validate_file_backup_workspace(a)?;
+    if a.scenario_version != s.version
+        || a.step >= s.steps.len()
+        || a.hints > s.hints.len()
+        || !within(s, MAX_SCENARIO)
+    {
+        return Err(
+            "Saved backup task version or instructions differ; previous work retained".into(),
+        );
+    }
+    let (
+        crate::engine::State::FileBackup { simulation },
+        crate::engine::State::FileBackup {
+            simulation: authored,
+        },
+        crate::engine::Goal::FileBackup { definition },
+    ) = (&a.state, &s.initial, &s.goal)
+    else {
+        return Err("Backup task and workspace do not match".into());
+    };
+    if authored != &definition.initial
+        || definition.validate().is_err()
+        || !definition.bound_state(simulation)
+    {
+        return Err("Saved backup files do not match the supplied task".into());
+    }
+    let Some(lesson) = &s.file_backup_teaching else {
+        return Err("Backup introduction and separate example are missing".into());
+    };
+    if !lesson.separate_from(authored)
+        || a.workspace
+            .as_ref()
+            .and_then(|w| w.file_backup_learning.as_ref())
+            .is_some_and(|l| !l.valid_for(lesson))
+    {
+        return Err(
+            "Saved backup example does not match this lesson; previous work retained".into(),
+        );
+    }
+    Ok(definition)
+}
+/// One bounded transaction over the complete attempt. Refusal retains both
+/// scopes, drafts, transcript, walkthrough and visit clock, not just the tree.
+/// The native caller must reserve8MiB transient space before invoking this path.
+pub fn perform(
+    a: &mut crate::progress::Attempt,
+    s: &crate::pack::Scenario,
+    scope: Scope,
+    input: &str,
+) -> Result<String, String> {
+    if input.len() > 4096 || input.trim().is_empty() {
+        return Err("Type one command of at most4096bytes first".into());
+    }
+    context(a, s)?;
+    let mut proposed = a.clone();
+    let output = match scope {
+        Scope::Assignment => {
+            let out = crate::engine::execute_for_goal(&mut proposed.state, &s.goal, input)?;
+            let workspace = proposed
+                .workspace
+                .get_or_insert_with(crate::workspace::WorkspaceData::new);
+            workspace.checked = false;
+            proposed
+                .transcript
+                .push(format!("simulated root $ {input}\n{out}"));
+            while proposed.transcript.len() > 120
+                || proposed.transcript.iter().map(String::len).sum::<usize>() > 262144
+            {
+                proposed.transcript.remove(0);
+            }
+            out
+        }
+        Scope::Practice => {
+            let lesson = s.file_backup_teaching.as_ref().unwrap();
+            let learning = proposed
+                .workspace
+                .as_mut()
+                .and_then(|w| w.file_backup_learning.as_mut())
+                .ok_or("Open the separate example before running its command")?;
+            learning.command = input.into();
+            learning.execute(lesson)?
+        }
+    };
+    if !within(&proposed, MAX_ATTEMPT) {
+        return Err("This command would exceed the saved backup workspace limit; previous work and drafts retained".into());
+    }
+    crate::progress::validate_file_backup_workspace(&proposed)?;
+    *a = proposed;
+    Ok(output)
+}

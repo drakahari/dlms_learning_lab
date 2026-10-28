@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    FileBackup {
+        simulation: crate::file_backup_terminal::Store,
+    },
     Nfs {
         simulation: crate::nfs::State,
     },
@@ -148,6 +151,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    FileBackup {
+        definition: Box<crate::file_backup_workspace::Definition>,
+    },
     Nfs {
         definition: Box<crate::nfs_workspace::Definition>,
     },
@@ -319,6 +325,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::FileBackup { simulation }, Goal::FileBackup { definition }) => {
+            definition.checks(simulation)
+        }
         (State::Nfs { simulation }, Goal::Nfs { definition }) => definition.checks(simulation),
         (State::RpmPackages { simulation }, Goal::RpmPackages { definition }) => {
             definition.checks(simulation)
@@ -643,6 +652,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::FileBackup { .. } => crate::file_backup_terminal::HELP,
         State::Nfs { .. } => crate::nfs_workspace::HELP,
         State::RpmPackages { .. } => crate::rpm_packages_workspace::HELP,
         State::BasicNat { .. } => crate::nat_workspace::HELP,
@@ -705,6 +715,23 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::FileBackup { simulation } = s {
+        if input.len() > 4096 {
+            return Err(
+                "Use one command of at most4096bytes; previous backup work retained".into(),
+            );
+        }
+        let Goal::FileBackup { definition } = goal else {
+            return Err("Backup commands require their supplied task".into());
+        };
+        definition.validate()?;
+        if !definition.bound_state(simulation) {
+            return Err(
+                "This backup workspace does not match the task; previous work retained".into(),
+            );
+        }
+        return simulation.execute(input);
+    }
     if let State::Nfs { simulation } = s {
         if input.len() > crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION {
             return Err("NFS typed input exceeds raw bound before trimming".into());
@@ -884,6 +911,18 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::FileBackup { .. }) {
+        if input.len() > 4096 {
+            return Err("Backup command exceeds4096bytes".into());
+        }
+        return match input.trim() {
+            "help" => Ok(help(s).into()),
+            "show" => Ok(describe(s)),
+            _ => Err(
+                "Backup commands require the supplied task context; no host command runs".into(),
+            ),
+        };
+    }
     if matches!(s, State::Nfs { .. }) {
         if input.len() > crate::nfs_workspace::PREFIX.len() + crate::nfs::MAX_ACTION {
             return Err("NFS typed input exceeds raw bound before trimming".into());
@@ -1058,7 +1097,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::Nfs { .. }
+        State::FileBackup { .. }
+        | State::Nfs { .. }
         | State::RpmPackages { .. }
         | State::BasicNat { .. }
         | State::ApacheStatic { .. }
@@ -1506,6 +1546,13 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::FileBackup { simulation } => format!(
+            "Virtual backup administrator: root. {} supplied file trees, {} saved archives and {} snapshots; current folder {}. All paths and permissions are simulated.",
+            simulation.trees.len(),
+            simulation.archives.len(),
+            simulation.snapshots.len(),
+            simulation.cwd
+        ),
         State::Nfs { simulation } => format!(
             "Supplied virtual NFS inventory: {} servers, {} clients, {} current mounts and {} existing text files. No host mount, RPC or trusted identity",
             simulation.inventory().servers.len(),

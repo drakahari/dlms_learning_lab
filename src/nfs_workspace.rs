@@ -921,6 +921,7 @@ pub fn perform(
 
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
+        file_backup_learning,
         nfs_session: _,
         nfs_learning: _,
         rpm_session,
@@ -986,6 +987,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || file_backup_learning.is_some()
         || rpm_session.is_some()
         || rpm_learning.is_some()
         || nat_draft.is_some()

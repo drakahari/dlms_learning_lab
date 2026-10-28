@@ -5,6 +5,8 @@ use std::collections::BTreeSet;
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub file_backup_teaching: Option<crate::file_backup_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nfs_teaching: Option<crate::nfs_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub nat_teaching: Option<crate::nat_teaching::Lesson>,
@@ -364,6 +366,31 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || matches!(s.goal, Goal::DebianPackages { .. })
         {
             return Err("Package teaching/objectives on another activity".into());
+        }
+        if let State::FileBackup { simulation } = &s.initial {
+            let Goal::FileBackup { definition } = &s.goal else {
+                return Err("Backup state needs its matching authored goal".into());
+            };
+            if simulation != &definition.initial
+                || definition.validate().is_err()
+                || !crate::file_backup_workspace::within(
+                    s,
+                    crate::file_backup_workspace::MAX_SCENARIO,
+                )
+            {
+                return Err("Backup initial files or bounded objectives differ".into());
+            }
+            let Some(lesson) = &s.file_backup_teaching else {
+                return Err(
+                    "Backup tasks need a separate introduction and runnable example".into(),
+                );
+            };
+            lesson.validate()?;
+            if !lesson.separate_from(simulation) {
+                return Err("Backup practice and assignment paths must be separate".into());
+            }
+        } else if s.file_backup_teaching.is_some() || matches!(s.goal, Goal::FileBackup { .. }) {
+            return Err("Backup teaching/objectives on another activity".into());
         }
         if let State::Nfs { simulation } = &s.initial {
             let Goal::Nfs { definition } = &s.goal else {
@@ -843,6 +870,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::FileBackup { simulation } => simulation.valid(),
         State::Nfs { simulation } => simulation.validate().is_ok(),
         State::RpmPackages { simulation } => crate::rpm_packages_workspace::admitted(simulation),
         State::BasicNat { simulation } => crate::nat_workspace::admitted(simulation),

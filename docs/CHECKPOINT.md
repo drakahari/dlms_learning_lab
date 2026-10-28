@@ -45,59 +45,65 @@ controlled GNU tar restore comparisons;237Python and coverage pass. Independent
 review found/fixed restore ctime, omitted-file type conflict and early bounds.
 No backup lab/credit yet: 206.2 remains Open, now accurately naming the foundation.
 
-M173–M177 reviewed shell capability is now integrated in MAIN evaluator11. All19
-source paths and the exact12-path current-consumer transition were independently
-pinned. Genuine before10/380-vector/historical data stay unchanged. The full
-inclusive R3 suite passes2045/0FAIL/0ignored across159 harnesses, including all19
-retained-history checks. Earlier R1 obsolete cat-stdin negative and R2 two stale
-NAT receipt literals were corrected explicitly, with all original failed logs
-retained; no expected observation was rewritten. Current-vs-historical filenames
-and receipts now reflect the transition actually performed, never fabricate10.
-The immutable actual10 verifier still passes after11.
+M173–M178 source milestones are committed/pushed8568198 and32ed454: reviewed
+shell evaluator11, bounded archive terminal/stat, outcome grading and isolated
+teaching foundation. Full MAIN inclusive M176 passes2045/0/0 (159 harnesses/all19
+retained checks) on its earlier exact source; later peer fixes and M178 pass their
+focused gates, not a relabeled full run. Original actual10/380-vector records,
+failed Bash032 observation and historical producers remain immutable. Reference
+59 still means58 supported positives plus1 exact confirmed invalid,0 unexpected.
+The genuine actual10 verifier passed after11. No new normal labs yet.
 
-Real Bash OracleR4 accepts58 supported positive observations and one exact
-confirmed invalid case,0 unexpected. Original54 inputs/failed032 output and all
-old evaluator10 records are immutable. Reference59 manifest:
-`64af7aea653ca60e97e641febb27d8be0552538b327197a2b2446017d9706ed6`.
-All-target Clippy,246Python, coverage and28-theme provenance checks pass. Final
-backup peer corrections pass27 focused runtime tests plus final all-target Clippy,
-Python and GNU comparisons; the2045 inclusive run precedes these last small
-numeric-chmod/listing guards. Ten GNU restore and eight GNU numeric-mode cases
-match. Exact private receipt and source-bound limitations are in ledger M173–M177.
-No new assignment or objective credit: catalog154/39 remains exact.
+M179 now authors four distinct backup tasks with working typed engine/pack,
+complete-origin practice, transactional whole-attempt actions and save/readback.
+68focused Rust plus3 actual native-memo refusal regressions, all-target Clippy,
+254Python and coverage pass. First compiler errors deliberately forced four
+metadata/source projection decisions and the original-nine impossible-kind arm;
+actual foreign refusals were added without ignoring new fields or weakening old
+assertions. Tests retain synthetic original154 data/no invented new contexts;
+actual history is separate. These four are NOT registered/native-accepted.
+FILE_BACKUP_LESSONS.md and ledgerM179 record source/evidence and remaining gates.
+A final checker replay after the gap-wording-only CSV edit also passes; the
+test-name clarification changes no body. Root has no active heavy wrapper.
 
-LACP R10 isolated full inclusive2031/0/0, all-target Clippy and actual native83
-captures pass. Root then viewed a genuine usability problem: the capstone's
-21-row verbose result hid the task/editor. R11 SOURCE ONLY is compacting the
-same21 canonical checks with one visible specific failure and optional full
-Details; no grading change. Actual after-render and normal integration remain.
-All native processes/wrappers exited; an initial sandbox NoCompositor refusal
-before any window is retained separately from the successful authorized run.
+The coverage checker now derives exact registered bundle includes, not every
+scenario JSON. Unregistered draft IDs are separate and cannot become practical
+coverage or inflate authored totals. All13 LPIC-2 206.2 rows remain Open with
+specific remaining directory/media/software/automation/dd/tape/mt/rsync gaps.
+Current154/39/45CCNA/32LPIC-1/28LPIC-2/49Bash and1240 reference statuses unchanged.
 
-Bash three substantive optional-input assignments/34 cases are frozen but
-unregistered. Their13 content groups and9 paired native event/controller groups now pass,
-with scoped Clippy. A separate8-frame capstone goal-slice source amendment is
-not yet tested; actual-window acceptance and private157-catalog full checks
-precede normal integration. Cron StageC now passes83 library,17 core,2 attempts,
-5 content,10 workspace and17 bin groups after preserving/fixing genuine new
-compile/event-fixture and modal-disable findings. Scoped Clippy and final7 widget tests pass; final Cron source is frozen R6
-(50owned/722protected),76 headless capture phases, not native PNGs. Actual native
-windows remain pending. Current sole heavy lease is LACP R11a26→Clippy→build→
-native106; its first new display shadowing compile error was retained and fixed
-without grader/data changes. ROOT M178 backup52/scopedClippy/247Python and GNU
-10restore/8modes/8stat pass and all wrappers are reaped.
-No worker may start heavy work without Root's explicit serialized lease.
+LACP actual R11d106 native frames pass, and Root viewed the before/after capstone:
+all21 checks remain with a visible first failure and compact status cells. R12
+removes an empty retired row and fixes singular wording;26 scoped/all-target
+Clippy/build and8 actual100/200 light-dark wide/narrow follow-up frames pass,
+all wrappers reaped. R12 source3972bab2, ELF9bac87bf; private result
+072130bba3d8ead4143af500be078463c49af00b933f18ae1cf0f5b3c969edac.
+Normal3pack/unit/current-consumer composition and Main regression remain.
 
-Backup now has bounded full/partial restore, parent/change clocks and an actual
-literal terminal adapter; it is NOT wired to the normal catalog yet. Independent
-review corrected special cat/tar operands, remote syntax and GNU directory set-ID
-preservation, with explicit regressions and controlled disposable references.
-Abstract archive format, virtual administrator identity, unsupported streams/
-verbose metadata/type replacement and all limits are disclosed. Outcome grading and independent runnable teaching now pass M178 focused gates;
-scenario/native/persistence integration remains and206.2 stays Open. Continue these units and
-the complete reconciliation queue without treating capability tests as curriculum.
-Latest pushed source milestone is8568198 (shell11/backup terminal); the verified installed
-9a90 candidate remains evaluator10, not the current source/new capabilities.
+Bash private157/40 now passes61 scoped,22 explicit historical,9 event and full
+inclusive2042/0/0 across158 harnesses/all19 retained groups. An original49→48
+current-run proof remains independently intact; new3 real records yield51 of52,
+with the deliberate unfinished draft retained. Clippy and9 affected tests pass.
+Its original128 actual native frames pass functional flows but ALL are946×929;
+that is NOT wide-window acceptance. A capture-only fullscreen-wide/windowed-narrow
+fix adds strict observed geometry and stronger essential-row coverage. It is the
+CURRENT SOLE HEAVY LEASE: paired checks/Clippy/build then full132 captures
+(ceiling136, phase<=64676), no product/data changes. First strict goal-row tests
+correctly caught missing middle rows; extra actual middle slices strengthen the
+union assertion. Preserve all earlier failures/128frames/source/ELF; no relabeling.
+
+Cron R6 scoped source50owned/722protected passes83library(+5retainedignored),17core,
+10workspace,2attempts,5lessons,17bin plus final7widget/Clippy.76 headless capture
+phases are NOT native PNGs. It is SOURCE ONLY closing its private4pack/40thunit,
+current-consumer and normal unit/Next navigation seams before full/native gates.
+No normal or objective credit yet. Main composition must preserve shell11/NFS
+cold and FileBackup, with reciprocal Cron/LACP/backup metadata/cache guards.
+
+Continue the complete reconciliation queue, including native backup UI/course
+integration after its reviewed backend. Installed9a90 remains evaluator10; new
+source proofs do not update that artifact. Repeat NFS actual two-process cold
+and final installed lifecycle/new-flow acceptance on the rebuilt regular ELF.
+All platform/reader/physical-device/novice acceptance limits remain distinct.
 
 Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
 three substantive tasks); bash-parameter-defaults-154 (faithful parameter fallback/

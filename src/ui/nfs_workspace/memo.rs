@@ -290,6 +290,7 @@ fn compact_size<T: Serialize + ?Sized>(v: &T, cap: usize) -> Option<usize> {
 }
 fn source_shape(s: &Scenario) -> bool {
     let Scenario {
+        file_backup_teaching,
         nfs_teaching,
         nat_teaching,
         rpm_packages_teaching,
@@ -341,7 +342,8 @@ fn source_shape(s: &Scenario) -> bool {
         prerequisites: _,
     } = s;
     let _ = nfs_teaching;
-    nat_teaching.is_none()
+    file_backup_teaching.is_none()
+        && nat_teaching.is_none()
         && rpm_packages_teaching.is_none()
         && apache_static_teaching.is_none()
         && spanning_tree_teaching.is_none()
@@ -415,6 +417,7 @@ fn same_source(a: &Scenario, b: &Scenario) -> bool {
 }
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        file_backup_learning,
         nfs_session: _,
         nfs_learning: _,
         rpm_session,
@@ -480,6 +483,7 @@ fn foreign(w: &model::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || file_backup_learning.is_some()
         || rpm_session.is_some()
         || rpm_learning.is_some()
         || nat_draft.is_some()
@@ -814,6 +818,44 @@ impl ser::SerializeStructVariant for Compound<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn admitted_backup_metadata_cannot_hit_warm_success_or_copy_foreign_payloads() {
+        let s = sources().remove(0);
+        let mut a = prepared(&s);
+        solve(&mut a, &s);
+        let good = a.clone();
+        let source = s.clone();
+        let raw: serde_json::Value =
+            serde_json::from_str(include_str!("../../../scenarios/file-backup-v1.json")).unwrap();
+        let lesson: dlms_learning_lab::file_backup_teaching::Lesson =
+            serde_json::from_value(raw["scenarios"][0]["file_backup_teaching"].clone()).unwrap();
+        let learning = dlms_learning_lab::file_backup_teaching::Learning::new(&lesson).unwrap();
+        assert!(learning.valid());
+        for corrupt_source in [false, true] {
+            let mut s = source.clone();
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            if corrupt_source {
+                s.file_backup_teaching = Some(lesson.clone());
+            } else {
+                a.workspace.as_mut().unwrap().file_backup_learning = Some(learning.clone());
+            }
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.meters, before.meters);
+            assert!(m.entries.is_empty());
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            if !corrupt_source {
+                assert!(!progress::current_solved(&a, &s));
+            }
+        }
+    }
+
     fn sources() -> Vec<Scenario> {
         crate::ui::tests::nfs_workspace::sources()
     }

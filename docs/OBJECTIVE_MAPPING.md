@@ -240,3 +240,21 @@ supporting instruction. Real RPC/discovery, daemons, trusted authentication,
 Kerberos, locking, client caches and durability/boot behavior remain absent. Numeric
 UID/group/root-squash practice is an ACCESS-style supplied-inventory model; it does
 not implement actual credential validation or a complete Linux open path.
+
+## M179 backup draft and registry bookkeeping boundary
+
+The bounded archive terminal now has tested outcome grading, isolated runnable
+teaching and whole-attempt persistence/admission. Four distinct authored backup
+assignments pass backend/content/alternate/negative/reset/readback tests but are
+not registered or native-accepted. All13 LPIC-2 206.2 references remain Open;
+their remaining columns now distinguish these drafts from missing directory/
+media/software/automation/dd/tape/mt/rsync requirements. No inherited tool credit,
+source fingerprint, status or implemented-scenario ID changes.
+
+The coverage checker now reads the exact static native bundle registry. An
+unregistered scenario file is reported separately and cannot satisfy practical
+evidence or inflate registered authored totals. Seven guards cover unsafe,
+dynamic, commented/quoted, duplicate and draft-only source cases. Current normal
+catalog154/39 and154Partial/1Supporting/1085Open are unchanged. A registry entry
+alone still does not prove behavior or teaching quality; the runtime/content and
+native evidence gates remain mandatory.

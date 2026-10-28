@@ -114,6 +114,17 @@ impl Memo {
         total_cap: usize,
         entries: usize,
     ) {
+        if s.file_backup_teaching.is_some() {
+            self.entries.retain(|e| e.id != s.id);
+            self.bytes = self.entries.iter().map(|e| e.charge).sum();
+            self.frame(&s.id, false);
+            self.fallback(
+                &s.id,
+                vec![(false, "Backup teaching belongs to another activity".into())],
+                Vec::new(),
+            );
+            return;
+        }
         let (
             engine::State::RpmPackages {
                 simulation: initial,
@@ -248,6 +259,7 @@ impl Memo {
 }
 pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        file_backup_learning,
         nfs_session,
         nfs_learning,
         rpm_session: _,
@@ -313,6 +325,7 @@ pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || file_backup_learning.is_some()
         || nfs_session.is_some()
         || nfs_learning.is_some()
         || nat_draft.is_some()
@@ -656,6 +669,44 @@ impl ser::SerializeStructVariant for Compound<'_> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    #[test]
+    fn admitted_backup_metadata_cannot_hit_warm_success_or_copy_foreign_payloads() {
+        let s = lessons().remove(0);
+        let mut a = attempt(&s);
+        solve(&s, &mut a);
+        let good = a.clone();
+        let source = s.clone();
+        let raw: serde_json::Value =
+            serde_json::from_str(include_str!("../../../scenarios/file-backup-v1.json")).unwrap();
+        let lesson: dlms_learning_lab::file_backup_teaching::Lesson =
+            serde_json::from_value(raw["scenarios"][0]["file_backup_teaching"].clone()).unwrap();
+        let learning = dlms_learning_lab::file_backup_teaching::Learning::new(&lesson).unwrap();
+        assert!(learning.valid());
+        for corrupt_source in [false, true] {
+            let mut s = source.clone();
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(true));
+            let before = m.counters;
+            if corrupt_source {
+                s.file_backup_teaching = Some(lesson.clone());
+            } else {
+                a.workspace.as_mut().unwrap().file_backup_learning = Some(learning.clone());
+            }
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &s, false);
+            assert_eq!(m.prepared(&s.id), Some(false));
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.meters, before.meters);
+            assert!(m.entries.is_empty());
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            if !corrupt_source {
+                assert!(!progress::current_solved(&a, &s));
+            }
+        }
+    }
+
     fn lessons() -> Vec<Scenario> {
         pack::load_catalog(&[
             include_str!("../../../scenarios/linux-files-v1.json"),
