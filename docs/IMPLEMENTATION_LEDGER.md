@@ -3144,3 +3144,48 @@ Logs m153-private154-full-inclusive-r3, m153-private154-clippy-r1 and
 m154-main154-core-catalog-content/python-r2/coverage/palettes remain privately
 retained alongside every failed run. Full curriculum, Windows/macOS runtime,
 physical-reader and novice acceptance remain open. No public release.
+
+
+### M155–M156 scoped installed Fedora154 delivery (2026-10-27)
+
+Main00d69d3c09ea3ae050148ac421e2ec9556ae3716 is committed/pushed after the
+1974/0/0 inclusive gate. Privacy/scope review includes91 tracked paths, no private
+artifacts/progress/screens/credentials, and exact Rust/data/test/build equality
+to gatedbc39dba. Current-doc reviewa6993c59 confirms all three earlier findings
+fixed. Clean Main candidate release build2m44s passes Linux223 notices/source
+closure. ELF8b6861790f8371da789b6b6187a9484a00e14fe13cda13fa176ac4bce2f18fbb;
+archivebe6480590bd0dfa94092f8f50f883c34e4e4bcb478323b4e9161147d9749b540.
+
+Actual private installed lifecycle upgrades87121151e82e, validates desktop/content/
+identity from outside checkout, cleanly uninstalls/reinstalls and preserves exact
+separate synthetic original-nine progress bytes. Same regular installed ELF then
+passes serialized NFS4/4 (1752.93s/106captures), command-construction3/3
+(254.93s/72), NAT3/3 (697.81s/80), alignment(69.82s/72), ten quiet Wayland starts
+0.865–0.916s, one traced Wayland start and script/DHCP actual two-process reopening
+33.08s/52.85s. All eight guarded processes exit0 and wrapper26053 is reaped.
+Final actual NFS captures include supplied IPv4/profile givens, required Write
+editors open by default and shorter optional inventory caption. Wrong, partial,
+reference/twoalternatives, success invalidation/repair, separate examples, full
+warm raw/portable/receipt readback, reset and Challenge all remain exercised.
+Actual NFS/NAT/alignment windows1920x1080 and946x929; scripting946x929. Never
+substitute a requested viewport for observed dimensions. All330 captures indexed;
+Root reviews representative new tasks/alignment, independent25NFS/21Bash frames.
+
+Two nonblocking presentation follow-ups: selected passing script input can show
+equal expected/actual under overall failure while per-case list correctly rejects
+other inputs; NFS horizontal scrollbar can offset adjacent Save rows. Neither is
+a grading pass. A suspected200% label overflow is withdrawn after actual full
+image review, with original observation retained. Optional expanded NFS inventory
+not visually reviewed; source/event tests verify its data. New-seven resume is
+warm, distinct from original script/DHCP cold checks. No novice, physical-device,
+screen-reader, Windows/macOS or complete-curriculum acceptance is inferred.
+
+Private final receipt reviews/catalog154/installed-00d-acceptance-r1/RESULT.json
+SHAeab3b0c281d070e0bce5e63cd05807650daf686815c925b1d69e176ba4590ca6.
+Peer NFS4be18e2a/Basha3f830f8 ACK representative renders with explicit limits.
+Build minimum21.76GiB available, installed checks minimum23.79GiB, PSI0/OOM0;
+all2jobs/2threads/sharedlock/disk backed. The earlier focused MAIN check briefly
+recorded PSI avg10 of0.18%, without sustained pressure/OOM; no global zero-pressure
+claim or memory guarantee. No other app/desktop/GPU/swap/service/model changes,
+new dependency, discarded diagnostics, CI dispatch or public release. Full
+curriculum154Partial/1Supporting/1085Open of1240 remains incomplete.

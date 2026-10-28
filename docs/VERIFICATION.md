@@ -6,9 +6,15 @@ source, including all14 retained-history checks; all-target Clippy passes. Main'
 Rust app, catalog, Rust tests and assets are byte-identical to that gated tree.
 A workflow test additionally verifies the current39 units against exact old37 and
 new2 objects; all215 Python checks pass separately on the integrated source.
-Baseline real-native flows pass for all seven new tasks. Final polished154 Fedora
-packaging and installed verification remain pending. Exact identities, failed and
-successful logs and scope are in CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
+Final real-native installed flows pass for all seven new tasks (178 captures),
+plus three NAT tasks80 captures, shared alignment72, ten quiet/one traced Wayland
+starts, actual script/DHCP cold reopening and installer lifecycle/legacy-byte
+retention. Exact candidate00d69d3/ELF/archive identity is in INSTALLATION.md.
+Two nonblocking UI follow-ups remain: selected-pass script comparison under overall
+failure, and an NFS scrollbar-related Save-row offset. New-seven resume is full
+warm readback; expanded optional inventory/novice/physical-reader acceptance is
+not inferred. Root and independent peers reviewed representative native frames.
+Exact identities, failed and successful logs and scope are in CHECKPOINT.md, IMPLEMENTATION_LEDGER.md and
 INSTALLATION.md. Shell behavior is evaluator10 and the current SHELL_SUBSET.md;
 older capability lists below are historical. MIT for original code/curriculum is
 approved; all third-party notices remain, with macOS dispatch redistribution open.

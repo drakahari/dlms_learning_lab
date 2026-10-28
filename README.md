@@ -1,6 +1,6 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop prototype for networking, Linux administration and scripting. **154 authored assignments in development:**45 CCNA,32 LPIC-1,28 LPIC-2 and49 Bash/Shell in39 source units. The latest source batch adds four [NFS assignments](docs/NFS_LESSONS.md) and three [command-construction scripting assignments](docs/SHELL_COMMAND_VECTOR_LESSONS.md), retaining full tasks, separate practice and optional guidance. Source, native and packaged acceptance are tracked separately in [the implementation ledger](docs/IMPLEMENTATION_LEDGER.md) and [installation evidence](docs/INSTALLATION.md); the154-lab Fedora candidate remains pending packaged verification. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop prototype for networking, Linux administration and scripting. **154 authored assignments in development:**45 CCNA,32 LPIC-1,28 LPIC-2 and49 Bash/Shell in39 source units. The latest source batch adds four [NFS assignments](docs/NFS_LESSONS.md) and three [command-construction scripting assignments](docs/SHELL_COMMAND_VECTOR_LESSONS.md), retaining full tasks, separate practice and optional guidance. Source, native and packaged acceptance are tracked separately in [the implementation ledger](docs/IMPLEMENTATION_LEDGER.md) and [installation evidence](docs/INSTALLATION.md); the154-lab Fedora candidate passes scoped installed verification, with two documented UI follow-ups. Illustrative practice, **not full exam coverage**. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified Fedora candidate
 
@@ -8,7 +8,7 @@ From this checkout, no build tools are needed to open the prepared candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gddb886b4d418-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
@@ -47,8 +47,13 @@ construction, approved transformation dispatch and review-before-publication.
 Networking tasks keep editors and explicit virtual operations; scripting tasks
 keep editable scripts and bounded execution against multiple sample inputs.
 Alternative valid solutions, useful wrong/partial feedback and resumed drafts
-remain part of the work. Packaged Fedora verification for this batch is pending;
-no Windows/macOS runtime, novice or assistive-device acceptance is implied.
+remain part of the work. Installed Fedora verification passes all seven new flows,
+three NAT flows,72 alignment captures,11 Wayland starts and script/DHCP cold
+reopening. This is scoped milestone evidence; full curriculum, Windows/macOS
+runtime, novice and assistive-device acceptance remain open. A selected passing
+script case can show equal expected/actual under overall failure; select a failing
+case to compare it. NFS scrollbars can offset adjacent Save rows. Grading remains
+state/behavior based; these UI follow-ups remain recorded in the checkpoint.
 
 The source now includes four [static-web configuration assignments](docs/STATIC_WEB_LESSONS.md)
 and three [reliable-text scripting assignments](docs/SHELL_SAFE_AUTOMATION_LESSONS.md).

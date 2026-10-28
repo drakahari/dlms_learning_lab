@@ -153,8 +153,8 @@ controls and exact named Linux tools remain Open. K8 remains Open: an implicit
 directory-slash redirect does not teach configurable Redirect statements.
 Current LPI objectives/version and Apache references were rechecked2026-10-26;
 all1240 source fingerprints/positions and future Cisco rows remain unchanged.
-Source inventory140/35=42CCNA/28LPIC-1/24LPIC-2/46Bash; latest accepted installed
-Fedora catalog is now140/35 at ddb886b after the final same-ELF candidate gates. Overlapping
+At that historical milestone, source inventory140/35=42CCNA/28LPIC-1/24LPIC-2/46Bash
+and accepted installed Fedora catalog140/35 at ddb886b passed its same-ELF gates. Overlapping
 144Partial/1Supporting/1095Open is not a completion percentage. The three reliable
 text scripts add real practice but no new issuer-row or universal POSIX claim.
 
@@ -169,14 +169,16 @@ pass actual Fedora Introduction → separate practice → full assignment flows,
 including wrong/partial answers, two alternatives each, success invalidation,
 warm save/resume/reset, Challenge and observed 100%/150%/200% light/dark screens.
 The complete native run captured 80 private PNGs. Main integration passes 45
-scoped UI checks; packaged and cold-process acceptance remain pending.
+scoped UI checks. Installed154 candidate00d69d3 now passes all three NAT flows
+(80 captures). NAT-specific cold-process acceptance remains pending; original
+script/DHCP cold checks are distinct. See INSTALLATION.md for exact artifact identity.
 
 Current CCNA v1.1 objective 4.1 receives **Partial practice** for this bounded
 inside-source static/pool model. It does not implement IOS CLI/interface setup,
 PAT, ports, sessions, routing, connectivity or real packets. All issuer source
 fingerprints remain unchanged; the separate future-blueprint plan receives no
-credit. The accepted NAT run used 143 assignments in 36 units; current source has
-147 assignments in37 units after the four RPM additions. Current source now has
+credit. The initial accepted NAT run used143 assignments/36 units, followed by147/37
+after four RPM additions. Current source and scoped installed candidate now have
 154 assignments/39 units after the NFS and scripting additions. Current coverage totals
 are 154 Partial, 1 Supporting and 1085 Open overlapping references, not percentages
 or completed certification objectives.
@@ -212,9 +214,12 @@ and a two-share capstone preserving unrelated vault state. Each uses a native
 configuration workspace and independent practice rather than host NFS execution.
 Current and independent new-mount checks distinguish actual files/mounts from saved
 policy, recognize correct alternatives, reject wrong/partial repairs and invalidate
-broken-again success. Technical gates are recorded in IMPLEMENTATION_LEDGER.md; final polished154
-packaged acceptance and its build identity remain pending in INSTALLATION.md.
-This paragraph alone is not acceptance evidence.
+broken-again success. Installed154 candidate00d69d3 passes all four final NFS
+flows (106 captures), alongside lifecycle/legacy-byte retention checks; technical
+gates and exact build identity are in IMPLEMENTATION_LEDGER.md/INSTALLATION.md.
+New-NFS resume is full warm readback, not four cold-process checks. Expanded
+optional inventory/novice/screen-reader/other-platform acceptance is not inferred.
+This paragraph alone is not acceptance evidence or broader objective credit.
 
 Only209.2,209.2.K1,209.2.K3 and209.2.K4 receive Partial practice for those bounded
 config-file-grammar, supplied-client restriction and mount-option slices. K3 credits

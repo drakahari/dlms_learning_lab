@@ -116,6 +116,11 @@ the replacement client after handover. Native acceptance and artifact identities
 are recorded in [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md) and
 [INSTALLATION.md](INSTALLATION.md); test descriptions alone are not acceptance.
 
-**The154-lab Fedora candidate is pending packaged verification.** Development
-runs do not establish clean installation, packaged behavior, Windows/macOS
-runtime, screen-reader or novice acceptance. No public release is published.
+**Installed Fedora candidate00d69d3 passes all four final NFS flows**,106 captures,
+including visible supplied IPv4 rows, default-open required Write editors and the
+shorter optional inventory caption. Lifecycle and exact synthetic legacy-byte
+retention also pass; see INSTALLATION.md for identities. New-task resume is full
+warm readback, not four cold-process tests. Optional expanded inventory was not
+visually reviewed; a horizontal editor scrollbar can offset adjacent Save rows.
+Windows/macOS runtime, screen-reader and novice acceptance remain pending.
+No public release is published.

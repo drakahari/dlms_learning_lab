@@ -116,7 +116,12 @@ Acceptance evidence includes independent source/content review, behavior and
 persistence regressions, fixed controlled Bash/Coreutils comparisons in disposable
 development fixtures, and actual native introduction/example/assignment/error/
 repair/reset/resume/Challenge flows at100/150/200 text with light/dark themes.
-Read the verification documents for which builds and flows were actually tested. Windows/macOS runtime, physical screen-reader
+Installed Fedora candidate00d69d3 passes all three final flows,72 captures, with
+separate example/assignment drafts, real Run/Stop and warm full progress readback.
+One feedback-selection issue remains: a selected passing case can show equal
+expected/actual beneath overall failure; the case list and grading correctly
+reject failing inputs. Select a failing case to inspect its difference.
+Read INSTALLATION.md for exact build identities and limits. Windows/macOS runtime, physical screen-reader
 and novice comprehension remain separate pending acceptance. Do not count source
 or automated tests as those observations.
 

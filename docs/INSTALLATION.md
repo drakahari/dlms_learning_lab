@@ -4,36 +4,53 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current scoped Fedora candidate: **ddb886b4d418**,140 authored labs/35 units
-(42CCNA,28LPIC-1,24LPIC-2,46Bash). Open directly from any terminal directory:
+Current scoped Fedora candidate: **00d69d3c09ea**,154 authored labs/39 units
+(45CCNA,32LPIC-1,28LPIC-2,49Bash). Source commit
+`00d69d3c09ea3ae050148ac421e2ec9556ae3716` is pushed; the following
+delivery-documentation commit does not change this executable. Open from any
+terminal directory, including your home directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gddb886b4d418-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-The same installed ELF passes upgrade from d781/uninstall/reinstall/desktop
-validation and exact synthetic original-nine progress retention; eleven normal
-Wayland starts; actual two-process script/DHCP reopening;72 shared alignment
-captures; and all seven new lesson flows (68 static-web and72 scripting captures).
-The earlier133 candidate separately passed all eight package/STP flows; those are
-not claimed repeated in this installed pass. Representative100/150/200% light/dark
-renders, fields/columns/focus/feedback reviewed. Apache/alignment measured946x929
-and1920x1080; scripting measured946x929 even when a wider size was requested.
-No diagnostic backend override, desktop changes or personal-progress inspection.
-Technical synthetic inputs are not novice, physical-device, screen-reader or
-other-platform acceptance. New-seven resume uses exact warm raw/portable/receipt
-readback; script/DHCP cold reopening is a distinct actual two-process check.
+The actual installed regular executable passes upgrade from87121151e82e, clean
+uninstall/reinstall, desktop validation, outside-checkout identity/content checks
+and exact synthetic original-nine progress-byte retention. The same ELF passes
+all four new NFS lesson flows106 captures, all three new scripting flows72, all
+three NAT flows80, and shared alignment72 captures. Wrong/partial/reference/two
+alternative solutions, current-success invalidation, isolated examples, warm full
+raw/portable/receipt readback, reset and Challenge are exercised. Actual light/dark
+100/150/200% screens were reviewed. NFS/NAT/alignment measured1920x1080 and946x929;
+scripting measured946x929 even where wider sizes were requested. Requested window
+sizes are not acceptance evidence. Independent render reviews viewed25NFS/21Bash
+frames; Root also inspected representative networking/alignment screens. All330
+flow/alignment captures are indexed, not claimed all individually viewed.
 
-ELF SHA-256: `90690062330eaa4b4a946c6eaaa282b5e221c42f770f672155025afbc24d0dc8`.
-Archive SHA-256: `bb1c89b52c1d5b043b2fb7fbdf542c73e3cf86910915723b4417aa3978f756ea`.
-Private accepted receipt: reviews/catalog140/installed-ddb-acceptance-r1/RESULT.json,
-SHA-256 `88d8434c189936113ba68dc5b9baaba038b364e60fca90850bab692dd0a2c2c8`.
-Linux223 notices and exact source archives passed the candidate gate. This is an
-unsigned development milestone with incomplete curriculum/platform acceptance.
-The retained d781 candidate failed the scripting Stop capture; it is not relabeled
-accepted. Its replacement changes only exact capture Run-acknowledgement pacing,
-with an actual-frame regression; normal execution and budgets are unchanged.
-Historical acceptance entries below retain their own identities.
+Ten quiet Wayland launches/readbacks pass0.865–0.916s; one separately traced
+Wayland launch passes. Eleven successes do not prove intermittent failure
+impossible. Actual two-process original script/DHCP reopening also passes.
+New-seven resume is warm readback, not seven cold-process tests. Expanded optional
+NFS inventory was source/event tested but not visually reviewed in this pass.
+These are synthetic technical checks, not novice, physical-device, screen-reader
+or Windows/macOS runtime acceptance. No desktop/backend override or personal
+progress inspection. All28 palettes remain; installed visual sampling is light/dark.
+
+Two nonblocking UI follow-ups remain: script output comparison can show the
+selected passing case while other cases fail (the per-case list and grading are
+correct; select a failing input to compare it), and an NFS editor scrollbar can
+offset adjacent Save rows. This is not full curriculum or perfect UX acceptance.
+
+ELF SHA-256: `8b6861790f8371da789b6b6187a9484a00e14fe13cda13fa176ac4bce2f18fbb`.
+Archive SHA-256: `be6480590bd0dfa94092f8f50f883c34e4e4bcb478323b4e9161147d9749b540`.
+Archive: `dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate.tar.gz`.
+Private receipt: reviews/catalog154/installed-00d-acceptance-r1/RESULT.json,
+SHA-256 `eab3b0c281d070e0bce5e63cd05807650daf686815c925b1d69e176ba4590ca6`.
+Linux223 dependency notices and exact source archives pass the candidate gate.
+All work used the shared two-job/two-thread runner and disk-backed artifacts.
+Build minimum21.76GiB available; installed checks minimum23.79GiB, PSI0/OOM0.
+Those observations are not a memory reservation or stress-test guarantee.
+No release or new cross-platform runtime acceptance. Older candidates remain intact.
 
 Extract the candidate archive. Open a terminal in its extracted folder and run:
 
@@ -784,5 +801,39 @@ Sidecar hashes and bounded embedded BUILD_INFO revision checked without running
 or extracting those applications. Private receipt reviews/ci-7dde3e4-candidates-r1.
 Actual Windows/macOS install/reopen/upgrade/uninstall, keyboard/scaling/accessibility
 and OS-security acceptance remain pending. No signing credentials were generated,
-no security policy bypassed and no release published. The actual installed Fedora
-accepted command at the top remains ddb886b, with its separate checksum/evidence.
+no security policy bypassed and no release published. At that milestone, the installed Fedora
+accepted command was ddb886b; its separate checksum/evidence remains historical.
+
+
+## Historical140 acceptance record
+
+Historical140 scoped Fedora candidate: **ddb886b4d418**,140 authored labs/35 units
+(42CCNA,28LPIC-1,24LPIC-2,46Bash). Open directly from any terminal directory:
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gddb886b4d418-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+The same installed ELF passes upgrade from d781/uninstall/reinstall/desktop
+validation and exact synthetic original-nine progress retention; eleven normal
+Wayland starts; actual two-process script/DHCP reopening;72 shared alignment
+captures; and all seven new lesson flows (68 static-web and72 scripting captures).
+The earlier133 candidate separately passed all eight package/STP flows; those are
+not claimed repeated in this installed pass. Representative100/150/200% light/dark
+renders, fields/columns/focus/feedback reviewed. Apache/alignment measured946x929
+and1920x1080; scripting measured946x929 even when a wider size was requested.
+No diagnostic backend override, desktop changes or personal-progress inspection.
+Technical synthetic inputs are not novice, physical-device, screen-reader or
+other-platform acceptance. New-seven resume uses exact warm raw/portable/receipt
+readback; script/DHCP cold reopening is a distinct actual two-process check.
+
+ELF SHA-256: `90690062330eaa4b4a946c6eaaa282b5e221c42f770f672155025afbc24d0dc8`.
+Archive SHA-256: `bb1c89b52c1d5b043b2fb7fbdf542c73e3cf86910915723b4417aa3978f756ea`.
+Private accepted receipt: reviews/catalog140/installed-ddb-acceptance-r1/RESULT.json,
+SHA-256 `88d8434c189936113ba68dc5b9baaba038b364e60fca90850bab692dd0a2c2c8`.
+Linux223 notices and exact source archives passed the candidate gate. This is an
+unsigned development milestone with incomplete curriculum/platform acceptance.
+The retained d781 candidate failed the scripting Stop capture; it is not relabeled
+accepted. Its replacement changes only exact capture Run-acknowledgement pacing,
+with an actual-frame regression; normal execution and budgets are unchanged.
+Historical acceptance entries below retain their own identities.

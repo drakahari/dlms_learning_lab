@@ -6,19 +6,34 @@ No public release. All ordinary milestones may continue without routine approval
 
 ## Verified application and next actions
 
-Main working source now has **154 authored labs /39 units: CCNA45, LPIC-1 32,
-LPIC-2 28, Bash49** after a gated squash integration, not yet committed at this
-entry. Private final sourcebc39dba passes COMPLETE all-target --include-ignored
-**1974PASS/0FAIL/0ignored across150 harnesses** and all-target Clippy21.99s.
-Main Rust app/catalog/Rust tests/assets/build inputs are byte-identical to that
-source; fresh exclusive MAIN target passes115 core/catalog/content checks including
-its retained checks. Main Python215, coverage154Partial/1Supporting/1085Open of1240
-and all28 palette checks PASS. One current-unit Python test was corrected37→39
-and strengthened with SHA-pinned full old37/new2 object equality; original43
-scripts/282cases and actual capture inputs remain immutable. No producer changed.
-Final integration documentation/privacy/source review is finishing. Next commit
-and push the scoped code, then build and VERIFY the real Fedora candidate.
-Do not treat source gates or the prior147 candidate as154 packaged acceptance.
+Main source commit **00d69d3c09ea3ae050148ac421e2ec9556ae3716** is pushed.
+It contains154 authored labs/39 units:45CCNA/32LPIC-1/28LPIC-2/49Bash. The seven
+new tasks were integrated ONLY AFTER privatebc39dba passed all-target inclusive
+1974PASS/0FAIL/0ignored across150 harnesses and all-target Clippy. Main Rust app,
+catalog, Rust tests/assets/build inputs match that gated source; fresh MAIN115
+focused checks, Python215, coverage154Partial/1Supporting/1085Open of1240 and
+all28 palette checks PASS. The one current-unit Python consumer was strengthened
+with exact SHA-bound old37/new2 unit objects; original capture inputs stay exact.
+
+Fedora candidate **00d69d3c09ea** now passes scoped INSTALLED acceptance.
+The same ELF passes lifecycle/upgrade from87121151e82e/uninstall/reinstall/desktop/
+legacy-byte retention; all four NFS106 and three scripting72 native flows; all
+three NAT80 flows; alignment72;10 quiet+1 traced Wayland launches; and original
+script/DHCP actual two-process reopening. Quiet starts0.865–0.916s. All330 flow/
+alignment PNGs indexed; representative Root and25NFS/21Bash peer render reviews.
+NFS/NAT/alignment measured1920x1080 and946x929; scripting946x929. Final required
+Write/supplied-IP/short-caption improvements are in this actual package.
+
+Two nonblocking UI follow-ups remain: script comparison can display the selected
+passing case beneath overall failure (per-case failures/grading are correct;
+select a failing input), and an NFS editor scrollbar can offset Save rows. No
+clipping blocker was established in the reviewed200% labels; an initial suspected
+overflow was withdrawn after full-image re-review. New-seven resume is warm full
+readback, not seven cold tests. Optional expanded NFS inventory was not visually
+reviewed. Full curriculum, other-platform/reader/novice acceptance stay open.
+No release. Exact hashes/scope are in INSTALLATION.md and private receipt
+reviews/catalog154/installed-00d-acceptance-r1/RESULT.json,
+SHAeab3b0c281d070e0bce5e63cd05807650daf686815c925b1d69e176ba4590ca6.
 
 ### Earlier147 candidate baseline (historical)
 
@@ -35,26 +50,26 @@ not percentages. Windows/macOS, physical reader and novice acceptance stay open.
 
 ### Immediate continuation
 
-1. NO active heavy command. Final privatebc39dba inclusive1974 and Clippy PASS;
-   all seven baseline native flows PASS (3Bash72 +4NFS106 captures). Current
-   polishing includes short inventory caption, task-required Write editors open
-   by default, and correct supplied IPv4/profile givens. Entire NFS UI18 PASS.
-   Strict given-selection test originally failed when its down-only scanner looked
-   above the viewport; actual selection was correct. Existing bounded real selector
-   reveal fixes the TEST route, without relaxing visibility/font/20-scroll checks;
-   stronger default-versus-persisted selection assertions and raw receipt equality
-   remain. Every failed diagnostic is retained, never reclassified as a pass.
-   Final whole-suite log m153-private154-full-inclusive-r3.log; Main focused
-   m154-main154-core-catalog-content115PASS, PythonR2 215PASS, palette/coverage PASS.
-   Squash is staged in MAIN, docs are being finalized; source code/data/Rust tests
-   remain EXACT privatebc39dba. Only tools/tests/test_automation_before10_oracle.py current-unit
-   consumer differs as documented above. Independent source reviews complete;
-   final docs/Python review is complete. Commit/push after scope/privacy review,
-   then tools/dev.py candidate. Rebuild from CLEAN MAIN only. Do not stop here.
-   Verify actual installed154 lifecycle/upgrade, full new7 native flows (including
-   final QA refinements), three NAT flows, alignment100/150/200 light/dark,
-   repeatedWayland launches and real script/DHCP cold reopening. Keep all older
-   artifacts; no public release. Windows/macOS/runtime/reader/novice remain open.
+1. NO heavy command active; wrapper26053 and every guarded child exited0/reaped.
+   Current source00d69d3 is pushed. Final delivery docs are being committed after
+   actual acceptance, without changing that ELF. Next ordinary work remains
+   authorized: correct the selected-case feedback presentation with real negative/
+   multi-case UI regressions, then continue the reviewed EtherChannel adapter
+   gates and remaining curriculum. Inspect the private adapter's latest frozen
+   manifest/review before integration; earlier history below is not an edit grant.
+   Do not count unbundled capabilities or planned tasks. Keep1240-reference map
+   honest;154Partial/1Supporting/1085Open is not a completion percentage.
+2. Actual installed candidate regular executable:
+   .build-artifacts/installations/verified-00d69d3c09ea-f3dkynwi/application/dlms-learning-lab.
+   ELF SHA8b6861790f8371da789b6b6187a9484a00e14fe13cda13fa176ac4bce2f18fbb.
+   Candidate/archive are in dist/ under exact00d69d3c09ea name below. Final gate
+   logs m153/m154/m155/m156 and all failed runs remain private; no cleanup grant.
+   Main2jobs/2threads/shared-lock/disk workflow stays mandatory. Build minimum
+   available21.76GiB, installed checks23.79GiB; PSI0/OOM0 in those runs.
+3. Windows/macOS actual desktop acceptance, physical reader and novice acceptance
+   remain pending. macOS dispatch original-notice provenance remains a packaging
+   blocker; finish independent work rather than inventing a notice or credentials.
+   MIT originals are owner-approved. No public release.
 
 ### Superseded integration notes (historical, not active instructions)
 
@@ -116,10 +131,9 @@ heavy command. Current logs/evidence live under ignored .build-artifacts/.
 
 Development launch from any terminal directory:
 `"$HOME/Documents/dlms_learning_lab/target/debug/dlms-learning-lab"`
-Fully scoped installed-accepted140 remains in INSTALLATION.md until the final154
-packaged scope passes; the currently available147 launch is:
-`"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g87121151e82e-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"`
-Do not confuse source/catalog availability with packaged proof.
+Scoped INSTALLED-verified154 launch from any terminal directory:
+`"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g00d69d3c09ea-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"`
+Old140/147 artifacts/evidence remain preserved; no whole-product completion claim.
 
 ## Mandatory safety on resume
 

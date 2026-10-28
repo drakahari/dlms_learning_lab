@@ -6,14 +6,18 @@ evidence ledger, not complete exam preparation. Main has **154 authored assignme
 /39 units:45CCNA,32LPIC-1,28LPIC-2,49Bash/Shell**. The latest two units contain
 three distinct safe-command scripting tasks and four NFS configuration tasks.
 Generated numerical practice and developer-only synthetic entries are excluded.
-Complete inclusive regression passes1974/0/0; packaged154 acceptance is pending.
+Complete inclusive regression passes1974/0/0. Installed Fedora candidate00d69d3
+passes scoped new-seven/NAT/alignment/lifecycle/startup/reopen verification; exact
+identity and two nonblocking UI follow-ups are in INSTALLATION.md.
 
-Three Basic NAT lessons have complete development-native Fedora flows; their
-packaged acceptance remains pending. Four RPM lessons have complete development
-AND installed147 native flows, including separate practice, alternate solutions,
-wrong/partial work, invalidation, reset/resume and scaling. Current147 candidate
-87121151e82e also passes lifecycle,11startups, real script/DHCP reopening and72
-shared alignment captures. Prior140 candidate ddb886b retains its scoped accepted
+Three Basic NAT lessons now have complete installed154 Fedora flows80 captures;
+the four NFS106 and three command-construction scripting72 flows pass on that
+same ELF. New-seven resume is full warm readback, not seven cold-process tests.
+Four RPM lessons separately passed development AND installed147 native flows,
+including separate practice, alternatives, wrong/partial work, invalidation,
+reset/resume and scaling; those flows were not repeated on154. Earlier147
+candidate87121151e82e retains its lifecycle/startup/reopen/alignment evidence.
+Prior140 candidate ddb886b retains its scoped accepted
 new-seven/static-web/safe-text evidence; it is not evidence for later units.
 No candidate/test count establishes complete curriculum or novice/platform mastery.
 See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
