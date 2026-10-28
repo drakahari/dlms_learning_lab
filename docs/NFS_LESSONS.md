@@ -128,3 +128,16 @@ warm readback, not four cold-process tests. Optional expanded inventory is not
 newly visually reviewed. Windows/macOS runtime, screen-reader/physical-device and
 novice acceptance remain pending. Previous00d scrollbar evidence is historical.
 No public release is published.
+
+### Source continuation: actual cold-process validation — 2026-10-28
+
+The guarded development tool now supports the closed `--case nfs` fixture. Two
+normal GUI processes share a newly created private profile: save actual applied
+policy/mounts/files plus independent unfinished assignment/example documents,
+fully exit, relaunch, compare all raw/portable/provenance/appearance fields, then
+repair both drafts through native editors and check their real goals. FinalR3
+passes with12 retained captures. It does not access personal progress or host NFS.
+The original installed9a90f275e133 candidate predates this fixture; final installed
+acceptance must repeat it on the rebuilt curriculum candidate. Exact scopes and
+retained failures are in M168 of IMPLEMENTATION_LEDGER.md. This changes validation,
+not NFS capability, authored lab count or certification credit.

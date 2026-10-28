@@ -276,13 +276,13 @@ def publish_manifest(session, report):
 
 
 def session_marker(session, temporary, nonce, case='script'):
-    require(case in ('script', 'dhcpv4'), 'Fixed script/dhcpv4 case only')
+    require(case in ('script', 'dhcpv4', 'nfs'), 'Fixed script/dhcpv4/nfs case only')
     require(re.fullmatch(r'[0-9a-f]{32}', nonce) is not None, 'Fixed marker nonce')
     marker = {'version': 1, 'purpose': PURPOSE, 'root': str(session),
               'temporary_root': str(temporary), 'nonce': nonce}
     # Preserve the exact legacy marker shape when the new case is not requested.
-    if case == 'dhcpv4':
-        marker['case'] = 'dhcpv4'
+    if case in ('dhcpv4', 'nfs'):
+        marker['case'] = case
     return marker
 
 
@@ -314,7 +314,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument('--app', required=True, type=Path)
     parser.add_argument('--output', type=Path)
-    parser.add_argument('--case', choices=('script', 'dhcpv4'), default='script')
+    parser.add_argument('--case', choices=('script', 'dhcpv4', 'nfs'), default='script')
     args = parser.parse_args()
     require(os.name == 'posix' and Path('/proc/self/fd').is_dir(), 'Fixed Linux native acceptance only')
     temporary = checked_directory(Path(os.environ.get('TMPDIR', '')))
@@ -363,7 +363,7 @@ def main():
         else:
             loaded = json.loads(read_bytes(session / 'reader-loaded.json', JSON_CAP))
             require(loaded == expected, 'Second process did not load the exact writer observation')
-            if args.case == 'dhcpv4':
+            if args.case in ('dhcpv4', 'nfs'):
                 verify_repaired_reader(session, expected)
     require(len(phases) == 2 and phases[0]['pid'] != phases[1]['pid'], 'Expected two distinct GUI processes')
     require(pin(app, BINARY_CAP) == before, 'Executable changed during native acceptance')
@@ -376,6 +376,13 @@ def main():
                            'Actual DHCP assignment/example exchanges, distinct unfinished policy drafts, '
                            'current leases, favorite and appearance survive cold load, then actual field repairs '
                            'and checks. No injected State, host DHCP, novice or other-platform acceptance.')
+    elif args.case == 'nfs':
+        report['case'] = 'nfs'
+        report['scope'] = ('Two real normal GUI processes share one fresh private XDG profile. '
+                           'Actual NFS editor/Save/Apply/Mount/Read operations, separate practice, '
+                           'distinct unfinished exports drafts, current mounts/files, favorite and appearance '
+                           'survive cold load. Reader repairs through native editors and rechecks both goals. '
+                           'No injected State, host NFS, novice or other-platform acceptance.')
     publish_manifest(session, report)
     try:
         print(f'PASS native cold-process reopen: {session}', flush=True)

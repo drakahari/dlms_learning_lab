@@ -1,5 +1,48 @@
 # Implementation continuation checkpoint
 
+## Active full-curriculum continuation — 2026-10-28
+
+Owner renewed the complete implementation task after4bc390a. Do not stop at a
+small batch/report or count a Fedora candidate as curriculum completion. Reconcile
+all recorded requirements; no arbitrary final lab count. Current inventory is
+still154/39 (45CCNA/32LPIC-1/28LPIC-2/49Bash). See
+[CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md): all136 current parent
+objectives and every1240 granular reference remain explicit; future29 CCNA rows
+stay separate. No objective promotion or source fingerprint change.
+
+MAIN M168 implements a closed NFS two-process case in the existing guarded native
+reopen tool. Relevant17 Rust reopen and7 shared-UI regressions,216Python, all-target
+Clippy and development build pass. Final actual nativeR3 passes two distinct fully
+exited processes (writer75.764s/read32.098s),12PNGs revealing restored fields/results.
+Every portable in-memory field and the cold reader's full loaded provenance match
+saved data; negative clock/receipt mutations reject. Writer provenance remains a
+disk durability fact: Save intentionally does not stamp caller data. Both mounted
+state/files and separate unfinished drafts survive, and real editor repairs pass
+both goals. An occupied-mount refusal correctly caught a redundant repair fixture;
+repair changes only unfinished drafts and rereads the retained mount. No State or
+grade is injected. Exact evidence: .build-artifacts/tmp/native-reopen-nfs-m168-r3.
+All root wrappers reaped. The older9a90f275e133 installed candidate remains unchanged;
+this development-native proof is not yet acceptance on a new installed candidate.
+
+Cron foundation15/scoped Clippy pass and its grant is released. Current sole
+HEAVY GRANT belongs to ccna-lacp-154 worker for initial library/adapter/content/bin
+gates (first new content fixture rejected schema0; fix is explicit schema1, no
+relaxed decoder). Root must NOT launch another heavy invocation until that worker
+reports DONE and reaped sessions. Root can commit/push M168 and prepare actual10
+capture source while waiting; then KEEP IMPLEMENTING rather than ending here.
+
+Parallel source work is isolated: ccna-lacp-154 (reviewed LACP backend/native and
+three substantive tasks); bash-parameter-defaults-154 (faithful parameter fallback/
+alternate forms, evaluator11 isolated ONLY); linux-scheduling-154 (bounded Cronie
+calendar/access/execution foundation, then scheduling tasks). All use MAINrunner,
+exclusive worktree targets and shared lock; no concurrent heavy run. Root must
+capture genuine actual10 authored/example/legacy bytes BEFORE integrating11.
+No unintegrated source/fixture receives catalog or coverage credit. Continue the
+remaining curriculum tables after these ordinary batches; platform/novice/reader
+acceptance stays distinct. No release or unrelated-project/desktop changes.
+
+## Previous verified UI milestone — historical baseline
+
 2026-10-28. The requested two-issue UI milestone is verified on the installed
 Fedora candidate. No release is published. Full application/curriculum completion
 remains open; this checkpoint does not turn the candidate into that claim.

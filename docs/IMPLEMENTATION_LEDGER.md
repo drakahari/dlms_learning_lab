@@ -3337,3 +3337,47 @@ optional inventory not newly visually reviewed. NAT80 stays on00d; RPM/olderunit
 acceptance remains bound to originalELFs. All28 palettes retained; native themes
 sampled light/dark. macOS dispatchnotice and actualWindows/macOS acceptance stay
 open. No release. Exact runnable artifact and owner-install steps: INSTALLATION.md.
+
+### M168 renewed full-scope reconciliation and NFS cold reopening (2026-10-28)
+
+Owner explicitly renewed complete curriculum implementation after4bc390a; ordinary
+reviewed batches continue without routine approval or stopping at this checkpoint.
+CURRICULUM_RECONCILIATION.md inventories all154 authored labs/39 units and every
+current136 parent assignment, linking all1240 granular gaps. CCNA45/LPIC-1 32/
+LPIC-2 28/Bash49 remain unchanged; no target count, placeholder or unintegrated
+foundation becomes coverage. Current versions checked against official pages/PDF
+2026-10-28; normalized source fingerprints remain their actual2026-10-22 snapshot.
+Twenty-nine future CCNA rows stay separate. Corrected stale NAT/RPM packaged-
+acceptance and shell-scope/command-construction descriptions without changing any
+credited ID, objective status, source fingerprint or count.
+
+Closed `--case nfs` now exercises two normal native processes in a fresh private
+XDG profile. Writer actually edits/saves/applies/mounts/reads both independent
+practice and assignment, then leaves different unfinished exports drafts. It
+saves appearance/favorite, fully exits; reader loads every exact raw/portable/
+provenance/preferences field and actual mounted state/files, repairs only the
+unsaved documents through normal widgets and checks both goals. No injected State,
+record/grade or host NFS. Save intentionally never stamps caller provenance, so
+writer observes persisted receipts while reader additionally proves its actual
+in-memory receipt matches. Negative clock and receipt changes fail these guards.
+
+Final17 reopened-context Rust and7 shared-feedback/alignment regressions pass;
+216Python, all-target Clippy, coverage and development build pass. Existing tests
+are not weakened. Final actual nativeR3 writer75.764s/read32.098s, distinct PIDs,
+exit0/0,12 PNGs revealing fields/results. Exact source/log/memory/frame receipts:
+ignored reviews/nfs-cold-m168/RESULT.json SHA256
+`628b8fe073be9f893ca5b4b9e5144d2ff5c273222bfe6891c761692a6cd09860`.
+Minimum available22.54GiB, PSI0/OOMdelta0; shared runner2jobs/2threads/disk artifacts.
+Earlier failures/captures retained: generic-tab metrics did not match NFS-specific
+controls; the first repair fixture correctly hit an occupied-mount refusal. The
+fixed reader repairs unfinished drafts without remounting a retained mount. The
+final guard also strengthens complete actual portable/provenance comparison.
+
+This is development-native evidence, not acceptance on a newly installed ELF.
+Installed9a90f275e133 remains the prior scoped154 candidate. Repeat NFS cold flow
+on the final rebuilt installed candidate after curriculum work. Physical-device,
+screen-reader, novice and Windows/macOS desktop acceptance remain open. No release.
+LACP native/content, scheduling and shell parameters proceed in isolated worktrees;
+only the explicitly granted worker may hold the shared heavy-work lock. Capture
+genuine evaluator10 evidence before integrating evaluator11; do not invent old
+answers or relabel evaluator11 outcomes as10.

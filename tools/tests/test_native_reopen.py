@@ -276,6 +276,15 @@ class RawObservationGuards(unittest.TestCase):
 
 
 class DhcpCaseGuards(unittest.TestCase):
+    def test_nfs_case_is_explicit_closed_marker_and_old_script_wire_stays_exact(self):
+        root = Path('/controlled/.build-artifacts/tmp/native-reopen-nfs')
+        original = reopen.session_marker(root, root.parent, 'b' * 32)
+        self.assertNotIn('case', original)
+        self.assertEqual(reopen.session_marker(root, root.parent, 'b' * 32, 'nfs'),
+                         dict(original, case='nfs'))
+        for case in ['NFS', 'nfs-any-path', '../nfs', 'nfs;anything']:
+            with self.assertRaises(reopen.ReopenError):
+                reopen.session_marker(root, root.parent, 'b' * 32, case)
     def test_default_marker_is_old_wire_and_only_closed_dhcp_case_adds_one_field(self):
         root = Path('/controlled/.build-artifacts/tmp/native-reopen-case')
         expected = {'version': 1, 'purpose': reopen.PURPOSE, 'root': str(root),

@@ -1,6 +1,7 @@
 //! Fixed developer-only two-process reopen. Normal startup does all persistence.
 use super::*;
 mod dhcpv4;
+mod nfs;
 use serde::{Deserialize, Serialize};
 use std::{
     collections::BTreeMap,
@@ -28,6 +29,8 @@ enum Case {
     Script,
     #[serde(rename = "dhcpv4")]
     DhcpV4,
+    #[serde(rename = "nfs")]
+    Nfs,
 }
 #[derive(Clone)]
 pub(crate) struct Session {
@@ -357,6 +360,20 @@ impl Session {
         let preferences =
             theme::Preferences::load(&preferences_path).expect("actual normal saved appearance");
         assert_eq!(
+            serde_json::to_value(&disk).unwrap(),
+            serde_json::to_value(&app.progress).unwrap(),
+            "every portable in-memory learning field matches the persisted projection"
+        );
+        if self.role == Role::Read {
+            // Save deliberately never stamps caller provenance. The writer's
+            // disk receipt is a durability fact; the reader must actually load it.
+            assert_eq!(
+                serde_json::to_value(&disk.migration_receipts).unwrap(),
+                serde_json::to_value(&app.progress.migration_receipts).unwrap(),
+                "cold reader actually loaded every provenance receipt"
+            );
+        }
+        assert_eq!(
             serde_json::to_value(&disk.attempts).unwrap(),
             serde_json::to_value(&app.progress.attempts).unwrap()
         );
@@ -564,6 +581,10 @@ impl LabApp {
         let session = self.reopen.as_ref().unwrap().clone();
         if session.case == Case::DhcpV4 {
             self.reopen_dhcpv4_tick(ctx, &session);
+            return;
+        }
+        if session.case == Case::Nfs {
+            self.reopen_nfs_tick(ctx, &session);
             return;
         }
         let phase = self.smoke_stage - 17000;
@@ -891,6 +912,7 @@ impl LabApp {
                 assert!(match session.case {
                     Case::Script => NAMES.contains(&name.as_str()),
                     Case::DhcpV4 => dhcpv4::CAPTURES.contains(&name.as_str()),
+                    Case::Nfs => nfs::CAPTURES.contains(&name.as_str()),
                 });
                 assert!(
                     image
@@ -1309,6 +1331,114 @@ mod context_tests {
         assert!(rejected.is_err());
         assert!(a.progress.attempts.is_empty() && a.pending_events.is_empty());
         assert!(!root.path().join("writer-observed.json").exists());
+    }
+    #[test]
+    fn reopen_nfs_closed_case_and_actual_drafts_checks_survive_full_reload() {
+        let (root, env, cwd) = context();
+        let marker_path = root.path().join("REOPEN-SESSION.json");
+        let mut marker: Marker = serde_json::from_slice(&fs::read(&marker_path).unwrap()).unwrap();
+        marker.case = Some(Case::Nfs);
+        fs::write(&marker_path, serde_json::to_vec(&marker).unwrap()).unwrap();
+        let session = Session::from_config(false, true, &env, &cwd)
+            .unwrap()
+            .unwrap();
+        assert_eq!(session.case, Case::Nfs);
+        assert!(Session::from_config(true, true, &env, &cwd).is_err());
+        assert!(Session::from_config(false, false, &env, &cwd).is_err());
+        let ctx = egui::Context::default();
+        let (mut writer, _old_profile) = dhcp_app(&ctx, &session);
+        let s = writer
+            .scenarios
+            .iter()
+            .find(|s| s.id == "lpic2-nfs-reference")
+            .unwrap()
+            .clone();
+        let writer_finish = nfs::finish(&s, true);
+        assert_eq!(dhcp_until(&ctx, &mut writer, writer_finish), 7);
+        for _ in 0..2 {
+            dhcp_frame(&ctx, &mut writer);
+            assert_eq!(writer.smoke_stage, writer_finish);
+        }
+        let path = writer.path.clone();
+        let original = bounded_file(&path, 16_000_000).unwrap();
+        let expected: Observed = serde_json::from_slice(
+            &bounded_file(&root.path().join("writer-observed.json"), JSON_CAP).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(expected.progress["attempts"].as_object().unwrap().len(), 1);
+        let clock = writer.progress.clock;
+        writer.progress.clock += 1;
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| session.observed(&writer)))
+                .is_err()
+        );
+        writer.progress.clock = clock;
+        drop(writer);
+        let mut read_env = env.clone();
+        read_env.insert("DLMS_NATIVE_REOPEN_PHASE".into(), "read".into());
+        let next_session = Session::from_config(false, true, &read_env, &root.path().join("read"))
+            .unwrap()
+            .unwrap();
+        let next = egui::Context::default();
+        let (mut reader, _old_profile) = dhcp_app(&next, &next_session);
+        reader.progress = progress::load(&path, &reader.scenarios).unwrap();
+        let prefs = theme::Preferences::load(&path.with_file_name("preferences-v1.json")).unwrap();
+        reader.theme_id = prefs.theme;
+        reader.scale = prefs.text_scale;
+        let receipts = reader.progress.migration_receipts.take();
+        assert!(
+            receipts.is_some(),
+            "fresh main save has persisted provenance"
+        );
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(
+                || next_session.observed(&reader)
+            ))
+            .is_err()
+        );
+        reader.progress.migration_receipts = receipts;
+        assert_eq!(bounded_file(&path, 16_000_000).unwrap(), original);
+        let reader_finish = nfs::finish(&s, false);
+        assert_eq!(dhcp_until(&next, &mut reader, reader_finish), 5);
+        for _ in 0..2 {
+            dhcp_frame(&next, &mut reader);
+            assert_eq!(reader.smoke_stage, reader_finish);
+        }
+        let loaded: Observed = serde_json::from_slice(
+            &bounded_file(&root.path().join("reader-loaded.json"), JSON_CAP).unwrap(),
+        )
+        .unwrap();
+        assert_eq!(
+            loaded, expected,
+            "exact every-field reload, not a reconstructed grade"
+        );
+        let repaired: Observed = serde_json::from_slice(
+            &bounded_file(&root.path().join("reader-repaired.json"), JSON_CAP).unwrap(),
+        )
+        .unwrap();
+        assert_ne!(
+            repaired.progress, expected.progress,
+            "native edits actually repair independent drafts"
+        );
+        assert_eq!(repaired.migration_receipts, expected.migration_receipts);
+        assert_eq!(repaired.preferences, expected.preferences);
+        assert_eq!(
+            bounded_file(&root.path().join("writer-progress.raw"), 16_000_000).unwrap(),
+            original
+        );
+        let finish = reader.smoke_stage;
+        reader.smoke_stage = finish + 1;
+        assert!(
+            std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| dhcp_frame(
+                &next,
+                &mut reader
+            )))
+            .is_err()
+        );
+        assert_eq!(
+            bounded_file(&root.path().join("reader-loaded.json"), JSON_CAP).unwrap(),
+            serde_json::to_vec_pretty(&loaded).unwrap()
+        );
     }
     #[test]
     fn valid_private_context_uses_only_the_normal_contained_profile_names() {

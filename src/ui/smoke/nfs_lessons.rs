@@ -748,6 +748,41 @@ fn raw_field<'a>(a: &'a Attempt, practice: bool, k: &str) -> &'a str {
     }
 }
 impl LabApp {
+    // Reuse the same native action routing for the closed two-process fixture.
+    // This never installs State or bypasses editor/Save/Apply event handling.
+    pub(in crate::ui) fn nfs_reopen_action(
+        &mut self,
+        ctx: &egui::Context,
+        id: &str,
+        action: &core::Action,
+        practice: bool,
+    ) -> bool {
+        self.nf_action(ctx, id, action, practice, false, None)
+    }
+    pub(in crate::ui) fn nfs_reopen_check(&mut self, ctx: &egui::Context) -> bool {
+        self.nf_click(ctx, &Control::Button("check"))
+    }
+    pub(in crate::ui) fn nfs_reopen_try(&mut self, ctx: &egui::Context) -> bool {
+        self.nf_click(ctx, &Control::Try)
+    }
+    pub(in crate::ui) fn nfs_reopen_tab(&mut self, ctx: &egui::Context, tab: usize) -> bool {
+        let view = match tab {
+            1 => teaching::View::Example,
+            2 => teaching::View::Assignment,
+            _ => panic!("closed NFS tab"),
+        };
+        self.nf_click(ctx, &Control::Tab(view))
+    }
+    pub(in crate::ui) fn nfs_reopen_reveal(&mut self, ctx: &egui::Context, result: bool) -> bool {
+        self.nf_reveal(
+            ctx,
+            &if result {
+                Control::Row(0)
+            } else {
+                Control::Field("exports")
+            },
+        )
+    }
     pub(in crate::ui) fn nfs_lessons_stage(smoke: bool, name: Option<&str>) -> Option<usize> {
         (smoke && name == Some("nfs-lessons")).then_some(FIRST)
     }
