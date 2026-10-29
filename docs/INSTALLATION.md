@@ -4,7 +4,28 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current scoped Fedora candidate: **9a90f275e133**,154 authored labs/39 units
+Current local Fedora candidate: **c68399443270**,168 labs/43 units
+(48CCNA,36LPIC-1,32LPIC-2,52Bash). Source
+`c683994432708db908ef2a599dac63e3d53eecdc`. No new curriculum or platform
+completion claim follows from packaging. Open from any terminal directory:
+
+```sh
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gc68399443270-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+```
+
+The actual installed executable passes upgrade from9a90f275e133, identity/content/
+checksum and desktop-entry validation, clean uninstall/reinstall and exact
+synthetic original-nine progress-byte retention. Two fully exited NFS processes
+verify saved work/drafts, current mounts/files, preferences and full progress/
+receipts. Ten serialized Wayland launches pass ready/first-update/capture checks
+without timeout (0.915–0.966s); this finite test cannot prove intermittent failures
+impossible. Other combined-unit installed flows remain pending. See
+[FEDORA_C683_VERIFICATION.md](FEDORA_C683_VERIFICATION.md) for immutable build
+checksums and scope. Older candidate files and their evidence remain retained.
+
+### Historical154-lab installed milestone
+
+Retained earlier scoped Fedora candidate: **9a90f275e133**,154 authored labs/39 units
 (45CCNA,32LPIC-1,28LPIC-2,49Bash). Source commit
 `9a90f275e133655f981cd79dd49d93f5246d7377` contains the reviewed UI fixes and
 five-size verification. The later documentation-only commit does not change this

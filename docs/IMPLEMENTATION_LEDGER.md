@@ -3857,3 +3857,53 @@ candidate/lifecycle and exact installed NFS process-cold reopening remain next;
 old154candidate is not relabeled. Isolated VM12 actual48 comparisons pass with
 independent readback; numeric3/physical4/selection1/one-off model remain outside
 implemented count pending their gates. Continue the whole curriculum queue.
+
+## M213–M220 — current candidate, actual installed lifecycle/cold restoration
+
+2026-10-28. Pushed coherent168 implementationc683994(48/36/32/52 across43units),
+including real backup Stop/paused-admission/root-frame corrections; no original
+lab/test waiver. M213 registered coverage passes168/1240 with only seven narrow
+backup promotions; all136 full parents remain incomplete. M214 built clean Main
+Fedora candidatec683994, Linux notices/source gatePASS, ELFba094814/archive
+ff27c158. Available candidate is not curriculum completion or a public release.
+
+M215 actual controlled install/upgrade from9a90f275e133, hash/catalog/desktop
+validation, uninstall/reinstall and unchanged synthetic original-nine progress
+PASS. Installed root verified-c68399443270-tgfekb2q. M216 exact installed ELF:
+NFS writer/reader fully exited separately,75.584/30.680s, live state/current grading,
+unfinished assignment/practice drafts and complete Progress/receipts/preferences
+restore. Twelve actual images/five viewed, manifest390bb775. Ten serialized
+Wayland launches all reach ready/first-update/capture without timeout,0.915–0.966s;
+per-launch logs retained, existing startup tool retains only one final image.
+Combined receiptc22a8f97/startupce335fe9. Available memory>=23.08GiB,PSIavg10=0,
+OOMdelta0. Finite starts do not guarantee absence of future intermittent failures.
+
+M217–M219 isolated171 numeric content: catalog5/history6/case12 and content14
+checks PASS. Three new negative fixtures initially assumed unreachable code was
+executed or omitted the first case's stderr/status; corrected those programs only,
+retaining exact grader/cases/masks/assertions. Failed runs retained. Independent
+peerc03ac0b7 ACK; actual VM12 fixed48 Bash comparison and genuine evaluator11
+history remain separately pinned. No numeric curriculum count yet: full inclusive,
+native and Main gates still pending. Native101-shot proposal102f67de source-only.
+
+M220 installed Cron77 is still active at this entry. Root actually inspected its
+wrong capstone screen: overall needs-attention with individually labeled Pass and
+one Needs-work reason. Also narrowLight200 editor: focus outline and complete
+Remove button fit in its own wrapped row, with expected vertical scrolling. Final
+runtime/source-pinned receipt is required before claiming route acceptance. Exact
+installed optional132/LACP/new backup81 routes remain pending.
+
+CHECKPOINT.md is reconciled to current168/c683 actual evidence; contradictory
+transient older current-state notes are preserved in Git history, not presented as
+new state. Current source proposals remain excluded: physical4, numeric3, backup
+selection1, one-off foundation and private-subnet outcome. The whole agreed
+curriculum remains active; continue directly to tested integrations. Windows/macOS
+runtime, assistive-device/screen-reader and novice acceptance remain pending.
+
+M220 final receipt1a9f79c6e03e9b9ca6f490d074afaad64bbb3ed25d4178d2e92293862852111c:
+installed Cron FULLYREAPEDexit0,77actual captures/40measured matrix on calendar
+handover task,56wide/21narrow;14actual images viewed by worker/two additionally
+Root. Both200%narrow Remove buttons fit; Pass/Needs-work literal labels readable.
+843.44s/844memorysamples/min22.87GiB/PSIavg10=0/OOM0; all651source+ELFunchanged.
+This closes the installed Cron route only; optional/LACP/backup routes remain.
+Root M221 isolated171 inclusive now active; no second heavy command launched.

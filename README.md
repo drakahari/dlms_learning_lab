@@ -2,13 +2,18 @@
 
 A native, offline Rust desktop learning application for networking, Linux administration and scripting. **168 authored assignments in43 units:**48 CCNA,36 LPIC-1,32 LPIC-2 and52 Bash/Shell. The latest source unit adds four practical backup/recovery assignments after the L2 LACP, optional shell-input and recurring-job units. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. This is **not full exam coverage**. Source, full-regression, native and candidate acceptance for the latest four additions are separated in [the catalog168 milestone](docs/CATALOG168_MILESTONE.md); the earlier154-lab installation evidence remains historical. Independent of DLMS_next and the old dlms_lab.
 
-## Open the verified154-lab Fedora candidate
+## Open the168-lab Fedora candidate
 
-This retained candidate contains the earlier154-lab milestone; it does not include the later fourteen source additions. A new168-lab candidate is pending build and installation acceptance. From this checkout, no build tools are needed to open the retained candidate.
-This absolute command also works when your terminal is in your home directory:
+The current local Fedora candidate is `c68399443270`:168 labs/43 units. Its
+installation/upgrade/uninstall/reinstall checks, NFS two-process cold reopening
+and ten serialized Wayland startups pass. Further combined-unit candidate flows
+remain pending; this is not a completed curriculum or public release. See the
+[exact verification scope and checksums](docs/FEDORA_C683_VERIFICATION.md).
+No development tools are needed to open it. This command also works from your
+home directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g9a90f275e133-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gc68399443270-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
 After a development build, `./target/debug/dlms-learning-lab` opens that separate
