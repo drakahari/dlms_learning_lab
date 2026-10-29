@@ -107,6 +107,17 @@ manifest/attestation authorizes `--mode verify` after a future evaluator advance
 Keep original9/10/11 producers, compiled source, executables and observations
 immutable. A source proposal or unsealed capture is not migration acceptance.
 
+The developer-only `case_classes_bash_oracle.py` is a narrow, fixed-fixture
+exception for the reviewed evaluator12 worktree. It still enters through MAIN's
+default-target runner and common lock. It derives that one worktree's exclusive
+target, validates its complete reviewed source inventory and compiled probe
+identity, and requires independently approved exact pins before capture. It has
+no arbitrary source, path, probe or checkout selector. The48 builtin-only cases
+use disposable directories and a stripped C-locale environment; every mismatch
+is retained. Preparing a control or passing synthetic guard tests is not actual
+Bash comparison acceptance. Existing collectors' Main/default-target restrictions
+and historical producers remain unchanged. This tool never executes learner work.
+
 ## Disk location and toolchain
 
 The dedicated ignored directory is `.build-artifacts` under the main checkout.
