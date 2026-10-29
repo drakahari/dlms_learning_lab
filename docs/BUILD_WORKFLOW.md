@@ -215,3 +215,23 @@ Verify exact revision and sidecar SHA-256 before owner delivery. Inspect bounded
 archive metadata without executing a Windows/macOS binary on Fedora; CI success
 is not desktop acceptance. Installing, unpacking and native acceptance remain
 separately guarded project-disk operations. No command here publishes a release.
+
+The genuine evaluator12 before13 producer has its own nondefault
+`historical-evaluator12-capture` feature and actual-revision12 guard. Its closed
+Main171 fixture derives55 scripts/420 cases/55 separate examples from static
+authored input pins. It derives prior context IDs from sealed genuine11 data and
+adds only the three actually executed numeric-script fixture contexts; genuine
+unfinished drafts, non-script Attempts, old records and receipts remain exact.
+`tools/dev.py tool scripting_before13_verify.py --mode prepare` launches nothing.
+Capture requires independent approval of exact producer/source/control pins and
+a fresh project-disk destination; verification cannot authorize revision13 until
+actual observations and retained source/binary have been independently sealed.
+No arbitrary source/profile/engine/path selector exists. Original9/10/11 capture
+producers/evidence remain immutable. Rebase the closed catalog index explicitly
+if newer normal non-script content is integrated before capture.
+
+The fixed Main171 capture was completed before the pending networking
+integration and independently sealed on2026-10-29. Keep that original index,
+compiled source and executable; do not rebase or regenerate this completed
+capture for later catalogs. See SHELL_EVALUATOR12_BASELINE.md and the ledger for
+its exact observations and verified identities.

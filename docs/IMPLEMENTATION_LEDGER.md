@@ -4016,3 +4016,127 @@ explicit7-ID enumerate and equivalent lifetime/let-chain/String borrow changes;
 no assertion/history/cap/visibility/warning waivers. Earlier typed57 evidence
 retains its own identity. No normal physical4 or technicalcontroller credit yet.
 Final physical R14 receipt9d1127d03a4c77e0d268e887ab967a220ca9db5e886a3042289b1bfdbe36284d;57owned/834protected exact, min21.117GiB/PSI0/OOM0/swap-out0. Private168/EVAL11 foundation only, not normal175 or Main/full/native acceptance.
+
+
+M240 normalprivate172 backend46PASS after one nonexistent target was refused before
+compiling; M245UI2PASS after real sibling Addresses tab was selected (old routing
+lesson correctly starts empty Static routes, diagnostic R5 proved differentROOT
+frames/noDiscard). All original grading/fullProgress/receipt assertions retained.
+M246oldrouting6PASS; M247alltargetClippy/UI2/regularbuildPASS after equivalent
+nested-if lint only. M248actualnative38PASS/fullyreaped13152:20geometry settings,
+4large-workspace views,8Rootimagesviewed,source894/ELF8e38823a exact. Receiptbcea7bc5,
+102.06s/min24631201792B/PSI0/swapout0/OOM0. Regularexecutable/16ownedsources retained
+privately. NewnativePracticechange/repairsourceR9 remainsUNRUN; this actualR7route
+onlyfills/checks example, no installed/cold/novice/reader/otherOS claim. Main171.
+M249Maindocumentation305Python/171registered1240refsPASS,87544fullyreaped.
+
+OneOff typed actual first compile E0382 fixed exact immutable reborrow; next gate
+lib97PASS5ignored/core19PASS/typed31PASS4FAIL exposed three nested job-ID persistence
+failures plus one missing new fixture alias binding. Canonical bounded decimal
+key seed +direct/buffered/nested/proof/Goal regressions and exact missing binding
+restore these tests unchanged. M250lib97/5ignored/core20/typed36PASS; M251first bin
+compile E0004 fixed explicit OneOff unreachable arm only in originalNine test.
+NAT2/actualoriginalNine1/oldforeign18/Cron2+Backup2PASS. Final equivalent Save guard
+let-chain gives alltargetClippyPASS and repeated61newgroups, source898feb0bfe4,
+receipt1dff4eab; min19.84GiB/maxsomePSI0.18/full0/OOM0/swapout0. Allreaped. Scoped
+ignored5 is not full inclusive/all24 acceptance; no OneOff native/lab count yet.
+
+Physical175source da22d35e independent707395 found two prospective failures: old
+backup helper full expected171 vscurrent175, and positive singleton tasks with
+missing prerequisites. Root combined176 fixes strengthen full171+canonical4+1
+and each foreign negative uses fresh valid full context/specific type error.
+Exact175snapshot retained; current140 count ops plus32semantic ops are closed in
+ignored network176-composition-r1. New46unit inverse preserves every older raw
+recipe/135fixtures; peer966a2cdf found new test wrong direct old-helper inputs,
+new-test-only R29067400b/peer22be06bb fixes actual41/40/39chain, old authority intact.
+M252combined926source/163owned a8def075 scoped run active; no176/Main credit yet.
+
+M252combined176 firstscope46PASS1FAIL, workspacesnotrun: newforeign-kind test wrongly
+includedfourOWNPhysical sources expecting metadata rejection. R2 keepsallold171+
+newprivate1 foreign masks explicitly172, addsall4ownpositive/context/currentfalse;
+productcodeunchanged. M253physical10/workspaces7PASS, so54distinctbackendgroups
+pass across retainedR1/R2identities. M254privateR9UI2PASS (nowrealexamplechange/
+repair+wholeProgressisolation); normalPhysical2failed nonexistentcourse_start in
+selectedunit. R3newtest usesexistingfourcardStart/Continue, allprofile/Next/current
+invalidation assertions unchanged. M255normalNext2/oldBackupUI11PASS. M256/257
+Clippy foundgenerated =! spacing thennewFilter defaultreassignment; source-only
+Rustfmt146owned(excluding5controllerseams)+equivalentaggregateinit. M258strict
+alltargetClippy--keep-going-DwarningsPASS3.35s, fullyreaped68702. M259inclusive
+alltargets/nofailfast/includeignored nowactive96800/frozen926manifest6de86c3b.
+Nativecontrollernotapplied, noMain176/curriculumcredityet. DiskNVMe/homeBtrfs859GiB
+available; noRAMtemporaryorcleanup. Source-onlytests/failurepremises retained.
+
+OneOffcontent4 SOURCEaa706b2a/peerfcf41b4f distinctreport/captured-repair/owner-retire/
+orderedhandover,15freshcases10due5early. ActualprivateOneOff175content9PASS3.25s+
+lib/contentClippyPASS, all903sourcef643bf31 exact, receipt7fd964cf. Reference/twoalts/
+wrongpartialhardcoded/damage/practice/actualreceipts/reset/Stop vectors unchanged.
+Wrapper46903/Clippyfullyreaped; min22.50GiB/PSI0/OOM0/swap-out0. No normalregistry/
+native/full-history acceptance. OneOffnativeR3sourcepeer25e2c602ACKall22UNRUN,
+requirescurrent176+typedR5closedreciprocalPhysical/OneOffunion. Bash55/420/15audit
+75281e9d distinguishesdeliveredworkfromlooprecovery/tracing/traps/richerstructures/
+regex/filesystemprojects. Newbreak/continuecapcontract/sourcefixturesproposedonly;
+genuine12before13capture mustprecede ANYevaluatoradvance, no newsemanticsyet.
+
+
+### M260 — close six network176 test-consumer failures (isolated, not Main)
+
+The six current-catalog assumptions/preparation failures from M259 now pass all
+75 tests in accounts_content/accounts_workspace/apache_static_workspace/catalog133/
+nfs_content/nfs_progress. Session22364 fully reaped0; all926 source paths stayed
+exact during the run. Independent source review06080faa retained historical44
+unit prefix, both exact appends, original119+numeric3 context-free execution
+comparisons and new private-office comparison. The four native Physical attempts
+now use their Goal-aware preparation and actual native drafts; all persistence,
+export, restore and reset assertions remain. Original backup Stop tests are
+unchanged and their two product failures remain open. No Main curriculum credit.
+
+Runner jobs2/runtime2, disk-backed target; minimum MemAvailable24113000448B,
+PSIavg10zero, swap-in/out and OOM deltas0. Evidence is ignored at
+`.build-artifacts/reviews/network176-consumer-applied-r6/RESULT.json`. Sole heavy
+lease released. Next: fix actual stale shared certificate after backup Stop,
+then compose reviewed Physical native controller and rerun inclusive/native gates.
+
+
+### M261–M267 — genuine12 capture and remaining network176 native gates
+
+Main capture-only7 has source review b874d288/R2 independent5ea8edc0. Final
+sealed verification now requires all retained compiled source, including refusal
+of an entirely missing tree.326Python PASS, producer test1/build PASS, fixed
+Root-reviewed prepare/capture PASS. Actual12 manifest109d1c74/attestation0f03d347
+retain55records420cases55examples475observations,145contexts, both genuine11
+inputs/rawbackups/unfinished drafts,296source inputs and real producer. Capture
+is not sealed or accepted for evaluator13 yet: independent raw readback pending.
+No learner runtime/catalog/revision changed. All five gate wrappers fully reaped;
+measurements/precise identities in ignored before13-main-applied-r2/RESULT.json.
+
+M266 network176 backup35PASS includes both original actual Stop failures and new
+actual prior-success/same-key forced-recheck/Stop/library/navigation/retry guard.
+Cancel forgets only the active ID’s shared certificate, retaining unrelated
+completion and all learner data. Original tests/index bytes remain exact. Source
+926 stayed exact. M267 newly composed Physical native7 compiles;26PASS/2FAIL,
+fully reaped66245. Two new controller event-delivery failures retained, no waived
+assertions: premature draft observation and absent typed sibling field. Ether
+has sole heavy lease/two-QA-file write authority until corrected28scope passes
+and all children are reaped. Main171 and coverage unchanged. Combined full/
+actual-render/native and candidate gates remain pending.
+
+
+### M268–M271 — Physical scoped closure and sealed scripting baseline
+
+Physical928sourcecd49da34 now passes all28Physical groups, including full108
+actual-egui controller/40measured settings and genuine Auto subset replacement.
+Source corrections only affect the new QA controller: post-click natural body
+render, named fixture within the unchanged32-character field cap, wheel inside
+actual popup row x-span, actual viewport/zoom settlement before header input.
+No model, grading, old assertion, focus/history injection or limit changes.
+The other927paths remain exact. All six worker wrappers fully reaped; actual
+Fedora PNG review/inclusive final gates still pending. Receiptaf5e7d7c.
+
+Independent genuine12 raw readback277db9e9 ACKs manifest109d1c74/attestation
+0f03d347, all11outputs/475observations/296retainedinputs/ordinary producer,
+145-context derivations and exact genuine11 drafts/history/raw backups. Root
+pinned both actual seals. M269 fixed final verify PASS; M270 all326Python PASS;
+M271 capture-feature producerClippy-Dwarnings PASS. All wrappers fully reaped.
+SHELL_EVALUATOR12_BASELINE.md documents reproduction and limits. Existing
+evaluator12/runtime/catalog171 unchanged; source-only loop-control development
+may proceed, but no evaluator13 behavior or new scripting credit is integrated.

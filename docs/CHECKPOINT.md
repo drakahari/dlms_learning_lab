@@ -59,17 +59,90 @@ widealiases),18worker+2RootactualPNGsviewed. Receipt5a4b69fd284c5b167cef2be81aba
 All664+da35b65aELF exact;358.19s/minavailable24538411008B/PSI0/OOM0. Newunit
 cold reopening and other combined-unit installed routes remain separate pending.
 
-**Current sole heavy lease: Root normal172 scoped build/tests**, session84052,
-log`.build-artifacts/logs/m240-private-office172-scoped-r3.log`. Do not launch
-another heavy command before full reap/release. Fresh worktree has its exclusive
-target; six actual integration targets include ipv4_routing_workspaces. Earlier
-wrong target was refused before compilation and retained. Native controller has
-source-only R3 b1f0ee89, peer pending; no UI execution claimed.
+**Current heavy lease: none.** Root Main capture-only Clippy73600/M271 is fully
+reaped0.
+Ether released every child after its physical28PASS gate; no worker heavy grant.
+W`.build-artifacts/worktrees/curriculum-network176` now has928source pins, final
+inventorycd49da3476d8120d2979452e11fa86792efc45973e8c049fedd7145a524720f7.
+Root must review/freeze source before inclusive/native commands; no W writes.
 
-Ether final R14alltargetClippy/index11/physicalUI13/plain-controls2 PASS, all
-wrappers fully reaped/released. Frozen source81ff0a96; no controller or four
-normal tasks counted. Main code remains065; these acceptance documentation
-updates do not change candidate source identity.
+M259 inclusive fully reaped96800 exit1:2450PASS/8FAIL/0ignored/195harnesses;
+all24 actual history groups PASS, source926 exact. M260 six reviewed consumer
+fixes75PASS, fully reaped22364; historical44units/both new appends/all123
+context-free assignments/persistence-export assertions retained. M266 actual
+backup35PASS, fully reaped76887: both original Stop failures plus new genuine
+prior-success→same-key recheck→Stop→navigation→retry regression PASS. Product
+cancel now forgets only that job's shared completion certificate; other work
+and grades persist. Original native Stop tests are byte-exact. All eight
+original failures have scoped fixes; combined inclusive rerun remains pending.
+
+Physical nativeR2 seven paths applied after exact beforeimages/Root review,
+source928 frozen at network176-native-applied-r8. M267 fully reaped66245 exit1:
+26PASS/2FAIL/0ignored. Two NEW controller failures: displayed_draft read before
+rendering the clicked view and unrelated typed draft missing from its persisted
+field. Ether corrected actual event delivery without model/answer injection, product
+changes or assertion/limit waivers: natural render after click, fixture within
+existing32-character cap, popup wheel in actual row span, viewport settlement
+before header actions. M268 all28Physical tests PASS/0ignored, including real
+Auto widget and full108route/40geometry; all children fully reaped. Only the
+new QA file changed; other927source paths exact. Root reviewed closed delivery
+diff. No actual Fedora Physical PNG/native-window or Main176 credit yet.
+
+Main additionally has seven closed capture-only files (no learner runtime/
+revision/catalog changes): M261326Python PASS, M262producer test1PASS,
+M263normalproducer build PASS, M264prepare/M265actual12capture PASS, all wrappers
+fully reaped. Captured genuine12 manifest109d1c747c8bb9cb8f497abcc5a3e13be5de53de6447b37fccc728ec15aeb448,
+attestation0f03d3474a70fa01295b545d6c14cec26ecdf8db758773cb951621e78e630f05,
+55records/420cases/55separate examples/475durable observations/145contexts.
+Both actual11 profile inputs/backups/history and two unfinished drafts retained;
+296compiled source inputs plus real producer retained. Independent actual
+readback ACK277db9e9; Root pinned both actual seals. M269 fixed final verify PASS,
+M270 all326Python PASS, both fully reaped. M271 feature-producerClippy-Dwarnings PASS.
+No evaluator13 semantics applied; source-only bounded loop-control proposal
+authorized, not curriculum credit. See SHELL_EVALUATOR12_BASELINE.md.
+
+New independent evidence since documentation17beb12 (pushed):
+
+- Private-office normal172 component: backend46+oldrouting6+UI2 PASS, alltarget
+  Clippy and regular build PASS. NativeR7 actual38captures,20settings+4large
+  workspace views,8Rootimages inspected across all five sizes/light/dark/wide/
+  narrow. Source894/ELF8e38823a unchanged; regularELF and16ownedsource files copied
+  under ignored native172-r7 evidence. Receiptbcea7bc5438e711b3904097f9af0dad1551081668255b1be080b8edd397e1b52.
+  Nativeexample experiment/repair was not exercised in that route; new R9 source
+  adds actual Willow/28 change/29repair plus wholeProgress isolation but is still
+  awaiting combined176 gates. Main original IPv4 design is unchanged.
+- OneOff typed foundation on currentMain171:61new groups PASS (core20,typed36,
+  codec3,NAT2), alltargetClippy PASS, other25old scopes PASS. Source898feb0bfe4,
+  receipt1dff4eabe531a373a9e7fdc792523dcc3437d26830306b19913c2d1056b9d4b1.
+  Ordinarylib97PASS/5ignored is a scoped result, not all-history acceptance.
+  Failures exposed mutable-reference move, nested numeric job-key decoding,
+  missing new fixture dispatch binding and oldNine exhaustive arm; minimal
+  reviewed fixes plus two added regressions retain all old assertions. New
+  nested pending/completed/proof/practice/Goal save/reopen tests now pass. Source-
+  only nativeR3 has22groups under independent review. Four meaningful LPIC-1
+  one-off assignments are being authored after this capability gate; NONE counted.
+- Physical175 frozen150-path component da22d35e: independent707395source review
+  confirmed old171/44/42packs/scripts55/420 preservation but found backup expected
+  tail171 vs175 and invalid singleton admission controls for dependent tasks.
+  Root176 remedies preserve exact171 and append canonicalphysical4+private1;
+  full four-task prerequisite admission and fresh full-context type-specific
+  negative guards replace the defective new setup. All failed predictions retained.
+- Unit inverse176 six paths d4ff +one-new-test-only R29067400b, peer22be06bb:
+  exact46→45→44→43→42→41→40→39→37 raw/typed chain and135oldfixtures preserved.
+  Older missing-unit negatives target their actual named units. New positive
+  helper input mismatch corrected without broadening old helper authority.
+- Installed171 and source2337/all24 acceptance remain separate above. Main305
+  Python and171/1240coverage validation reran PASS after documentation changes.
+
+Source-only workers continue under their assigned paths. OneOff four-task content now has actual9PASS/scopedClippyPASS, all903source
+f643bf31 exact, receipt7fd964cf5cb8f60e6c56f6b7c321ee7e67e4d41316a341db493d4be0313c1fe2.
+Still no normal registration/native/inclusive acceptance. Ether fixes an actual
+QA Auto-reselect premise against the real widget (no product/learner execution
+limit changed); native108/40 is NOT an observed run. Selection reviews its closed
+hunks and OneOff native Stop/held-release remedies. NFS authors one-off content
+only in ignored proposals. No owner decision or unavailable-platform blocker
+prevents this independent implementation work. Continue, do not stop at this
+checkpoint or a candidate.
 
 ## Next implementation queue — proposals do not earn credit
 

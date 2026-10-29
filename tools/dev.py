@@ -38,7 +38,7 @@ def validate_cargo_args(arguments):
         raise RuntimeError('Cargo job/test/path/config overrides are not accepted; use the reviewed runner options')
 
 
-def historical_capture_preflight(arguments, cwd):
+def _historical_capture_preflight_9_11(arguments, cwd):
     """Frozen public9 capture cannot be tested/compiled as current outcomes.
 
     Cargo skips this one nondefault-feature target in ordinary all-target gates.
@@ -115,6 +115,43 @@ def historical_capture_preflight(arguments, cwd):
         raise RuntimeError('Explicit public11 capture requires --features historical-evaluator11-capture')
 
 
+def historical_capture_preflight(arguments, cwd):
+    _historical_capture_preflight_9_11(arguments, cwd)
+    feature = 'historical-evaluator12-capture'
+    enabled, explicit = False, False
+    index = 0
+    while index < len(arguments) and arguments[index] != '--':
+        value = arguments[index]
+        names = None
+        if value in ('--features', '-F'):
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo features require an explicit value')
+            names = arguments[index]
+        elif value.startswith('--features='):
+            names = value.split('=', 1)[1]
+        elif value.startswith('-F'):
+            names = value[2:].removeprefix('=')
+        elif value == '--example':
+            index += 1
+            if index >= len(arguments):
+                raise RuntimeError('Cargo example requires an explicit name')
+            explicit |= arguments[index] == 'scripting_before13_capture'
+        elif value == '--example=scripting_before13_capture':
+            explicit = True
+        if names is not None:
+            enabled |= any(name.rsplit('/', 1)[-1] == feature for name in re.split(r'[,\s]+', names))
+        index += 1
+    if not (enabled or explicit):
+        return
+    with (Path(cwd) / 'src/shell.rs').open('rb') as stream:
+        raw = stream.read(512 * 1024 + 1)
+    if len(raw) > 512 * 1024 or re.findall(rb'^pub const EVALUATOR_REVISION: u32 = ([0-9]+);$', raw, re.MULTILINE) != [b'12']:
+        raise RuntimeError('Frozen scripting_before13_capture requires actual public evaluator12; current evaluator cannot relabel historical observations')
+    if explicit and not enabled:
+        raise RuntimeError('Explicit public12 capture requires --features historical-evaluator12-capture')
+
+
 def tool_outputs(arguments, cwd, root):
     result = list(arguments)
     seen = False
@@ -175,7 +212,7 @@ def main():
         elif args.action == 'python-tests':
             session.run([sys.executable, '-m', 'unittest', 'discover', '-s', 'tools/tests', '-v'], cwd=args.cwd)
         elif args.action == 'tool':
-            allowed = {'case_classes_bash_oracle.py', 'scripting_before12_verify.py', 'optional_inputs_bash_oracle.py', 'file_backup_reference.py', 'parameter_bash_oracle.py', 'parameters_before11_verify.py', 'rpm_version_oracle.py', 'automation_before10_oracle.py', 'getopts_scope_oracle.py', 'getopts_before9_oracle.py', 'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
+            allowed = {'scripting_before13_verify.py', 'case_classes_bash_oracle.py', 'scripting_before12_verify.py', 'optional_inputs_bash_oracle.py', 'file_backup_reference.py', 'parameter_bash_oracle.py', 'parameters_before11_verify.py', 'rpm_version_oracle.py', 'automation_before10_oracle.py', 'getopts_scope_oracle.py', 'getopts_before9_oracle.py', 'case_bash_oracle.py', 'bash_reference.py', 'filesystem_reference.py', 'ipv4_route_reference.py', 'ipv6_reference.py', 'process_reference.py', 'storage_reference.py', 'native_startup.py', 'native_reopen.py', 'installed_acceptance.py', 'verify_coverage.py', 'verify_palettes.py'}
             if args.cwd.resolve() != root or args.target_dir:
                 raise RuntimeError('Fixed reference tools currently require the main checkout/default target to preserve probe provenance')
             if not args.args or args.args[0] not in allowed:
