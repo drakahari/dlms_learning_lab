@@ -288,3 +288,96 @@ class Guards(unittest.TestCase):
         self.assertEqual(sum(v['passed'] for v in comparisons),0)
         self.assertTrue(all(not v['vm_matches_authored'] and v['bash_matches_authored'] for v in comparisons))
         self.assertTrue(all(v['actual_bash'] is None and v['actual_future_vm'] is None for v in self.rows))
+
+    def test_reviewed_dotted_source_directories_are_retained_in_the_exact_structure(self):
+        # This genuinely fails before the correction: the first .cargo directory
+        # hits the unchanged simple-basename guard. No compiler/child runs here.
+        work=self.root/'work';work.mkdir()
+        for name in (*c.CORE,'.cargo/config.toml','.github/workflows/ci.yml'):
+            self.put(name,'SYNTHETIC reviewed source '+name,work)
+        main_names=[c.SELF,c.TEST,c.FIXED,'tools/dev.py','tools/build_safety.py',
+                    'tools/case_bash_oracle.py','tools/automation_before10_oracle.py']
+        for name in main_names:self.put(name,'SYNTHETIC tooling '+name)
+        paths=[p for p in work.rglob('*') if p.is_file()]+[self.root/n for n in main_names]
+        before=c.pins([(p,c.CAP) for p in paths])
+        reviewed={p.relative_to(work).as_posix():{} for p in paths if p.is_relative_to(work)
+                  and p.relative_to(work).as_posix()!=c.PROBE_SOURCE}
+        producer=self.put('unexecuted-producer',b'\x7fELFSYNTHETIC ONLY')
+        out=self.root/'retention';out.mkdir()
+        kept=c.snapshot_sources(self.root,work,out,reviewed,producer,c.safe.pin(producer,c.BINARY_CAP),
+                                before,c.safe.Budget(c.TOTAL))
+        self.assertEqual(len(kept),len(paths)+1)
+        for name in ('.cargo/config.toml','.github/workflows/ci.yml'):
+            self.assertEqual((out/'compiled-source/worktree'/name).read_bytes(),(work/name).read_bytes())
+        for name in ('.cargo','.github','.github/workflows'):
+            self.assertEqual((out/'compiled-source/worktree'/name).stat().st_mode & 0o777,0o700)
+        self.assertEqual((out/'actual12-producer').read_bytes(),producer.read_bytes())
+
+    def test_dotted_exception_does_not_allow_aliases_dotdot_nested_or_unknown_directories(self):
+        destination=self.root/'destination';destination.mkdir(mode=0o700)
+        for name in ['../outside/file','./.cargo/config','.config/file','.cargo.evil/file',
+                     'src/.cargo/file','.github/../file','/absolute/file','src/name.with.dot/file']:
+            with self.assertRaises(c.safe.OracleError,msg=name):c.retained_source_parent(destination,name)
+        outside=self.root/'outside';outside.mkdir(mode=0o700)
+        alias=self.root/'alias-test';alias.mkdir(mode=0o700);(alias/'.github').symlink_to(outside)
+        with self.assertRaises(c.safe.OracleError):c.retained_source_parent(alias,'.github/workflows/file')
+        self.assertEqual(list(outside.iterdir()),[])
+        nonprivate=self.root/'nonprivate';nonprivate.mkdir(mode=0o700)
+        (nonprivate/'.cargo').mkdir(mode=0o755)
+        with self.assertRaises(c.safe.OracleError):c.retained_source_parent(nonprivate,'.cargo/config')
+        self.assertEqual((nonprivate/'.cargo').stat().st_mode & 0o777,0o755)
+        # The global helper must keep rejecting dotted names.
+        with self.assertRaises(c.safe.OracleError):c.safe.private_dir(destination,'.cargo')
+
+    def test_late_retention_failure_still_keeps_actual_child_status_and_case_comparisons(self):
+        # Execute the collector's real control flow against deliberate failing
+        # SYNTHETIC observations, never a real subprocess, VM or historical file.
+        from contextlib import ExitStack, nullcontext
+        base=self.root/'synthetic-capture-base';base.mkdir()
+        (base/(c.CAPTURE+'-APPROVED.json')).write_text('{}')
+        probe=self.put('synthetic-probe','UNEXECUTED synthetic bytes')
+        bash=self.put('synthetic-bash','UNEXECUTED synthetic bytes')
+        manual=self.put('synthetic-manual','SYNTHETIC manual')
+        pinned=[c.safe.pin(probe,c.CAP),c.safe.pin(bash,c.CAP)]
+        def capture(command,folder,work,env,budget,inherited,*,vm=False):
+            name=folder.name
+            if name=='vm-identity': result={'stdout':'{}','stderr':'','status':0}
+            elif name=='vm-outcomes':result={'stdout':self.vm_lines(),'stderr':'','status':0}
+            elif name=='bash-version':result={'stdout':'GNU bash, version 5.3.9 SYNTHETIC\n','stderr':'','status':0}
+            else:
+                row=self.rows[int(name.removeprefix('case'))]
+                # A nonzero status must not be normalized/inferred as success
+                # even when stdout and stderr happen to match the prediction.
+                result={'stdout':row['proposed_stdout'],'stderr':'','status':7}
+            for key in ('stdout','stderr'):
+                c.safe.write_new(folder/(key+'.raw'),result[key].encode(),budget,c.VM_STREAM)
+            return result
+        with ExitStack() as stack:
+            substitutions=[(c,'ROOT',self.root),(c,'main_entry',lambda root:(7,)),
+                (c,'baseline',lambda root:None),(c,'load_fixed',lambda root:self.rows),
+                (c,'clone_proof',lambda root:(self.root,probe,{}, {'synthetic':True})),
+                (c,'source_paths',lambda *args:[]),(c,'pins',lambda paths:pinned),
+                (c.safe,'source_identity',lambda root:'SYNTHETIC fixed head'),
+                (c.safe,'BASH',bash),(c.safe,'MANUAL',manual),(c.safe,'MANUAL_SHA',c.digest(manual.read_bytes())),
+                (c,'owned_directory',lambda root,path:base),(c,'approved',lambda *args:None),
+                (c,'pinned_executable',lambda *args:nullcontext(('SYNTHETIC-not-executed',9))),
+                (c,'capture_child',capture),(c,'identity',lambda *args:None),(c.safe,'quiet_group',lambda:None)]
+            for obj,name,value in substitutions:stack.enter_context(patch.object(obj,name,value))
+            stack.enter_context(patch.object(c.subprocess,'Popen',side_effect=AssertionError('No real child allowed')))
+            snapshot=stack.enter_context(patch.object(c,'snapshot_sources',side_effect=c.safe.OracleError('SYNTHETIC late retention failure')))
+            with self.assertRaisesRegex(c.safe.OracleError,'late retention failure'):c.main(['--mode','capture'])
+            snapshot.assert_called_once()
+        out=base/c.CAPTURE
+        for n in (0,47):
+            result=c.strict((out/f'case{n:02}'/'RESULT.json').read_bytes())
+            self.assertEqual(result['result']['status'],7)
+            self.assertEqual(result['result']['files'],{})
+            self.assertEqual(result['result']['stdout'],self.rows[n]['proposed_stdout'])
+            comparison=c.strict((out/f'case{n:02}'/'COMPARISON.json').read_bytes())
+            self.assertEqual(comparison['actual_bash539']['status'],7)
+            self.assertFalse(comparison['comparison']['passed'])
+        self.assertEqual(len(list(out.glob('case*/RESULT.json'))),48)
+        self.assertEqual(len(list(out.glob('case*/COMPARISON.json'))),48)
+        self.assertFalse((out/'MANIFEST.json').exists())
+        self.assertFalse((out/'COMPLETE').exists())
+        self.assertTrue(all(row['actual_bash'] is None for row in self.rows))

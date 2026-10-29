@@ -38,7 +38,7 @@ BASELINE = '.build-artifacts/reviews/bash-numeric-validation/captures/public11-1
 BASELINE_SHA = 'e303bdecb9f57a89debd77c8300d27b523c94630446bc918e4c5e4c171373168'
 ATTESTATION_SHA = '254d696e4ca90ec508b6034f015ae5710bf2184a30e068d9839a9f93d6523e48'
 OUTPUT = '.build-artifacts/reviews/bash-numeric-validation/bash-captures'
-CAPTURE = 'classes48-r1'  # New attempt requires a reviewed source revision; no overwrite or arbitrary ID.
+CAPTURE = 'classes48-r2'  # New attempt requires a reviewed source revision; no overwrite or arbitrary ID.
 CAP = 16_000_000
 BINARY_CAP = 256 * 1024 * 1024
 TOTAL = 512 * 1024 * 1024
@@ -306,6 +306,46 @@ def capture_child(command, folder, work, env, budget, inherited, *, vm=False):
         popen=lambda cmd, **kw: bounded_popen(cmd, vm=vm, **kw))
 
 
+def retained_source_parent(destination, name):
+    # child enforces a canonical relative source name before any mkdir. Only
+    # the two actually reviewed top-level dotted directories receive this local
+    # exception; all other directories keep safe.private_dir's old grammar.
+    child(destination, name)
+    directory(destination)
+    parent = destination
+    parts = Path(name).parts[:-1]
+    safe.require(len(parts) <= 32, 'Bounded reviewed source directory depth')
+    for position, component in enumerate(parts):
+        if component in ('.cargo', '.github'):
+            safe.require(position == 0, 'Only reviewed top-level dotted source directories')
+            path = parent / component
+            try:
+                path.mkdir(mode=0o700)
+            except FileExistsError:
+                pass
+            directory(path)  # lstat every ancestor, including this exact child.
+            safe.require(stat.S_IMODE(path.lstat().st_mode) == 0o700,
+                         'Expected private0700 source directory; never chmod existing evidence')
+            safe.require(path.resolve().parent == parent.resolve(), 'Source directory escaped its parent')
+            parent = path
+        else:
+            try:
+                parent = safe.private_dir(parent, component)
+            except FileExistsError:
+                parent = safe.private_dir(parent, component, existing=True)
+    return parent
+
+
+def retain_child_result(folder, result, files, budget):
+    # Called immediately after a complete bounded child and empty-CWD check.
+    # Preserve its real return status even if later source retention fails.
+    safe.require(set(result) == {'stdout', 'stderr', 'status'}
+                 and type(result['status']) is int and files == {}, 'Actual closed child result shape')
+    return safe.json_new(folder / 'RESULT.json',
+        {'kind': 'fixed-class48-child-observation', 'result': {**result, 'files': files},
+         'claims': 'Observed child result only; not COMPLETE or acceptance'}, budget, CAP)
+
+
 def snapshot_sources(root, work, out, reviewed, probe, executable_pin, before, budget):
     bundle = safe.private_dir(out, 'compiled-source')
     expected = {p['path']: p for p in before}
@@ -315,10 +355,8 @@ def snapshot_sources(root, work, out, reviewed, probe, executable_pin, before, b
                                 'tools/case_bash_oracle.py', 'tools/automation_before10_oracle.py'])]:
         destination = safe.private_dir(bundle, label)
         for name in names:
-            target = child(destination, name); parent = destination
-            for component in Path(name).parts[:-1]:
-                try: parent = safe.private_dir(parent, component)
-                except FileExistsError: parent = safe.private_dir(parent, component, existing=True)
+            target = child(destination, name)
+            retained_source_parent(destination, name)
             raw = safe.read_bytes(child(base, name), CAP)
             wanted = expected[str(child(base, name))]
             safe.require(len(raw) == wanted['bytes'] and digest(raw) == wanted['sha256'], 'Source changed before retention')
@@ -373,7 +411,9 @@ def main(argv=None):
             # The existing closed environment itself fixes LC_ALL/LANG=C and
             # deliberately refuses caller-supplied locale/startup overrides.
             result = capture_child(command, folder, cwd, safe.closed_environment({}, tmp), budget, held, vm=is_vm)
-            safe.quiet_group(); empty_work(cwd)
+            safe.quiet_group()
+            files = empty_work(cwd)
+            outputs.append(retain_child_result(folder, result, files, budget))
             outputs.extend(safe.pin(folder / n, VM_STREAM if is_vm else STREAM) for n in ['stdout.raw', 'stderr.raw'])
             return result
         result = run('vm-identity', [vm, '--identity'], is_vm=True)
@@ -389,9 +429,11 @@ def main(argv=None):
         for n, (row, actual) in enumerate(zip(rows, actual_vm)):
             result = run(f'case{n:02}', [sh, *safe.BASH_FLAGS, '-c', row['source'], '--', *row['args']])
             bash_result = {**result, 'files': {}, 'error': None}
-            observations.append({'id': row['id'], 'source_sha256': digest(row['source'].encode()),
+            observation = {'id': row['id'], 'source_sha256': digest(row['source'].encode()),
                 'case_sha256': digest(canonical(case_input(row))), 'authored': authored(row),
-                'actual_vm12': actual, 'actual_bash539': bash_result, 'comparison': comparison(row, actual, bash_result)})
+                'actual_vm12': actual, 'actual_bash539': bash_result, 'comparison': comparison(row, actual, bash_result)}
+            observations.append(observation)
+            outputs.append(safe.json_new(out / f'case{n:02}' / 'COMPARISON.json', observation, budget, CAP))
     safe.require(time.monotonic() - start < DEADLINE, 'Whole reference deadline exceeded')
     safe.require(pins(paths) == before and safe.source_identity(root) == head, 'Source/input/binary changed during capture')
     _, _, _, after_clone = clone_proof(root); safe.require(after_clone == clone, 'W identity changed during capture')
