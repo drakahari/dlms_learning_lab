@@ -21,6 +21,7 @@ impl std::io::Write for Count {
     }
 }
 fn fits<T: Serialize>(value: &T) -> bool {
+    crate::native_observations::backup_json();
     serde_json::to_writer(Count(0), value).is_ok()
 }
 
@@ -578,6 +579,7 @@ pub fn size<T: Serialize>(value: &T, cap: usize) -> Option<usize> {
         }
     }
     let mut counter = Counter { used: 0, cap };
+    crate::native_observations::backup_json();
     serde_json::to_writer(&mut counter, value).ok()?;
     Some(counter.used)
 }
@@ -588,6 +590,8 @@ pub fn within<T: Serialize>(value: &T, cap: usize) -> bool {
 // No ..: every added metadata field needs an explicit admission decision.
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
+        physical_link_draft,
+        physical_link_learning,
         etherchannel_draft,
         etherchannel_learning,
         file_backup_learning: _,
@@ -657,7 +661,9 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         legacy_practice_reviewed,
         migrated_practice_host,
     } = w;
-    cron_session.is_some()
+    physical_link_draft.is_some()
+        || physical_link_learning.is_some()
+        || cron_session.is_some()
         || cron_learning.is_some()
         || etherchannel_draft.is_some()
         || etherchannel_learning.is_some()
@@ -827,6 +833,7 @@ pub fn perform(
 
 pub fn source_shape(s: &crate::pack::Scenario) -> bool {
     let crate::pack::Scenario {
+        physical_link_teaching,
         file_backup_teaching,
         etherchannel_teaching,
         cron_teaching,
@@ -880,7 +887,8 @@ pub fn source_shape(s: &crate::pack::Scenario) -> bool {
         mac_teaching,
         debian_packages_teaching,
     } = s;
-    file_backup_teaching.is_some()
+    physical_link_teaching.is_none()
+        && file_backup_teaching.is_some()
         && cron_teaching.is_none()
         && etherchannel_teaching.is_none()
         && nfs_teaching.is_none()

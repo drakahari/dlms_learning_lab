@@ -45,7 +45,7 @@ fn four_distinct_registered_lessons_have_actual_prerequisites_and_isolated_examp
     let normal = pack::bundled().unwrap();
     let sources = lessons();
     assert_eq!(sources.len(), 4);
-    assert_eq!(normal.len(), 171);
+    assert_eq!(normal.len(), 176);
     assert_eq!(
         serde_json::to_value(&normal[160..164]).unwrap(),
         serde_json::to_value(&sources).unwrap()

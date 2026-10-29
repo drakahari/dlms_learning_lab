@@ -748,7 +748,7 @@ fn original125_source_metadata_unit_order_and_omitted_optional_wire_are_exact() 
         serde_json::from_str(include_str!("fixtures/spanning-tree-original125.json")).unwrap();
     let expected: Vec<Scenario> = serde_json::from_value(v["scenarios"].clone()).unwrap();
     let all = catalog();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     assert_eq!(
         all[..125].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         expected.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
@@ -836,7 +836,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     let original = all.clone();
     let s = scenario();
     let mut p = retained_profile(&all);
-    assert_eq!(p.attempts.len(), 171);
+    assert_eq!(p.attempts.len(), 176);
     let histories = p
         .attempts
         .values()
@@ -917,7 +917,11 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
         "shell-optional-report",
         "shell-optional-handover",
     ];
-    let numeric_ids=["shell-numeric-retry","shell-numeric-intake","shell-numeric-publication"];
+    let numeric_ids = [
+        "shell-numeric-retry",
+        "shell-numeric-intake",
+        "shell-numeric-publication",
+    ];
     let expected_scripts = original_script_ids
         .iter()
         .copied()
@@ -956,8 +960,14 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     }
     let original52_current=p.attempts.iter().filter(|(id,_)|original_script_ids.contains(id.as_str())||new_ids.contains(&id.as_str()))
         .filter(|(_,a)|matches!(&a.state,State::Script{run:Some(r),..}if r.engine_revision==shell::EVALUATOR_REVISION)).count();
-    assert_eq!(original52_current,51,"Original52 retain51 actual current runs and the same unfinished assignment");
-    assert_eq!(current,54,"55 current scripts with the same one retained unfinished assignment");
+    assert_eq!(
+        original52_current, 51,
+        "Original52 retain51 actual current runs and the same unfinished assignment"
+    );
+    assert_eq!(
+        current, 54,
+        "55 current scripts with the same one retained unfinished assignment"
+    );
     let prior = prior(&p, &original);
     let mut a = prepared(&s);
     let lesson = s.spanning_tree_teaching.as_ref().unwrap();

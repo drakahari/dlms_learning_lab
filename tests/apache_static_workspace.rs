@@ -1,4 +1,7 @@
 //! Prospective app-only model checks. No host Apache/HTTP/command execution.
+#[path = "support/combined_catalog.rs"]
+mod combined_catalog;
+use amendment_sha as digest;
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
 #[path = "support/teaching_amendment.rs"]
@@ -530,8 +533,8 @@ fn original125_typed_specs_relative_order_units_and_optional_nil_wire_are_exact(
             w.get("apache_static_draft").is_none() && w.get("apache_static_learning").is_none()
         );
     }
-    let current_units: serde_json::Value =
-        serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
+    let raw44 = original44_unit_bytes();
+    let current_units: serde_json::Value = serde_json::from_slice(&raw44).unwrap();
     assert_eq!(current_units["version"], baseline["units"]["version"]);
     assert_eq!(current_units["version"], serde_json::json!(1));
     let old_units = baseline["units"]["units"].as_array().unwrap();
@@ -719,7 +722,7 @@ fn current_real_script_records_genuine678_histories_both_editors_backup_restore_
         )
     }
     assert_eq!(restored.attempts[&s.id].state, s.initial);
-    assert_eq!(originals.len(), 171);
+    assert_eq!(originals.len(), 176);
 }
 #[test]
 fn context_corruption_and_wrong_kind_save_never_overwrite_a_valid_profile() {
@@ -851,7 +854,7 @@ fn direct_oversized_whitespace_teaching_rejects_before_trim_without_publishing()
 fn both_family_current_helpers_reject_foreign_valid_metadata_without_mutating_or_saving() {
     let apache_scenario = scenario();
     let mut all = catalog();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     let package_scenario = all
         .iter()
         .find(|s| s.id == "lpic1-package-install")
@@ -1213,4 +1216,31 @@ fn probe_feedback_excerpts_are_bounded_and_no_listener_stays_distinct() {
             && rows[0].1.contains("expected HTTP 200")
     );
     assert!(rows.iter().all(|r| r.1.len() <= 512));
+}
+
+// Recover the complete reviewed44 predecessor through both closed raw inverses.
+// Canonical physical/private append recipes and all historical37 bytes stay fixed.
+fn original44_unit_bytes() -> Vec<u8> {
+    let raw = include_bytes!("../scenarios/units-v1.json");
+    let before = combined_catalog::before_physical_units(raw).unwrap();
+    let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
+    let original: serde_json::Value = serde_json::from_slice(&before).unwrap();
+    assert_eq!(current["units"].as_array().unwrap().len(), 46);
+    assert_eq!(original["units"].as_array().unwrap().len(), 44);
+    assert_eq!(
+        &current["units"].as_array().unwrap()[..44],
+        original["units"].as_array().unwrap().as_slice()
+    );
+    let physical: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog175-registration.json")).unwrap();
+    let private: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog176-registration.json")).unwrap();
+    assert_eq!(current["units"][44], physical["physical_unit"]);
+    assert_eq!(current["units"][45], private["private_unit"]);
+    // Existing pinned helper validates original raw37 plus every prior recipe.
+    assert_eq!(
+        combined_catalog::old_unit_bytes(raw).unwrap(),
+        combined_catalog::old_unit_bytes(&before).unwrap()
+    );
+    before
 }

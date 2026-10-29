@@ -1120,6 +1120,9 @@ fn every_legacy_prepare_keeps_full_caller_exact_with_valid_new_family_fields() {
 fn old_prepared(s: &pack::Scenario) -> Attempt {
     let mut a = Attempt::new(s, 9);
     workspace::prepare(&mut a);
+    if matches!(a.state, State::PhysicalLink { .. }) {
+        dlms_learning_lab::physical_link_workspace::prepare_attempt(&mut a, s, true).unwrap();
+    }
     let names = [
         "accounts_teaching",
         "acl_teaching",

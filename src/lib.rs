@@ -14,6 +14,7 @@ pub mod debian_packages_terminal;
 pub mod debian_packages_workspace;
 pub mod engine;
 pub mod filesystem;
+pub mod native_observations;
 pub mod nfs;
 pub mod nfs_teaching;
 pub mod nfs_workspace;
@@ -146,3 +147,8 @@ pub mod etherchannel_workspace;
 pub mod file_backup_teaching;
 pub mod file_backup_terminal;
 pub mod file_backup_workspace;
+
+pub mod physical_link;
+pub mod physical_link_assignment;
+pub mod physical_link_teaching;
+pub mod physical_link_workspace;

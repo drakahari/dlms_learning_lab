@@ -179,20 +179,46 @@ fn every_introduction_example_runs_and_its_suggested_edit_changes_behavior() {
             s.id
         );
     }
-    let numeric: serde_json::Value = serde_json::from_str(include_str!("fixtures/shell-numeric-validation-review.json")).unwrap();
-    let rows=numeric["labs"].as_array().unwrap();
-    assert_eq!(rows.iter().map(|r|r["id"].as_str().unwrap()).collect::<Vec<_>>(),["shell-numeric-retry","shell-numeric-intake","shell-numeric-publication"]);
-    assert_eq!(edits[52..55].len(),rows.len());
-    for (row,(from,to)) in rows.iter().zip(edits[52..55].iter().copied()) {
-        let s=labs.iter().find(|s|Some(s.id.as_str())==row["id"].as_str()).unwrap();
-        let lesson=s.teaching.as_ref().unwrap();let practice=&row["practice"];
-        assert_eq!(practice["reference"],lesson.example);
-        let changed=lesson.example.replacen(from,to,1);
-        assert_eq!(changed,practice["experiment"]["source"].as_str().unwrap());
-        let expected:shell::Case=serde_json::from_value(practice["experiment"]["case"].clone()).unwrap();
-        assert!(expected.accepts(&shell::run(&changed,&lesson.fixture)),"{} independent numeric experiment",s.id);
-        let repair=practice["repair"].as_str().unwrap();assert_eq!(repair,lesson.example);
-        assert!(lesson.fixture.accepts(&shell::run(repair,&lesson.fixture)),"{} repaired numeric example",s.id);
+    let numeric: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/shell-numeric-validation-review.json"
+    ))
+    .unwrap();
+    let rows = numeric["labs"].as_array().unwrap();
+    assert_eq!(
+        rows.iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        [
+            "shell-numeric-retry",
+            "shell-numeric-intake",
+            "shell-numeric-publication"
+        ]
+    );
+    assert_eq!(edits[52..55].len(), rows.len());
+    for (row, (from, to)) in rows.iter().zip(edits[52..55].iter().copied()) {
+        let s = labs
+            .iter()
+            .find(|s| Some(s.id.as_str()) == row["id"].as_str())
+            .unwrap();
+        let lesson = s.teaching.as_ref().unwrap();
+        let practice = &row["practice"];
+        assert_eq!(practice["reference"], lesson.example);
+        let changed = lesson.example.replacen(from, to, 1);
+        assert_eq!(changed, practice["experiment"]["source"].as_str().unwrap());
+        let expected: shell::Case =
+            serde_json::from_value(practice["experiment"]["case"].clone()).unwrap();
+        assert!(
+            expected.accepts(&shell::run(&changed, &lesson.fixture)),
+            "{} independent numeric experiment",
+            s.id
+        );
+        let repair = practice["repair"].as_str().unwrap();
+        assert_eq!(repair, lesson.example);
+        assert!(
+            lesson.fixture.accepts(&shell::run(repair, &lesson.fixture)),
+            "{} repaired numeric example",
+            s.id
+        );
     }
 }
 #[test]

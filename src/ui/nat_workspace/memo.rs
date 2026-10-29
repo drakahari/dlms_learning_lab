@@ -110,6 +110,30 @@ impl Memo {
         total_cap: usize,
         entries: usize,
     ) {
+        if s.physical_link_teaching.is_some()
+            || a.workspace.as_ref().is_some_and(|w| {
+                w.physical_link_draft.is_some() || w.physical_link_learning.is_some()
+            })
+        {
+            self.entries.retain(|e| e.id != s.id);
+            self.bytes = self.entries.iter().map(|e| e.charge).sum();
+            self.remember_frame(&s.id, false);
+            if self
+                .fallback_practice
+                .as_ref()
+                .is_some_and(|(id, _)| id == &s.id)
+            {
+                self.fallback_practice = None;
+            }
+            self.fallback(
+                &s.id,
+                vec![(
+                    false,
+                    "Physical-link data belong to another activity".into(),
+                )],
+            );
+            return;
+        }
         if s.file_backup_teaching.is_some() {
             self.entries.retain(|e| e.id != s.id);
             self.bytes = self.entries.iter().map(|e| e.charge).sum();
@@ -248,6 +272,8 @@ impl Memo {
 // All typed foreign-family payloads are rejected by NAT admission. Never copy them.
 fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        physical_link_draft,
+        physical_link_learning,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,
@@ -319,6 +345,8 @@ fn foreign(w: &model::WorkspaceData) -> bool {
     } = w;
     macro_rules! any { ($($v:ident),* $(,)?) => { false $(|| $v.is_some())* }; }
     any!(
+        physical_link_draft,
+        physical_link_learning,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,
@@ -1571,6 +1599,107 @@ mod tests {
             assert_eq!(m.counters.meters, before.meters + 1);
             assert_eq!(serde_json::to_vec(&good).unwrap(), good_attempt);
             assert_eq!(serde_json::to_vec(&source).unwrap(), good_source);
+        }
+    }
+    #[test]
+    fn valid_physical_source_and_each_optional_field_refuse_a_warm_success_before_copy() {
+        let (source, mut a) = teaching_fixture();
+        solve(&source, &mut a);
+        let good = a.clone();
+        let (physical, p) = crate::ui::tests::physical_workspace::prepared();
+        let pw = p.workspace.as_ref().unwrap();
+        assert!(pw.valid());
+        for mask in 0..4 {
+            let mut source = source.clone();
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            let before = m.counters;
+            if mask == 0 {
+                source.physical_link_teaching = physical.physical_link_teaching.clone();
+            } else {
+                let w = a.workspace.as_mut().unwrap();
+                if mask & 1 != 0 {
+                    w.physical_link_draft = pw.physical_link_draft.clone();
+                }
+                if mask & 2 != 0 {
+                    w.physical_link_learning = pw.physical_link_learning.clone();
+                }
+                assert!(w.valid());
+            }
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(false));
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.evaluations, before.evaluations);
+            assert!(m.practice_rows(&source.id).is_none());
+            assert!(m.entries.is_empty());
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            source.physical_link_teaching = None;
+            a = good.clone();
+            m.begin_frame();
+            m.evaluate(&a, &source, false);
+            assert_eq!(
+                m.prepared(&source.id),
+                Some(true),
+                "Removing foreign physical fields must restore legitimate own completion"
+            );
+        }
+    }
+    #[test]
+    fn valid_physical_source_and_each_optional_field_refuse_uncacheable_fallback_and_practice_rows()
+    {
+        let (source, mut good) = teaching_fixture();
+        solve(&source, &mut good);
+        let (physical, p) = crate::ui::tests::physical_workspace::prepared();
+        let pw = p.workspace.as_ref().unwrap();
+        for mask in 0..4 {
+            let mut a = good.clone();
+            let mut source = source.clone();
+            let mut m = Memo::default();
+            m.evaluate_limits(&a, &source, false, 1, 1, 0);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            assert!(m.entries.is_empty());
+            assert!(m.rows(&source.id).unwrap().iter().all(|r| r.0));
+            assert!(m.practice_rows(&source.id).is_some());
+            let before = m.counters;
+            if mask == 0 {
+                source.physical_link_teaching = physical.physical_link_teaching.clone();
+            } else {
+                let w = a.workspace.as_mut().unwrap();
+                if mask & 1 != 0 {
+                    w.physical_link_draft = pw.physical_link_draft.clone();
+                }
+                if mask & 2 != 0 {
+                    w.physical_link_learning = pw.physical_link_learning.clone();
+                }
+                assert!(w.valid());
+            }
+            let caller = serde_json::to_vec(&a).unwrap();
+            let authored = serde_json::to_vec(&source).unwrap();
+            m.evaluate_limits(&a, &source, false, 1, 1, 0);
+            assert_eq!(m.prepared(&source.id), Some(false));
+            assert!(m.rows(&source.id).unwrap().iter().all(|r| !r.0));
+            assert!(m.practice_rows(&source.id).is_none());
+            assert_eq!(m.counters.evaluations, before.evaluations);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert!(m.entries.is_empty());
+            assert!(
+                progress::current_nat_checks(&a, &source)
+                    .iter()
+                    .all(|r| !r.0)
+            );
+            assert!(!progress::current_solved(&a, &source));
+            assert_eq!(serde_json::to_vec(&a).unwrap(), caller);
+            assert_eq!(serde_json::to_vec(&source).unwrap(), authored);
+            source.physical_link_teaching = None;
+            m.begin_frame();
+            m.evaluate_limits(&good, &source, false, 1, 1, 0);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            assert!(m.practice_rows(&source.id).is_some());
         }
     }
 }

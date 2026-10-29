@@ -7,7 +7,7 @@ pub(in crate::ui) fn sources() -> Vec<Scenario> {
 }
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
+    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
     let at = 160;
     assert_eq!(
         a.scenarios[at..164]
@@ -30,7 +30,7 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
         "The four canonical backup assignments retain their exact positions"
     );
     assert_eq!(
-        a.scenarios[168..]
+        a.scenarios[168..171]
             .iter()
             .map(|s| s.id.as_str())
             .collect::<Vec<_>>(),
@@ -658,7 +658,7 @@ fn route_reveal(ctx: &egui::Context, a: &mut LabApp, key: &str) -> egui::Rect {
 fn cron_normal_unit_picker_start_next_and_complete_use_actual_events_and_warm_checks() {
     let (ctx, mut a) = app();
     draw(&ctx, &mut a);
-    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
+    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
     assert!(a.progress.attempts.is_empty());
     let before = snapshot(&a);
     let picker = route_reveal(&ctx, &mut a, "unit");

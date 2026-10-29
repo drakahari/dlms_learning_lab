@@ -255,6 +255,7 @@ impl Store {
         {
             return false;
         }
+        crate::native_observations::backup_json();
         serde_json::to_writer(Count(0), self).is_ok()
     }
     pub fn from_json(raw: &str) -> Result<Self, String> {

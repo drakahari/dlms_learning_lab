@@ -45,7 +45,7 @@ fn value<T: serde::Serialize + ?Sized>(v: &T) -> Value {
 fn every_reviewed160_definition_and_order_precedes_the_exact_four_authored_cron_tasks() {
     let old = old_catalog();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (160, 171));
+    assert_eq!((old.len(), all.len()), (160, 176));
     assert_eq!(value(&all[..160]), value(&old));
     assert_eq!(
         value(
@@ -72,7 +72,7 @@ fn every_reviewed160_definition_and_order_precedes_the_exact_four_authored_cron_
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [48, 36, 32, 55]
+        [53, 36, 32, 55]
     );
     for s in &all[160..164] {
         assert!(matches!(s.initial, State::Cron { .. }) && matches!(s.goal, Goal::Cron { .. }));
@@ -116,7 +116,7 @@ fn exact_new42_inverse_retains_the_complete_reviewed41_then_every_prior_closed_l
     );
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 44);
+    assert_eq!(units.len(), 46);
     let old = course::load(std::str::from_utf8(&previous).unwrap(), &old_catalog()).unwrap();
     assert_eq!(old.len(), 41);
     assert_eq!(value(&units[..41]), value(&old));

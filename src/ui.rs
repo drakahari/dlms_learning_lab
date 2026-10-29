@@ -12,6 +12,7 @@ mod acl_workspace;
 mod address_learning;
 mod apache_static_workspace;
 mod client_learning;
+mod completion_index;
 mod controls;
 mod cron_workspace;
 mod data;
@@ -25,6 +26,7 @@ mod legacy_learning;
 mod nat_workspace;
 mod nfs_workspace;
 mod ospf_workspace;
+mod physical_link_workspace;
 mod process_learning;
 mod rpm_packages;
 mod script_learning;
@@ -51,6 +53,7 @@ struct Metrics {
     backup: file_backup_workspace::BackupMetrics,
     nfs: nfs_workspace::NfsMetrics,
     ether: etherchannel_workspace::EtherMetrics,
+    physical: physical_link_workspace::Metrics,
     rpm: rpm_packages::RpmMetrics,
     nat_fields: Vec<(String, egui::Rect, egui::Id, bool, egui::Rect)>,
     nat_controls: Vec<(String, egui::Rect, bool, egui::Rect)>,
@@ -131,6 +134,8 @@ struct Metrics {
     unit_complete: Option<egui::Rect>,
     filters: Vec<egui::Rect>,
     card_actions: Vec<(egui::Rect, egui::Rect)>,
+    library_search: Option<egui::Rect>,
+    card_verification: Vec<(String, Option<completion_index::Status>, egui::Rect)>,
     pagination: bool,
     inputs: Vec<egui::Rect>,
     seed_fields: Vec<(String, egui::Rect, egui::Id)>,
@@ -221,6 +226,9 @@ struct Metrics {
     discovery_options: Vec<(String, egui::Rect)>,
     editor_viewport: Option<egui::Rect>,
     probe: Option<egui::Rect>,
+    routing_device: Option<egui::Rect>,
+    routing_address_tab: Option<egui::Rect>,
+    routing_device_choices: Vec<(String, egui::Rect)>,
     routing_forward: Option<egui::Rect>,
     routing_add: Option<egui::Rect>,
     routing_route_interface: Option<egui::Rect>,
@@ -269,6 +277,7 @@ struct Metrics {
     reopen_scale_items: Vec<(f32, egui::Rect)>,
     reopen_theme: Option<egui::Rect>,
     reopen_theme_items: Vec<(String, egui::Rect)>,
+    physical_picker_choices: Vec<(String, egui::Rect, egui::Rect)>,
     stop: Option<egui::Rect>,
     hint: Option<egui::Rect>,
     why: Option<egui::Rect>,
@@ -331,6 +340,8 @@ pub struct LabApp {
     rpm_presentation: rpm_packages::Presentation,
     nfs_presentation: nfs_workspace::Presentation,
     ether_presentation: etherchannel_workspace::Presentation,
+    physical_presentation: physical_link_workspace::Presentation,
+    completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
     backup_presentation: file_backup_workspace::Presentation,
     help_open: bool,
@@ -437,6 +448,7 @@ impl LabApp {
         let preferences_read_only = preferences_error.is_some() || lock_error.is_some();
         let preferences = preferences.unwrap_or_default();
         theme::apply(ctx, &preferences.theme);
+        let completion_index = completion_index::Handle::default();
         Self {
             scenarios,
             units,
@@ -477,8 +489,14 @@ impl LabApp {
             rpm_presentation: rpm_packages::Presentation::default(),
             nfs_presentation: nfs_workspace::Presentation::default(),
             ether_presentation: etherchannel_workspace::Presentation::default(),
+            physical_presentation: physical_link_workspace::Presentation::with_index(
+                completion_index.clone(),
+            ),
             cron_presentation: cron_workspace::Presentation::default(),
-            backup_presentation: file_backup_workspace::Presentation::default(),
+            backup_presentation: file_backup_workspace::Presentation::with_index(
+                completion_index.clone(),
+            ),
+            completion_index,
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -491,6 +509,12 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if let Some(stage) = Self::physical_stage(
+                smoke,
+                developer,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if let Some(stage) =
                 Self::etherchannel_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
@@ -610,6 +634,9 @@ impl LabApp {
                 7660
             } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("acl-workspace") {
                 7600
+            } else if smoke && std::env::var("DLMS_SMOKE_STAGE").as_deref() == Ok("private-office")
+            {
+                72000
             } else if let Some(stage) = Self::numeric_validation_stage(
                 smoke,
                 std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
@@ -764,6 +791,7 @@ impl LabApp {
         self.rpm_presentation.clear();
         self.nfs_presentation.clear();
         self.ether_presentation.clear();
+        self.physical_presentation.clear();
         self.cron_presentation.clear();
         self.backup_presentation.clear();
         self.script_job = None;
@@ -783,6 +811,7 @@ impl LabApp {
         Self::prepare_nfs(a, s, new_attempt);
         Self::prepare_ether(a, s, new_attempt);
         Self::prepare_cron(a, s);
+        Self::prepare_physical(a, s, new_attempt);
         Self::prepare_backup(a, s, new_attempt);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
@@ -905,7 +934,11 @@ impl LabApp {
                 .unwrap()
                 .selected_device = device;
         }
-        let nfs_recency_notice = if matches!(a.state, engine::State::EtherChannel { .. }) {
+        let nfs_recency_notice = if matches!(a.state, engine::State::PhysicalLink { .. }) {
+            self.input.clear();
+            self.checked = false;
+            dlms_learning_lab::physical_link_workspace::record_visit(a, s, clock).err()
+        } else if matches!(a.state, engine::State::EtherChannel { .. }) {
             self.input.clear();
             self.checked = false;
             dlms_learning_lab::etherchannel_workspace::record_visit(a, s, clock).err()
@@ -928,6 +961,9 @@ impl LabApp {
             self.checked = data.checked;
             None
         };
+        if nfs_recency_notice.is_none() {
+            let _ = self.completion_index.rekey_metadata(a, s);
+        }
         self.selected = Some(i);
         self.reset_pending = false;
         self.focus_input = true;
@@ -971,9 +1007,12 @@ impl LabApp {
         self.rpm_presentation.clear();
         self.nfs_presentation.clear();
         self.ether_presentation.clear();
+        self.physical_presentation.clear();
         self.cron_presentation.clear();
         self.backup_presentation.reset_all();
+        self.physical_presentation.reset_all();
         let s = &self.scenarios[i];
+        self.completion_index.forget(&s.id);
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
             self.mac_trace_reset = Some(i);
@@ -986,6 +1025,7 @@ impl LabApp {
         Self::prepare_nfs(a, s, true);
         Self::prepare_ether(a, s, true);
         Self::prepare_cron(a, s);
+        Self::prepare_physical(a, s, true);
         Self::prepare_backup(a, s, true);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
@@ -1125,6 +1165,7 @@ impl LabApp {
         }
     }
     fn text_size_picker(&mut self, ui: &mut egui::Ui) {
+        let observe_picker = self.reopen.is_some() || self.physical_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1136,13 +1177,18 @@ impl LabApp {
                         scale,
                         format!("{:.0}%", scale * 100.),
                     );
-                    if self.reopen.is_some() {
+                    if observe_picker {
                         self.metrics.reopen_scale_items.push((scale, item.rect));
+                        self.metrics.physical_picker_choices.push((
+                            format!("scale:{scale:.2}"),
+                            item.rect,
+                            ui.clip_rect(),
+                        ));
                     }
                 }
             });
         name_control(&r.response, "Text size");
-        if self.reopen.is_some() {
+        if observe_picker {
             self.metrics.reopen_scale = Some(r.response.rect);
         }
         self.metrics.header.push(r.response.rect);
@@ -1163,6 +1209,7 @@ impl LabApp {
         self.theme_dropdown_width(ui, 195.);
     }
     fn theme_dropdown_width(&mut self, ui: &mut egui::Ui, width: f32) {
+        let observe_picker = self.reopen.is_some() || self.physical_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)
@@ -1175,17 +1222,22 @@ impl LabApp {
                             t.id.clone(),
                             format!("{} · {}", t.group, t.name),
                         );
-                        if self.reopen.is_some() {
+                        if observe_picker {
                             self.metrics
                                 .reopen_theme_items
                                 .push((t.id.clone(), item.rect));
+                            self.metrics.physical_picker_choices.push((
+                                format!("theme:{}", t.id),
+                                item.rect,
+                                ui.clip_rect(),
+                            ));
                         }
                     }
                 })
         })
         .inner;
         name_control(&r.response, "Application theme");
-        if self.reopen.is_some() {
+        if observe_picker {
             self.metrics.reopen_theme = Some(r.response.rect);
         }
         self.metrics.header.push(r.response.rect);
@@ -1278,7 +1330,33 @@ impl LabApp {
                     })
                 })
                 .count();
-            ui.label(if earlier > 0 {
+            let pending = unit
+                .labs
+                .iter()
+                .filter(|id| {
+                    self.progress.attempts.get(*id).is_some_and(|a| {
+                        self.scenarios
+                            .iter()
+                            .find(|s| &s.id == *id)
+                            .is_some_and(|s| {
+                                self.completion_index.status(a, s)
+                                    == Some(completion_index::Status::Pending)
+                            })
+                    })
+                })
+                .count();
+            ui.label(if pending > 0 {
+                format!(
+                    "{} · {done}/{} verified complete · {pending} pending verification{}",
+                    unit.title,
+                    unit.labs.len(),
+                    if earlier > 0 {
+                        format!(" · {earlier} earlier completions retained")
+                    } else {
+                        String::new()
+                    }
+                )
+            } else if earlier > 0 {
                 format!(
                     "{} · {done}/{} currently verified · {earlier} earlier completions retained",
                     unit.title,
@@ -1354,7 +1432,9 @@ impl LabApp {
         };
         let next = if matches!(
             self.scenarios[i].initial,
-            engine::State::Cron { .. } | engine::State::FileBackup { .. }
+            engine::State::Cron { .. }
+                | engine::State::FileBackup { .. }
+                | engine::State::PhysicalLink { .. }
         ) {
             let position = unit
                 .labs
@@ -1397,6 +1477,7 @@ impl LabApp {
                 self.rpm_presentation.clear();
                 self.nfs_presentation.clear();
                 self.ether_presentation.clear();
+                self.physical_presentation.clear();
                 self.cron_presentation.clear();
                 self.backup_presentation.clear();
             }
@@ -1446,6 +1527,7 @@ impl LabApp {
                 .char_limit(200),
         );
         name_control(&search, "Search labs by title, goal or topic");
+        self.metrics.library_search = Some(search.rect);
         if search.changed() {
             self.page = 0;
         }
@@ -1580,11 +1662,16 @@ impl LabApp {
             .enumerate()
             .filter(|(_, s)| {
                 let a = self.progress.attempts.get(&s.id);
-                catalog::matches(
+                catalog::matches_verification(
                     s,
                     &self.filter,
                     a.is_some(),
-                    a.is_some_and(|a| self.nfs_visible_solved(a, s)),
+                    a.and_then(|a| {
+                        self.completion_index
+                            .status(a, s)
+                            .map(|v| v.result())
+                            .unwrap_or_else(|| Some(self.nfs_visible_solved(a, s)))
+                    }),
                     self.progress.favorites.contains(&s.id),
                 )
             })
@@ -1593,6 +1680,38 @@ impl LabApp {
             items.sort_by_key(|(_, s)| {
                 std::cmp::Reverse(self.progress.attempts.get(&s.id).map_or(0, |a| a.visited))
             });
+        }
+        self.completion_index.page(
+            source
+                .iter()
+                .filter(|s| {
+                    catalog::matches_filters(
+                        s,
+                        &self.filter,
+                        self.progress.attempts.contains_key(&s.id),
+                        self.progress.favorites.contains(&s.id),
+                    )
+                })
+                .filter(|s| {
+                    self.completion_index.can_queue(&s.id)
+                        && self.progress.attempts.get(&s.id).is_some_and(|a| {
+                            self.completion_index.status(a, s)
+                                == Some(completion_index::Status::Pending)
+                        })
+                })
+                .take(12)
+                .map(|s| s.id.clone()),
+        );
+        if !self.settings_open
+            && !self.theme_preview
+            && !self.data_tools.modal_open()
+            && self
+                .completion_index
+                .pending(&self.progress, &self.scenarios)
+                .is_some()
+        {
+            ui.ctx()
+                .request_repaint_after(std::time::Duration::from_millis(16));
         }
         self.page = self.page.min(items.len().saturating_sub(1) / 12);
         self.metrics.pagination = items.len() > 12;
@@ -1647,12 +1766,17 @@ impl LabApp {
                     .attempts
                     .get(&s.id)
                     .is_some_and(|a| file_backup_workspace::solved_with_memos(self, a, s));
-                (*i, *s, complete)
+                let verification = self
+                    .progress
+                    .attempts
+                    .get(&s.id)
+                    .and_then(|a| self.completion_index.status(a, s));
+                (*i, *s, complete, verification)
             })
             .collect::<Vec<_>>();
         for row in page_items.chunks(columns) {
             ui.columns(columns, |uis| {
-                for (col, (i, s, complete)) in row.iter().enumerate() {
+                for (col, (i, s, complete, verification)) in row.iter().enumerate() {
                     let ui = &mut uis[col];
                     card(ui).show(ui, |ui| {
                         ui.set_min_width((ui.available_width() - 1.).max(0.));
@@ -1687,7 +1811,11 @@ impl LabApp {
                         let a = self.progress.attempts.get(&s.id);
                         let complete = *complete;
                         let favorite = self.progress.favorites.contains(&s.id);
-                        let status = if a.is_some_and(|a| progress::legacy_script_credit(a, s))
+                        let status = if *verification == Some(completion_index::Status::Pending) {
+                            "Verification pending · Open to check saved work"
+                        } else if *verification == Some(completion_index::Status::Incomplete) {
+                            "Incomplete · Continue working"
+                        } else if a.is_some_and(|a| progress::legacy_script_credit(a, s))
                             && !complete
                         {
                             "Earlier run complete · Rerun to verify"
@@ -1759,11 +1887,17 @@ impl LabApp {
                                 self.dirty = true;
                             }
                             rects = Some((start.rect, fav.rect));
-                            ui.label(RichText::new(status).small().color(if complete {
-                                palette(ui).success
-                            } else {
-                                palette(ui).muted
-                            }));
+                            let status_response =
+                                ui.label(RichText::new(status).small().color(if complete {
+                                    palette(ui).success
+                                } else {
+                                    palette(ui).muted
+                                }));
+                            self.metrics.card_verification.push((
+                                s.id.clone(),
+                                *verification,
+                                status_response.rect,
+                            ));
                         });
                         if let Some(rects) = rects {
                             self.metrics.card_actions.push(rects);
@@ -1828,7 +1962,13 @@ impl LabApp {
                                     "status",
                                     "Any status",
                                     &mut self.filter.status,
-                                    ["Not started", "In progress", "Complete"].into_iter(),
+                                    [
+                                        "Not started",
+                                        "In progress",
+                                        "Complete",
+                                        "Verification pending",
+                                    ]
+                                    .into_iter(),
                                     width,
                                 ),
                                 2 => {
@@ -1896,6 +2036,8 @@ impl LabApp {
     }
     fn render(&mut self, ctx: &egui::Context) {
         self.metrics = Metrics::default();
+        let completion_root_frame = ctx.cumulative_frame_nr_for(egui::ViewportId::ROOT);
+        self.completion_index.begin_frame(completion_root_frame);
         self.nat_presentation.memo.begin_frame();
         self.rpm_presentation.memo.begin_frame();
         self.nfs_presentation.memo.begin_frame();
@@ -1910,10 +2052,13 @@ impl LabApp {
         let nfs_selected_before_restore = self.selected;
         self.data_dialog(ctx);
         if nfs_selected_before_restore.is_some() && self.selected.is_none() {
+            self.completion_index.clear();
             self.nfs_presentation.clear();
             self.ether_presentation.clear();
+            self.physical_presentation.clear();
             self.cron_presentation.clear();
             self.backup_presentation.reset_all();
+            self.physical_presentation.reset_all();
         }
         self.sync_appearance(ctx, previous);
         self.rpm_prepass();
@@ -1923,6 +2068,7 @@ impl LabApp {
         self.cron_prepass(ctx);
         self.advance_backup(ctx);
         self.backup_prepass(ctx);
+        self.physical_library_prepass(ctx);
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(palette(ui).error, error);
@@ -2106,4 +2252,12 @@ fn name_control(response: &egui::Response, label: impl Into<String>) {
 }
 fn palette(ui: &egui::Ui) -> theme::Roles {
     theme::roles(ui.ctx())
+}
+
+impl LabApp {
+    fn prepare_physical(a: &mut Attempt, s: &Scenario, new: bool) {
+        if matches!(s.initial, engine::State::PhysicalLink { .. }) {
+            let _ = dlms_learning_lab::physical_link_workspace::prepare_attempt(a, s, new);
+        }
+    }
 }

@@ -604,7 +604,28 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
             // Preserve this real new-family positive in the cross-family matrix.
             dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
         }
-        a.workspace.as_mut().unwrap().command = format!("Retained draft for {}", s.id);
+        if matches!(a.state, State::PhysicalLink { .. }) {
+            use dlms_learning_lab::physical_link_workspace as physical;
+            physical::prepare_attempt(&mut a, s, true).unwrap();
+            let mut draft = a
+                .workspace
+                .as_ref()
+                .unwrap()
+                .physical_link_draft
+                .as_ref()
+                .unwrap()
+                .clone();
+            let port = draft.configuration.ports.values_mut().next().unwrap();
+            port.admin_up = !port.admin_up;
+            physical::set_draft(&mut a, s, physical::Scope::Assignment, &draft).unwrap();
+            assert!(!progress::current_solved(&a, s));
+            assert!(
+                a.workspace.as_ref().unwrap().command.is_empty(),
+                "Native physical config never borrows a terminal draft"
+            );
+        } else {
+            a.workspace.as_mut().unwrap().command = format!("Retained draft for {}", s.id);
+        }
         a.transcript
             .push("Retained synthetic investigation transcript".into());
         p.attempts.insert(s.id.clone(), a);

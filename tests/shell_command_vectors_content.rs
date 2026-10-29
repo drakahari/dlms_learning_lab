@@ -103,7 +103,7 @@ fn catalog() -> Vec<Scenario> {
     static ALL: OnceLock<Vec<Scenario>> = OnceLock::new();
     ALL.get_or_init(|| {
         let all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 171);
+        assert_eq!(all.len(), 176);
         for new in authored() {
             let actual = all.iter().find(|s| s.id == new.id).unwrap();
             assert_eq!(
@@ -182,7 +182,7 @@ fn three_distinct_registered_tasks_preserve_original147_and_exact37_unit_prefix(
         r.original_ids.iter().collect::<Vec<_>>()
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 44);
+    assert_eq!(units.len(), 46);
     let private40 =
         cron_registration::private_cron_units(include_bytes!("../scenarios/units-v1.json"))
             .unwrap();

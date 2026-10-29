@@ -30,6 +30,8 @@ pub(in crate::ui) mod numeric_validation;
 pub(in crate::ui) mod optional_inputs;
 mod ospf;
 mod ospf_lessons;
+pub(in crate::ui) mod physical_link_lessons;
+pub(in crate::ui) mod private_office;
 pub(super) mod reopen;
 pub(in crate::ui) mod rpm_lessons;
 mod safe_automation_lessons;
@@ -398,6 +400,13 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 66000..=66999 => {
+                let (advance, capture) = self.physical_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
             n @ 49700..=49724 => {
                 let (advance, capture) = self.etherchannel_spacing_native(ctx, n);
                 if !advance {
@@ -647,6 +656,13 @@ impl LabApp {
             }
             n @ nat::FIRST..=nat::LAST => {
                 let (advance, capture) = self.nat_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n @ 72000..=72499 => {
+                let (advance, capture) = self.private_office_native(ctx, n);
                 if !advance {
                     return;
                 }

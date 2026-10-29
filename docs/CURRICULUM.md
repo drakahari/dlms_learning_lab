@@ -2,42 +2,20 @@
 
 Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
 retain their separately documented2026-10-22 source snapshot. This is a plan and
-evidence ledger, not complete exam preparation. Main has **171 source-integrated assignments
-/44 units:48CCNA,36LPIC-1,32LPIC-2,55Bash/Shell**. Three numeric-validation,
-malformed-record and safe-publication assignments follow the backup unit. Private
-full/native and final Main full/static/coverage gates passed; a new171 candidate
-is pending.
-Units by track are12CCNA,9LPIC-1,8LPIC-2 and15Bash. Generated
-numerical practice and developer-only synthetic entries are excluded. All136
-current parent objectives remain incomplete (97 Open,39 Partial).
+evidence ledger, not complete exam preparation. Main has **176 source-integrated
+assignments/46 units:53CCNA,36LPIC-1,32LPIC-2,55Bash/Shell**. Four physical-uplink
+assignments and one private-office plan follow the earlier171 catalog. Units by
+track are14CCNA,9LPIC-1,8LPIC-2 and15Bash. Generated numerical practice and developer
+synthetic entries are excluded. All136 current parent objectives remain incomplete
+(94Open/42Partial); the1240 overlapping references are172Partial/1Supporting/1067Open.
 
-Source/content, final behavior/regression, real native and packaged results for
-the latest four additions are distinguished in [CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md). Main native
-receipts and a new candidate are pending final pinning; source existence does not
-establish rendered-screen, novice or platform acceptance. The retained
-UI-only9a90f275e133 milestone added no curriculum: its154-lab inclusive regression
-passed1981/0/0 and its installed Fedora candidate passed scoped NFS, command-
-construction, reliable-text, alignment, lifecycle/startup/original reopen checks.
-Those earlier observations are preserved below and in INSTALLATION.md; they do
-not prove acceptance of the fourteen later assignments.
-
-Three Basic NAT lessons retain installed154 Fedora flows80 captures on00d69d3;
-NAT was not rerun on the UI-only9a90f275e133 ELF. Four NFS106 and three command-
-construction scripting72 flows pass on that latest ELF, alongside reliable-text72.
-New-seven resume is full warm readback, not seven cold-process tests.
-Four RPM lessons separately passed development AND installed147 native flows,
-including separate practice, alternatives, wrong/partial work, invalidation,
-reset/resume and scaling; those flows were not repeated on154. Earlier147
-candidate87121151e82e retains its lifecycle/startup/reopen/alignment evidence.
-Prior140 candidate ddb886b retains its scoped accepted
-new-seven/static-web/safe-text evidence; it is not evidence for later units.
-No candidate/test count establishes complete curriculum or novice/platform mastery.
-See [COMPLETION.md](COMPLETION.md) and [IMPLEMENTATION_LEDGER.md](IMPLEMENTATION_LEDGER.md).
-
-The2026-10-28 [complete reconciliation](CURRICULUM_RECONCILIATION.md) enumerates
-every current parent assignment still incomplete, links every granular gap and
-inventories the42 integrated units. No arbitrary final lab count replaces the
-agreed skills. Source-only foundations and private content remain excluded.
+Main inclusive2,467/all24history groups pass. Source, scoped rendered evidence,
+long-route teardown and installed candidates are separated in
+[CATALOG176_MILESTONE.md](CATALOG176_MILESTONE.md). The available171 candidate's
+installed lifecycle/NFS cold reopening/ten starts retain their exact065032d identity.
+No current candidate, documentation row or test count completes the agreed scope.
+Windows/macOS runtime, screen-reader/physical-device and novice acceptance remain
+pending. Historical milestones retain their original catalog and build identities.
 
 ## Primary sources and version boundaries
 

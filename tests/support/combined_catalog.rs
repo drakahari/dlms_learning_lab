@@ -3,8 +3,152 @@ use super::digest;
 use serde_json::Value;
 const NFS_INDEX_SHA: &str = "d1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef";
 const BASH_REVIEW_SHA: &str = "fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e82ee5f58a8f9c0eb";
+/// Exact private46-to-reviewed45 inverse; both raw and complete typed objects
+/// must match. Historical physical45/numeric44/backup43 recipes remain immutable.
+pub fn before_private_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let bytes = include_bytes!("../fixtures/catalog176-registration.json");
+    if digest::hash(bytes) != "690e81765c71f591972c921fed7ce417eb21e67afdd272d8049789290757898f" {
+        return Err("Immutable private-office append recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    if digest::hash(raw)
+        != recipe["after_units46_sha256"]
+            .as_str()
+            .ok_or("Private46 pin missing")?
+        || raw.len() as u64
+            != recipe["after_units46_bytes"]
+                .as_u64()
+                .ok_or("Private46 length missing")?
+    {
+        return Err("Exact private46 raw units differ".into());
+    }
+    let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
+    let prefix = text
+        .strip_suffix(
+            recipe["append_suffix_utf8"]
+                .as_str()
+                .ok_or("Private suffix missing")?,
+        )
+        .ok_or("Exact final private-office append differs")?;
+    let before = format!(
+        "{prefix}{}",
+        recipe["old_tail_utf8"]
+            .as_str()
+            .ok_or("Reviewed45 tail missing")?
+    )
+    .into_bytes();
+    if digest::hash(&before)
+        != recipe["before_units45_sha256"]
+            .as_str()
+            .ok_or("Reviewed45 pin missing")?
+        || before.len() as u64
+            != recipe["before_units45_bytes"]
+                .as_u64()
+                .ok_or("Reviewed45 length missing")?
+    {
+        return Err("Full reviewed45 raw bytes differ".into());
+    }
+    if before.as_slice() != include_bytes!("../fixtures/private-office-units-before175.json") {
+        return Err("Immutable reviewed45 raw fixture differs".into());
+    }
+    let mut expected: Value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
+    if expected != recipe["before_units45"] {
+        return Err("Full reviewed45 typed units differ".into());
+    }
+    let units = expected["units"]
+        .as_array_mut()
+        .ok_or("Reviewed45 array missing")?;
+    if units.len() != 45 {
+        return Err("Reviewed45 count differs".into());
+    }
+    units.push(recipe["private_unit"].clone());
+    if serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? != expected {
+        return Err("Change outside exact private-office unit append".into());
+    }
+    Ok(before)
+}
+fn private_prefix(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    if digest::hash(raw) == "3e616aa9199af235062796880af5735ba3537bf52c0f6a672b1d42e4a7788ae6" {
+        Ok(Some(before_private_units(raw)?))
+    } else {
+        Ok(None)
+    }
+}
+/// Exact private45-to-reviewed44 inverse. All old raw objects/recipes stay fixed.
+pub fn before_physical_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_private = private_prefix(raw)?;
+    let raw = without_private.as_deref().unwrap_or(raw);
+    let bytes = include_bytes!("../fixtures/catalog175-registration.json");
+    if digest::hash(bytes) != "a594ed8c8a4744101869ac2b32e5a01b14afca0eeebc1884f2490b5d5b3c2050" {
+        return Err("Immutable physical append recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    if digest::hash(raw)
+        != recipe["after_units45_sha256"]
+            .as_str()
+            .ok_or("Physical45 pin missing")?
+        || raw.len() as u64
+            != recipe["after_units45_bytes"]
+                .as_u64()
+                .ok_or("Physical45 length missing")?
+    {
+        return Err("Exact new45 raw units differ".into());
+    }
+    let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
+    let prefix = text
+        .strip_suffix(
+            recipe["append_suffix_utf8"]
+                .as_str()
+                .ok_or("Physical suffix missing")?,
+        )
+        .ok_or("Exact final physical append differs")?;
+    let before = format!(
+        "{prefix}{}",
+        recipe["old_tail_utf8"]
+            .as_str()
+            .ok_or("Original44 tail missing")?
+    )
+    .into_bytes();
+    if digest::hash(&before)
+        != recipe["before_units44_sha256"]
+            .as_str()
+            .ok_or("Original44 pin missing")?
+        || before.len() as u64
+            != recipe["before_units44_bytes"]
+                .as_u64()
+                .ok_or("Original44 length missing")?
+    {
+        return Err("Full original44 raw bytes differ".into());
+    }
+    let mut expected: Value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
+    if expected != recipe["before_units44"] {
+        return Err("Full original44 typed units differ".into());
+    }
+    let units = expected["units"]
+        .as_array_mut()
+        .ok_or("Original44 array missing")?;
+    if units.len() != 44 {
+        return Err("Original44 count differs".into());
+    }
+    units.push(recipe["physical_unit"].clone());
+    if serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? != expected {
+        return Err("Change outside exact physical unit append".into());
+    }
+    Ok(before)
+}
+fn physical_prefix(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let without_private = private_prefix(raw)?;
+    let raw = without_private.as_deref().unwrap_or(raw);
+    if digest::hash(raw) == "089c2ffcc7b5901a86960e36fc71bf433bc920e74ef1bf8c8042369c16c01a2a" {
+        Ok(Some(before_physical_units(raw)?))
+    } else {
+        Ok(None)
+    }
+}
 /// Exact new44-to-reviewed43 inverse. All old raw objects and recipes stay fixed.
 pub fn before_numeric_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_physical = physical_prefix(raw)?;
+    let raw = without_physical.as_deref().unwrap_or(raw);
     let bytes = include_bytes!("../fixtures/catalog171-registration.json");
     if digest::hash(bytes) != "573d8d85745ef923b515673ebce518107dbdc19e6558906aae13f6b9f3b4519c" {
         return Err("Immutable numeric append recipe differs".into());
@@ -66,6 +210,8 @@ pub fn before_numeric_units(raw: &[u8]) -> Result<Vec<u8>, String> {
 }
 /// Only normalize the exact accepted numeric suffix before the retained43 body.
 pub fn before_backup_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_physical = physical_prefix(raw)?;
+    let raw = without_physical.as_deref().unwrap_or(raw);
     let before = if digest::hash(raw)
         == "4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b"
     {
@@ -139,6 +285,8 @@ fn reviewed_before_backup_units(raw: &[u8]) -> Result<Vec<u8>, String> {
 }
 /// Normalize only the exact new append, then use the retained reviewed42 body.
 pub fn before_cron_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_physical = physical_prefix(raw)?;
+    let raw = without_physical.as_deref().unwrap_or(raw);
     let numeric = if digest::hash(raw)
         == "4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b"
     {
@@ -218,6 +366,8 @@ fn reviewed_before_cron_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 pub fn before_optional_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_physical = physical_prefix(raw)?;
+    let raw = without_physical.as_deref().unwrap_or(raw);
     let recipe_raw = include_bytes!("../fixtures/catalog160-registration.json");
     if digest::hash(recipe_raw)
         != "e431d3f3e8102fac06272879b91baf20ae00144e410cc3278886f70a37b4e312"
@@ -274,6 +424,8 @@ pub fn before_optional_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(recovered)
 }
 pub fn before_lacp_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_physical = physical_prefix(raw)?;
+    let raw = without_physical.as_deref().unwrap_or(raw);
     let recipe_raw = include_str!("../fixtures/catalog157-original154-boundary.json");
     if digest::hash(recipe_raw.as_bytes())
         != "0d2035c4da961607c6b40066a944040f2ee133a1270dceefe5c69598768f9969"
@@ -332,6 +484,8 @@ pub fn before_lacp_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(original.to_vec())
 }
 pub fn old_unit_bytes(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_physical = physical_prefix(raw)?;
+    let raw = without_physical.as_deref().unwrap_or(raw);
     let before_cron = before_cron_units(raw).ok();
     let raw = before_cron.as_deref().unwrap_or(raw);
     let before_optional = before_optional_units(raw).ok();

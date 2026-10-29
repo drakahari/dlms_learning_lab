@@ -49,7 +49,7 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     assert_eq!(texts.len(), 35);
     let old = pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (147, 171));
+    assert_eq!((old.len(), all.len()), (147, 176));
     exact(&all[..147].to_vec(), &old);
     exact(
         &old.iter()
@@ -70,7 +70,7 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [48, 36, 32, 55]
+        [53, 36, 32, 55]
     );
     let current_raw = include_str!("../scenarios/units-v1.json");
     let raw39 = cron_registration::previous_units(
@@ -85,7 +85,7 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     );
     let original = course::load(&reconstructed, &old).unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!((original.len(), units.len()), (37, 44));
+    assert_eq!((original.len(), units.len()), (37, 46));
     exact(&units[..37].to_vec(), &original);
     exact(&units[38], &i["appended_unit"]);
     assert_eq!(

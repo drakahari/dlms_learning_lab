@@ -5,7 +5,7 @@ mod fixture;
 use dlms_learning_lab::{file_backup_workspace as work, script_teaching::View};
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
+    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
     let authored = fixture::catalog();
     assert_eq!(
         serde_json::to_value(&a.scenarios[..164]).unwrap(),
@@ -20,6 +20,14 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     ))
     .unwrap();
     let backup: dlms_learning_lab::pack::Pack = serde_json::from_str(fixture::DATA).unwrap();
+    let physical: dlms_learning_lab::pack::Pack =
+        serde_json::from_str(include_str!("../../../scenarios/physical-links-v1.json")).unwrap();
+    let private: dlms_learning_lab::pack::Pack = serde_json::from_str(include_str!(
+        "../../../scenarios/ipv4-private-planning-v1.json"
+    ))
+    .unwrap();
+    assert_eq!(physical.scenarios.len(), 4);
+    assert_eq!(private.scenarios.len(), 1);
     assert_eq!(numeric.scenarios.len(), 3);
     assert_eq!(backup.scenarios.len(), 4);
     let expected = authored[..164]
@@ -28,9 +36,19 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
         .chain(&numeric.scenarios)
         .collect::<Vec<_>>();
     assert_eq!(
+        serde_json::to_value(&a.scenarios[..171]).unwrap(),
+        serde_json::to_value(&expected).unwrap(),
+        "Entire original171 remains exact"
+    );
+    let expected = expected
+        .into_iter()
+        .chain(&physical.scenarios)
+        .chain(&private.scenarios)
+        .collect::<Vec<_>>();
+    assert_eq!(
         serde_json::to_value(&a.scenarios).unwrap(),
         serde_json::to_value(expected).unwrap(),
-        "Entire actual normal catalog: all prior164, canonical backup4 and canonical numeric3"
+        "Entire176: exact prior171 + canonicalphysical4 + canonicalprivate1"
     );
     let canonical: dlms_learning_lab::pack::Pack = serde_json::from_str(fixture::DATA).unwrap();
     assert_eq!(

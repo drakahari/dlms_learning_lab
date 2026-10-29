@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -520,6 +520,29 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
             source.id
         );
     }
+    let physical = all
+        .iter()
+        .filter(|s| matches!(s.initial, State::PhysicalLink { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        physical.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        [
+            "ccna-physical-media-span",
+            "ccna-physical-duplex-diagnosis",
+            "ccna-physical-counter-baseline",
+            "ccna-physical-uplink-handover"
+        ]
+    );
+    for source in physical {
+        let mut state = source.initial.clone();
+        let before = serde_json::to_value(&state).unwrap();
+        assert!(engine::execute(&mut state, &source.solution[0]).is_err());
+        assert_eq!(serde_json::to_value(&state).unwrap(), before);
+        for input in &source.solution {
+            engine::execute_for_goal(&mut state, &source.goal, input).unwrap();
+        }
+        assert!(engine::solved(&state, &source.goal));
+    }
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -541,14 +564,41 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::EtherChannel { .. }
                     | State::Cron { .. }
                     | State::FileBackup { .. }
+                    | State::PhysicalLink { .. }
             )
         })
         .collect::<Vec<_>>();
-    let numeric_ids=["shell-numeric-retry","shell-numeric-intake","shell-numeric-publication"];
-    assert_eq!(old.iter().filter(|s|!numeric_ids.contains(&s.id.as_str())).count(),119,"Every original119 context-free assignment remains in the loop");
-    assert_eq!(old.iter().filter(|s|numeric_ids.contains(&s.id.as_str())).map(|s|s.id.as_str()).collect::<Vec<_>>(),numeric_ids);
-    assert!(old.iter().filter(|s|numeric_ids.contains(&s.id.as_str())).all(|s|matches!(s.initial,State::Script{..})&&matches!(s.goal,engine::Goal::Script{..})&&s.teaching.is_some()));
-    assert_eq!(old.len(),122,"all current context-free assignment kinds remain exercised");
+    let numeric_ids = [
+        "shell-numeric-retry",
+        "shell-numeric-intake",
+        "shell-numeric-publication",
+    ];
+    assert_eq!(
+        old.iter()
+            .filter(|s| !numeric_ids.contains(&s.id.as_str()) && s.id != "ccna-private-office-plan")
+            .count(),
+        119,
+        "Every original119 context-free assignment remains in the loop"
+    );
+    assert_eq!(
+        old.iter()
+            .filter(|s| numeric_ids.contains(&s.id.as_str()))
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        numeric_ids
+    );
+    assert!(
+        old.iter()
+            .filter(|s| numeric_ids.contains(&s.id.as_str()))
+            .all(|s| matches!(s.initial, State::Script { .. })
+                && matches!(s.goal, engine::Goal::Script { .. })
+                && s.teaching.is_some())
+    );
+    assert_eq!(
+        old.len(),
+        123,
+        "all original122 plus private-office1 context-free assignment kinds remain exercised"
+    );
     assert_eq!(
         old[113..116]
             .iter()
@@ -579,6 +629,16 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
             .iter()
             .all(|s| matches!(s.initial, State::Script { .. })
                 && matches!(s.goal, engine::Goal::Script { .. }))
+    );
+    let office = old
+        .iter()
+        .filter(|s| s.id == "ccna-private-office-plan")
+        .collect::<Vec<_>>();
+    assert_eq!(office.len(), 1);
+    assert!(matches!(office[0].initial, State::Ipv4Routing { .. }));
+    assert_eq!(
+        old[122].id, "ccna-private-office-plan",
+        "All previous122 entries stay ahead of the one new existing-kind project"
     );
     for s in old {
         let mut raw = s.initial.clone();

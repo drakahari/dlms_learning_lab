@@ -341,7 +341,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 44);
+    assert_eq!(units.len(), 46);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -375,8 +375,15 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
         serde_json::from_str(include_str!("fixtures/cron-registration-v1.json")).unwrap();
     let backup: Value =
         serde_json::from_str(include_str!("fixtures/catalog168-registration.json")).unwrap();
-    let numeric:Value=serde_json::from_str(include_str!("fixtures/catalog171-registration.json")).unwrap();
-    assert_eq!(units.pop().unwrap(),numeric["numeric_unit"]);
+    let numeric: Value =
+        serde_json::from_str(include_str!("fixtures/catalog171-registration.json")).unwrap();
+    let physical: Value =
+        serde_json::from_str(include_str!("fixtures/catalog175-registration.json")).unwrap();
+    let private: Value =
+        serde_json::from_str(include_str!("fixtures/catalog176-registration.json")).unwrap();
+    assert_eq!(units.pop().unwrap(), private["private_unit"]);
+    assert_eq!(units.pop().unwrap(), physical["physical_unit"]);
+    assert_eq!(units.pop().unwrap(), numeric["numeric_unit"]);
     assert_eq!(units.pop().unwrap(), backup["backup_unit"]);
     assert_eq!(units.pop().unwrap(), cron["unit"]);
     let optional: Value =

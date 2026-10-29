@@ -15,6 +15,10 @@ fn script_histories<'de, D: serde::Deserializer<'de>>(
 #[serde(default, deny_unknown_fields)]
 pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub physical_link_draft: Option<crate::physical_link_assignment::Draft>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub physical_link_learning: Option<crate::physical_link_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_backup_learning: Option<crate::file_backup_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etherchannel_draft: Option<crate::etherchannel_workspace::Draft>,
@@ -150,6 +154,11 @@ impl WorkspaceData {
     }
     pub fn valid(&self) -> bool {
         self.version == 1
+            && self.physical_link_draft.as_ref().is_none_or(|d| d.valid())
+            && self
+                .physical_link_learning
+                .as_ref()
+                .is_none_or(|l| l.valid())
             && self.file_backup_learning.as_ref().is_none_or(|l| l.valid())
             && self.etherchannel_draft.as_ref().is_none_or(|d| d.valid())
             && self
@@ -298,11 +307,29 @@ pub fn preserve_script_history(a: &mut Attempt) {
         w.checked = false;
     }
 }
+/// Presence-only new-family guard. It grants no credit and copies no state.
+pub fn has_physical_metadata(a: &Attempt) -> bool {
+    crate::physical_link_workspace::has_metadata(a)
+}
+pub fn is_physical_workspace(a: &Attempt) -> bool {
+    crate::physical_link_workspace::is_workspace(a)
+}
+pub(crate) fn reject_physical_metadata(a: &Attempt) -> Result<(), String> {
+    if is_physical_workspace(a) {
+        Err(
+            "Physical-link work belongs to its physical-link activity; previous work retained"
+                .into(),
+        )
+    } else {
+        Ok(())
+    }
+}
 /// Presence-only owned-kind/foreign-metadata test, without copying or grading.
 pub fn is_file_backup_workspace(a: &Attempt) -> bool {
     matches!(a.state, State::FileBackup { .. }) || crate::file_backup_workspace::has_metadata(a)
 }
 pub(crate) fn reject_file_backup_workspace(a: &Attempt) -> Result<(), String> {
+    reject_physical_metadata(a)?;
     if is_file_backup_workspace(a) {
         Err("Backup work belongs to its backup activity; previous work retained".into())
     } else {
@@ -360,6 +387,13 @@ pub(crate) fn reject_nfs_metadata(a: &Attempt) -> Result<(), String> {
     }
 }
 pub fn prepare(a: &mut Attempt) {
+    if matches!(a.state, State::PhysicalLink { .. }) {
+        return;
+    }
+    if has_physical_metadata(a) {
+        return;
+    }
+
     if crate::file_backup_workspace::has_metadata(a) && !matches!(a.state, State::FileBackup { .. })
     {
         return;

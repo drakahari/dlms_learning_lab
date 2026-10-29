@@ -20,7 +20,7 @@ const IDS: [&str; 4] = [
 ];
 fn private_catalog() -> Vec<pack::Scenario> {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     assert_eq!(
         all[154..160]
             .iter()

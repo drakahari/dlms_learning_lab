@@ -105,7 +105,7 @@ fn catalog() -> &'static Vec<Scenario> {
         assert_eq!(shell::EVALUATOR_REVISION, 12);
         let old = originals();
         let current = pack::bundled().unwrap();
-        assert_eq!(current.len(), 171);
+        assert_eq!(current.len(), 176);
         assert_eq!(value(&current[..168]), value(&old));
         let added: Pack = serde_json::from_str(PACK).unwrap();
         assert_eq!(added.schema_version, 1);
@@ -187,7 +187,7 @@ fn exact_three_distinct_tasks36_cases_have_closed_prerequisites_and_one_advisory
     assert_eq!(unit.labs, IDS.map(str::to_string));
     let existing = pack::bundled().unwrap();
     let units = course::bundled(&existing).unwrap();
-    assert_eq!(units.len(), 44);
+    assert_eq!(units.len(), 46);
     assert_eq!(value(&units[43]), value(&unit));
     let index = json!({"version":1,"units":units});
     let validated = course::load(&index.to_string(), catalog()).unwrap();

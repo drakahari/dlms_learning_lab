@@ -16,7 +16,7 @@ pub fn lessons() -> Vec<Scenario> {
         let rows=value["scenarios"].as_array().unwrap();
         assert_eq!(rows.iter().map(|s|s["id"].as_str().unwrap()).collect::<Vec<_>>(),IDS);
         let normal=pack::bundled().unwrap();
-        assert_eq!(normal.len(),171);
+        assert_eq!(normal.len(),176);
         let by_id: BTreeMap<_,_>=normal.iter().map(|s|(s.id.as_str(),s)).collect();
         let mut pending:Vec<String>=rows.iter().flat_map(|s|s["prerequisites"].as_array().unwrap()).map(|id|id.as_str().unwrap().into()).collect();
         let mut needed=BTreeSet::new();

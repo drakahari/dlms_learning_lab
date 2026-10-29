@@ -200,6 +200,40 @@ class FixedAutomationSafety(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, 'Whole amended Lesson'):
                 teaching_amendment.historical_example(ROOT, scenario)
 
+    def closed_original44_units(self, current_raw):
+        # Close both canonical appends before asserting the unchanged old44/43
+        # hashes below. No historical input, recipe or observation is rewritten.
+        for catalog, before_count, after_count, unit_key, expected_recipe in [
+            (176, 45, 46, 'private_unit', '690e81765c71f591972c921fed7ce417eb21e67afdd272d8049789290757898f'),
+            (175, 44, 45, 'physical_unit', 'a594ed8c8a4744101869ac2b32e5a01b14afca0eeebc1884f2490b5d5b3c2050'),
+        ]:
+            recipe_raw=(ROOT/f'tests/fixtures/catalog{catalog}-registration.json').read_bytes()
+            self.assertEqual(hashlib.sha256(recipe_raw).hexdigest(), expected_recipe)
+            recipe=json.loads(recipe_raw)
+            self.assertEqual(hashlib.sha256(current_raw).hexdigest(), recipe[f'after_units{after_count}_sha256'])
+            self.assertEqual(len(current_raw), recipe[f'after_units{after_count}_bytes'])
+            suffix=recipe['append_suffix_utf8'].encode()
+            self.assertTrue(current_raw.endswith(suffix))
+            original=current_raw[:-len(suffix)]+recipe['old_tail_utf8'].encode()
+            self.assertEqual(hashlib.sha256(original).hexdigest(), recipe[f'before_units{before_count}_sha256'])
+            self.assertEqual(len(original), recipe[f'before_units{before_count}_bytes'])
+            old=json.loads(original)
+            self.assertEqual(old, recipe[f'before_units{before_count}'])
+            self.assertEqual(len(old['units']), before_count)
+            self.assertEqual(json.loads(current_raw), {**old,'units':old['units']+[recipe[unit_key]]})
+            current_raw=original
+        return current_raw
+
+    def test_closed_network_appends_recover_all_old_units_and_refuse_changed_bytes(self):
+        current=(ROOT/'scenarios/units-v1.json').read_bytes()
+        old=self.closed_original44_units(current)
+        self.assertEqual(hashlib.sha256(old).hexdigest(), '4003d17a5eca81584a994dd389063a9efd7abb513093ca802ffff15bf79f6d4b')
+        self.assertEqual(len(json.loads(current)['units']),46)
+        self.assertEqual(json.loads(current)['units'][:44],json.loads(old)['units'])
+        for bad in [current+b' ',current.replace(b'physical-uplink-diagnosis',b'physical-uplink-tampered',1)]:
+            with self.assertRaises(AssertionError):
+                self.closed_original44_units(bad)
+
     def test_original43_authored_inputs_are_exact_registered_pack_metadata(self):
         _, data=oracle.authored_inputs(ROOT)
         self.assertEqual(len(data['scripts']),43)
@@ -220,6 +254,7 @@ class FixedAutomationSafety(unittest.TestCase):
             self.assertEqual(p['teaching']['fixture'],s['example_case'])
         self.assertEqual(data['catalog'],{n:s['version'] for n,s in raw_packs.items()})
         current_raw=(ROOT/'scenarios/units-v1.json').read_bytes()
+        current_raw=self.closed_original44_units(current_raw)
         numeric_raw=(ROOT/'tests/fixtures/catalog171-registration.json').read_bytes()
         self.assertEqual(hashlib.sha256(numeric_raw).hexdigest(),
                          '573d8d85745ef923b515673ebce518107dbdc19e6558906aae13f6b9f3b4519c')

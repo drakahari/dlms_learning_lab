@@ -99,7 +99,7 @@ fn getopts_history_exact_smoke_tick_opening_preserves_both_frozen_profiles_witho
         (HistorySource::Writer8, 116, vec![7, 8]),
     ] {
         let (ctx, mut a, i) = opened(mode);
-        assert_eq!(a.scenarios.len(), 171);
+        assert_eq!(a.scenarios.len(), 176);
         assert_eq!(a.progress.attempts.len(), contexts);
         assert_eq!(a.selected, Some(i));
         assert_eq!(

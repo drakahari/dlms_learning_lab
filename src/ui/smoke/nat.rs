@@ -1268,7 +1268,7 @@ impl LabApp {
         let mut ops = Vec::new();
         match step {
             Step::Admit => {
-                assert_eq!((self.scenarios.len(), self.units.len()), (171, 44));
+                assert_eq!((self.scenarios.len(), self.units.len()), (176, 46));
                 assert!(self.progress.attempts.is_empty());
                 assert!(self.scenarios.iter().all(|s| s.id != ID));
                 let s = pack::load(include_str!(
@@ -1672,7 +1672,7 @@ impl LabApp {
                     &original,
                     "All current normal metadata unchanged",
                 );
-                assert_eq!(self.units.len(), 44);
+                assert_eq!(self.units.len(), 46);
                 return self.nat_shot(ctx, "technical-library-final");
             }
             Step::Finish => {

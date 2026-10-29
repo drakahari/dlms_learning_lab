@@ -1,4 +1,7 @@
 //! Registration is append-only; new curriculum must not fabricate learner work.
+#[path = "support/combined_catalog.rs"]
+mod combined_catalog;
+use amendment_sha as digest;
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
 #[path = "support/teaching_amendment.rs"]
@@ -19,7 +22,7 @@ const NEW: [&str; 8] = [
 #[test]
 fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current147() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 171);
+    assert_eq!(current.len(), 176);
     let all = &current[..133];
     assert_eq!(all.len(), 133);
     let baseline: serde_json::Value =
@@ -34,7 +37,15 @@ fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current147
         all[125..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         NEW
     );
-    let current_units = course::bundled(&current).unwrap();
+    let all_current_units = course::bundled(&current).unwrap();
+    assert_eq!(all_current_units.len(), 46);
+    let raw44 = original44_unit_bytes();
+    let current_units =
+        course::load(std::str::from_utf8(&raw44).unwrap(), &current[..171]).unwrap();
+    assert_eq!(
+        serde_json::to_value(&all_current_units[..44]).unwrap(),
+        serde_json::to_value(&current_units).unwrap()
+    );
     assert_eq!(current_units.len(), 44);
     let units = &current_units[..33];
     assert_eq!(units.len(), 33);
@@ -115,4 +126,31 @@ fn six_real_example_annotations_validate_and_old_writer_history_creates_no_new_a
     for id in NEW {
         assert!(!q.attempts.contains_key(id));
     }
+}
+
+// Recover the complete reviewed44 predecessor through both closed raw inverses.
+// Canonical physical/private append recipes and all historical37 bytes stay fixed.
+fn original44_unit_bytes() -> Vec<u8> {
+    let raw = include_bytes!("../scenarios/units-v1.json");
+    let before = combined_catalog::before_physical_units(raw).unwrap();
+    let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
+    let original: serde_json::Value = serde_json::from_slice(&before).unwrap();
+    assert_eq!(current["units"].as_array().unwrap().len(), 46);
+    assert_eq!(original["units"].as_array().unwrap().len(), 44);
+    assert_eq!(
+        &current["units"].as_array().unwrap()[..44],
+        original["units"].as_array().unwrap().as_slice()
+    );
+    let physical: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog175-registration.json")).unwrap();
+    let private: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog176-registration.json")).unwrap();
+    assert_eq!(current["units"][44], physical["physical_unit"]);
+    assert_eq!(current["units"][45], private["private_unit"]);
+    // Existing pinned helper validates original raw37 plus every prior recipe.
+    assert_eq!(
+        combined_catalog::old_unit_bytes(raw).unwrap(),
+        combined_catalog::old_unit_bytes(&before).unwrap()
+    );
+    before
 }

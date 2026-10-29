@@ -6,6 +6,9 @@ use dlms_learning_lab::{
 };
 
 pub(super) fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if model::is_physical_workspace(a) {
+        return;
+    }
     if model::is_file_backup_workspace(a) {
         return;
     }

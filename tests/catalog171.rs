@@ -48,7 +48,7 @@ fn old_catalog() -> Vec<pack::Scenario> {
 fn exact168_full_definitions_order52_scripts384_cases_and52_examples_stay_unchanged() {
     let old = old_catalog();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (168, 171));
+    assert_eq!((old.len(), all.len()), (168, 176));
     assert_eq!(value(&all[..168]), value(&old));
     assert_eq!(
         value(
@@ -93,7 +93,7 @@ fn exact168_full_definitions_order52_scripts384_cases_and52_examples_stay_unchan
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [48, 36, 32, 55]
+        [53, 36, 32, 55]
     );
     for s in &all[168..171] {
         assert!(matches!(s.initial, State::Script { .. }) && s.teaching.is_some());
@@ -138,7 +138,7 @@ fn exact44_append_recovers_all43_raw_objects_and_every_old_closed_inverse() {
     let all = pack::bundled().unwrap();
     let old_units = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!((old_units.len(), units.len()), (43, 44));
+    assert_eq!((old_units.len(), units.len()), (43, 46));
     assert_eq!(value(&units[..43]), value(&old_units));
     assert_eq!(value(&units[43]), r["numeric_unit"]);
     assert_eq!(units[43].labs, IDS.map(str::to_string));
@@ -158,7 +158,13 @@ fn new_inverse_rejects_partial_extra_changed_old_new_reordered_and_missing_unit(
             1 => v["units"][43]["summary"] = "Changed new".into(),
             2 => v["units"].as_array_mut().unwrap().swap(42, 43),
             _ => {
-                v["units"].as_array_mut().unwrap().pop();
+                let units = v["units"].as_array_mut().unwrap();
+                let at = units
+                    .iter()
+                    .position(|u| u["id"] == "shell-numeric-validation")
+                    .unwrap();
+                assert_eq!(at, 43);
+                units.remove(at);
             }
         }
         let b = serde_json::to_vec_pretty(&v).unwrap();

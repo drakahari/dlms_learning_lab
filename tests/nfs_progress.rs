@@ -1,3 +1,7 @@
+#[path = "support/combined_catalog.rs"]
+mod combined_catalog;
+#[path = "../examples/support/automation_digest.rs"]
+mod digest;
 use dlms_learning_lab::{
     engine::{self, State},
     nfs as core, nfs_teaching as teach, nfs_workspace as work, pack,
@@ -108,10 +112,18 @@ fn full_source_version_kind_initial_and_lesson_pins_reject_before_mutation() {
 #[test]
 fn old147_wire_none_fields_and_existing_solved_nfs_without_metadata_remain_truthful() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     let units = dlms_learning_lab::course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 44);
-    assert_eq!(units.last().unwrap().id, "shell-numeric-validation");
+    assert_eq!(units.len(), 46);
+    let raw44 = original44_unit_bytes();
+    let original44 =
+        dlms_learning_lab::course::load(std::str::from_utf8(&raw44).unwrap(), &all[..171]).unwrap();
+    assert_eq!(original44.len(), 44);
+    assert_eq!(
+        serde_json::to_value(&units[..44]).unwrap(),
+        serde_json::to_value(&original44).unwrap()
+    );
+    assert_eq!(original44.last().unwrap().id, "shell-numeric-validation");
     for s in &all[..147] {
         assert!(s.nfs_teaching.is_none());
         assert!(
@@ -206,7 +218,7 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 171);
+    assert_eq!(p.attempts.len(), 176);
     let old = serde_json::to_value(&p.attempts).unwrap();
     let mut a = solved(&s);
     let source = s.nfs_teaching.as_ref().unwrap();
@@ -406,4 +418,31 @@ fn saved_pending_publication_and_faults_do_not_masquerade_as_current_or_denied()
         .is_err()
     );
     exact(&a, &before);
+}
+
+// Recover the complete reviewed44 predecessor through both closed raw inverses.
+// Canonical physical/private append recipes and all historical37 bytes stay fixed.
+fn original44_unit_bytes() -> Vec<u8> {
+    let raw = include_bytes!("../scenarios/units-v1.json");
+    let before = combined_catalog::before_physical_units(raw).unwrap();
+    let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
+    let original: serde_json::Value = serde_json::from_slice(&before).unwrap();
+    assert_eq!(current["units"].as_array().unwrap().len(), 46);
+    assert_eq!(original["units"].as_array().unwrap().len(), 44);
+    assert_eq!(
+        &current["units"].as_array().unwrap()[..44],
+        original["units"].as_array().unwrap().as_slice()
+    );
+    let physical: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog175-registration.json")).unwrap();
+    let private: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog176-registration.json")).unwrap();
+    assert_eq!(current["units"][44], physical["physical_unit"]);
+    assert_eq!(current["units"][45], private["private_unit"]);
+    // Existing pinned helper validates original raw37 plus every prior recipe.
+    assert_eq!(
+        combined_catalog::old_unit_bytes(raw).unwrap(),
+        combined_catalog::old_unit_bytes(&before).unwrap()
+    );
+    before
 }

@@ -12,8 +12,8 @@ fn native_app() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
     a.smoke = true;
     a.smoke_stage = BASE;
-    assert_eq!(a.scenarios.len(), 171);
-    assert_eq!(a.units.len(), 44);
+    assert_eq!(a.scenarios.len(), 176);
+    assert_eq!(a.units.len(), 46);
     assert!(IDS.iter().all(|id| a.scenarios.iter().any(|s| &s.id == id)));
     assert!(a.progress.attempts.is_empty());
     assert!(a._smoke_profile.is_some());

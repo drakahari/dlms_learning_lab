@@ -1,0 +1,260 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "ccna-private-office-plan",
+      "version": 1,
+      "track": "CCNA",
+      "topic": "Private IPv4 address planning",
+      "unit": "private-office-planning",
+      "title": "Choose private space for a new office",
+      "summary": "Choose a free private subnet, size it for the team, and configure two computers consistently.",
+      "objective": "Alder and Birch need one private office LAN for at least 20 ordinary host addresses, using no more than 62. Existing allocations reserve 10.19.0.0/16, 172.18.0.0/24 and 192.168.40.0/23; your whole subnet must avoid them. Choose any suitable RFC1918 private subnet and give both computers different usable addresses with the same network and prefix. Keep both links up and verify traffic and replies. The supplied 192.0.2.x training addresses are documentation addresses, not private allocations.",
+      "retry_guidance": "Read the first failing outcome, then compare both address/prefix fields. A successful exchange alone does not prove matching masks. Check the whole private subnet, capacity and reserved blocks before choosing different host addresses.",
+      "difficulty": "Intermediate",
+      "minutes": 18,
+      "steps": [
+        "Choose and configure an office allocation",
+        "Verify capacity, consistency and replies"
+      ],
+      "guide": [
+        {
+          "title": "Choose and configure an office allocation",
+          "why": "A private pool can be reused in separate organizations, but two overlapping allocations inside this network would be ambiguous.",
+          "action": "In Addresses & interfaces, choose Alder and enter a suitable address/prefix; then choose Birch and enter a different host address in that same block. The full assignment lists the reserved allocations. No route entries are needed on this single shared LAN.",
+          "commands": []
+        },
+        {
+          "title": "Verify capacity, consistency and replies",
+          "why": "Nearby hosts can sometimes exchange traffic despite different masks, so verify the assignment outcomes as well as connectivity.",
+          "action": "Choose Check configuration. Fix any private-space, capacity, overlap or matching-mask feedback, then check again.",
+          "commands": []
+        }
+      ],
+      "explanation": "One valid plan is 10.20.3.1/27 and10.20.3.2/27: the private 10/8 pool contains the entire 10.20.3.0–10.20.3.31 block, it does not overlap any reserved allocation, and its 30 ordinary host addresses meet the 20–62 policy. Other free private blocks and a /26 with 62 ordinary hosts also work. Both computers need the same aligned network/prefix and different nonreserved host addresses. Private space does not encrypt traffic or automatically provide Internet access; other special-use space is not automatically public.",
+      "hints": [
+        "The RFC1918 pools are 10.0.0.0/8, 172.16.0.0/12 and 192.168.0.0/16. The complete chosen subnet must fit in one pool and avoid every reserved block.",
+        "For conventional host addresses, capacity is 2^(32−prefix)−2. Five host bits give 30 usable addresses; six give 62. Pick an aligned, unreserved block with that capacity.",
+        "After picking a free block, choose two different ordinary hosts. A network or broadcast address is not a workstation address; equal-looking first octets do not replace checking both complete network/prefixes."
+      ],
+      "sources": [
+        "https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf",
+        "https://www.rfc-editor.org/rfc/rfc1918.html",
+        "https://www.rfc-editor.org/rfc/rfc1122.html",
+        "https://www.iana.org/assignments/iana-ipv4-special-registry"
+      ],
+      "simplifications": "Native bounded IPv4 fields and logical traffic, not IOS/Linux commands or real packets. Only modeled private/documentation endpoints;192.0.2.x and198.51.100.x are documentation ranges, not globally routable stand-ins asserted as public. Conventional /1–/30 host addressing only; /31 and /32 excluded. No NAT, Internet service, ARP, DHCP, security, address registration or physical equipment claim. Private reuse across organizations does not permit overlapping allocations here. Source authoring checked2026-10-29.",
+      "initial": {
+        "kind": "Ipv4Routing",
+        "topology": {
+          "devices": {
+            "Alder": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Birch": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "192.0.2.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            }
+          }
+        }
+      },
+      "goal": {
+        "kind": "Ipv4Routing",
+        "requirements": [
+          {
+            "kind": "PrivateSubnet",
+            "device": "Alder",
+            "interface": "lan",
+            "minimum_hosts": 20,
+            "maximum_hosts": 62,
+            "avoid": [
+              {
+                "address": "10.19.0.0",
+                "length": 16
+              },
+              {
+                "address": "172.18.0.0",
+                "length": 24
+              },
+              {
+                "address": "192.168.40.0",
+                "length": 23
+              }
+            ]
+          },
+          {
+            "kind": "PrivateSubnet",
+            "device": "Birch",
+            "interface": "lan",
+            "minimum_hosts": 20,
+            "maximum_hosts": 62,
+            "avoid": [
+              {
+                "address": "10.19.0.0",
+                "length": 16
+              },
+              {
+                "address": "172.18.0.0",
+                "length": 24
+              },
+              {
+                "address": "192.168.40.0",
+                "length": 23
+              }
+            ]
+          },
+          {
+            "kind": "SameSubnet",
+            "left_device": "Alder",
+            "left_interface": "lan",
+            "right_device": "Birch",
+            "right_interface": "lan"
+          },
+          {
+            "kind": "Reachable",
+            "label": "The two computers exchange traffic and replies",
+            "from": "Alder",
+            "target_device": "Birch",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ]
+      },
+      "solution": [
+        "address Alder lan 10.20.3.1/27",
+        "address Birch lan 10.20.3.2/27"
+      ],
+      "prerequisites": [
+        "ccna-ipv4",
+        "ccna-vlsm",
+        "ccna-gateway"
+      ],
+      "ipv4_routing_teaching": {
+        "start_with_routes": false,
+        "prerequisite_note": "Use the IPv4/VLSM/diagnosis foundations first: read an address/prefix, find usable hosts and compare subnet sizes. Configure device selects a computer; Addresses & interfaces edits its address/prefix and link. This activity uses one shared LAN, so no static routes are required.",
+        "concepts": [
+          {
+            "title": "Private means locally reusable, not protected",
+            "text": "Private addresses come from 10.0.0.0/8, 172.16.0.0/12 or192.168.0.0/16. Separate organizations can reuse those pools. Inside one connected network, conflicting allocations can still break communication. Private addresses do not provide encryption or an automatic Internet connection."
+          },
+          {
+            "title": "Size the whole block",
+            "text": "A prefix describes how many of IPv4’s 32 address bits identify the network. The rest choose positions inside the block. For example, /28 leaves 4 host bits: 16 total addresses and 14 ordinary hosts in this conventional exercise. The entire subnet must fit inside a private pool, not just the entered computer address."
+          },
+          {
+            "title": "Agreement needs more than a successful exchange",
+            "text": "Both computers must use the same aligned network and prefix, and different usable host addresses. Two nearby hosts with different masks can sometimes talk; that does not make their subnet definitions consistent. Check configuration tests both conditions independently."
+          },
+          {
+            "title": "Keep existing allocations separate",
+            "text": "A reserved block belongs to another allocation even when its computers are not shown. Avoid overlap in either direction: a small subnet inside it conflicts, and a larger subnet enclosing it conflicts too. These blocks may cross octet boundaries; inspect their full prefixes, not only the final number."
+          }
+        ],
+        "example_description": "In separate practice, Aspen and Willow need 6–14 ordinary hosts and must avoid 172.22.8.0/24. Load example settings fills only their draft fields with 172.22.4.33/29 and 172.22.4.34/29. Apply and test example to verify them; it never changes the assignment or earns credit.",
+        "fixture": {
+          "devices": {
+            "Aspen": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.10",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            },
+            "Willow": {
+              "forwarding": false,
+              "interfaces": {
+                "lan": {
+                  "link": "office",
+                  "up": true,
+                  "address": {
+                    "address": "198.51.100.20",
+                    "prefix": 24
+                  }
+                }
+              },
+              "routes": []
+            }
+          }
+        },
+        "example_solution": [
+          "address Aspen lan 172.22.4.33/29",
+          "address Willow lan 172.22.4.34/29"
+        ],
+        "outcomes": [
+          {
+            "kind": "PrivateSubnet",
+            "device": "Aspen",
+            "interface": "lan",
+            "minimum_hosts": 6,
+            "maximum_hosts": 14,
+            "avoid": [
+              {
+                "address": "172.22.8.0",
+                "length": 24
+              }
+            ]
+          },
+          {
+            "kind": "PrivateSubnet",
+            "device": "Willow",
+            "interface": "lan",
+            "minimum_hosts": 6,
+            "maximum_hosts": 14,
+            "avoid": [
+              {
+                "address": "172.22.8.0",
+                "length": 24
+              }
+            ]
+          },
+          {
+            "kind": "SameSubnet",
+            "left_device": "Aspen",
+            "left_interface": "lan",
+            "right_device": "Willow",
+            "right_interface": "lan"
+          },
+          {
+            "kind": "Reachable",
+            "label": "The two computers exchange traffic and replies",
+            "from": "Aspen",
+            "target_device": "Willow",
+            "target_interface": "lan",
+            "first_hop": null,
+            "when": []
+          }
+        ],
+        "try_change": "Change only Willow’s /29 to /28 and apply. The hosts can still exchange traffic, but the matching-prefix outcome fails. Restore /29, apply again, then try a different free ordinary host in the same block."
+      }
+    }
+  ]
+}

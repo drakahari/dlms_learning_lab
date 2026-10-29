@@ -12,6 +12,25 @@ pub struct Filter {
     pub recent: bool,
 }
 pub fn matches(s: &Scenario, f: &Filter, started: bool, complete: bool, favorite: bool) -> bool {
+    matches_verification(s, f, started, Some(complete), favorite)
+}
+pub fn matches_verification(
+    s: &Scenario,
+    f: &Filter,
+    started: bool,
+    complete: Option<bool>,
+    favorite: bool,
+) -> bool {
+    matches_filters(s, f, started, favorite)
+        && match f.status.as_str() {
+            "Complete" => complete == Some(true),
+            "In progress" => started && complete == Some(false),
+            "Verification pending" => started && complete.is_none(),
+            "Not started" => !started,
+            _ => true,
+        }
+}
+pub fn matches_filters(s: &Scenario, f: &Filter, started: bool, favorite: bool) -> bool {
     let q = f.search.to_lowercase();
     (q.is_empty()
         || format!(
@@ -27,12 +46,6 @@ pub fn matches(s: &Scenario, f: &Filter, started: bool, complete: bool, favorite
         && (f.max_minutes == 0 || s.minutes <= f.max_minutes)
         && (!f.favorites || favorite)
         && (!f.recent || started)
-        && match f.status.as_str() {
-            "Complete" => complete,
-            "In progress" => started && !complete,
-            "Not started" => !started,
-            _ => true,
-        }
 }
 /// Explicitly synthetic metadata stress fixture, never counted or launched as authored content.
 pub fn synthetic_catalog(seed: &[Scenario], count: usize) -> Vec<Scenario> {

@@ -306,6 +306,9 @@ pub(crate) fn validate_file_backup_workspace(a: &Attempt) -> Result<(), String> 
     }
     Ok(())
 }
+pub fn current_physical_link_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    crate::physical_link_workspace::checks(a, s)
+}
 pub fn current_file_backup_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     match crate::file_backup_workspace::context(a, s) {
         Ok(d) => {
@@ -628,6 +631,7 @@ pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     rows
 }
 pub(crate) fn validate_nat_metadata(a: &Attempt) -> Result<(), String> {
+    crate::physical_link_workspace::metadata(a)?;
     validate_nfs_workspace(a)?;
     validate_nat_workspace(a)?;
     // Existing family validators are admission only; none calls a grader.
@@ -714,6 +718,17 @@ pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
     rows
 }
 pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
+    if crate::physical_link_workspace::metadata(a).is_err() {
+        return false;
+    }
+    if matches!(a.state, State::PhysicalLink { .. }) {
+        let rows = crate::physical_link_workspace::checks(a, s);
+        return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
+    if s.physical_link_teaching.is_some() {
+        return false;
+    }
+
     if crate::etherchannel_workspace::reject_foreign_source(s).is_err()
         || crate::etherchannel_workspace::metadata(a).is_err()
     {
@@ -1066,6 +1081,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             .iter()
             .find(|s| &s.id == id)
             .ok_or("Unknown saved scenario; original retained")?;
+        crate::physical_link_workspace::reject_foreign_source(s)?;
         if a.scenario_version != s.version
             || std::mem::discriminant(&a.state) != std::mem::discriminant(&s.initial)
             || a.step >= s.steps.len()
@@ -1074,6 +1090,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
         {
             return Err("Incompatible saved attempt; original retained".into());
         }
+        crate::physical_link_workspace::metadata(a)?;
         validate_nfs_workspace(a)?;
         validate_rpm_workspace(a)?;
         validate_nat_workspace(a)?;
@@ -1105,6 +1122,9 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err(
                 "Saved access/log practice differs from its lesson; original retained".into(),
             );
+        }
+        if matches!(a.state, State::PhysicalLink { .. }) {
+            crate::physical_link_workspace::context(a, s)?;
         }
         if matches!(a.state, State::FileBackup { .. }) {
             crate::file_backup_workspace::context(a, s)?;
@@ -2121,6 +2141,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     }
     validate_provenance(p)?;
     for a in p.attempts.values() {
+        crate::physical_link_workspace::metadata(a)?;
         crate::pack::validate_state(&a.state)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;

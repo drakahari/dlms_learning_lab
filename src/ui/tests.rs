@@ -4,6 +4,7 @@ mod apache_static;
 mod apache_static_lessons;
 mod client_learning;
 mod command_vectors;
+mod completion_index;
 mod cron_lessons_native;
 pub(in crate::ui) mod cron_workspace;
 mod debian_packages;
@@ -26,6 +27,10 @@ pub(in crate::ui) mod nfs_workspace;
 mod numeric_validation;
 mod optional_inputs;
 mod ospf;
+mod physical_native_controller;
+mod physical_normal_catalog;
+pub(in crate::ui) mod physical_workspace;
+mod private_office;
 mod safe_automation_lessons;
 mod seed_learning;
 mod spanning_tree;
@@ -907,6 +912,15 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                     ),
                 )
                 .unwrap();
+            }
+            State::PhysicalLink { simulation } => {
+                let mut configuration = simulation.configuration().clone();
+                for port in configuration.ports.values_mut() {
+                    port.admin_up = false;
+                }
+                simulation
+                    .perform(&dlms_learning_lab::physical_link::Action::Configure { configuration })
+                    .unwrap();
             }
             State::EtherChannel { simulation } => {
                 let mut configuration = simulation.configuration().clone();

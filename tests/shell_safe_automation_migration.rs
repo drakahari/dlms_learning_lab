@@ -54,7 +54,25 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 171);
+    assert_eq!(labs.len(), 176);
+    for id in [
+        "ccna-physical-media-span",
+        "ccna-physical-duplex-diagnosis",
+        "ccna-physical-counter-baseline",
+        "ccna-physical-uplink-handover",
+    ] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::PhysicalLink { .. }));
+        assert!(!original.attempts.contains_key(id));
+        assert!(!original.favorites.contains(id));
+    }
+    let office = labs
+        .iter()
+        .find(|s| s.id == "ccna-private-office-plan")
+        .unwrap();
+    assert!(matches!(office.initial, State::Ipv4Routing { .. }));
+    assert!(!original.attempts.contains_key(&office.id));
+    assert!(!original.favorites.contains(&office.id));
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -63,6 +81,11 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "ccna-private-office-plan",
+            "ccna-physical-media-span",
+            "ccna-physical-duplex-diagnosis",
+            "ccna-physical-counter-baseline",
+            "ccna-physical-uplink-handover",
             "lpic2-backup-selective-recovery",
             "lpic2-backup-incremental-chain",
             "lpic2-backup-snapshot-branch",

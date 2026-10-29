@@ -126,6 +126,9 @@ impl Learning {
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if crate::workspace::is_physical_workspace(attempt) {
+        return;
+    }
     if crate::workspace::is_file_backup_workspace(attempt) {
         return;
     }
@@ -154,6 +157,11 @@ pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
 pub fn preferred_device(requirements: &[Requirement]) -> Option<String> {
     requirements.first().map(|r| match r {
         Requirement::AddressIn { device, .. }
+        | Requirement::PrivateSubnet { device, .. }
+        | Requirement::SameSubnet {
+            left_device: device,
+            ..
+        }
         | Requirement::KeepAddress { device, .. }
         | Requirement::Forwarding { device, .. }
         | Requirement::StaticRouteFor { device, .. } => device.clone(),

@@ -2,13 +2,15 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are168 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1071 Open rows; no full-objective completion is asserted. Main source
-contains171 authored assignments/44 units. Candidate065032d0a90b contains the same
-171 assignments; installed lifecycle, NFS cold reopening and ten serialized Wayland
-launches pass on its exact ELF. New-unit installed workflows remain separately
-tracked, rather than inherited from development runs. See
-[CATALOG171_MILESTONE.md](CATALOG171_MILESTONE.md),
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are172 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1067 Open rows; no full-objective completion is asserted. Main source
+contains176 authored assignments/46 units (53CCNA,36LPIC-1,32LPIC-2,55Bash).
+The latest five add four narrow CCNA evidence rows, not full-objective credit.
+All136 parents remain incomplete(94Open/42Partial). Main inclusive2,467/all24
+history groups pass. Native and packaged identities remain separate: see
+[CATALOG176_MILESTONE.md](CATALOG176_MILESTONE.md). Candidate065032d0a90b still
+contains171 assignments; its installed lifecycle, NFS cold reopening and ten
+serialized Wayland launches retain that exact ELF. See also
 [FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
 [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
@@ -318,3 +320,11 @@ future CCNA credit is inherited. Official LPI page/version5.0/105.2 rechecked
 2026-10-29; original2026-10-22 source fingerprints unchanged. Private full2337/
 all24history and native101 pass; final Main2337/static/coverage pass; a new171
 candidate remains pending. See SHELL_NUMERIC_VALIDATION_LESSONS.md and CATALOG171_MILESTONE.md.
+
+The176 source milestone adds only narrow current CCNA v1.1 evidence at1.3,
+1.3.a,1.4 and1.7. Four physical-link tasks model compatible profiles, duplex,
+fresh counter changes and protected handover; one private-office task accepts
+valid alternate RFC1918 plans while checking whole-subnet reservations and
+matching interfaces. Shared media1.3.b and all wider unresolved behaviors remain
+Open. Futurev2.0 receives no inherited credit. The coverage CSV retains all other
+1236 rows exactly. See PHYSICAL_LINK_LESSONS.md and IPV4_PRIVATE_PLANNING_LESSONS.md.

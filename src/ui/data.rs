@@ -260,6 +260,9 @@ impl LabApp {
                         Ok(safety) => {
                             self.invalidate_apache_presentation();
                             self.progress = candidate.progress;
+                            self.completion_index.clear();
+                            self.physical_presentation.reset_all();
+                            self.backup_presentation.reset_all();
                             self.address_worked.clear();
                             self.address_example = None;
                             self.selected = None;

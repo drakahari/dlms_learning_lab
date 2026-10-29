@@ -65,12 +65,34 @@ fn reviews() -> Vec<Review> {
     ]) {
         rows.push(Review { id: row["id"].as_str().unwrap().into(), alternate: row["alternatives"][0].as_str().unwrap().into(), incorrect: row["common_wrong"][wrong].as_str().unwrap().into(), misconception: misconception.into() });
     }
-    let numeric:serde_json::Value=serde_json::from_str(include_str!("fixtures/shell-numeric-validation-review.json")).unwrap();
-    let additions=numeric["labs"].as_array().unwrap();
-    assert_eq!(additions.iter().map(|r|r["id"].as_str().unwrap()).collect::<Vec<_>>(),["shell-numeric-retry","shell-numeric-intake","shell-numeric-publication"]);
-    for (row,wrong) in additions.iter().zip(["leading_zero_accepted","trims_before_validation","truncates_before_validation"]) {
-        let bad=&row["common_wrong"][wrong];
-        rows.push(Review{id:row["id"].as_str().unwrap().into(),alternate:row["alternatives"][0].as_str().unwrap().into(),incorrect:bad["source"].as_str().unwrap().into(),misconception:bad["reason"].as_str().unwrap().into()});
+    let numeric: serde_json::Value = serde_json::from_str(include_str!(
+        "fixtures/shell-numeric-validation-review.json"
+    ))
+    .unwrap();
+    let additions = numeric["labs"].as_array().unwrap();
+    assert_eq!(
+        additions
+            .iter()
+            .map(|r| r["id"].as_str().unwrap())
+            .collect::<Vec<_>>(),
+        [
+            "shell-numeric-retry",
+            "shell-numeric-intake",
+            "shell-numeric-publication"
+        ]
+    );
+    for (row, wrong) in additions.iter().zip([
+        "leading_zero_accepted",
+        "trims_before_validation",
+        "truncates_before_validation",
+    ]) {
+        let bad = &row["common_wrong"][wrong];
+        rows.push(Review {
+            id: row["id"].as_str().unwrap().into(),
+            alternate: row["alternatives"][0].as_str().unwrap().into(),
+            incorrect: bad["source"].as_str().unwrap().into(),
+            misconception: bad["reason"].as_str().unwrap().into(),
+        });
     }
     rows
 }

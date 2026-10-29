@@ -151,6 +151,8 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
     };
     let mut original_drafts = 0;
     let mut backup_drafts = 0;
+    let mut physical_drafts = 0;
+    let mut private_drafts = 0;
     for (n, s) in labs.iter().enumerate() {
         let mut a = Attempt::new(s, n as u64);
         workspace::prepare(&mut a);
@@ -160,6 +162,44 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         if let Some(lesson) = &s.file_backup_teaching {
             // Preserve this real new-family positive in the cross-family matrix.
             dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
+        }
+        if matches!(a.state, State::PhysicalLink { .. }) {
+            use dlms_learning_lab::physical_link_workspace as physical;
+            physical::prepare_attempt(&mut a, s, true).unwrap();
+            let mut draft = a
+                .workspace
+                .as_ref()
+                .unwrap()
+                .physical_link_draft
+                .as_ref()
+                .unwrap()
+                .clone();
+            let port = draft.configuration.ports.values_mut().next().unwrap();
+            port.admin_up = !port.admin_up;
+            physical::set_draft(&mut a, s, physical::Scope::Assignment, &draft).unwrap();
+            physical_drafts += 1;
+            p.attempts.insert(s.id.clone(), a);
+            continue;
+        }
+        if s.id == "ccna-private-office-plan" {
+            let draft = a
+                .workspace
+                .as_mut()
+                .unwrap()
+                .routing_v4_draft
+                .as_mut()
+                .unwrap();
+            draft
+                .devices
+                .get_mut("Alder")
+                .unwrap()
+                .interfaces
+                .get_mut("lan")
+                .unwrap()
+                .address = "unfinished office draft".into();
+            private_drafts += 1;
+            p.attempts.insert(s.id.clone(), a);
+            continue;
         }
         let w = a.workspace.as_mut().unwrap();
         w.command = "unfinished |".into();
@@ -178,9 +218,18 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         p.attempts.insert(s.id.clone(), a);
     }
     assert_eq!((original_drafts, backup_drafts), (167, 4));
+    assert_eq!(physical_drafts, 4);
+    assert_eq!(private_drafts, 1);
     assert_eq!(
-        labs[168..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
-        ["shell-numeric-retry", "shell-numeric-intake", "shell-numeric-publication"],
+        labs[168..171]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "shell-numeric-retry",
+            "shell-numeric-intake",
+            "shell-numeric-publication"
+        ],
         "Only the three new numeric drafts extend the prior164 non-backup drafts"
     );
     progress::save(&path, &p).unwrap();

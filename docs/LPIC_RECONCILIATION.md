@@ -1,12 +1,11 @@
 # LPIC reconciliation and next implementation frontier
 
-Reconciled against current Main168 source, checked2026-10-28. The normal catalog
-has36 LPIC-1 and32 LPIC-2 authored assignments, including four recurring-job
-and four backup/recovery assignments. Related52 Bash assignments are not counted again as Linux-track
-labs. No parent is complete. Final full/native/candidate results for the latest four source
-additions remain separately pending in CATALOG168_MILESTONE.md; the earlier ten
-source additions retain their actual history in CATALOG164_MILESTONE.md. The original
-4bc390a/private158 source epochs remain in Git and retained private evidence.
+The original reconciliation snapshot used Main168 source on2026-10-28. Current
+Main176 keeps the same36LPIC-1 and32LPIC-2 assignments, including four recurring-job
+and four backup/recovery tasks;55related Bash assignments are counted separately.
+No LPIC parent is complete and no new LPIC objective credit is inherited from the
+five networking additions. Current combined tests/native/candidate distinctions
+are in CATALOG176_MILESTONE.md; historical168/164/154 receipts keep their identities.
 
 Official objective pages still identify [LPIC-1 5.0,101-500/102-500](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 4.5,201-450/202-450](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Both objective pages were fetched; overview URLs timed out. No new objective version was found in those pages. Existing granular fingerprints remain the 2026-10-22 snapshot, not silently rehashed or redated.
 

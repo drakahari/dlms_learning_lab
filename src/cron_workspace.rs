@@ -968,6 +968,9 @@ pub fn context<'a>(
     a: &crate::progress::Attempt,
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
+    if s.physical_link_teaching.is_some() {
+        return Err("Physical-link teaching belongs to its own activity".into());
+    }
     crate::workspace::reject_file_backup_workspace(a)?;
     crate::progress::validate_cron_metadata(a)?;
     if !source_shape(s) || s.version != a.scenario_version || !within(s, MAX_CONTEXT) {
@@ -1017,6 +1020,7 @@ pub fn context<'a>(
 pub fn source_shape(s: &crate::pack::Scenario) -> bool {
     let crate::pack::Scenario {
         cron_teaching: _,
+        physical_link_teaching,
         file_backup_teaching,
         etherchannel_teaching,
         nfs_teaching,
@@ -1069,7 +1073,8 @@ pub fn source_shape(s: &crate::pack::Scenario) -> bool {
         mac_teaching,
         debian_packages_teaching,
     } = s;
-    file_backup_teaching.is_none()
+    physical_link_teaching.is_none()
+        && file_backup_teaching.is_none()
         && etherchannel_teaching.is_none()
         && nfs_teaching.is_none()
         && nat_teaching.is_none()
@@ -1111,6 +1116,8 @@ pub fn source_shape(s: &crate::pack::Scenario) -> bool {
 pub fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
         cron_session: _,
+        physical_link_draft,
+        physical_link_learning,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,
@@ -1179,7 +1186,9 @@ pub fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         legacy_practice_reviewed: _,
         migrated_practice_host: _,
     } = w;
-    file_backup_learning.is_some()
+    physical_link_draft.is_some()
+        || physical_link_learning.is_some()
+        || file_backup_learning.is_some()
         || etherchannel_draft.is_some()
         || etherchannel_learning.is_some()
         || nfs_session.is_some()

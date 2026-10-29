@@ -139,7 +139,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -186,6 +186,11 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "ccna-private-office-plan",
+            "ccna-physical-media-span",
+            "ccna-physical-duplex-diagnosis",
+            "ccna-physical-counter-baseline",
+            "ccna-physical-uplink-handover",
             "lpic2-backup-selective-recovery",
             "lpic2-backup-incremental-chain",
             "lpic2-backup-snapshot-branch",
@@ -242,7 +247,25 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All55 later tasks remain absent and ungraded; no invented contexts.
+    ); // All60 later tasks remain absent and ungraded; no invented contexts.
+    let office = all
+        .iter()
+        .find(|s| s.id == "ccna-private-office-plan")
+        .unwrap();
+    assert!(matches!(office.initial, State::Ipv4Routing { .. }));
+    assert!(!p.attempts.contains_key(&office.id));
+    assert!(!p.favorites.contains(&office.id));
+    for id in [
+        "ccna-physical-media-span",
+        "ccna-physical-duplex-diagnosis",
+        "ccna-physical-counter-baseline",
+        "ccna-physical-uplink-handover",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::PhysicalLink { .. }));
+        assert!(!p.attempts.contains_key(id));
+        assert!(!p.favorites.contains(id));
+    }
     for id in [
         "shell-optional-policy",
         "shell-optional-report",

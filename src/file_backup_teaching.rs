@@ -63,6 +63,7 @@ fn fits<T: Serialize>(value: &T, cap: usize) -> bool {
             Ok(())
         }
     }
+    crate::native_observations::backup_json();
     serde_json::to_writer(Counter { bytes: 0, cap }, value).is_ok()
 }
 fn prose(s: &str, cap: usize) -> bool {

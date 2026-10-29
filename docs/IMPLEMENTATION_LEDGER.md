@@ -4140,3 +4140,145 @@ M271 capture-feature producerClippy-Dwarnings PASS. All wrappers fully reaped.
 SHELL_EVALUATOR12_BASELINE.md documents reproduction and limits. Existing
 evaluator12/runtime/catalog171 unchanged; source-only loop-control development
 may proceed, but no evaluator13 behavior or new scripting credit is integrated.
+
+
+### M272–M274 — final network176 source freeze and inclusive gate
+
+Capture-only milestoneb25b1f0 is committed/pushed with ten reviewed public paths;
+actual profiles/observations/source copies/ELF/screenshots stay ignored. Closed
+8-path capture/guide union into isolated176 retains its runtime, all28Physical
+assertions and prior source. Final933-sourceM272 found one type-complexity lint
+in the new QA state. Root replaced the exact tuple with a named alias, without
+executable or assertion changes. M273 all-targetClippy--keep-going-Dwarnings
+PASS, wrapper70487 fully reaped. M274 inclusive alltargets/no-fail-fast/include-
+ignored now running94851; source933 frozen, no other heavy grant. Do not edit W
+or claim full acceptance until actual completion/reap. Native/candidate pending.
+
+
+### M274 complete; M275–M280 final style/native-build/Python checks
+
+InclusiveM274 fully reaped94851 exit0:2464PASS/0FAIL/0ignored195harnesses; all24
+genuine history groups actually execute.933sourceR10 exact before/after. Minimum
+available21268062208B, maxsome/fullPSIavg10 0.18, swap-out/OOM deltas0. M275 CI
+format check found only two inherited numeric-teaching tests unformatted; R11
+formats those2 (no product/logic/old assertion change). M277bothtargets9PASS,
+M278alltargetClippyPASS, M279all462Rustfiles format-checkPASS. Full result belongs
+to R10; these nine assertions are rerun after test-only formatting. Ordinary
+regularELF201488272B/71f129cf built successfully, runtime sources unchanged.
+
+M280worktreePython326checks:325PASS1FAIL, wrapper95614 fully reaped1. One old
+43-authored-script consumer assumes current44unitbytes; new46 needs exact closed
+private/physical inverse first. Root one-file source-only remedy R12 retains all
+old authored/hash/unit assertions and adds corruption controls; independent peer
+review pending before application. No Main176/native/packaging credit yet.
+
+
+### M281 and actual NativePhysical108 underway
+
+R12one-filePython source seam peer416227d6 retains exact46→45→44 canonical
+recipes and all original43/282/hash/prefix assertions. M281327PythonPASS0,
+wrapper69626 fully reaped. Final933-sourceR12a77d747b; product/runtime remains
+exact with ordinary201488272-byteELF71f129cf.
+
+Ether owns sole actual native lease3786. Restricted pre-window NoCompositor
+refusal is retained/reaped1. Exact same command then approved for existing
+Wayland-session access, no backend/desktop changes; run-l3aorhz3 is currently
+rendering. All4meaningful lesson workflows complete,40-layout matrix underway;
+final108PNGs/reap/rendered review still pending. CombinedPrivateR9controledf93158
+independently predicts165steps/40PNGs (including /28wrong→/29repair), not old38.
+No parallel heavy grant or normal176 credit yet.
+
+Independently reviewed loop-control R2(semanticsa99cf17b/resource-historyef250de2)
+is source-applied only in new isolated bash-loop13-b25, baseb25b1f0:9ownedfiles,
+889otherbasefiles unchanged; no compile/test/reference or Main/evaluator13 credit.
+Main remains171/evaluator12. The new retained-evidence helper requires all11
+manifest outputs/296source inputs/streamed retained ELF; metadata is bounded
+before reservation. Current-marker transition remains a separate source proposal;
+all frozen12records/producers/history stay unchanged.
+
+
+### Native results and first actual bounded loop-control gates
+
+Physicalactual108finished thenexit101 on deferred Close/Finish reentry; retain
+failed9e7a1e58 and all108images. Root8+worker18actualPNGs viewed: centeredcontrols/
+cards/reflow sound, stacked counters/emptylog unnecessarily separate actions,
+blank global toolbar appears in some captures. Privateactual40/165steps exits0
+(76de87f0;933source/ELF71fexact), with14worker+4Rootimages reviewed; same blank
+toolbar in047 means visualpolish pending despite functionalPASS. No candidate
+or novice/accessibility/otherOS inference. CompactUIproposal25626b25/sourcepeer
+ed359640 remainsunapplied; terminal8516 and headerdiagnostic28dd are QA-only.
+
+Loop13 isolated171baseb25 firstcompile(M28352622) reached normalbin old numeric
+const12, so no tests ran. Reviewed14current-marker transition3d5bde94 preserves
+all frozen records/producers and no fictional12 on direct9/10/11→13. M28425PASS
+(two targets, all3genuine12groups executed), source898 exact; M285threeinternal
+metadata/instruction/owner bounds PASS. No reference Bash, fullsuite or newlab
+credit yet. Main12/171 preserved.
+
+M286 terminal-only full108+extraCloseframe test nowrunning58889. Header patch
+CHECK did not apply against terminal's changed final context; no header writes.
+Terminal-only source snapshot retained before testing; recompose by exact clean
+three-way merge after fullreap. No product patch or second heavy until release.
+
+### Compact investigation and independent visual correction (M287–M297)
+
+M287 strict108headless capture/header checks and two extra deferred Close frames
+PASS. M28830PASS/1newharnessFAIL; the section-only test gave more width than the
+normal app. R2uses actual app/card/DPI; M289privatehelpercompileFAIL, then R17
+onlyconstructs identical localLabApp. M290real-layoutgroupPASS and M295all31
+Physicalbin testsPASS/0ignored; no old assertion removed. M296ordinarynativebuild
+PASS; M297actual native108 is running under sole shared lock, no other heavy work.
+
+Independent reinspection eec90fea corrects the inherited blank-toolbar claim: all
+six labels are visible, five Physical decodedheader strips are byte-identical,
+and Private023/047 headers also match exactly. This was a review error, not an
+established renderer defect. Original receipts remain; no telemetry/product
+change is warranted. Counterspacing and deferredClose remain independently fixed.
+
+M291Main340PASS/1syntheticfixtureERROR; missingmirror setup corrected without
+changing15testbodies/assertions. M293all341PythonPASS. M292fixedloop13probebuild
+PASS. M294referenceprepare failed before children because oldidentityreader
+assumedlooseMainref. Newcollector-localR2boundedHEADreader reviewed91314960,
+rejectsnonLFcontrols; original15+4tests preserved, two negatives appended. Applied
+onlynewcollector+newtest, runtimevalidation pending; oldhelpers/evidence/Gitrefs
+unchanged. No realBashcapture or newlooplab credit yet.
+
+M297actual108PNGs/40settings/all4workflow interactionPASS, wrapper143 afterward;
+clean teardown remainsunverified. Exact wrapper3807650/child3807661/processgroup
+absent and sharedlockfree; stale marker preserved (notdeleted), no processsignal.
+M298safelyrefusedmarker/nochild. M299all347PythonPASS. Renderpeercadc0e1b
+viewed16newimages/12matrix andbefore/all5scales/twowidths/LightDark, nofinding.
+M302threeordinarynative starts/exits nowrunning withsameELF41cd8c15.
+
+M300fixedreferencepreparePASS, Rootverified1222pins andapprovedonly16fixed
+builtin/disposablecases. M301actual16Bash539/VM13 fulloutcomesMATCH/0mismatch,
+eightVM-onlyhonestUnsupported; manifest20767c35, no durabilitywarning, wrapper
+31203fullyreaped0. Independentreadbackpending. Mainstill12/171; no curriculum
+credit or generalBashconformance inference.
+
+M3023/3shortnative launch/exits0 (2.467/2.417/2.518s), samecompactELF41cd8c15,
+fullyreaped78365; M297long-route teardown stillunverified.169reviewednetwork176
+paths copied into Main after allbeforeimagechecks,7capturepaths alreadyexact,
+Mainnewreferenceallowlist/workflow preserved. Source176/46/evaluator12, matching
+fullMain gate M303 nowrunning19662; nocommit or coveragepromotionbeforechecks.
+OneOff/Loop13/selection remainunregistered/uncredited.
+
+### Main176 final combined gates and continued queue
+
+M303fullyreaped19662exit0:2467PASS/0FAIL/0ignored/195harnesses/all24actualhistory
+groups. All936sourcepaths exactbefore/after431e525d; receiptd50ceb60. Minavailable
+18004926464B/maxsome+fullPSI0.57/swapout11261pages/OOM0; twojobs/twothreads.
+M304alltargetClippy-DwarningsPASS (39527), M305348PythonPASS (1214). M306actual
+coverage found four unsupported src/ui/test paths in newly authored evidence
+rows; removed onlythoseentries whilekeeping integrationtests/scopedclaims, tool
+unchanged. M307176registered/1240refsPASS. Allother1236granular/162planningrows
+remain exact. M308final348PythonPASS (66736), after correctedmetadata. Onlydocs
+and README changed after full; compiledsource remains identical.
+
+M301referenceactualreadback independentlysealed:341fd4c8, attestation1aaa1c27,
+all16actualBash/VMfulloutcomes+8honestexclusions/1222inputs/1004outputs/old12data
+exact. Three new contentfiles appliedonlyinWbash-loop13 aftercapture/readback;
+R2gradinggaps closed peerbd9557d5, content stillunrun/unregistered. OneOff180
+171pathsource proposal699dc283 receives83corepeercbd1fd63 andconsumer36583eea
+ACK, no runtimeacceptanceyet. A suspectedunusedcron declaration was retracted
+after confirmingactualtransitiveuse; no removals/waivers. Continueordinarybatches.

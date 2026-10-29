@@ -1,13 +1,16 @@
 //! Compact native backup terminal. No host paths, processes or network actions.
 use super::*;
+use crate::ui::completion_index::{Family, Handle, Key};
 use dlms_learning_lab::{
     engine::{Goal, State},
     file_backup_workspace as work,
     file_backup_workspace::presentation::{Edit, present},
 };
+use std::sync::Arc;
 /// Reject every foreign teaching field before a native snapshot or warm lookup.
-fn source_shape(s: &Scenario) -> bool {
+pub(in crate::ui) fn source_shape(s: &Scenario) -> bool {
     let Scenario {
+        physical_link_teaching,
         file_backup_teaching,
         etherchannel_teaching,
         cron_teaching,
@@ -61,7 +64,8 @@ fn source_shape(s: &Scenario) -> bool {
         mac_teaching,
         debian_packages_teaching,
     } = s;
-    file_backup_teaching.is_some()
+    physical_link_teaching.is_none()
+        && file_backup_teaching.is_some()
         && cron_teaching.is_none()
         && etherchannel_teaching.is_none()
         && nfs_teaching.is_none()
@@ -97,7 +101,7 @@ fn source_shape(s: &Scenario) -> bool {
             (State::FileBackup { .. }, Goal::FileBackup { .. })
         )
 }
-fn same_source(a: &Scenario, b: &Scenario) -> bool {
+pub(in crate::ui) fn same_source(a: &Scenario, b: &Scenario) -> bool {
     if !source_shape(a) || !source_shape(b) {
         return false;
     }
@@ -141,6 +145,9 @@ fn same_source(a: &Scenario, b: &Scenario) -> bool {
         })
 }
 fn same_attempt(a: &Attempt, b: &Attempt) -> bool {
+    same_attempt_fields(a, b, false)
+}
+pub(in crate::ui) fn same_attempt_fields(a: &Attempt, b: &Attempt, metadata: bool) -> bool {
     // No ..: an added persistent field cannot silently disappear from the key.
     let Attempt {
         scenario_version: _,
@@ -156,10 +163,10 @@ fn same_attempt(a: &Attempt, b: &Attempt) -> bool {
     a.scenario_version == b.scenario_version
         && a.state == b.state
         && a.step == b.step
-        && a.challenge == b.challenge
+        && (metadata || a.challenge == b.challenge)
         && a.hints == b.hints
         && a.transcript == b.transcript
-        && a.visited == b.visited
+        && (metadata || a.visited == b.visited)
         && a.ipv4.is_none()
         && b.ipv4.is_none()
         && match (&a.workspace, &b.workspace) {
@@ -176,10 +183,12 @@ fn same_attempt(a: &Attempt, b: &Attempt) -> bool {
         }
 }
 
-fn foreign(w: &model::WorkspaceData) -> bool {
+pub(in crate::ui) fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
         etherchannel_draft,
         etherchannel_learning,
+        physical_link_draft,
+        physical_link_learning,
         file_backup_learning: _,
         cron_session,
         cron_learning,
@@ -247,7 +256,9 @@ fn foreign(w: &model::WorkspaceData) -> bool {
         legacy_practice_reviewed,
         migrated_practice_host,
     } = w;
-    cron_session.is_some()
+    physical_link_draft.is_some()
+        || physical_link_learning.is_some()
+        || cron_session.is_some()
         || cron_learning.is_some()
         || etherchannel_draft.is_some()
         || etherchannel_learning.is_some()
@@ -331,8 +342,9 @@ struct Counters {
     hits: usize,
 }
 struct Entry {
-    source: Scenario,
-    attempt: Attempt,
+    source: Arc<Scenario>,
+    attempt: Arc<Attempt>,
+    key: Arc<Key>,
     assignment: Vec<(bool, String)>,
     practice: Vec<(bool, String)>,
     charge: usize,
@@ -340,8 +352,9 @@ struct Entry {
     cancelled: bool,
 }
 struct Job {
-    source: Scenario,
-    attempt: Attempt,
+    source: Arc<Scenario>,
+    attempt: Arc<Attempt>,
+    key: Arc<Key>,
     run: Option<work::CheckRun>,
     assignment: Option<Vec<(bool, String)>>,
     charge: usize,
@@ -350,6 +363,7 @@ struct Job {
 #[derive(Default)]
 struct CheckMemo {
     entries: Vec<Entry>,
+    certificates: Handle,
     job: Option<Job>,
     tick: u64,
     counters: Counters,
@@ -367,6 +381,10 @@ impl CheckMemo {
     }
     fn cancel(&mut self) {
         if let Some(mut job) = self.job.take() {
+            // A forced same-key recheck can reuse an earlier completed proof.
+            // Stop discards that proof as well as the in-flight work, so both
+            // this workspace and library cards remain pending until retry.
+            self.certificates.forget(&job.source.id);
             if self.cancelled.len() < 64 {
                 self.cancelled.insert(job.source.id.clone());
             } else {
@@ -400,6 +418,7 @@ impl CheckMemo {
             self.entries.push(Entry {
                 source: job.source,
                 attempt: job.attempt,
+                key: job.key,
                 assignment: Vec::new(),
                 practice: Vec::new(),
                 charge: job.charge,
@@ -427,14 +446,14 @@ impl CheckMemo {
         })
     }
     fn passed(&self, a: &Attempt, s: &Scenario) -> Option<bool> {
-        self.rows(a, s, false)
-            .map(|rows| !rows.is_empty() && rows.iter().all(|r| r.0))
+        self.certificates.status(a, s).and_then(|s| s.result())
     }
     /// Actual UI caller supplies borrowed current data. No stale result survives a
     /// changed complete key; all owned admission occurs only on a genuine miss.
     fn prepare(&mut self, a: &Attempt, s: &Scenario, force: bool) -> Result<(), String> {
         if !source_shape(s) || a.ipv4.is_some() || a.workspace.as_ref().is_some_and(foreign) {
             self.entries.retain(|e| e.source.id != s.id);
+            self.certificates.forget(&s.id);
             if self.job.as_ref().is_some_and(|j| j.source.id == s.id) {
                 self.job = None;
             }
@@ -449,6 +468,18 @@ impl CheckMemo {
             self.background_paused = false;
         }
         if !force && self.ready(a, s).is_some() {
+            if self.certificates.status(a, s) == Some(completion_index::Status::Pending)
+                && let Some(entry) = self
+                    .ready(a, s)
+                    .filter(|e| !e.cancelled && !e.assignment.is_empty())
+            {
+                self.certificates.publish(
+                    &entry.key,
+                    a,
+                    s,
+                    entry.assignment.iter().all(|r| r.0),
+                )?;
+            }
             self.counters.hits += 1;
             return Ok(());
         }
@@ -520,9 +551,11 @@ impl CheckMemo {
                 self.entries.remove(index);
             }
             self.tick = self.tick.saturating_add(1);
+            let (key, copied) = self.certificates.admit(a, s, Family::Backup)?;
             self.entries.push(Entry {
-                source: s.clone(),
-                attempt: a.clone(),
+                source: Arc::clone(&key.source),
+                attempt: Arc::clone(&key.attempt),
+                key,
                 assignment: Vec::new(),
                 practice: Vec::new(),
                 charge,
@@ -530,7 +563,7 @@ impl CheckMemo {
                 cancelled: true,
             });
             self.counters.admissions += 1;
-            self.counters.copies += 1;
+            self.counters.copies += usize::from(copied);
             return Ok(());
         }
         let State::FileBackup { simulation } = &a.state else {
@@ -585,17 +618,19 @@ impl CheckMemo {
                 .ok_or("Backup cache cannot reserve the next checker")?;
             self.entries.remove(index);
         }
+        let (key, copied) = self.certificates.admit(a, s, Family::Backup)?;
         let run = work::CheckRun::new(definition, simulation)?;
         self.job = Some(Job {
-            source: s.clone(),
-            attempt: a.clone(),
+            source: Arc::clone(&key.source),
+            attempt: Arc::clone(&key.attempt),
+            key,
             run: Some(run),
             assignment: None,
             charge,
             run_charge,
         });
         self.counters.admissions += 1;
-        self.counters.copies += 1;
+        self.counters.copies += usize::from(copied);
         self.notice = None;
         self.entries.retain(|e| e.source.id != s.id);
         Ok(())
@@ -697,9 +732,19 @@ impl CheckMemo {
             };
             self.entries.remove(index);
         }
+        if let Err(error) = self.certificates.publish(
+            &job.key,
+            a,
+            s,
+            !assignment.is_empty() && assignment.iter().all(|r| r.0),
+        ) {
+            self.notice = Some(error);
+            return false;
+        }
         self.entries.push(Entry {
             source: job.source,
             attempt: job.attempt,
+            key: job.key,
             assignment,
             practice,
             charge: job.charge,
@@ -1330,6 +1375,12 @@ fn page_inner(
                     m.rows.push((n, *ok, r.rect));
                 }
                 m.complete = !practice && passed;
+            } else if !practice && p.memo.passed(a, s) == Some(true) {
+                ui.strong("Assignment complete · This exact saved work remains verified");
+                m.complete = true;
+                if p.memo.job.is_some() {
+                    ui.label("Refreshing objective details…");
+                }
             } else if p.memo.job.is_some() {
                 ui.label("Checking the current files and independent recovery samples…");
             }
@@ -1426,6 +1477,11 @@ fn page(
         .inner
 }
 impl Presentation {
+    pub(super) fn with_index(certificates: Handle) -> Self {
+        let mut p = Self::default();
+        p.memo.certificates = certificates;
+        p
+    }
     /// Borrowed observation of an actual explicit cancellation; no grade authority.
     pub(in crate::ui) fn explicitly_stopped(&self, id: &str) -> bool {
         self.memo.cancelled.contains(id) && self.memo.job.as_ref().is_none_or(|j| j.source.id != id)
@@ -1482,7 +1538,9 @@ impl Presentation {
 
 // Check results are ephemeral; no memo boolean becomes saved progress.
 pub(super) fn solved_with_memos(app: &LabApp, a: &Attempt, s: &Scenario) -> bool {
-    if matches!(s.initial, engine::State::FileBackup { .. }) {
+    if let Some(status) = app.completion_index.status(a, s) {
+        status == completion_index::Status::Complete
+    } else if matches!(s.initial, engine::State::FileBackup { .. }) {
         app.backup_presentation.memo.passed(a, s).unwrap_or(false)
     } else {
         cron_workspace::solved_with_memos(
@@ -1530,19 +1588,35 @@ impl LabApp {
             self.progress.attempts.contains_key(id) && self.scenarios.iter().any(|s| &s.id == id)
         });
 
-        let selected = self
-            .selected
-            .and_then(|i| self.scenarios.get(i))
-            .map(|s| s.id.as_str());
-        for selected_pass in [true, false] {
-            for s in &self.scenarios {
-                if matches!(s.initial, engine::State::FileBackup { .. })
-                    && (selected == Some(s.id.as_str())) == selected_pass
-                    && let Some(a) = self.progress.attempts.get(&s.id)
-                    && let Err(e) = self.backup_presentation.memo.prepare(a, s, false)
-                    && selected == Some(s.id.as_str())
+        self.completion_index
+            .retain(&self.progress, &self.scenarios);
+        let target = if let Some(i) = self.selected {
+            matches!(self.scenarios[i].initial, engine::State::FileBackup { .. }).then_some(i)
+        } else {
+            self.completion_index
+                .pending(&self.progress, &self.scenarios)
+                .filter(|i| matches!(self.scenarios[*i].initial, engine::State::FileBackup { .. }))
+        };
+        if let Some(i) = target.filter(|_| {
+            self.selected.is_some()
+                || (!self.settings_open
+                    && !self.theme_preview
+                    && !self.data_tools.modal_open()
+                    && self.completion_index.take_work())
+        }) {
+            let source = &self.scenarios[i];
+            if let Some(a) = self.progress.attempts.get(&source.id) {
+                if let Err(error) = self.backup_presentation.memo.prepare(a, source, false) {
+                    self.completion_index.refuse(&source.id);
+                    if self.selected == Some(i) {
+                        self.backup_presentation.notice = Some(error);
+                    }
+                } else if self.selected.is_none()
+                    && !self.backup_presentation.checking()
+                    && self.completion_index.status(a, source)
+                        == Some(completion_index::Status::Pending)
                 {
-                    self.backup_presentation.notice = Some(e);
+                    self.completion_index.refuse(&source.id);
                 }
             }
         }
@@ -1656,6 +1730,100 @@ mod stopped_admission_tests {
         m
     }
     #[test]
+    fn stopped_same_key_recheck_revokes_only_its_previous_success_until_explicit_retry() {
+        let (source, mut attempt) = fixture(3);
+        let (other_source, mut other_attempt) = fixture(0);
+        for (a, s) in [(&mut attempt, &source), (&mut other_attempt, &other_source)] {
+            for command in &s.solution {
+                work::perform(a, s, work::Scope::Assignment, command).unwrap();
+            }
+            assert!(
+                progress::current_solved(a, s),
+                "Actual authored solution must pass"
+            );
+        }
+        let mut p = Presentation::default();
+        for (a, s) in [(&other_attempt, &other_source), (&attempt, &source)] {
+            p.memo.prepare(a, s, true).unwrap();
+            for _ in 0..4096 {
+                if !p.memo.advance(a, s) {
+                    break;
+                }
+            }
+            assert!(p.memo.job.is_none(), "Bounded actual checker finished");
+            assert_eq!(p.memo.passed(a, s), Some(true));
+            assert_eq!(
+                p.memo.certificates.status(a, s),
+                Some(completion_index::Status::Complete)
+            );
+        }
+        let caller = serde_json::to_vec(&attempt).unwrap();
+        let other_caller = serde_json::to_vec(&other_attempt).unwrap();
+        let previous_key = Arc::clone(&p.memo.ready(&attempt, &source).unwrap().key);
+        p.memo.prepare(&attempt, &source, true).unwrap();
+        assert!(
+            Arc::ptr_eq(&previous_key, &p.memo.job.as_ref().unwrap().key),
+            "The real counterexample reuses an already successful exact key"
+        );
+        p.memo.cancel();
+        assert!(p.explicitly_stopped(&source.id));
+        assert!(p.memo.rows(&attempt, &source, false).is_none());
+        assert_eq!(p.memo.passed(&attempt, &source), None);
+        assert_eq!(
+            p.memo.certificates.status(&attempt, &source),
+            Some(completion_index::Status::Pending),
+            "The shared library authority is pending too, not just hidden in the workspace"
+        );
+        assert_eq!(
+            p.memo.certificates.status(&other_attempt, &other_source),
+            Some(completion_index::Status::Complete)
+        );
+        let stopped = p.memo.counters;
+        p.clear(); // Actual Back/library navigation preserves explicit Stop.
+        for _ in 0..24 {
+            p.memo.prepare(&attempt, &source, false).unwrap();
+            assert!(!p.memo.advance(&attempt, &source));
+        }
+        assert_eq!(p.memo.counters.copies, stopped.copies);
+        assert_eq!(p.memo.counters.ticks, stopped.ticks);
+        assert_eq!(serde_json::to_vec(&attempt).unwrap(), caller);
+        attempt.visited += 1; // Real Continue changes only visit metadata.
+        p.memo.prepare(&attempt, &source, false).unwrap();
+        assert!(p.explicitly_stopped(&source.id));
+        assert!(p.memo.job.is_none());
+        assert!(p.memo.rows(&attempt, &source, false).is_none());
+        assert_eq!(p.memo.passed(&attempt, &source), None);
+        assert!(
+            !p.memo
+                .certificates
+                .rekey_metadata(&attempt, &source)
+                .unwrap()
+        );
+        assert_eq!(
+            p.memo.certificates.status(&attempt, &source),
+            Some(completion_index::Status::Pending)
+        );
+        assert_eq!(p.memo.counters.ticks, stopped.ticks);
+        assert_eq!(serde_json::to_vec(&other_attempt).unwrap(), other_caller);
+        assert_eq!(p.memo.passed(&other_attempt, &other_source), Some(true));
+        let resumed = serde_json::to_vec(&attempt).unwrap();
+        p.memo.prepare(&attempt, &source, true).unwrap();
+        assert!(!p.explicitly_stopped(&source.id));
+        for _ in 0..4096 {
+            if !p.memo.advance(&attempt, &source) {
+                break;
+            }
+        }
+        assert!(p.memo.job.is_none());
+        assert_eq!(p.memo.passed(&attempt, &source), Some(true));
+        assert_eq!(
+            p.memo.certificates.status(&attempt, &source),
+            Some(completion_index::Status::Complete)
+        );
+        assert_eq!(serde_json::to_vec(&attempt).unwrap(), resumed);
+        assert_eq!(serde_json::to_vec(&other_attempt).unwrap(), other_caller);
+    }
+    #[test]
     fn stopped_recency_refresh_retains_full_key_without_grading_or_idle_copies() {
         let (s, mut a) = fixture(3);
         let mut m = cancelled(&a, &s);
@@ -1740,5 +1908,70 @@ mod stopped_admission_tests {
         assert_eq!(m.job.as_ref().unwrap().source.id, s.id);
         a.visited -= 1;
         assert_eq!(serde_json::to_vec(&a).unwrap(), input);
+    }
+}
+
+#[cfg(test)]
+mod physical_guard_tests {
+    use super::*;
+    #[test]
+    fn physical_optional_fields_and_teaching_refuse_backup_warm_rows_without_copy_or_work() {
+        let source = pack::bundled()
+            .unwrap()
+            .into_iter()
+            .find(|s| s.id == "lpic2-backup-selective-recovery")
+            .unwrap();
+        let mut good = Attempt::new(&source, 3);
+        dlms_learning_lab::file_backup_teaching::prepare(
+            &mut good,
+            source.file_backup_teaching.as_ref().unwrap(),
+            true,
+        )
+        .unwrap();
+        for command in &source.solution {
+            work::perform(&mut good, &source, work::Scope::Assignment, command).unwrap();
+        }
+        assert!(progress::current_solved(&good, &source));
+        let (physical, p) = crate::ui::tests::physical_workspace::prepared();
+        let pw = p.workspace.as_ref().unwrap();
+        for mask in 0..4 {
+            let mut s = source.clone();
+            let mut a = good.clone();
+            let mut memo = CheckMemo::default();
+            memo.prepare(&a, &s, false).unwrap();
+            for _ in 0..128 {
+                if !memo.advance(&a, &s) {
+                    break;
+                }
+            }
+            assert_eq!(memo.passed(&a, &s), Some(true));
+            let before = memo.counters;
+            if mask == 0 {
+                s.physical_link_teaching = physical.physical_link_teaching.clone();
+            } else {
+                let w = a.workspace.as_mut().unwrap();
+                if mask & 1 != 0 {
+                    w.physical_link_draft = pw.physical_link_draft.clone();
+                }
+                if mask & 2 != 0 {
+                    w.physical_link_learning = pw.physical_link_learning.clone();
+                }
+                assert!(w.valid());
+            }
+            let caller = serde_json::to_value(&a).unwrap();
+            assert!(memo.prepare(&a, &s, false).is_err());
+            assert_eq!(memo.passed(&a, &s), None);
+            assert!(memo.entries.is_empty());
+            assert!(memo.job.is_none());
+            assert_eq!(memo.counters, before);
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            memo.prepare(&good, &source, false).unwrap();
+            for _ in 0..128 {
+                if !memo.advance(&good, &source) {
+                    break;
+                }
+            }
+            assert_eq!(memo.passed(&good, &source), Some(true));
+        }
     }
 }

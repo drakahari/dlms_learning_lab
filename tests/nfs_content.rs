@@ -1,5 +1,9 @@
 //! Registered authored NFS pack. Independent source loading retains all reviewed outcomes.
 //! Expected vectors are authored independently, never generated from the evaluator.
+#[path = "support/combined_catalog.rs"]
+mod combined_catalog;
+#[path = "../examples/support/automation_digest.rs"]
+mod digest;
 use dlms_learning_lab::{
     backup, course,
     engine::{self, State},
@@ -202,10 +206,19 @@ fn preserve(a: &Attempt, s: &pack::Scenario, requirements: &[work::Requirement])
 #[test]
 fn prerequisites_guides_and_six_or_fewer_concepts_precede_real_native_actions() {
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 171);
+    assert_eq!(normal.len(), 176);
     let units = course::bundled(&normal).unwrap();
-    assert_eq!(units.len(), 44);
-    assert_eq!(units.last().unwrap().id, "shell-numeric-validation");
+    assert_eq!(units.len(), 46);
+    let raw44 = original44_unit_bytes();
+    let original44 =
+        dlms_learning_lab::course::load(std::str::from_utf8(&raw44).unwrap(), &normal[..171])
+            .unwrap();
+    assert_eq!(original44.len(), 44);
+    assert_eq!(
+        serde_json::to_value(&units[..44]).unwrap(),
+        serde_json::to_value(&original44).unwrap()
+    );
+    assert_eq!(original44.last().unwrap().id, "shell-numeric-validation");
     assert!(normal[..147].iter().all(|s| !IDS.contains(&s.id.as_str())));
     let all = labs();
     assert_eq!(all.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(), IDS);
@@ -672,7 +685,7 @@ fn two_full_raw_drafts_histories_genuine_old_records_backup_resume_and_selected_
  {
     let all = labs();
     let catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 171);
+    assert_eq!(catalog.len(), 176);
     exact(&catalog[150..154], &all);
     let original = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let mut p = progress::decode(original, &catalog).unwrap();
@@ -776,4 +789,31 @@ fn two_full_raw_drafts_histories_genuine_old_records_backup_resume_and_selected_
     ));
     exact(&restored.favorites, &p.favorites);
     assert_eq!(restored.clock, 91);
+}
+
+// Recover the complete reviewed44 predecessor through both closed raw inverses.
+// Canonical physical/private append recipes and all historical37 bytes stay fixed.
+fn original44_unit_bytes() -> Vec<u8> {
+    let raw = include_bytes!("../scenarios/units-v1.json");
+    let before = combined_catalog::before_physical_units(raw).unwrap();
+    let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
+    let original: serde_json::Value = serde_json::from_slice(&before).unwrap();
+    assert_eq!(current["units"].as_array().unwrap().len(), 46);
+    assert_eq!(original["units"].as_array().unwrap().len(), 44);
+    assert_eq!(
+        &current["units"].as_array().unwrap()[..44],
+        original["units"].as_array().unwrap().as_slice()
+    );
+    let physical: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog175-registration.json")).unwrap();
+    let private: serde_json::Value =
+        serde_json::from_slice(include_bytes!("fixtures/catalog176-registration.json")).unwrap();
+    assert_eq!(current["units"][44], physical["physical_unit"]);
+    assert_eq!(current["units"][45], private["private_unit"]);
+    // Existing pinned helper validates original raw37 plus every prior recipe.
+    assert_eq!(
+        combined_catalog::old_unit_bytes(raw).unwrap(),
+        combined_catalog::old_unit_bytes(&before).unwrap()
+    );
+    before
 }

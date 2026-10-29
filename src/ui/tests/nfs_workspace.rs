@@ -25,7 +25,7 @@ pub(in crate::ui) fn sources() -> Vec<Scenario> {
 }
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
+    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
     let at = a.scenarios.len();
     a.scenarios.extend(sources());
     a.launch(at + n);
@@ -1464,13 +1464,13 @@ fn nfs_four_plausible_wrong_configs_and_meaningful_partial_repairs_have_literal_
 
 fn normal_nfs_opened(id: &str) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
+    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
     let i = a.scenarios.iter().position(|s| s.id == id).unwrap();
     a.launch(i);
     draw(&ctx, &mut a);
     assert_eq!(
         a.scenarios.len(),
-        171,
+        176,
         "Use the normal authored catalog only"
     );
     assert_eq!(chosen(&a).state, a.scenarios[i].initial);

@@ -446,6 +446,8 @@ pub fn apply(d: &Definition, s: &mut State, a: &core::Action) -> Result<core::Pl
 // Exhaustive classification: new typed metadata requires a deliberate admission decision.
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
+        physical_link_draft,
+        physical_link_learning,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,
@@ -516,6 +518,8 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || physical_link_draft.is_some()
+        || physical_link_learning.is_some()
         || file_backup_learning.is_some()
         || etherchannel_draft.is_some()
         || etherchannel_learning.is_some()

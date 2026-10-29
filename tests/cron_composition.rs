@@ -11,7 +11,7 @@ use dlms_learning_lab::{
 };
 fn sources() -> (Scenario, Scenario, Scenario) {
     let mut all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     let cron = all.remove(
         all.iter()
             .position(|s| s.id == "lpic1-cron-weekday-report")

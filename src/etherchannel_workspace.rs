@@ -1341,6 +1341,7 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
 }
 fn foreign_source(s: &crate::pack::Scenario) -> bool {
     s.cron_teaching.is_some()
+        || s.physical_link_teaching.is_some()
         || s.file_backup_teaching.is_some()
         || s.teaching.is_some()
         || s.nfs_teaching.is_some()
@@ -1409,6 +1410,9 @@ pub(crate) fn context<'a>(
     a: &crate::progress::Attempt,
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
+    if s.physical_link_teaching.is_some() {
+        return Err("Physical-link teaching belongs to its own activity".into());
+    }
     crate::workspace::reject_file_backup_workspace(a)?;
     if a.scenario_version != s.version
         || a.step >= s.steps.len()
@@ -1869,6 +1873,7 @@ pub fn record_visit(
 }
 
 pub(crate) fn reject_foreign_source(s: &crate::pack::Scenario) -> Result<(), String> {
+    crate::physical_link_workspace::reject_foreign_source(s)?;
     if s.etherchannel_teaching.is_some()
         && !matches!(
             (&s.initial, &s.goal),

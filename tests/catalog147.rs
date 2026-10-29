@@ -219,7 +219,7 @@ fn original143_typed_fields_and36units_have_only_the_closed_nat_intro_exception(
         pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
     assert_eq!(original.len(), 143);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 171);
+    assert_eq!(all.len(), 176);
     let nat_raw = ORIGINAL_PACKS.last().unwrap().1;
     if digest::hash(nat_raw.as_bytes())
         == index["nat_teaching_amendment"]["new_pack_sha256"]
@@ -253,10 +253,10 @@ fn original143_typed_fields_and36units_have_only_the_closed_nat_intro_exception(
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [48, 36, 32, 55]
+        [53, 36, 32, 55]
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 44);
+    assert_eq!(units.len(), 46);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(index["units"]["units"].clone()).unwrap();
     assert_eq!(old_units.len(), 36);

@@ -26,6 +26,9 @@ pub enum ServiceEvent {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum State {
+    PhysicalLink {
+        simulation: crate::physical_link::State,
+    },
     FileBackup {
         simulation: crate::file_backup_terminal::Store,
     },
@@ -157,6 +160,9 @@ pub enum State {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 #[serde(tag = "kind", deny_unknown_fields)]
 pub enum Goal {
+    PhysicalLink {
+        definition: Box<crate::physical_link_assignment::Definition>,
+    },
     FileBackup {
         definition: Box<crate::file_backup_workspace::Definition>,
     },
@@ -337,6 +343,9 @@ pub fn access(
 pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
     let c = |b, t: &str| (b, t.to_owned());
     match (s, g) {
+        (State::PhysicalLink { simulation }, Goal::PhysicalLink { definition }) => {
+            definition.checks(simulation)
+        }
         (State::FileBackup { simulation }, Goal::FileBackup { definition }) => {
             definition.checks(simulation)
         }
@@ -668,6 +677,7 @@ pub fn solved(s: &State, g: &Goal) -> bool {
 }
 pub fn help(s: &State) -> &'static str {
     match s {
+        State::PhysicalLink { .. } => crate::physical_link_workspace::HELP,
         State::FileBackup { .. } => crate::file_backup_terminal::HELP,
         State::EtherChannel { .. } => crate::etherchannel_workspace::HELP,
         State::Cron { .. } => crate::cron_workspace::HELP,
@@ -733,6 +743,12 @@ pub fn help(s: &State) -> &'static str {
 /// Preserve the exact legacy path for other kinds. Account mutations must retain
 /// compatibility with the immutable authored initial state before publication.
 pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<String, String> {
+    if let State::PhysicalLink { simulation } = s {
+        let Goal::PhysicalLink { definition } = goal else {
+            return Err("Physical-link actions need their authored task".into());
+        };
+        return crate::physical_link_workspace::execute(definition, simulation, input);
+    }
     if let State::FileBackup { simulation } = s {
         if input.len() > 4096 {
             return Err(
@@ -942,6 +958,17 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
 }
 /// The parser only mutates typed values. It has no OS, shell, filesystem or network APIs.
 pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
+    if matches!(s, State::PhysicalLink { .. }) {
+        if input.len()
+            > crate::physical_link_workspace::PREFIX.len() + crate::physical_link::MAX_ACTION
+        {
+            return Err("Physical-link raw action exceeds its bound".into());
+        }
+        return match input.trim() {
+            "help" => Ok(help(s).into()), "show" => Ok(describe(s)),
+            _ => Err("Physical-link changes need their supplied task; use native configuration tools. No host or IOS command runs".into()),
+        };
+    }
     if matches!(s, State::FileBackup { .. }) {
         if input.len() > 4096 {
             return Err("Backup command exceeds4096bytes".into());
@@ -1156,7 +1183,8 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         return Ok(describe(s));
     }
     match s {
-        State::FileBackup { .. }
+        State::PhysicalLink { .. }
+        | State::FileBackup { .. }
         | State::EtherChannel { .. }
         | State::Cron { .. }
         | State::Nfs { .. }
@@ -1607,6 +1635,11 @@ fn tail(text: &str, count: &str) -> Result<String, String> {
 }
 pub fn describe(s: &State) -> String {
     match s {
+        State::PhysicalLink { simulation } => format!(
+            "Simulated physical uplinks: {} supplied interfaces and {} point-to-point links. Qualification and deterministic samples are not physical measurements or real network traffic",
+            simulation.topology().ports.len(),
+            simulation.topology().links.len()
+        ),
         State::FileBackup { simulation } => format!(
             "Virtual backup administrator: root. {} supplied file trees, {} saved archives and {} snapshots; current folder {}. All paths and permissions are simulated.",
             simulation.trees.len(),

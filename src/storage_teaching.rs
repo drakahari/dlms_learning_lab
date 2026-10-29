@@ -143,6 +143,9 @@ pub fn save_action(text: String) -> String {
 }
 
 pub fn prepare(attempt: &mut crate::progress::Attempt, lesson: &Lesson, new_attempt: bool) {
+    if crate::workspace::is_physical_workspace(attempt) {
+        return;
+    }
     if crate::workspace::is_file_backup_workspace(attempt) {
         return;
     }

@@ -5,6 +5,8 @@ use std::collections::BTreeSet;
 #[serde(deny_unknown_fields)]
 pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub physical_link_teaching: Option<crate::physical_link_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_backup_teaching: Option<crate::file_backup_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub etherchannel_teaching: Option<crate::etherchannel_teaching::Lesson>,
@@ -182,7 +184,10 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || s.solution.iter().any(|v| {
                 v.trim().is_empty()
                     || v.len()
-                        > if matches!(s.initial, State::EtherChannel { .. }) {
+                        > if matches!(s.initial, State::PhysicalLink { .. }) {
+                            crate::physical_link_workspace::PREFIX.len()
+                                + crate::physical_link::MAX_ACTION
+                        } else if matches!(s.initial, State::EtherChannel { .. }) {
                             crate::etherchannel_workspace::PREFIX.len()
                                 + crate::etherchannel::MAX_ACTION_BYTES
                         } else if matches!(s.initial, State::Nfs { .. }) {
@@ -373,6 +378,33 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             || matches!(s.goal, Goal::DebianPackages { .. })
         {
             return Err("Package teaching/objectives on another activity".into());
+        }
+        if let State::PhysicalLink { simulation } = &s.initial {
+            let Goal::PhysicalLink { definition } = &s.goal else {
+                return Err("Physical-link State needs matching typed Goal".into());
+            };
+            let Some(lesson) = &s.physical_link_teaching else {
+                return Err(
+                    "Physical-link tasks need an introduction and separate runnable example".into(),
+                );
+            };
+            if simulation != &definition.initial
+                || !crate::physical_link_workspace::source_shape(s)
+                || !crate::physical_link_workspace::within(
+                    s,
+                    crate::physical_link_workspace::MAX_SCENARIO,
+                )
+            {
+                return Err("Physical-link initial/context differs or exceeds its bound".into());
+            }
+            definition.validate()?;
+            lesson.validate(definition)?;
+            if s.guide.iter().any(|step| !step.commands.is_empty()) {
+                return Err("Physical-link tasks use native tools; internal author JSON must not be taught as IOS".into());
+            }
+        } else if s.physical_link_teaching.is_some() || matches!(s.goal, Goal::PhysicalLink { .. })
+        {
+            return Err("Physical-link teaching/Goal belongs to another activity".into());
         }
         if let State::FileBackup { simulation } = &s.initial {
             let Goal::FileBackup { definition } = &s.goal else {
@@ -928,6 +960,7 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
 }
 pub fn validate_state(s: &State) -> Result<(), String> {
     let valid = match s {
+        State::PhysicalLink { simulation } => simulation.validate().is_ok(),
         State::FileBackup { simulation } => simulation.valid(),
         State::EtherChannel { simulation } => simulation.validate().is_ok(),
         State::Cron { simulation } => simulation.validate().is_ok(),
@@ -1139,5 +1172,7 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/linux-cron-v1.json"),
         include_str!("../scenarios/file-backup-v1.json"),
         include_str!("../scenarios/shell-numeric-validation-v1.json"),
+        include_str!("../scenarios/physical-links-v1.json"),
+        include_str!("../scenarios/ipv4-private-planning-v1.json"),
     ])
 }

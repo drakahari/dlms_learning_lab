@@ -612,6 +612,23 @@ pub enum Requirement {
         network: Prefix,
         exclude: Vec<Ipv4Addr>,
     },
+    /// Choose an entire conventional RFC1918 subnet, with room for the task.
+    /// This does not imply security, NAT or Internet reachability.
+    PrivateSubnet {
+        device: String,
+        interface: String,
+        minimum_hosts: u32,
+        maximum_hosts: u32,
+        avoid: Vec<Prefix>,
+    },
+    /// Two distinct ordinary hosts on the same modeled LAN must share the
+    /// complete network/prefix, not merely be able to reach each other today.
+    SameSubnet {
+        left_device: String,
+        left_interface: String,
+        right_device: String,
+        right_interface: String,
+    },
     KeepAddress {
         device: String,
         interface: String,
@@ -661,6 +678,37 @@ impl Requirement {
                     && network.valid()
                     && (1..=30).contains(&network.length)
                     && exclude.len() <= 16
+            }
+            Self::PrivateSubnet {
+                device,
+                interface,
+                minimum_hosts,
+                maximum_hosts,
+                avoid,
+            } => {
+                port(device, interface).is_some()
+                    && *minimum_hosts >= 1
+                    && minimum_hosts <= maximum_hosts
+                    && *maximum_hosts <= (1u32 << 24) - 2
+                    && avoid.len() <= 16
+                    && avoid.iter().all(Prefix::valid)
+                    && avoid
+                        .iter()
+                        .map(|p| (u32::from(p.address), p.length))
+                        .collect::<BTreeSet<_>>()
+                        .len()
+                        == avoid.len()
+            }
+            Self::SameSubnet {
+                left_device,
+                left_interface,
+                right_device,
+                right_interface,
+            } => {
+                left_device != right_device
+                    && port(left_device, left_interface)
+                        .zip(port(right_device, right_interface))
+                        .is_some_and(|(left, right)| left.link == right.link)
             }
             Self::KeepAddress {
                 device,
@@ -746,6 +794,111 @@ impl Requirement {
                         issue.unwrap_or_else(|| "Address and prefix meet the task".into())
                     ),
                 )
+            }
+            Self::PrivateSubnet {
+                device,
+                interface,
+                minimum_hosts,
+                maximum_hosts,
+                avoid,
+            } => {
+                let result = (|| -> Result<String, String> {
+                    let a = t.devices[device].interfaces[interface]
+                        .address
+                        .as_ref()
+                        .ok_or(
+                            "No address is assigned; choose a private host address and prefix",
+                        )?;
+                    if !a.usable() {
+                        return Err("Choose an ordinary host address; the network and broadcast addresses are reserved in this exercise".into());
+                    }
+                    let p = Prefix::new(a.address, a.prefix).unwrap();
+                    let end = p.last_address().unwrap();
+                    let private = [
+                        (Ipv4Addr::new(10, 0, 0, 0), 8),
+                        (Ipv4Addr::new(172, 16, 0, 0), 12),
+                        (Ipv4Addr::new(192, 168, 0, 0), 16),
+                    ]
+                    .into_iter()
+                    .any(|(address, length)| {
+                        let block = Prefix::new(address, length).unwrap();
+                        block.contains(p.address) && block.contains(end)
+                    });
+                    if !private {
+                        return Err("The entire subnet must fit inside a private-use block: 10.0.0.0/8, 172.16.0.0/12 or 192.168.0.0/16. Other special-use addresses are not automatically public Internet addresses".into());
+                    }
+                    let capacity = (1u64 << (32 - a.prefix)) - 2;
+                    if capacity < u64::from(*minimum_hosts) || capacity > u64::from(*maximum_hosts)
+                    {
+                        return Err(format!(
+                            "This /{} subnet has {capacity} usable host addresses; choose room for {minimum_hosts}–{maximum_hosts}",
+                            a.prefix
+                        ));
+                    }
+                    if let Some(other) = avoid
+                        .iter()
+                        .find(|other| p.contains(other.address) || other.contains(p.address))
+                    {
+                        return Err(format!(
+                            "{} overlaps the reserved block {}; choose a separate subnet",
+                            p.text(),
+                            other.text()
+                        ));
+                    }
+                    Ok(format!(
+                        "{} is a separate private subnet with {capacity} usable host addresses",
+                        p.text()
+                    ))
+                })();
+                match result {
+                    Ok(message) => (true, format!("{device}/{interface}: {message}")),
+                    Err(message) => (false, format!("{device}/{interface}: {message}")),
+                }
+            }
+            Self::SameSubnet {
+                left_device,
+                left_interface,
+                right_device,
+                right_interface,
+            } => {
+                let left = t.devices[left_device].interfaces[left_interface]
+                    .address
+                    .as_ref();
+                let right = t.devices[right_device].interfaces[right_interface]
+                    .address
+                    .as_ref();
+                let result = (|| -> Result<String, String> {
+                    let (Some(left), Some(right)) = (left, right) else {
+                        return Err("Assign an address and prefix to both computers".into());
+                    };
+                    if !left.usable() || !right.usable() {
+                        return Err("Choose ordinary host addresses for both computers; network and broadcast addresses are reserved in this exercise".into());
+                    }
+                    if left.address == right.address {
+                        return Err("The two computers need different host addresses".into());
+                    }
+                    if left.prefix != right.prefix {
+                        return Err(format!(
+                            "Use matching prefixes: /{} and /{} describe different address blocks, even if these two hosts can currently communicate",
+                            left.prefix, right.prefix
+                        ));
+                    }
+                    let network = Prefix::new(left.address, left.prefix).unwrap();
+                    if !network.contains(right.address) {
+                        return Err(format!(
+                            "The computers are in different subnets: {} and {}",
+                            network.text(),
+                            Prefix::new(right.address, right.prefix).unwrap().text()
+                        ));
+                    }
+                    Ok(format!("Different usable hosts share {}", network.text()))
+                })();
+                let label =
+                    format!("{left_device}/{left_interface} and {right_device}/{right_interface}");
+                match result {
+                    Ok(message) => (true, format!("{label}: {message}")),
+                    Err(message) => (false, format!("{label}: {message}")),
+                }
             }
             Self::KeepAddress {
                 device,

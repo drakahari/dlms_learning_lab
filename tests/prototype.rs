@@ -347,7 +347,23 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::EtherChannel { simulation } = &a.state {
+        if let State::PhysicalLink { simulation } = &a.state {
+            let mut configuration = simulation.configuration().clone();
+            for port in configuration.ports.values_mut() {
+                port.admin_up = false;
+            }
+            let action = dlms_learning_lab::physical_link::Action::Configure { configuration };
+            engine::execute_for_goal(
+                &mut a.state,
+                &s.goal,
+                &format!(
+                    "{}{}",
+                    dlms_learning_lab::physical_link_workspace::PREFIX,
+                    serde_json::to_string(&action).unwrap()
+                ),
+            )
+            .unwrap();
+        } else if let State::EtherChannel { simulation } = &a.state {
             // A genuine admitted bad configuration, preserving the source and
             // topology: disable every member after the taught solution passed.
             let mut configuration = simulation.configuration().clone();

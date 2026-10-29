@@ -13,7 +13,7 @@ struct Witness {
 }
 fn opened() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (171, 44));
+    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
     assert!(a.progress.attempts.is_empty());
     a.smoke = true;
     a.smoke_stage = FIRST;
@@ -239,7 +239,7 @@ fn closed_normal_selector_and_exact_actual_opening_obey_pacing_and_private_start
     assert_eq!(a.smoke_stage, FIRST);
     assert!(a.progress.attempts.is_empty());
     until(&ctx, &mut a, FIRST + 4, &mut w);
-    assert_eq!(a.scenarios.len(), 171);
+    assert_eq!(a.scenarios.len(), 176);
     assert_eq!(a.progress.attempts.len(), 1);
     assert!(a.progress.favorites.contains(IDS[0]));
     assert_eq!(
@@ -305,8 +305,8 @@ fn all_three_actual_normal_flows_preserve_prior_work_finish_holds_and_bounded_re
     let (ctx, mut a) = opened();
     let mut w = Witness::default();
     until(&ctx, &mut a, LAST, &mut w);
-    assert_eq!(a.scenarios.len(), 171);
-    assert_eq!(a.units.len(), 44);
+    assert_eq!(a.scenarios.len(), 176);
+    assert_eq!(a.units.len(), 46);
     assert_eq!(a.progress.attempts.len(), 3);
     for id in IDS {
         let s = a.scenarios.iter().find(|s| s.id == id).unwrap();

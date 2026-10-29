@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main171 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main176 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -10,12 +10,12 @@ grading, persistence and available native acceptance. There is no lab-count targ
 
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
-| CCNA | 48 | 12 | 69 | 42 | 0 |
+| CCNA | 53 | 14 | 65 | 46 | 0 |
 | LPIC-1 | 36 | 9 | 504 | 93 | 1 |
 | LPIC-2 | 32 | 8 | 498 | 33 | 0 |
 | Bash/Shell | 55 | 15 | Separate path below | — | — |
 
-All136 current parent objectives remain incomplete (97 Open,39 Partial).
+All136 current parent objectives remain incomplete (94 Open,42 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -48,11 +48,11 @@ configuration or troubleshooting.
 | --- | --- | --- | --- |
 | 1.1 | Open | Trace a campus request through its devices | device roles and packet path. Required model not implemented; cannot claim faithful command or state behavior. |
 | 1.2 | Open | Choose a resilient branch topology | topology graph. Required model not implemented; cannot claim faithful command or state behavior. |
-| 1.3 | Open | Select a suitable physical uplink | cable/transceiver metadata. Evidence/configuration reasoning can be simulated; physical, kernel, cryptographic or assistive-device operation cannot be validated here. |
-| 1.4 | Open | Diagnose an error-prone uplink | interface counters/link state. Required model not implemented; cannot claim faithful command or state behavior. |
+| 1.3 | Partial practice · ccna-physical-media-span;ccna-physical-duplex-diagnosis;ccna-physical-counter-baseline;ccna-physical-uplink-handover | Select a suitable physical uplink | Shared-medium/pairwise architecture, real transceivers/optical power/BER/installation and full cable specification/IOS/device conformance remain unimplemented; no full objective credit. |
+| 1.4 | Partial practice · ccna-physical-duplex-diagnosis;ccna-physical-counter-baseline;ccna-physical-uplink-handover | Diagnose an error-prone uplink | Finite deterministic fault/counter model; no physical measurement, general BER/error taxonomy, real collision/backoff protocol or complete IOS troubleshooting commands. |
 | 1.5 | Open | Explain a transport failure from a trace | TCP/UDP packet model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 1.6 | Partial practice · ccna-ipv4;ccna-vlsm;ccna-gateway;ccna-ipv4-branch-handover | Allocate and verify a branch address plan | Bounded native static practice only; no IOS protocol-code/metric display, dynamic protocol selection, recursive next hops, ECMP, real packets or full equipment-stack behavior. Conventional IPv4 interfaces exclude /31-/32. |
-| 1.7 | Open | Repair a private-address overlap | address scope model. Required model not implemented; cannot claim faithful command or state behavior. |
+| 1.7 | Partial practice · ccna-private-office-plan | Repair a private-address overlap | Single supplied LAN and flat native configuration only; no public Internet, NAT, DHCP, ARP/kernel/device execution or complete private-address design. /31 and /32 remain excluded. |
 | 1.8 | Partial practice · ccna-ipv6-neighbor;ccna-ipv6-workstation;ccna-ipv6-handover | Configure a dual-stack segment | No ND/RA/SLAAC, dual-stack or IOS behavior. |
 | 1.9 | Partial practice · ccna-ipv6-neighbor;ccna-ipv6-scope | Choose appropriate IPv6 destinations | No complete global/ULA/link-local choice progression, multicast, general anycast or modified EUI-64 instruction. |
 | 1.10 | Partial practice · ccna-gateway | Repair a client across OS-style views | No Windows/macOS client-command workspaces or complete client parameter checks. |
@@ -195,7 +195,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These43 units, and only their168 registered authored scenarios, count as
+These46 units, and only their176 registered authored scenarios, count as
 implemented inventory. The presence of a unit does not mean its entire related
 objective or wider course stage is complete. Exact per-lab prerequisites remain
 in the versioned scenario packs; unit prerequisites are in units-v1.json.
@@ -250,11 +250,15 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 
 | Bash/Shell | Numeric input and safe decisions (`shell-numeric-validation`) | `shell-numeric-retry`, `shell-numeric-intake`, `shell-numeric-publication` |
 
+| CCNA | Physical uplinks: choose, investigate and hand over (`physical-uplink-diagnosis`) | `ccna-physical-media-span`, `ccna-physical-duplex-diagnosis`, `ccna-physical-counter-baseline`, `ccna-physical-uplink-handover` |
+| CCNA | Private office planning (`private-office-planning`) | `ccna-private-office-plan` |
+
 ## Bash/Shell remaining path
 
 The55 source-integrated scripts span15 units. The new numeric unit has passed
-private full/native and final Main full/static/coverage gates; new171 candidate
-verification remains pending. They already cover bounded indexed arrays,
+private full/native and final Main full/static/coverage gates. Available171
+candidate065032d has installed numeric101 and NFS cold/startup acceptance; it
+does not contain the five newer networking assignments. They already cover bounded indexed arrays,
 command-output capture, getopts, case dispatch, command-list construction,
 read-only literal fallback/alternate expansion and optional-input projects,
 C-locale cut/sort/uniq work, explicit pipefail and bounded case-class numeric
@@ -286,20 +290,25 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. FinalMain171 full/all24history/Clippy/Python/coverage gates pass. Commit/push
-   the reviewed numeric3 integration, then continue the following work. Private2337/native101 acceptance retains its
-   own executable identity; old168 Fedora candidatec683 remains available and
-   separately verified. No artifact identity is moved to newer code.
-2. Complete physical-link foreign/UI/index tests and authored4/native gates;
-   Source prototypes and private fixtures are not normal-catalog credit.
-3. Compile/test the shared completion index before registering fifth-backup FHS
-   selection; complete ArtifactSet/content/progress/normal-native gates. Never
-   increase cache caps to hide fairness problems.
-4. Build one-off scheduling adapters/teaching/workspace from the actual19-pass
-   core, then meaningful assignments; records alone are not execution proof.
+1. Retain source/candidate identities: numeric171/065032d and capture-tooling
+   b25b1f0 are committed/pushed; genuine evaluator12 baseline is independently
+   sealed before any loop-control advance. The four physical-link tasks and
+   private-office project are a distinct five-assignment integration. Their
+   evidence is not a full-objective or complete-curriculum claim.
+2. Compose the four one-off scheduling assignments after the typed/content gates:
+   source-reviewed native Stop/index/Next dispatch, exact176-predecessor
+   registration and current-consumer closures precede complete normal180
+   validation. Unregistered prototypes earn no catalog credit.
+3. Complete the fifth-backup directory-selection ArtifactSet/content/progress/
+   normal-native gates against the accepted shared index and Stop fixes. Do not
+   increase cache caps or replace prior fields/results to hide fairness issues.
+4. Compile/test bounded own-scope break/continue, compare fixed supported cases
+   with real Bash in disposable fixtures, and run genuine12-history migrations
+   before authoring two distinct recovery tasks. Source parsing/review earns no
+   evaluator13 runtime acceptance or authored credit.
 5. Continue every remaining network/Linux/scripting assignment and capability in
-   the granular ledger. Current reference versions/fingerprints and future CCNA
-   separation remain as recorded; no arbitrary catalog quota or routine approval.
+   the granular ledger. Current reference fingerprints and future CCNA separation
+   remain as recorded; no arbitrary catalog quota or routine approval gate.
 
 Full curriculum acceptance stays separate from Windows/macOS desktop,
 physical-device/screen-reader and novice acceptance. No release publication.

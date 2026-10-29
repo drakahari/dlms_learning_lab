@@ -227,7 +227,7 @@ impl LabApp {
             .iter()
             .position(|s| s.id == id)
             .expect("Normal safe-automation lab");
-        assert_eq!((self.scenarios.len(), self.units.len()), (171, 44));
+        assert_eq!((self.scenarios.len(), self.units.len()), (176, 46));
         assert_eq!(
             self.scenarios
                 .iter()

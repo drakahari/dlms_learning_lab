@@ -114,6 +114,20 @@ impl Memo {
         total_cap: usize,
         entries: usize,
     ) {
+        if s.physical_link_teaching.is_some() {
+            self.entries.retain(|e| e.id != s.id);
+            self.bytes = self.entries.iter().map(|e| e.charge).sum();
+            self.frame(&s.id, false);
+            self.fallback(
+                &s.id,
+                vec![(
+                    false,
+                    "Physical-link teaching belongs to another activity".into(),
+                )],
+                Vec::new(),
+            );
+            return;
+        }
         if s.file_backup_teaching.is_some() {
             self.entries.retain(|e| e.id != s.id);
             self.bytes = self.entries.iter().map(|e| e.charge).sum();
@@ -262,6 +276,8 @@ impl Memo {
 }
 pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
     let model::WorkspaceData {
+        physical_link_draft,
+        physical_link_learning,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,
@@ -332,6 +348,8 @@ pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
         migrated_practice_host: _,
     } = w;
     false
+        || physical_link_draft.is_some()
+        || physical_link_learning.is_some()
         || file_backup_learning.is_some()
         || etherchannel_draft.is_some()
         || etherchannel_learning.is_some()
@@ -1187,6 +1205,52 @@ mod tests {
             source.cron_teaching = None;
             m.evaluate(&good, &source, false);
             assert_eq!(m.prepared(&source.id), Some(true));
+        }
+    }
+    #[test]
+    fn valid_physical_source_and_each_optional_field_refuse_a_warm_success_before_copy() {
+        let source = lessons().remove(0);
+        let mut a = attempt(&source);
+        solve(&source, &mut a);
+        let good = a.clone();
+        let (physical, p) = crate::ui::tests::physical_workspace::prepared();
+        let pw = p.workspace.as_ref().unwrap();
+        assert!(pw.valid());
+        for mask in 0..4 {
+            let mut source = source.clone();
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            let before = m.counters;
+            if mask == 0 {
+                source.physical_link_teaching = physical.physical_link_teaching.clone();
+            } else {
+                let w = a.workspace.as_mut().unwrap();
+                if mask & 1 != 0 {
+                    w.physical_link_draft = pw.physical_link_draft.clone();
+                }
+                if mask & 2 != 0 {
+                    w.physical_link_learning = pw.physical_link_learning.clone();
+                }
+                assert!(w.valid());
+            }
+            let caller = serde_json::to_value(&a).unwrap();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(false));
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.meters, before.meters);
+            assert!(m.entries.is_empty());
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            source.physical_link_teaching = None;
+            a = good.clone();
+            m.begin_frame();
+            m.evaluate(&a, &source, false);
+            assert_eq!(
+                m.prepared(&source.id),
+                Some(true),
+                "Removing foreign physical fields must restore legitimate own completion"
+            );
         }
     }
 }

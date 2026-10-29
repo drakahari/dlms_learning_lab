@@ -484,18 +484,25 @@ fn device_controls(
             egui::Layout::left_to_right(egui::Align::Center),
             |ui| {
                 ui.set_width(width);
-                egui::ComboBox::from_id_salt(("routing-v4-device", index, practice))
+                let combo = egui::ComboBox::from_id_salt(("routing-v4-device", index, practice))
                     .width(width)
                     .truncate()
                     .selected_text(&draft.selected_device)
                     .show_ui(ui, |ui| {
                         for name in topology.devices.keys() {
-                            ui.selectable_value(&mut draft.selected_device, name.clone(), name);
+                            let choice =
+                                ui.selectable_value(&mut draft.selected_device, name.clone(), name);
+                            metrics
+                                .routing_device_choices
+                                .push((name.clone(), choice.rect));
                         }
                     });
+                metrics.routing_device = Some(combo.response.rect);
             },
         );
-        ui.selectable_value(&mut draft.show_routes, false, "Addresses & interfaces");
+        let address_tab =
+            ui.selectable_value(&mut draft.show_routes, false, "Addresses & interfaces");
+        metrics.routing_address_tab = Some(address_tab.rect);
         ui.selectable_value(&mut draft.show_routes, true, "Static routes");
     });
     let device = draft.devices.get_mut(&draft.selected_device).unwrap();
