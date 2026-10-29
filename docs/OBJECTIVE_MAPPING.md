@@ -4,11 +4,13 @@ Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://lea
 
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are168 narrowly evidenced Partial practice rows, one Supporting explanation
 row and1071 Open rows; no full-objective completion is asserted. Main source
-contains168 authored assignments/43 units. The retained Fedora candidate
-9a90f275e133 contains154; it is not acceptance evidence for the fourteen later source
-assignments. [CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md) separates source,
-behavior, pending final full-regression/native and candidate receipts. Current reconciliation is
-in [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
+contains171 authored assignments/44 units. Candidate065032d0a90b contains the same
+171 assignments; installed lifecycle, NFS cold reopening and ten serialized Wayland
+launches pass on its exact ELF. New-unit installed workflows remain separately
+tracked, rather than inherited from development runs. See
+[CATALOG171_MILESTONE.md](CATALOG171_MILESTONE.md),
+[FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
+[CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
 

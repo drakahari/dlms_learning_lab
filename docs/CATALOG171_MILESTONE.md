@@ -1,8 +1,9 @@
 # Numeric requests and safe publication — source171 milestone
 
 Main source integrates171 assignments/44units after reviewed private acceptance
-and final Main full/static/coverage gates. The reviewed commit is being prepared;
-the available installed Fedora candidate remains168/c683994. No release or full
+and final Main full/static/coverage gates. Implementation065032d0a90b is pushed. Its matching Fedora candidate is built,
+installed and verified for lifecycle/NFS cold reopening/ten native starts; further
+installed new-unit checks remain separate. No release or full
 curriculum claim. This page distinguishes source integration from verification
 and packaging rather than moving an old result to a new build.
 
@@ -79,9 +80,11 @@ The remaining curriculum is in OBJECTIVE_MAPPING.md and CURRICULUM_RECONCILIATIO
 ## Remaining gates
 
 Final Main inclusive/all24history/Clippy/Python/coverage passed after integration;
-privacy review and coherent commit/push follow. A new candidate must have its
-own build identity/checksums and actual installed/upgrade/reopen flows, including
-NFS cold restoration. The existing168 candidate keeps its scoped acceptance.
-Windows/macOS runtime/signing, screen-reader/physical-device and novice acceptance
-remain pending. Physical4, selection1, one-off and private-address prototypes are
-excluded. No installer/release publication is authorized.
+privacy-reviewed implementation065032d0a90b is committed and pushed. The matching
+candidate has its own build identity/checksums and actual installed upgrade,
+uninstall/reinstall, NFS cold restoration and ten serialized starts. See
+[FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md). The101capture
+numeric development run above is not installed-unit acceptance; that remains
+separately tracked. Windows/macOS runtime/signing, screen-reader/physical-device
+and novice acceptance remain pending. Physical4, selection1, one-off and
+private-address prototypes are excluded. No public release.

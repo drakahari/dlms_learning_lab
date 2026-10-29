@@ -4,24 +4,24 @@ These are **development milestone candidates**, not a complete curriculum or a p
 
 ## Linux / Fedora
 
-Current local Fedora candidate: **c68399443270**,168 labs/43 units
-(48CCNA,36LPIC-1,32LPIC-2,52Bash). Source
-`c683994432708db908ef2a599dac63e3d53eecdc`. No new curriculum or platform
-completion claim follows from packaging. Open from any terminal directory:
+Current local Fedora candidate: **065032d0a90b**,171 labs/44 units
+(48CCNA,36LPIC-1,32LPIC-2,55Bash). Source
+`065032d0a90b781532874d159207f496a5b68f95`. Packaging is not curriculum or
+platform completion. Open from any terminal directory:
 
 ```sh
-"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-gc68399443270-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
+"$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g065032d0a90b-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 ```
 
-The actual installed executable passes upgrade from9a90f275e133, identity/content/
-checksum and desktop-entry validation, clean uninstall/reinstall and exact
-synthetic original-nine progress-byte retention. Two fully exited NFS processes
-verify saved work/drafts, current mounts/files, preferences and full progress/
-receipts. Ten serialized Wayland launches pass ready/first-update/capture checks
-without timeout (0.915–0.966s); this finite test cannot prove intermittent failures
-impossible. Other combined-unit installed flows remain pending. See
-[FEDORA_C683_VERIFICATION.md](FEDORA_C683_VERIFICATION.md) for immutable build
-checksums and scope. Older candidate files and their evidence remain retained.
+The actual installed executable passes upgrade fromc68399443270, identity/content/
+checksum and desktop-entry validation, uninstall/reinstall and exact synthetic
+original-nine progress-byte retention. Two fully exited NFS processes verify saved
+work/drafts, current mounts/files, preferences and full progress/receipts. Ten
+serialized Wayland starts pass ready/first-update/capture checks with no timeout
+(0.915–0.966s). A finite test cannot rule out every intermittent failure. Other
+combined-unit installed flows remain separately tracked. See
+[FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) for exact checksums
+and scope. Older candidates and their original evidence remain retained.
 
 ### Historical154-lab installed milestone
 

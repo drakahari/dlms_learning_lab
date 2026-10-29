@@ -3978,3 +3978,41 @@ moved; removal frombefore/after restores every originalbyte, including genuine
 history. RootsourceACK266f1836; R4source0b947253, six explicit nonemptyforeign
 filters and22UI/Clippy pending. No visibility/loader/assertion waivers. Separate
 controller107 remains private/source-only until actual gates/registration.
+
+
+M236/M237 candidate065032d0a90b actual build and installed lifecycle PASS:
+ELFda35b65a/63914944B, archive022bfe6d/43131971B; clean171/44, upgradefromc683,
+identity/content/desktop, uninstall/reinstall and unchanged controlled original-nine
+bytes. Installed ordinary ELF subsequently passes NFS two-process cold route
+(writer75.506s/read30.492s,12PNGs, distinct drafts/fullProgress+receipts) and10/10
+serialized Wayland starts0.915–0.966s without timeout. Wrappers21707/3701 fully
+reaped; receipt7067accf, Main66418898e38 and ELF unchanged. SixworkerPNGs plus
+Roottwo actual images reviewed:100%Navy/150%Light centered fields/aligned Save
+rows, larger text scrolls. Startup retains ten logs but only finalPNG. Minimum
+available24688263168B/PSI0/OOM0. Installednumeric101 remains separatepending.
+
+M235 private IPv4capabilityR3 actual42PASS/ClippyPASS including10new+32old groups;
+source1d4fc37c/SameSubnet complements actualReachable. M238 authored private-office
+contentR2 actual8PASS: alternatepools/boundaries,13wrong/partial, maskdisagreement
+withsuccessfultraffic,31/32atomicrejection, isolatedexamplefill/change/repair,
+invalid/unreachablepacks and savedseparatedrafts/originalnine/actualreceipts/reset.
+No registry/count/coverage credit. Fresh Main171 isolated normal172source staging
+3512781d adds exactsamecapability/content plus one normalregistry/unit; native/
+currentcatalogacceptance still pending. No main implementation change here.
+
+Installed numeric101 actualPASS,65175fullyreaped0/lease released. Exact ordinary
+ELFda35b65a and664runtime pins unchanged; receipt5a4b69fd.101PNGs(85narrow/16wide),
+20actualsettings/12capstone200%views(8unique+4identicalwidealiases),18worker+2Root
+images viewed. ActualStart/Intro/separateexample/experiment/repair/fullassignment,
+wrong/partial/reference/twoalternatives/currentinvalidation/selectedPass-overallFail,
+RunStop/realUndoRedoTabShiftTab/Challenge/warmContinue/fullrawreceipts/reset all
+PASS; numericcold remainspending.358.19s/min24538411008B/PSI0/swapout0/OOM0.
+No acceptance transferred from the previous development ELF.
+
+Physical R14 final source81ff0a96 actual alltargetClippyPASS11.67s, index11PASS
+8.30s/physicalUI13PASS5.50s/strongplain-controls2PASS0.24s, allreaped/noignored.
+Mechanical21b53bd8 reuses exact existing source()->fixture::scenario() factory,
+explicit7-ID enumerate and equivalent lifetime/let-chain/String borrow changes;
+no assertion/history/cap/visibility/warning waivers. Earlier typed57 evidence
+retains its own identity. No normal physical4 or technicalcontroller credit yet.
+Final physical R14 receipt9d1127d03a4c77e0d268e887ab967a220ca9db5e886a3042289b1bfdbe36284d;57owned/834protected exact, min21.117GiB/PSI0/OOM0/swap-out0. Private168/EVAL11 foundation only, not normal175 or Main/full/native acceptance.
