@@ -1,4 +1,6 @@
 //! Exact complete Main164 prefix plus four distinct backup/recovery assignments.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{Goal, State},
@@ -45,7 +47,7 @@ fn old_catalog() -> Vec<pack::Scenario> {
 fn all_reviewed164_complete_definitions_precede_only_the_four_authored_backups() {
     let old = old_catalog();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (164, 176));
+    assert_eq!((old.len(), one_off_boundary::before_len(&all)), (164, 176));
     assert_eq!(value(&all[..164]), value(&old));
     assert_eq!(
         value(
@@ -76,6 +78,11 @@ fn all_reviewed164_complete_definitions_precede_only_the_four_authored_backups()
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all[..176].iter().filter(|s| s.track == t).count()),
         [53, 36, 32, 55]
     );
     for s in &all[164..168] {
@@ -139,7 +146,7 @@ fn exact43_append_recovers_all42_bytes_objects_and_every_earlier_closed_inverse(
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
     let old = course::load(std::str::from_utf8(&previous).unwrap(), &old_catalog()).unwrap();
-    assert_eq!((old.len(), units.len()), (42, 46));
+    assert_eq!((old.len(), one_off_boundary::before_len(&units)), (42, 46));
     assert_eq!(value(&units[..42]), value(&old));
     assert_eq!(value(&units[42]), r["backup_unit"]);
     assert_eq!(units[42].id, "backup-and-recovery");

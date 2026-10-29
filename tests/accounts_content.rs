@@ -1,5 +1,9 @@
 //! Authored account outcomes, alternatives, preservation and separate practice.
 //! All mutation commands use the immutable goal-aware boundary, never host tools.
+#[path = "../examples/support/automation_digest.rs"]
+mod digest;
+#[path = "support/one_off_registration.rs"]
+mod one_off_registration;
 use dlms_learning_lab::{
     accounts::{self, Requirement},
     accounts_teaching::{self, Learning},
@@ -47,8 +51,9 @@ fn plans() -> Vec<Plan> {
     p.plans
 }
 fn catalog_with_labs() -> Vec<Scenario> {
-    let mut all = pack::bundled()
-        .unwrap()
+    let normal = pack::bundled().unwrap();
+    assert_eq!(one_off_registration::original_catalog(&normal).len(), 176);
+    let mut all = normal
         .into_iter()
         .filter(|s| s.unit != "local-account-lifecycle")
         .collect::<Vec<_>>();
@@ -604,7 +609,39 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
             // Preserve this real new-family positive in the cross-family matrix.
             dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
         }
-        if matches!(a.state, State::PhysicalLink { .. }) {
+        if matches!(a.state, State::OneOff { .. }) {
+            use dlms_learning_lab::one_off_workspace as one;
+            one::budget::prepare(&mut a, s).unwrap();
+            let path = if let Goal::OneOff { definition } = &s.goal {
+                definition.editable[0].clone()
+            } else {
+                unreachable!()
+            };
+            one::budget::apply_attempt(
+                &mut a,
+                s,
+                &one::Action::Edit {
+                    path,
+                    text: format!("# Retained OneOff assignment draft for {}\n", s.id),
+                },
+                false,
+            )
+            .unwrap();
+            let path = s.one_off_teaching.as_ref().unwrap().definition.editable[0].clone();
+            one::budget::apply_attempt(
+                &mut a,
+                s,
+                &one::Action::Edit {
+                    path,
+                    text: "# Retained separate OneOff example draft\n".into(),
+                },
+                true,
+            )
+            .unwrap();
+            assert!(a.workspace.as_ref().unwrap().command.is_empty());
+            assert!(one::context(&a, s).is_ok());
+            assert!(!progress::current_solved(&a, s));
+        } else if matches!(a.state, State::PhysicalLink { .. }) {
             use dlms_learning_lab::physical_link_workspace as physical;
             physical::prepare_attempt(&mut a, s, true).unwrap();
             let mut draft = a

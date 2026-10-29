@@ -1,5 +1,7 @@
 //! Current12 boundaries use actual9 evidence ONLY in explicit private replay.
 //! The default tests never fabricate historical9 outcomes or implied revisions.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup,
     engine::{Goal, State},
@@ -54,7 +56,7 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&labs), 176);
     for id in [
         "ccna-physical-media-span",
         "ccna-physical-duplex-diagnosis",
@@ -73,6 +75,17 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert!(matches!(office.initial, State::Ipv4Routing { .. }));
     assert!(!original.attempts.contains_key(&office.id));
     assert!(!original.favorites.contains(&office.id));
+    for id in [
+        "lpic1-at-report",
+        "lpic1-at-capture-repair",
+        "lpic1-at-owner-queue",
+        "lpic1-at-handover",
+    ] {
+        let source = labs.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::OneOff { .. }));
+        assert!(!original.attempts.contains_key(id));
+        assert!(!original.favorites.contains(id));
+    }
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -81,6 +94,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "lpic1-at-report",
+            "lpic1-at-capture-repair",
+            "lpic1-at-owner-queue",
+            "lpic1-at-handover",
             "ccna-private-office-plan",
             "ccna-physical-media-span",
             "ccna-physical-duplex-diagnosis",
@@ -277,7 +294,7 @@ fn actual9_open_prepare_preserves_all6_7_8_9_histories_drafts_and_unrelated_cont
     let (raw, original, labs) = private();
     let mut loaded = progress::decode(&raw, &labs).unwrap();
     evidence::exact(&history(&loaded, false), &history(&original, false));
-    // These are the exact loaded133 contexts. All38 later tasks stay absent; opening
+    // These are the exact loaded133 contexts. Later tasks stay absent; opening
     // an older profile must not fabricate Attempts or historical answers.
     for lab in labs
         .iter()

@@ -312,6 +312,10 @@ pub fn prepare(
     lesson: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    if crate::workspace::is_one_off_workspace(attempt) {
+        return Err("One-off workspace belongs to its own activity; previous work retained".into());
+    }
+
     crate::progress::validate_file_backup_workspace(attempt)?;
     let crate::engine::State::FileBackup { simulation } = &attempt.state else {
         return Err("Backup example needs a backup assignment".into());

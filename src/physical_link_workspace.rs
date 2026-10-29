@@ -29,6 +29,8 @@ pub fn is_workspace(a: &Attempt) -> bool {
 }
 pub fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
     let crate::workspace::WorkspaceData {
+        one_off_session,
+        one_off_learning,
         etherchannel_draft,
         etherchannel_learning,
         physical_link_draft: _,
@@ -100,7 +102,9 @@ pub fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         legacy_practice_reviewed,
         migrated_practice_host,
     } = w;
-    file_backup_learning.is_some()
+    one_off_session.is_some()
+        || one_off_learning.is_some()
+        || file_backup_learning.is_some()
         || !w.command.is_empty()
         || cron_session.is_some()
         || cron_learning.is_some()
@@ -170,6 +174,7 @@ pub fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
 
 pub fn source_shape(s: &crate::pack::Scenario) -> bool {
     let crate::pack::Scenario {
+        one_off_teaching,
         physical_link_teaching,
         file_backup_teaching,
         etherchannel_teaching,
@@ -224,7 +229,8 @@ pub fn source_shape(s: &crate::pack::Scenario) -> bool {
         mac_teaching,
         debian_packages_teaching,
     } = s;
-    physical_link_teaching.is_some()
+    one_off_teaching.is_none()
+        && physical_link_teaching.is_some()
         && file_backup_teaching.is_none()
         && cron_teaching.is_none()
         && etherchannel_teaching.is_none()

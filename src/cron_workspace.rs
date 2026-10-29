@@ -1018,7 +1018,11 @@ pub fn context<'a>(
 }
 
 pub fn source_shape(s: &crate::pack::Scenario) -> bool {
+    if s.one_off_teaching.is_some() {
+        return false;
+    }
     let crate::pack::Scenario {
+        one_off_teaching: _,
         cron_teaching: _,
         physical_link_teaching,
         file_backup_teaching,
@@ -1114,7 +1118,12 @@ pub fn source_shape(s: &crate::pack::Scenario) -> bool {
 }
 
 pub fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let crate::workspace::WorkspaceData {
+        one_off_session: _,
+        one_off_learning: _,
         cron_session: _,
         physical_link_draft,
         physical_link_learning,

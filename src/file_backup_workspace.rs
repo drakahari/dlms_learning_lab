@@ -589,9 +589,14 @@ pub fn within<T: Serialize>(value: &T, cap: usize) -> bool {
 
 // No ..: every added metadata field needs an explicit admission decision.
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let crate::workspace::WorkspaceData {
         physical_link_draft,
         physical_link_learning,
+        one_off_session: _,
+        one_off_learning: _,
         etherchannel_draft,
         etherchannel_learning,
         file_backup_learning: _,
@@ -832,8 +837,12 @@ pub fn perform(
 }
 
 pub fn source_shape(s: &crate::pack::Scenario) -> bool {
+    if s.one_off_teaching.is_some() {
+        return false;
+    }
     let crate::pack::Scenario {
         physical_link_teaching,
+        one_off_teaching: _,
         file_backup_teaching,
         etherchannel_teaching,
         cron_teaching,

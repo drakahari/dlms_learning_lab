@@ -1,4 +1,6 @@
 //! Private native-integration fixture tests; this fixture is not bundled curriculum.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     discovery::{self, Check},
     discovery_teaching::Learning,
@@ -133,7 +135,7 @@ fn private_pack_reference_alternate_orders_and_refreshes_reach_both_current_neig
         assert!(!engine::solved(&state, &lab.goal));
     }
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert!(!all.iter().any(|s| s.id == lab.id));
     assert!(engine::help(&lab.initial).contains("no CDP"));
 }

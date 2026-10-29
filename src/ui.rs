@@ -25,6 +25,8 @@ mod file_backup_workspace;
 mod legacy_learning;
 mod nat_workspace;
 mod nfs_workspace;
+mod one_off_boundary;
+mod one_off_workspace;
 mod ospf_workspace;
 mod physical_link_workspace;
 mod process_learning;
@@ -50,6 +52,7 @@ mod workspace;
 #[derive(Default)]
 struct Metrics {
     cron: cron_workspace::CronMetrics,
+    one_off: one_off_workspace::OneOffMetrics,
     backup: file_backup_workspace::BackupMetrics,
     nfs: nfs_workspace::NfsMetrics,
     ether: etherchannel_workspace::EtherMetrics,
@@ -343,6 +346,7 @@ pub struct LabApp {
     physical_presentation: physical_link_workspace::Presentation,
     completion_index: completion_index::Handle,
     cron_presentation: cron_workspace::Presentation,
+    one_off_presentation: one_off_workspace::Presentation,
     backup_presentation: file_backup_workspace::Presentation,
     help_open: bool,
     extra_filters: bool,
@@ -493,6 +497,9 @@ impl LabApp {
                 completion_index.clone(),
             ),
             cron_presentation: cron_workspace::Presentation::default(),
+            one_off_presentation: one_off_workspace::Presentation::with_index(
+                completion_index.clone(),
+            ),
             backup_presentation: file_backup_workspace::Presentation::with_index(
                 completion_index.clone(),
             ),
@@ -509,6 +516,11 @@ impl LabApp {
             started: Instant::now(),
             smoke_stage: if is_reopen {
                 17000
+            } else if let Some(stage) = Self::one_off_lessons_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
+                stage
             } else if let Some(stage) = Self::physical_stage(
                 smoke,
                 developer,
@@ -793,6 +805,7 @@ impl LabApp {
         self.ether_presentation.clear();
         self.physical_presentation.clear();
         self.cron_presentation.clear();
+        self.one_off_presentation.clear();
         self.backup_presentation.clear();
         self.script_job = None;
         self.script_case = 0;
@@ -811,6 +824,7 @@ impl LabApp {
         Self::prepare_nfs(a, s, new_attempt);
         Self::prepare_ether(a, s, new_attempt);
         Self::prepare_cron(a, s);
+        Self::prepare_one_off(a, s);
         Self::prepare_physical(a, s, new_attempt);
         Self::prepare_backup(a, s, new_attempt);
         if let Some(lesson) = &s.acl_teaching {
@@ -946,6 +960,10 @@ impl LabApp {
             self.input.clear();
             self.checked = false;
             dlms_learning_lab::file_backup_workspace::presentation::record_visit(a, s, clock).err()
+        } else if matches!(a.state, engine::State::OneOff { .. }) {
+            self.input.clear();
+            self.checked = false;
+            dlms_learning_lab::one_off_workspace::budget::record_visit(a, s, clock).err()
         } else if matches!(a.state, engine::State::Cron { .. }) {
             self.input.clear();
             self.checked = false;
@@ -1009,10 +1027,25 @@ impl LabApp {
         self.ether_presentation.clear();
         self.physical_presentation.clear();
         self.cron_presentation.clear();
+        self.one_off_presentation.clear();
         self.backup_presentation.reset_all();
         self.physical_presentation.reset_all();
         let s = &self.scenarios[i];
         self.completion_index.forget(&s.id);
+        if matches!(s.initial, engine::State::OneOff { .. }) {
+            if let Some(a) = self.progress.attempts.get_mut(&s.id)
+                && let Err(error) =
+                    dlms_learning_lab::one_off_workspace::budget::reset_attempt(a, s)
+            {
+                self.notice = Some(error);
+                return;
+            }
+            self.one_off_presentation.memo.changed(&s.id);
+            self.dirty = true;
+            self.reset_pending = false;
+            self.lesson_scroll_reset = true;
+            return;
+        }
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
             self.mac_trace_reset = Some(i);
@@ -1025,6 +1058,7 @@ impl LabApp {
         Self::prepare_nfs(a, s, true);
         Self::prepare_ether(a, s, true);
         Self::prepare_cron(a, s);
+        Self::prepare_one_off(a, s);
         Self::prepare_physical(a, s, true);
         Self::prepare_backup(a, s, true);
         if let Some(lesson) = &s.acl_teaching {
@@ -1165,7 +1199,9 @@ impl LabApp {
         }
     }
     fn text_size_picker(&mut self, ui: &mut egui::Ui) {
-        let observe_picker = self.reopen.is_some() || self.physical_capture_active();
+        let observe_picker = self.reopen.is_some()
+            || self.physical_capture_active()
+            || self.one_off_capture_active();
         ui.label(RichText::new("Text size").small().color(palette(ui).muted));
         let r = egui::ComboBox::from_id_salt("text-size")
             .width(84.)
@@ -1209,7 +1245,9 @@ impl LabApp {
         self.theme_dropdown_width(ui, 195.);
     }
     fn theme_dropdown_width(&mut self, ui: &mut egui::Ui, width: f32) {
-        let observe_picker = self.reopen.is_some() || self.physical_capture_active();
+        let observe_picker = self.reopen.is_some()
+            || self.physical_capture_active()
+            || self.one_off_capture_active();
         let r = controls::cell(ui, width, |ui| {
             egui::ComboBox::from_id_salt("native-theme-picker")
                 .width(width)
@@ -1435,6 +1473,7 @@ impl LabApp {
             engine::State::Cron { .. }
                 | engine::State::FileBackup { .. }
                 | engine::State::PhysicalLink { .. }
+                | engine::State::OneOff { .. }
         ) {
             let position = unit
                 .labs
@@ -1479,6 +1518,7 @@ impl LabApp {
                 self.ether_presentation.clear();
                 self.physical_presentation.clear();
                 self.cron_presentation.clear();
+                self.one_off_presentation.clear();
                 self.backup_presentation.clear();
             }
         }
@@ -2057,6 +2097,7 @@ impl LabApp {
             self.ether_presentation.clear();
             self.physical_presentation.clear();
             self.cron_presentation.clear();
+            self.one_off_presentation.clear();
             self.backup_presentation.reset_all();
             self.physical_presentation.reset_all();
         }
@@ -2066,6 +2107,7 @@ impl LabApp {
         self.ether_prepass();
         self.advance_cron(ctx);
         self.cron_prepass(ctx);
+        self.one_off_prepass(ctx);
         self.advance_backup(ctx);
         self.backup_prepass(ctx);
         self.physical_library_prepass(ctx);

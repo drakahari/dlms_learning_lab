@@ -1,4 +1,6 @@
 //! Normal catalog registration; private capability/content fixtures do not earn credit.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{course, pack};
 use serde_json::{Value, json};
 const ID: &str = "ccna-private-office-plan";
@@ -55,7 +57,7 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
     let old = before();
     let all = pack::bundled().unwrap();
     assert_eq!(old.len(), 175);
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         serde_json::to_value(&all[..175]).unwrap(),
         serde_json::to_value(&old).unwrap()
@@ -70,7 +72,7 @@ fn normal_catalog_preserves_all_175_full_scenarios_and_appends_one_project() {
     assert_eq!(all[175].id, ID);
     for (track, count) in [
         ("CCNA", 53),
-        ("LPIC-1", 36),
+        ("LPIC-1", 40),
         ("LPIC-2", 32),
         ("Bash/Shell", 55),
     ] {
@@ -89,7 +91,7 @@ fn normal_unit_index_preserves_45_units_and_appends_real_prerequisite_guided_pro
         json!(&raw["units"].as_array().unwrap()[..45]),
         old_raw["units"]
     );
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     let unit = units
         .iter()
         .find(|u| u.id == "private-office-planning")

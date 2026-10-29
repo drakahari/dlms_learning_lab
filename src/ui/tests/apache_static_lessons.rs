@@ -5,7 +5,7 @@ use super::*;
 fn opened() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
     assert_eq!(
-        a.scenarios.len(),
+        one_off_boundary::before_len(&a.scenarios),
         176,
         "normal143 registration required, no fake filler scenarios"
     );

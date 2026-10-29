@@ -18,7 +18,13 @@ fn app_native() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
     a.smoke = true;
     a.smoke_stage = FIRST;
-    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
+    assert_eq!(
+        (
+            one_off_boundary::before_len(&a.scenarios),
+            one_off_boundary::before_len(&a.units)
+        ),
+        (176, 46)
+    );
     assert!(a.progress.attempts.is_empty());
     (ctx, a)
 }
@@ -198,16 +204,19 @@ fn nat_closed_selector_actual_smoke_tick_opens_only_one_unsolved_private_fixture
     a.started = Instant::now();
     actual_tick(&ctx, &mut a, false, &mut w);
     assert_eq!(a.smoke_stage, FIRST);
-    assert_eq!(a.scenarios.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&a.scenarios), 176);
     assert!(a.progress.attempts.is_empty());
     until(&ctx, &mut a, FIRST + 2, &mut w);
-    assert_eq!((a.scenarios.len(), a.units.len()), (177, 46));
     assert_eq!(
-        serde_json::to_value(&a.scenarios[..176]).unwrap(),
+        (a.scenarios.len(), one_off_boundary::before_len(&a.units)),
+        (181, 46)
+    );
+    assert_eq!(
+        serde_json::to_value(&a.scenarios[..180]).unwrap(),
         serde_json::to_value(pack::bundled().unwrap()).unwrap(),
         "The single private NAT fixture must preserve every normal assignment"
     );
-    assert_eq!(a.scenarios[176].id, ID);
+    assert_eq!(a.scenarios[180].id, ID);
     assert!(
         w.fullscreen_requests.contains(&true),
         "Initial wide view must issue a real fullscreen request; this fake renderer does not claim WM acceptance"

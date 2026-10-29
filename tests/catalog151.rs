@@ -1,4 +1,6 @@
 //! Combined154 NFS boundary: exact original147 plus Bash3, then NFS4; raw37 retained.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{course, engine, nfs, nfs_teaching, nfs_workspace, pack, progress};
 use serde_json::Value;
 #[path = "support/combined_catalog.rs"]
@@ -49,7 +51,7 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     assert_eq!(texts.len(), 35);
     let old = pack::load_catalog(&texts.iter().map(String::as_str).collect::<Vec<_>>()).unwrap();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (147, 176));
+    assert_eq!((old.len(), one_off_boundary::before_len(&all)), (147, 176));
     exact(&all[..147].to_vec(), &old);
     exact(
         &old.iter()
@@ -70,6 +72,11 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all[..176].iter().filter(|s| s.track == t).count()),
         [53, 36, 32, 55]
     );
     let current_raw = include_str!("../scenarios/units-v1.json");
@@ -85,7 +92,10 @@ fn complete_old147_pack_bytes_typed_specs_order_and_raw37_units_remain_exact() {
     );
     let original = course::load(&reconstructed, &old).unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!((original.len(), units.len()), (37, 46));
+    assert_eq!(
+        (original.len(), one_off_boundary::before_len(&units)),
+        (37, 46)
+    );
     exact(&units[..37].to_vec(), &original);
     exact(&units[38], &i["appended_unit"]);
     assert_eq!(

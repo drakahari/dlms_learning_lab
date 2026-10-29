@@ -162,7 +162,8 @@ impl Memo {
         let shape = s.etherchannel_teaching.is_none()
             && storage_shape(a)
             && s.id.len() <= 80
-            && s.cron_teaching.is_none();
+            && s.cron_teaching.is_none()
+            && s.one_off_teaching.is_none();
         if !force
             && shape
             && let Some(e) = self.entries.iter_mut().find(|e| {
@@ -275,9 +276,14 @@ impl Memo {
     }
 }
 pub(super) fn foreign(w: &model::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let model::WorkspaceData {
         physical_link_draft,
         physical_link_learning,
+        one_off_session: _,
+        one_off_learning: _,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,

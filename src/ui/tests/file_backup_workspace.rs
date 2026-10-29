@@ -5,7 +5,13 @@ mod fixture;
 use dlms_learning_lab::{file_backup_workspace as work, script_teaching::View};
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
+    assert_eq!(
+        (
+            one_off_boundary::before_len(&a.scenarios),
+            one_off_boundary::before_len(&a.units)
+        ),
+        (176, 46)
+    );
     let authored = fixture::catalog();
     assert_eq!(
         serde_json::to_value(&a.scenarios[..164]).unwrap(),
@@ -46,9 +52,21 @@ fn opened(n: usize) -> (egui::Context, LabApp, usize) {
         .chain(&private.scenarios)
         .collect::<Vec<_>>();
     assert_eq!(
-        serde_json::to_value(&a.scenarios).unwrap(),
-        serde_json::to_value(expected).unwrap(),
+        serde_json::to_value(&a.scenarios[..176]).unwrap(),
+        serde_json::to_value(&expected).unwrap(),
         "Entire176: exact prior171 + canonicalphysical4 + canonicalprivate1"
+    );
+    let one_off: dlms_learning_lab::pack::Pack =
+        serde_json::from_str(include_str!("../../../scenarios/linux-one-off-v1.json")).unwrap();
+    assert_eq!(one_off.scenarios.len(), 4);
+    let expected = expected
+        .into_iter()
+        .chain(&one_off.scenarios)
+        .collect::<Vec<_>>();
+    assert_eq!(
+        serde_json::to_value(&a.scenarios).unwrap(),
+        serde_json::to_value(&expected).unwrap(),
+        "Entire180: exact original176 + canonicalOneOff4"
     );
     let canonical: dlms_learning_lab::pack::Pack = serde_json::from_str(fixture::DATA).unwrap();
     assert_eq!(

@@ -1,4 +1,6 @@
 //! Combined154 Bash boundary: exact original147 plus Bash3, then NFS4.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{self, Goal, State},
@@ -45,7 +47,7 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     let old = existing();
     assert_eq!(old.len(), 147);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         serde_json::to_value(&all[..147]).unwrap(),
         serde_json::to_value(&old).unwrap()
@@ -66,6 +68,11 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all[..176].iter().filter(|s| s.track == t).count()),
         [53, 36, 32, 55]
     );
     let scripts = all
@@ -94,7 +101,7 @@ fn exact_closed_unit_append_reconstructs_the_complete_original37_unit_bytes() {
     assert_eq!(original.len(), 37);
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     assert_eq!(
         serde_json::to_value(&units[..37]).unwrap(),
         serde_json::to_value(original).unwrap()

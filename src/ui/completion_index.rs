@@ -11,6 +11,7 @@ const META_RESERVE: usize = 1024 * 1024;
 pub(super) enum Family {
     Physical,
     Backup,
+    OneOff,
 }
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(super) enum Status {
@@ -46,6 +47,7 @@ fn cheap(a: &Attempt, s: &Scenario, family: Family) -> bool {
                         && w.physical_link_learning.is_some()
                 })
         }
+        Family::OneOff => one_off_workspace::memo::cheap(a, s),
         Family::Backup => {
             file_backup_workspace::source_shape(s)
                 && matches!(a.state, engine::State::FileBackup { .. })
@@ -61,6 +63,7 @@ pub(super) fn family(s: &Scenario) -> Option<Family> {
     match s.initial {
         engine::State::PhysicalLink { .. } => Some(Family::Physical),
         engine::State::FileBackup { .. } => Some(Family::Backup),
+        engine::State::OneOff { .. } => Some(Family::OneOff),
         _ => None,
     }
 }
@@ -68,12 +71,14 @@ fn source_eq(a: &Scenario, b: &Scenario, family: Family) -> bool {
     match family {
         Family::Physical => physical_link_workspace::memo::same_source(a, b),
         Family::Backup => file_backup_workspace::same_source(a, b),
+        Family::OneOff => one_off_workspace::memo::same_source(a, b),
     }
 }
 fn attempt_eq(a: &Attempt, b: &Attempt, family: Family, metadata: bool) -> bool {
     match family {
         Family::Physical => physical_link_workspace::memo::same_attempt_fields(a, b, metadata),
         Family::Backup => file_backup_workspace::same_attempt_fields(a, b, metadata),
+        Family::OneOff => one_off_workspace::memo::same_attempt_fields(a, b, metadata),
     }
 }
 fn context(a: &Attempt, s: &Scenario, family: Family) -> Result<(), String> {
@@ -86,6 +91,12 @@ fn context(a: &Attempt, s: &Scenario, family: Family) -> Result<(), String> {
         }
         Family::Backup => {
             dlms_learning_lab::file_backup_workspace::context(a, s)?;
+        }
+        Family::OneOff => {
+            dlms_learning_lab::one_off_workspace::context(a, s)?;
+            if !one_off_workspace::memo::index_context(a, s) {
+                return Err("One-off native shape differs".into());
+            }
         }
     }
     Ok(())

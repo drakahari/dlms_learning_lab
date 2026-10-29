@@ -1,4 +1,6 @@
 //! Authored case unit: whole outcomes, alternate methods and preserved prior work.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{self, Goal, State},
@@ -104,15 +106,20 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
         assert!(shell::EVALUATOR_REVISION >= 8);
     }
     let all = catalog();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| all[..176].iter().filter(|s| s.track == track).count()),
         [53, 36, 32, 55]
     );
     let original = pack::bundled().unwrap();
     let normal_units = course::bundled(&original).unwrap();
-    assert_eq!(normal_units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&normal_units), 46);
     let normal_unit = normal_units
         .iter()
         .find(|u| u.id == "shell-case-dispatch")

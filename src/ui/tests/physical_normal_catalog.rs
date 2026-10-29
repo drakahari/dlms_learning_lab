@@ -64,7 +64,13 @@ fn bring(
 }
 fn open_unit() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
+    assert_eq!(
+        (
+            one_off_boundary::before_len(&a.scenarios),
+            one_off_boundary::before_len(&a.units)
+        ),
+        (176, 46)
+    );
     assert_eq!(
         a.scenarios[171..175]
             .iter()

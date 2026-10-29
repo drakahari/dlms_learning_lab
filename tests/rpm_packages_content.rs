@@ -1,4 +1,6 @@
 //! Normally registered authored RPM outcomes. No host utility, guessed observation, or history grading.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup, engine, pack,
     progress::{self, Attempt, Progress},
@@ -196,7 +198,7 @@ fn actual_prerequisites_guides_and_introduction_precede_the_separate_tasks() {
         }
     }
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&normal), 176);
     assert!(
         normal[..143]
             .iter()
@@ -522,7 +524,7 @@ fn foreign_learning_or_catalog_cannot_pass_and_prepare_refusal_is_atomic() {
 fn both_raw_drafts_full_histories_backup_resume_and_selected_reset_keep_other_work_exact() {
     let all = labs();
     let catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&catalog), 176);
     for reviewed in &all {
         let registered = catalog.iter().find(|s| s.id == reviewed.id).unwrap();
         exact(registered, reviewed);

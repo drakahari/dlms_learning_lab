@@ -7,6 +7,8 @@ pub struct Scenario {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub physical_link_teaching: Option<crate::physical_link_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub one_off_teaching: Option<crate::one_off_teaching::Lesson>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub file_backup_teaching: Option<crate::file_backup_teaching::Lesson>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub etherchannel_teaching: Option<crate::etherchannel_teaching::Lesson>,
@@ -455,6 +457,35 @@ fn validate(p: Pack) -> Result<Vec<Scenario>, String> {
             }
         } else if s.etherchannel_teaching.is_some() || matches!(s.goal, Goal::EtherChannel { .. }) {
             return Err("LACP Goal/teaching belongs to another activity".into());
+        }
+        if let State::OneOff { simulation } = &s.initial {
+            let Goal::OneOff { definition } = &s.goal else {
+                return Err("One-off State needs its authored Goal".into());
+            };
+            if !crate::one_off_workspace::source_shape(s)
+                || simulation.simulation != definition.initial
+                || simulation.last_run.is_some()
+                || definition.validate().is_err()
+                || !crate::cron_workspace::within(s, crate::one_off_workspace::MAX_CONTEXT)
+            {
+                return Err("One-off initial/source context differs or exceeds2MiB".into());
+            }
+            if s.guide.iter().any(|g| !g.commands.is_empty()) {
+                return Err("One-off native actions must not teach the internal JSON authoring codec as Linux".into());
+            }
+            if crate::one_off_workspace::budget::fresh_size(s, 0).is_none() {
+                return Err("Fresh complete one-off workspace exceeds2MiB before copy".into());
+            }
+            if let Some(l) = &s.one_off_teaching {
+                l.validate()?;
+                if !l.separate_from(definition) {
+                    return Err(
+                        "One-off practice needs disjoint supplied files and accounts".into(),
+                    );
+                }
+            }
+        } else if s.one_off_teaching.is_some() || matches!(s.goal, Goal::OneOff { .. }) {
+            return Err("One-off Goal/teaching attached to another activity".into());
         }
         if let State::Cron { simulation } = &s.initial {
             let Goal::Cron { definition } = &s.goal else {
@@ -963,6 +994,7 @@ pub fn validate_state(s: &State) -> Result<(), String> {
         State::PhysicalLink { simulation } => simulation.validate().is_ok(),
         State::FileBackup { simulation } => simulation.valid(),
         State::EtherChannel { simulation } => simulation.validate().is_ok(),
+        State::OneOff { simulation } => simulation.valid(),
         State::Cron { simulation } => simulation.validate().is_ok(),
         State::Nfs { simulation } => simulation.validate().is_ok(),
         State::RpmPackages { simulation } => crate::rpm_packages_workspace::admitted(simulation),
@@ -1174,5 +1206,6 @@ pub fn bundled() -> Result<Vec<Scenario>, String> {
         include_str!("../scenarios/shell-numeric-validation-v1.json"),
         include_str!("../scenarios/physical-links-v1.json"),
         include_str!("../scenarios/ipv4-private-planning-v1.json"),
+        include_str!("../scenarios/linux-one-off-v1.json"),
     ])
 }

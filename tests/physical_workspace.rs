@@ -1,4 +1,6 @@
 //! Prospective complete-attempt integration and isolation gates. No curriculum credit.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup,
     engine::{self, State},
@@ -159,7 +161,7 @@ fn examples_fill_apply_probe_reset_and_scope_resume_never_replace_assignment_or_
     p.favorites.insert(s.id.clone());
     p.attempts.insert(s.id.clone(), a.clone());
     let mut all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     all.push(s.clone());
     let decoded = progress::decode(&serde_json::to_vec(&p).unwrap(), &all).unwrap();
     assert_eq!(
@@ -254,16 +256,32 @@ fn valid_foreign_metadata_is_rejected_in_all_old_kinds_without_preparation_mutat
     let learning = w.physical_link_learning.clone().unwrap();
     assert!(learning.valid());
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let old = all
         .iter()
         .filter(|s| !matches!(s.initial, State::PhysicalLink { .. }))
         .collect::<Vec<_>>();
     assert_eq!(
-        old.len(),
+        old[..172].len(),
         172,
         "Every original171 and private-office1 remains in the foreign-kind matrix"
     );
+    assert_eq!(old.len(), 176);
+    assert_eq!(
+        old[172..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        [
+            "lpic1-at-report",
+            "lpic1-at-capture-repair",
+            "lpic1-at-owner-queue",
+            "lpic1-at-handover"
+        ]
+    );
+    assert!(
+        old[172..]
+            .iter()
+            .all(|s| matches!(&s.initial, State::OneOff { .. }))
+    );
+
     assert_eq!(
         old.iter()
             .filter(|s| s.id == "ccna-private-office-plan")
@@ -493,8 +511,11 @@ fn full_section_hint_digits_and_scope_reset_use_exact_whole_attempt_sizes() {
 #[test]
 fn current_registered_catalog_and_nil_optional_fields_remain_exactly_old_scope() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
-    assert_eq!(dlms_learning_lab::course::bundled(&all).unwrap().len(), 46);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
+    assert_eq!(
+        one_off_boundary::before_len(&dlms_learning_lab::course::bundled(&all).unwrap()),
+        46
+    );
     assert_eq!(
         all[171..175]
             .iter()

@@ -347,7 +347,22 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
             "lpic2-storage" => "config set device invalid-device",
             _ => "# unfinished script",
         };
-        if let State::PhysicalLink { simulation } = &a.state {
+        if let State::OneOff { simulation } = &a.state {
+            let engine::Goal::OneOff { definition } = &s.goal else {
+                panic!("One-off goal context");
+            };
+            assert!(definition.requirements.iter().any(|r| matches!(
+                r,
+                dlms_learning_lab::one_off_workspace::Requirement::Clock { .. }
+            )));
+            let end = simulation.simulation.clock.after(1).unwrap();
+            let command = format!(
+                "{}{}",
+                dlms_learning_lab::one_off_workspace::PREFIX,
+                serde_json::json!({"kind":"Run","end":end})
+            );
+            engine::execute_for_goal(&mut a.state, &s.goal, &command).unwrap();
+        } else if let State::PhysicalLink { simulation } = &a.state {
             let mut configuration = simulation.configuration().clone();
             for port in configuration.ports.values_mut() {
                 port.admin_up = false;

@@ -1,4 +1,6 @@
 //! Three unregistered outcomes, not host NAT/IOS or action-history grading.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup,
     engine::{Goal, State},
@@ -206,7 +208,7 @@ fn normal_catalog_context_prerequisite_chain_and_source_shape() {
     let all = labs();
     assert_eq!(all.len(), 3);
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&normal), 176);
     assert!(
         all.iter()
             .all(|s| normal.iter().any(|current| current.id == s.id))

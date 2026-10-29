@@ -815,7 +815,13 @@ impl LabApp {
     fn nf_scope(&self) {
         self.nat_private();
         assert!(!self.synthetic);
-        assert_eq!((self.scenarios.len(), self.units.len()), (176, 46));
+        assert_eq!(
+            (
+                one_off_boundary::before_len(&self.scenarios),
+                one_off_boundary::before_len(&self.units)
+            ),
+            (176, 46)
+        );
         assert_eq!(
             self.scenarios[150..154]
                 .iter()

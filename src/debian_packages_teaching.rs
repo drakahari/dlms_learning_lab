@@ -478,6 +478,10 @@ pub fn prepare(
     l: &Lesson,
     new_attempt: bool,
 ) -> Result<(), String> {
+    if crate::workspace::is_one_off_workspace(a) {
+        return Err("One-off workspace belongs to its own activity; previous work retained".into());
+    }
+
     crate::workspace::reject_etherchannel_metadata(a)?;
     crate::workspace::reject_nfs_metadata(a)?;
     let crate::engine::State::DebianPackages { simulation } = &a.state else {

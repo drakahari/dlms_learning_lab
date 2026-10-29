@@ -2,6 +2,8 @@
 mod combined_catalog;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+#[path = "support/one_off_registration.rs"]
+mod one_off_registration;
 use dlms_learning_lab::{
     engine::{self, State},
     nfs as core, nfs_teaching as teach, nfs_workspace as work, pack,
@@ -112,8 +114,11 @@ fn full_source_version_kind_initial_and_lesson_pins_reject_before_mutation() {
 #[test]
 fn old147_wire_none_fields_and_existing_solved_nfs_without_metadata_remain_truthful() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
-    let units = dlms_learning_lab::course::bundled(&all).unwrap();
+    assert_eq!(one_off_registration::original_catalog(&all).len(), 176);
+    let raw46 =
+        one_off_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let units =
+        dlms_learning_lab::course::load(std::str::from_utf8(&raw46).unwrap(), &all[..176]).unwrap();
     assert_eq!(units.len(), 46);
     let raw44 = original44_unit_bytes();
     let original44 =
@@ -218,7 +223,22 @@ fn actual_save_readonly_load_export_inspect_restore_preserves_all_records_before
             .entry(source.id.clone())
             .or_insert_with(|| Attempt::new(source, 7));
     }
-    assert_eq!(p.attempts.len(), 176);
+    assert_eq!(p.attempts.len(), 180);
+    assert_eq!(
+        p.attempts
+            .keys()
+            .filter(|id| !one_off_registration::IDS.contains(&id.as_str()))
+            .count(),
+        176
+    );
+    for id in one_off_registration::IDS {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        let new = &p.attempts[id];
+        assert_eq!(new.state, source.initial);
+        assert_eq!(new.step, 0);
+        assert!(new.transcript.is_empty());
+        assert!(!progress::current_solved(new, source));
+    }
     let old = serde_json::to_value(&p.attempts).unwrap();
     let mut a = solved(&s);
     let source = s.nfs_teaching.as_ref().unwrap();
@@ -423,7 +443,9 @@ fn saved_pending_publication_and_faults_do_not_masquerade_as_current_or_denied()
 // Recover the complete reviewed44 predecessor through both closed raw inverses.
 // Canonical physical/private append recipes and all historical37 bytes stay fixed.
 fn original44_unit_bytes() -> Vec<u8> {
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let raw47 = include_bytes!("../scenarios/units-v1.json");
+    let original46 = one_off_registration::before_units(raw47).unwrap();
+    let raw = original46.as_slice();
     let before = combined_catalog::before_physical_units(raw).unwrap();
     let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
     let original: serde_json::Value = serde_json::from_slice(&before).unwrap();

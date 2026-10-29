@@ -27,6 +27,7 @@ pub(in crate::ui) mod nat_lessons;
 mod nfs_alignment;
 pub(in crate::ui) mod nfs_lessons;
 pub(in crate::ui) mod numeric_validation;
+pub(in crate::ui) mod one_off_lessons;
 pub(in crate::ui) mod optional_inputs;
 mod ospf;
 mod ospf_lessons;
@@ -367,7 +368,17 @@ impl LabApp {
         let immediate_stop = immediate_stop || cron_lessons::immediate_stop(self.smoke_stage);
         let immediate_stop =
             immediate_stop || file_backup_lessons::immediate_stop(self.smoke_stage);
-        if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
+        let immediate_stop = immediate_stop || one_off_lessons::immediate_stop(self.smoke_stage);
+        // OneOff owns explicit wheel, Undo, geometry and capture settlement.
+        // Avoid extra idle pauses between its already-acknowledged native steps.
+        let idle_millis = if self.one_off_capture_active() {
+            50
+        } else {
+            350
+        };
+        if self.capture_pending
+            || (!immediate_stop && self.started.elapsed().as_millis() < idle_millis)
+        {
             return;
         }
         let key = |key, command| egui::Event::Key {
@@ -400,6 +411,14 @@ impl LabApp {
         };
         let mut shot: Option<String> = None;
         match self.smoke_stage {
+            n @ 73000..=73999 => {
+                let (advance, capture) = self.one_off_lessons_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+
             n @ 66000..=66999 => {
                 let (advance, capture) = self.physical_native(ctx, n);
                 if !advance {

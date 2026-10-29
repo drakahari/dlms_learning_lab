@@ -453,6 +453,10 @@ impl Learning {
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) -> Result<(), String> {
+    if crate::workspace::is_one_off_workspace(attempt) {
+        return Err("One-off workspace belongs to its own activity; previous work retained".into());
+    }
+
     crate::workspace::reject_etherchannel_metadata(attempt)?;
     crate::workspace::reject_nfs_metadata(attempt)?;
     if lesson.validate().is_err() || Client::from_state(&attempt.state).is_none() {

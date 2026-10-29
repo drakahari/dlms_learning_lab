@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     client_teaching::{self as client, Action, Client, Draft, Learning},
     engine::{self, State},
@@ -31,7 +33,7 @@ fn solved(s: &pack::Scenario) -> State {
 #[test]
 fn original_nine_definitions_and_existing_client_terminal_solutions_remain_exact() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&labs), 176);
     let old: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/client-original-seeds.json")).unwrap();
     for row in old["scenarios"].as_array().unwrap() {

@@ -2,6 +2,8 @@
 //! observations; no historical public9 Record/outcome is relabeled as current.
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::shell::{self, Case, Outcome, Vm};
@@ -430,7 +432,7 @@ fn all43_existing_scripts282_cases_and43_examples_keep_exact_authored_inputs_and
     ))
     .unwrap();
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&current), 176);
     let labs = &current[..133];
     let catalog = labs
         .iter()

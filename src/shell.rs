@@ -6,6 +6,7 @@ pub mod cron;
 mod execution;
 mod getopts;
 mod globbing;
+pub mod one_off;
 mod parameters;
 mod preparation;
 mod substitution;

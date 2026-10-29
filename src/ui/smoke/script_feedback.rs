@@ -23,7 +23,13 @@ impl LabApp {
         let snapshot = egui::Id::new("script-feedback-unchanged-progress");
         match phase {
             0 => {
-                assert_eq!((self.scenarios.len(), self.units.len()), (176, 46));
+                assert_eq!(
+                    (
+                        one_off_boundary::before_len(&self.scenarios),
+                        one_off_boundary::before_len(&self.units)
+                    ),
+                    (176, 46)
+                );
                 assert!(self.progress.attempts.is_empty());
                 self.scale = 1.;
                 self.theme_id = "dlms-dark".into();

@@ -1,4 +1,8 @@
 //! Private backend fixture; not bundled/countable curriculum or native UI acceptance.
+#[path = "../examples/support/automation_digest.rs"]
+mod digest;
+#[path = "support/one_off_registration.rs"]
+mod one_off_registration;
 use dlms_learning_lab::{
     accounts,
     accounts_teaching::{self, Learning},
@@ -56,7 +60,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_registration::original_catalog(&all).len(), 176);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -543,6 +547,29 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
         }
         assert!(engine::solved(&state, &source.goal));
     }
+    let one_off = all
+        .iter()
+        .filter(|s| matches!(s.initial, State::OneOff { .. }))
+        .collect::<Vec<_>>();
+    assert_eq!(
+        one_off.iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
+        one_off_registration::IDS
+    );
+    for source in one_off {
+        let mut raw = source.initial.clone();
+        let before = raw.clone();
+        assert!(engine::execute(&mut raw, &source.solution[0]).is_err());
+        assert_eq!(raw, before);
+        let mut contextual = source.initial.clone();
+        for command in &source.solution {
+            engine::execute_for_goal(&mut contextual, &source.goal, command).unwrap();
+        }
+        assert!(engine::solved(&contextual, &source.goal));
+        let mut own = Attempt::new(source, 1);
+        dlms_learning_lab::one_off_workspace::budget::prepare(&mut own, source).unwrap();
+        assert!(dlms_learning_lab::one_off_workspace::context(&own, source).is_ok());
+        assert!(own.workspace.as_ref().unwrap().command.is_empty());
+    }
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -565,6 +592,7 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::Cron { .. }
                     | State::FileBackup { .. }
                     | State::PhysicalLink { .. }
+                    | State::OneOff { .. }
             )
         })
         .collect::<Vec<_>>();

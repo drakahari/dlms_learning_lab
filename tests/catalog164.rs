@@ -1,4 +1,6 @@
 //! Full reviewed Main160 prefix plus exactly four substantive Cron assignments.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{Goal, State},
@@ -45,7 +47,7 @@ fn value<T: serde::Serialize + ?Sized>(v: &T) -> Value {
 fn every_reviewed160_definition_and_order_precedes_the_exact_four_authored_cron_tasks() {
     let old = old_catalog();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (160, 176));
+    assert_eq!((old.len(), one_off_boundary::before_len(&all)), (160, 176));
     assert_eq!(value(&all[..160]), value(&old));
     assert_eq!(
         value(
@@ -72,6 +74,11 @@ fn every_reviewed160_definition_and_order_precedes_the_exact_four_authored_cron_
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| all[..176].iter().filter(|s| s.track == track).count()),
         [53, 36, 32, 55]
     );
     for s in &all[160..164] {
@@ -116,7 +123,7 @@ fn exact_new42_inverse_retains_the_complete_reviewed41_then_every_prior_closed_l
     );
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     let old = course::load(std::str::from_utf8(&previous).unwrap(), &old_catalog()).unwrap();
     assert_eq!(old.len(), 41);
     assert_eq!(value(&units[..41]), value(&old));

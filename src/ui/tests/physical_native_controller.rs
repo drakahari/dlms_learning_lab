@@ -324,6 +324,6 @@ fn physical_controller_normal_catalog_108_capture_phases_finish_with_real_contro
     }
     assert_eq!(serde_json::to_vec(&a.scenarios).unwrap(), original);
     assert_eq!(serde_json::to_vec(&a.units).unwrap(), units);
-    assert_eq!(a.scenarios.len(), 176);
-    assert_eq!(a.units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&a.scenarios), 176);
+    assert_eq!(one_off_boundary::before_len(&a.units), 46);
 }

@@ -1,5 +1,7 @@
 //! Verify the original140 registration prefix under current147.
 //! Pins authored input metadata, never regenerated historical learner results.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::{
@@ -191,7 +193,7 @@ fn exact<A: serde::Serialize + ?Sized, B: serde::Serialize + ?Sized>(a: &A, b: &
 #[test]
 fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let old = index();
     let pins = old["packs"].as_array().unwrap();
     assert_eq!(pins.len(), 31);
@@ -234,7 +236,7 @@ fn exact_frozen133_typed_specs_and33_units_are_unchanged_prefixes_of_current147(
         NEW
     );
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(old["units"]["units"].clone()).unwrap();
     assert_eq!(old_units.len(), 33);
@@ -364,7 +366,7 @@ fn old_actual_profiles_keep_exact_contexts_and_do_not_receive_new_answers() {
                 .entry(s.id.clone())
                 .or_insert_with(|| Attempt::new(s, 1));
         }
-        assert_eq!(p.attempts.len(), 176);
+        assert_eq!(one_off_boundary::before_len(&p.attempts), 176);
         for (id, attempt) in old.as_object().unwrap() {
             exact(
                 &p.attempts[id],

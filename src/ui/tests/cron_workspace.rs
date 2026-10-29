@@ -7,7 +7,13 @@ pub(in crate::ui) fn sources() -> Vec<Scenario> {
 }
 fn opened(n: usize) -> (egui::Context, LabApp, usize) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
+    assert_eq!(
+        (
+            one_off_boundary::before_len(&a.scenarios),
+            one_off_boundary::before_len(&a.units)
+        ),
+        (176, 46)
+    );
     let at = 160;
     assert_eq!(
         a.scenarios[at..164]
@@ -658,7 +664,13 @@ fn route_reveal(ctx: &egui::Context, a: &mut LabApp, key: &str) -> egui::Rect {
 fn cron_normal_unit_picker_start_next_and_complete_use_actual_events_and_warm_checks() {
     let (ctx, mut a) = app();
     draw(&ctx, &mut a);
-    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
+    assert_eq!(
+        (
+            one_off_boundary::before_len(&a.scenarios),
+            one_off_boundary::before_len(&a.units)
+        ),
+        (176, 46)
+    );
     assert!(a.progress.attempts.is_empty());
     let before = snapshot(&a);
     let picker = route_reveal(&ctx, &mut a, "unit");

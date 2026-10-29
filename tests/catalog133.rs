@@ -1,6 +1,8 @@
 //! Registration is append-only; new curriculum must not fabricate learner work.
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
+#[path = "support/one_off_registration.rs"]
+mod one_off_registration;
 use amendment_sha as digest;
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
@@ -22,7 +24,7 @@ const NEW: [&str; 8] = [
 #[test]
 fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current147() {
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 176);
+    assert_eq!(one_off_registration::original_catalog(&current).len(), 176);
     let all = &current[..133];
     assert_eq!(all.len(), 133);
     let baseline: serde_json::Value =
@@ -37,7 +39,10 @@ fn old125_specs_and31_units_remain_exact_within_original133_prefix_of_current147
         all[125..].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         NEW
     );
-    let all_current_units = course::bundled(&current).unwrap();
+    let raw46 =
+        one_off_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let all_current_units =
+        course::load(std::str::from_utf8(&raw46).unwrap(), &current[..176]).unwrap();
     assert_eq!(all_current_units.len(), 46);
     let raw44 = original44_unit_bytes();
     let current_units =
@@ -131,7 +136,9 @@ fn six_real_example_annotations_validate_and_old_writer_history_creates_no_new_a
 // Recover the complete reviewed44 predecessor through both closed raw inverses.
 // Canonical physical/private append recipes and all historical37 bytes stay fixed.
 fn original44_unit_bytes() -> Vec<u8> {
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let raw47 = include_bytes!("../scenarios/units-v1.json");
+    let original46 = one_off_registration::before_units(raw47).unwrap();
+    let raw = original46.as_slice();
     let before = combined_catalog::before_physical_units(raw).unwrap();
     let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
     let original: serde_json::Value = serde_json::from_slice(&before).unwrap();

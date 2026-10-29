@@ -114,6 +114,10 @@ impl Memo {
             || a.workspace.as_ref().is_some_and(|w| {
                 w.physical_link_draft.is_some() || w.physical_link_learning.is_some()
             })
+            || s.one_off_teaching.is_some()
+            || a.workspace
+                .as_ref()
+                .is_some_and(|w| w.one_off_session.is_some() || w.one_off_learning.is_some())
         {
             self.entries.retain(|e| e.id != s.id);
             self.bytes = self.entries.iter().map(|e| e.charge).sum();
@@ -129,7 +133,7 @@ impl Memo {
                 &s.id,
                 vec![(
                     false,
-                    "Physical-link data belong to another activity".into(),
+                    "Data from another activity cannot be graded as NAT work".into(),
                 )],
             );
             return;
@@ -162,6 +166,7 @@ impl Memo {
         self.tick = self.tick.saturating_add(1);
         let shape = s.etherchannel_teaching.is_none()
             && s.cron_teaching.is_none()
+            && s.one_off_teaching.is_none()
             && storage_shape(a, definition)
             && s.id.len() <= 80
             && s.nat_teaching
@@ -271,9 +276,14 @@ impl Memo {
 // Exhaustive projection: adding any new workspace field requires a deliberate decision.
 // All typed foreign-family payloads are rejected by NAT admission. Never copy them.
 fn foreign(w: &model::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let model::WorkspaceData {
         physical_link_draft,
         physical_link_learning,
+        one_off_session: _,
+        one_off_learning: _,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,
@@ -1696,6 +1706,119 @@ mod tests {
             assert_eq!(serde_json::to_vec(&a).unwrap(), caller);
             assert_eq!(serde_json::to_vec(&source).unwrap(), authored);
             source.physical_link_teaching = None;
+            m.begin_frame();
+            m.evaluate_limits(&good, &source, false, 1, 1, 0);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            assert!(m.practice_rows(&source.id).is_some());
+        }
+    }
+    #[test]
+    fn valid_one_off_source_and_each_optional_field_refuse_a_warm_success_before_copy() {
+        let (source, mut a) = teaching_fixture();
+        solve(&source, &mut a);
+        let good = a.clone();
+        let (one_off, p) = crate::ui::tests::one_off_admission::prepared();
+        let pw = p.workspace.as_ref().unwrap();
+        assert!(pw.valid());
+        for mask in 0..4 {
+            let mut source = source.clone();
+            a = good.clone();
+            let mut m = Memo::default();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            let mut other_source = source.clone();
+            other_source.id = "synthetic-nat-unrelated-cache-peer".into();
+            let other_attempt = good.clone();
+            m.evaluate(&other_attempt, &other_source, false);
+            assert_eq!(m.prepared(&other_source.id), Some(true));
+            let before = m.counters;
+            if mask == 0 {
+                source.one_off_teaching = one_off.one_off_teaching.clone();
+            } else {
+                let w = a.workspace.as_mut().unwrap();
+                if mask & 1 != 0 {
+                    w.one_off_session = pw.one_off_session.clone();
+                }
+                if mask & 2 != 0 {
+                    w.one_off_learning = pw.one_off_learning.clone();
+                }
+                assert!(w.valid());
+            }
+            let caller = serde_json::to_value(&a).unwrap();
+            let authored = serde_json::to_value(&source).unwrap();
+            m.evaluate(&a, &source, false);
+            assert_eq!(m.prepared(&source.id), Some(false));
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.evaluations, before.evaluations);
+            assert_eq!(m.counters.hits, before.hits);
+            assert!(m.practice_rows(&source.id).is_none());
+            assert_eq!(m.entries.len(), 1);
+            assert_eq!(m.entries[0].id, other_source.id);
+            assert!(m.practice_rows(&other_source.id).is_some());
+            assert_eq!(serde_json::to_value(&a).unwrap(), caller);
+            assert_eq!(serde_json::to_value(&source).unwrap(), authored);
+            assert!(!progress::current_solved(&a, &source));
+            source.one_off_teaching = None;
+            a = good.clone();
+            m.begin_frame();
+            m.evaluate(&a, &source, false);
+            assert_eq!(
+                m.prepared(&source.id),
+                Some(true),
+                "Removing foreign one-off fields must restore legitimate own completion"
+            );
+        }
+    }
+    #[test]
+    fn valid_one_off_source_and_each_optional_field_refuse_uncacheable_fallback_and_practice_rows()
+    {
+        let (source, mut good) = teaching_fixture();
+        solve(&source, &mut good);
+        let (one_off, p) = crate::ui::tests::one_off_admission::prepared();
+        let pw = p.workspace.as_ref().unwrap();
+        for mask in 0..4 {
+            let mut a = good.clone();
+            let mut source = source.clone();
+            let mut m = Memo::default();
+            m.evaluate_limits(&a, &source, false, 1, 1, 0);
+            assert_eq!(m.prepared(&source.id), Some(true));
+            assert!(m.entries.is_empty());
+            assert!(m.rows(&source.id).unwrap().iter().all(|r| r.0));
+            assert!(m.practice_rows(&source.id).is_some());
+            let before = m.counters;
+            if mask == 0 {
+                source.one_off_teaching = one_off.one_off_teaching.clone();
+            } else {
+                let w = a.workspace.as_mut().unwrap();
+                if mask & 1 != 0 {
+                    w.one_off_session = pw.one_off_session.clone();
+                }
+                if mask & 2 != 0 {
+                    w.one_off_learning = pw.one_off_learning.clone();
+                }
+                assert!(w.valid());
+            }
+            let caller = serde_json::to_vec(&a).unwrap();
+            let authored = serde_json::to_vec(&source).unwrap();
+            m.evaluate_limits(&a, &source, false, 1, 1, 0);
+            assert_eq!(m.prepared(&source.id), Some(false));
+            assert!(m.rows(&source.id).unwrap().iter().all(|r| !r.0));
+            assert!(m.practice_rows(&source.id).is_none());
+            assert_eq!(m.counters.evaluations, before.evaluations);
+            assert_eq!(m.counters.hits, before.hits);
+            assert_eq!(m.counters.meters, before.meters);
+            assert_eq!(m.counters.snapshots, before.snapshots);
+            assert!(m.entries.is_empty());
+            assert!(
+                progress::current_nat_checks(&a, &source)
+                    .iter()
+                    .all(|r| !r.0)
+            );
+            assert!(!progress::current_solved(&a, &source));
+            assert_eq!(serde_json::to_vec(&a).unwrap(), caller);
+            assert_eq!(serde_json::to_vec(&source).unwrap(), authored);
+            source.one_off_teaching = None;
             m.begin_frame();
             m.evaluate_limits(&good, &source, false, 1, 1, 0);
             assert_eq!(m.prepared(&source.id), Some(true));

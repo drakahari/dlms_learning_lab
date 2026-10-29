@@ -1,4 +1,6 @@
 //! Prospective teaching/context tests; offline simulation only, no authored new labs.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{self, State},
     nat::Action,
@@ -307,7 +309,7 @@ fn foreign_practice_rejects_current_save_decode_and_good_file_is_unchanged() {
 #[test]
 fn old_140_wire_and_views_are_unchanged_and_technical_fixture_unregistered() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert!(all[..140].iter().all(|s| s.nat_teaching.is_none()));
     assert_eq!(
         all[140..143]

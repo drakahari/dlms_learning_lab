@@ -1,5 +1,7 @@
 //! Composed-family admission and exact-wire size checks. Fixed test fixtures only;
 //! no host execution, historical writer regeneration or progress installation.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     cron_workspace as cron,
     engine::{Goal, State},
@@ -11,7 +13,7 @@ use dlms_learning_lab::{
 };
 fn sources() -> (Scenario, Scenario, Scenario) {
     let mut all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let cron = all.remove(
         all.iter()
             .position(|s| s.id == "lpic1-cron-weekday-report")

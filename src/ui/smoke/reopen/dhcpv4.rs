@@ -100,7 +100,7 @@ impl LabApp {
         let i = self.scenarios.iter().position(|s| s.id == LAB).unwrap();
         let lesson = s.dhcpv4_teaching.as_ref().unwrap();
         assert_eq!(s.version, 1);
-        assert_eq!(self.scenarios.len(), 176);
+        assert_eq!(one_off_boundary::before_len(&self.scenarios), 176);
         self.reopen_dhcp_private(session);
         let mut shot = None;
         if phase == 0 && !self.reopen_geometry(ctx) {

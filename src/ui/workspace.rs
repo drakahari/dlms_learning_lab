@@ -23,6 +23,7 @@ impl LabApp {
                 self.ether_presentation.clear();
                 self.physical_presentation.clear();
                 self.cron_presentation.clear();
+                self.one_off_presentation.clear();
                 self.backup_presentation.clear();
             }
             ui.label(
@@ -77,6 +78,15 @@ impl LabApp {
                         self.notice = Some(error);
                         challenge = before;
                     }
+                } else if matches!(self.scenarios[i].initial, State::OneOff { .. }) {
+                    if let Err(error) = dlms_learning_lab::one_off_workspace::budget::set_challenge(
+                        self.progress.attempts.get_mut(&id).unwrap(),
+                        &self.scenarios[i],
+                        challenge,
+                    ) {
+                        self.notice = Some(error);
+                        challenge = before;
+                    }
                 } else {
                     self.progress.attempts.get_mut(&id).unwrap().challenge = challenge;
                 }
@@ -98,6 +108,7 @@ impl LabApp {
                 self.ether_presentation.clear();
                 self.physical_presentation.clear();
                 self.cron_presentation.clear();
+                self.one_off_presentation.clear();
                 self.backup_presentation.clear();
             }
             let r = ui.add(button("Reset"));
@@ -136,6 +147,12 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::OneOff { .. }) {
+            self.one_off_page(ui, i);
+            Self::workspace_footer(ui);
+            return;
+        }
+
         if matches!(self.scenarios[i].initial, State::PhysicalLink { .. }) {
             self.physical_page(ui, i);
             Self::workspace_footer(ui);

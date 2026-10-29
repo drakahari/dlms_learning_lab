@@ -1,4 +1,6 @@
 //! Real existing-family prepare matrices. Source-only until Root gates.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::Goal, pack::Scenario, physical_link_workspace as work, progress::Attempt, workspace,
 };
@@ -138,7 +140,7 @@ fn all_thirty_real_old_prepares_reject_new_kind_before_metadata_and_valid_option
     let learning = baseline.physical_link_learning.clone().unwrap();
     assert!(learning.valid());
     let all = dlms_learning_lab::pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let mut seen = BTreeSet::new();
     for old in &all {
         let value = serde_json::to_value(old).unwrap();
@@ -202,7 +204,7 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
 {
     let source = fixture::scenario();
     let all = dlms_learning_lab::pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let lesson = source.physical_link_teaching.clone();
     assert_eq!(
         all[171..175]
@@ -262,10 +264,17 @@ fn every_old_source_refuses_the_new_teaching_field_and_every_physical_source_ref
         .map(|(i, _)| i)
         .collect::<Vec<_>>();
     assert_eq!(
-        old_indices.len(),
+        old_indices[..172].len(),
         172,
         "Every previous171 and the new private-office kind is tested"
     );
+    assert_eq!(old_indices.len(), 176);
+    assert_eq!(&old_indices[172..], &[176, 177, 178, 179]);
+    assert!(old_indices[172..].iter().all(|i| matches!(
+        &all[*i].initial,
+        dlms_learning_lab::engine::State::OneOff { .. }
+    )));
+
     for index in old_indices {
         let mut foreign = all.clone();
         foreign[index].physical_link_teaching = lesson.clone();

@@ -29,6 +29,9 @@ pub enum State {
     PhysicalLink {
         simulation: crate::physical_link::State,
     },
+    OneOff {
+        simulation: Box<crate::one_off_workspace::Assignment>,
+    },
     FileBackup {
         simulation: crate::file_backup_terminal::Store,
     },
@@ -162,6 +165,9 @@ pub enum State {
 pub enum Goal {
     PhysicalLink {
         definition: Box<crate::physical_link_assignment::Definition>,
+    },
+    OneOff {
+        definition: Box<crate::one_off_workspace::Definition>,
     },
     FileBackup {
         definition: Box<crate::file_backup_workspace::Definition>,
@@ -350,6 +356,9 @@ pub fn checks(s: &State, g: &Goal) -> Vec<(bool, String)> {
             definition.checks(simulation)
         }
         (State::EtherChannel { simulation }, Goal::EtherChannel { definition }) => {
+            definition.checks(simulation)
+        }
+        (State::OneOff { simulation }, Goal::OneOff { definition }) => {
             definition.checks(simulation)
         }
         (State::Cron { simulation }, Goal::Cron { definition }) => definition.checks(simulation),
@@ -680,6 +689,7 @@ pub fn help(s: &State) -> &'static str {
         State::PhysicalLink { .. } => crate::physical_link_workspace::HELP,
         State::FileBackup { .. } => crate::file_backup_terminal::HELP,
         State::EtherChannel { .. } => crate::etherchannel_workspace::HELP,
+        State::OneOff { .. } => crate::one_off_workspace::HELP,
         State::Cron { .. } => crate::cron_workspace::HELP,
         State::Nfs { .. } => crate::nfs_workspace::HELP,
         State::RpmPackages { .. } => crate::rpm_packages_workspace::HELP,
@@ -773,6 +783,12 @@ pub fn execute_for_goal(s: &mut State, goal: &Goal, input: &str) -> Result<Strin
         return crate::etherchannel_workspace::execute(definition, simulation, input);
     }
 
+    if let State::OneOff { simulation } = s {
+        let Goal::OneOff { definition } = goal else {
+            return Err("One-off authored goal differs".into());
+        };
+        return crate::one_off_workspace::execute(definition, simulation, input);
+    }
     if let State::Cron { simulation } = s {
         let Goal::Cron { definition } = goal else {
             return Err("Scheduling needs its authored context".into());
@@ -997,6 +1013,18 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
         };
     }
 
+    if matches!(s, State::OneOff { .. }) {
+        if input.len()
+            > crate::one_off_workspace::PREFIX.len() + crate::one_off_workspace::MAX_ACTION
+        {
+            return Err("One-off input exceeds raw bound before trimming".into());
+        }
+        return match input.trim() {
+            "help" => Ok(crate::one_off_workspace::HELP.into()),
+            "show" => Ok(describe(s)),
+            _ => Err("One-off changes require authored context; no host command runs".into()),
+        };
+    }
     if matches!(s, State::Cron { .. }) {
         if input.len() > crate::cron_workspace::PREFIX.len() + crate::cron_workspace::MAX_ACTION {
             return Err("Scheduling input exceeds raw bound".into());
@@ -1184,6 +1212,7 @@ pub fn execute(s: &mut State, input: &str) -> Result<String, String> {
     }
     match s {
         State::PhysicalLink { .. }
+        | State::OneOff { .. }
         | State::FileBackup { .. }
         | State::EtherChannel { .. }
         | State::Cron { .. }
@@ -1651,6 +1680,12 @@ pub fn describe(s: &State) -> String {
             "Virtual L2 LACP: {} supplied devices, {} physical pairs. No packets, timers, routed channel or host command",
             simulation.topology().devices.len(),
             simulation.topology().cables.len()
+        ),
+        State::OneOff { simulation } => format!(
+            "Virtual UTC {} · {} pending one-off jobs · {} virtual files. Explicit bounded simulation only",
+            simulation.simulation.clock.text(),
+            simulation.simulation.jobs.len(),
+            simulation.simulation.files.len()
         ),
         State::Cron { simulation } => format!(
             "Virtual UTC {} · {} supplied accounts · {} installed user tables · {} virtual files. Only the explicit clock advances; no host scheduler runs",

@@ -4397,3 +4397,23 @@ M351348PythonPASS; M352coverage176/1240PASS, no promotion or count inflation.
 Foundation scope remains library work only; all136 parents stay incomplete.
 Scoped privacy/source review and formatting pass. Current new-core tests and
 alltargetClippy are verified independently of the unchanged176 learner catalog.
+
+
+### Source180: four one-off scheduling tasks integrated
+
+Main assembly174closedpaths peerf4eeed2f preserves all unowned core/history
+source. MainM354154PASS2fixtureFAIL caught omission of the already-reviewed Ether
+Goal-aware preparation branch; included exact5lines, M355all17PASS, fullcode/data
+parity now differs from the actualW only in intentional Main core exports, newer
+runner/current Python closure and byte-exact relocated unit authoring metadata.
+M356all32UI906-phase routePASS; M357alltargetClippyPASS.
+
+M358coverage correctly rejected unit metadata in scenarios/; relocated unchanged
+8c8b3231 bytes to tests/fixtures and verified exact raw registered unit. Validator
+unchanged. M359180registered/1240refs/175Partial/1Supporting/1064OpenPASS. Only
+107.2/K1 strengthen andT9/T10/T11 promote narrowly; all136parents remain incomplete.
+M360Python348groups had2 current-consumer failures on the new47rawunits; strict
+47→46 inversec472, currentcount47 and extra tamper control fix the premise while
+keeping old44/43 assertions/collectors exact. M361all348PythonPASS. Current Main
+inclusive gate is not claimed; latestfull2482 remains176-source. Continue182
+without pausing, then reviewed LVM/NTP units and all mapped remaining work.

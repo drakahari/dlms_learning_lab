@@ -628,7 +628,7 @@ impl LabApp {
     ) -> (bool, Option<String>) {
         assert!((FIRST..END).contains(&stage));
         assert_eq!(
-            self.scenarios.len(),
+            one_off_boundary::before_len(&self.scenarios),
             176,
             "normal143 registration is a runtime prerequisite"
         );

@@ -79,7 +79,7 @@ fn dhcp_lessons_native_exact_smoketick_open_geometry_and_repeated_finish_hold() 
     a.smoke_stage = FIRST;
     controller_frame(&ctx, &mut a, true);
     assert_eq!(a.smoke_stage, FIRST + 1);
-    assert_eq!(a.scenarios.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&a.scenarios), 176);
     assert_eq!(
         a.dhcpv4_view(a.selected.unwrap()),
         teaching::View::Introduction

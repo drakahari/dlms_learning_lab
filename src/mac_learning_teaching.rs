@@ -144,6 +144,10 @@ pub fn prepare(a: &mut crate::progress::Attempt, l: &Lesson, new_attempt: bool) 
     if crate::workspace::is_physical_workspace(a) {
         return;
     }
+    if crate::workspace::is_one_off_workspace(a) {
+        return;
+    }
+
     if crate::workspace::is_file_backup_workspace(a) {
         return;
     }

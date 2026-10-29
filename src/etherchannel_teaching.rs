@@ -341,6 +341,10 @@ pub fn prepare(
     s: &crate::pack::Scenario,
     new: bool,
 ) -> Result<(), String> {
+    if crate::workspace::is_one_off_workspace(a) {
+        return Err("One-off workspace belongs to its own activity; previous work retained".into());
+    }
+
     work::prepare_attempt(a, s, new)
 }
 

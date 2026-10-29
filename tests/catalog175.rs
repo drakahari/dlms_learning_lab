@@ -1,4 +1,6 @@
 //! Physical175 component gates composed into private normal176. Not a runtime/curriculum acceptance claim.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     catalog, course,
     engine::{self, Goal},
@@ -74,7 +76,7 @@ fn applied(s: &pack::Scenario, c: &core::Configuration) -> Attempt {
 fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_exact() {
     let old = before();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (171, 176));
+    assert_eq!((old.len(), one_off_boundary::before_len(&all)), (171, 176));
     assert_eq!(value(&all[..171]), value(&old));
     assert_eq!(
         value(
@@ -112,6 +114,11 @@ fn complete171_prefix_specs_order_all55_scripts420_cases_and55_examples_remain_e
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all[..176].iter().filter(|s| s.track == t).count()),
         [53, 36, 32, 55]
     );
 }
@@ -180,7 +187,10 @@ fn exact45_append_recovers_complete44_raw_objects_and_every_older_closed_inverse
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
     let old_units = course::load(std::str::from_utf8(&old).unwrap(), &before()).unwrap();
-    assert_eq!((old_units.len(), units.len()), (44, 46));
+    assert_eq!(
+        (old_units.len(), one_off_boundary::before_len(&units)),
+        (44, 46)
+    );
     assert_eq!(value(&units[..44]), value(&old_units));
     assert_eq!(value(&units[44]), r["physical_unit"]);
     assert_eq!(units[44].labs, IDS.map(str::to_owned));
@@ -367,7 +377,10 @@ fn private46_inverse_recovers_exact_physical45_then_every_original_closed_unit_r
     assert_eq!(all[175].id, "ccna-private-office-plan");
     let old = course::load(std::str::from_utf8(&before45).unwrap(), &all175).unwrap();
     let current = course::bundled(&all).unwrap();
-    assert_eq!((old.len(), current.len()), (45, 46));
+    assert_eq!(
+        (old.len(), one_off_boundary::before_len(&current)),
+        (45, 46)
+    );
     assert_eq!(value(&current[..45]), value(&old));
     assert_eq!(value(&current[45]), r["private_unit"]);
     assert_eq!(current[45].labs, ["ccna-private-office-plan"]);

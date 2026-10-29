@@ -1,6 +1,8 @@
 //! Private backend-only fixture, prospective tests; no authored/native acceptance.
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::{
@@ -748,7 +750,7 @@ fn original125_source_metadata_unit_order_and_omitted_optional_wire_are_exact() 
         serde_json::from_str(include_str!("fixtures/spanning-tree-original125.json")).unwrap();
     let expected: Vec<Scenario> = serde_json::from_value(v["scenarios"].clone()).unwrap();
     let all = catalog();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         all[..125].iter().map(|s| s.id.as_str()).collect::<Vec<_>>(),
         expected.iter().map(|s| s.id.as_str()).collect::<Vec<_>>()
@@ -836,7 +838,7 @@ fn real_current_records_genuine678_history_both_drafts_export_restore_and_select
     let original = all.clone();
     let s = scenario();
     let mut p = retained_profile(&all);
-    assert_eq!(p.attempts.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&p.attempts), 176);
     let histories = p
         .attempts
         .values()

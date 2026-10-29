@@ -1,4 +1,6 @@
 //! Exact complete currentMain168 prefix plus three numeric validation assignments.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{Goal, State},
@@ -48,7 +50,7 @@ fn old_catalog() -> Vec<pack::Scenario> {
 fn exact168_full_definitions_order52_scripts384_cases_and52_examples_stay_unchanged() {
     let old = old_catalog();
     let all = pack::bundled().unwrap();
-    assert_eq!((old.len(), all.len()), (168, 176));
+    assert_eq!((old.len(), one_off_boundary::before_len(&all)), (168, 176));
     assert_eq!(value(&all[..168]), value(&old));
     assert_eq!(
         value(
@@ -93,6 +95,11 @@ fn exact168_full_definitions_order52_scripts384_cases_and52_examples_stay_unchan
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|t| all[..176].iter().filter(|s| s.track == t).count()),
         [53, 36, 32, 55]
     );
     for s in &all[168..171] {
@@ -138,7 +145,10 @@ fn exact44_append_recovers_all43_raw_objects_and_every_old_closed_inverse() {
     let all = pack::bundled().unwrap();
     let old_units = course::load(std::str::from_utf8(&before).unwrap(), &old).unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!((old_units.len(), units.len()), (43, 46));
+    assert_eq!(
+        (old_units.len(), one_off_boundary::before_len(&units)),
+        (43, 46)
+    );
     assert_eq!(value(&units[..43]), value(&old_units));
     assert_eq!(value(&units[43]), r["numeric_unit"]);
     assert_eq!(units[43].labs, IDS.map(str::to_string));

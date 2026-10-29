@@ -258,3 +258,8 @@ never host initialization scripts or dynamically executable plugins. Future
 unregistered foundations and proposals earn no curriculum credit. All development
 build/test/reference/native gates follow BUILD_WORKFLOW.md and its shared lock,
 two Cargo jobs, two runtime threads and verified disk-backed artifacts.
+
+
+Unit-only authoring examples belong under `tests/fixtures/`. Every JSON file in
+`scenarios/` other than `units-v1.json` must be an actual versioned scenario Pack;
+coverage validation rejects stray metadata instead of treating it as a lab.

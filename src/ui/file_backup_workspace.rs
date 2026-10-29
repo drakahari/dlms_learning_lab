@@ -9,8 +9,12 @@ use dlms_learning_lab::{
 use std::sync::Arc;
 /// Reject every foreign teaching field before a native snapshot or warm lookup.
 pub(in crate::ui) fn source_shape(s: &Scenario) -> bool {
+    if s.one_off_teaching.is_some() {
+        return false;
+    }
     let Scenario {
         physical_link_teaching,
+        one_off_teaching: _,
         file_backup_teaching,
         etherchannel_teaching,
         cron_teaching,
@@ -184,7 +188,12 @@ pub(in crate::ui) fn same_attempt_fields(a: &Attempt, b: &Attempt, metadata: boo
 }
 
 pub(in crate::ui) fn foreign(w: &model::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let model::WorkspaceData {
+        one_off_session: _,
+        one_off_learning: _,
         etherchannel_draft,
         etherchannel_learning,
         physical_link_draft,

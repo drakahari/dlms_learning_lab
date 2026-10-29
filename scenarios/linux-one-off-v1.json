@@ -1,0 +1,3090 @@
+{
+  "schema_version": 1,
+  "scenarios": [
+    {
+      "id": "lpic1-at-report",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-one-off-jobs",
+      "title": "Queue and verify a one-time report",
+      "summary": "Copy the current arrivals list into a report once, five minutes after submission, as Mira. Verify actual output after advancing virtual time.",
+      "objective": "The virtual UTC clock starts at 2026-10-29 10:00. As Mira, write and save /work/report-job.sh so that it copies the current /work/report-input into /work/report-output. Queue exactly one job five minutes after submission. Run through 10:06 UTC and verify the report. Leave the queue empty and preserve the peer note. Fresh checks use different arrivals lists: do not type the report contents directly.",
+      "retry_guidance": "Read the failing owner/time/input case, inspect captured source with at -c, then repair only the mistaken part. Saving a script does not update a previously queued copy. Reset affects this attempt and its separate practice only.",
+      "difficulty": "Beginner",
+      "minutes": 16,
+      "steps": [
+        "Understand the task and inspect supplied files/queue",
+        "Edit and save the needed scripts; submit or repair captured work",
+        "Inspect pending jobs, advance only when the task requests it, and check actual outcomes"
+      ],
+      "guide": [],
+      "explanation": "atq lists your pending job IDs, due times and owner; at -c ID shows its captured script. Select a supplied account using the account control. Run advances only this virtual clock; no jobs run while the app is closed. Stop cancels the unfinished simulated interval and publishes none of it; real at does not undo completed work. Correct solutions use live file reads rather than the first sample text. Queue membership, captured variables, replayed current effects and independent samples are different checks; an ID or an old success message alone is not completion.",
+      "hints": [
+        "Inspect the saved file and pending queue before changing anything. The assignment states which owner, timing and output must be retained.",
+        "Save a cat command that reads the source at dispatch. at -f chooses the script; now + 5 minutes chooses the delay.",
+        "Check the requested current output and all fresh cases. The worked explanation is optional; an alternate supported command or script is accepted when its behavior matches."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/testing/at/at.1.en.html"
+      ],
+      "simplifications": "Offline in-process one-off queue; flat virtual /work files only. UTC minute precision, explicit virtual Run, no background work while closed. at -f, supported -t/now forms, atq/at -l, atrm/at -r and at -c only; simulated account selection is not su/sudo or filesystem permission enforcement. Ordinary captured scalar values use the supplied variables editor, not an export command. No real at, shell, clock, services, spool, mail, network, at.allow/deny, systemd timers or concurrency. Stop cancels an unfinished simulated interval transaction; real at does not roll back completed effects. No full POSIX or Linux-equipment equivalence.",
+      "initial": {
+        "kind": "OneOff",
+        "simulation": {
+          "simulation": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 1,
+            "users": [
+              "mira",
+              "pat",
+              "root"
+            ],
+            "files": {
+              "/work/report-job.sh": "# Write the report command here.\n",
+              "/work/report-input": "arrivals: 12\n",
+              "/work/report-peer.txt": "Keep this peer note.\n"
+            },
+            "jobs": {},
+            "records": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "OneOff",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 1,
+            "users": [
+              "mira",
+              "pat",
+              "root"
+            ],
+            "files": {
+              "/work/report-job.sh": "# Write the report command here.\n",
+              "/work/report-input": "arrivals: 12\n",
+              "/work/report-peer.txt": "Keep this peer note.\n"
+            },
+            "jobs": {},
+            "records": []
+          },
+          "editable": [
+            "/work/report-job.sh",
+            "/work/report-input"
+          ],
+          "outputs": [
+            "/work/report-output"
+          ],
+          "preserve_jobs": [],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": []
+            },
+            {
+              "kind": "QueueExactly",
+              "source": "LastRun",
+              "jobs": [
+                {
+                  "owner": "mira",
+                  "script_path": "/work/report-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/report-output",
+              "text": "arrivals: 12\n"
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "mira",
+                "script_path": "/work/report-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Live input 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "mira",
+                "script_path": "/work/report-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/report-job.sh": "# Write the report command here.\n",
+                "/work/report-input": "arrivals: 12\n",
+                "/work/report-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "mira",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/report-job.sh": "# Write the report command here.\n",
+                "/work/report-input": "arrivals: 12\n",
+                "/work/report-peer.txt": "Keep this peer note.\n",
+                "/work/report-output": "arrivals: 12\n"
+              }
+            },
+            {
+              "name": "Live input 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "mira",
+                "script_path": "/work/report-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/report-job.sh": "# Write the report command here.\n",
+                "/work/report-input": "arrivals: 41\n",
+                "/work/report-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "mira",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/report-job.sh": "# Write the report command here.\n",
+                "/work/report-input": "arrivals: 41\n",
+                "/work/report-peer.txt": "Keep this peer note.\n",
+                "/work/report-output": "arrivals: 41\n"
+              }
+            },
+            {
+              "name": "Before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "mira",
+                "script_path": "/work/report-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/report-job.sh": "# Write the report command here.\n",
+                "/work/report-input": "arrivals: 12\n",
+                "/work/report-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/report-job.sh": "# Write the report command here.\n",
+                "/work/report-input": "arrivals: 12\n",
+                "/work/report-peer.txt": "Keep this peer note.\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "one-off {\"kind\":\"Write\",\"path\":\"/work/report-job.sh\",\"text\":\"cat /work/report-input > /work/report-output\\n\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"mira\",\"environment\":{},\"text\":\"at -f /work/report-job.sh now + 5 minutes\"}",
+        "one-off {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":29,\"hour\":10,\"minute\":6}}"
+      ],
+      "prerequisites": [
+        "lpic1-file-navigation",
+        "shell-handover"
+      ],
+      "one_off_teaching": {
+        "prerequisite_note": "Read these concepts or start the full assignment. Earlier units can help, but you can begin here. No scheduling experience is needed; this introduction explains the script and controls.",
+        "concepts": [
+          {
+            "title": "A job is work saved for later",
+            "text": "A script is a text file containing commands. Type in the file editor; Save updates the simulated file. at -f reads that saved file and queues a separate copy. A line beginning # is a comment. Open the assignment directly if you already know this."
+          },
+          {
+            "title": "Copy live input, then choose a time",
+            "text": "cat reads a file. In cat /work/sample-input > /work/sample-report, > replaces the output with that text. Queuing does not run it. at -f /work/sample.sh now + 3 minutes requests one run three virtual minutes after submission; -t 202610291003 names an absolute UTC minute. Our simulator supports only the documented subset."
+          },
+          {
+            "title": "Inspect before advancing",
+            "text": "atq lists your pending job IDs, due times and owner; at -c ID shows its captured script. Select a supplied account using the account control. Run advances only this virtual clock; no jobs run while the app is closed. Stop cancels the unfinished simulated interval and publishes none of it; real at does not undo completed work."
+          }
+        ],
+        "example_description": "Separate practice uses willow0 and /work/practice0-job.sh. Its files, queued copies, variables, drafts and clock are independent; no example action earns assignment credit.",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 1,
+            "users": [
+              "practicepeer0",
+              "root",
+              "willow0"
+            ],
+            "files": {
+              "/work/practice0-job.sh": "# Write the report command here.\n",
+              "/work/practice0-input": "crates: 4\n",
+              "/work/practice0-peer.txt": "Keep this peer note.\n"
+            },
+            "jobs": {},
+            "records": []
+          },
+          "editable": [
+            "/work/practice0-job.sh",
+            "/work/practice0-input"
+          ],
+          "outputs": [
+            "/work/practice0-output"
+          ],
+          "preserve_jobs": [],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": []
+            },
+            {
+              "kind": "QueueExactly",
+              "source": "LastRun",
+              "jobs": [
+                {
+                  "owner": "willow0",
+                  "script_path": "/work/practice0-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/practice0-output",
+              "text": "crates: 4\n"
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "willow0",
+                "script_path": "/work/practice0-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Live input 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow0",
+                "script_path": "/work/practice0-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice0-job.sh": "# Write the report command here.\n",
+                "/work/practice0-input": "crates: 4\n",
+                "/work/practice0-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "willow0",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice0-job.sh": "# Write the report command here.\n",
+                "/work/practice0-input": "crates: 4\n",
+                "/work/practice0-peer.txt": "Keep this peer note.\n",
+                "/work/practice0-output": "crates: 4\n"
+              }
+            },
+            {
+              "name": "Live input 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow0",
+                "script_path": "/work/practice0-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice0-job.sh": "# Write the report command here.\n",
+                "/work/practice0-input": "crates: 23\n",
+                "/work/practice0-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "willow0",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice0-job.sh": "# Write the report command here.\n",
+                "/work/practice0-input": "crates: 23\n",
+                "/work/practice0-peer.txt": "Keep this peer note.\n",
+                "/work/practice0-output": "crates: 23\n"
+              }
+            },
+            {
+              "name": "Before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow0",
+                "script_path": "/work/practice0-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/practice0-job.sh": "# Write the report command here.\n",
+                "/work/practice0-input": "crates: 4\n",
+                "/work/practice0-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/practice0-job.sh": "# Write the report command here.\n",
+                "/work/practice0-input": "crates: 4\n",
+                "/work/practice0-peer.txt": "Keep this peer note.\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Type the sample file",
+            "explanation": "Fill inserts this different example into its own practice draft; it does not run or save the assignment.",
+            "action": {
+              "kind": "Edit",
+              "path": "/work/practice0-job.sh",
+              "text": "cat /work/practice0-input > /work/practice0-output\n"
+            }
+          },
+          {
+            "title": "Save this example file",
+            "explanation": "Apply the practice draft to its simulated file before submitting a job.",
+            "action": {
+              "kind": "Save",
+              "path": "/work/practice0-job.sh"
+            }
+          },
+          {
+            "title": "Choose the sample account",
+            "explanation": "This native selector changes whose queue you inspect; it is not a Linux command.",
+            "action": {
+              "kind": "Actor",
+              "actor": "willow0"
+            }
+          },
+          {
+            "title": "Set sample variables",
+            "explanation": "These ordinary values are captured only when the following submission runs.",
+            "action": {
+              "kind": "Environment",
+              "values": {}
+            }
+          },
+          {
+            "title": "at -f /work/practice0-job.sh now + 5 minutes",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "at -f /work/practice0-job.sh now + 5 minutes"
+            }
+          },
+          {
+            "title": "Advance only the example clock",
+            "explanation": "Run the supplied virtual interval and inspect practice output. Stop is a simulator transaction cancellation, not a promise about real at.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            }
+          }
+        ],
+        "try_change": "After the worked example, edit the sample script to add a comment but do not save it. Notice the unsaved-draft feedback while the captured job/output stays unchanged. Repair restores the saved script text; it does not overwrite the assignment.",
+        "try_actions": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice0-job.sh",
+            "text": "cat /work/practice0-input > /work/practice0-output\n# unsaved note\n"
+          }
+        ],
+        "try_rows": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice0-job.sh",
+            "text": "cat /work/practice0-input > /work/practice0-output\n"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-at-capture-repair",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-one-off-jobs",
+      "title": "Repair a captured job without losing live updates",
+      "summary": "A queued dispatch report contains an old label. Repair the script and captured variables, replace the old job, then include an input update made after submission.",
+      "objective": "As Devon, inspect the pending job and its captured source. Replace that job with exactly one job from /work/dispatch-job.sh, five minutes after submission, capturing LABEL=Final in the variables editor. The script must write the captured label plus a newline, then the live input, into /work/dispatch-output. After submission, update /work/dispatch-input to arrivals: 9 followed by a newline. Run through 10:06 UTC; the report must read Final then arrivals: 9 on separate lines. Leave no pending jobs and preserve the peer note. Editing the old source or variables alone does not update its captured job.",
+      "retry_guidance": "Read the failing owner/time/input case, inspect captured source with at -c, then repair only the mistaken part. Saving a script does not update a previously queued copy. Reset affects this attempt and its separate practice only.",
+      "difficulty": "Intermediate",
+      "minutes": 22,
+      "steps": [
+        "Understand the task and inspect supplied files/queue",
+        "Edit and save the needed scripts; submit or repair captured work",
+        "Inspect pending jobs, advance only when the task requests it, and check actual outcomes"
+      ],
+      "guide": [],
+      "explanation": "Files used by cat are read when the job actually runs, so a saved input update after submission should appear. If the result is wrong, inspect script, captured variables, live files and due time separately. Removal affects pending work, not effects of a job already completed. Correct solutions use live file reads rather than the first sample text. Queue membership, captured variables, replayed current effects and independent samples are different checks; an ID or an old success message alone is not completion.",
+      "hints": [
+        "Inspect the saved file and pending queue before changing anything. The assignment states which owner, timing and output must be retained.",
+        "Compare captured text/variables (at -c ID) with the editor and live input. Remove only the obsolete pending ID before replacement.",
+        "Check the requested current output and all fresh cases. The worked explanation is optional; an alternate supported command or script is accepted when its behavior matches."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/testing/at/at.1.en.html"
+      ],
+      "simplifications": "Offline in-process one-off queue; flat virtual /work files only. UTC minute precision, explicit virtual Run, no background work while closed. at -f, supported -t/now forms, atq/at -l, atrm/at -r and at -c only; simulated account selection is not su/sudo or filesystem permission enforcement. Ordinary captured scalar values use the supplied variables editor, not an export command. No real at, shell, clock, services, spool, mail, network, at.allow/deny, systemd timers or concurrency. Stop cancels an unfinished simulated interval transaction; real at does not roll back completed effects. No full POSIX or Linux-equipment equivalence.",
+      "initial": {
+        "kind": "OneOff",
+        "simulation": {
+          "simulation": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 2,
+            "users": [
+              "devon",
+              "pat",
+              "root"
+            ],
+            "files": {
+              "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+              "/work/dispatch-input": "before update\n",
+              "/work/dispatch-peer.txt": "Keep this peer note.\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "devon",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 5
+                },
+                "script_path": "/work/dispatch-job.sh",
+                "source": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "environment": {
+                  "LABEL": "Draft"
+                }
+              }
+            },
+            "records": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "OneOff",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 2,
+            "users": [
+              "devon",
+              "pat",
+              "root"
+            ],
+            "files": {
+              "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+              "/work/dispatch-input": "before update\n",
+              "/work/dispatch-peer.txt": "Keep this peer note.\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "devon",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 5
+                },
+                "script_path": "/work/dispatch-job.sh",
+                "source": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "environment": {
+                  "LABEL": "Draft"
+                }
+              }
+            },
+            "records": []
+          },
+          "editable": [
+            "/work/dispatch-job.sh",
+            "/work/dispatch-input"
+          ],
+          "outputs": [
+            "/work/dispatch-output"
+          ],
+          "preserve_jobs": [],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": []
+            },
+            {
+              "kind": "QueueExactly",
+              "source": "LastRun",
+              "jobs": [
+                {
+                  "owner": "devon",
+                  "script_path": "/work/dispatch-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/dispatch-output",
+              "text": "Final\narrivals: 9\n"
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "devon",
+                "script_path": "/work/dispatch-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              }
+            },
+            {
+              "kind": "CapturedEnvironment",
+              "source": "LastRun",
+              "job": {
+                "owner": "devon",
+                "script_path": "/work/dispatch-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "values": {
+                "LABEL": "Final"
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Live input 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "devon",
+                "script_path": "/work/dispatch-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "/work/dispatch-input": "arrivals: 9\n",
+                "/work/dispatch-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "devon",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "/work/dispatch-input": "arrivals: 9\n",
+                "/work/dispatch-peer.txt": "Keep this peer note.\n",
+                "/work/dispatch-output": "Final\narrivals: 9\n"
+              }
+            },
+            {
+              "name": "Live input 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "devon",
+                "script_path": "/work/dispatch-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "/work/dispatch-input": "arrivals: 63\n",
+                "/work/dispatch-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "devon",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "/work/dispatch-input": "arrivals: 63\n",
+                "/work/dispatch-peer.txt": "Keep this peer note.\n",
+                "/work/dispatch-output": "Final\narrivals: 63\n"
+              }
+            },
+            {
+              "name": "Before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "devon",
+                "script_path": "/work/dispatch-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "/work/dispatch-input": "before update\n",
+                "/work/dispatch-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/dispatch-job.sh": "printf 'Draft\\n' > /work/dispatch-output\n",
+                "/work/dispatch-input": "before update\n",
+                "/work/dispatch-peer.txt": "Keep this peer note.\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "one-off {\"kind\":\"Command\",\"actor\":\"devon\",\"environment\":{},\"text\":\"atq\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"devon\",\"environment\":{},\"text\":\"at -c 1\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"devon\",\"environment\":{},\"text\":\"atrm 1\"}",
+        "one-off {\"kind\":\"Write\",\"path\":\"/work/dispatch-job.sh\",\"text\":\"printf '%s\\\\n' \\\"$LABEL\\\" > /work/dispatch-output\\ncat /work/dispatch-input >> /work/dispatch-output\\n\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"devon\",\"environment\":{\"LABEL\":\"Final\"},\"text\":\"at -f /work/dispatch-job.sh now + 5 minutes\"}",
+        "one-off {\"kind\":\"Write\",\"path\":\"/work/dispatch-input\",\"text\":\"arrivals: 9\\n\"}",
+        "one-off {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":29,\"hour\":10,\"minute\":6}}"
+      ],
+      "prerequisites": [
+        "lpic1-at-report"
+      ],
+      "one_off_teaching": {
+        "prerequisite_note": "Read these concepts or start the full assignment. Earlier units can help, but you can begin here. First complete or review the preceding one-off assignment; its queue/time and file concepts are used here.",
+        "concepts": [
+          {
+            "title": "The queued copy is separate",
+            "text": "at captures saved script text and variable values when you submit. Saving a repaired file or changing the variable editor afterward does not rewrite an older job. Inspect at -c ID, remove the stale job with atrm ID, and submit the corrected file."
+          },
+          {
+            "title": "Captured variables and live input differ",
+            "text": "A variable is a named value. Put LABEL=Approved in the supplied variables editor as a name/value pair; do not type export into the queue command box. printf '%s\\n' \"$LABEL\" prints that captured value: %s is the text slot; \\n ends the line; double quotes keep the value together. Then cat /work/sample-input >> /work/sample-output appends the live file; >> preserves earlier output."
+          },
+          {
+            "title": "Retry without resetting everything",
+            "text": "Files used by cat are read when the job actually runs, so a saved input update after submission should appear. If the result is wrong, inspect script, captured variables, live files and due time separately. Removal affects pending work, not effects of a job already completed."
+          }
+        ],
+        "example_description": "Separate practice uses willow1 and /work/practice1-job.sh. Its files, queued copies, variables, drafts and clock are independent; no example action earns assignment credit.",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 2,
+            "users": [
+              "practicepeer1",
+              "root",
+              "willow1"
+            ],
+            "files": {
+              "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+              "/work/practice1-input": "before update\n",
+              "/work/practice1-peer.txt": "Keep this peer note.\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "willow1",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 5
+                },
+                "script_path": "/work/practice1-job.sh",
+                "source": "printf 'Draft\\n' > /work/practice1-output\n",
+                "environment": {
+                  "LABEL": "Draft"
+                }
+              }
+            },
+            "records": []
+          },
+          "editable": [
+            "/work/practice1-job.sh",
+            "/work/practice1-input"
+          ],
+          "outputs": [
+            "/work/practice1-output"
+          ],
+          "preserve_jobs": [],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": []
+            },
+            {
+              "kind": "QueueExactly",
+              "source": "LastRun",
+              "jobs": [
+                {
+                  "owner": "willow1",
+                  "script_path": "/work/practice1-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/practice1-output",
+              "text": "Practice\ncrates: 4\n"
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "willow1",
+                "script_path": "/work/practice1-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              }
+            },
+            {
+              "kind": "CapturedEnvironment",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow1",
+                "script_path": "/work/practice1-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "values": {
+                "LABEL": "Practice"
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Live input 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow1",
+                "script_path": "/work/practice1-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+                "/work/practice1-input": "crates: 4\n",
+                "/work/practice1-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "willow1",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+                "/work/practice1-input": "crates: 4\n",
+                "/work/practice1-peer.txt": "Keep this peer note.\n",
+                "/work/practice1-output": "Practice\ncrates: 4\n"
+              }
+            },
+            {
+              "name": "Live input 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow1",
+                "script_path": "/work/practice1-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+                "/work/practice1-input": "crates: 23\n",
+                "/work/practice1-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": {
+                "owner": "willow1",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+                "/work/practice1-input": "crates: 23\n",
+                "/work/practice1-peer.txt": "Keep this peer note.\n",
+                "/work/practice1-output": "Practice\ncrates: 23\n"
+              }
+            },
+            {
+              "name": "Before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow1",
+                "script_path": "/work/practice1-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+                "/work/practice1-input": "before update\n",
+                "/work/practice1-peer.txt": "Keep this peer note.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/practice1-job.sh": "printf 'Draft\\n' > /work/practice1-output\n",
+                "/work/practice1-input": "before update\n",
+                "/work/practice1-peer.txt": "Keep this peer note.\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the sample account",
+            "explanation": "This native selector changes whose queue you inspect; it is not a Linux command.",
+            "action": {
+              "kind": "Actor",
+              "actor": "willow1"
+            }
+          },
+          {
+            "title": "Set sample variables",
+            "explanation": "These ordinary values are captured only when the following submission runs.",
+            "action": {
+              "kind": "Environment",
+              "values": {}
+            }
+          },
+          {
+            "title": "atrm 1",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "atrm 1"
+            }
+          },
+          {
+            "title": "Type the sample file",
+            "explanation": "Fill inserts this different example into its own practice draft; it does not run or save the assignment.",
+            "action": {
+              "kind": "Edit",
+              "path": "/work/practice1-job.sh",
+              "text": "printf '%s\\n' \"$LABEL\" > /work/practice1-output\ncat /work/practice1-input >> /work/practice1-output\n"
+            }
+          },
+          {
+            "title": "Save this example file",
+            "explanation": "Apply the practice draft to its simulated file before submitting a job.",
+            "action": {
+              "kind": "Save",
+              "path": "/work/practice1-job.sh"
+            }
+          },
+          {
+            "title": "Set sample variables",
+            "explanation": "These ordinary values are captured only when the following submission runs.",
+            "action": {
+              "kind": "Environment",
+              "values": {
+                "LABEL": "Practice"
+              }
+            }
+          },
+          {
+            "title": "at -f /work/practice1-job.sh now + 5 minutes",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "at -f /work/practice1-job.sh now + 5 minutes"
+            }
+          },
+          {
+            "title": "Type the sample file",
+            "explanation": "Fill inserts this different example into its own practice draft; it does not run or save the assignment.",
+            "action": {
+              "kind": "Edit",
+              "path": "/work/practice1-input",
+              "text": "crates: 4\n"
+            }
+          },
+          {
+            "title": "Save this example file",
+            "explanation": "Apply the practice draft to its simulated file before submitting a job.",
+            "action": {
+              "kind": "Save",
+              "path": "/work/practice1-input"
+            }
+          },
+          {
+            "title": "Advance only the example clock",
+            "explanation": "Run the supplied virtual interval and inspect practice output. Stop is a simulator transaction cancellation, not a promise about real at.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            }
+          }
+        ],
+        "try_change": "After the worked example, edit the sample script to add a comment but do not save it. Notice the unsaved-draft feedback while the captured job/output stays unchanged. Repair restores the saved script text; it does not overwrite the assignment.",
+        "try_actions": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice1-job.sh",
+            "text": "printf '%s\\n' \"$LABEL\" > /work/practice1-output\ncat /work/practice1-input >> /work/practice1-output\n# unsaved note\n"
+          }
+        ],
+        "try_rows": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice1-job.sh",
+            "text": "printf '%s\\n' \"$LABEL\" > /work/practice1-output\ncat /work/practice1-input >> /work/practice1-output\n"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-at-owner-queue",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-one-off-jobs",
+      "title": "Retire an obsolete job and preserve another owner\u2019s work",
+      "summary": "Investigate two owners\u2019 pending work, cancel only the obsolete job, and leave one correct replacement queued without disturbing the peer.",
+      "objective": "Inspect the queue as root and as Nia. Remove Nia's obsolete job, preserve Pat's job2 exactly, and leave exactly one Nia replacement from /work/owner-job.sh scheduled five minutes after submission. The replacement must copy the live /work/owner-input into /work/owner-output. Do not advance the virtual clock: this handover delivers pending work. The complete queue must contain only Pat's unchanged job and Nia's tested replacement. Listing owners does not change filesystem permissions.",
+      "retry_guidance": "Read the failing owner/time/input case, inspect captured source with at -c, then repair only the mistaken part. Saving a script does not update a previously queued copy. Reset affects this attempt and its separate practice only.",
+      "difficulty": "Intermediate",
+      "minutes": 20,
+      "steps": [
+        "Understand the task and inspect supplied files/queue",
+        "Edit and save the needed scripts; submit or repair captured work",
+        "Inspect pending jobs, advance only when the task requests it, and check actual outcomes"
+      ],
+      "guide": [],
+      "explanation": "A queue can look correct while its script is wrong. Here Check runs independent deterministic samples against captured work without changing your actual clock or files. Retaining a job in the pending queue is intentional in this assignment; the simulator\u2019s result list is not real at mail or spool output. Correct solutions use live file reads rather than the first sample text. Queue membership, captured variables, replayed current effects and independent samples are different checks; an ID or an old success message alone is not completion.",
+      "hints": [
+        "Inspect the saved file and pending queue before changing anything. The assignment states which owner, timing and output must be retained.",
+        "Compare captured text/variables (at -c ID) with the editor and live input. Remove only the obsolete pending ID before replacement.",
+        "Check the requested current output and all fresh cases. The worked explanation is optional; an alternate supported command or script is accepted when its behavior matches."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/testing/at/at.1.en.html"
+      ],
+      "simplifications": "Offline in-process one-off queue; flat virtual /work files only. UTC minute precision, explicit virtual Run, no background work while closed. at -f, supported -t/now forms, atq/at -l, atrm/at -r and at -c only; simulated account selection is not su/sudo or filesystem permission enforcement. Ordinary captured scalar values use the supplied variables editor, not an export command. No real at, shell, clock, services, spool, mail, network, at.allow/deny, systemd timers or concurrency. Stop cancels an unfinished simulated interval transaction; real at does not roll back completed effects. No full POSIX or Linux-equipment equivalence.",
+      "initial": {
+        "kind": "OneOff",
+        "simulation": {
+          "simulation": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 3,
+            "users": [
+              "nia",
+              "pat",
+              "root"
+            ],
+            "files": {
+              "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+              "/work/owner-input": "stock: 17\n",
+              "/work/owner-peer.txt": "Keep this peer note.\n",
+              "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+              "/work/owner-peer.sh": "printf 'Peer check\\n'\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "nia",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 3
+                },
+                "script_path": "/work/owner-obsolete.sh",
+                "source": "printf obsolete\\n\n",
+                "environment": {}
+              },
+              "2": {
+                "id": 2,
+                "owner": "pat",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 45
+                },
+                "script_path": "/work/owner-peer.sh",
+                "source": "printf 'Peer check\\n'\n",
+                "environment": {}
+              }
+            },
+            "records": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "OneOff",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 3,
+            "users": [
+              "nia",
+              "pat",
+              "root"
+            ],
+            "files": {
+              "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+              "/work/owner-input": "stock: 17\n",
+              "/work/owner-peer.txt": "Keep this peer note.\n",
+              "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+              "/work/owner-peer.sh": "printf 'Peer check\\n'\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "nia",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 3
+                },
+                "script_path": "/work/owner-obsolete.sh",
+                "source": "printf obsolete\\n\n",
+                "environment": {}
+              },
+              "2": {
+                "id": 2,
+                "owner": "pat",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 45
+                },
+                "script_path": "/work/owner-peer.sh",
+                "source": "printf 'Peer check\\n'\n",
+                "environment": {}
+              }
+            },
+            "records": []
+          },
+          "editable": [
+            "/work/owner-job.sh",
+            "/work/owner-input"
+          ],
+          "outputs": [
+            "/work/owner-output"
+          ],
+          "preserve_jobs": [
+            2
+          ],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": [
+                {
+                  "owner": "pat",
+                  "script_path": "/work/owner-peer.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 45
+                  }
+                },
+                {
+                  "owner": "nia",
+                  "script_path": "/work/owner-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 0
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Live input 1",
+              "source": "Queued",
+              "job": {
+                "owner": "nia",
+                "script_path": "/work/owner-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+                "/work/owner-input": "stock: 17\n",
+                "/work/owner-peer.txt": "Keep this peer note.\n",
+                "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+                "/work/owner-peer.sh": "printf 'Peer check\\n'\n"
+              },
+              "expected": {
+                "owner": "nia",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+                "/work/owner-input": "stock: 17\n",
+                "/work/owner-peer.txt": "Keep this peer note.\n",
+                "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+                "/work/owner-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/owner-output": "stock: 17\n"
+              }
+            },
+            {
+              "name": "Live input 2",
+              "source": "Queued",
+              "job": {
+                "owner": "nia",
+                "script_path": "/work/owner-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+                "/work/owner-input": "stock: 2\n",
+                "/work/owner-peer.txt": "Keep this peer note.\n",
+                "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+                "/work/owner-peer.sh": "printf 'Peer check\\n'\n"
+              },
+              "expected": {
+                "owner": "nia",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+                "/work/owner-input": "stock: 2\n",
+                "/work/owner-peer.txt": "Keep this peer note.\n",
+                "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+                "/work/owner-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/owner-output": "stock: 2\n"
+              }
+            },
+            {
+              "name": "Before due",
+              "source": "Queued",
+              "job": {
+                "owner": "nia",
+                "script_path": "/work/owner-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+                "/work/owner-input": "stock: 17\n",
+                "/work/owner-peer.txt": "Keep this peer note.\n",
+                "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+                "/work/owner-peer.sh": "printf 'Peer check\\n'\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/owner-job.sh": "cat /work/owner-input > /work/owner-output\n",
+                "/work/owner-input": "stock: 17\n",
+                "/work/owner-peer.txt": "Keep this peer note.\n",
+                "/work/owner-obsolete.sh": "printf obsolete\\n\n",
+                "/work/owner-peer.sh": "printf 'Peer check\\n'\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "one-off {\"kind\":\"Command\",\"actor\":\"root\",\"environment\":{},\"text\":\"atq\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"nia\",\"environment\":{},\"text\":\"at -c 1\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"nia\",\"environment\":{},\"text\":\"atrm 1\"}",
+        "one-off {\"kind\":\"Write\",\"path\":\"/work/owner-job.sh\",\"text\":\"cat /work/owner-input > /work/owner-output\\n\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"nia\",\"environment\":{},\"text\":\"at -f /work/owner-job.sh now + 5 minutes\"}"
+      ],
+      "prerequisites": [
+        "lpic1-at-capture-repair"
+      ],
+      "one_off_teaching": {
+        "prerequisite_note": "Read these concepts or start the full assignment. Earlier units can help, but you can begin here. First complete or review the preceding one-off assignment; its queue/time and file concepts are used here.",
+        "concepts": [
+          {
+            "title": "An ID names a job, not its owner",
+            "text": "atq shows only the selected ordinary account\u2019s pending jobs; root can list all supplied owners. at -l is an alias. Use the account picker to inspect both views. These simulated owner rules do not implement filesystem permissions, root impersonation or at.allow/deny."
+          },
+          {
+            "title": "Remove exactly the obsolete work",
+            "text": "at -c ID inspects captured text. atrm ID or at -r ID removes that pending job; do not assume ID numbers from another attempt. Read the returned ID after submitting a replacement. A newly queued job gets a new ID, while Pat\u2019s existing work must retain its original captured contents and time."
+          },
+          {
+            "title": "A pending handover still needs a real script",
+            "text": "A queue can look correct while its script is wrong. Here Check runs independent deterministic samples against captured work without changing your actual clock or files. Retaining a job in the pending queue is intentional in this assignment; the simulator\u2019s result list is not real at mail or spool output."
+          }
+        ],
+        "example_description": "Separate practice uses willow2 and /work/practice2-job.sh. Its files, queued copies, variables, drafts and clock are independent; no example action earns assignment credit.",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 3,
+            "users": [
+              "practicepeer2",
+              "root",
+              "willow2"
+            ],
+            "files": {
+              "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+              "/work/practice2-input": "crates: 4\n",
+              "/work/practice2-peer.txt": "Keep this peer note.\n",
+              "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+              "/work/practice2-peer.sh": "printf 'Peer check\\n'\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "willow2",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 3
+                },
+                "script_path": "/work/practice2-obsolete.sh",
+                "source": "printf obsolete\\n\n",
+                "environment": {}
+              },
+              "2": {
+                "id": 2,
+                "owner": "practicepeer2",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 45
+                },
+                "script_path": "/work/practice2-peer.sh",
+                "source": "printf 'Peer check\\n'\n",
+                "environment": {}
+              }
+            },
+            "records": []
+          },
+          "editable": [
+            "/work/practice2-job.sh",
+            "/work/practice2-input"
+          ],
+          "outputs": [
+            "/work/practice2-output"
+          ],
+          "preserve_jobs": [
+            2
+          ],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": [
+                {
+                  "owner": "practicepeer2",
+                  "script_path": "/work/practice2-peer.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 45
+                  }
+                },
+                {
+                  "owner": "willow2",
+                  "script_path": "/work/practice2-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 0
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Live input 1",
+              "source": "Queued",
+              "job": {
+                "owner": "willow2",
+                "script_path": "/work/practice2-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+                "/work/practice2-input": "crates: 4\n",
+                "/work/practice2-peer.txt": "Keep this peer note.\n",
+                "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice2-peer.sh": "printf 'Peer check\\n'\n"
+              },
+              "expected": {
+                "owner": "willow2",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+                "/work/practice2-input": "crates: 4\n",
+                "/work/practice2-peer.txt": "Keep this peer note.\n",
+                "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice2-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice2-output": "crates: 4\n"
+              }
+            },
+            {
+              "name": "Live input 2",
+              "source": "Queued",
+              "job": {
+                "owner": "willow2",
+                "script_path": "/work/practice2-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+                "/work/practice2-input": "crates: 23\n",
+                "/work/practice2-peer.txt": "Keep this peer note.\n",
+                "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice2-peer.sh": "printf 'Peer check\\n'\n"
+              },
+              "expected": {
+                "owner": "willow2",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+                "/work/practice2-input": "crates: 23\n",
+                "/work/practice2-peer.txt": "Keep this peer note.\n",
+                "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice2-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice2-output": "crates: 23\n"
+              }
+            },
+            {
+              "name": "Before due",
+              "source": "Queued",
+              "job": {
+                "owner": "willow2",
+                "script_path": "/work/practice2-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+                "/work/practice2-input": "crates: 4\n",
+                "/work/practice2-peer.txt": "Keep this peer note.\n",
+                "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice2-peer.sh": "printf 'Peer check\\n'\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/practice2-job.sh": "cat /work/practice2-input > /work/practice2-output\n",
+                "/work/practice2-input": "crates: 4\n",
+                "/work/practice2-peer.txt": "Keep this peer note.\n",
+                "/work/practice2-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice2-peer.sh": "printf 'Peer check\\n'\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the sample account",
+            "explanation": "This native selector changes whose queue you inspect; it is not a Linux command.",
+            "action": {
+              "kind": "Actor",
+              "actor": "root"
+            }
+          },
+          {
+            "title": "Set sample variables",
+            "explanation": "These ordinary values are captured only when the following submission runs.",
+            "action": {
+              "kind": "Environment",
+              "values": {}
+            }
+          },
+          {
+            "title": "Choose the sample account",
+            "explanation": "This native selector changes whose queue you inspect; it is not a Linux command.",
+            "action": {
+              "kind": "Actor",
+              "actor": "willow2"
+            }
+          },
+          {
+            "title": "atrm 1",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "atrm 1"
+            }
+          },
+          {
+            "title": "Type the sample file",
+            "explanation": "Fill inserts this different example into its own practice draft; it does not run or save the assignment.",
+            "action": {
+              "kind": "Edit",
+              "path": "/work/practice2-job.sh",
+              "text": "cat /work/practice2-input > /work/practice2-output\n"
+            }
+          },
+          {
+            "title": "Save this example file",
+            "explanation": "Apply the practice draft to its simulated file before submitting a job.",
+            "action": {
+              "kind": "Save",
+              "path": "/work/practice2-job.sh"
+            }
+          },
+          {
+            "title": "at -f /work/practice2-job.sh now + 5 minutes",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "at -f /work/practice2-job.sh now + 5 minutes"
+            }
+          }
+        ],
+        "try_change": "After the worked example, edit the sample script to add a comment but do not save it. Notice the unsaved-draft feedback while the captured job/output stays unchanged. Repair restores the saved script text; it does not overwrite the assignment.",
+        "try_actions": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice2-job.sh",
+            "text": "cat /work/practice2-input > /work/practice2-output\n# unsaved note\n"
+          }
+        ],
+        "try_rows": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice2-job.sh",
+            "text": "cat /work/practice2-input > /work/practice2-output\n"
+          }
+        ]
+      }
+    },
+    {
+      "id": "lpic1-at-handover",
+      "version": 1,
+      "track": "LPIC-1",
+      "topic": "Scheduled tasks",
+      "unit": "linux-one-off-jobs",
+      "title": "Hand over an ordered two-job report",
+      "summary": "Replace an obsolete report with an ordered producer/consumer pair, prove both jobs completed correctly, and preserve a peer\u2019s future job.",
+      "objective": "As Tess, retire the obsolete job while keeping Pat's future job2 unchanged. Prepare a producer from /work/handover-job.sh at +2 minutes that copies live /work/handover-input to /work/handover-stage. Prepare a consumer from /work/handover-summary.sh at +5 minutes, capturing TITLE=Evening, that writes that title, a newline and the staged contents to /work/handover-output. Run through 10:06 UTC. Verify both files, both captured jobs and the ordering; only Pat's job should remain queued. Preserve the peer note. Fresh checks vary both the input and the consumer's available stage contents.",
+      "retry_guidance": "Read the failing owner/time/input case, inspect captured source with at -c, then repair only the mistaken part. Saving a script does not update a previously queued copy. Reset affects this attempt and its separate practice only.",
+      "difficulty": "Intermediate",
+      "minutes": 28,
+      "steps": [
+        "Understand the task and inspect supplied files/queue",
+        "Edit and save the needed scripts; submit or repair captured work",
+        "Inspect pending jobs, advance only when the task requests it, and check actual outcomes"
+      ],
+      "guide": [],
+      "explanation": "Root can inspect all queue entries, but having that ability does not mean removing every job is safe. Preserve the peer\u2019s future ID, source, variables and time. Jobs past due are eligible at the next simulated Run; merely looking at a queue or closing the app does not advance this clock. Correct solutions use live file reads rather than the first sample text. Queue membership, captured variables, replayed current effects and independent samples are different checks; an ID or an old success message alone is not completion.",
+      "hints": [
+        "Inspect the saved file and pending queue before changing anything. The assignment states which owner, timing and output must be retained.",
+        "Compare captured text/variables (at -c ID) with the editor and live input. Remove only the obsolete pending ID before replacement.",
+        "Check the requested current output and all fresh cases. The worked explanation is optional; an alternate supported command or script is accepted when its behavior matches."
+      ],
+      "sources": [
+        "https://www.lpi.org/our-certifications/exam-101-102-objectives/",
+        "https://manpages.debian.org/testing/at/at.1.en.html"
+      ],
+      "simplifications": "Offline in-process one-off queue; flat virtual /work files only. UTC minute precision, explicit virtual Run, no background work while closed. at -f, supported -t/now forms, atq/at -l, atrm/at -r and at -c only; simulated account selection is not su/sudo or filesystem permission enforcement. Ordinary captured scalar values use the supplied variables editor, not an export command. No real at, shell, clock, services, spool, mail, network, at.allow/deny, systemd timers or concurrency. Stop cancels an unfinished simulated interval transaction; real at does not roll back completed effects. No full POSIX or Linux-equipment equivalence.",
+      "initial": {
+        "kind": "OneOff",
+        "simulation": {
+          "simulation": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 3,
+            "users": [
+              "pat",
+              "root",
+              "tess"
+            ],
+            "files": {
+              "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+              "/work/handover-input": "orders: 18\n",
+              "/work/handover-peer.txt": "Keep this peer note.\n",
+              "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+              "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+              "/work/handover-summary.sh": "# Prepare the final report here.\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "tess",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 3
+                },
+                "script_path": "/work/handover-obsolete.sh",
+                "source": "printf obsolete\\n\n",
+                "environment": {}
+              },
+              "2": {
+                "id": 2,
+                "owner": "pat",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 45
+                },
+                "script_path": "/work/handover-peer.sh",
+                "source": "printf 'Peer check\\n'\n",
+                "environment": {}
+              }
+            },
+            "records": []
+          }
+        }
+      },
+      "goal": {
+        "kind": "OneOff",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 3,
+            "users": [
+              "pat",
+              "root",
+              "tess"
+            ],
+            "files": {
+              "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+              "/work/handover-input": "orders: 18\n",
+              "/work/handover-peer.txt": "Keep this peer note.\n",
+              "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+              "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+              "/work/handover-summary.sh": "# Prepare the final report here.\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "tess",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 3
+                },
+                "script_path": "/work/handover-obsolete.sh",
+                "source": "printf obsolete\\n\n",
+                "environment": {}
+              },
+              "2": {
+                "id": 2,
+                "owner": "pat",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 45
+                },
+                "script_path": "/work/handover-peer.sh",
+                "source": "printf 'Peer check\\n'\n",
+                "environment": {}
+              }
+            },
+            "records": []
+          },
+          "editable": [
+            "/work/handover-job.sh",
+            "/work/handover-summary.sh",
+            "/work/handover-input"
+          ],
+          "outputs": [
+            "/work/handover-stage",
+            "/work/handover-output"
+          ],
+          "preserve_jobs": [
+            2
+          ],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": [
+                {
+                  "owner": "pat",
+                  "script_path": "/work/handover-peer.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 45
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "QueueExactly",
+              "source": "LastRun",
+              "jobs": [
+                {
+                  "owner": "tess",
+                  "script_path": "/work/handover-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 2
+                  }
+                },
+                {
+                  "owner": "tess",
+                  "script_path": "/work/handover-summary.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                },
+                {
+                  "owner": "pat",
+                  "script_path": "/work/handover-peer.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 45
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/handover-stage",
+              "text": "orders: 18\n"
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/handover-output",
+              "text": "Evening\norders: 18\n"
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              }
+            },
+            {
+              "kind": "CapturedEnvironment",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "values": {
+                "TITLE": "Evening"
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Producer 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 3
+              },
+              "files": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": {
+                "owner": "tess",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n",
+                "/work/handover-stage": "orders: 18\n"
+              }
+            },
+            {
+              "name": "Consumer 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n",
+                "/work/handover-stage": "orders: 18\n"
+              },
+              "expected": {
+                "owner": "tess",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n",
+                "/work/handover-stage": "orders: 18\n",
+                "/work/handover-output": "Evening\norders: 18\n"
+              }
+            },
+            {
+              "name": "Producer 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 3
+              },
+              "files": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 57\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": {
+                "owner": "tess",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 57\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n",
+                "/work/handover-stage": "orders: 57\n"
+              }
+            },
+            {
+              "name": "Consumer 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 57\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n",
+                "/work/handover-stage": "orders: 57\n"
+              },
+              "expected": {
+                "owner": "tess",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 57\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n",
+                "/work/handover-stage": "orders: 57\n",
+                "/work/handover-output": "Evening\norders: 57\n"
+              }
+            },
+            {
+              "name": "Producer before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 1
+              },
+              "files": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n"
+              }
+            },
+            {
+              "name": "Consumer before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "tess",
+                "script_path": "/work/handover-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/handover-job.sh": "cat /work/handover-input > /work/handover-output\n",
+                "/work/handover-input": "orders: 18\n",
+                "/work/handover-peer.txt": "Keep this peer note.\n",
+                "/work/handover-obsolete.sh": "printf obsolete\\n\n",
+                "/work/handover-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/handover-summary.sh": "# Prepare the final report here.\n"
+              }
+            }
+          ]
+        }
+      },
+      "solution": [
+        "one-off {\"kind\":\"Command\",\"actor\":\"root\",\"environment\":{},\"text\":\"atq\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"tess\",\"environment\":{},\"text\":\"at -c 1\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"tess\",\"environment\":{},\"text\":\"atrm 1\"}",
+        "one-off {\"kind\":\"Write\",\"path\":\"/work/handover-job.sh\",\"text\":\"cat /work/handover-input > /work/handover-stage\\n\"}",
+        "one-off {\"kind\":\"Write\",\"path\":\"/work/handover-summary.sh\",\"text\":\"printf '%s\\\\n' \\\"$TITLE\\\" > /work/handover-output\\ncat /work/handover-stage >> /work/handover-output\\n\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"tess\",\"environment\":{},\"text\":\"at -f /work/handover-job.sh now + 2 minutes\"}",
+        "one-off {\"kind\":\"Command\",\"actor\":\"tess\",\"environment\":{\"TITLE\":\"Evening\"},\"text\":\"at -f /work/handover-summary.sh now + 5 minutes\"}",
+        "one-off {\"kind\":\"Run\",\"end\":{\"year\":2026,\"month\":10,\"day\":29,\"hour\":10,\"minute\":6}}"
+      ],
+      "prerequisites": [
+        "lpic1-at-owner-queue"
+      ],
+      "one_off_teaching": {
+        "prerequisite_note": "Read these concepts or start the full assignment. Earlier units can help, but you can begin here. First complete or review the preceding one-off assignment; its queue/time and file concepts are used here.",
+        "concepts": [
+          {
+            "title": "Two jobs form a dependency",
+            "text": "A producer writes a file; a later consumer reads it. Saving both scripts and submitting both jobs is necessary. Give the producer an earlier due time and inspect both IDs. This exercise orders jobs serially; real at does not guarantee a later job waits for a slow earlier job, so real production dependencies need stronger coordination."
+          },
+          {
+            "title": "Verify current output and independent behavior",
+            "text": "After Run, inspect the stage and final report, then Check. Fresh samples use different input for each captured script and compare all supplied files, exit status and errors. Matching one visible report is insufficient: the consumer must actually read its stage file and the producer must read live input."
+          },
+          {
+            "title": "Keep unrelated work intact",
+            "text": "Root can inspect all queue entries, but having that ability does not mean removing every job is safe. Preserve the peer\u2019s future ID, source, variables and time. Jobs past due are eligible at the next simulated Run; merely looking at a queue or closing the app does not advance this clock."
+          }
+        ],
+        "example_description": "Separate practice uses willow3 and /work/practice3-job.sh. Its files, queued copies, variables, drafts and clock are independent; no example action earns assignment credit.",
+        "definition": {
+          "initial": {
+            "version": 1,
+            "clock": {
+              "year": 2026,
+              "month": 10,
+              "day": 29,
+              "hour": 10,
+              "minute": 0
+            },
+            "next_id": 3,
+            "users": [
+              "practicepeer3",
+              "root",
+              "willow3"
+            ],
+            "files": {
+              "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+              "/work/practice3-input": "crates: 4\n",
+              "/work/practice3-peer.txt": "Keep this peer note.\n",
+              "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+              "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+              "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+            },
+            "jobs": {
+              "1": {
+                "id": 1,
+                "owner": "willow3",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 3
+                },
+                "script_path": "/work/practice3-obsolete.sh",
+                "source": "printf obsolete\\n\n",
+                "environment": {}
+              },
+              "2": {
+                "id": 2,
+                "owner": "practicepeer3",
+                "submitted": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 0
+                },
+                "due": {
+                  "year": 2026,
+                  "month": 10,
+                  "day": 29,
+                  "hour": 10,
+                  "minute": 45
+                },
+                "script_path": "/work/practice3-peer.sh",
+                "source": "printf 'Peer check\\n'\n",
+                "environment": {}
+              }
+            },
+            "records": []
+          },
+          "editable": [
+            "/work/practice3-job.sh",
+            "/work/practice3-summary.sh",
+            "/work/practice3-input"
+          ],
+          "outputs": [
+            "/work/practice3-stage",
+            "/work/practice3-output"
+          ],
+          "preserve_jobs": [
+            2
+          ],
+          "requirements": [
+            {
+              "kind": "QueueExactly",
+              "source": "Queued",
+              "jobs": [
+                {
+                  "owner": "practicepeer3",
+                  "script_path": "/work/practice3-peer.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 45
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "QueueExactly",
+              "source": "LastRun",
+              "jobs": [
+                {
+                  "owner": "willow3",
+                  "script_path": "/work/practice3-job.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 2
+                  }
+                },
+                {
+                  "owner": "willow3",
+                  "script_path": "/work/practice3-summary.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 5
+                  }
+                },
+                {
+                  "owner": "practicepeer3",
+                  "script_path": "/work/practice3-peer.sh",
+                  "timing": {
+                    "kind": "AfterSubmission",
+                    "minutes": 45
+                  }
+                }
+              ]
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/practice3-stage",
+              "text": "crates: 4\n"
+            },
+            {
+              "kind": "CurrentFile",
+              "path": "/work/practice3-output",
+              "text": "Practice\ncrates: 4\n"
+            },
+            {
+              "kind": "Clock",
+              "at": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              }
+            },
+            {
+              "kind": "Dispatched",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              }
+            },
+            {
+              "kind": "CapturedEnvironment",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "values": {
+                "TITLE": "Practice"
+              }
+            }
+          ],
+          "probes": [
+            {
+              "name": "Producer 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 3
+              },
+              "files": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": {
+                "owner": "willow3",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n",
+                "/work/practice3-stage": "crates: 4\n"
+              }
+            },
+            {
+              "name": "Consumer 1",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n",
+                "/work/practice3-stage": "crates: 4\n"
+              },
+              "expected": {
+                "owner": "willow3",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n",
+                "/work/practice3-stage": "crates: 4\n",
+                "/work/practice3-output": "Practice\ncrates: 4\n"
+              }
+            },
+            {
+              "name": "Producer 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 3
+              },
+              "files": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 23\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": {
+                "owner": "willow3",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 23\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n",
+                "/work/practice3-stage": "crates: 23\n"
+              }
+            },
+            {
+              "name": "Consumer 2",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 6
+              },
+              "files": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 23\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n",
+                "/work/practice3-stage": "crates: 23\n"
+              },
+              "expected": {
+                "owner": "willow3",
+                "when": {
+                  "kind": "Dispatch"
+                },
+                "status": "Completed",
+                "exit_status": 0,
+                "stdout": "",
+                "stderr": "",
+                "error": null
+              },
+              "after": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 23\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n",
+                "/work/practice3-stage": "crates: 23\n",
+                "/work/practice3-output": "Practice\ncrates: 23\n"
+              }
+            },
+            {
+              "name": "Producer before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-job.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 2
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 1
+              },
+              "files": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+              }
+            },
+            {
+              "name": "Consumer before due",
+              "source": "LastRun",
+              "job": {
+                "owner": "willow3",
+                "script_path": "/work/practice3-summary.sh",
+                "timing": {
+                  "kind": "AfterSubmission",
+                  "minutes": 5
+                }
+              },
+              "window": {
+                "kind": "AfterSubmission",
+                "start_minutes": 0,
+                "end_minutes": 4
+              },
+              "files": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+              },
+              "expected": null,
+              "after": {
+                "/work/practice3-job.sh": "cat /work/practice3-input > /work/practice3-output\n",
+                "/work/practice3-input": "crates: 4\n",
+                "/work/practice3-peer.txt": "Keep this peer note.\n",
+                "/work/practice3-obsolete.sh": "printf obsolete\\n\n",
+                "/work/practice3-peer.sh": "printf 'Peer check\\n'\n",
+                "/work/practice3-summary.sh": "# Prepare the final report here.\n"
+              }
+            }
+          ]
+        },
+        "example_actions": [
+          {
+            "title": "Choose the sample account",
+            "explanation": "This native selector changes whose queue you inspect; it is not a Linux command.",
+            "action": {
+              "kind": "Actor",
+              "actor": "root"
+            }
+          },
+          {
+            "title": "Set sample variables",
+            "explanation": "These ordinary values are captured only when the following submission runs.",
+            "action": {
+              "kind": "Environment",
+              "values": {}
+            }
+          },
+          {
+            "title": "Choose the sample account",
+            "explanation": "This native selector changes whose queue you inspect; it is not a Linux command.",
+            "action": {
+              "kind": "Actor",
+              "actor": "willow3"
+            }
+          },
+          {
+            "title": "atrm 1",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "atrm 1"
+            }
+          },
+          {
+            "title": "Type the sample file",
+            "explanation": "Fill inserts this different example into its own practice draft; it does not run or save the assignment.",
+            "action": {
+              "kind": "Edit",
+              "path": "/work/practice3-job.sh",
+              "text": "cat /work/practice3-input > /work/practice3-stage\n"
+            }
+          },
+          {
+            "title": "Save this example file",
+            "explanation": "Apply the practice draft to its simulated file before submitting a job.",
+            "action": {
+              "kind": "Save",
+              "path": "/work/practice3-job.sh"
+            }
+          },
+          {
+            "title": "Type the sample file",
+            "explanation": "Fill inserts this different example into its own practice draft; it does not run or save the assignment.",
+            "action": {
+              "kind": "Edit",
+              "path": "/work/practice3-summary.sh",
+              "text": "printf '%s\\n' \"$TITLE\" > /work/practice3-output\ncat /work/practice3-stage >> /work/practice3-output\n"
+            }
+          },
+          {
+            "title": "Save this example file",
+            "explanation": "Apply the practice draft to its simulated file before submitting a job.",
+            "action": {
+              "kind": "Save",
+              "path": "/work/practice3-summary.sh"
+            }
+          },
+          {
+            "title": "at -f /work/practice3-job.sh now + 2 minutes",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "at -f /work/practice3-job.sh now + 2 minutes"
+            }
+          },
+          {
+            "title": "Set sample variables",
+            "explanation": "These ordinary values are captured only when the following submission runs.",
+            "action": {
+              "kind": "Environment",
+              "values": {
+                "TITLE": "Practice"
+              }
+            }
+          },
+          {
+            "title": "at -f /work/practice3-summary.sh now + 5 minutes",
+            "explanation": "Run this supported queue command only when you choose to execute it in the separate practice workspace.",
+            "action": {
+              "kind": "Command",
+              "text": "at -f /work/practice3-summary.sh now + 5 minutes"
+            }
+          },
+          {
+            "title": "Advance only the example clock",
+            "explanation": "Run the supplied virtual interval and inspect practice output. Stop is a simulator transaction cancellation, not a promise about real at.",
+            "action": {
+              "kind": "Run",
+              "end": {
+                "year": 2026,
+                "month": 10,
+                "day": 29,
+                "hour": 10,
+                "minute": 6
+              }
+            }
+          }
+        ],
+        "try_change": "After the worked example, edit the sample script to add a comment but do not save it. Notice the unsaved-draft feedback while the captured job/output stays unchanged. Repair restores the saved script text; it does not overwrite the assignment.",
+        "try_actions": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice3-job.sh",
+            "text": "cat /work/practice3-input > /work/practice3-stage\n# unsaved note\n"
+          }
+        ],
+        "try_rows": [
+          false,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true,
+          true
+        ],
+        "repair": [
+          {
+            "kind": "Edit",
+            "path": "/work/practice3-job.sh",
+            "text": "cat /work/practice3-input > /work/practice3-stage\n"
+          }
+        ]
+      }
+    }
+  ]
+}

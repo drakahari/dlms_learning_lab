@@ -13,8 +13,8 @@ fn normal_private_office_real_controls_examples_mask_failure_alternatives_resume
     let (ctx, mut a) = app();
     a.smoke = true;
     a.smoke_stage = BASE;
-    assert_eq!(a.scenarios.len(), 176);
-    assert_eq!(a.units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&a.scenarios), 176);
+    assert_eq!(one_off_boundary::before_len(&a.units), 46);
     assert!(a.progress.attempts.is_empty());
     let mut fullscreen = false;
     let mut shots = Vec::new();

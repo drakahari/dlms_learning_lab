@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{self, Goal, State},
     pack,
@@ -22,7 +24,7 @@ fn fixture() -> Case {
 #[test]
 fn all_authored_scripts_grade_behavior_and_break_after_edit() {
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&labs), 176);
     let scripts: Vec<_> = labs.iter().filter(|s| s.track == "Bash/Shell").collect();
     assert_eq!(scripts.len(), 55);
     for s in scripts {

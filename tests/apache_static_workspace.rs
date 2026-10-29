@@ -1,6 +1,8 @@
 //! Prospective app-only model checks. No host Apache/HTTP/command execution.
 #[path = "support/combined_catalog.rs"]
 mod combined_catalog;
+#[path = "support/one_off_registration.rs"]
+mod one_off_registration;
 use amendment_sha as digest;
 #[path = "../examples/support/automation_digest.rs"]
 mod amendment_sha;
@@ -722,7 +724,10 @@ fn current_real_script_records_genuine678_histories_both_editors_backup_restore_
         )
     }
     assert_eq!(restored.attempts[&s.id].state, s.initial);
-    assert_eq!(originals.len(), 176);
+    assert_eq!(
+        one_off_registration::original_catalog(&originals).len(),
+        176
+    );
 }
 #[test]
 fn context_corruption_and_wrong_kind_save_never_overwrite_a_valid_profile() {
@@ -854,7 +859,7 @@ fn direct_oversized_whitespace_teaching_rejects_before_trim_without_publishing()
 fn both_family_current_helpers_reject_foreign_valid_metadata_without_mutating_or_saving() {
     let apache_scenario = scenario();
     let mut all = catalog();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_registration::original_catalog(&all).len(), 176);
     let package_scenario = all
         .iter()
         .find(|s| s.id == "lpic1-package-install")
@@ -1221,7 +1226,9 @@ fn probe_feedback_excerpts_are_bounded_and_no_listener_stays_distinct() {
 // Recover the complete reviewed44 predecessor through both closed raw inverses.
 // Canonical physical/private append recipes and all historical37 bytes stay fixed.
 fn original44_unit_bytes() -> Vec<u8> {
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let raw47 = include_bytes!("../scenarios/units-v1.json");
+    let original46 = one_off_registration::before_units(raw47).unwrap();
+    let raw = original46.as_slice();
     let before = combined_catalog::before_physical_units(raw).unwrap();
     let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
     let original: serde_json::Value = serde_json::from_slice(&before).unwrap();

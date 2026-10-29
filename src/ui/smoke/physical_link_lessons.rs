@@ -1137,11 +1137,15 @@ impl LabApp {
                     "Fresh private acceptance profile only"
                 );
                 assert_eq!(
-                    self.scenarios.len(),
+                    one_off_boundary::before_len(&self.scenarios),
                     176,
                     "Exact normal catalog source boundary"
                 );
-                assert_eq!(self.units.len(), 46, "Exact normal unit source boundary");
+                assert_eq!(
+                    one_off_boundary::before_len(&self.units),
+                    46,
+                    "Exact normal unit source boundary"
+                );
                 assert_eq!(dlms_learning_lab::shell::EVALUATOR_REVISION, 12);
                 assert_eq!(
                     self.scenarios

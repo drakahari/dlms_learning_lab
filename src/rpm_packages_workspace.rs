@@ -445,9 +445,14 @@ pub fn apply(d: &Definition, s: &mut State, a: &core::Action) -> Result<core::Pl
 
 // Exhaustive classification: new typed metadata requires a deliberate admission decision.
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let crate::workspace::WorkspaceData {
         physical_link_draft,
         physical_link_learning,
+        one_off_session: _,
+        one_off_learning: _,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,

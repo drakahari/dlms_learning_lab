@@ -150,6 +150,9 @@ pub mod file_backup_teaching;
 pub mod file_backup_terminal;
 pub mod file_backup_workspace;
 
+pub mod one_off;
+pub mod one_off_teaching;
+pub mod one_off_workspace;
 pub mod physical_link;
 pub mod physical_link_assignment;
 pub mod physical_link_teaching;

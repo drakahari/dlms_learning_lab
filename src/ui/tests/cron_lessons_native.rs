@@ -14,7 +14,13 @@ struct Witness {
 }
 fn opened() -> (egui::Context, LabApp) {
     let (ctx, mut a) = app();
-    assert_eq!((a.scenarios.len(), a.units.len()), (176, 46));
+    assert_eq!(
+        (
+            one_off_boundary::before_len(&a.scenarios),
+            one_off_boundary::before_len(&a.units)
+        ),
+        (176, 46)
+    );
     assert!(a.progress.attempts.is_empty());
     assert_eq!(
         a.scenarios[160..164]
@@ -201,7 +207,7 @@ fn cron_controller_constructor_is_closed_and_stage_selection_is_exact() {
             .collect::<Vec<_>>(),
         IDS
     );
-    assert_eq!(pack::bundled().unwrap().len(), 176);
+    assert_eq!(one_off_boundary::before_len(&pack::bundled().unwrap()), 176);
 }
 #[test]
 fn cron_real_controller_and_capture_phases_complete_all_four_without_model_injection() {

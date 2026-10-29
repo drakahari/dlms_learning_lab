@@ -1287,6 +1287,9 @@ pub fn execute(d: &Definition, s: &mut core::State, input: &str) -> Result<Strin
     Ok("Virtual LACP configuration applied".into())
 }
 pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     w.cron_session.is_some()
         || w.cron_learning.is_some()
         || w.file_backup_learning.is_some()
@@ -1340,6 +1343,9 @@ pub(crate) fn foreign(w: &crate::workspace::WorkspaceData) -> bool {
         || w.mac_learning.is_some()
 }
 fn foreign_source(s: &crate::pack::Scenario) -> bool {
+    if s.one_off_teaching.is_some() {
+        return true;
+    }
     s.cron_teaching.is_some()
         || s.physical_link_teaching.is_some()
         || s.file_backup_teaching.is_some()

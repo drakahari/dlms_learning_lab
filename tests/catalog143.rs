@@ -1,4 +1,6 @@
 //! Original143 registration scope retained under current147, with full original140 preservation.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{self, State},
@@ -175,7 +177,7 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of147() {
     .unwrap();
     assert_eq!(original.len(), 140);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     exact(&all[..140], &original);
     assert_eq!(
         all[140..143]
@@ -187,6 +189,11 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of147() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| all[..176].iter().filter(|s| s.track == track).count()),
         [53, 36, 32, 55]
     );
     let versions = original
@@ -196,7 +203,7 @@ fn exact_140_typed_scenarios_and35units_are_unchanged_ordered_prefixes_of147() {
     exact(&versions, &index["catalog"]);
     assert!(original.iter().all(|s| s.nat_teaching.is_none()));
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     let old_units: Vec<course::Unit> =
         serde_json::from_value(index["units"]["units"].clone()).unwrap();
     assert_eq!(index["units"]["version"], 1);
@@ -240,7 +247,7 @@ fn genuine_old_profiles_keep_exact_attempts_and_receive_no_nat_answers_on_open()
                 .entry(s.id.clone())
                 .or_insert_with(|| Attempt::new(s, 1));
         }
-        assert_eq!(loaded.attempts.len(), 176);
+        assert_eq!(one_off_boundary::before_len(&loaded.attempts), 176);
         for (id, value) in before.as_object().unwrap() {
             exact(&loaded.attempts[id], value);
         }

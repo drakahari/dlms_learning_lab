@@ -1,4 +1,6 @@
 //! Literal current-query teaching with fixed virtual text; no host log access.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup,
     engine::State,
@@ -233,7 +235,7 @@ fn new_learning_drafts_context_and_backup_restore_preserve_every_old_context_and
             .or_insert_with(|| Attempt::new(s, 1));
     }
     let old = serde_json::to_value(&p).unwrap();
-    assert_eq!(p.attempts.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&p.attempts), 176);
     assert!(
         old["attempts"]
             .as_object()

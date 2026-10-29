@@ -1156,6 +1156,11 @@ fn old_prepared(s: &pack::Scenario) -> Attempt {
         // retain all four in the positive/foreign-negative matrix.
         dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
     }
+    if matches!(a.state, State::OneOff { .. }) {
+        // Retain every new one-off source in the positive/foreign-negative
+        // matrix using the same Goal-aware preparation as its real workspace.
+        dlms_learning_lab::one_off_workspace::budget::prepare(&mut a, s).unwrap();
+    }
     if let Some(lesson) = &s.file_backup_teaching {
         // Preserve this real new-family positive in the cross-family matrix.
         dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();

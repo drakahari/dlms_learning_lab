@@ -1,5 +1,7 @@
 //! Four distinct privately registered authored lessons. Variants within each fresh
 //! probe set are grading cases, not separately counted authored scenarios.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     cron_workspace::{self as work, ReferenceAction},
     engine::{self, Goal, State},
@@ -45,7 +47,7 @@ fn four_distinct_registered_lessons_have_actual_prerequisites_and_isolated_examp
     let normal = pack::bundled().unwrap();
     let sources = lessons();
     assert_eq!(sources.len(), 4);
-    assert_eq!(normal.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&normal), 176);
     assert_eq!(
         serde_json::to_value(&normal[160..164]).unwrap(),
         serde_json::to_value(&sources).unwrap()

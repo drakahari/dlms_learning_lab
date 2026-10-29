@@ -289,8 +289,12 @@ fn compact_size<T: Serialize + ?Sized>(v: &T, cap: usize) -> Option<usize> {
     Some(c.used)
 }
 fn source_shape(s: &Scenario) -> bool {
+    if s.one_off_teaching.is_some() {
+        return false;
+    }
     let Scenario {
         physical_link_teaching,
+        one_off_teaching: _,
         file_backup_teaching,
         etherchannel_teaching,
         cron_teaching,
@@ -422,9 +426,14 @@ fn same_source(a: &Scenario, b: &Scenario) -> bool {
         })
 }
 fn foreign(w: &model::WorkspaceData) -> bool {
+    if w.one_off_session.is_some() || w.one_off_learning.is_some() {
+        return true;
+    }
     let model::WorkspaceData {
         physical_link_draft,
         physical_link_learning,
+        one_off_session: _,
+        one_off_learning: _,
         file_backup_learning,
         etherchannel_draft,
         etherchannel_learning,

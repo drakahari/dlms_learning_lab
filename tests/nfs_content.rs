@@ -4,6 +4,8 @@
 mod combined_catalog;
 #[path = "../examples/support/automation_digest.rs"]
 mod digest;
+#[path = "support/one_off_registration.rs"]
+mod one_off_registration;
 use dlms_learning_lab::{
     backup, course,
     engine::{self, State},
@@ -206,8 +208,10 @@ fn preserve(a: &Attempt, s: &pack::Scenario, requirements: &[work::Requirement])
 #[test]
 fn prerequisites_guides_and_six_or_fewer_concepts_precede_real_native_actions() {
     let normal = pack::bundled().unwrap();
-    assert_eq!(normal.len(), 176);
-    let units = course::bundled(&normal).unwrap();
+    assert_eq!(one_off_registration::original_catalog(&normal).len(), 176);
+    let raw46 =
+        one_off_registration::before_units(include_bytes!("../scenarios/units-v1.json")).unwrap();
+    let units = course::load(std::str::from_utf8(&raw46).unwrap(), &normal[..176]).unwrap();
     assert_eq!(units.len(), 46);
     let raw44 = original44_unit_bytes();
     let original44 =
@@ -685,7 +689,7 @@ fn two_full_raw_drafts_histories_genuine_old_records_backup_resume_and_selected_
  {
     let all = labs();
     let catalog = pack::bundled().unwrap();
-    assert_eq!(catalog.len(), 176);
+    assert_eq!(one_off_registration::original_catalog(&catalog).len(), 176);
     exact(&catalog[150..154], &all);
     let original = include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json");
     let mut p = progress::decode(original, &catalog).unwrap();
@@ -794,7 +798,9 @@ fn two_full_raw_drafts_histories_genuine_old_records_backup_resume_and_selected_
 // Recover the complete reviewed44 predecessor through both closed raw inverses.
 // Canonical physical/private append recipes and all historical37 bytes stay fixed.
 fn original44_unit_bytes() -> Vec<u8> {
-    let raw = include_bytes!("../scenarios/units-v1.json");
+    let raw47 = include_bytes!("../scenarios/units-v1.json");
+    let original46 = one_off_registration::before_units(raw47).unwrap();
+    let raw = original46.as_slice();
     let before = combined_catalog::before_physical_units(raw).unwrap();
     let current: serde_json::Value = serde_json::from_slice(raw).unwrap();
     let original: serde_json::Value = serde_json::from_slice(&before).unwrap();

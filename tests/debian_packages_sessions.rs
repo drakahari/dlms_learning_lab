@@ -1,4 +1,6 @@
 //! Source-only prospective app tests; real commands run only in the pure model.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup,
     debian_packages::{self as core, Action},
@@ -467,7 +469,7 @@ fn current_credit_ignores_raw_command_and_history_but_rejects_foreign_inspector_
 fn both_sessions_and_full_attempts_survive_actual_backup_restore_before_selected_reset() {
     let s = scenario();
     let mut all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let mut p = progress::decode(
         include_bytes!("fixtures/shell-v8-synthetic-writer-progress.json"),
         &all,

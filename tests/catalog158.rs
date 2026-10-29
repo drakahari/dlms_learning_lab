@@ -1,5 +1,7 @@
 //! Preserve the independently pinned standalone Cron158/40 proof inside combined164.
 //! Not a claim of runtime acceptance until this source is composed and gated.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     course,
     engine::{Goal, State},
@@ -20,7 +22,7 @@ const IDS: [&str; 4] = [
 ];
 fn private_catalog() -> Vec<pack::Scenario> {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert_eq!(
         all[154..160]
             .iter()

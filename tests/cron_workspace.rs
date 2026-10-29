@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     cron::{Moment, State},
     cron_teaching::{AnnotatedAction, Concept, Learning, Lesson},

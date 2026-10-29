@@ -25,6 +25,10 @@ mod nat_teaching;
 mod nfs_lessons_native;
 pub(in crate::ui) mod nfs_workspace;
 mod numeric_validation;
+pub(in crate::ui) mod one_off_admission;
+mod one_off_lessons_native;
+mod one_off_physical;
+pub(in crate::ui) mod one_off_workspace;
 mod optional_inputs;
 mod ospf;
 mod physical_native_controller;
@@ -931,7 +935,8 @@ fn every_lab_grades_state_and_invalidates_after_breakage_without_walkthrough_gat
                 }
                 simulation.reconfigure(configuration).unwrap();
             }
-            State::FileBackup { .. }
+            State::OneOff { .. }
+            | State::FileBackup { .. }
             | State::Cron { .. }
             | State::Nfs { .. }
             | State::RpmPackages { .. }

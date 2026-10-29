@@ -1,4 +1,6 @@
 //! Proposed short-option projects. All outcomes are authored data, not captured results.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup, course,
     engine::{self, Goal, State},
@@ -105,9 +107,9 @@ fn three_projects_are_normally_bundled_with_real_prerequisites_and_one_unit() {
         assert!(shell::EVALUATOR_REVISION >= 9);
     }
     let all = catalog();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     let proposed: course::Unit =
         serde_json::from_str(include_str!("fixtures/shell-getopts-unit-proposal.json")).unwrap();
     assert!(
@@ -425,8 +427,17 @@ fn all_original_119_identities_and_actual_frozen_history_survive_read_only_loadi
     let old = pack::bundled().unwrap();
     let all = catalog();
     assert_eq!(baseline.len(), 119);
+    assert_eq!(one_off_boundary::before_len(&old), 176);
     assert_eq!(
         old.iter().map(|s| &s.id).collect::<BTreeSet<_>>().len(),
+        180
+    );
+    assert_eq!(
+        old[..176]
+            .iter()
+            .map(|s| &s.id)
+            .collect::<BTreeSet<_>>()
+            .len(),
         176
     );
     // The119 metadata fixture is sorted by source filename, not app order.

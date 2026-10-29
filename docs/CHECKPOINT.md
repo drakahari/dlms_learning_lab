@@ -1,303 +1,209 @@
-# Implementation continuation checkpoint
+# Continue the complete Learning Lab implementation
 
-Updated2026-10-29. Continue the owner-authorized complete curriculum automatically
-through reviewed/tested/committed/pushed batches. No arbitrary lab-count target.
-Preserve native Rust/egui, offline bounded simulation,28themes, accepted skippable
-Introduction → separate practice → full assignment, all existing progress. MIT is
-explicitly approved. No public release, unrelated-project edits, host learner
-execution or desktop/GPU/swap/service/model changes. No owner decision blocks the
-current curriculum work. Read BUILD_WORKFLOW.md before every heavy invocation.
+Updated2026-10-29. Continue the owner's authorized full curriculum automatically
+through tested, reviewed, committed/pushed batches. Do not stop at this checkpoint,
+a small source batch or a Fedora package. No arbitrary lab-count target. Work
+only here: native Rust/egui, offline bounded simulation,28themes, approved complete
+assignments and skippable Introduction → separate practice → Assignment. Preserve
+all progress. MIT is approved. No public release, unrelated-project edits, host
+learner execution or desktop/GPU/swap/service/model changes. No owner decision
+blocks current independent work. Read BUILD_WORKFLOW.md before heavy commands.
 
-## Actual current source and gates
+## Current Main and actual coverage
 
-Main now integrates176authored labs/46units:53CCNA/14,36LPIC-1/9,32LPIC-2/8,
-55Bash/15. Learner evaluator12. Five new tasks are four Physical uplinks and one
-private-office plan; all prior171 fullspecs/42packs/44raw units/55scripts/420cases/
-55examples remain exact. Reviewed commits5410fb9(reference tools) and96e78de(176learner milestone) are
-committed and pushed to origin/main. Earlier runnable candidate remains065032d.
+Main contains180 authored assignments/47units:53CCNA/14units,40LPIC-1/10,
+32LPIC-2/8,55Bash/15. Evaluator12. Four newly integrated OneOff tasks preserve
+all176 predecessor definitions/46raw units and55scripts/420cases/55examples.
+Core foundation commits929cd20 andc03999c are pushed; the180 source append and
+updated docs are not yet committed. Earlier5410fb9/96e78de/c9faed4 remain pushed.
 
-M303Main inclusive fullyreaped19662exit0:2467PASS/0FAIL/0ignored/195harnesses;
-all24 actual history groups executed.936sourcepaths unchanged, source431e525d,
-receiptd50ceb60d3ee37d60e07e8530ccb0391110fb67dee5f2f89a0a4bba237c4ba73.
-M304alltargetClippy-DwarningsPASS, fullyreaped39527. M305348PythonPASS,
-fullyreaped1214. M306coverage rejected four newCSV src/ui/test path entries;
-Root removed only those unsupported entries, retained all integration-test evidence
-and scoped claims, did not change validator. M307coverage176/1240PASS.
-M308final348PythonPASS, fullyreaped66736. All462Rust files format-checkPASS;
-scoped186-file privacy review/diff-checkPASS. Commits5410fb9/96e78de and checkpoint
-c9faed4 are pushed. M326 fullyreaped59680exit1:2572PASS/2FAIL/0ignored/199harnesses; both
-failures were the EtherChannel cross-family fixture missing OneOff goal-context
-preparation. Reviewed five-line preparation branch preserves all assertions;
-M327 entire affected target17PASS. Main176/evaluator12 runtime unchanged.
-M329 Main pure virtual LVM core15PASS, fullyreaped54303exit0. M330 Main
-all-target Clippy -DwarningsPASS, fullyreaped40571exit0. Four reviewed foundation
-paths are applied; no engine/catalog/progress/coverage credit. M331 native OneOff controller pair fullyreaped34514exit1:1PASS/1FAIL;
-Shift-Tab now passes after an ordinary deferred-focus frame. Next actual-event
-failure is a missing theme-menu choice; source-only driver diagnosis continues.
-M332 Main176+LVM inclusive fullyreaped11048exit0:2482PASS/0FAIL/0ignored/
-196harnesses. Receiptb6fcf2e32ee2f3f1cdce3db3066c0875d4188e0b8bd51c9bfe0688d6719efd91.
-Main compiled source unchanged from929cd20. Minavailable21043863552B, PSI0,
-swapout0/OOM0. M3341PASS/1FAIL reached Stop after all menu settings; an actual short Check
-finishes before the Stop click. M338 corrected real RunStop route906stages/53
-planned captures2PASS, fullyreaped6755. M336 all30 prior OneOffUI PASS; M339
-all-targetClippyPASS; M340 ordinary native buildPASS. M341 actual Fedora OneOff run89985/run-x3rzjbhb fullyreapedexit0, all53PNGs/
-20settings/all4flows in1155.603s. Receipt48512c76503ba0903dd04ca992fd5989cd194ab18771d1f9c8b36ae3bb612d22;
-source961 exactbefore/after, minimumavailable23995777024B/PSI0/swapout0/OOM0.
-37originalPNGpeerreviewe635638f plus3Rootviews exposed fivepresentationfindings.
-CompactR205bfdb52 (peer4f5f00ca) applied after the run, including onlyfour new
-prerequisite-note edits and canonicalrecipepinupdates. M342all32UI+M343content72
-PASS. Rootadded real failure-first display assertion at allfourwrongcapture
-phases; M345all32PASS,906/53unchanged. QAidle50ms onlyOneOff (other350 unchanged)
-preserves explicitready/Undo/wheel/Stop/captureguards; needs actual rerender.
-M349 W alltargetClippyPASS and M350 ordinarybuildPASS. Retained current
-polished source/ELF before another Cargo run: source961 b24ca8a1,208481936B
-ELFe1acf8d2a7ab9a1b40e63d3857214a38a3cf8f8ee4aa22d5b70b6771c0dee61a,
-.build-artifacts/reviews/one-off/polished180-m350-build/. M353 actualpolished
-53capture rerun is sole heavy84261; do not mutate W or launch another heavy
-invocation until reaped. This uses the retained exact executable/private profile. Source9619b572e01; ELF208470720B
-a7c92e31f053b856bd0bfe26731ca8438bb6af4467a728c669abaab7285f4982.
+Current coverage175Partial/1Supporting/1064Open over1240 overlapping references;
+all136 parents remain incomplete(94Open/42Partial). Only107.2.T9/T10/T11 gain
+narrow at/atq/atrm practice;107.2/K1 strengthen. At access files, timers, services,
+spool, overlap/locking, real time and full utility/shell behavior remain absent.
+Current CCNAv1.1/LPIC-1v5.0/LPIC-2v4.5; upcomingCCNAv2.0 separate. Requirements,
+every gap and authoring queue: COMPLETION.md, OBJECTIVE_MAPPING.md,
+SKILL_COVERAGE.csv and CURRICULUM_RECONCILIATION.md. Pure libraries/proposals are
+not curriculum credit. No full exam-preparation or mastery claim.
 
-M310Loop full failed2375PASS/1FAIL/0ignored/188harnesses, source901unchanged.
-Only failure: genuine11 future-record refusal used hardcoded13, now current13.
-Peer c10980d7 approved current.checked_add(1) for three synthetic future inputs,
-all refusal/raw-original assertions unchanged. M311all6actual11 targetPASS.
-M314/M315Clippy found only two new test identifier casing issues and one nested
-condition in test record collection; corrected without lint waivers or assertion
-changes. M318Loop alltargetClippyPASS. M322rerun fullyreaped15606exit0:2376PASS/0FAIL/0ignored/188harnesses, all27actual
-historygroupsPASS. Source901a8a62d5a unchanged; receipt0a1b509b6dfd207440d66af11627922f7d2df17d41c7f101a088155b8b2b4251.
-Only3testfiles differ fromM310, runtime/fixtures/producers unchanged; minavailable
-23768936448B/PSI0/swapout0/OOM0. Isolatedcapability13 stillnotMain-integrated.
+## Current Main verification; finish and commit180, then continue182
 
-OneOff180 M312catalog/core/content/typed72PASS. M313UIcompile15errors were only
-misplaced test helpers/duplicated copied history module. Two-file remedy8ba28d98,
-peer67123959, preserves original canonical history and all unique tests/asserts,
-changes no runtime/API. M316then27PASS/3UIFAIL; source-driverb5c4e9b peer4767b59
-fixes window-aware clicks, settles real wheels within original20 limit, and uses
-actual header Reset. M31928PASS/2StopFAIL; scale/Reset nowpass. NextStop assertion
-is retained. M317/M320/M321logging shows parent scroll offset187.7→57.7 on press
-BEFORE Check action/content-height change, translating Stop out of view. Official
-egui source suggests synthetic PointerMoved+Pressed same frame activates parent
-drag using130pxdelta; do not disable productdrag or weaken visibility. M323confirmed realpointerdelta[-4,130] anddraggedparentB017 viewport; this was
-synthetic Move+Press inoneframe, not an established productlayoutdefect. Natural
-hover db1525ea keepsall136oldasserts plus1noViewportjump; M32429PASS/1NextStop
-pausedFAIL because genericsettling exhausts shortfiniteCheck. Immediate native
-cursorpacing e4fa0fd8 peerb42373b5 usesrealhover+press/releasebatch andoneStop-paint
-frame, no Goal/case/limit/assertchanges. M325all30UI PASS/0ignored, fullyreaped77993.
-M326full180 failed only the two cross-family fixture initializations above.
-Native R2 six hooks then applied after exact before-image/peer checks; current
-W961 sources. M328 paired controller tests1PASS/1FAIL: backward keyboard focus
-assertion runs before egui applies its documented next-frame Shift-Tab. Minimal
-source-only timing correction is under review; no assertions/model injection or
-focus requests are being removed/added. No actual native OneOff acceptance yet.
-No productdragdisable/forcedfocus/scroll/model was needed.
+- M332 latest inclusive Main:2482PASS/0FAIL/0ignored/196harnesses, all actual
+  history groups, on preceding176+LVM/commit929cd20. Fullyreaped11048exit0;
+  receiptb6fcf2e32ee2f3f1cdce3db3066c0875d4188e0b8bd51c9bfe0688d6719efd91.
+  No compiled-source mutation. Minavailable21043863552B/PSI0/swapout0/OOM0.
+  Do not relabel this a current180 inclusive result.
+- Main180 assembly175paths: reviewed174closedunionad466be3 (peerf4eeed2f)
+  plus exact previously reviewed5line Ether Goal-aware test preparation branch
+  (peer5f0b04a7). Initial M354156total/154PASS2fixtureFAIL; after the omitted
+  helper was included M355 all17 affected testsPASS. Existing assertions/scenarios
+  retained. All W→Main code/data differences are intentional Main library core
+  exports and the newer MAIN development runner; no other test fix is omitted.
+- M356 MainOneOff UI32PASS/full906-step real-event controller; M357 Main
+  all-targetClippy-DwarningsPASS. M359 coverage180/1240PASS. M358 had correctly
+  rejected unused unit metadata in scenarios/: moved exact8c8b3231 bytes to
+  tests/fixtures/one-off-unit-proposal.json, raw registered unit unchanged, no
+  references/runtime change and validator unchanged. Keep only real packs plus
+  units-v1.json in scenarios/.
+- M360Python346PASS/2current-consumerFAIL: old43/44 historical assertions lacked
+  the new47→46 inverse. Added exactc472recipe before unchanged46→45→44 chain,
+  currentcount47 and OneOfftampernegative; immutable collectors untouched.
+  M361 all348PythonPASS, fullyreaped49235. No heavy invocation is active.
+  Source/docs privacy/format/diff gates then commit/push180. Main
+  unified inclusive remains pending with the next coherent182 integration.
 
-Coverage172Partial/1Supporting/1067Open over1240overlapping references, all136
-parents incomplete(94Open/42Partial). CurrentCCNAv1.1/LPIC-1v5.0/LPIC-2v4.5;
-futureCCNAv2.0 separate. CURRICULUM_RECONCILIATION.md enumerates every remaining
-parent task; SKILL_COVERAGE.csv has every unresolved child/tool item. No OneOff,
-loop-recovery or directory-selection lab credit yet.
+All heavy work uses MAIN absolute tools/dev.py, one shared lock, Cargo2jobs/Rust
+2threads, separate checkout targets and verified NVMe-backed artifacts. No second
+heavy invocation. No new large /tmp data or cleanup without exact approval.
+Never mutate compiled checkout source during a heavy run. Workers are source-only.
 
-## Actual native evidence and unresolved long-route exit
+## Actual OneOff180 native evidence, retained identities
 
-Compact counters retain all five values/two Clear actions, remove empty six-line
-output reservation, reflow with shared font-derived controls. M295all31Physical
-bin testsPASS; M296ordinarynativebuildPASS. Same-source Wcurriculum-network176
-exclusive target ELF201514784B SHA41cd8c1587a7841fb5a6ba96aae521f71b3ded3482df1db9eee3949ed3db8ce0.
+W .build-artifacts/worktrees/curriculum-network176; exclusive target
+.build-artifacts/targets/curriculum-network176-ebbe88e9a1000408. Its source is
+still180/evaluator12, separate from Main extra pure libraries/development tools.
 
-M297actual run-dl061a37 completed all108PNGs/40settings/all4 interaction flows,
-then wrapper93260 returned143. Overall clean teardown is NOT accepted. Exact
-wrapper3807650/child3807661/processgroup were gone; sharedlockfree; stale marker
-preserved in .build-artifacts/reviews/network176-native-m297-termination-audit,
-no process signaled. Cause unestablished, no PSI/OOM/swapout. M298refused stale
-marker/no tests launched; M299347PythonPASS after audited recovery.
-Renderpeercadc0e1b viewed16newimages/12matrix+before, all5sizes/twowidths/LightDark,
-no finding in viewed portions. Root also viewed before/after counterfresh with
-explicit original image detail. Earlier blank-toolbar claim was a review error,
-correctedeec90fea; no renderer/backend change. M302three short same-ELF launch/
-exits PASS0,2.467/2.417/2.518s, fullyreaped78365; not long-route teardown acceptance.
-Repeat/diagnose the long normal route before calling a new candidate ready.
+M338906-phase native controller pair2PASS, M336old30UI PASS; M34372core/content/
+workspace/registrationPASS. Root corrected real driver defects, retaining all
+assertions: natural separate hover (no parent-scroll drag), deferred ShiftTab,
+actual popup x for wheels, stable geometry/Env acknowledgements and real RunStop.
+A short authored Check can finish before Stop: current route queues4 actual
+32-command jobs through native editor/terminal, snapshots prepared work, stops
+Run, checks24idle/warmBack/resume, then selected Reset and actual reference work
+again. It never fabricates a Goal/proof or reduces production work budgets.
 
-Private actual normal176 run-m6vldl48:165steps/40PNGs exit0, receipt76de87f0,
-source933R12a77d/ELF201488272B71f129cf before compactPhysical changes. Includes
-real /28wrong→/29repair, isolated practice, mask disagreement despite traffic,
-reset/resume.14worker+4Rootviews. No installed/cold-private/novice/otherOS claim.
+M341 actual native all4tasks/ref+2alts/wrongpartial/examples/owner+capture/reset/
+warmresume/keyboard/Stop/20settings/53PNGs exits0 after1155.603s, fullyreaped89985.
+Before source9619b572e01, ELF208470720Ba7c92e31. Original53screens/full961-source
+archive retained under .reviews/one-off/actual-native180-m341-r1; original dev ELF
+was subsequently replaced by ordinary Cargo integration builds, so hash identifies
+that run rather than an available binary. Independent37original PNG reviewe635638f
+plus3Rootviews found five presentation issues; no renderer/backend change.
 
-Older Physical run-l3aorhz3 had all108PNGs then panic101 on deferred Close reentry.
-QA-only close latch now passes two extra root frames; strict header-paint108
-headless checksPASS. Keep original failed9e7a1e58 evidence. M297is separate143,
-not the original panic and not a proven application/Wayland defect.
+CompactR205bfdb52/sourcepeer4f5f00ca fixes prerequisite jargon, six-row empty file
+reserve, stretched labels, repeated permanent detail and green bookkeeping before
+the real failure. Grading indices/truth unchanged; only four prerequisite notes
+change in the pack (newd469ba09; canonical recipe c472de75). M34232UI/M34372
+contentPASS. Root added a real indexed-failure-first capture assertion at all4
+wrong screens; M34532UI/full906routePASS. QA idle50ms onlyOneOff (others350ms)
+keeps all explicit Undo1.2s/wheel150ms/geometry/capture/Stop/15s/300poll guards.
 
-## Existing runnable candidate, separate from current source
+M349alltargetClippy/M350ordinarybuildPASS. Retained exact current executable:
+.build-artifacts/reviews/one-off/polished180-m350-build/dlms-learning-lab
+208481936B SHAe1acf8d2a7ab9a1b40e63d3857214a38a3cf8f8ee4aa22d5b70b6771c0dee61a;
+source961 digestb24ca8a110707992727fe4675c2cd74046e07900b718ee7a308a2b236ca9f114.
+M353 actual polished repeat all53/20settings/all4flows exits0 in300.151s,
+fullyreaped84261. Receipt3ad6d7f9ad1509f122232f7cedf36c161f51eae5bc6d99bf0df4f118c45b5cbd.
+Source unchanged, retained executable used. Independent16originals reviewed with
+same-name before pins, peer3800af68; Root3originals. All4 failures visible first;
+readability/alignment across5scales/twowidths/LightDark and200% goal edges checked.
+Populated multi-job label not independently viewed in those16; not all53 controls
+or28themes/novice/screen-reader/physical-device/otherOS/package acceptance.
+Minavailable24204206080B/PSI0/swapout0/OOM0. Private screenshots remain ignored:
+.native-runs/run-shylqp_e/screenshots/workspaces (before run-x3rzjbhb).
+
+## Next shell182 closed proposals; apply narrow current-source composition
+
+Normal182R4 .reviews/bash-loop-recovery/normal182-source-r4/MANIFEST.json
+721f74fd237620cf0d5518c4a29e30e3f36639101efb3499662889c2bf8e998b;
+75owned/15new. NativeR2 .reviews/bash-loop-recovery/native182-source-r2/
+MANIFEST.json02d4d905c5a8f4382c73eb3b7576a5e44bf85ddf336e6389d2261b4e4a82ea0c,
+8paths/3new. Override only its smoke.rs afterimage using compact pacing delta
+.reviews/bash-loop-recovery/native182-source-r3-pacing-delta/MANIFEST.json
+92f1089021a93b2010f312359283e99cceb3e82f386fbd76f9ce3ac4d8a1a582.
+Other75+7 afterimages unchanged. Add one-file Python182 current inverse
+.reviews/bash-loop-recovery/python182-current-inverse-r1/MANIFEST.json
+931f097b8aef5ae37b22f2dc6d64baaf6090c488c4d4a964ae8af1eed27d4e91,
+patch60db6111; applies only after unit48, preserves Root47 and all old44/43 guards.
+Source peers0f7991c3/f55e7b73 and exact rebases
+retain all original55/420/55/history and polished OneOff data/recipes.
+
+DO NOT copy stale whole files: Main library has LVM/NTP exports; Ether helper is
+bf11; shared UI Clippy cleanup50962 and input78bc preserved; OneOff native current
+has Root's later failure-first assertion beyond0d06. Apply ONEOFF-COUNT-ONLY
+metadata hunks to current driver/test, preserving906/53 and Root assertions.
+One new authoring-file relocation above is intentional; older protected manifests
+still list its scenarios/ path. Preserve bytes at tests/fixtures instead.
+
+This adds2distinct scripts/1unit,57scripts/442cases/57examples; normal182/48
+=53CCNA/40LPIC-1/32LPIC-2/57Bash. Nothing counts until current normal integration
+and gates. Scope: real owned-loop break/continue, stream handoff and independent
+fallback jobs. No caller-loop/function/pipeline control escape. Pure13 isolated
+full2376PASS/all27 actualhistorygroups/Clippy PASS, receipt0a1b509b. Content10PASS
+(ref+2alts/22cases/wrongpartialhardcodes/examples/resetresume). Actual fixed16
+Bash comparisons match+8honest exclusions; manifest20767c35/attestation1aaa1c27.
+Native2-script82capture/10paired-group source remains unrun. After normal182
+apply, notify selection_review with exact source receipt for LVM186 closed rebase.
+
+## LVM186 and NTP190 units: reviewed source, unrun, unregistered
+
+LVM unitR3 .reviews/lvm-unit-source-r3/MANIFEST.json0159fe3dd186e45dfcaf859713b732066da8625d1dfbf4d63f1871b616a0f44b;
+sourcepeer5cae90b7.28paths/7new,9content+6UI=15UNRUN. Doc-only38fd42d9 fixes old
+2UI/11 wording. R3 fixes shared controls, ASCII/UTF8 dropped-paste/Enter ordering,
+deep Undo/selection, readable capacities/status and retry errors. Four distinct
+free-pool/new-PV/filesystem-only/preserved-handover assignments with separate
+practice. Strict core16MainPASS uses real resize2fs /dev/VG/LV syntax. No host LVM.
+
+selection_review is preparing .reviews/lvm-normal186-source-r1 DRAFT on actual
+Main182: mandatory OneOff optional-field/refusal/exhaustive merges, shared Next,
+reset/Undo, strict complete182prefix/raw49→48 recipe and current-consumer loops.
+Do not freeze its shared beforeimages against old176 or count it early. Projected
+186/49 =53CCNA/40LPIC-1/36LPIC-2/57Bash, not current totals.
+
+NTP unitR2 .reviews/ntp-unit-source-r2/MANIFEST.json5105468f33bcf507396bd24d07af0dfc912085b1fbe36d62815241980c9dd218;
+sourcepeer4e4deafee2317f988b57056521886dea904c43663ecc7cac9d9757fc3e9a0ad9.
+27paths/7new,14content+9UI=23UNRUN. Four real chain/cycle/asymmetric-return/policy
+handover tasks; separate examples, immutable supplied world, native shared cards/
+connectors, adjacent Check, optional inventory, readable cycle instruction and
+shared Next. source-aware save_with_catalog checks all attempts/source+state
+kinds before unchanged writer, catalog-owned restore/open/library admission;
+old-family/producers stay exact. Compose narrowly after OneOff/Loop/LVM; no normal
+registry/current consumer/native acceptance yet. No clock/network/daemon changes.
+
+## Pure models/reference tools and historical integrity
+
+Main c03999c: current LVM16/NTP18/ERE16 core groups pass (M34450; style-only ERE
+letchain then M34716), M348alltargetClippy, M351348Python, M352176coverage before
+OneOff append. ERE pure src/ere.rs is unexported/not a learner utility, compiler
+SHA42bc6a56. Nonbacktracking bounded C-byte regex, no dependencies/host input.
+Core sourcepeer817550e5; compile_work is not yet a complete VM instruction charge;
+cooperative latency/VM integration and genuine13 before14 remain future gates.
+
+FixedEREcollectorR2 .reviews/ere-reference/source-r2/MANIFEST.json5ccc5055f9602b1a692971c61364136a7a8f2c4fb5635d40cfc82bf38a636268;
+patch edc1e3dd7e564364f32dff0efa8e21289379ee6a2c4f5fd5dfdca1af76dc3a8f,
+sourcepeer59f33d07.5paths direct-core probe/fixed34GNU+8excluded collector/
+14mockguardgroups/guide/single runner allowlist. UNAPPLIED/UNRUN. Prepare launches
+no child; Root must build, independently pin/approve source+compiler+ELF+GNU then
+capture in disposable disk fixtures. AllactualsNULL until observed. Existing
+source_identity helper packed-only-ref limitation fails closed; current loose Main
+ref works. Do not modify immutable historical helpers or Git refs to evade gates.
+
+Original9/10/11/12 sources/producers/captures remain immutable. Genuine12 public171
+55/420/55/145context baseline109d1c74/attestation0f03d347, source2966fb2b, retained
+ELF0a32601f. Current extra non-script labs have no invented earlier records. New
+language requires honest rerun/history, not relabeled current success. Directory-
+selection backup1 older proposals stay unregistered; rebase/gate before counting.
+
+## Available candidate; final available-platform acceptance still required
 
 "$HOME/Documents/dlms_learning_lab/dist/dlms-learning-lab-0.1.0-g065032d0a90b-x86_64-unknown-linux-gnu-fedora-44-candidate/dlms-learning-lab"
 
 171labs/44units. ELF63914944B SHAda35b65a622f33f81e8def365454b978c4011df42bd3768dd9e4ab56d5832f94;
 archive43131971B SHA022bfe6d8ef0c6afe28025fe0ec9f4ba6f0a764dc33294d03616ba352c127721.
-M236candidate/M237installed lifecycle PASS: upgradefromc683, exact original-nine
-progress, uninstall/reinstall. Installed ordinary ELF at
-.build-artifacts/installations/verified-065032d0a90b-stxg8zqo/application/dlms-learning-lab.
-NFS writer75.506/read30.492s distinct fully exited processes PASS,10serialized
-Wayland starts PASS, receipt7067accf. Installed numeric101 PASS5a4b69fd. All664
-compiled inputs18898e38 and exactELF preserved; FEDORA_065032D_VERIFICATION.md.
-Do not claim Windows/macOS runtime, screen-reader/physical-device or novice
-acceptance. No new176 candidate exists yet; no installer/release publication.
+M236build/M237installed upgradefromc683/original9 exact/uninstallreinstallPASS.
+Installed .build-artifacts/installations/verified-065032d0a90b-stxg8zqo/application/
+dlms-learning-lab: NFS writer75.506s/read30.492s distinct exited processesPASS,
+tenWaylandstartsPASS7067accf; installed numeric101PASS5a4b69fd. No new180candidate.
 
-## Next reviewed Linux batch — OneOff180
+Before next candidate-ready claim: full inclusive Rust/include-ignored, Python,
+Clippy, notices, clean identified Main package; install/upgrade/reopen/progress/
+uninstall, NFS two-process cold and representative new flows on installed exact
+ELF, actual width/scale/theme review. Physical native long M297 had108captures
+then143; cause unknown, retained source/ELF41 remain. Three short same-ELF exits0
+are not long-route proof. Repeat/diagnose it. OneOff long/shorter clean exits do
+not establish Physical's cause or universal Wayland acceptance.
 
-Frozen source proposal .build-artifacts/reviews/one-off/rebase180-r17-consumers-r2/
-MANIFEST.json SHA699dc283f430811b330336e1e620f2dddc24d93d6e6b2a5b5279bbbd7a85669a;
-CLOSED.patch SHA bb161a21a64f57e0f186362abe37eceedda393546987adc3805c2887bd342cf7
-(check exact filename in manifest).171owned/26new/788protected against R17 W933.
-83core/registry/Next foundation plus88consumer paths. All live W933 unchanged.
-Corepeer cbd1fd63 ACK preserves four Root driftmerges: BackupowncertStop+94line
-regression, indexobserved, PhysicalQA/picker/modules and compactR17constructor.
-Captured-variable JSON inspection remedy aadd6217 fixes actual teaching gap.
-Consumerpeer36583eea ACK; correction160693ca preserves/retracts the preliminary concern. Its suspected unused cron module
-finding was retracted: support/cron_lessons imports parent boundary transitively;
-DO NOT remove that declaration or add lint waiver. No R3 required.
-
-Shared boundary is privateQA/test-only, validates canonical4OneOff append and
-strict47→46raw/typed inverse, preserves176/46 assertions and all full-current
-behavior loops. Explicit clocks/draft/181fixture/old4-IDs-absent controls retained.
-Root applied all171 closed paths to Wcurriculum-network176 after exact933
-beforeimage/171precondition checks. It now has959publicsourcepaths/prospective
-180/47 =53CCNA,40LPIC-1,32LPIC-2,55Bash; still NOT Main-integrated or credited.
-Corepeercbd1fd63 and consumer36583eea ACK. Source/runtimeacceptance pending.
-OriginalR17source933+ELF41 are retained independently at physical-native/
-compact41-retained before future rebuild. Run scoped core/typed/content/catalog
-and actualUI tests after M310; use Main runner with W
-explicit cwd/exclusive target, no shared target or second heavy. Original isolated
-oneoff-after-network176 frozen947 remains; compose R17+staged171 rather than
-copying old whole files. Normal4-lab native controller/actual screens still needed.
-
-## Next shell capability/unit — isolated evaluator13
-
-W .build-artifacts/worktrees/bash-loop13-b25, detachedb25b1f0, exclusive target
-.build-artifacts/targets/bash-loop13-b25-9d617199e48aa1cd. Reviewed9capability+14
-current-marker seams applied, Main stays12. M28425PASS includes three genuine12
-historical groups; M285three internal metadata/budget testsPASS. M310full13 failedonlyfuturefixture, correctedtarget6PASS; M322fullrerunongoing.
-Bounded owned-loop break/continue, input restoration, local function/capture scope;
-caller-loop/pipeline/invaliddepth behavior honestlyUnsupported. No host learner code.
-
-Genuine12 original55/420/55/145contexts captured before capability: baseline
-.build-artifacts/reviews/bash-loop-recovery/captures/public12-171-420-r1;
-manifest109d1c74,attestation0f03d347,source2966fb2b42b,retained113437256B ELF0a32601f.
-All old9/10/11/12 sources/producers/observations remain immutable.
-
-New Mainfixedcollector passes347then348Python. M300preparePASS; Rootrehashed1222
-pins/approved only16fixedbuiltin disposable hostcases. M301actualcapture16MATCH/
-0mismatch+8VMhonestUnsupported, manifest20767c35b740563e0518d9c9e879a0e4cde6fc0f657e25bf54ffa82f70ca6317.
-Independentreadback341fd4c8/attestation1aaa1c27 verifies1222inputs1004outputs,
-all898retainedWsource/probe8160160B3a52917a,old12evidence. No generalBash or
-curriculum acceptance. Capture directory bash-captures/loop16-r1 stays immutable.
-Collector-local packedHEAD R2 peer91314960 rejects nonLFcontrols; historical
-helpers/Gitmetadata unchanged. Do not rerun/rebase completed captures.
-
-Two substantive unregistered lessons source proposal content-source-r2 manifest
-8478f6e7da5e66515885d75fe103cb7ef8e4e487cd17ba0f5b7d86beebba6be9,
-COMPOSITE3.patch7cfe0808..., peerbd9557d5. Root applied ONLY its3newfiles to W
-AFTER actualcapture/readback, now901sourcepaths; original898 are unchanged.
-Finite intake/tailhandoff10cases+2guards; independentboundedfallback12cases+8guards.
-Reviewer found absent-destination and digit/hyphen/length grading gaps; R2fixes
-both with realgradedcases, preserving original12/6 and wrongmasks in ninthtest.
-M309actual content10PASS/0FAIL/0ignored in22.77s, fullyreaped53823: references,
-two alternatives perlab,22behaviorcases/fourslices, guards/negativepartialmasks,
-example isolation/invalidation/reset/resume/invalidpacks; Stopgroup is VM-only,
-not native no-record acceptance. M310full13/history2375/1, singlefutureinputpremise corrected; M311sixPASS;
-M318ClippyPASS; M322fullrerun2376PASS/all27actualhistory, fullyreaped15606.
-No native or normalregistration acceptance yet.
-Register only after actualcontent/progression/native acceptance; preserve all55old
-scripts/420cases/55examples and original records. Main180 union will need closed
-rebase of capability/current seams, not blind stale afterimages.
-
-## Subsequent queue and platform limits
-
-Directory-selection backup capability/content remain unregistered old proposals
-(pureR2 98899573, contentR2, normal169R3 c62e58a7/peer eb0d2aad); rebase current
-shared-index/Stop/OneOff first, run proper gates, do not count its one task yet.
-Then continue all reconciled remaining CCNA/Linux/shell capabilities and substantive
-units; no scope conflict identified. Keep coverage honest after each batch.
-
-macOS dispatch0.2 original notice still absent at lockedrevision; recheck405254a1
-on2026-10-29 found no authoritative text. Do not invent attribution or call macOS
-artifact redistributable. Finish independent work; signing/platform environments,
-physical-device/screen-reader/novice acceptance are pending. No public release.
-
-All heavy commands use MAIN tools/dev.py sharedlock, Cargo2jobs/Rust2threads,
-exclusive per-W target and verified disk-backed artifacts. M303minimumavailable
-18004926464B, maxsome/fullPSI0.57, swapout11261pages/OOM0. No additional heavy
-launch under pressure. Never delete evidence/baselines/toolchains or use RAM/tmp.
-
-## Current isolated proposals and next execution
-
-OneOff native R2 six hooks are applied in Wcurriculum-network176 (961 paths).
-Initial source peer37310ae; Shift-Tab next-frame correction7a231321 fixes the
-first M328 focus failure. M331 then1PASS/1FAIL on an absent theme-menu item.
-Root applied sole-file geometry-hover guard6fd764ff, current source0b296f84;
-it reaches a moved control in a separate real frame and retains every assertion.
-M3331PASS/1FAIL reaches the later200% scale popup: wheel clip center x549
-is outside actual popup x386..451. Source-reviewed narrow actual-row-x wheel
-correction applied (source d0e210eb); M334 passed the menu settings and failed the short CheckStop premise.
-M338 real RunStop remedy is applied and passes; see current active run above. Actual Fedora M341 is still running; early captures are not whole-run acceptance.
-Keep all four real tasks/906 stages/53
-captures,20 measured settings, original scroll/time limits and real native input.
-No model, grade, popup, focus or scroll installation is authorized.
-
-Loop normal182/48 integration R3 is frozen at
-.build-artifacts/reviews/bash-loop-recovery/normal182-source-r3/MANIFEST.json,
-SHA123932d20d05e2a0db22ac959277f672c1fd047ac25dc0e4d8b4162b4d3182cd.
-Its75 proposed paths remain byte-exact to peer-reviewed R2 (0f7991c3);901
-protected paths preserve the Ether helper and all native OneOff hooks through
-e642 Shift-Tab. The later0b296f84 hover guard must also be retained. Six native
-count/navigation changes are explicitly deferred, never silently overwritten.
-The two new scripting tasks and native route are pending normal integration.
-Projected182/48 =53CCNA/40LPIC-1/32LPIC-2/57Bash,57scripts442cases57examples;
-these are not current Main totals. Isolated evaluator13 full2376/all27 actual
-history groups and Clippy pass. Original historical producers remain immutable.
-
-Main929cd20 adds the reviewed LVM pure module/export, subset guide and15 tests.
-The independently reviewed strict resize2fs device-path correction8cc is now
-applied with16 tests (new combined rerun pending). Pure NTP four paths are also
-applied; M337 all18 testsPASS, fullyreaped74611. No NTP/4.2 authored credit.
-Do not overwrite the Main LVM or NTP exports when composing pending OneOff.
-M329 all15 and M330 all-target Clippy pass; pushed. Current authored totals and
-204.3 Open status are unchanged. Main M332 inclusive176+LVM2482PASS/0FAIL/0ignored/196harnesses, fullyreaped
-11048exit0; compiled source unchanged. No pressure/swapout/OOM. The source-only four-task LVM unit is being
-authored with explicit device-path syntax for resize2fs, independent examples,
-preserved neighboring volumes/data and no real device access. A strict parser/
-help correction for the bare resize2fs map alias is pending with that proposal.
-
-Finish actual M341 native OneOff rendering; fix real failures
-without weakening assertions, then build/run and inspect actual Fedora screens.
-Compose Main180 only from the174 owned OneOff paths, preserving Main's new LVM
-export and three files; all other reviewed before-images still match exactly.
-Then full/static/coverage gates, honest documentation, commit/push and continue
-directly to the reviewed182 shell unit and LVM. No owner decision blocks work.
-
-
-Main uncommitted foundations: NTP fourpaths, strict LVM threepaths, ERE fournew
-paths (unexported). M344all50corePASS (16ERE/16LVM/18NTP), fullyreaped88025.
-M346Clippy found one equivalent ERE nested-if style issue; corrected to letchain
-(current src/ere.rs42bc6a56, no semantic/assertion change). M34716EREPASS and
-M348alltargetClippyPASS, fullyreaped39174. No NTP/ERE authored credit. Main
-objective counts remain172Partial/1Supporting/1067Open;4.2 onlygaptext corrected.
-
-Pending source gates: normal182R4 manifest721f74fd, nativeR2overlay02d4d905
-plus one-file formatted-QApacing delta92f10890. Root's later failure-first QA
-assertion must survive via narrow OneOff count-only hunks; never replace whole
-old0d06afterimage. LVMunitR3manifest0159fe3d, sourcepeer5cae90b7;28paths/7new,
-9content+6UI=15groupsUNRUN; apply strict core first (doneMain), compose mandatory
-OneOff fields/exhaustive seams before registration. Doc-only38fd42d9 corrects
-stale counts. NTPfour-task source authoring continues. EREcore sourcepeer817550e5;
-fixedreferencecollectorR2manifest5ccc5055 is source-only, independentreview and
-14guardtests/build/prepare/Rootpinapproval/actual34comparisons stillpending.
-No owner decision blocks work. Continue through coherent tested batches; no final
-summary/stop at these gates and no curriculum completion claim.
-
-
-M351 Main348PythonPASS; M352coverage176/1240PASS. Current foundation code/privacy/
-format gates pass; no objective promotion or authored count changed. Source-only
-collector peer59f33d07 ACK;14 mocked groups/build/prepare/approval/actual GNU
-observations remain pending. Native182 compact pacing delta92f10890 preserves
-formattedb128 smoke source; its other7 hooks must also preserve Root's later
-failure-first assertion using narrow count-only hunks. Do not copy stale files.
+Windows/macOS desktop/signing, screen-reader/physical-device and novice acceptance
+remain pending. macOS dispatch0.2 original notice still unavailable at locked
+revision (recheck405254a1); do not invent attribution or call macOS redistributable.
+Finish independent curriculum work. No release or installer publication.

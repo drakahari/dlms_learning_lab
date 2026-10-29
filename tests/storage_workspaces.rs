@@ -1,4 +1,6 @@
 //! Unbundled integration fixture; not additional authored curriculum.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{self, Goal, State},
     pack,
@@ -57,7 +59,7 @@ fn fixture_is_reachable_but_unbundled_and_teaching_is_required() {
     assert!(!engine::solved(&s.initial, &s.goal));
     assert!(progress::current_solved(&solved(&s), &s));
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert!(all.iter().all(|s| s.id != "test-storage-workspace"));
     let mut value: serde_json::Value =
         serde_json::from_str(include_str!("fixtures/storage-workspace-preview.json")).unwrap();

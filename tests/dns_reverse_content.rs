@@ -1,4 +1,6 @@
 //! Bundled original reverse-zone assignments. No host DNS or commands.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup, course,
     dns::{self, Data, QueryType, Record, Server, Transfer, Zone},
@@ -135,9 +137,9 @@ fn three_distinct_tasks_have_real_prerequisites_bounded_goals_and_reachable_refe
     let all = catalog();
     let tasks = labs();
     assert_eq!(tasks.len(), 3);
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     let unit = units.iter().find(|u| u.id == "dns-reverse").unwrap();
     assert_eq!(unit.prerequisites, ["dns-forward"]);
     assert_eq!(unit.labs, IDS);

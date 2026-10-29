@@ -1,5 +1,7 @@
 //! New optional metadata must not alter old-wire serialization or let an old
 //! activity retain a solved result when a foreign scheduling payload is present.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine, pack,
     progress::{self, Attempt, Progress},
@@ -23,7 +25,7 @@ fn old_catalog_success_rejects_cron_payload_without_mutation_or_invented_credit(
     let catalog = pack::bundled().unwrap();
     // This is the immutable pre-Cron154 prefix, not a current catalog count.
     // Existing catalog baseline tests separately pin the exact older147 rows.
-    assert_eq!(catalog.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&catalog), 176);
     assert_eq!(
         catalog[147..154]
             .iter()

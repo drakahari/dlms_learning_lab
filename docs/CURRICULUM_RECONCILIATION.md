@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main176 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main180 source, reconciled2026-10-29; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -11,7 +11,7 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | CCNA | 53 | 14 | 65 | 46 | 0 |
-| LPIC-1 | 36 | 9 | 504 | 93 | 1 |
+| LPIC-1 | 40 | 10 | 501 | 96 | 1 |
 | LPIC-2 | 32 | 8 | 498 | 33 | 0 |
 | Bash/Shell | 55 | 15 | Separate path below | — | — |
 
@@ -133,7 +133,7 @@ configuration or troubleshooting.
 | 106.2 | Open | Choose a remote desktop arrangement | session/desktop architecture model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 106.3 | Open | Choose accessible workstation settings | accessibility decision model. Evidence/configuration reasoning can be simulated; physical, kernel, cryptographic or assistive-device operation cannot be validated here. |
 | 107.1 | Partial practice · lpic1-account-onboarding;lpic1-account-membership;lpic1-account-retirement;lpic1-account-team-handover;lpic1-traversal | Onboard a user with correct group access | Bounded fixed local records only; no passwords, chage, authentication/PAM/login, live sessions, full NSS/defaults or complete utility option surface. Supplied templates only; no template maintenance/links/ACL/xattrs. Expiry is metadata only. |
-| 107.2 | Partial practice · lpic1-cron-weekday-report;lpic1-cron-environment-output;lpic1-cron-access-retirement;lpic1-cron-calendar-handover | Schedule a report without overlapping runs | No at/anacron, systemd timer units, overlap/duration/locking, timezone/DST, mail/PAM/SELinux, spool-file administration or learner-facing cron CLI. Bounded UTC recurring-job/access practice does not complete107.2. |
+| 107.2 |Partial practice · lpic1-cron-weekday-report;lpic1-cron-environment-output;lpic1-cron-access-retirement;lpic1-cron-calendar-handover;lpic1-at-report;lpic1-at-capture-repair;lpic1-at-owner-queue;lpic1-at-handover | Schedule a report without overlapping runs | Bounded UTC cron/one-off practice only; no anacron, at access files, systemd timers, overlap/locking, timezone/DST, mail/PAM/SELinux, spool administration or full Linux command/shell behavior. |
 | 107.3 | Open | Repair a locale-sensitive report | locale/timezone/encoding model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 108.1 | Open | Diagnose clock drift and time sources | clock/NTP model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 108.2 | Partial practice · lpic2-service | Route and rotate useful logs | No date/priority filters, journal persistence/rotation/rescue, rsyslog or syslog-ng configuration. |
@@ -195,7 +195,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These46 units, and only their176 registered authored scenarios, count as
+These47 units, and only their180 registered authored scenarios, count as
 implemented inventory. The presence of a unit does not mean its entire related
 objective or wider course stage is complete. Exact per-lab prerequisites remain
 in the versioned scenario packs; unit prerequisites are in units-v1.json.
@@ -252,6 +252,8 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 
 | CCNA | Physical uplinks: choose, investigate and hand over (`physical-uplink-diagnosis`) | `ccna-physical-media-span`, `ccna-physical-duplex-diagnosis`, `ccna-physical-counter-baseline`, `ccna-physical-uplink-handover` |
 | CCNA | Private office planning (`private-office-planning`) | `ccna-private-office-plan` |
+
+| LPIC-1 | One-off jobs: capture, inspect and hand over (`linux-one-off-jobs`) | `lpic1-at-report`, `lpic1-at-capture-repair`, `lpic1-at-owner-queue`, `lpic1-at-handover` |
 
 ## Bash/Shell remaining path
 

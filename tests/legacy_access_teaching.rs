@@ -1,4 +1,6 @@
 //! Original access tasks receive separate typed practice; no host identity API.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     engine::{self, Goal, State},
     legacy_access_teaching::{self as access, Learning, Snapshot},
@@ -341,7 +343,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 46);
+    assert_eq!(one_off_boundary::before_len(&units), 46);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -381,6 +383,9 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
         serde_json::from_str(include_str!("fixtures/catalog175-registration.json")).unwrap();
     let private: Value =
         serde_json::from_str(include_str!("fixtures/catalog176-registration.json")).unwrap();
+    let one_off: Value =
+        serde_json::from_str(include_str!("fixtures/catalog180-registration.json")).unwrap();
+    assert_eq!(units.pop().unwrap(), one_off["one_off_unit"]);
     assert_eq!(units.pop().unwrap(), private["private_unit"]);
     assert_eq!(units.pop().unwrap(), physical["physical_unit"]);
     assert_eq!(units.pop().unwrap(), numeric["numeric_unit"]);

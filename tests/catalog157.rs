@@ -1,4 +1,6 @@
 //! Normal LACP registration: exact public154/39 prefixes plus three authored tasks.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{course, engine::State, pack, progress};
 use serde_json::Value;
 #[path = "support/combined_catalog.rs"]
@@ -49,7 +51,7 @@ fn original154_full_pack_bytes_typed_objects_and39_unit_objects_remain_exact() {
         &pin["catalog"],
     );
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     exact(&all[..154].to_vec(), &old);
     let declared: pack::Pack =
         serde_json::from_str(include_str!("../scenarios/etherchannel-v1.json")).unwrap();
@@ -64,6 +66,11 @@ fn original154_full_pack_bytes_typed_objects_and39_unit_objects_remain_exact() {
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
+        [53, 40, 32, 55]
+    );
+    assert_eq!(
+        ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
+            .map(|track| all[..176].iter().filter(|s| s.track == track).count()),
         [53, 36, 32, 55]
     );
     let current_raw = include_bytes!("../scenarios/units-v1.json");
@@ -77,7 +84,10 @@ fn original154_full_pack_bytes_typed_objects_and39_unit_objects_remain_exact() {
     );
     let old_units = course::load(std::str::from_utf8(&old_raw).unwrap(), &old).unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!((old_units.len(), units.len()), (39, 46));
+    assert_eq!(
+        (old_units.len(), one_off_boundary::before_len(&units)),
+        (39, 46)
+    );
     exact(&units[..39].to_vec(), &old_units);
     exact(&units[39], &pin["append"]["new_unit"]);
     assert_eq!(units[39].prerequisites, ["vlan-data-foundations"]);

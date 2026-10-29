@@ -1,4 +1,6 @@
 //! Prospective app/progress tests. No host package utilities or fabricated historical runs.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup, engine, pack,
     progress::{self, Attempt, Progress},
@@ -249,7 +251,7 @@ fn bound_guards_precede_clone_and_max_escaped_state_has_a_closed_frontier() {
 #[test]
 fn original143_and_nil_old_wire_remain_exact_under_registered_rpm_and_raw_limits() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     assert!(all[..143].iter().all(|s| s.rpm_packages_teaching.is_none()
         && !matches!(s.initial, engine::State::RpmPackages { .. })));
     assert_eq!(

@@ -6,6 +6,10 @@ const BASH_REVIEW_SHA: &str = "fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e8
 /// Exact private46-to-reviewed45 inverse; both raw and complete typed objects
 /// must match. Historical physical45/numeric44/backup43 recipes remain immutable.
 pub fn before_private_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let without_one_off = one_off_prefix(raw)?;
+    let raw = without_one_off.as_deref().unwrap_or(raw);
+    let without_one_off = one_off_prefix(raw)?;
+    let raw = without_one_off.as_deref().unwrap_or(raw);
     let bytes = include_bytes!("../fixtures/catalog176-registration.json");
     if digest::hash(bytes) != "690e81765c71f591972c921fed7ce417eb21e67afdd272d8049789290757898f" {
         return Err("Immutable private-office append recipe differs".into());
@@ -68,6 +72,8 @@ pub fn before_private_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     Ok(before)
 }
 fn private_prefix(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    let without_one_off = one_off_prefix(raw)?;
+    let raw = without_one_off.as_deref().unwrap_or(raw);
     if digest::hash(raw) == "3e616aa9199af235062796880af5735ba3537bf52c0f6a672b1d42e4a7788ae6" {
         Ok(Some(before_private_units(raw)?))
     } else {
@@ -573,4 +579,43 @@ pub fn old_unit_bytes(raw: &[u8]) -> Result<Vec<u8>, String> {
         return Err("Change outside exact ordered Bash/NFS unit appends".into());
     }
     Ok(old)
+}
+
+// Exact OneOff47 predecessor; older helpers keep their original closed recipes.
+fn one_off_prefix(raw: &[u8]) -> Result<Option<Vec<u8>>, String> {
+    if digest::hash(raw) != "4fd98d5b9290bdd7e79e5c848ba37d4d1c2fb59641ac0a4412f78c4953e338c0" {
+        return Ok(None);
+    }
+    let bytes = include_bytes!("../fixtures/catalog180-registration.json");
+    if digest::hash(bytes) != "c472de759a336ae226a9349da605b569e08b9ab65c8b86d162276b78d01cda0d" {
+        return Err("OneOff append recipe differs".into());
+    }
+    let r: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    if raw.len() as u64 != r["after_units47_bytes"].as_u64().ok_or("47length")? {
+        return Err("OneOff47 bytes differ".into());
+    }
+    let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
+    let head = text
+        .strip_suffix(r["append_suffix_utf8"].as_str().ok_or("47suffix")?)
+        .ok_or("OneOff47 suffix differs")?;
+    let before = format!("{head}{}", r["old_tail_utf8"].as_str().ok_or("46tail")?).into_bytes();
+    if digest::hash(&before) != r["before_units46_sha256"].as_str().ok_or("46pin")?
+        || before.len() as u64 != r["before_units46_bytes"].as_u64().ok_or("46length")?
+        || before.as_slice() != include_bytes!("../fixtures/one-off-units-before176.json")
+    {
+        return Err("Complete reviewed46 raw units differ".into());
+    }
+    let mut expected: Value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
+    if expected != r["before_units46"] {
+        return Err("Complete reviewed46 objects differ".into());
+    }
+    let units = expected["units"].as_array_mut().ok_or("46units")?;
+    if units.len() != 46 {
+        return Err("46count".into());
+    }
+    units.push(r["one_off_unit"].clone());
+    if expected != serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? {
+        return Err("Change outside exact OneOff unit append".into());
+    }
+    Ok(Some(before))
 }

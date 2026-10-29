@@ -2,13 +2,14 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are172 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1067 Open rows; no full-objective completion is asserted. Main source
-contains176 authored assignments/46 units (53CCNA,36LPIC-1,32LPIC-2,55Bash).
-The latest five add four narrow CCNA evidence rows, not full-objective credit.
-All136 parents remain incomplete(94Open/42Partial). Main inclusive2,467/all24
-history groups pass. Native and packaged identities remain separate: see
-[CATALOG176_MILESTONE.md](CATALOG176_MILESTONE.md). Candidate065032d0a90b still
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are175 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1064 Open rows; no full-objective completion is asserted. Main source
+contains180 authored assignments/47 units (53CCNA,40LPIC-1,32LPIC-2,55Bash).
+Four one-off assignments strengthen107.2/K1 and add only narrow at/atq/atrm
+Partial evidence. All136 parents remain incomplete(94Open/42Partial). The latest
+full Main inclusive2,482 pass predates this append; current targeted/native and
+pending unified gates are separated in
+[CATALOG180_MILESTONE.md](CATALOG180_MILESTONE.md). Candidate065032d0a90b still
 contains171 assignments; its installed lifecycle, NFS cold reopening and ten
 serialized Wayland launches retain that exact ELF. See also
 [FEDORA_065032D_VERIFICATION.md](FEDORA_065032D_VERIFICATION.md) and
@@ -336,3 +337,11 @@ immutable supplied delivery/source evidence. Current4.2 stays Open until native
 instruction, separate practice and meaningful configuration/troubleshooting
 assignments pass their own gates. Packet timing, clock discipline, multipeer
 selection and real clocks remain absent; see NTP_SUBSET.md.
+
+
+The180 one-off unit promotes only107.2.T9/T10/T11 from Open to narrow Partial
+practice. Existing107.2/K1 evidence is strengthened; at access files, service,
+spool, systemd timers, overlap/locking, timezone/DST and full utility/shell
+behavior remain unimplemented. All other source fingerprints/statuses are
+retained; see ONE_OFF_LESSONS.md.175Partial/1Supporting/1064Open overlap and
+are not a completion percentage. No full parent objective becomes complete.

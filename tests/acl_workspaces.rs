@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     acl_editor as editor, acl_routing as routing, acl_teaching, acl_workspace as aw, backup,
     engine::{self, Goal, State},
@@ -77,7 +79,7 @@ fn encoded(p: &Progress) -> Vec<u8> {
 #[test]
 fn typed_state_pack_and_reference_are_reachable_without_bundling_a_new_lab() {
     let s = scenario();
-    assert_eq!(pack::bundled().unwrap().len(), 176);
+    assert_eq!(one_off_boundary::before_len(&pack::bundled().unwrap()), 176);
     assert!(!pack::bundled().unwrap().iter().any(|lab| lab.id == s.id));
     let mut current = s.initial.clone();
     assert!(!engine::solved(&current, &s.goal));
@@ -405,7 +407,7 @@ fn imported_assignment_example_and_foreign_workspace_attacks_fail_without_file_c
 fn all_bundled_attempts_current_runs_real6_history_and_malformed_acl_drafts_survive() {
     let s = scenario();
     let mut labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&labs), 176);
     let mut p = Progress {
         schema_version: 1,
         clock: 99,

@@ -19,6 +19,10 @@ pub struct WorkspaceData {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub physical_link_learning: Option<crate::physical_link_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub one_off_session: Option<crate::one_off_workspace::Session>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub one_off_learning: Option<crate::one_off_teaching::Learning>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub file_backup_learning: Option<crate::file_backup_teaching::Learning>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub etherchannel_draft: Option<crate::etherchannel_workspace::Draft>,
@@ -159,6 +163,8 @@ impl WorkspaceData {
                 .physical_link_learning
                 .as_ref()
                 .is_none_or(|l| l.valid())
+            && self.one_off_session.as_ref().is_none_or(|s| s.valid())
+            && self.one_off_learning.as_ref().is_none_or(|l| l.valid())
             && self.file_backup_learning.as_ref().is_none_or(|l| l.valid())
             && self.etherchannel_draft.as_ref().is_none_or(|d| d.valid())
             && self
@@ -364,6 +370,7 @@ pub fn is_cron_workspace(a: &Attempt) -> bool {
     matches!(a.state, State::Cron { .. }) || has_cron_metadata(a)
 }
 pub(crate) fn reject_cron_metadata(a: &Attempt) -> Result<(), String> {
+    reject_one_off_workspace(a)?;
     reject_file_backup_workspace(a)?;
     if is_cron_workspace(a) {
         Err("Scheduling workspace metadata belongs to its scheduling activity; previous work retained".into())
@@ -394,6 +401,9 @@ pub fn prepare(a: &mut Attempt) {
         return;
     }
 
+    if is_one_off_workspace(a) {
+        return;
+    }
     if crate::file_backup_workspace::has_metadata(a) && !matches!(a.state, State::FileBackup { .. })
     {
         return;
@@ -742,4 +752,22 @@ pub fn pending_seed_configuration_draft(a: &Attempt) -> bool {
             .is_some_and(|draft| draft != configured_device),
         _ => false,
     }
+}
+
+pub fn has_one_off_metadata(a: &Attempt) -> bool {
+    a.workspace
+        .as_ref()
+        .is_some_and(|w| w.one_off_session.is_some() || w.one_off_learning.is_some())
+}
+pub fn is_one_off_workspace(a: &Attempt) -> bool {
+    matches!(a.state, State::OneOff { .. }) || has_one_off_metadata(a)
+}
+pub(crate) fn reject_one_off_workspace(a: &Attempt) -> Result<(), String> {
+    if is_one_off_workspace(a) {
+        return Err(
+            "One-off drafts and state require their own authored context; previous work retained"
+                .into(),
+        );
+    }
+    Ok(())
 }

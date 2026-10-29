@@ -1,5 +1,7 @@
 //! Opt-in fixed public9→current11 comparison, not a producer or saved recording.
 //! No Bash, process, learner source/path options, or old evidence writes.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::{
@@ -313,7 +315,7 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
     let boundaries: Value =
         serde_json::from_slice(include_bytes!("fixtures/automation-vm-boundaries.json")).unwrap();
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&current), 176);
     // Compare the exact original133 input context; the7 newly authored tasks
     // have no public9 observation and must never acquire fabricated old rows.
     let labs = &current[..133];

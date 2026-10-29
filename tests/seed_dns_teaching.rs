@@ -1,3 +1,5 @@
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 use dlms_learning_lab::{
     backup,
     engine::{self, Goal, State},
@@ -323,7 +325,7 @@ fn dns_old_first_open_preserves_assignment_and_both_raw_editor_fields() {
 #[test]
 fn dns_teaching_pins_only_authored_keys_and_keeps_original_nine_assignment_payloads() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let baseline: Vec<Value> =
         serde_json::from_str(include_str!("fixtures/seed-teaching-original-nine.json")).unwrap();
     assert_eq!(baseline.len(), 9);

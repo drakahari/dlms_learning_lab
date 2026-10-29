@@ -1,5 +1,7 @@
 //! Current-evaluator migration checks from exact actually captured writer8 bytes.
 //! New outcomes exist only when these tests explicitly execute the current VM.
+#[path = "../src/ui/one_off_boundary.rs"]
+mod one_off_boundary;
 #[path = "support/teaching_amendment.rs"]
 mod teaching_amendment;
 use dlms_learning_lab::{
@@ -139,7 +141,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 176);
+    assert_eq!(one_off_boundary::before_len(&all), 176);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -178,6 +180,17 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(case_count, 246);
     let mut p = progress::decode(ACTUAL8, &all).unwrap();
     assert_eq!(p.attempts.len(), 116);
+    for id in [
+        "lpic1-at-report",
+        "lpic1-at-capture-repair",
+        "lpic1-at-owner-queue",
+        "lpic1-at-handover",
+    ] {
+        let source = all.iter().find(|s| s.id == id).unwrap();
+        assert!(matches!(source.initial, State::OneOff { .. }));
+        assert!(!p.attempts.contains_key(id));
+        assert!(!p.favorites.contains(id));
+    }
     let missing: BTreeSet<_> = all
         .iter()
         .filter(|s| !p.attempts.contains_key(&s.id))
@@ -186,6 +199,10 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "lpic1-at-report",
+            "lpic1-at-capture-repair",
+            "lpic1-at-owner-queue",
+            "lpic1-at-handover",
             "ccna-private-office-plan",
             "ccna-physical-media-span",
             "ccna-physical-duplex-diagnosis",
@@ -247,7 +264,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All60 later tasks remain absent and ungraded; no invented contexts.
+    ); // Later tasks remain absent and ungraded; no invented contexts.
     let office = all
         .iter()
         .find(|s| s.id == "ccna-private-office-plan")

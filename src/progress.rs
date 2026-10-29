@@ -151,6 +151,11 @@ pub fn legacy_script_credit(a: &Attempt, s: &Scenario) -> bool {
 /// No result survives a state/draft change or becomes a persisted credential.
 /// Reject context and pending draft first; do not run new-client probes for them.
 pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -218,6 +223,11 @@ pub fn current_dhcpv4_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Current applied draft/context first; snapshot predicates are derived once per batch.
 pub fn current_spanning_tree_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -310,6 +320,11 @@ pub fn current_physical_link_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Str
     crate::physical_link_workspace::checks(a, s)
 }
 pub fn current_file_backup_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     match crate::file_backup_workspace::context(a, s) {
         Ok(d) => {
             let State::FileBackup { simulation } = &a.state else {
@@ -322,6 +337,11 @@ pub fn current_file_backup_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Strin
 }
 /// Current LACP outcomes use applied typed configuration and bounded independent fault snapshots.
 pub fn current_etherchannel_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     let d = match crate::etherchannel_workspace::context(a, s) {
         Ok(d) => d,
         Err(e) => return vec![(false, crate::etherchannel_workspace::notice(e))],
@@ -344,6 +364,7 @@ pub fn current_etherchannel_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, Stri
 }
 /// Scheduling metadata admission only; no grading, parser execution or inferred credit.
 pub(crate) fn validate_cron_metadata(a: &Attempt) -> Result<(), String> {
+    crate::one_off_workspace::metadata(a)?;
     let present = crate::workspace::has_cron_metadata(a);
     let State::Cron { simulation } = &a.state else {
         return if present {
@@ -366,6 +387,11 @@ pub(crate) fn validate_cron_metadata(a: &Attempt) -> Result<(), String> {
     Ok(())
 }
 pub fn current_cron_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     let d = match crate::cron_workspace::context(a, s) {
         Ok(d) => d,
         Err(e) => return vec![(false, e)],
@@ -420,6 +446,11 @@ pub(crate) fn validate_nfs_workspace(a: &Attempt) -> Result<(), String> {
 }
 /// Snapshot grading uses actual current files/mounts plus independent next-mount trials.
 pub fn current_nfs_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -434,6 +465,11 @@ pub fn current_nfs_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
 }
 /// Fresh RPM current outcomes. A transcript, raw command or checked flag never grants credit.
 pub fn current_rpm_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -514,6 +550,11 @@ fn validate_rpm_workspace(a: &Attempt) -> Result<(), String> {
 }
 /// Fresh package outcomes with context/session guards; display history is never credit.
 pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -567,6 +608,11 @@ pub fn current_debian_packages_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, S
     definition.checks(simulation)
 }
 pub fn current_apache_static_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -662,6 +708,11 @@ pub(crate) fn validate_nat_metadata(a: &Attempt) -> Result<(), String> {
     Ok(())
 }
 pub fn current_nat_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    if let Err(e) = crate::one_off_workspace::metadata(a)
+        .and_then(|_| crate::one_off_workspace::reject_foreign_source(s))
+    {
+        return vec![(false, e)];
+    }
     if let Err(e) = crate::etherchannel_workspace::reject_foreign_source(s) {
         return vec![(false, crate::etherchannel_workspace::notice(e))];
     }
@@ -729,6 +780,15 @@ pub fn current_solved(a: &Attempt, s: &Scenario) -> bool {
         return false;
     }
 
+    if matches!(a.state, State::OneOff { .. }) {
+        let rows = current_one_off_checks(a, s);
+        return !rows.is_empty() && rows.iter().all(|r| r.0);
+    }
+    if crate::workspace::has_one_off_metadata(a)
+        || crate::one_off_workspace::reject_foreign_source(s).is_err()
+    {
+        return false;
+    }
     if crate::etherchannel_workspace::reject_foreign_source(s).is_err()
         || crate::etherchannel_workspace::metadata(a).is_err()
     {
@@ -1091,6 +1151,10 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             return Err("Incompatible saved attempt; original retained".into());
         }
         crate::physical_link_workspace::metadata(a)?;
+        crate::one_off_workspace::metadata(a)?;
+        if matches!(a.state, State::OneOff { .. }) {
+            crate::one_off_workspace::context(a, s)?;
+        }
         validate_nfs_workspace(a)?;
         validate_rpm_workspace(a)?;
         validate_nat_workspace(a)?;
@@ -1650,6 +1714,7 @@ pub fn decode(bytes: &[u8], scenarios: &[Scenario]) -> Result<Progress, String> 
             );
         }
         crate::pack::validate_state(&a.state)?;
+        crate::one_off_workspace::metadata(a)?;
         if !crate::workspace::can_preserve_script_history(a) {
             return Err("Saved script history is full; original retained. Keep a copy of the progress file; this profile needs a history migration.".into());
         }
@@ -2143,6 +2208,7 @@ fn validate_for_save(p: &Progress) -> Result<(), String> {
     for a in p.attempts.values() {
         crate::physical_link_workspace::metadata(a)?;
         crate::pack::validate_state(&a.state)?;
+        crate::one_off_workspace::metadata(a)?;
         validate_mac_workspace(a)?;
         validate_acl_workspace(a)?;
         validate_nfs_workspace(a)?;
@@ -2894,4 +2960,25 @@ mod actual9_before10_writer_acceptance {
         );
         assert!(candidate.migration_receipts.is_none());
     }
+}
+
+pub fn current_one_off_checks(a: &Attempt, s: &Scenario) -> Vec<(bool, String)> {
+    let d = match crate::one_off_workspace::context(a, s) {
+        Ok(d) => d,
+        Err(e) => return vec![(false, e)],
+    };
+    let State::OneOff { simulation } = &a.state else {
+        return vec![(false, "One-off state differs".into())];
+    };
+    let Some(session) = a
+        .workspace
+        .as_ref()
+        .and_then(|w| w.one_off_session.as_ref())
+    else {
+        return vec![(
+            false,
+            "Prepare the one-off editing workspace before checking".into(),
+        )];
+    };
+    crate::one_off_workspace::checks_with_session(d, simulation, session)
 }
