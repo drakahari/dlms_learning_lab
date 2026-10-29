@@ -1,0 +1,164 @@
+{
+  "schema_version": 1,
+  "purpose": "Fixed original pure inode/path foundation comparison design. These are development fixtures, not learner progress/curriculum. No actions are decoded from JSON.",
+  "actual_comparison": null,
+  "cases": [
+    {
+      "id": "shared-alias-independent-copy",
+      "expected_observations": {
+        "same_alias": true,
+        "copy_distinct": true,
+        "alias_links": 2,
+        "copy_links": 1,
+        "original": "updated\n",
+        "alias": "updated\n",
+        "copy": "seed\n"
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "unlink-one-then-last-name",
+      "expected_observations": {
+        "alias_identity_preserved": true,
+        "remaining_links": 1,
+        "content": "payload\n",
+        "removed_name": "NotFound",
+        "last_name": "NotFound"
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "move-relative-link-changes-parent",
+      "expected_observations": {
+        "before": "alpha\n",
+        "after": "beta\n",
+        "target": "data",
+        "same_link_identity": true,
+        "kind_symbolic": true,
+        "old_name": "NotFound"
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "dangling-link-arrival-retirement",
+      "expected_observations": {
+        "kind_symbolic": true,
+        "target": "later",
+        "target_bytes": 5,
+        "before": "NotFound",
+        "arrived": "arrived\n",
+        "after": "NotFound"
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "internal-directory-link-prefix",
+      "expected_observations": {
+        "same_target": true,
+        "content": "nested\n",
+        "raw_target": "real",
+        "default_symbolic": true,
+        "follow_directory": true,
+        "trailing_slash_directory": true
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "copy-follows-source-with-independent-data",
+      "expected_observations": {
+        "copy_distinct": true,
+        "copy_regular": true,
+        "source_symbolic": true,
+        "view": "second\n",
+        "copy": "first\n",
+        "copy_links": 1
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "fixed-file-errors-preserve-content",
+      "expected_observations": {
+        "existing_destination": "Exists",
+        "file_component": "NotDirectory",
+        "file_trailing_slash": "NotDirectory",
+        "missing": "NotFound",
+        "source": "protected\n",
+        "existing": "existing\n",
+        "atomic": true
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    },
+    {
+      "id": "utf8-data-and-literal-names",
+      "expected_observations": {
+        "same_alias": true,
+        "data_bytes": 3,
+        "target_bytes": 9,
+        "target": "-odd name",
+        "content": "é\n",
+        "links": 2
+      },
+      "vm_observation": null,
+      "linux_observation": null
+    }
+  ],
+  "vm_only": [
+    {
+      "id": "absolute_target_missing",
+      "expected_error_kind": "NotFound",
+      "vm_observation": null,
+      "linux_observation": null,
+      "reason": "No host execution for traversal/absolute-target/cycle/unsupported/limit controls."
+    },
+    {
+      "id": "root_parent_escape",
+      "expected_error_kind": "NotFound",
+      "vm_observation": null,
+      "linux_observation": null,
+      "reason": "No host execution for traversal/absolute-target/cycle/unsupported/limit controls."
+    },
+    {
+      "id": "hard_directory",
+      "expected_error_kind": "Unsupported",
+      "vm_observation": null,
+      "linux_observation": null,
+      "reason": "No host execution for traversal/absolute-target/cycle/unsupported/limit controls."
+    },
+    {
+      "id": "hard_symbolic",
+      "expected_error_kind": "Unsupported",
+      "vm_observation": null,
+      "linux_observation": null,
+      "reason": "No host execution for traversal/absolute-target/cycle/unsupported/limit controls."
+    },
+    {
+      "id": "cycle",
+      "expected_error_kind": "Loop",
+      "vm_observation": null,
+      "linux_observation": null,
+      "reason": "No host execution for traversal/absolute-target/cycle/unsupported/limit controls."
+    },
+    {
+      "id": "oversized_target",
+      "expected_error_kind": "Invalid",
+      "vm_observation": null,
+      "linux_observation": null,
+      "reason": "No host execution for traversal/absolute-target/cycle/unsupported/limit controls."
+    }
+  ],
+  "not_compared": [
+    "Numeric inode/device identifiers or allocation/reuse order",
+    "Timestamps/ownership/modes/permissions/directory link counts/storage sizes",
+    "Directory mutation, mount points, hardlinks to symbolic links/directories",
+    "Existing-destination rename overwrite semantics; only unused destination is compared",
+    "Open descriptors after last unlink and physical block allocation/CoW",
+    "Any absolute target, dot-dot traversal, cycle/limit or personal path"
+  ]
+}

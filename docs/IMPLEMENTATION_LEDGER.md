@@ -4594,3 +4594,38 @@ Post-doc M442396PythonPASS/M443coveragePASS:186registered/49units,
 181Partial1Supporting1058Open/1240references, all165planningrows consistent.
 No extra source fingerprint/status changes. Privacy/whitespace checks and scoped
 commits/push follow; actual Fedora candidate remains171 pending later rebuild.
+
+### Settled HSRP and inode/link foundations — no new authored coverage
+
+Accepted186 and its independent runner/reference fixes are committed and pushed
+as55b2853,7229380,3668384. New bounded pure models add no State/Goal, catalog
+entries, progress schema or learner-host execution. M44418HSRP/16Links tests pass;
+they exercise history/preemption/tracked versus untracked failure, alternate
+solutions, octet-crossing arithmetic, alias identity, relative/dangling links,
+atomic failures, codec/resource limits and resume/reset. M448alltargetClippyPASS
+after removing only one unused import from Links (peer c568db3b); M450421Python
+PASS. No assertion or semantic code changed in that lint correction.
+
+M449 rebuilt the fixed Links probe,1,455,560B/b66af25a. M451prepare launches no
+children:24 exact pins/6compiled inputs, control6121226c. Root and independent
+peer2cd51875 streamed source/compiler/ELF/Python/kernel pins; Root changed only
+the approval literal. M452actual fixed comparison fails on case0: operation
+observations match, but worker inventory is empty while collector sees the
+retained files. Failure/source/ELFs/control remain in ignored links8-r1. No
+reference or curriculum acceptance is inferred; fix the inventory path and use a
+new independently reviewed destination. Existing accepted186 remains unchanged.
+
+Fresh-scan source9decd56c/peerbc63765a opens literal dot relative to each held
+directory FD, closes only its new description, and preserves all inventory/error/
+16-entry bounds. The exact earlier cursor producer was not instrumented; no
+unsupported causal claim follows. All25 old guard bodies remain exact; three
+new mock groups reproduce consumed cursors, complete alias inventories, repeated
+scans and closure on errors/excess entries. M453424PythonPASS. M454fresh24pins
+e6ba267a receive Root and independent c52eba02 readback; approval changes only
+the literal. M455links8-r2 exits0:8Linux matches/6actualVM-only outcomes,74outputs,
+manifest5141c690ec4d12c887f78e62fd3b0e2603476a619b18bbb26e486fa415ff9a89.
+M456retained verifyPASS. Independent553bfc5a checks every raw output/source/ELF/
+control/status plus final file contents, links and alias groups without replay.
+No broad POSIX/CLI, native or authored coverage claim; no new catalog credit.
+Ordinary reference observations show25.36GB available/PSI0/no counter increase;
+the short run is not a stress or universal memory-safety acceptance test.

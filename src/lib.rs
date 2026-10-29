@@ -168,3 +168,8 @@ pub mod ntp;
 #[doc(hidden)]
 #[path = "../examples/support/automation_digest.rs"]
 pub mod developer_digest;
+
+/// Bounded settled gateway-failover model; authored integration is separate.
+pub mod hsrp;
+/// Bounded inode/link VFS; separate from the existing file model.
+pub mod links;

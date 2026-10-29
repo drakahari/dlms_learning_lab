@@ -45,9 +45,14 @@ is in OBJECTIVE_MAPPING.md/SKILL_COVERAGE.csv/CURRICULUM_RECONCILIATION.md.
 
 ## Next actions — continue without routine approval
 
-1. After privacy check/commit/push186, continue the reviewed batches below;
-   post-doc396Python/coverage checks already pass.
-2. Test reviewed pureHSRP18 andLinks16 before dependent content. Then integrate
+1. Accepted186 is committed/pushed as55b2853, with runner7229380 and ERE reference
+   3668384. Continue the reviewed batches below; this is not curriculum completion.
+2. PureHSRP18 andLinks16 passed M444. M448alltargetClippy and M450421Python pass.
+   M452 failed its worker inventory check on case0; links8-r1 is preserved.
+   Fresh relative-directory scans keep all inventory checks; M453424PythonPASS.
+   M455fresh links8-r2 matches8Linux cases/6actualVM-only outcomes; M456verifyPASS,
+   independent raw/source/ELF/final-alias readback553bfc5a accepts its narrow scope.
+   Then integrate
    reviewed NTP4 normal190/source-aware progress/native90, test and commit.
 3. Apply boundedERE14 only after current/genuine13 migration guards; compile/test
    the reviewed utility comparator, approve exact pins then observe24GNU matches.
@@ -67,18 +72,19 @@ LVM68/12widget tests, runner termination handling and genuine13seals.
 
 All paths below are under ignored `.build-artifacts/reviews/`; inspect manifests
 and exact current beforeimages. Retain Root documentation drift rather than
-copying old whole-tree snapshots. Current source HEAD is4721b2a until this
-milestone is committed; source-inventory digests are not Git revisions.
+copying old whole-tree snapshots. Accepted source HEAD is55b2853; current pure
+models/reference additions are not yet committed. Source-inventory digests are
+not Git revisions.
 
 | Work | Latest source | Status |
 | --- | --- | --- |
 | NTP normal190 | `ntp-normal190-source-r5` /4aff6831 |75owned/12new; peerb392768f; retains Loopa667/current-positive proof and canonical imports;31prospective groups |
 | NTP native | `ntp-native190-source-r3` /9a998ef9 |6owned/2new; peer0589c4de;1369actions/90captures/two groups unrun |
-| HSRP pure | `hsrp-foundation-source-r1` /b7adcb80 |18pure groups unrun; no Goal/content credit |
-| Links pure | `links-foundation-source-r1` /b8adc39a |16pure groups unrun; oldTree unchanged |
+| HSRP pure | `hsrp-foundation-source-r1` /b7adcb80 |M44418PASS; no Goal/content credit |
+| Links pure | `links-foundation-source-r1` /b8adc39a |M44416PASS; oldTree unchanged; only unused import removed afterward, peerc568db3b |
 | HSRP normal capability | `hsrp-workspace-source-r3` /6f10a907 |peer64eaa772;19groups unrun, explicit down/return/source/rawpacket fixes; rebase current190 before apply |
 | Links normal capability | `links-normal190-source-r2` /058e7af6 |20component+14normal groups unrun; peer found sharedNext veto/original-nine arm omissions, author remedy pending; no pack/credit |
-| Fixed Links reference | `links-reference-source-r3` /62b95036 |peer4a9246fe;25guards/eight Linux comparisons/six VM-only cases unrun |
+| Fixed Links reference | `links-reference-fresh-scan-source-r5` /9decd56c |28guards pass; M4558matches/6VM-only, manifest5141c690; M456verify and independent553bfc5a; failedr1 preserved |
 | ERE14 VM integration | `shell-ere14-capability-source-r2` /e1571f74 |peer37afdf1e;19groups unrun; retain owned-capacity/globalwork/cooperativeStop tests |
 | Genuine13/current14 consumers | `shell-ere14-consumer-source-r1` /12dde423 |peer7142f99c;25paths/15groups unrun, narrow current190 rebase needed |
 | Fixed ERE24 reference | `shell-ere24-reference-source-r1` /7e566bc9 |peer29d62169;18guards/actual24matches unrun; six reason-only exclusions are not observed passes |
