@@ -75,6 +75,8 @@ pub mod discovery;
 pub mod discovery_teaching;
 pub mod discovery_workspace;
 
+/// Bounded virtual linear-LVM growth foundation; no curriculum integration.
+pub mod lvm;
 pub mod storage;
 
 pub mod storage_workspace;

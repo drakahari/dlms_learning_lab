@@ -4290,3 +4290,48 @@ M310inclusiveLoop13alltargets+ignored nowrunning95632. Rootapplied171closedOneOf
 paths onlyinWcurriculum-network176, prospective180/47/959sources, bothpeerACKs.
 Mainnotmodified; originalR17source933 and ELF41 copied/hashed independently on
 projectdisk before further build. No OneOffruntime/newcredit yet.
+
+M310isolatedLoop13full:2375PASS/1future-inputpremiseFAIL/0ignored/188harnesses,
+901sources unchanged; minavailable22660030464B/PSI0/swapout0/OOM0. Rootfuture
+fixturecurrent+1 peer c10980d7, M311actual11sixPASS. M318alltargetClippyPASS
+after two identifier names+equivalent test-only iflet condition, no waivers.
+M322full901rerun15606currentlysoleheavy.
+
+OneOffM3124targets72PASS. M313UIcompile15testmodule errors/no tests; preserve
+originalcanonical95linehistory, moveonlynew2NATtests, cfgtestthreehelpersibling
+visibility/import (67123959). M31627PASS3UIFAIL. Driver4767b59 correctsresized
+clicks/wheelsettlement/headerReset, preservesall12/136assertions. M31928PASS2
+StopFAIL. DiagnosticM321shows130pxscrollonpointerPRESS beforeCheck action, not
+contentchange; officialeguidragpath+hypothesis logged, confirmationpendingM322
+release. No productdragdisable/forcedfocus/scroll/model, allStopassertions stay.
+
+M322isolatedLoop13full2376PASS/0FAIL/0ignored/188harnesses/all27actualhistory
+groups, source901a8a62d5a exact, receipt0a1b509b. M323confirms130pxparentdrag
+on syntheticMove+press, naturalhoverfixrealisticpointerevents/no productchange.
+M32429PASS1NextStoppausedFAIL frompostClickidle; nativeimmediateclickpacing
+e4fa0fd8/b42373b5 preservesallgoals/cases/limits/assertions. M325all30OneOffUI
+PASS/0ignored, fullyreaped77993. M326full180/source959593c456f now59680soleheavy.
+NativeOneOff53captureproposal62f38156 review78a4requires2driverfixes/unrun.
+No newMainlabcredit orcandidateacceptance inferred.
+
+
+### M329–M331: bounded LVM foundation and scheduling verification
+
+Main receives only the reviewed pure LVM module/export, exact-subset guide and
+15 new integration tests. Source review0e5d449b independently checked extent
+arithmetic, ownership, allocation and bounded loading. M329 all15 pass; M330
+all-target Clippy with warnings denied passes. No learner catalog, progress
+schema, objective status or existing tests change. This supports subsequent
+real storage assignments; it is not itself authored curriculum. No host LVM or
+filesystem command is executed.
+
+M326 isolated OneOff180 full run ended2572PASS/2FAIL; both failures were missing
+goal-context preparation in the same cross-family EtherChannel fixture helper.
+The reviewed five-line branch retains all existing assertions; M327 all17 tests
+in that target pass. Full180 success is not yet claimed. Native R2 source
+peer37310ae was applied; M328 paired capture-phase checks1PASS/1FAIL caught a
+Shift-Tab focus assertion before egui's documented deferred next-frame focus.
+The eight-line driver-only settlement keeps all assertions/events and does not
+force focus or alter product behavior. M331 rerun1PASS/1FAIL: focus passes, next failure is a missing actual theme
+menu choice. The source-only driver diagnosis continues; no native acceptance
+is inferred.
