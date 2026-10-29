@@ -56,7 +56,7 @@ fn learn(a: &mut Attempt) -> &mut Learning {
 fn private_fixture_is_unbundled_and_reference_alternates_reach_current_whole_outcomes() {
     let s = scenario();
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     assert!(!all.iter().any(|x| x.id == s.id));
     const {
         assert!(
@@ -483,6 +483,43 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
             .all(|s| matches!(s.initial, State::Cron { .. })
                 && matches!(s.goal, engine::Goal::Cron { .. }))
     );
+    assert_eq!(
+        all[164..168]
+            .iter()
+            .map(|s| s.id.as_str())
+            .collect::<Vec<_>>(),
+        [
+            "lpic2-backup-selective-recovery",
+            "lpic2-backup-incremental-chain",
+            "lpic2-backup-snapshot-branch",
+            "lpic2-backup-recovery-handover",
+        ]
+    );
+    for source in &all[164..168] {
+        assert!(
+            matches!(source.initial, State::FileBackup { .. })
+                && matches!(source.goal, Goal::FileBackup { .. })
+        );
+        assert!(source.file_backup_teaching.is_some());
+        let mut raw = source.initial.clone();
+        let before = raw.clone();
+        assert!(engine::execute(&mut raw, &source.solution[0]).is_err());
+        assert_eq!(
+            raw, before,
+            "Goal-less backup operations preserve complete supplied state"
+        );
+        let mut contextual = source.initial.clone();
+        for command in &source.solution {
+            engine::execute_for_goal(&mut contextual, &source.goal, command).unwrap();
+        }
+        assert!(
+            engine::checks(&contextual, &source.goal)
+                .iter()
+                .all(|r| r.0),
+            "{}",
+            source.id
+        );
+    }
     let old = all
         .into_iter()
         // Compare the legacy context-free kinds. Packages and spanning tree,
@@ -503,6 +540,7 @@ fn old_kinds_keep_exact_execute_behavior_through_the_new_wrapper() {
                     | State::Nfs { .. }
                     | State::EtherChannel { .. }
                     | State::Cron { .. }
+                    | State::FileBackup { .. }
             )
         })
         .collect::<Vec<_>>();

@@ -227,3 +227,50 @@ fn malformed_context_and_unsupported_commands_cannot_mutate_the_assignment() {
     assert_eq!(state, before);
     assert!(engine::execute(&mut state, "rm /restore/project/handover.txt").is_err());
 }
+
+#[test]
+fn identical_archive_member_names_do_not_prove_correct_recoverable_contents() {
+    let s = lab("lpic2-backup-recovery-handover");
+    let initial = data(s);
+    let old = &initial.archives["/backups/candidate-a.tar"];
+    let correct = &initial.archives["/backups/candidate-b.tar"];
+    assert_eq!(
+        old.entries.keys().collect::<Vec<_>>(),
+        correct.entries.keys().collect::<Vec<_>>()
+    );
+    assert_eq!(old.root, correct.root);
+    assert_eq!(old.incremental, correct.incremental);
+    assert!(
+        old.entries
+            .iter()
+            .any(|(path, entry)| entry.text != correct.entries[path].text),
+        "The actual supplied candidates have matching names but different stored data"
+    );
+    let review = review();
+    let row = &review["labs"][3];
+    assert_eq!(row["id"], s.id);
+    let wrong = execute(s, &strings(&row["wrong"]));
+    let wrong_rows = engine::checks(&wrong, &s.goal);
+    assert_eq!(
+        wrong_rows.iter().map(|r| r.0).collect::<Vec<_>>(),
+        [true, false, false, false, true, true]
+    );
+    assert!(wrong_rows[4].1.contains("stored file names"));
+    assert!(!engine::solved(&wrong, &s.goal));
+    let mut repaired = execute(s, &s.solution);
+    assert!(engine::solved(&repaired, &s.goal));
+    engine::execute_for_goal(
+        &mut repaired,
+        &s.goal,
+        "cp /backups/candidate-a.tar /backups/recovery-level.tar",
+    )
+    .unwrap();
+    let damaged = engine::checks(&repaired, &s.goal);
+    assert_eq!(
+        damaged.iter().map(|r| r.0).collect::<Vec<_>>(),
+        [true, true, false, false, true, true],
+        "A previously restored tree and correct member names cannot stand in for fresh recoveries"
+    );
+    assert!(damaged[2].1.contains("wrong contents") && damaged[3].1.contains("wrong contents"));
+    assert!(!engine::solved(&repaired, &s.goal));
+}

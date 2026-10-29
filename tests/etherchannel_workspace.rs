@@ -1153,6 +1153,10 @@ fn old_prepared(s: &pack::Scenario) -> Attempt {
         // retain all four in the positive/foreign-negative matrix.
         dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
     }
+    if let Some(lesson) = &s.file_backup_teaching {
+        // Preserve this real new-family positive in the cross-family matrix.
+        dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
+    }
     let raw = serde_json::to_value(s).unwrap();
     for (site, key) in names.iter().enumerate() {
         if raw.get(*key).is_some() {

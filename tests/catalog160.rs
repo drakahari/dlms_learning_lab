@@ -40,7 +40,7 @@ fn original() -> Vec<Scenario> {
 #[test]
 fn original154_ether_three_and_optional_three_have_exact_normal_order_and_fresh_credit() {
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     assert_eq!(value(&all[..154]), value(&original()));
     let ether: Pack =
         serde_json::from_str(include_str!("../scenarios/etherchannel-v1.json")).unwrap();
@@ -64,7 +64,7 @@ fn original154_ether_three_and_optional_three_have_exact_normal_order_and_fresh_
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [48, 36, 28, 52]
+        [48, 36, 32, 52]
     );
     let scripts = all
         .iter()
@@ -163,7 +163,7 @@ fn exact_two_unit_appends_preserve_original39_and_both_fixed_intermediates() {
     assert_eq!(serde_json::from_slice::<Value>(raw).unwrap(), expected);
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 42);
+    assert_eq!(units.len(), 43);
     assert_eq!(value(&units[..39]), old["units"]);
     // Exercise the complete41→40→39→37 inverse against the immutable old
     // source evidence as well as the newer two-append source checks above.

@@ -360,6 +360,9 @@ impl Learning {
     }
 }
 pub fn prepare(attempt: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if crate::workspace::is_file_backup_workspace(attempt) {
+        return;
+    }
     if crate::workspace::is_etherchannel_workspace(attempt)
         || crate::workspace::is_cron_workspace(attempt)
     {

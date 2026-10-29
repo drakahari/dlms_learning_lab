@@ -968,6 +968,7 @@ pub fn context<'a>(
     a: &crate::progress::Attempt,
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
+    crate::workspace::reject_file_backup_workspace(a)?;
     crate::progress::validate_cron_metadata(a)?;
     if !source_shape(s) || s.version != a.scenario_version || !within(s, MAX_CONTEXT) {
         return Err("Scheduling source, version or complete Scenario bound differs".into());

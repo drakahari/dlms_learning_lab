@@ -3,8 +3,81 @@ use super::digest;
 use serde_json::Value;
 const NFS_INDEX_SHA: &str = "d1781b990368d1e5cecf871c2b11032659756cd67e39f6f5facc51f7998472ef";
 const BASH_REVIEW_SHA: &str = "fa59c06a6efcfedb5a04ead90de2df84834d94cec3a5446e82ee5f58a8f9c0eb";
-/// Exact new42→reviewed41 inverse; no historical producer or old recipe changes.
+/// Exact new43-to-reviewed42 inverse. No old unit object or recipe is rewritten.
+pub fn before_backup_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let bytes = include_bytes!("../fixtures/catalog168-registration.json");
+    if digest::hash(bytes) != "8e8b382e4546f3e48a7441281f4db9448b68bf9333b19c7acf20e882623d4c23" {
+        return Err("Immutable backup append recipe differs".into());
+    }
+    let recipe: Value = serde_json::from_slice(bytes).map_err(|e| e.to_string())?;
+    if digest::hash(raw)
+        != recipe["after_units43_sha256"]
+            .as_str()
+            .ok_or("New43 pin missing")?
+        || raw.len() as u64
+            != recipe["after_units43_bytes"]
+                .as_u64()
+                .ok_or("New43 length missing")?
+    {
+        return Err("Exact current43 raw units differ".into());
+    }
+    let text = std::str::from_utf8(raw).map_err(|e| e.to_string())?;
+    let prefix = text
+        .strip_suffix(
+            recipe["append_suffix_utf8"]
+                .as_str()
+                .ok_or("Exact backup suffix missing")?,
+        )
+        .ok_or("Exact final backup append differs")?;
+    let before = format!(
+        "{prefix}{}",
+        recipe["old_tail_utf8"]
+            .as_str()
+            .ok_or("Reviewed42 tail missing")?
+    )
+    .into_bytes();
+    if digest::hash(&before)
+        != recipe["before_units42_sha256"]
+            .as_str()
+            .ok_or("Reviewed42 pin missing")?
+        || before.len() as u64
+            != recipe["before_units42_bytes"]
+                .as_u64()
+                .ok_or("Reviewed42 length missing")?
+    {
+        return Err("Full reviewed42 raw bytes differ".into());
+    }
+    let mut expected: Value = serde_json::from_slice(&before).map_err(|e| e.to_string())?;
+    if expected != recipe["before_units42"] {
+        return Err("Full reviewed42 typed units differ".into());
+    }
+    let units = expected["units"]
+        .as_array_mut()
+        .ok_or("Reviewed42 unit array absent")?;
+    if units.len() != 42 {
+        return Err("Reviewed42 count differs".into());
+    }
+    units.push(recipe["backup_unit"].clone());
+    if serde_json::from_slice::<Value>(raw).map_err(|e| e.to_string())? != expected {
+        return Err("Change outside ordered backup append".into());
+    }
+    // Prove every previous inverse still consumes exactly its reviewed source.
+    reviewed_before_cron_units(&before)?;
+    Ok(before)
+}
+/// Normalize only the exact new append, then use the retained reviewed42 body.
 pub fn before_cron_units(raw: &[u8]) -> Result<Vec<u8>, String> {
+    let before = if digest::hash(raw)
+        == "667727c71295957dfe7a0553d938dd2e7c4a4ba82d0af3b33b9e7d24f19dd7a9"
+    {
+        Some(before_backup_units(raw)?)
+    } else {
+        None
+    };
+    reviewed_before_cron_units(before.as_deref().unwrap_or(raw))
+}
+/// Exact new42→reviewed41 inverse; no historical producer or old recipe changes.
+fn reviewed_before_cron_units(raw: &[u8]) -> Result<Vec<u8>, String> {
     let bytes = include_bytes!("../fixtures/catalog164-registration.json");
     if digest::hash(bytes) != "980ac05b935f9cbcc76bf3f1dff351de2e11dbad326ccf349f195f70c4f13072" {
         return Err("Immutable Cron combined append recipe differs".into());

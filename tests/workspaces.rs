@@ -149,26 +149,83 @@ fn versioned_workspace_drafts_roundtrip_and_invalid_metadata_preserves_original(
         schema_version: 1,
         ..Default::default()
     };
+    let mut original_drafts = 0;
+    let mut backup_drafts = 0;
     for (n, s) in labs.iter().enumerate() {
         let mut a = Attempt::new(s, n as u64);
         workspace::prepare(&mut a);
         if matches!(a.state, State::Cron { .. }) {
             dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
         }
+        if let Some(lesson) = &s.file_backup_teaching {
+            // Preserve this real new-family positive in the cross-family matrix.
+            dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
+        }
         let w = a.workspace.as_mut().unwrap();
         w.command = "unfinished |".into();
-        w.service_port = Some("unfinished".into());
-        w.dns_address = Some("192.0.".into());
-        w.dns_serial = Some("draft".into());
-        w.mount_device = Some("/dev/vd".into());
+        if s.file_backup_teaching.is_some() {
+            // New backup work has its own isolated draft, not another activity's
+            // service/DNS/mount fields. Keep every original164 case unchanged.
+            w.file_backup_learning.as_mut().unwrap().command = "tar --unfinished".into();
+            backup_drafts += 1;
+        } else {
+            w.service_port = Some("unfinished".into());
+            w.dns_address = Some("192.0.".into());
+            w.dns_serial = Some("draft".into());
+            w.mount_device = Some("/dev/vd".into());
+            original_drafts += 1;
+        }
         p.attempts.insert(s.id.clone(), a);
     }
+    assert_eq!((original_drafts, backup_drafts), (164, 4));
     progress::save(&path, &p).unwrap();
     let q = progress::load(&path, &labs).unwrap();
     assert_eq!(
         serde_json::to_value(&p).unwrap(),
         serde_json::to_value(&q).unwrap()
     );
+    let valid_raw = std::fs::read(&path).unwrap();
+    for s in labs.iter().filter(|s| s.file_backup_teaching.is_some()) {
+        let a = &q.attempts[&s.id];
+        assert_eq!(a.workspace.as_ref().unwrap().command, "unfinished |");
+        assert_eq!(
+            a.workspace
+                .as_ref()
+                .unwrap()
+                .file_backup_learning
+                .as_ref()
+                .unwrap()
+                .command,
+            "tar --unfinished"
+        );
+        assert!(!progress::current_solved(a, s));
+        for field in 0..4 {
+            let mut foreign = progress::decode(&valid_raw, &labs).unwrap();
+            let w = foreign
+                .attempts
+                .get_mut(&s.id)
+                .unwrap()
+                .workspace
+                .as_mut()
+                .unwrap();
+            match field {
+                0 => w.service_port = Some("unfinished".into()),
+                1 => w.dns_address = Some("192.0.".into()),
+                2 => w.dns_serial = Some("draft".into()),
+                3 => w.mount_device = Some("/dev/vd".into()),
+                _ => unreachable!(),
+            }
+            assert!(
+                progress::save(&path, &foreign).is_err(),
+                "Foreign backup field {field}"
+            );
+            assert_eq!(
+                std::fs::read(&path).unwrap(),
+                valid_raw,
+                "Refusal preserves the complete valid file"
+            );
+        }
+    }
     p.attempts
         .get_mut(&labs[0].id)
         .unwrap()

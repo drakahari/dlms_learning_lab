@@ -1409,6 +1409,7 @@ pub(crate) fn context<'a>(
     a: &crate::progress::Attempt,
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
+    crate::workspace::reject_file_backup_workspace(a)?;
     if a.scenario_version != s.version
         || a.step >= s.steps.len()
         || a.hints > s.hints.len()

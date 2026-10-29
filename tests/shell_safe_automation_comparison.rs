@@ -313,7 +313,7 @@ fn all1570_historical_rows_are_classified_and380_vectors_compared_without_relabe
     let boundaries: Value =
         serde_json::from_slice(include_bytes!("fixtures/automation-vm-boundaries.json")).unwrap();
     let current = pack::bundled().unwrap();
-    assert_eq!(current.len(), 164);
+    assert_eq!(current.len(), 168);
     // Compare the exact original133 input context; the7 newly authored tasks
     // have no public9 observation and must never acquire fabricated old rows.
     let labs = &current[..133];

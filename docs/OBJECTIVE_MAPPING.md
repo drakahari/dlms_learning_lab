@@ -2,12 +2,12 @@
 
 Checked2026-10-22 against the current official [Cisco CCNA v1.1 PDF](https://learningcontent.cisco.com/documents/marketing/exam-topics/200-301-CCNA-v1.1.pdf), [LPIC-1 v5.0 objectives](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 v4.5 objectives](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Current/upcoming version dates remain in [CURRICULUM.md](CURRICULUM.md). Upcoming Cisco v2.0 stays in its separate planning rows; it receives no inherited current-version credit.
 
-[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are161 narrowly evidenced Partial practice rows, one Supporting explanation
-row and1078 Open rows; no full-objective completion is asserted. Main source
-contains164 authored assignments/42 units. The retained Fedora candidate
-9a90f275e133 contains154; it is not acceptance evidence for the ten new source
-assignments. [CATALOG164_MILESTONE.md](CATALOG164_MILESTONE.md) separates source,
-behavior, pending Main native and candidate receipts. Current reconciliation is
+[SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) indexes **1240 current references**:136 parent objectives,58 Cisco lettered subobjectives,375 LPI knowledge-area bullets and671 named-tool/term bullets. These references overlap in scope and are **not a completion percentage, curriculum count or additional labs**. There are168 narrowly evidenced Partial practice rows, one Supporting explanation
+row and1071 Open rows; no full-objective completion is asserted. Main source
+contains168 authored assignments/43 units. The retained Fedora candidate
+9a90f275e133 contains154; it is not acceptance evidence for the fourteen later source
+assignments. [CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md) separates source,
+behavior, pending final full-regression/native and candidate receipts. Current reconciliation is
 in [CURRICULUM_RECONCILIATION.md](CURRICULUM_RECONCILIATION.md).
 
 Cisco references retain official IDs. LPI references `.K1`, `.K2`… mean the one-based knowledge-area bullet under that parent; `.T1`, `.T2`… mean the one-based named files/tools/terms bullet. These suffixes are local bookkeeping, not issuer identifiers. Each row links directly to its official parent section and records the source position. A bullet containing several tools remains one source item; partial evidence never implies all of them work.
@@ -282,3 +282,26 @@ PDF2.4 and LPIC-1v5.0 section107.2; the complete normalized source fingerprints
 retain their actual2026-10-22 snapshot. Future CCNAv2.0 receives no inherited
 credit. Native/candidate results are separately pending in CATALOG164_MILESTONE.md
 until their real runs and source/binary identities are recorded.
+
+## Backup recovery and explicit cross-track tar slices — 2026-10-28
+
+Seven previously Open rows gain narrowly Partial practice from the four normal
+backup assignments: LPIC-2 206.2 parent/K4/K5/K6/T3 and, after a separate explicit
+issuer/content audit, LPIC-1 103.3.K6/T9. The first combined knowledge bullet gains
+only its tar part, not cpio/dd. The already Partial103.3 parent retains its status
+and adds only this defined scope, keeping its coarse/granular scenario IDs exact.
+No further child/utility credit is inherited. The four tasks remain LPIC-2 labs;
+cross-track reuse does not add authored titles or increase LPIC-1 inventory.
+
+Manual recovery uses actual supported CLI in a bounded virtual root role.
+Independent empty/stale restore probes inspect modeled names/text/metadata and
+archive payloads/history; they are not checksum, real tar-byte, media or physical
+filesystem validation.206.2 K1/K2/K3 and T1/T2/T4/T5/T6 remain Open.
+
+Totals are168Partial/1Supporting/1071Open; all136 parents remain incomplete
+(97Open/39Partial). The equal168 lab/Partial-row counts are coincidental and
+measure different overlapping things. Current official206.2/103.3 pages were
+checked2026-10-28, retaining all original1240 fingerprint/URL/position fields
+and29 future rows. Final Main full/native/installed gates and exact evidence
+identities remain separately pending in CATALOG168_MILESTONE.md. Earlier
+M179 draft/source observations and CATALOG164 native history remain historical.

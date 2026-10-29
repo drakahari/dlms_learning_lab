@@ -1,9 +1,11 @@
-# Backup recovery unit — authored draft, not registered
+# Backup recovery unit — four registered assignments
 
-Four distinct LPIC-2 assignments have tested simulation, teaching, grading and
-progress backends. They are **not in the normal catalog yet**: native workspace,
-complete-input presentation, course navigation and installed acceptance remain.
-No objective is promoted. See FILE_BACKUP_SUBSET.md for exact GNU-style flags,
+Four distinct LPIC-2 assignments are registered normally in the eighth LPIC-2
+unit, `backup-and-recovery`. The compact native terminal, separate practice and
+complete-input progress handling are integrated; full composed regression passes; actual
+native render and installed acceptance remain separate gates. Only the explicit
+manual/recovery/tar slices listed in CATALOG168_MILESTONE.md gain Partial
+practice; the broader objective is incomplete. See FILE_BACKUP_SUBSET.md for exact GNU-style flags,
 virtual administrator role, abstract archive format and exclusions.
 
 | Assignment | Meaningful work | What plausible wrong work misses |
@@ -29,15 +31,38 @@ are disjoint; the persisted practice retains its complete initial definition.
 Same-path work cannot be relabeled as a different example. Running it cannot
 award assignment credit.
 
-M179:68 focused Rust checks plus3 native-memo refusal regressions pass, including
+Historical foundation evidence, M179:68 focused Rust checks plus3 native-memo refusal regressions pass, including
 references, long-option alternatives, wrong/partial/broken work, example changes
 and repairs, Step0 completion, draft isolation, selected reset, tempfile save/
 fresh deserialize and exact synthetic original154 preservation. This is **not**
 a process-cold native or installed-app test. All-target Clippy and254Python pass;
-full composed inclusive/native/installer gates remain. Actual old evaluation
+the later normal168 composed inclusive suite passes2279 checks with no failures or ignored tests; actual native/installer gates remain separate. Actual old evaluation
 history remains covered separately by the required inclusive retained-history
 suite, not replaced by the synthetic compatibility fixture.
 
 No tar binary parsing, compression, links/devices, tape, remote rsync, actual
 filesystem traversal, timestamps or privileged operations run. The broader
 206.2 knowledge/tool requirements remain explicitly Open in the objective map.
+
+## Normal native workflow and current acceptance
+
+Choose the LPIC-2 backup unit or search its four titles. Learn keeps the
+Introduction → separate Try example → full Assignment pattern; Challenge keeps
+the same full task and optional guidance. Insert command fills only example
+input. Run command/Enter acts only on the selected virtual scope. Check work
+compares the current files and independent fresh recovery samples; Stop checking
+cancels the bounded checker and retains all work. Back/Resume retains both
+drafts/files and recency; Reset confirms that only the selected attempt changes.
+
+The two capstone candidate archives deliberately have identical member names,
+root and incremental type, but different contents. A structural list/payload
+result can pass while recovery still fails; inspect actual restored text and
+independent samples. Neither an archive filename nor an older successful restore
+awards current success.
+
+The real-event native controller and final Fedora run pass all81 capture phases and cover references/two supported alternatives,
+wrong/partial/damaged states, inert examples, real input/Undo, reset/cancel/Stop,
+full warm progress/receipt readback and normal unit/Next navigation. Its40-view
+all-five-size light/dark wide/narrow matrix is representative lab0 only. Four
+additional capstone200%narrow goal-start/end views prove reachable text edges
+without claiming the full goal fits vertically at once. Actual81 captures and scoped image review now PASS on the final development ELF6492df0c; final packaged acceptance remains PENDING. CATALOG168_MILESTONE.md records source/ELF/log identities, the retained initial failures and the exact inspected scope.

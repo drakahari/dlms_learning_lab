@@ -1,10 +1,10 @@
 # DLMS Learning Lab
 
-A native, offline Rust desktop learning application for networking, Linux administration and scripting. **164 authored assignments in42 units:**48 CCNA,36 LPIC-1,28 LPIC-2 and52 Bash/Shell. The latest source units add L2 LACP configuration/troubleshooting, optional shell inputs with intentional empty values, and recurring cron reports/access/handover. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. This is **not full exam coverage**. Main native and candidate acceptance for these ten additions must be recorded separately in [the catalog164 milestone](docs/CATALOG164_MILESTONE.md); the earlier154-lab installation evidence remains historical. Independent of DLMS_next and the old dlms_lab.
+A native, offline Rust desktop learning application for networking, Linux administration and scripting. **168 authored assignments in43 units:**48 CCNA,36 LPIC-1,32 LPIC-2 and52 Bash/Shell. The latest source unit adds four practical backup/recovery assignments after the L2 LACP, optional shell-input and recurring-job units. Meaningful assignments, separate practice, optional help, saved progress and all28 themes remain. This is **not full exam coverage**. Source, full-regression, native and candidate acceptance for the latest four additions are separated in [the catalog168 milestone](docs/CATALOG168_MILESTONE.md); the earlier154-lab installation evidence remains historical. Independent of DLMS_next and the old dlms_lab.
 
 ## Open the verified154-lab Fedora candidate
 
-This retained candidate contains the earlier154-lab milestone; it does not include the latest ten source additions. A new164-lab candidate is pending build and installation acceptance. From this checkout, no build tools are needed to open the retained candidate.
+This retained candidate contains the earlier154-lab milestone; it does not include the later fourteen source additions. A new168-lab candidate is pending build and installation acceptance. From this checkout, no build tools are needed to open the retained candidate.
 This absolute command also works when your terminal is in your home directory:
 
 ```sh
@@ -39,7 +39,7 @@ Use the [project build workflow](docs/BUILD_WORKFLOW.md): two Cargo jobs, two te
 
 The checked-in Cargo.lock pins dependencies. First-time builds need crates.io access; the application operates offline. On another Fedora machine, inspect missing native dependencies before adding packages. This machine already supplied the C linker, X11/Wayland and OpenGL runtime libraries; no extra development packages were needed. egui uses bundled fonts and dynamically loads xkbcommon.
 
-## This milestone
+## Retained installed154 milestone
 
 Script results explicitly separate the selected numbered case's Pass/Fail from
 the whole run. Named failing cases explain the difference; pointer or keyboard
@@ -166,3 +166,7 @@ Four [access-policy assignments](docs/LINUX_ACCESS.md) continue LPIC-1 file foun
 Four native IPv4 access-policy assignments now add source filtering, ordered service rules, direction diagnosis and a two-router handover. See [ACL_LESSONS.md](docs/ACL_LESSONS.md) for exact verification and limits. Source additions are separate from the older installed Fedora candidate listed in INSTALLATION.md.
 
 Four [local-account assignments](docs/ACCOUNT_LESSONS.md) add explicit onboarding/template homes, exact membership repair, evidence-preserving retirement and a stable-GID team handover. Native simulated administrator terminals retain independent examples, current-state checks and supported alternate command sequences. No host accounts, passwords, authentication or login sessions are touched.
+
+## Current backup and recovery unit
+
+Four [backup assignments](docs/FILE_BACKUP_LESSONS.md) use a real simulated terminal: recover one selected file without overwriting newer work, rebuild an ordered incremental chain, branch a snapshot while preserving history, and deliver a recovery that passes independent tests. Introductions, separate runnable practice, full assignments, optional guidance and saved drafts remain. Every command operates on bounded virtual files/archives. The tar subset is defined explicitly; native Stop cancels its bounded checker. Source integration and a test count do not establish final native or packaged acceptance; see [the current evidence gates](docs/CATALOG168_MILESTONE.md).

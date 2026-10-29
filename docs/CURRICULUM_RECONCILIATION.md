@@ -1,6 +1,6 @@
 # Curriculum reconciliation and remaining implementation
 
-Current Main164 source, reconciled2026-10-28; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
+Current Main168 source, reconciled2026-10-28; original154 baseline `4bc390a` is retained in historical evidence. This is an implementation queue, not
 new curriculum or a completion claim. The accepted product requirements remain
 in [COMPLETION.md](COMPLETION.md): substantive native simulation, prerequisite
 teaching, separate runnable practice, meaningful assignments, negative/alternate
@@ -11,11 +11,11 @@ grading, persistence and available native acceptance. There is no lab-count targ
 | Track | Integrated authored labs | Units | Open references | Partial practice | Supporting only |
 | --- | ---: | ---: | ---: | ---: | ---: |
 | CCNA | 48 | 12 | 69 | 42 | 0 |
-| LPIC-1 | 36 | 9 | 506 | 91 | 1 |
-| LPIC-2 | 28 | 7 | 503 | 28 | 0 |
+| LPIC-1 | 36 | 9 | 504 | 93 | 1 |
+| LPIC-2 | 32 | 8 | 498 | 33 | 0 |
 | Bash/Shell | 52 | 14 | Separate path below | — | — |
 
-All136 current parent objectives remain incomplete (98 Open,38 Partial).
+All136 current parent objectives remain incomplete (97 Open,39 Partial).
 The full1240 overlapping parent/subobjective/knowledge/tool records in
 [SKILL_COVERAGE.csv](SKILL_COVERAGE.csv) identify **every** unresolved reference,
 its exact source position, implemented lab IDs, verified slice, remaining behavior
@@ -115,7 +115,7 @@ configuration or troubleshooting.
 | 102.6 | Open | Recognize a guest device mismatch | virtual guest metadata. Evidence/configuration reasoning can be simulated; physical, kernel, cryptographic or assistive-device operation cannot be validated here. |
 | 103.1 | Partial practice · shell-handover;shell-arguments;lpic1-file-navigation;lpic1-file-names | Diagnose a surprising shell value | Only disclosed command grammar; environment export, history, search path and broader command discovery remain absent. |
 | 103.2 | Partial practice · lpic1-logs;shell-pipelines;shell-cut-inventory;shell-sort-manifest;shell-uniq-counts;shell-text-capstone | Normalize a noisy inventory stream | Broader tool suite (sed, wc, tr, formatters, digests/compressed inputs), complete option/locale behavior and Linux terminal integration remain absent; this is partial scripted filter practice. |
-| 103.3 | Partial practice · lpic1-file-navigation;lpic1-file-names;lpic1-copy-move;lpic1-file-cleanup;lpic1-file-handover;lpic1-search-release-set;lpic1-search-incomplete-intake;lpic1-search-private-handover | Reorganize a project without losing data | No recursive directory copy/removal, terminal shell globs, archives/device I/O, size/time find predicates, -exec/-delete, or full GNU option surface. |
+| 103.3 | Partial practice · lpic1-file-navigation;lpic1-file-names;lpic1-copy-move;lpic1-file-cleanup;lpic1-file-handover;lpic1-search-release-set;lpic1-search-incomplete-intake;lpic1-search-private-handover;lpic2-backup-selective-recovery;lpic2-backup-incremental-chain;lpic2-backup-snapshot-branch;lpic2-backup-recovery-handover | Reorganize a project without losing data | Cross-track tar-only recovery is explicit; cpio/dd, recursive directory copy/removal, terminal globs, real/compressed archives, size/time find, -exec/-delete and full GNU options remain absent. |
 | 103.4 | Partial practice · shell-streams;shell-pipelines;shell-report;shell-loop | Separate report data from diagnostics | No xargs/tee/process substitution or full descriptor/process semantics. |
 | 103.5 | Partial practice · lpic1-process-pause;lpic1-process-pending;lpic1-process-priority;lpic1-process-handover | Find a runaway process family | Fixed virtual metadata and supported positive-PID actions only. Jobs, fg/bg, nohup, spawning/nice, sorting, top/resource monitoring, groups, handlers, full scheduler/capabilities and complete Linux utility syntax remain absent. |
 | 103.6 | Partial practice · lpic1-process-priority;lpic1-process-handover | Restore interactive workload priority | Fixed virtual metadata and supported positive-PID actions only. Jobs, fg/bg, nohup, spawning/nice, sorting, top/resource monitoring, groups, handlers, full scheduler/capabilities and complete Linux utility syntax remain absent. |
@@ -169,7 +169,7 @@ configuration or troubleshooting.
 | 205.2 | Open | Repair a bonded VLAN uplink | bond/VLAN/bridge state machine. Required model not implemented; cannot claim faithful command or state behavior. |
 | 205.3 | Open | Trace intermittent network failures | packet counters and route diagnostics. Required model not implemented; cannot claim faithful command or state behavior. |
 | 206.1 | Open | Stage and verify a source installation | build/install manifest model. Required model not implemented; cannot claim faithful command or state behavior. |
-| 206.2 | Open | Restore a consistent incremental backup | Typed archive/terminal/outcome/isolated-teaching and attempt backends tested; four authored tasks remain unregistered. Native workspace/course/candidate acceptance and broader directory/media/software/automation/dd/tape/mt/rsync practice remain pending. Compression, links/devices and physical filesystem behavior remain absent. |
+| 206.2 | Partial practice · lpic2-backup-selective-recovery;lpic2-backup-incremental-chain;lpic2-backup-snapshot-branch;lpic2-backup-recovery-handover | Restore a consistent incremental backup | Registered manual/selective/chain/branch/handover recovery only. Directory selection, products/media, backup shell automation, dd, tape/mt and rsync remain Open. No real tar bytes, compression, links/devices, checksums or physical filesystem validation; final native/candidate receipts are separate. |
 | 206.3 | Open | Communicate a planned maintenance window | notification audience/time model. Required model not implemented; cannot claim faithful command or state behavior. |
 | 207.1 | Partial practice · lpic2-dns;lpic2-dns-dualstack;lpic2-dns-aliases;lpic2-dns-mail;lpic2-dns-rrsets;lpic2-dns-secondary;lpic2-dns-handover | Restore recursive versus authoritative behavior | No full BIND configuration/file locations, recursive/cache service, logging, real utilities or transfer protocol; this is zone-reload concept practice only. |
 | 207.2 | Partial practice · lpic2-dns;lpic2-dns-dualstack;lpic2-dns-aliases;lpic2-dns-mail;lpic2-dns-rrsets;lpic2-dns-secondary;lpic2-dns-handover;lpic2-dns-reverse-investigation;lpic2-dns-reverse-ipv6;lpic2-dns-reverse-handover | Repair forward and reverse zone consistency | No full BIND configuration/utilities, zone-file locations, omitted/relative owners, directives or full SOA grammar. Reverse tasks use one fixed authoritative origin; external canonicality and paired forward/reverse consistency are not checked. Root hints, delegation/glue/RFC2317, wire transfers, caching/recursion and DNS security remain absent; TTL choices are accepted but not assessed. |
@@ -195,7 +195,7 @@ configuration or troubleshooting.
 
 ## Delivered unit inventory
 
-These42 units, and only their164 registered authored scenarios, count as
+These43 units, and only their168 registered authored scenarios, count as
 implemented inventory. The presence of a unit does not mean its entire related
 objective or wider course stage is complete. Exact per-lab prerequisites remain
 in the versioned scenario packs; unit prerequisites are in units-v1.json.
@@ -246,6 +246,8 @@ in the versioned scenario packs; unit prerequisites are in units-v1.json.
 | Bash/Shell | Optional inputs and intentional empty values (`shell-optional-inputs`) | `shell-optional-policy`, `shell-optional-report`, `shell-optional-handover` |
 | LPIC-1 | Recurring jobs: reports, access and safe handover (`linux-cron-foundations`) | `lpic1-cron-weekday-report`, `lpic1-cron-environment-output`, `lpic1-cron-access-retirement`, `lpic1-cron-calendar-handover` |
 
+| LPIC-2 | Backups: inspect, recover and preserve history (`backup-and-recovery`) | `lpic2-backup-selective-recovery`, `lpic2-backup-incremental-chain`, `lpic2-backup-snapshot-branch`, `lpic2-backup-recovery-handover` |
+
 ## Bash/Shell remaining path
 
 The52 delivered scripts span14 units. They already cover bounded indexed arrays,
@@ -280,11 +282,13 @@ or test-only fixture is not a delivered lesson.
 
 ## Current implementation order
 
-1. Complete and pin Main164 actual LACP/optional-input/Cron native flows and the
-   new packaged Fedora lifecycle/cold-reopen evidence. Earlier154 evidence stays
-   tied to its actual ELF. Source/test counts are not rendered-screen acceptance.
-2. Finish the independent backup/restore capability, authored unit and native
-   verification. Existing unregistered source drafts do not count as curriculum.
+1. Finish and pin normal Main168 actual backup/native and the earlier ten-source
+   LACP/optional-input/Cron flows on the final combined candidate. Recheck its
+   packaged Fedora lifecycle and exact installed NFS cold reopen. Earlier154
+   evidence remains tied to its actual ELF; source/test counts do not prove renders.
+2. Extend the delivered manual backup subset into important-directory selection,
+   products/media choices and the remaining automation/recovery requirements.
+   Seven explicitly scoped rows are Partial; the wider backup objective is incomplete.
 3. Continue physical-uplink capability/content and remaining CCNA frontiers; the
    unregistered pure physical backend grants no current objective credit. L3
    EtherChannel and packet/timer behavior remain separate from delivered L2 work.

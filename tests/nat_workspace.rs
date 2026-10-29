@@ -481,7 +481,7 @@ fn max_escaped_draft_and_max_trial_work_stay_bounded() {
 fn foreign_metadata_fails_all_success_paths_and_never_overwrites_good_file() {
     let s = scenario();
     let mut all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     let old = all
         .iter()
         .find(|s| matches!(s.initial, State::ApacheStatic { .. }))
@@ -542,7 +542,7 @@ fn current_contexts_pending_nat_backup_restore_and_selected_reset_retention() {
     use std::sync::atomic::{AtomicBool, AtomicUsize};
     let s = scenario();
     let mut all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     let old_specs = serde_json::to_vec(&all).unwrap();
     let mut p = Progress {
         schema_version: 1,

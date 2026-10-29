@@ -600,6 +600,10 @@ fn prior_ninety_and_four_acl_attempts_new_drafts_and_shell_history_survive_expor
         if matches!(a.state, State::Cron { .. }) {
             dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
         }
+        if let Some(lesson) = &s.file_backup_teaching {
+            // Preserve this real new-family positive in the cross-family matrix.
+            dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
+        }
         a.workspace.as_mut().unwrap().command = format!("Retained draft for {}", s.id);
         a.transcript
             .push("Retained synthetic investigation transcript".into());

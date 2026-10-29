@@ -45,7 +45,7 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     let old = existing();
     assert_eq!(old.len(), 147);
     let all = pack::bundled().unwrap();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     assert_eq!(
         serde_json::to_value(&all[..147]).unwrap(),
         serde_json::to_value(&old).unwrap()
@@ -66,7 +66,7 @@ fn exact_original147_typed_specifications_and_order_are_the_combined154_prefix()
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|t| all.iter().filter(|s| s.track == t).count()),
-        [48, 36, 28, 52]
+        [48, 36, 32, 52]
     );
     let scripts = all
         .iter()
@@ -94,7 +94,7 @@ fn exact_closed_unit_append_reconstructs_the_complete_original37_unit_bytes() {
     assert_eq!(original.len(), 37);
     let all = pack::bundled().unwrap();
     let units = course::bundled(&all).unwrap();
-    assert_eq!(units.len(), 42);
+    assert_eq!(units.len(), 43);
     assert_eq!(
         serde_json::to_value(&units[..37]).unwrap(),
         serde_json::to_value(original).unwrap()

@@ -471,6 +471,10 @@ fn populate_prior98(all: &[Scenario]) -> Progress {
         if matches!(a.state, State::Cron { .. }) {
             dlms_learning_lab::cron_workspace::budget::prepare(&mut a, s).unwrap();
         }
+        if let Some(lesson) = &s.file_backup_teaching {
+            // Preserve this real new-family positive in the cross-family matrix.
+            dlms_learning_lab::file_backup_teaching::prepare(&mut a, lesson, true).unwrap();
+        }
         if let Some(lesson) = &s.service_teaching {
             dlms_learning_lab::service_teaching::prepare(&mut a, lesson, true);
         }

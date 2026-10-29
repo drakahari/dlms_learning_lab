@@ -222,7 +222,7 @@ class FixedAutomationSafety(unittest.TestCase):
         units=json.loads((ROOT/'scenarios/units-v1.json').read_bytes())
         self.assertEqual(units['version'],1)
         frozen=json.loads((ROOT/'tests/fixtures/catalog133-original-index.json').read_bytes())
-        self.assertEqual(len(units['units']),42)
+        self.assertEqual(len(units['units']),43)
         # Current consumer only: the original capture inputs and observations above
         # remain frozen. Verify all37 prior unit objects and both exact new units.
         old_index_raw=(ROOT/'tests/fixtures/nfs-original147-source-index.json').read_bytes()
@@ -248,6 +248,14 @@ class FixedAutomationSafety(unittest.TestCase):
         cron=json.loads(cron_raw)
         self.assertEqual(units['units'][:41],cron['before_units41']['units'])
         self.assertEqual(units['units'][41],cron['cron_unit'])
+        backup_raw=(ROOT/'tests/fixtures/catalog168-registration.json').read_bytes()
+        self.assertEqual(hashlib.sha256(backup_raw).hexdigest(),
+                         '8e8b382e4546f3e48a7441281f4db9448b68bf9333b19c7acf20e882623d4c23')
+        backup=json.loads(backup_raw)
+        self.assertEqual(units['units'][:42],backup['before_units42']['units'])
+        self.assertEqual(units['units'][42],backup['backup_unit'])
+        self.assertEqual(hashlib.sha256((ROOT/'scenarios/units-v1.json').read_bytes()).hexdigest(),
+                         backup['after_units43_sha256'])
         original35=units['units'][:35]
         self.assertEqual(len(original35),35)
         self.assertEqual(original35[:33],frozen['units']['units'])

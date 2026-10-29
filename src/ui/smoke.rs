@@ -16,6 +16,7 @@ mod dhcpv4;
 mod dhcpv4_lessons;
 mod dns_reverse;
 pub(in crate::ui) mod etherchannel_lessons;
+pub(in crate::ui) mod file_backup_lessons;
 mod find_lessons;
 mod legacy_terminal;
 mod mac_layout;
@@ -360,6 +361,8 @@ impl LabApp {
         let immediate_stop = immediate_stop || command_vectors::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || optional_inputs::immediate_stop(self.smoke_stage);
         let immediate_stop = immediate_stop || cron_lessons::immediate_stop(self.smoke_stage);
+        let immediate_stop =
+            immediate_stop || file_backup_lessons::immediate_stop(self.smoke_stage);
         if self.capture_pending || (!immediate_stop && self.started.elapsed().as_millis() < 350) {
             return;
         }
@@ -402,6 +405,13 @@ impl LabApp {
             }
             n @ 49000..=49680 => {
                 let (advance, capture) = self.etherchannel_native(ctx, n);
+                if !advance {
+                    return;
+                }
+                shot = capture;
+            }
+            n if self.file_backup_lessons_contains_stage(n) => {
+                let (advance, capture) = self.file_backup_lessons_native(ctx, n);
                 if !advance {
                     return;
                 }

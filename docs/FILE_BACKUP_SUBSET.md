@@ -1,9 +1,11 @@
 # Virtual archive and restore subset
 
-This foundation is not yet an integrated lab or objective credit. It supplies
-typed, offline file/archive/snapshot behavior for the remaining LPIC-2 backup
-work. Learner terminal syntax, teaching, assignments and native interaction still
-need validation before catalog registration.
+This bounded model now supports four normally registered LPIC-2 backup/recovery
+assignments. It defines the actual simulator boundary, not full GNU tar or exam
+coverage. Source/course integration is distinct from final full-regression,
+actual native and installed acceptance; current gates are in
+[CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md). Earlier foundation results
+below retain their historical source identities.
 
 The model stores ordinary UTF-8 files, directories, ownership, permission modes
 and logical modification/change times. A selected directory is represented by
@@ -20,7 +22,7 @@ out of order can restore stale contents. The model applies the requested archive
 honestly instead of granting success based on an expected command or rejecting
 every wrong chain before its consequences can be inspected. Snapshot branches
 support both sequential increments and a larger increment since an older base.
-Future grading must restore into independent empty targets and inspect files,
+Outcome grading restores into independent empty/stale sample targets and inspects files,
 contents, modes and unrelated-data preservation, not merely archive filenames.
 
 The original technical reference is GNU tar1.35, *Incremental Dumps*, local
@@ -58,9 +60,9 @@ private bounded result and publishes only after complete validation. Failures
 leave the target unchanged. General file-copy permissions and GNU tar's
 partial-write/error-continuation behavior are not yet modeled by this foundation.
 
-## Terminal adapter — tested, not catalog-integrated
+## Terminal adapter in the four registered assignments
 
-The tested unregistered adapter uses one literal command at a time. Its typed
+The bounded adapter uses one literal command at a time. Its typed
 surface is `tar -c/-x/-t -f ARCHIVE [-C DIRECTORY] [-g SNAPSHOT | -G]`
 (with optional -v for creation/extraction only),
 including clustered short options and the corresponding long forms. Creation
@@ -95,9 +97,9 @@ propagate SGID to new directories. No host creation mask or identity is read. Wh
 candidate on success. Focused runtime16 core/11 terminal groups and final all-target Clippy pass. The
 full2045-test inclusive run passes on the source before the last numeric-chmod/
 listing correction; the corrected source passes all27 focused groups. Ten controlled GNU tar comparisons include
-partial restores that preserve unrelated changes. Teaching, grading integration
-and native validation still precede registration; no extra authored assignment
-or objective credit follows from this section.
+partial restores that preserve unrelated changes. These are historical foundation observations; normal registration and its
+separate final acceptance gates are recorded below. A foundation test count
+alone never earns another authored assignment or objective credit.
 
 
 The interactive backup terminal has no stdin/archive byte stream: `cat -` and
@@ -122,7 +124,7 @@ name-only listing is not silently presented as GNU tar -tv output.
 
 ## Outcome grading and separate teaching foundation
 
-The unregistered workspace definition can require restored names/text/metadata,
+The workspace definition can require restored names/text/metadata,
 independent recovery from declared archive levels, exact stored payload/type/root,
 a current source-bound snapshot, and preservation of named supplied archives and
 snapshots. An archive filename or a clean-looking existing restore folder is not
@@ -136,11 +138,13 @@ Definitions have bounded early label/path/sequence admission and a2MiB aggregate
 limit; test trees have at most64 entries/32KiB text. CheckRun validates borrowed
 inputs before owning fixed definition/state snapshots. Each tick handles at most
 one archive application or one result row; dropping it cancels without publishing
-success. At most54 result rows exist. Before native integration the UI must
-reserve the combined snapshots, recovery target/transients and result storage
-(conservative8MiB per admitted entry), key results by the COMPLETE input, and
-publish success only when done and still current. These are integration duties,
-not a claim that an unused source module already proves a native workflow.
+success. At most54 result rows exist. The native integration reserves
+combined snapshots, recovery transients and results, keys results by the COMPLETE
+input and publishes only finished, still-current outcomes. Its four-entry cache
+is bounded to8MiB per entry/32MiB aggregate with a separately reserved16MiB
+active checker. Borrowed edits preserve native Undo/cursor on rejected input;
+whole-attempt2MiB admission occurs before publication. These source invariants
+need actual native/candidate verification; passing a backend alone is insufficient.
 
 The separate lesson supplies concise concepts, runnable explained example
 commands, an adverse change and a repair. Loading verifies all three against the
@@ -149,8 +153,8 @@ from the assignment. Persisted practice has independent command text, transcript
 and view; its commands never receive an Attempt or award assignment credit.
 Transcript retention is16 entries/64KiB total, with32KiB command output; draft
 4096bytes and raw lesson2MiB. Outer progress byte bounds and valid_for validation
-must precede display/use of restored practice. No complete backup lab is counted
-until scenario, progress and native interaction acceptance is finished.
+must precede display/use of restored practice. The current registry counts four authored tasks; source registration and
+actual native/candidate acceptance remain separate gates in the current milestone.
 
 `stat -c FORMAT [--] FILE` now reads actual virtual tree metadata. Supported
 format substitutions are `%a`, `%A`, `%U`, `%G`, `%n` and `%%`, without modifiers;
@@ -165,7 +169,7 @@ numeric modes and ten restore projections. No reference utility is part of the
 learner execution engine. See M178 for source-bound evidence and remaining gates.
 
 
-## M179 authored integration boundary
+## Historical M179 authored integration boundary
 
 Four unregistered assignments now have typed engine/pack validation and tested
 complete-attempt transactions. Native scenario admission is256KiB; each complete
@@ -183,3 +187,21 @@ Existing original154 profile fields remain compatible; new attempts are never
 invented. Fresh file-load tests do not imply native process-cold acceptance.
 See FILE_BACKUP_LESSONS.md and ledgerM179; all13 objective206.2 references remain
 Open until appropriate native integration and broader required content exist.
+
+## Current normal168 integration boundary
+
+The normal registry now contains these four distinct lessons; the M179
+unregistered observations above remain historical. Complete attempts still
+include both scopes/history within2MiB; no cap is raised by registration.
+Cheap reciprocal kind/learning guards protect other lab families before their
+preparation can mutate a backup Attempt. Complete source and state keys prevent
+warm results from attaching to a changed/foreign activity.
+
+The current map explicitly credits only206.2 parent/K4/K5/K6/T3 and cross-track
+103.3.K6 tar-only/T9 within this disclosed subset. Structural Payloads compares
+member names/root/incremental type; actual text/metadata validation belongs to
+Tree and independent Recovery outcomes. No checksum or binary integrity is
+implied. Directory selection/products/media, shell backup automation, dd, tape/mt
+and rsync remain Open. Final composed inclusive suite passes2279 checks with no
+failures or ignored tests. Final81 development-native screenshots and scoped render review pass. Exact installed
+candidate/NFS cold reopening remain separately pending.

@@ -22,6 +22,7 @@ impl LabApp {
                 self.nfs_presentation.clear();
                 self.ether_presentation.clear();
                 self.cron_presentation.clear();
+                self.backup_presentation.clear();
             }
             ui.label(
                 RichText::new(format!("{} / {}", track, topic))
@@ -46,7 +47,18 @@ impl LabApp {
                 self.metrics.manager_challenge = Some(independent.rect);
             }
             if before != challenge {
-                if matches!(self.scenarios[i].initial, State::EtherChannel { .. }) {
+                if matches!(self.scenarios[i].initial, State::FileBackup { .. }) {
+                    if let Err(error) =
+                        dlms_learning_lab::file_backup_workspace::presentation::record_mode(
+                            self.progress.attempts.get_mut(&id).unwrap(),
+                            &self.scenarios[i],
+                            challenge,
+                        )
+                    {
+                        self.notice = Some(error);
+                        challenge = before;
+                    }
+                } else if matches!(self.scenarios[i].initial, State::EtherChannel { .. }) {
                     if let Err(error) = dlms_learning_lab::etherchannel_workspace::record_mode(
                         self.progress.attempts.get_mut(&id).unwrap(),
                         &self.scenarios[i],
@@ -70,6 +82,7 @@ impl LabApp {
                 self.nfs_presentation.clear();
                 self.ether_presentation.clear();
                 self.cron_presentation.clear();
+                self.backup_presentation.clear();
             }
             let r = ui.add(button("Reset"));
             self.metrics.reset = Some(r.rect);
@@ -107,6 +120,11 @@ impl LabApp {
         challenge
     }
     pub(super) fn workspace(&mut self, ui: &mut egui::Ui, i: usize) {
+        if matches!(self.scenarios[i].initial, State::FileBackup { .. }) {
+            self.backup_page(ui, i);
+            Self::workspace_footer(ui);
+            return;
+        }
         if matches!(self.scenarios[i].initial, State::EtherChannel { .. }) {
             self.ether_page(ui, i);
             return;

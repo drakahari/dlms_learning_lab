@@ -1,10 +1,11 @@
 # LPIC reconciliation and next implementation frontier
 
-Reconciled against current Main164 source, checked2026-10-28. The normal catalog
-has36 LPIC-1 and28 LPIC-2 authored assignments, including four recurring-job
-assignments. Related52 Bash assignments are not counted again as Linux-track
-labs. No parent is complete. Native/candidate results for the latest ten source
-additions remain separately pending in CATALOG164_MILESTONE.md. The original
+Reconciled against current Main168 source, checked2026-10-28. The normal catalog
+has36 LPIC-1 and32 LPIC-2 authored assignments, including four recurring-job
+and four backup/recovery assignments. Related52 Bash assignments are not counted again as Linux-track
+labs. No parent is complete. Final full/native/candidate results for the latest four source
+additions remain separately pending in CATALOG168_MILESTONE.md; the earlier ten
+source additions retain their actual history in CATALOG164_MILESTONE.md. The original
 4bc390a/private158 source epochs remain in Git and retained private evidence.
 
 Official objective pages still identify [LPIC-1 5.0,101-500/102-500](https://www.lpi.org/our-certifications/exam-101-102-objectives/) and [LPIC-2 4.5,201-450/202-450](https://www.lpi.org/our-certifications/exam-201-202-objectives/). Both objective pages were fetched; overview URLs timed out. No new objective version was found in those pages. Existing granular fingerprints remain the 2026-10-22 snapshot, not silently rehashed or redated.
@@ -13,12 +14,12 @@ Official objective pages still identify [LPIC-1 5.0,101-500/102-500](https://www
 
 | Track | Parents | Knowledge rows | Named tools/terms | Total overlapping references |
 | --- | --- | --- | --- | --- |
-| LPIC-1 |28 Open /14 Partial |151 Open /29 Partial /1 Supporting |327 Open /48 Partial |598 |
-| LPIC-2 |35 Open /6 Partial |180 Open /14 Partial |288 Open /8 Partial |531 |
+| LPIC-1 |28 Open /14 Partial |150 Open /30 Partial /1 Supporting |326 Open /49 Partial |598 |
+| LPIC-2 |34 Open /7 Partial |177 Open /17 Partial |287 Open /9 Partial |531 |
 
 All 83 parent rows and 1129 granular rows were enumerated. Every coarse parent
 credits exactly the same scenario-ID set as its granular parent. Every credited
-scenario exists; every prerequisite on all64 LPIC assignments resolves; every
+scenario exists; every prerequisite on all68 LPIC assignments resolves; every
 authored LPIC assignment has at least one granular mapping. These are consistency
 checks, not proof that each credited scope is sufficient for the whole objective.
 The existing unit/content tests, native evidence and item-specific remaining
@@ -51,7 +52,7 @@ recurring-job/access/configuration slices; at/timer/CLI requirements stay Open.
 | 102.6 | Open | None | Recognize a guest device mismatch / Terminal and file basics |
 | 103.1 | Partial | shell-handover;shell-arguments;lpic1-file-navigation;lpic1-file-names | Diagnose a surprising shell value / Terminal and file basics |
 | 103.2 | Partial | lpic1-logs;shell-pipelines;shell-cut-inventory;shell-sort-manifest;shell-uniq-counts;shell-text-capstone | Normalize a noisy inventory stream / Terminal and file basics |
-| 103.3 | Partial | lpic1-file-navigation;lpic1-file-names;lpic1-copy-move;lpic1-file-cleanup;lpic1-file-handover;lpic1-search-release-set;lpic1-search-incomplete-intake;lpic1-search-private-handover | Reorganize a project without losing data / Terminal and file basics |
+| 103.3 | Partial | lpic1-file-navigation;lpic1-file-names;lpic1-copy-move;lpic1-file-cleanup;lpic1-file-handover;lpic1-search-release-set;lpic1-search-incomplete-intake;lpic1-search-private-handover;lpic2-backup-selective-recovery;lpic2-backup-incremental-chain;lpic2-backup-snapshot-branch;lpic2-backup-recovery-handover | Reorganize a project without losing data / Terminal and file basics |
 | 103.4 | Partial | shell-streams;shell-pipelines;shell-report;shell-loop | Separate report data from diagnostics / Terminal and file basics |
 | 103.5 | Partial | lpic1-process-pause;lpic1-process-pending;lpic1-process-priority;lpic1-process-handover | Find a runaway process family / Linux file foundations and ordinary-user access policy |
 | 103.6 | Partial | lpic1-process-priority;lpic1-process-handover | Restore interactive workload priority / Linux file foundations and ordinary-user access policy |
@@ -105,7 +106,7 @@ recurring-job/access/configuration slices; at/timer/CLI requirements stay Open.
 | 205.2 | Open | None | Repair a bonded VLAN uplink / LPIC-1 foundation track |
 | 205.3 | Open | None | Trace intermittent network failures / LPIC-1 foundation track |
 | 206.1 | Open | None | Stage and verify a source installation / LPIC-1 foundation track |
-| 206.2 | Open | None | Restore a consistent incremental backup / LPIC-1 foundation track |
+| 206.2 | Partial | lpic2-backup-selective-recovery;lpic2-backup-incremental-chain;lpic2-backup-snapshot-branch;lpic2-backup-recovery-handover | Broader directory/media/product/automation requirements remain / Linux file handover then sequential backup prerequisites |
 | 206.3 | Open | None | Communicate a planned maintenance window / LPIC-1 foundation track |
 | 207.1 | Partial | lpic2-dns;lpic2-dns-dualstack;lpic2-dns-aliases;lpic2-dns-mail;lpic2-dns-rrsets;lpic2-dns-secondary;lpic2-dns-handover | Restore recursive versus authoritative behavior / LPIC-1 foundation track |
 | 207.2 | Partial | lpic2-dns;lpic2-dns-dualstack;lpic2-dns-aliases;lpic2-dns-mail;lpic2-dns-rrsets;lpic2-dns-secondary;lpic2-dns-handover;lpic2-dns-reverse-investigation;lpic2-dns-reverse-ipv6;lpic2-dns-reverse-handover | Repair forward and reverse zone consistency / LPIC-1 foundation track |
@@ -223,11 +224,36 @@ Main native/candidate receipts are separately pending in CATALOG164_MILESTONE.md
 
 ## Following Linux frontiers
 
-LPIC-2 206.2 backup remains wholly Open for authored practical credit. A separate
-virtual archive foundation and unregistered drafts are in development; selected
-restore, snapshot lineage and damaged-backup recovery still need an integrated,
-verified teaching unit. Existing user-progress backup is an
-application safety feature, not Linux backup curriculum. Subsequent batches must
+Four registered LPIC-2 backup assignments implement a bounded manual recovery
+unit. Only206.2 parent/K4/K5/K6/T3 receive Partial practice; K5 is independent
+modeled restore validation, not byte-format/checksum/media integrity. K1/K2/K3
+and T1/T2/T4/T5/T6 remain Open: important directories, products/media, backup
+shell automation, dd, tape/mt and rsync still need substantive teaching/practice.
+An explicit cross-track audit maps tar-only103.3.K6/T9 to these same four tasks,
+without counting them as new LPIC-1 labs or covering cpio/dd. Existing learner-
+progress export remains an application feature, not Linux backup curriculum. Subsequent batches must
 also address Open disk/filesystem/LVM/RAID, kernel/boot, logging/time, networking,
 security/authentication and remaining site services. The complete parent table
 and granular rows above retain every gap; this unit does not redefine completion.
+
+## Backup manual-recovery boundary — 2026-10-28
+
+Current LPIC-2v4.5/206.2 and LPIC-1v5.0/103.3 objective pages were fetched
+2026-10-28. Their full2026-10-22 fingerprint inventory is unchanged. The normal
+unit `backup-and-recovery` follows `linux-file-foundations`; the first task
+requires `lpic1-file-handover`, then each requires the preceding backup task.
+
+| Lab | Actual prerequisites |
+| --- | --- |
+| lpic2-backup-selective-recovery | lpic1-file-handover |
+| lpic2-backup-incremental-chain | lpic2-backup-selective-recovery |
+| lpic2-backup-snapshot-branch | lpic2-backup-incremental-chain |
+| lpic2-backup-recovery-handover | lpic2-backup-snapshot-branch |
+
+The bounded tar CLI is taught and executed; its explicit103.3.K6/T9 reuse is not
+inherited from a native editor action. Structural member-name/root/type checks
+do not certify contents: the capstone candidates intentionally share these
+properties but contain different text, and current/fresh recovery must detect it.
+All full parent objectives remain incomplete; the global ledger is168Partial/
+1Supporting/1071Open, not a completion percentage. Final native/packaged and
+installed NFS cold-reopen gates remain pending in CATALOG168_MILESTONE.md.

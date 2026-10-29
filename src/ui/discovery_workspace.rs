@@ -6,6 +6,9 @@ use dlms_learning_lab::{
 };
 
 pub(super) fn prepare(a: &mut Attempt, lesson: &Lesson, new_attempt: bool) {
+    if model::is_file_backup_workspace(a) {
+        return;
+    }
     if dlms_learning_lab::workspace::is_etherchannel_workspace(a)
         || dlms_learning_lab::workspace::is_cron_workspace(a)
     {
@@ -709,6 +712,53 @@ mod nfs_prepare_guard_tests {
                     );
                 }
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod backup_family_refusal_tests {
+    use super::*;
+    #[test]
+    fn real_discovery_prepare_preserves_backup_kind_and_valid_foreign_learning_in_both_modes() {
+        let all = pack::bundled().unwrap();
+        let source = all.iter().find(|s| s.discovery_teaching.is_some()).unwrap();
+        let lesson = source.discovery_teaching.as_ref().unwrap();
+        let extra: pack::Pack =
+            serde_json::from_str(include_str!("../../scenarios/file-backup-v1.json")).unwrap();
+        let backup = &extra.scenarios[0];
+        let owned = backup.file_backup_teaching.as_ref().unwrap();
+        owned.validate().unwrap();
+        let mut prepared = Attempt::new(backup, 11);
+        model::prepare(&mut prepared);
+        dlms_learning_lab::file_backup_teaching::prepare(&mut prepared, owned, true).unwrap();
+        for has_learning in [false, true] {
+            for new in [false, true] {
+                let mut a = if has_learning {
+                    prepared.clone()
+                } else {
+                    Attempt::new(backup, 11)
+                };
+                let before = serde_json::to_vec(&a).unwrap();
+                prepare(&mut a, lesson, new);
+                assert_eq!(serde_json::to_vec(&a).unwrap(), before);
+            }
+        }
+        let mut own = Attempt::new(source, 7);
+        model::prepare(&mut own);
+        prepare(&mut own, lesson, true);
+        assert!(own.workspace.as_ref().unwrap().discovery_learning.is_some());
+        own.workspace.as_mut().unwrap().file_backup_learning = prepared
+            .workspace
+            .as_ref()
+            .unwrap()
+            .file_backup_learning
+            .clone();
+        assert!(own.workspace.as_ref().unwrap().valid());
+        let before = serde_json::to_vec(&own).unwrap();
+        for new in [false, true] {
+            prepare(&mut own, lesson, new);
+            assert_eq!(serde_json::to_vec(&own).unwrap(), before);
         }
     }
 }

@@ -2,22 +2,22 @@
 
 Version boundaries rechecked **2026-10-27**; the granular objective fingerprints
 retain their separately documented2026-10-22 source snapshot. This is a plan and
-evidence ledger, not complete exam preparation. Main has **164 authored assignments
-/42 units:48CCNA,36LPIC-1,28LPIC-2,52Bash/Shell**. Three new units contain
-L2 LACP initiation/member/service/resilient handover, deliberate optional shell
-inputs and bounded recurring cron reports/access/system-table handover. Generated
+evidence ledger, not complete exam preparation. Main has **168 authored assignments
+/43 units:48CCNA,36LPIC-1,32LPIC-2,52Bash/Shell**. The latest four backup/recovery assignments follow
+L2 LACP, deliberate optional shell inputs and bounded recurring cron practice.
+Units by track are12CCNA,9LPIC-1,8LPIC-2 and14Bash. Generated
 numerical practice and developer-only synthetic entries are excluded. All136
-current parent objectives remain incomplete (98 Open,38 Partial).
+current parent objectives remain incomplete (97 Open,39 Partial).
 
-Source/content, behavior, real native and packaged results for these ten additions
-are distinguished in [CATALOG164_MILESTONE.md](CATALOG164_MILESTONE.md). Main native
+Source/content, final behavior/regression, real native and packaged results for
+the latest four additions are distinguished in [CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md). Main native
 receipts and a new candidate are pending final pinning; source existence does not
 establish rendered-screen, novice or platform acceptance. The retained
 UI-only9a90f275e133 milestone added no curriculum: its154-lab inclusive regression
 passed1981/0/0 and its installed Fedora candidate passed scoped NFS, command-
 construction, reliable-text, alignment, lifecycle/startup/original reopen checks.
 Those earlier observations are preserved below and in INSTALLATION.md; they do
-not prove acceptance of the ten new assignments.
+not prove acceptance of the fourteen later assignments.
 
 Three Basic NAT lessons retain installed154 Fedora flows80 captures on00d69d3;
 NAT was not rerun on the UI-only9a90f275e133 ELF. Four NFS106 and three command-
@@ -336,3 +336,29 @@ report assignment still requires duration/locking and is not marked finished.
 The optional-input Bash unit strengthens the course without promoting another
 certification row. See CATALOG164_MILESTONE.md for exact IDs, boundaries and
 separate pending native/candidate receipts. No future CCNA row gains credit.
+
+## Registered backup and recovery unit — 2026-10-28
+
+Four substantive LPIC-2 tasks now follow Linux file handover and sequential
+backup prerequisites: precise selected-file recovery, ordered incremental/deletion
+recovery, an older-snapshot branch with preserved evidence, and candidate
+investigation/recovery handover. Each has a concise Introduction, different
+separate terminal practice with an explained adverse change/repair, and a full
+independent Assignment. See FILE_BACKUP_LESSONS.md and CATALOG168_MILESTONE.md.
+
+Only206.2 parent/K4/K5/K6/T3 gain narrowly Partial practice. K5 means modeled
+independent recoverability and preservation, not binary integrity/checksums.
+An explicit cross-track audit also maps the taught, actually executed bounded
+tar CLI to LPIC-1 103.3.K6 (tar only; cpio/dd remain missing) and103.3.T9.
+No credit is inferred from a command name or from learner-progress export.
+The normal catalog is168/43; the overlapping ledger is168Partial/1Supporting/
+1071Open. These coincidentally equal168 totals are not a completion percentage.
+All136 full current parents remain incomplete:97Open/39Partial.
+
+Current LPIC-2v4.5/206.2 and LPIC-1v5.0/103.3 issuer pages were checked
+2026-10-28. The1240 original source fingerprints/positions/URLs and29 future
+CCNAv2.0 rows are unchanged. Directory-selection instruction, backup products
+and media, backup shell automation, dd, tape/mt and rsync remain Open, alongside
+real archive bytes, compression, links/devices and physical system behavior.
+Final full/native/candidate gates remain explicit pending evidence, including
+the exact installed NFS cold-reopen repetition; no new installation is claimed.

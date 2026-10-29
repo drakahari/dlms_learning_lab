@@ -3737,3 +3737,123 @@ new exact r2 control was independently reviewed before the first actual capture.
 No old capture/destination was overwritten. This adds no scenarios or issuer
 coverage; continue the reviewed numeric-validation capability and backup/physical
 work, not a release or curriculum-completion claim.
+
+
+## M195–M199 — normal backup unit and full composed regression gate
+
+2026-10-28. Current working catalog168/43:48CCNA,36LPIC-1,32LPIC-2,52Bash.
+Four manual-backup/recovery tasks now use the normal native terminal and course
+navigation, with separate practice, preserved drafts and outcome-based current/
+independent recovery checks. Borrowed bounded command/history presentation,
+responsive cancel and real keyboard/Undo regressions preserve the shared aligned
+controls. Names/root/archive-kind feedback now explicitly differs from content
+recovery: wrong data can pass the structural row while failing both recoveries.
+No grade Boolean or authored goal was weakened to fix that new fixture mistake.
+
+Full inclusive composed suite:2279PASS/0FAIL/0ignored across180 harnesses, all19
+retained history groups actually executed.646 code/data/tool input hashes remain
+unchanged, source9a6b887094aeaa88, logf47c07e1, receipt4c728d96. The first run's
+2265PASS/10fixtureFAIL remains retained; exact old Cron tail plus new backup tail,
+private catalog counts and legitimate separate backup drafts repaired those tests.
+All original164 draft cases remain, plus16 foreign-field refusal/disk-retention
+checks. No test, history group, loader cap or accepted solution was removed.
+
+Final all-target Clippy -Dwarnings and283Python checks PASS. Three paired native-
+controller groups execute81 real-event capture phases; actual Fedora window,
+render and installed-candidate evidence remains pending. Regular Main dev build
+PASS:main168-gated-9a6b887094aeaa88, ELF2af1dccb93092ffa1008b43a44d978a1597a035c6169bd80ecf2b2274797edcc.
+All heavy work stays serialized at2jobs/2test threads. The full run sampled908
+points, minimum21.18GiB available, PSIavg10some/full0/0 and OOMdelta0. This is not
+a stress test or a guarantee under other concurrent workloads.
+
+Seven narrowly justified objective rows gain Partial practice; all136 complete
+current parent objectives remain incomplete. Public documentation separates the
+168 source inventory from the older154 installed candidate. Physical-networking
+and case-pattern capabilities continue in isolated source proposals; neither
+uncompiled drafts nor a future package count as accepted curriculum. No release.
+
+
+## M200–M203 — coverage validation and actual native timing regression
+
+2026-10-28. Applied the exact reviewed backup coverage documentation; seven new
+narrow Partial rows only. The first replay rejected two native-test source paths
+in each of eight new evidence cells: the existing schema permits integration
+paths under tests/. Corrected those cells while retaining eight real integration
+test files and separate native-source citations. The verifier was unchanged;
+replayPASS168registered/no drafts/1240 references. All283Python checks pass.
+
+Committed819c349 adds guarded fixed48 case-class development reference tooling;
+no learner evaluator change or new lab credit. The first302-test Python run caught
+a redundant supplied LC_ALL override rejected by the existing closed-environment
+helper. Only new code now passes an empty supplied environment; added assertions
+verify fixed C locale and unchanged override refusals.302Python PASS. All48 actual
+reference observations remain unrun/null until explicitly approved real capture.
+
+Actual backup Main168 run produced seven real native images, then failed the
+capture-only Undo300-poll bound. Headless50ms/frame had hidden the natural-time
+wait/rapid-frame mismatch. A new real-flow1ms/frame test fails old code at phase1,
+300polls/0.296seconds. Reviewed capture-only50ms productive cadence, finite15s
+deadline and delayed waiting repaint retain every actual1.2s Undo checkpoint,
+cursor/fullProgress/three-retry assertion and all81 capture phases. Four paired
+controller groups thenPASS9.75s; all-targetClippyPASS. No learner engine, native
+history installation or grading change. Earlier failed capture remains retained.
+
+Fresh651input source572fb40140c5883a pinned; regular buildPASS10.86s,
+ELF7a7c7c976d4ec99acad0107922487a40362d8d7faa26044c0b3268eb98182ef0.
+Corrected native repeat is in progress; no render/candidate acceptance is assumed.
+Continue the physical and shell curriculum queue after this milestone.
+
+
+## M204–M209 — cancellation/resume and bounded frame scheduling
+
+2026-10-28. The corrected native backup run reached80 actual images (40 lab0
+alignment views and4 capstone goal-edge views included), but failed when a generic
+multi-stage Stop click arrived after a short checker completed. Retain that run
+as FAILED. New24-incidental-render regression fails the old driver; the measured
+immediate real pointer click plus actual cancelled-ID witness proves cancellation
+rather than natural completion. Stronger Back/Resume checks then found a real
+admission bug: recency changed the complete memo key while Stop skipped refresh.
+
+Reviewed fix refreshes only a fully validated, bounded cancelled snapshot, with
+empty results and no checker construction/tick. Full keys, Stop intent, other live
+work and4-entry/32MiBcache/48MiBcombined allowances remain. Three extra internal
+regressions verify invalid-context refusal before copies, warm no-copy behavior
+and independent active-job preservation.22backup UI groups PASS. A separate real
+egui-discard test then found2 checker ticks within one frame. An ephemeral root-
+frame marker enforces the already documented one-step bound; all23 groups PASS.
+Neither a successful native final route nor packaged acceptance is inferred.
+
+Isolated evaluator12 scoped gates pass129 checks, including actual11/10 history;
+normal Main stays11. Fixed developer reference R1 failed during source retention;
+raw outputs match but unstored Bash statuses stay unknown. Committed09fb923 fixes
+only the collector's reviewed source-directory retention and immediate diagnostic
+recording;305PythonPASS, originals unchanged. Fresh approved R2 comparison is in
+progress. No new numeric/physical scenario is counted before its actual gates.
+
+
+## M210–M212 — final normal168 source gate and actual native acceptance
+
+2026-10-28. After retaining all failed before/after runs and independently reviewed
+fixes, final full inclusive suite2285PASS/0FAIL/0ignored across180harnesses; all19
+retained historical groups actually execute.651source/data/tool/config paths
+unchanged, canonical99ca2292c5ab48a7, logdf9237fe, receiptb6919346. All-target
+Clippy -Dwarnings and305Python PASS. Full run916memory samples/min21.73GiB
+available/PSIavg10some+full0/OOMdelta0/swap-outdelta0;190 swap-in pages observed.
+One heavy runner at a time,2Cargo jobs/2test threads, disk-backed artifacts.
+
+Final actual native run-pk0sodjy FULLYREAPEDexit0 on regular ELF6492df0c:
+81captures, all four meaningful normal assignments, separate examples/adverse/
+repair, references/two alternatives, wrong/partial/broken results, actual Stop
+marker, warm Back/Resume, complete Progress+receipts, reset and UnitComplete PASS.
+Receipt6340dc42 pins all651unchanged source files, executable and images. Forty
+lab0 views exercise all five text sizes/Light+Dark/wide+narrow; four capstone200%
+narrow views prove goal-edge reachability.57images1920x1080/24images946x929,
+17images inspected. Long terminal/field text scrolls; large text may need page
+scrolling. Earlier7/80-image failed runs remain separate. No novice, physical
+assistive-device/screen-reader, installed-candidate or other-OS claim follows.
+
+The working source catalog is168/43 (48CCNA/36LPIC-1/32LPIC-2/52Bash). New Fedora
+candidate/lifecycle and exact installed NFS process-cold reopening remain next;
+old154candidate is not relabeled. Isolated VM12 actual48 comparisons pass with
+independent readback; numeric3/physical4/selection1/one-off model remain outside
+implemented count pending their gates. Continue the whole curriculum queue.

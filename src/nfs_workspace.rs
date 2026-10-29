@@ -1087,6 +1087,7 @@ pub(crate) fn context<'a>(
     a: &crate::progress::Attempt,
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
+    crate::workspace::reject_file_backup_workspace(a)?;
     if s.cron_teaching.is_some() {
         return Err("Scheduling teaching belongs to its scheduling activity".into());
     }
@@ -1745,7 +1746,7 @@ mod attempt_projection_tests {
     fn actual9_profile_nfs_addition_keeps_original_records_and_raw_backup() {
         let raw = crate::actual9_test_evidence::original9();
         let mut all = pack::bundled().unwrap();
-        assert_eq!(all.len(), 164);
+        assert_eq!(all.len(), 168);
         let s = scenario();
         all.push(s.clone());
         let mut p = progress::decode(&raw, &all).unwrap();

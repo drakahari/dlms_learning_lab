@@ -298,6 +298,17 @@ pub fn preserve_script_history(a: &mut Attempt) {
         w.checked = false;
     }
 }
+/// Presence-only owned-kind/foreign-metadata test, without copying or grading.
+pub fn is_file_backup_workspace(a: &Attempt) -> bool {
+    matches!(a.state, State::FileBackup { .. }) || crate::file_backup_workspace::has_metadata(a)
+}
+pub(crate) fn reject_file_backup_workspace(a: &Attempt) -> Result<(), String> {
+    if is_file_backup_workspace(a) {
+        Err("Backup work belongs to its backup activity; previous work retained".into())
+    } else {
+        Ok(())
+    }
+}
 /// Presence only, without serialization or completion authority.
 pub fn has_etherchannel_metadata(a: &Attempt) -> bool {
     a.workspace
@@ -326,6 +337,7 @@ pub fn is_cron_workspace(a: &Attempt) -> bool {
     matches!(a.state, State::Cron { .. }) || has_cron_metadata(a)
 }
 pub(crate) fn reject_cron_metadata(a: &Attempt) -> Result<(), String> {
+    reject_file_backup_workspace(a)?;
     if is_cron_workspace(a) {
         Err("Scheduling workspace metadata belongs to its scheduling activity; previous work retained".into())
     } else {

@@ -11,6 +11,8 @@ mod dhcpv4;
 mod dhcpv4_lessons;
 mod etherchannel_native;
 pub(in crate::ui) mod etherchannel_workspace;
+mod file_backup_lessons_native;
+mod file_backup_workspace;
 mod getopts_history;
 mod getopts_lessons;
 mod mac_learning;

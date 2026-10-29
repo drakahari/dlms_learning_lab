@@ -367,6 +367,34 @@ fn broken_attempts_are_resumable_instead_of_becoming_invalid_saves() {
                 ),
             )
             .unwrap();
+        } else if let State::FileBackup { simulation } = &a.state {
+            let engine::Goal::FileBackup { definition } = &s.goal else {
+                panic!("backup task Goal context")
+            };
+            let (root, relative) = definition
+                .requirements
+                .iter()
+                .find_map(|r| match r {
+                    dlms_learning_lab::file_backup_workspace::Requirement::Tree {
+                        path,
+                        expected,
+                        ..
+                    } => expected
+                        .entries
+                        .iter()
+                        .find(|(name, entry)| !name.is_empty() && !entry.node.directory)
+                        .map(|(name, _)| (path.clone(), name.clone())),
+                    _ => None,
+                })
+                .expect("Authored backup task requires an actual restored file");
+            assert!(engine::solved(&a.state, &s.goal));
+            assert!(
+                simulation.trees[&root].entries.contains_key(&relative),
+                "Required restored file exists before damaging it"
+            );
+            let path = format!("{}/{relative}", root.trim_end_matches('/'));
+            let quoted = format!("'{}'", path.replace('\'', "'\\''"));
+            engine::execute_for_goal(&mut a.state, &s.goal, &format!("rm -- {quoted}")).unwrap();
         } else if let State::Nfs { simulation } = &a.state {
             use dlms_learning_lab::{nfs, nfs_workspace};
             let engine::Goal::Nfs { definition } = &s.goal else {

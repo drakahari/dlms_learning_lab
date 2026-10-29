@@ -54,7 +54,7 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     let raw = evidence::original9();
     let original: Progress = serde_json::from_slice(&raw).unwrap();
     let labs = pack::bundled().unwrap();
-    assert_eq!(labs.len(), 164);
+    assert_eq!(labs.len(), 168);
     let later = labs
         .iter()
         .filter(|s| !original.attempts.contains_key(&s.id))
@@ -63,6 +63,10 @@ fn private() -> (Vec<u8>, Progress, Vec<pack::Scenario>) {
     assert_eq!(
         later,
         std::collections::BTreeSet::from([
+            "lpic2-backup-selective-recovery",
+            "lpic2-backup-incremental-chain",
+            "lpic2-backup-snapshot-branch",
+            "lpic2-backup-recovery-handover",
             "ccna-lacp-initiation",
             "ccna-lacp-member-service",
             "ccna-lacp-resilient-handover",
@@ -244,7 +248,7 @@ fn actual9_open_prepare_preserves_all6_7_8_9_histories_drafts_and_unrelated_cont
     let (raw, original, labs) = private();
     let mut loaded = progress::decode(&raw, &labs).unwrap();
     evidence::exact(&history(&loaded, false), &history(&original, false));
-    // These are the exact loaded133 contexts. All21 later tasks stay absent; opening
+    // These are the exact loaded133 contexts. All35 later tasks stay absent; opening
     // an older profile must not fabricate Attempts or historical answers.
     for lab in labs
         .iter()

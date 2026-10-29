@@ -341,7 +341,7 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
     let mut current: Value =
         serde_json::from_str(include_str!("../scenarios/units-v1.json")).unwrap();
     let units = current["units"].as_array_mut().unwrap();
-    assert_eq!(units.len(), 42);
+    assert_eq!(units.len(), 43);
     assert_eq!(units.iter().filter(|u| u["id"] == "dns-reverse").count(), 1);
     assert_eq!(
         units
@@ -373,6 +373,9 @@ fn all_original116_specifications_goals_solutions_units_and_versions_are_preserv
         serde_json::from_str(include_str!("fixtures/nfs-original147-source-index.json")).unwrap();
     let cron: Value =
         serde_json::from_str(include_str!("fixtures/cron-registration-v1.json")).unwrap();
+    let backup: Value =
+        serde_json::from_str(include_str!("fixtures/catalog168-registration.json")).unwrap();
+    assert_eq!(units.pop().unwrap(), backup["backup_unit"]);
     assert_eq!(units.pop().unwrap(), cron["unit"]);
     let optional: Value =
         serde_json::from_str(include_str!("fixtures/shell-optional-inputs-review.json")).unwrap();

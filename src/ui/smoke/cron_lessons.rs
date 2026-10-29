@@ -383,7 +383,7 @@ impl LabApp {
     }
     fn cr_scope(&self) {
         self.nat_private();
-        assert_eq!((self.scenarios.len(), self.units.len()), (164, 42));
+        assert_eq!((self.scenarios.len(), self.units.len()), (168, 43));
         assert_eq!(
             self.scenarios[160..164]
                 .iter()

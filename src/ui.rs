@@ -20,6 +20,7 @@ mod dhcpv4_workspace;
 mod discovery_workspace;
 mod dns_workspace;
 mod etherchannel_workspace;
+mod file_backup_workspace;
 mod legacy_learning;
 mod nat_workspace;
 mod nfs_workspace;
@@ -47,6 +48,7 @@ mod workspace;
 #[derive(Default)]
 struct Metrics {
     cron: cron_workspace::CronMetrics,
+    backup: file_backup_workspace::BackupMetrics,
     nfs: nfs_workspace::NfsMetrics,
     ether: etherchannel_workspace::EtherMetrics,
     rpm: rpm_packages::RpmMetrics,
@@ -330,6 +332,7 @@ pub struct LabApp {
     nfs_presentation: nfs_workspace::Presentation,
     ether_presentation: etherchannel_workspace::Presentation,
     cron_presentation: cron_workspace::Presentation,
+    backup_presentation: file_backup_workspace::Presentation,
     help_open: bool,
     extra_filters: bool,
     host_activity: bool,
@@ -475,6 +478,7 @@ impl LabApp {
             nfs_presentation: nfs_workspace::Presentation::default(),
             ether_presentation: etherchannel_workspace::Presentation::default(),
             cron_presentation: cron_workspace::Presentation::default(),
+            backup_presentation: file_backup_workspace::Presentation::default(),
             help_open: false,
             extra_filters: false,
             host_activity: false,
@@ -490,6 +494,11 @@ impl LabApp {
             } else if let Some(stage) =
                 Self::etherchannel_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
             {
+                stage
+            } else if let Some(stage) = Self::file_backup_lessons_stage(
+                smoke,
+                std::env::var("DLMS_SMOKE_STAGE").ok().as_deref(),
+            ) {
                 stage
             } else if let Some(stage) =
                 Self::cron_lessons_stage(smoke, std::env::var("DLMS_SMOKE_STAGE").ok().as_deref())
@@ -751,6 +760,7 @@ impl LabApp {
         self.nfs_presentation.clear();
         self.ether_presentation.clear();
         self.cron_presentation.clear();
+        self.backup_presentation.clear();
         self.script_job = None;
         self.script_case = 0;
         self.progress.clock = self.progress.clock.saturating_add(1);
@@ -768,6 +778,7 @@ impl LabApp {
         Self::prepare_nfs(a, s, new_attempt);
         Self::prepare_ether(a, s, new_attempt);
         Self::prepare_cron(a, s);
+        Self::prepare_backup(a, s, new_attempt);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, new_attempt)
                 .expect("validated ACL lesson");
@@ -893,6 +904,10 @@ impl LabApp {
             self.input.clear();
             self.checked = false;
             dlms_learning_lab::etherchannel_workspace::record_visit(a, s, clock).err()
+        } else if matches!(a.state, engine::State::FileBackup { .. }) {
+            self.input.clear();
+            self.checked = false;
+            dlms_learning_lab::file_backup_workspace::presentation::record_visit(a, s, clock).err()
         } else if matches!(a.state, engine::State::Cron { .. }) {
             self.input.clear();
             self.checked = false;
@@ -952,6 +967,7 @@ impl LabApp {
         self.nfs_presentation.clear();
         self.ether_presentation.clear();
         self.cron_presentation.clear();
+        self.backup_presentation.reset_all();
         let s = &self.scenarios[i];
         self.address_worked.remove(&s.id);
         if matches!(s.initial, engine::State::MacLearning { .. }) {
@@ -965,6 +981,7 @@ impl LabApp {
         Self::prepare_nfs(a, s, true);
         Self::prepare_ether(a, s, true);
         Self::prepare_cron(a, s);
+        Self::prepare_backup(a, s, true);
         if let Some(lesson) = &s.acl_teaching {
             dlms_learning_lab::acl_teaching::prepare(a, lesson, true)
                 .expect("validated ACL lesson");
@@ -1330,7 +1347,10 @@ impl LabApp {
         let Some(unit) = self.units.iter().find(|u| u.id == self.scenarios[i].unit) else {
             return;
         };
-        let next = if matches!(self.scenarios[i].initial, engine::State::Cron { .. }) {
+        let next = if matches!(
+            self.scenarios[i].initial,
+            engine::State::Cron { .. } | engine::State::FileBackup { .. }
+        ) {
             let position = unit
                 .labs
                 .iter()
@@ -1373,6 +1393,7 @@ impl LabApp {
                 self.nfs_presentation.clear();
                 self.ether_presentation.clear();
                 self.cron_presentation.clear();
+                self.backup_presentation.clear();
             }
         }
     }
@@ -1608,15 +1629,25 @@ impl LabApp {
         }
         let columns = if ui.available_width() >= 980. { 2 } else { 1 };
         let mut launch = None;
-        for row in items
+        // Read current results for only this page before mutable card controls.
+        // This keeps the complete memo key without borrowing the entire app
+        // from inside a closure that also edits favorites/navigation.
+        let page_items = items
             .iter()
             .skip(self.page * 12)
             .take(12)
-            .collect::<Vec<_>>()
-            .chunks(columns)
-        {
+            .map(|(i, s)| {
+                let complete = self
+                    .progress
+                    .attempts
+                    .get(&s.id)
+                    .is_some_and(|a| file_backup_workspace::solved_with_memos(self, a, s));
+                (*i, *s, complete)
+            })
+            .collect::<Vec<_>>();
+        for row in page_items.chunks(columns) {
             ui.columns(columns, |uis| {
-                for (col, (i, s)) in row.iter().enumerate() {
+                for (col, (i, s, complete)) in row.iter().enumerate() {
                     let ui = &mut uis[col];
                     card(ui).show(ui, |ui| {
                         ui.set_min_width((ui.available_width() - 1.).max(0.));
@@ -1649,17 +1680,7 @@ impl LabApp {
                             },
                         );
                         let a = self.progress.attempts.get(&s.id);
-                        let complete = a.is_some_and(|a| {
-                            cron_workspace::solved_with_memos(
-                                &self.cron_presentation.memo,
-                                &self.ether_presentation.memo,
-                                &self.nfs_presentation.memo,
-                                &self.rpm_presentation.memo,
-                                &self.nat_presentation.memo,
-                                a,
-                                s,
-                            )
-                        });
+                        let complete = *complete;
                         let favorite = self.progress.favorites.contains(&s.id);
                         let status = if a.is_some_and(|a| progress::legacy_script_credit(a, s))
                             && !complete
@@ -1887,6 +1908,7 @@ impl LabApp {
             self.nfs_presentation.clear();
             self.ether_presentation.clear();
             self.cron_presentation.clear();
+            self.backup_presentation.reset_all();
         }
         self.sync_appearance(ctx, previous);
         self.rpm_prepass();
@@ -1894,6 +1916,8 @@ impl LabApp {
         self.ether_prepass();
         self.advance_cron(ctx);
         self.cron_prepass(ctx);
+        self.advance_backup(ctx);
+        self.backup_prepass(ctx);
         if let Some(error) = &self.storage_error {
             egui::TopBottomPanel::bottom("storage-error").show(ctx, |ui| {
                 ui.colored_label(palette(ui).error, error);

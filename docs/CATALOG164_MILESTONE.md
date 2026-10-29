@@ -1,5 +1,10 @@
 # Catalog164: implemented inventory and separate acceptance gates
 
+Historical164/42 milestone record. Current normal168/43 backup integration and
+its separate final gates are in [CATALOG168_MILESTONE.md](CATALOG168_MILESTONE.md).
+The evidence and incomplete acceptance below retain their original source/ELF
+identities; later source registration does not retroactively change them.
+
 Source reconciliation checked2026-10-28. Main contains164 authored assignments in
 42 units:48CCNA/12units,36LPIC-1/9,28LPIC-2/7 and52Bash/Shell/14. This milestone
 adds exactly ten distinct assignments after the complete previous154 definitions;

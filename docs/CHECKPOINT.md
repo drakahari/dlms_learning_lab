@@ -16,40 +16,142 @@ heavy work, RAM /tmp artifacts, cleanup or interruption of other applications.
 
 ### Current Main, lease and exact next action
 
-HEAD73199d5 is pushed (followinga6aca2c/8568198/32ed454). Main has reviewed
-registered164 assignments/42units:48CCNA/36LPIC-1/28LPIC-2/52Bash. Ten normal
-new tasks are Ether3, optional-input Script3 and Cron4. All original37 packs/
-154 complete objects/39 raw unit objects remain independently pinned. The latest
-accepted installed baseline is still154/39 at9a90f275e133 below; do not relabel it.
-The four backup tasks remain unregistered and outside all catalog/coverage counts.
+Committed source821d58d is pushed (following73199d5/a6aca2c):164 assignments/
+42units. Current working source is168/43 after the reviewed backup integration,
+with full-regression/native/candidate gates still pending below. Original37packs/
+154completeobjects/39rawunits and allprevious164definitions remain pinned.
+The last verified installed baseline remains154/39 at9a90f275e133, not168.
 
-CURRENT SOLE HEAVY LEASE: etherchannel_review_resume owns physical adapterR2
-worktree validation (35prospective groups then all-targetClippy), MAINrunner,
-DEBUG0/2jobs/2threads/exclusive worktree target. Root may source-edit Main but
-must launch no heavy work until the worker explicitly releases/reaps. Do not
-interrupt other applications or bypass the lock.
+CURRENT SOLE HEAVY LEASE: NONE. Root47035finalMain168inclusiveFULLYREAPED:
+2285PASS/0FAIL/0ignored/180harnesses;all19retainedhistorygroupsactuallyexecuted.
+Source65199ca2292c5ab48a7010bc5d568829e5d02de6f56f4bb0a8691f87626491985cd
+unchanged, receiptb6919346/logdf9237fe. FinalalltargetClippyPASS305PythonPASS.
 
-Main164 inclusive2249PASS/ClippyPASS/269PythonPASS/coveragePASS. Ordinary Cron
-R2 actual77PNG/40matrix receipt5500fa55 is control-flow PASS but retains narrow200
-overflow and glyph failures. Both fixed; all20Cron UI groups pass expanded
-failing-before/passing-after x-bounds/paint regressions. Corrected native and
-combined installed acceptance still pending. Old154candidate remains separate.
+FinalregularMain168build6492df0c275efa70b93fc7592c85ca2c2ec733bbc0dd15e35bfc5db4a466973d,
+versionmain168-gated-99ca2292c5ab48a7. ACTUALnative31675FULLYREAPEDexit0:
+81PNGs/run-pk0sodjy,strictStop/warm/BackResume/currentfullProgress+receipts and
+UnitCompletePASS. Source651/ELFunchangedafterrun. Receipt6340dc42;40lab0matrix+
+4capstonegoal-edgeviews,57wide1920x1080/24narrow946x929;17actualPNGsviewedbyworker,
+RootviewedUnitComplete.446memorysamples/min24,711,290,880B/PSI0/OOM0. This is DEV evidence, notnewinstaller.
 
-Actual evaluator11-before12 capture is now SEALED and fixed verifyPASS:
-private public11-164-384-r1, manifeste303bdec, attestation254d696e, retained
-producer0d3e3bf4 and283sourcefiles.52records/384cases/52examples; both142contexts
-preserve139actual old plus only3executed new scripts. Drafts50current+2whole
-unchanged unfinished Attempts;90non-script exact each;22absent not invented.
-Python283PASS; explicit11feature build/ClippyPASS. Do not rerun/overwrite the
-producer or relabel it12. New sealed verifier is safe after later capability
-changes; old9/10 producers/evidence remain exact. VM12 source work can proceed
-only in an isolated reviewed worktree with exact case-feature amendments.
+NEXT NOW: privacyaudit/stageexplicitcurrent168source/docs;commit/pushcoherent
+backupintegration+realregressionfixes; candidatebuildfromcleanMainonly. Thenexact
+installedlifecycle/upgrade/progress/desktopvalidate+newflows/NFS2processcold+
+repeatedcoldstarts. CorrectedCron77/normaloptional132/LACP onfinalcombinedELF
+remainrequired. LastinstalledcandidateSTILLOLD1549a90f275e133 untilthatgates.
+No release. OtherworkersSOURCEONLY; RootwilltakecandidateleaseafterGitclean.
 
-NEXT after current capture-tool commit: create numeric-case isolated worktree
-from actual current11; apply closed9file backup native proposal7baf181b to Main
-(unregistered4), compile5presentation+11actual-event+2UTF8 and fix findings.
-NFS worker prepares closed168/43registration, only integrate after native/code
-gates. Full curriculum and candidate/NFS cold acceptance stay open.
+Fixedactual48VM12/BashR2 Root86575fullyREAPEDPASS48/48fourfields0mismatches;
+manifest8db68bfc/1072outputs/actualcompiledidentity12/48/28with18pins. Rootallrow/
+raw/status/files/outputreadback + independentBashpeerbb99c9aaACK; r1failedbytes/
+nullunretainedstatusesunchanged. This is scopedcasefidelity, notlesson/platform
+acceptance; MainlearnerengineSTILL11, no numericlabcredit.
+
+NEWnumericintegrationW bash-numeric-integration-168 branchcodex/... createdfrom
+09fb923PLUSexactcurrentMain869publicpaths, snapshot580ad4b8edd0cbbed54749a679a596166fc3a565bab1b3dcbdfdd151b2490263.
+SourcebaseincludesALLRootStop/paused/frame/Undo/alignmentfixesand168/43. Bashworker
+source-ports21reviewedVM12diffswith3wayRootdriftpreservedand3newnumericdrafts;
+expected171/44ONLYafteractualgates, notcurrentcount. OldW861/capturesimmutable.
+No WheavyuntilRootlease. Allcurrent52/384/52packbytesmustremainexact;19old+5new
+historygroups requiredoncomposed12; no fabricated11visitondirect9/10upgrades.
+
+CurrentMain168/43 appsource includes Stop driver, paused-admission and per-frame
+fixes. All23backupUIgroupsPASS21.55s(m208-backup-frame-after-r1). Newstrictactual
+Stop24incidentalrenders testFAILEDoldgenericdriver(cancelled=false); fixedclick
+actuallycancels, thennewBack/Resumeassertions exposedREALlostadmission(product
+wouldshowOpenWorkspaceinsteadofCheck). Root8812a8c7/peerac6002ce refreshesonlybounded
+cancelledempty-row/full-key snapshot afterfullcontext+8MBstructuraladmission,
+retainsStop+otherjob,4/32/48limits; no CheckRun/ticks/credit.22groupsPASS. Separate
+actualdiscarddiagnostic FAILED2passes/2ticks despiteone-per-framepromise. Root
+5adfa049/peerf48e8c5f addssoleephemeral ROOTframe marker; all23groupsnowPASS.
+Oldfailedlogs/receiptsremain; noneofthesenewfixeshasactualnativefinalacceptanceyet.
+
+MainHEAD09fb923 pushed(after819c349):two development-tool milestones only; current
+168UI/registration/docsremainuncommittedpendingfinalfull/native. MainregularELF
+stillOLD7a7c7c97(source572fb651), notrebuiltwithpaused/framefixes. Lastinstalled
+candidateSTILLOLD1549a90f275e133. Rebuild/pinnewELFafterfull/Clippy; actualnative81,
+correctedCron77/optional132/LACP theninstalledlifecycle/NFScoldallremainrequired.
+
+Actualbackupm20377306 fullyreapedFAILED80PNGs/run-mbhgz7hz; oldUndo fixed,40lab0
+matrix/4capstonegoalviewsreadableacross100/115/125/150/200/lightdark/widenarrow.
+Rootviewed200narrowLightcommand/Darkoutput/LightGoalEnd. FailureStopdrivernotaccepted.
+Receipt0d9af30d/14viewed,463memorysamples/min24,810,684,416B/PSI0/OOM0. No81acceptance.
+
+Earlier Root full inclusive40248 REAPED2279PASS/0FAIL/0ignored/180harnesses; all19
+history groups actually executed, receipt4c728d96/logf47c07e1/source6469a6b8870.
+Later changes are separately gated development-tooling and capture-controller
+pacing, not learner engine/grading edits. Python302PASS after1newguarderror;
+coverage168/1240PASS afternewproposedtestpathschemaerror, oldcheckerunchanged.
+
+Actual backup native m199R2 run-8f5qnzy4 produced7 real1920x1080 images, then
+failed stage62058/Undo at300polls; NOT native acceptance. Root viewed assignment:
+readable goal/terminal/centered input. Preserved R1 sandboxNoCompositor diagnostic
+and R2 failedscreens. Independent2pathsourceproposal7f32cd97: newslow-monotonic
+regression FAILS oldcontroller phase1after300polls/0.296seconds; capture-only50ms
+productivecadence fixesit, keeps300poll/15second bounds and all1.2s actualUndo/
+cursor/fullProgress assertions. FourcontrollergroupsPASS9.75s includingall81.
+No native Undo/State/Progress is installed, no learner scheduling/gradechange.
+Corrected actual native repeat and render acceptance remain pending untilreap.
+
+HEAD819c349 pushed (guarded fixed48 reference tooling only); dirtyworking168/43 tracks48/36/32/52. Exact102path backup
+registration+reciprocalisolation224332b8 appliedafterpeerbd42e. RootUI9 plusnative
+controllerR4 areapplied. NativeSource81steps/40lab0matrix/4capstoneGoalStartEnd
+captures:3paired real-event groupsPASS9.61s afteractualruntimefixes, NO actual
+nativewindowyet. Rootfocuspacing amendment waits an ordinary idleframe afterTab/
+ShiftTab; allfocus/cursor/fullProgress assertionsremain. R4peerb9b5fda6 reviewed
+immutableSource; Rootruntime/payload corrections recordedseparately.
+
+FullR1 REAPED2265PASS/10FAIL/0ignored/180harnesses. Failuresonlyfixtures:7Cron
+helperexpectedentiretail160..tocontainonly4oldCron;NAT/DHCPprivatecatalog169vs165;
+genericdraftmatrix putforbiddenservice/DNS/mountfieldsinto4Backup. Repairsretain
+exactCron4 ANDentireBackup4tail;NATall168prefix+privateID;DHCPall168prefix/caps;
+alloriginal164draftcasesunchangedplus4ownassignment/practicedrafts,16foreign-save
+refusalsanddisk-retentionchecks. Scoped20Cron+1NAT+25DHCP+7workspacesPASS. Newtest
+fixtureinitiallycallednonexistentProgress.clone, fixedtodecodeactualsavedbytes.
+PythonR1onecurrent42unitcountfailure→43withfull42prefix+exactunit/hashproof;
+PythonR2 283PASS. AlltargetClippyPASS/coveragePASS beforelastcontrollerfeedback;
+repeatstaticgatesafterfullR2. No test,cap,historygrouporgraderwaiver.
+
+M197 caughtnewcapstonefixture/feedbackmistake: Payloadsmeansfilemembernames/root/
+backupkind, notcontents. Candidatesa/bsharethosestructuresbutdifferindata. Correct
+wrongrows[T,F,F,F,T,T],damagerows[T,T,F,F,T,T];overallFthroughactualcurrent/fresh
+recoverychecks. Rootclarifiedpass/failuretext(no Boolean/Goal/datachange), added
+statefulwrong/ref/damagebytes-regression andcorrectedONLYnewfixture2booleans/
+reason. Bothpeers independentlyconfirmed; correction8837ea64 preservesearlier
+reviewoverstatement. Content+workspacegatesPASS; finalall81pairedPASS. Source
+CLIworkflowproofnowrequires1freshRunreceipt+entirepriorhistory andrealUndo/Redo.
+
+OldMain164Cronic actual77receipt5500fa55 retainedvisualoverflow/glyphfindings.
+Thosewerefixedwithdirectwrappingbuttons+Pass/Needswork and20UIgroups; corrected
+actualMain168nativeCron/optional/LACP andnewbackup81/windowsstillpending. Latest
+verifiedinstalledcandidateisOLD1549a90f275e133, not168. FinalinstalledNFSactual
+2processcold/lifecycle/repeatedstartsremainrequired; no releasepublication.
+
+NEXT afternativelease: inspectactualbackup81; correctedCron77/normaloptional/LACP flowswith
+screenshots. ApplyclosedDocs1688357bd94afterfillingrealreceipts:7narrowrows,
+168Partial/1Supporting/1071Open,97Open39Partialparents,all136incomplete;1240source
+fingerprints/29futureuntouched. Commit/pushverified168source; buildcandidatefrom
+cleanMain,verifyinstallednewflows/NFScold/lifecycle/coldstarts. Keepcoursecompletion
+separate; continuephysical/Bashmodelsandallremainingreconciliation, no stopatbatch.
+
+PhysicalbackendR2private35/ClippyPASSreceipt5ae90f6b. Authored4distinctphysical
+DRAFTSSource63fdd653/232kJSON;counterassignmentneutral,symptom-based,noCRCanswer
+spoiler,essentialGb/s teaching,2alternatives/negative/partial/break+separatepractice.
+No normalState/Goal/native/registrationorcredit. Etheragentsource-onlyW ccna-physical-integration-168 hasexact865pathMain168
+snapshotbase; newtypedadapter/projections/guardsUNCOMPILED. Preserveall168and
+actualRootnativebackupguards; no additional heavy lease.
+
+BashcaseclassesW bash-case-validation-164(base821d58d) sourcea3361501/patch0be238cc,
+21owned840protected; new12capability+4internal+5genuine11historygroupsUNRUN. Peer
+cd5d37f4 sourceACK, all48referenceobservationsNULL. Class48oracleplan653c8a42 uses
+fixed28builtin-onlyprograms,48cases; workerNOWimplementingclosedprobe/collector
+proposalwithportablecomputedexclusiveWtargetandRoot-approvedsame-sourcepins.
+OldMain/defaultcollector guardsstayunchanged;noarbitrarysource/probe/cwdCLI. No
+heavy/referencegrantyet. Actual11-before12SEALED e303bdec/254d696e/producer0d3e3bf4/
+283sources;peer178485b4 verifies52/384/52,both142contexts,2wholeauthenticdrafts,
+90nonScriptsexacteach/22absent. Sourceindex164stayshistoricalafter168. Neverrerun/
+rebuild/relabelold9/10/11captures; no new12learnercreditinvented.
+
 First Main160 full25347 reaped2162PASS/13fixtureFAIL/0ignored across169 harnesses.
 Repairs preserve every scenario/assertion/cap: exact new unit-tail assertions,
 bounded pack fixtures, valid positives plus intended negative diagnostics, and
@@ -261,3 +363,53 @@ implemented UI or curriculum credit. Pending-job library fairness and actual
 editor replacement/Undo/budget tests remain before wiring. Bash source-review
 help was requested while its final-row capture fix remains frozen. No Main code
 change accompanies those prototypes.
+
+
+### Source-only next proposals after current native foundation
+
+Physical W ccna-physical-integration-168: newtypedState/Goal/Draft/Learning,
+whole2MiBprojections beforelargecopies, all30-family reciprocalguards+Discovery,
+allfive existingnative memo refusals, boundary/alternate/partial/break/backupproof
+UNCOMPILED. Etherworker closing manifest against865path snapshot, noMainwrites.
+
+Numeric authored3 proposal6a645373:36 goalcases/23supplemental predictions,
+6alternatives, separateexamples/change/repair and13wrong/partial/hardcodedprograms.
+Current52/384/52bytesunchanged. ALLUNRUN/unregistered; VM12capability/scopes/actual
+fixed48comparisons mustpass beforecontentintegration. Nevercountthesedrafts.
+
+RootnewbackupArtifactSet outcomeproposal f260fc0d:2paths/650protected,6newprospective
+tests, exactvirtualarchive/snapshotfilenames separatefromcontents/freshRecovery.
+Neededbeforea futureFHSselectionassignmentcanrejectoverinclusivecache/runtime
+backups; no curriculum/count/credit. Allcaps/hostboundaryunchanged. SOURCEONLY,
+unapplied/uncompiled/untested; Bashpeerreviewpending. FHS3.0officialfreedesktop
+sourcecheckedOct28; oldLFchapterendpointsdenied automatedaccess,no bypass.
+
+
+### M204–M209 actual capability/test state and immediate continuation
+
+VM12 W bash-case-validation-164 scoped129PASS/0fail/0ignored:10internal+42class/
+case/parameter+12actual11/10history+65safeautomation/NATregressions. Allwrappers
+fullyreaped (3458/50142/49616/56138). Coldcompile1m06s, dedicateda418target.
+Regularfixedprobea9021234(8,297,920bytes) build/scopedClippyPASS. Firstactualfixed48
+R1 collectedrealVMidentity12/48/28+allrawstreams,butcollectorfailedretaining.cargo;
+Bashreturnstatusesnotdurable thereforeNULL/noacceptance. Partialr1immutable,
+receipt1df55343. Rootreviewed2pathtoolR2(onlytop-level.cargo/.githubexception,
+oldhelperunchanged;immediateper-childstatus/percaserecords),305PythonPASS;09fb923
+pushed. R2newcontrol/capturecurrentlyactiveabove. Neveroverwriteclasses48-r1.
+
+After86575: independentlyreadall48four-fieldactualrows/source/outputpins; ifPASS
+askBashpeerreadback. RunVM12 fullinclusive/all24historygroups+ClippybeforeMainmerge;
+port21owneddiffsintoCURRENT168carefully(nevercopyold164currentcounts/schema files).
+Numeric3draft6a645373/36+23cases/6alts remainsUNRUN/unregistered; actualcontent/
+UI/currentgrading/progress gates requiredbeforecounting. No 55scriptclaimyet.
+
+Physical47source7f18c3c8/patch98335a29 independentpeerACK36a17033,833protected+
+865snapshots exact;55newprospectivegroups/old33privateR2testsunchanged. UNCOMPILED/
+unregistered; GUIhonestlyrefusespendingnative. EtherauthoringnativeSOURCEONLYin
+newignoredproposal, notmutatingfrozenW. Runscopedtyped/projection/guardgatesafter
+Rootfoundationlease; preserveMainnewpaused/frame/capturefixesin3wayintegration.
+
+ArtifactSetcapabilityR2 98899573 (R1peer675e49f0 wordingcorrection),onecore+6tests,
+unapplied/uncompiled,NOauthoredlab. FutureFHSselectionneedsexactfilenamesseparate
+fromcontents/recovery; no planneditembecomescredit. Numeric/physicaldrafts likewise
+notincludedin168/43. Wholeagreedcurriculumremainsopen; continue,notstatus-stop.

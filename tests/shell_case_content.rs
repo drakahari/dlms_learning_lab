@@ -104,15 +104,15 @@ fn normal_pack_and_unit_prerequisites_are_real_and_all_three_assignments_are_reg
         assert!(shell::EVALUATOR_REVISION >= 8);
     }
     let all = catalog();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     assert_eq!(
         ["CCNA", "LPIC-1", "LPIC-2", "Bash/Shell"]
             .map(|track| all.iter().filter(|s| s.track == track).count()),
-        [48, 36, 28, 52]
+        [48, 36, 32, 52]
     );
     let original = pack::bundled().unwrap();
     let normal_units = course::bundled(&original).unwrap();
-    assert_eq!(normal_units.len(), 42);
+    assert_eq!(normal_units.len(), 43);
     let normal_unit = normal_units
         .iter()
         .find(|u| u.id == "shell-case-dispatch")

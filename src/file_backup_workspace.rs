@@ -1,5 +1,7 @@
 //! Outcome grading for bounded virtual backup tasks, not command-history matching.
 //! No host access; not yet registered in the normal catalog.
+pub mod presentation;
+use crate::engine::{Goal, State};
 use crate::{file_backup::Tree, file_backup_terminal::Store};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -313,10 +315,10 @@ fn immediate_check(initial: &Store, state: &Store, requirement: &Requirement) ->
             (
                 pass,
                 if pass {
-                    format!("{name}: the intended file payloads and backup type match")
+                    format!("{name}: stored file names, top-level folder and backup type match")
                 } else {
                     format!(
-                        "{name}: stored file payloads, root name or backup type differ. List the archive and check which snapshot you used; an archive name alone does not establish its contents."
+                        "{name}: stored file names, top-level folder or backup type differ. List the archive and check which snapshot you used; names alone do not verify file contents."
                     )
                 },
             )
@@ -732,8 +734,7 @@ pub fn context<'a>(
     s: &'a crate::pack::Scenario,
 ) -> Result<&'a Definition, String> {
     crate::progress::validate_file_backup_workspace(a)?;
-    if s.cron_teaching.is_some()
-        || s.etherchannel_teaching.is_some()
+    if !source_shape(s)
         || a.scenario_version != s.version
         || a.step >= s.steps.len()
         || a.hints > s.hints.len()
@@ -822,4 +823,96 @@ pub fn perform(
     crate::progress::validate_file_backup_workspace(&proposed)?;
     *a = proposed;
     Ok(output)
+}
+
+pub fn source_shape(s: &crate::pack::Scenario) -> bool {
+    let crate::pack::Scenario {
+        file_backup_teaching,
+        etherchannel_teaching,
+        cron_teaching,
+        nfs_teaching,
+        nat_teaching,
+        rpm_packages_teaching,
+        apache_static_teaching,
+        spanning_tree_teaching,
+        dhcpv4_teaching,
+        id: _,
+        version: _,
+        track: _,
+        topic: _,
+        unit: _,
+        title: _,
+        summary: _,
+        objective: _,
+        retry_guidance: _,
+        difficulty: _,
+        minutes: _,
+        steps: _,
+        guide: _,
+        explanation: _,
+        hints: _,
+        sources: _,
+        simplifications: _,
+        initial: _,
+        goal: _,
+        solution: _,
+        prerequisites: _,
+        teaching,
+        terminal_teaching,
+        process_teaching,
+        accounts_teaching,
+        unit_manager_teaching,
+        ospf_teaching,
+        discovery_teaching,
+        storage_teaching,
+        acl_teaching,
+        ipv6_teaching,
+        ipv4_routing_teaching,
+        address_teaching,
+        service_teaching,
+        client_teaching,
+        seed_dns_teaching,
+        seed_mount_teaching,
+        legacy_access_teaching,
+        legacy_logs_teaching,
+        dns_teaching,
+        switching_teaching,
+        mac_teaching,
+        debian_packages_teaching,
+    } = s;
+    file_backup_teaching.is_some()
+        && cron_teaching.is_none()
+        && etherchannel_teaching.is_none()
+        && nfs_teaching.is_none()
+        && nat_teaching.is_none()
+        && rpm_packages_teaching.is_none()
+        && apache_static_teaching.is_none()
+        && spanning_tree_teaching.is_none()
+        && dhcpv4_teaching.is_none()
+        && teaching.is_none()
+        && terminal_teaching.is_none()
+        && process_teaching.is_none()
+        && accounts_teaching.is_none()
+        && unit_manager_teaching.is_none()
+        && ospf_teaching.is_none()
+        && discovery_teaching.is_none()
+        && storage_teaching.is_none()
+        && acl_teaching.is_none()
+        && ipv6_teaching.is_none()
+        && ipv4_routing_teaching.is_none()
+        && address_teaching.is_none()
+        && service_teaching.is_none()
+        && client_teaching.is_none()
+        && seed_dns_teaching.is_none()
+        && seed_mount_teaching.is_none()
+        && legacy_access_teaching.is_none()
+        && legacy_logs_teaching.is_none()
+        && dns_teaching.is_none()
+        && switching_teaching.is_none()
+        && mac_teaching.is_none()
+        && debian_packages_teaching.is_none()
+        && matches!(
+            (&s.initial, &s.goal),
+            (State::FileBackup { .. }, Goal::FileBackup { .. })
+        )
 }

@@ -35,7 +35,7 @@ impl LabApp {
         let narrow = case >= 10;
         if phase == 0 {
             if case == 0 {
-                assert_eq!((self.scenarios.len(), self.units.len()), (164, 42));
+                assert_eq!((self.scenarios.len(), self.units.len()), (168, 43));
                 assert!(self.progress.attempts.is_empty());
                 let i = self
                     .scenarios

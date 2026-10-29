@@ -139,7 +139,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     .unwrap();
     assert_eq!(provenance["sha256"], digest::hash(ACTUAL8));
     let all = labs();
-    assert_eq!(all.len(), 164);
+    assert_eq!(all.len(), 168);
     let baseline: serde_json::Value = serde_json::from_str(include_str!(
         "fixtures/getopts-before9-authored-inputs.json"
     ))
@@ -186,6 +186,10 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
     assert_eq!(
         missing,
         BTreeSet::from([
+            "lpic2-backup-selective-recovery",
+            "lpic2-backup-incremental-chain",
+            "lpic2-backup-snapshot-branch",
+            "lpic2-backup-recovery-handover",
             "ccna-lacp-initiation",
             "ccna-lacp-member-service",
             "ccna-lacp-resilient-handover",
@@ -235,7 +239,7 @@ fn exact_genuine8_fixture_and_all40_definitions246_cases_are_pinned_without_new_
             "lpic2-web-access",
             "lpic2-web-handover",
         ])
-    ); // All48 later tasks remain absent and ungraded; no invented contexts.
+    ); // All52 later tasks remain absent and ungraded; no invented contexts.
     for id in [
         "shell-optional-policy",
         "shell-optional-report",
